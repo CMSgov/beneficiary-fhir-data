@@ -57,8 +57,8 @@ public class SqsDao {
   }
 
   /**
-   * Create a queue with the given name and return its URL. This is very basic and intended only for
-   * use in tests.
+   * Create a FIFO queue with the given name and return its URL. This is very basic and intended
+   * only for use in tests.
    *
    * @param queueName name of queue to create
    * @return URL of created queue

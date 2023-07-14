@@ -13,6 +13,7 @@ import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,9 @@ import software.amazon.awssdk.services.sqs.model.SqsException;
 public class SqsProgressReporter {
   /**
    * Used to serialize the messages. Using Jackson for this is a little slower than building up the
-   * JSON directly but is less error prone.
+   * JSON directly but is far less error prone. Null properties will be omitted from the JSON to
+   * make it more compact. Sorting properties alphabetically can make tests more stable and make it
+   * easier to find particular fields in test samples.
    */
   private final ObjectMapper objectMapper =
       JsonMapper.builder()
@@ -42,7 +45,10 @@ public class SqsProgressReporter {
   private final String queueUrl;
   /** Applied to every message to identify a specific sequence for FIFO purposes. */
   private final String messageGroupId;
-  /** Applied to every message to uniquely identify a message within a specific sequence. */
+  /**
+   * Applied to every message to uniquely identify it within a specific sequence. Explicit
+   * deduplication ids prevent SQS assuming two messages with the same hash are redundant.
+   */
   private final AtomicInteger nextMessageId;
 
   /**
@@ -56,7 +62,7 @@ public class SqsProgressReporter {
   }
 
   /**
-   * Initialize a new instance using UUID for {@link #messageGroupId}.
+   * Initialize a new instance.
    *
    * @param sqsDao used to communicate with SQS
    * @param queueUrl identifies the queue to which progress updates are sent
@@ -70,7 +76,8 @@ public class SqsProgressReporter {
   }
 
   /**
-   * Intended to be used as an argument when creating a {@link MigratorProgressTracker}.
+   * Converts the progress object into JSON and sends it to SQS. Method signature allows it to be
+   * used as a {@link Consumer} argument when creating a {@link MigratorProgressTracker}.
    *
    * @param progress the progress to report
    * @throws SqsException if SQS message send failed

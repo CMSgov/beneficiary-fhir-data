@@ -76,6 +76,10 @@ public class AppConfiguration extends BaseAppConfiguration {
     StringBuilder builder = new StringBuilder(super.toString());
     builder.append(", flywayScriptLocationOverride=");
     builder.append(flywayScriptLocationOverride);
+    builder.append(", sqsClient=");
+    builder.append(sqsClient == null ? "disabled" : "enabled");
+    builder.append(", sqsQueueName=");
+    builder.append(sqsQueueName);
     return builder.toString();
   }
 

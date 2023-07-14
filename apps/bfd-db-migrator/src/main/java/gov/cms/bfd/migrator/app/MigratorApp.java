@@ -94,7 +94,7 @@ public final class MigratorApp {
    *
    * @throws FatalErrorException to report an error that should terminate the application
    */
-  void run() throws FatalErrorException {
+  private void run() throws FatalErrorException {
     LOGGER.info("Successfully started");
     final AppConfiguration appConfig = loadAppConfiguration();
 
@@ -121,7 +121,7 @@ public final class MigratorApp {
    * @param appMetrics used to track app metrics
    * @throws FatalErrorException to report an error that should terminate the application
    */
-  void validateSchema(
+  private void validateSchema(
       DatabaseOptions databaseOptions,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
@@ -151,7 +151,7 @@ public final class MigratorApp {
    * @param appMetrics used to track app metrics
    * @throws FatalErrorException to report an error that should terminate the application
    */
-  void createOrUpdateSchema(
+  private void createOrUpdateSchema(
       DatabaseOptions databaseOptions,
       String flywayScriptLocationOverride,
       MigratorProgressTracker progressTracker,
@@ -179,7 +179,7 @@ public final class MigratorApp {
    * @return the configuration
    * @throws FatalErrorException to report an error that should terminate the application
    */
-  AppConfiguration loadAppConfiguration() throws FatalErrorException {
+  private AppConfiguration loadAppConfiguration() throws FatalErrorException {
 
     try {
       AppConfiguration appConfig = AppConfiguration.loadConfig(System::getenv);
@@ -197,7 +197,7 @@ public final class MigratorApp {
    * @param appConfig contains the SQS configuration settings
    * @return the tracker
    */
-  MigratorProgressTracker createProgressTracker(AppConfiguration appConfig) {
+  private MigratorProgressTracker createProgressTracker(AppConfiguration appConfig) {
     Consumer<MigratorProgress> progressConsumer;
     final var sqsClient = appConfig.getSqsClient();
     if (sqsClient == null) {
@@ -219,7 +219,7 @@ public final class MigratorApp {
    * @param appConfig the app config
    * @return the metrics
    */
-  MetricRegistry setupMetrics(AppConfiguration appConfig) {
+  private MetricRegistry setupMetrics(AppConfiguration appConfig) {
     MetricRegistry appMetrics = new MetricRegistry();
     appMetrics.registerAll(new MemoryUsageGaugeSet());
     appMetrics.registerAll(new GarbageCollectorMetricSet());
@@ -264,7 +264,7 @@ public final class MigratorApp {
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
-  static HikariDataSource createPooledDataSource(
+  private HikariDataSource createPooledDataSource(
       DatabaseOptions dbOptions, MetricRegistry metrics) {
     HikariDataSource pooledDataSource = new HikariDataSource();
 

@@ -40,10 +40,10 @@ public class MigratorProgressTracker {
   /**
    * Reports app has completed a stage of the migration.
    *
-   * @param migrationStage migration stage just completed
+   * @param migrationProgress migration stage just completed
    */
-  public void migrating(DatabaseMigrationProgress migrationStage) {
-    var progress = new MigratorProgress(MigratorProgress.Stage.Migrating, migrationStage);
+  public void migrating(DatabaseMigrationProgress migrationProgress) {
+    var progress = new MigratorProgress(MigratorProgress.Stage.Migrating, migrationProgress);
     progressReporter.accept(progress);
   }
 }
