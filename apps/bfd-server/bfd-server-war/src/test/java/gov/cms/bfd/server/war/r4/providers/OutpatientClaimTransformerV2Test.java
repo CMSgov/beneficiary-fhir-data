@@ -5,10 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
@@ -48,8 +51,15 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link OutpatientClaimTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class OutpatientClaimTransformerV2Test {
   /** The parsed claim used to generate the EOB and for validating with. */
   OutpatientClaim claim;
@@ -59,6 +69,12 @@ public final class OutpatientClaimTransformerV2Test {
   ClaimTransformerInterfaceV2 claimTransformerInterface;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -89,9 +105,12 @@ public final class OutpatientClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
     claimTransformerInterface =
         new OutpatientClaimTransformerV2(
-            new MetricRegistry(),
+            mockMetricRegistry,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
     claim = generateClaim();

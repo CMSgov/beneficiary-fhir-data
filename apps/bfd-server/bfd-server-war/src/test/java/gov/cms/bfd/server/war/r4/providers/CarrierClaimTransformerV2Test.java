@@ -3,10 +3,13 @@ package gov.cms.bfd.server.war.r4.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -46,8 +49,15 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Tests the {@link CarrierClaimTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CarrierClaimTransformerV2Test {
   /** The claim under test. */
   CarrierClaim claim;
@@ -57,6 +67,12 @@ public class CarrierClaimTransformerV2Test {
   private static final FhirContext fhirContext = FhirContext.forR4();
   /** The transformer under test. */
   ClaimTransformerInterfaceV2 transformerInterface;
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -87,11 +103,15 @@ public class CarrierClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
     transformerInterface =
         new CarrierClaimTransformerV2(
-            new MetricRegistry(),
+            mockMetricRegistry,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
+
     claim = generateClaim();
     ExplanationOfBenefit genEob = transformerInterface.transform(claim, Boolean.FALSE);
     IParser parser = fhirContext.newJsonParser();

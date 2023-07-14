@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
@@ -53,10 +56,16 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link HospiceClaimTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class HospiceClaimTransformerV2Test {
-
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob = null;
   /** The parsed claim used to generate the EOB and for validating with. */
@@ -65,7 +74,12 @@ public final class HospiceClaimTransformerV2Test {
   ClaimTransformerInterfaceV2 claimTransformerInterface;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
-
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -73,8 +87,11 @@ public final class HospiceClaimTransformerV2Test {
    */
   @BeforeEach
   public void generateClaim() throws FHIRException, IOException {
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
     claimTransformerInterface =
-        new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
+        new HospiceClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
