@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static java.util.Objects.requireNonNull;
-
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -15,13 +13,16 @@ import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -76,7 +77,7 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumber Boolean denoting whether to include tax numbers in the response
+   * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
