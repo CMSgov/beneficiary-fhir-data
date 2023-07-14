@@ -48,7 +48,7 @@ This will help:
 BFD already includes simple versions for certain aspects of the system but their utility is somewhat limited:
 - The FHIR API Server endpoint version is incremented to communicate backward incompatibility (`v1` vs `v2`)
 - Pipeline ETL Manifest schema version also communicates backward incompatibility, but when/how this is incremented is somewhat arbitrary (`v9` vs `v10`)
-- Database schema and migration script versions increments for each new script, featuring a [requirement for backward compatibility](https://github.com/CMSgov/beneficiary-fhir-data/blob/78859787247bc70f56baaa52a164e3a76f05b20e/rfcs/0011-separate-flyway-from-pipeline.md#proposed-solution) between two consecutive versions (`V100` and `V101`) **but** compatibility is not guaranteed between three (`V100` and `V102`) 
+- Database schema and migration script versions increments for each new script, featuring a [requirement for backward compatibility](https://github.com/CMSgov/beneficiary-fhir-data/blob/78859787247bc70f56baaa52a164e3a76f05b20e/docs/rfcs/0011-separate-flyway-from-pipeline.md#proposed-solution) between two consecutive versions (`V100` and `V101`) **but** compatibility is not guaranteed between three (`V100` and `V102`) 
 - Jenkins build versions serve as a reference point to specific job executions, but are otherwise meaningless (`#260` vs `#261`)
 
 Though helpful, existing resource versions are insufficient for deriving relevant information for the change outside the specific contexts in which the versions are applied; in other words, these version strings are not _semantic_.
