@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 data "aws_caller_identity" "current" {}
 
 data "aws_kms_key" "cmk" {
@@ -8,6 +10,10 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
   path = "/bfd/${local.env}/common/nonsensitive"
 }
 
+data "aws_ssm_parameters_by_path" "nonsensitive_service" {
+  path = "/bfd/${local.env}/${local.service}/nonsensitive"
+}
+
 data "archive_file" "alert_lambda_scheduler_src" {
   type        = "zip"
   output_path = "${path.module}/lambda_src/${local.alert_lambda_scheduler_src}.zip"
@@ -15,5 +21,15 @@ data "archive_file" "alert_lambda_scheduler_src" {
   source {
     content  = file("${path.module}/lambda_src/${local.alert_lambda_scheduler_src}.py")
     filename = "${local.alert_lambda_scheduler_src}.py"
+  }
+}
+
+data "archive_file" "alerting_lambda_src" {
+  type        = "zip"
+  output_path = "${path.module}/lambda_src/${local.alerting_lambda_src}.zip"
+
+  source {
+    content  = file("${path.module}/lambda_src/${local.alerting_lambda_src}.py")
+    filename = "${local.alerting_lambda_src}.py"
   }
 }
