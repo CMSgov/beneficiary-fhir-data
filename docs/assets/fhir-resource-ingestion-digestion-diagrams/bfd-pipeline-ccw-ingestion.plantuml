@@ -27,6 +27,7 @@ splunk -> slack: Load status sent \n to #BFD-notices channel
 slack --> s3
 s3 -> s3: Timestamped folder for resource moved \n from 'Incoming' to the 'Done' folder
 s3 --> "bfd-pipeline": ETL process continues if more \n resources still in 'Incoming' folder
+"bfd-pipeline" -> "bfd-pipeline": datasetMonitorListener interface closed
 "bfd-pipeline" --> s3
 s3--> ccw
 @enduml
