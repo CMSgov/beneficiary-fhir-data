@@ -1,10 +1,13 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -23,10 +26,40 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class PartDEventTransformerTest {
+  /** The transformer under test. */
+  ClaimTransformerInterface transformerInterface;
+  /** The Metric Registry to use for the test. */
+  @Mock MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  static @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  protected void setup() {
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
+        .thenReturn("UNKNOWN");
+
+    transformerInterface = new PartDEventTransformer(metricRegistry, drugDisplayLookup);
+  }
+
   /**
    * Verifies that {@link PartDEventTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_PDE} {@link PartDEvent}.
@@ -36,13 +69,7 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
-    ExplanationOfBenefit eob =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim,
-            new MetricRegistry(),
-            Boolean.FALSE,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob = transformerInterface.transform(claim);
 
     assertMatches(claim, eob);
   }
@@ -129,13 +156,7 @@ public final class PartDEventTransformerTest {
       throws IOException {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
-    ExplanationOfBenefit eob =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim,
-            new MetricRegistry(),
-            false,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob = transformerInterface.transform(claim);
 
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
@@ -171,13 +192,6 @@ public final class PartDEventTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob) throws FHIRException {
-    /*
-     * Unfortunately this method is called from outside this class; need to create
-     * a FdaDrugCodeDisplayLookup object for this verfication test.
-     */
-    FdaDrugCodeDisplayLookup drugDisplayLookup =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,

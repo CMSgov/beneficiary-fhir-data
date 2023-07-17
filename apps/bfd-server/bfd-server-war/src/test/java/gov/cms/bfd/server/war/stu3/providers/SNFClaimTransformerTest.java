@@ -1,9 +1,12 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
@@ -23,10 +26,40 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link SNFClaimTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class SNFClaimTransformerTest {
+  /** The transformer under test. */
+  ClaimTransformerInterface transformerInterface;
+  /** The Metric Registry to use for the test. */
+  @Mock MetricRegistry metricRegistry;
+  /** The NPI org lookup to use for the test. */
+  static @Mock NPIOrgLookup npiOrgLookup;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  protected void setup() {
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
+        .thenReturn(Optional.of("UNKNOWN"));
+
+    transformerInterface = new SNFClaimTransformer(metricRegistry, npiOrgLookup);
+  }
+
   /**
    * Verifies that {@link SNFClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
@@ -44,13 +77,7 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim,
-            new MetricRegistry(),
-            Boolean.FALSE,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob = transformerInterface.transform(claim);
 
     assertMatches(claim, eob);
   }
@@ -65,12 +92,6 @@ public final class SNFClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob) throws FHIRException {
-    /*
-     * Unfortunately this method is called from outside this class; need to create
-     * a NPIOrgLookup object for this verfication test.
-     */
-    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
-
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -173,7 +194,7 @@ public final class SNFClaimTransformerTest {
         new CCWProcedure(
             claim.getProcedure1Code(), claim.getProcedure1CodeVersion(), claim.getProcedure1Date());
     TransformerTestUtils.assertHasCoding(
-        ccwProcedure.getFhirSystem().toString(),
+        ccwProcedure.getFhirSystem(),
         claim.getProcedure1Code().get(),
         eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
     assertEquals(

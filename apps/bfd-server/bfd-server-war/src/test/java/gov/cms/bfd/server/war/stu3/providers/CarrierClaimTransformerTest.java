@@ -3,8 +3,12 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -28,22 +32,41 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class CarrierClaimTransformerTest {
+  /** The transformer under test. */
+  ClaimTransformerInterface transformerInterface;
   /** The Metric Registry to use for the test. */
-  private MetricRegistry metricRegistry;
+  @Mock MetricRegistry metricRegistry;
   /** The FDA drug lookup to use for the test. */
-  private FdaDrugCodeDisplayLookup drugDisplayLookup;
+  @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
   /** The NPI org lookup to use for the test. */
-  private NPIOrgLookup npiOrgLookup;
+  @Mock NPIOrgLookup npiOrgLookup;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
-    metricRegistry = new MetricRegistry();
-    drugDisplayLookup = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    npiOrgLookup = new NPIOrgLookup();
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
+        .thenReturn(Optional.of("UNKNOWN"));
+    when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
+        .thenReturn("UNKNOWN");
+
+    transformerInterface =
+        new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, npiOrgLookup);
   }
 
   /**
@@ -65,16 +88,12 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit eobWithLastUpdated =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Boolean.TRUE, drugDisplayLookup, npiOrgLookup);
+    ExplanationOfBenefit eobWithLastUpdated = transformerInterface.transform(claim, true);
 
     assertMatches(claim, eobWithLastUpdated, Boolean.TRUE);
 
     claim.setLastUpdated(Optional.empty());
-    ExplanationOfBenefit eobWithoutLastUpdated =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Boolean.TRUE, drugDisplayLookup, npiOrgLookup);
+    ExplanationOfBenefit eobWithoutLastUpdated = transformerInterface.transform(claim, true);
 
     assertMatches(claim, eobWithoutLastUpdated, true);
   }
@@ -101,9 +120,7 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit eob =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Boolean.TRUE, drugDisplayLookup, npiOrgLookup);
+    ExplanationOfBenefit eob = transformerInterface.transform(claim, true);
 
     assertEquals(2, eob.getCareTeam().size());
   }
@@ -126,9 +143,7 @@ public final class CarrierClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim, metricRegistry, Boolean.TRUE, drugDisplayLookup, npiOrgLookup);
+    ExplanationOfBenefit eob = transformerInterface.transform(claim, true);
 
     assertMatches(claim, eob, true);
   }

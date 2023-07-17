@@ -3,10 +3,13 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
@@ -24,10 +27,40 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class DMEClaimTransformerTest {
+  /** The transformer under test. */
+  ClaimTransformerInterface transformerInterface;
+  /** The Metric Registry to use for the test. */
+  @Mock MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  protected void setup() {
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
+        .thenReturn("UNKNOWN");
+
+    transformerInterface = transformerInterface(metricRegistry, drugDisplayLookup);
+  }
+
   /**
    * Verifies that {@link DMEClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
@@ -39,19 +72,10 @@ public final class DMEClaimTransformerTest {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     DMEClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
-            .findFirst()
-            .get();
+        (DMEClaim)
+            parsedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> r).findFirst().get();
 
-    ExplanationOfBenefit eob =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim,
-            new MetricRegistry(),
-            Boolean.TRUE,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob = transformerInterface.transform(claim, true);
 
     assertMatches(claim, eob, true);
   }

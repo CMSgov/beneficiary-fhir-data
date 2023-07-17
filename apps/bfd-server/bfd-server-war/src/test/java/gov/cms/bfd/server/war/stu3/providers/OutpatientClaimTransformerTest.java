@@ -2,9 +2,12 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
@@ -26,14 +29,44 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.LoggerFactory;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class OutpatientClaimTransformerTest {
   private static final org.slf4j.Logger LOGGER =
       LoggerFactory.getLogger(OutpatientClaimTransformerTest.class);
+
+  /** The transformer under test. */
+  ClaimTransformerInterface transformerInterface;
+  /** The Metric Registry to use for the test. */
+  @Mock MetricRegistry metricRegistry;
+  /** The NPI org lookup to use for the test. */
+  static @Mock NPIOrgLookup npiOrgLookup;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  protected void setup() {
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
+        .thenReturn(Optional.of("UNKNOWN"));
+
+    transformerInterface = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
+  }
 
   /**
    * Verifies that {@link
@@ -53,13 +86,7 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim,
-            new MetricRegistry(),
-            Boolean.FALSE,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob = transformerInterface.transform(claim);
 
     assertMatches(claim, eob);
   }
@@ -86,13 +113,7 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        TransformerTestUtils.transformRifRecordToEob(
-            claim,
-            new MetricRegistry(),
-            Boolean.FALSE,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+    ExplanationOfBenefit eob = transformerInterface.transform(claim);
 
     assertMatches(claim, eob);
   }
@@ -126,14 +147,7 @@ public final class OutpatientClaimTransformerTest {
                   "Running at Bene-Id: {}, Claim-Id: {}",
                   claim.getBeneficiaryId(),
                   claim.getClaimId());
-              ExplanationOfBenefit eob =
-                  TransformerTestUtils.transformRifRecordToEob(
-                      claim,
-                      new MetricRegistry(),
-                      Boolean.FALSE,
-                      FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                      new NPIOrgLookup());
-
+              ExplanationOfBenefit eob = transformerInterface.transform(claim);
               assertMatches(claim, eob);
             });
   }
@@ -149,12 +163,6 @@ public final class OutpatientClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(OutpatientClaim claim, ExplanationOfBenefit eob) throws FHIRException {
-    /*
-     * Unfortunately this method is called from outside this class; need to create
-     * a NPIOrgLookup object for this verfication test.
-     */
-    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
-
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -221,7 +229,7 @@ public final class OutpatientClaimTransformerTest {
               claim.getProcedure1CodeVersion(),
               claim.getProcedure1Date());
       TransformerTestUtils.assertHasCoding(
-          ccwProcedure.getFhirSystem().toString(),
+          ccwProcedure.getFhirSystem(),
           claim.getProcedure1Code().get(),
           eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
       assertEquals(
