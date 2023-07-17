@@ -3813,8 +3813,8 @@ public final class TransformerUtils {
    * @param val {@link Integer} bitmask denoting the claim types that have data
    * @return {@link EnumSet} of {@link ClaimType} types to process.
    */
-  public static EnumSet fetchClaimsAvailability(Set<ClaimType> claimTypes, Integer val) {
-    EnumSet availSet = EnumSet.noneOf(ClaimType.class);
+  public static EnumSet<ClaimType> fetchClaimsAvailability(Set<ClaimType> claimTypes, Integer val) {
+    EnumSet<ClaimType> availSet = EnumSet.noneOf(ClaimType.class);
     if (claimTypes.contains(ClaimType.CARRIER) && (val & QueryUtils.V_CARRIER_HAS_DATA) != 0) {
       availSet.add(ClaimType.CARRIER);
     }
