@@ -58,7 +58,7 @@ public final class DMEClaimTransformerTest {
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 
-    transformerInterface = transformerInterface(metricRegistry, drugDisplayLookup);
+    transformerInterface = new DMEClaimTransformer(metricRegistry, drugDisplayLookup);
   }
 
   /**

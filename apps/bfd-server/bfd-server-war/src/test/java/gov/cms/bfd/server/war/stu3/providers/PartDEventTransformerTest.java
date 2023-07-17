@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
@@ -42,8 +41,6 @@ public final class PartDEventTransformerTest {
   ClaimTransformerInterface transformerInterface;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
-  /** The FDA drug lookup to use for the test. */
-  static @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
   /** The mock metric timer. */
   @Mock Timer mockTimer;
   /** The mock metric timer context (used to stop the metric). */
@@ -54,10 +51,9 @@ public final class PartDEventTransformerTest {
   protected void setup() {
     when(metricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
-    when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
-        .thenReturn("UNKNOWN");
-
-    transformerInterface = new PartDEventTransformer(metricRegistry, drugDisplayLookup);
+    transformerInterface =
+        new PartDEventTransformer(
+            metricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
   }
 
   /**
@@ -218,11 +214,12 @@ public final class PartDEventTransformerTest {
     assertEquals("01", claim.getPrescriberIdQualifierCode());
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
+        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
+        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 

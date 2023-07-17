@@ -3,7 +3,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
@@ -50,8 +49,6 @@ public final class OutpatientClaimTransformerTest {
   ClaimTransformerInterface transformerInterface;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
-  /** The NPI org lookup to use for the test. */
-  static @Mock NPIOrgLookup npiOrgLookup;
   /** The mock metric timer. */
   @Mock Timer mockTimer;
   /** The mock metric timer context (used to stop the metric). */
@@ -62,10 +59,8 @@ public final class OutpatientClaimTransformerTest {
   protected void setup() {
     when(metricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
-    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
-        .thenReturn(Optional.of("UNKNOWN"));
 
-    transformerInterface = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
+    transformerInterface = new OutpatientClaimTransformer(metricRegistry, new NPIOrgLookup());
   }
 
   /**
@@ -204,7 +199,7 @@ public final class OutpatientClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        (new NPIOrgLookup()).retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

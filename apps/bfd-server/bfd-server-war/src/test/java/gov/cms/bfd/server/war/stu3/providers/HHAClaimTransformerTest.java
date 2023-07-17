@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimLine;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +40,7 @@ public final class HHAClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The NPI org lookup to use for the test. */
-  static @Mock NPIOrgLookup npiOrgLookup;
+  @Mock NPIOrgLookup npiOrgLookup;
   /** The mock metric timer. */
   @Mock Timer mockTimer;
   /** The mock metric timer context (used to stop the metric). */
@@ -87,6 +89,11 @@ public final class HHAClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   public static void assertMatches(HHAClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+    // interesting conumdrum here....we should be using Mock(s) for unit tests, but this static
+    // method is invoked from ITs (integration tests) which means that our BeforeEach setup will
+    // not create the NPIOrgLookup so we need to explicitly create one here.
+    NPIOrgLookup localNpiLookup = new NPIOrgLookup();
+
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -108,7 +115,7 @@ public final class HHAClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        localNpiLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),
