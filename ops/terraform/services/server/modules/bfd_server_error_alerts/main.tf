@@ -24,8 +24,9 @@ locals {
     : split("/", key)[5] => value
   }
 
-  alerter_lambda_rate     = local.nonsensitive_service_config["500_errors_alerter_rate"]
-  alerter_lambda_lookback = local.nonsensitive_service_config["500_errors_log_lookback_seconds"]
+  alerter_lambda_rate       = local.nonsensitive_service_config["500_errors_alerter_rate"]
+  alerter_lambda_lookback   = local.nonsensitive_service_config["500_errors_log_lookback_seconds"]
+  alerter_lambda_slack_hook = local.nonsensitive_service_config["500_errors_alerter_slack_webhook"]
 
   name_prefix                 = "${local.app}-${local.env}-500-errors"
   alert_lambda_scheduler_name = "${local.name_prefix}-errors-alerter-scheduler"
@@ -159,6 +160,7 @@ resource "aws_lambda_function" "alerting_lambda" {
     variables = {
       BFD_ENVIRONMENT      = local.env
       LOG_LOOKBACK_SECONDS = local.alerter_lambda_lookback
+      SLACK_WEBHOOK        = nonsensitive(data.aws_ssm_parameter.alerter_slack_webhook.value)
     }
   }
 

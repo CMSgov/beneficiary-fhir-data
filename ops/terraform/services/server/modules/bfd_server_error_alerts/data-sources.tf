@@ -14,6 +14,11 @@ data "aws_ssm_parameters_by_path" "nonsensitive_service" {
   path = "/bfd/${local.env}/${local.service}/nonsensitive"
 }
 
+data "aws_ssm_parameter" "alerter_slack_webhook" {
+  name            = "/bfd/mgmt/common/sensitive/slack_webhook_${local.alerter_lambda_slack_hook}"
+  with_decryption = true
+}
+
 data "archive_file" "alert_lambda_scheduler_src" {
   type        = "zip"
   output_path = "${path.module}/lambda_src/${local.alert_lambda_scheduler_src}.zip"

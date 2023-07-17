@@ -98,4 +98,4 @@
 # Server logs for errors between invocations. Should match "500_errors_alerter_rate" plus a few
 # seconds as the Lambda may not be invoked on exact intervals of the aforementioned rate
 /bfd/${env}/server/nonsensitive/500_errors_log_lookback_seconds: 310
-
+/bfd/${env}/server/nonsensitive/500_errors_alerter_slack_webhook: 'bfd_test' # #bfd-test channel
