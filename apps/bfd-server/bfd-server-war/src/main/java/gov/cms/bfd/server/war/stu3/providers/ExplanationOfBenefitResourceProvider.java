@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static java.util.Objects.requireNonNull;
-
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -31,7 +29,21 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.r4.providers.ClaimTypeV2;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -47,20 +59,8 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link ExplanationOfBenefit} resources,
@@ -562,7 +562,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * Parses the claim types to return in the search by parsing out the type tokens parameters.
    *
    * @param type a {@link TokenAndListParam} for the "type" field in a search
-   * @return The {@link ClaimTypeV2}s to be searched, as computed from the specified "type" {@link
+   * @return The {@link ClaimType}s to be searched, as computed from the specified "type" {@link
    *     TokenAndListParam} search param
    */
   public static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
