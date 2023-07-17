@@ -101,9 +101,9 @@ resource "aws_lambda_function" "alert_lambda_scheduler" {
   function_name = local.alert_lambda_scheduler_name
 
   description = join("", [
-    "Invoked when the ${aws_cloudwatch_metric_alarm.this.alarm_name} transitions to a new state in ",
-    "${local.env}. This Lambda either creates or removes EventBridge cron schedules that invoke ",
-    "the NAME_HERE Lambda"
+    "Invoked when the ${aws_cloudwatch_metric_alarm.this.alarm_name} transitions to a new state ",
+    "in ${local.env}. This Lambda either creates or removes EventBridge cron schedules that ",
+    "invoke the ${local.alerting_lambda_name} Lambda"
   ])
 
   tags = {
