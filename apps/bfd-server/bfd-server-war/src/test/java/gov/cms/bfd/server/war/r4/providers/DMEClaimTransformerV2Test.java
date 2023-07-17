@@ -1,11 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
@@ -16,13 +10,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -51,6 +38,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /** Unit tests for {@link DMEClaimTransformerV2}. */
 @ExtendWith(MockitoExtension.class)
@@ -107,7 +108,7 @@ public final class DMEClaimTransformerV2Test {
         new DMEClaimTransformerV2(
             mockMetricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, Boolean.FALSE);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
