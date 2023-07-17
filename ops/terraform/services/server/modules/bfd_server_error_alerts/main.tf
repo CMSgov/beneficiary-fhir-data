@@ -25,7 +25,7 @@ locals {
   }
 
   alerter_lambda_rate       = local.nonsensitive_service_config["500_errors_alerter_rate"]
-  alerter_lambda_lookback   = local.nonsensitive_service_config["500_errors_log_lookback_seconds"]
+  alerter_lambda_lookback   = local.nonsensitive_service_config["500_errors_alerter_log_lookback_seconds"]
   alerter_lambda_slack_hook = local.nonsensitive_service_config["500_errors_alerter_slack_webhook"]
 
   name_prefix                 = "${local.app}-${local.env}-500-errors"
