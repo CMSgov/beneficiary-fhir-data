@@ -1,0 +1,181 @@
+import calendar
+import json
+import logging
+import os
+import sys
+from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Optional
+
+import boto3
+from botocore.config import Config
+
+REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
+BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
+EVENTBRIDGE_SCHEDULES_GROUP = os.environ.get("EVENTBRIDGE_SCHEDULES_GROUP", "")
+RECURRING_SCHEDULE_RATE_STR = os.environ.get("RECURRING_SCHEDULE_RATE_STR", "")
+SCHEDULER_ROLE_ARN = os.environ.get("SCHEDULER_ROLE_ARN", "")
+ALERTER_LAMBDA_ARN = os.environ.get("ALERTER_LAMBDA_ARN", "")
+ONETIME_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-at-"
+RATE_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-every-"
+BOTO_CONFIG = Config(
+    region_name=REGION,
+    # Instructs boto3 to retry upto 10 times using an exponential backoff
+    retries={
+        "total_max_attempts": 10,
+        "mode": "adaptive",
+    },
+)
+
+
+class AlarmState(str, Enum):
+    """"""
+
+    ALARMING = "ALARM"
+    OK = "OK"
+
+
+class Schedule(ABC):
+    @property
+    @abstractmethod
+    def expression(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
+
+class OnetimeSchedule(Schedule):
+    def __init__(self, time: datetime) -> None:
+        super().__init__()
+        self.time = time
+
+    @property
+    def expression(self) -> str:
+        return f"at({self.isoformat})"
+
+    @property
+    def name(self) -> str:
+        return f"{ONETIME_SCHEDULE_NAME_PREFIX}{self.utc_timestamp}"
+
+    @property
+    def isoformat(self) -> str:
+        return self.time.isoformat(timespec="seconds")
+
+    @property
+    def utc_timestamp(self) -> str:
+        return str(calendar.timegm(self.time.utctimetuple()))
+
+    @staticmethod
+    def from_name(name: str) -> Optional["OnetimeSchedule"]:
+        try:
+            utc_timestamp = int(name.removeprefix(ONETIME_SCHEDULE_NAME_PREFIX))
+            return OnetimeSchedule(time=datetime.utcfromtimestamp(utc_timestamp))
+        except ValueError:
+            logger.error(
+                "Unable to create OnetimeSchedule from schedule with name %s",
+                name,
+                exc_info=True,
+            )
+            return None
+
+
+class RateSchedule(Schedule):
+    def __init__(self, rate_str: str) -> None:
+        super().__init__()
+        self.rate_str = rate_str
+
+    @property
+    def expression(self) -> str:
+        return f"rate({self.rate_str})"
+
+    @property
+    def name(self) -> str:
+        return f"{RATE_SCHEDULE_NAME_PREFIX}{self.rate_str.replace(' ', '-')}"
+
+
+logging.basicConfig(level=logging.INFO, force=True)
+logger = logging.getLogger()
+try:
+    scheduler_client = boto3.client("scheduler", config=BOTO_CONFIG)  # type: ignore
+except Exception as exc:
+    logger.error(
+        "Unrecoverable exception occurred when attempting to create boto3 clients/resources: %s",
+        repr(exc),
+    )
+    sys.exit(0)
+
+
+def __create_schedule(schedule: Schedule) -> bool:
+    logger.info("Creating schedule %s to run %s...", schedule.name, ALERTER_LAMBDA_ARN)
+    try:
+        scheduler_client.create_schedule(
+            GroupName=EVENTBRIDGE_SCHEDULES_GROUP,
+            Name=schedule.name,
+            ScheduleExpression=schedule.expression,
+            ScheduleExpressionTimezone="UTC",
+            Target={"RoleArn": SCHEDULER_ROLE_ARN, "Arn": ALERTER_LAMBDA_ARN},
+            FlexibleTimeWindow={"Mode": "OFF"},
+        )
+    except scheduler_client.exceptions.ClientError:
+        logger.error(
+            "An unrecoverable error occurred when trying to schedule %s: ",
+            schedule.name,
+            exc_info=True,
+        )
+        return False
+
+    logger.info("Schedule %s created successfully", schedule.name)
+    return True
+
+
+def handler(event: Any, context: Any):
+    if not all(
+        [
+            REGION,
+            BFD_ENVIRONMENT,
+            EVENTBRIDGE_SCHEDULES_GROUP,
+            RECURRING_SCHEDULE_RATE_STR,
+        ]
+    ):
+        print("Not all necessary environment variables were defined, exiting...")
+        return
+
+    try:
+        record: dict[str, Any] = event["Records"][0]
+    except KeyError as ex:
+        logger.error("The incoming event was invalid: %s", repr(ex))
+        return
+    except IndexError:
+        logger.error("Invalid event notification, no records found")
+        return
+
+    try:
+        sns_message_json: str = record["Sns"]["Message"]
+        alarm_details = json.loads(sns_message_json)
+        alarm_state = AlarmState(alarm_details["NewStateValue"])
+    except KeyError:
+        logger.error("No message found in SNS notification")
+        return
+    except json.JSONDecodeError:
+        logger.error("SNS message body was not valid JSON")
+        return
+
+    scheduler_client.list_schedules(
+        GroupName=EVENTBRIDGE_SCHEDULES_GROUP, NamePrefix=ONETIME_SCHEDULE_NAME_PREFIX
+    )
+    if alarm_state == AlarmState.ALARMING:
+        # Create schedules to invoke alerter
+        logger.info(
+            "Alarm state is %s, indicating that some requests to server have errored.",
+            alarm_state.value,
+        )
+
+        schedule_at_time = datetime.utcnow() + timedelta(minutes=1)
+        __create_schedule(OnetimeSchedule(time=schedule_at_time))
+    elif alarm_state == AlarmState.OK:
+        # delete rate schedules
+        logger.info("%s", alarm_state)

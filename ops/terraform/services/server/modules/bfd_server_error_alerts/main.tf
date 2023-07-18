@@ -126,6 +126,8 @@ resource "aws_lambda_function" "alert_lambda_scheduler" {
       BFD_ENVIRONMENT             = local.env
       EVENTBRIDGE_SCHEDULES_GROUP = aws_scheduler_schedule_group.this.name
       RECURRING_SCHEDULE_RATE_STR = local.alerter_lambda_rate
+      SCHEDULER_ROLE_ARN          = aws_iam_role.scheduler_assume_role.arn
+      ALERTER_LAMBDA_ARN          = aws_lambda_function.alerting_lambda.arn
     }
   }
 
