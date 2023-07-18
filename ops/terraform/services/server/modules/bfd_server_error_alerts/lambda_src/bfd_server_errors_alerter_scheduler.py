@@ -103,7 +103,8 @@ try:
     scheduler_client = boto3.client("scheduler", config=BOTO_CONFIG)  # type: ignore
 except Exception as exc:
     logger.error(
-        "Unrecoverable exception occurred when attempting to create boto3 clients/resources: %s",
+        "Unrecoverable exception occurred when attempting to create boto3"
+        " clients/resources: %s",
         repr(exc),
     )
     sys.exit(0)
@@ -164,18 +165,58 @@ def handler(event: Any, context: Any):
         logger.error("SNS message body was not valid JSON")
         return
 
-    scheduler_client.list_schedules(
-        GroupName=EVENTBRIDGE_SCHEDULES_GROUP, NamePrefix=ONETIME_SCHEDULE_NAME_PREFIX
+    # Delete old OnetimeSchedules by listing all OnetimeSchedules within the group and deleting
+    # those with names indicating times that have since passed
+    all_onetime_schedules = [
+        one_time_schedule
+        for schedule in scheduler_client.list_schedules(
+            GroupName=EVENTBRIDGE_SCHEDULES_GROUP,
+            NamePrefix=ONETIME_SCHEDULE_NAME_PREFIX,
+        )["Schedules"]
+        if "Name" in schedule
+        and (
+            (one_time_schedule := OnetimeSchedule.from_name(schedule["Name"]))
+            is not None
+        )
+    ]
+    all_schedules_to_delete = [
+        x for x in all_onetime_schedules if x.time <= datetime.utcnow()
+    ]
+    for schedule in all_schedules_to_delete:
+        logger.info(
+            "Deleting schedule %s as its invocation time has passed...", schedule.name
+        )
+        scheduler_client.delete_schedule(
+            GroupName=EVENTBRIDGE_SCHEDULES_GROUP, Name=schedule.name
+        )
+        logger.info("Schedule %s deleted successfully", schedule.name)
+
+    # The scheduler always schedules the alerter to run within the next minute in order to capture
+    # any errors that may have occurred between the alarm going into ALARM and invoking this Lambda
+    # or the time between the last run of the alerter and the alarm returning to its OK state
+    run_in_one_minute = OnetimeSchedule(time=datetime.utcnow() + timedelta(minutes=1))
+    logger.info(
+        "Scheduling %s to run in one minute (%s UTC) from now...",
+        ALERTER_LAMBDA_ARN,
+        run_in_one_minute.isoformat,
     )
+    if not __create_schedule(schedule=run_in_one_minute):
+        return
+
     if alarm_state == AlarmState.ALARMING:
         # Create schedules to invoke alerter
         logger.info(
-            "Alarm state is %s, indicating that some requests to server have errored.",
+            "Alarm state is %s, indicating that some requests to server have errored."
+            " Scheduling %s to run every %s until Alarm has returned to %s state...",
             alarm_state.value,
+            ALERTER_LAMBDA_ARN,
+            RECURRING_SCHEDULE_RATE_STR,
+            AlarmState.OK.value,
         )
 
-        schedule_at_time = datetime.utcnow() + timedelta(minutes=1)
-        __create_schedule(OnetimeSchedule(time=schedule_at_time))
+        rate_schedule = RateSchedule(rate_str=RECURRING_SCHEDULE_RATE_STR)
+        if not __create_schedule(schedule=rate_schedule):
+            return
     elif alarm_state == AlarmState.OK:
         # delete rate schedules
         logger.info("%s", alarm_state)
