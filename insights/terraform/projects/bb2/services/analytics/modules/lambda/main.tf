@@ -13,7 +13,7 @@ locals {
 
 
 # Zip File containing Lambda script
-data "archive_file" "zip-archive-update_athena_metric_tables" {
+data "archive_file" "zip_archive_update_athena_metric_tables" {
   type        = "zip"
   output_path = "${path.module}/lambda_function.zip"
   source_dir  = local.source_dir
@@ -33,7 +33,7 @@ resource "aws_lambda_function" "update_athena_metric_tables_lambda" {
     "x86_64",
   ]
   description                    = var.description
-  filename                       = data.archive_file.zip-archive-update_athena_metric_tables.output_path
+  filename                       = data.archive_file.zip_archive_update_athena_metric_tables.output_path
   handler                        = "lambda_function.lambda_handler"
   layers                         = []
   memory_size                    = 128
@@ -42,7 +42,7 @@ resource "aws_lambda_function" "update_athena_metric_tables_lambda" {
   role                           = local.lambda_role_arn
   publish                        = false
   runtime                        = "python3.9"
-  source_code_hash               = data.archive_file.zip-archive-update_athena_metric_tables.output_base64sha256
+  source_code_hash               = data.archive_file.zip_archive_update_athena_metric_tables.output_base64sha256
 
   # Set timeout to max.
   timeout = 900
