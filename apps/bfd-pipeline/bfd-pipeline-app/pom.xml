@@ -143,6 +143,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Used to write fluent assertions in unit tests. -->
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-model-rif-samples</artifactId>
             <scope>test</scope>
@@ -224,6 +230,20 @@
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Used to build docker image for the project. -->
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>${jib.goal}</goal>
                         </goals>
                     </execution>
                 </executions>
