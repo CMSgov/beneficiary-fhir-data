@@ -162,6 +162,7 @@ resource "aws_lambda_function" "alerting_lambda" {
     variables = {
       BFD_ENVIRONMENT      = local.env
       LOG_LOOKBACK_SECONDS = local.alerter_lambda_lookback
+      LOG_GROUP            = "/bfd/${local.env}/${local.app}/access.json"
       SLACK_WEBHOOK        = data.aws_ssm_parameter.alerter_slack_webhook.value
     }
   }
