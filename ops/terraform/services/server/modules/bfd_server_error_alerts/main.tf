@@ -34,7 +34,10 @@ locals {
   alerting_lambda_name        = "${local.name_prefix}-errors-alerter"
   alerting_lambda_src         = "${replace(local.app, "-", "_")}_errors_alerter"
 
-  all_http500s_count_metric = "http-requests/count/500-responses"
+  # We construct this manually (instead of through a data resource) as ephemeral environments may
+  # not have any Log Group and thus will fail to apply otherwise
+  access_json_log_group_name = "/bfd/${local.env}/${local.app}/access.json"
+  all_http500s_count_metric  = "http-requests/count/500-responses"
 }
 
 resource "aws_cloudwatch_metric_alarm" "this" {
@@ -162,7 +165,7 @@ resource "aws_lambda_function" "alerting_lambda" {
     variables = {
       BFD_ENVIRONMENT      = local.env
       LOG_LOOKBACK_SECONDS = local.alerter_lambda_lookback
-      LOG_GROUP            = "/bfd/${local.env}/${local.app}/access.json"
+      LOG_GROUP            = local.access_json_log_group_name
       SLACK_WEBHOOK        = data.aws_ssm_parameter.alerter_slack_webhook.value
     }
   }

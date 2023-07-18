@@ -62,6 +62,38 @@ resource "aws_iam_policy" "scheduler" {
   )
 }
 
+resource "aws_iam_policy" "read_log" {
+  name = "${local.alerting_lambda_name}-read-logs"
+  description = join("", [
+    "Permissions for ${local.alerting_lambda_name} to start and retrieve the results of a Log ",
+    "Insights query against the ${local.access_json_log_group_name} CloudWatch Log Group"
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect   = "Allow"
+          Action   = ["logs:StartQuery"]
+          Resource = [
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.access_json_log_group_name}",
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.access_json_log_group_name}:log-stream:*",
+          ]
+        },
+        # GetQueryResults does not support resource-level restrictions.
+        # See https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazoncloudwatchlogs.html
+        {
+          Effect   = "Allow"
+          Action   = ["logs:GetQueryResults"]
+          Resource = ["*"]
+        }
+      ]
+    }
+  )
+}
+
+
 resource "aws_iam_policy" "invoke_alerter" {
   name = "${local.name_prefix}-scheduler-assumee-allow-lambda-invoke"
   description = join("", [
@@ -142,7 +174,12 @@ resource "aws_iam_role_policy_attachment" "logs_to_lambda_roles" {
   policy_arn = aws_iam_policy.logs[each.key].arn
 }
 
-resource "aws_iam_role_policy_attachment" "scheduler_to_alert_scheduler_assume_role" {
+resource "aws_iam_role_policy_attachment" "read_log_to_alerter_role" {
+  role       = aws_iam_role.lambda_roles[local.alerting_lambda_name].name
+  policy_arn = aws_iam_policy.read_log.arn
+}
+
+resource "aws_iam_role_policy_attachment" "scheduler_to_alert_scheduler_role" {
   role       = aws_iam_role.lambda_roles[local.alert_lambda_scheduler_name].name
   policy_arn = aws_iam_policy.scheduler.arn
 }

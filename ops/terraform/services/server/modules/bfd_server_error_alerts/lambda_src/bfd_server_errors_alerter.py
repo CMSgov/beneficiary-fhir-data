@@ -132,8 +132,7 @@ def handler(event: Any, context: Any):
         logger.error("Not all necessary environment variables were defined, exiting...")
         return
 
-    utc_now = datetime.fromisoformat("2023-03-03T15:55:00")
-    # utc_now = datetime.utcnow()
+    utc_now = datetime.utcnow()
     start_time = utc_now - timedelta(seconds=LOG_LOOKBACK_SECONDS)
     start_time_timestamp = calendar.timegm(start_time.utctimetuple())
     end_time = utc_now
@@ -142,8 +141,8 @@ def handler(event: Any, context: Any):
         "Querying %s log group for 500 responses per-partner, per-operation between %s"
         " UTC and %s UTC (%s second(s) timespan)...",
         LOG_GROUP,
-        start_time.isoformat(),
-        end_time.isoformat(),
+        start_time.isoformat(timespec="seconds"),
+        end_time.isoformat(timespec="seconds"),
         LOG_LOOKBACK_SECONDS,
     )
     try:
