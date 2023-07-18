@@ -270,8 +270,8 @@ def handler(event: Any, context: Any):
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        ":alert: THIS IS A TEST OF IN-PROGRESS WORK AND SHOULD BE"
-                        " IGNORED :alert:\n"
+                        ":notification-alert: *Error Alert for"
+                        f" `{BFD_ENVIRONMENT}` BFD Server* :notification-alert:\n"
                     ),
                 },
             },
