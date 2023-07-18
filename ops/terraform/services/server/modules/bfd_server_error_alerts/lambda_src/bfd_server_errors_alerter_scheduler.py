@@ -195,7 +195,8 @@ def handler(event: Any, context: Any):
             logger.info("Schedule %s deleted successfully", schedule.name)
     except scheduler_client.exceptions.ClientError:
         logger.error(
-            "An error occurred when trying to delete old OnetimeSchedules; continuing. Err: ",
+            "An error occurred when trying to delete old OnetimeSchedules; continuing."
+            " Err: ",
             exc_info=True,
         )
 
@@ -251,6 +252,7 @@ def handler(event: Any, context: Any):
                 )
         except scheduler_client.exceptions.ClientError:
             logger.error(
-                "An unrecoverable error occurred when trying to delete rate schedules: ",
+                "An unrecoverable error occurred when trying to delete rate"
+                " schedules: ",
                 exc_info=True,
             )
