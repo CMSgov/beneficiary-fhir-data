@@ -1,0 +1,30 @@
+@startuml
+title BFD-Pipeline-CCW Ingestion of Beneficiary/Claim Data Sequence
+participant ccw
+database s3
+participant "bfd-pipeline"
+participant splunk
+note over splunk: Specific Splunk Components: \n forwarders/indexers/search heads/ui/configuration
+participant slack
+database "bfd-db"
+ccw -> s3: Delivery of RIF and manifest files to 'bfd-prod-etl' S3 bucket \n under 'Incoming/<timestamp>' prefix
+s3 --> ccw
+s3 -> "bfd-pipeline": ETL/RIF Loader process triggered via event notification
+group ETL
+"bfd-pipeline" <-> splunk: bfd-pipeline logs forwarded \n to splunk via splunk-forwarder
+activate splunk
+"bfd-pipeline" -> s3: query for new RIF data
+s3 --> "bfd-pipeline": data discovered
+splunk -> splunk: data discovery messages detected
+splunk -> slack: data discovery status sent \n to #bfd-notices channel
+"bfd-pipeline" -> s3: request manifest, RIF files
+s3 --> "bfd-pipeline": delivery of manifest, RIF files
+"bfd-pipeline" -> "bfd-db": DB operations applied for resources
+"bfd-db" --> "bfd-pipeline"
+"bfd-pipeline" -> "bfd-pipeline": Process complete, load status logged
+"bfd-pipeline" -> s3: move completed RIFs, manifests to 'Done/<timestamp' prefix
+splunk -> splunk: data load messages detected
+splunk -> slack: data load status sent \n to #bfd-notices channel
+deactivate splunk
+end
+@enduml
