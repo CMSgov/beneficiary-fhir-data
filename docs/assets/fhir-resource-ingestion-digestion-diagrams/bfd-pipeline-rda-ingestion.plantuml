@@ -1,0 +1,32 @@
+@startuml
+title BFD-Pipeline-RDA-GRPC Ingestion of Partially Adjudicated Claims Data Sequence
+participant "rda-api"
+participant "bfd-pipeline"
+database "bfd-db"
+note over "rda-api": Runs every 5 min in prod \n 1 hr in test
+group Initialization
+"bfd-pipeline" -> "rda-api": Smoke test to determine connectivity
+"rda-api" --> "bfd-pipeline"  
+"bfd-pipeline" -> "rda-api": Dead Letter Queue (DLQ) Processing: \n Read failed claims from DLQ table
+"rda-api" --> "bfd-pipeline"
+"bfd-pipeline" -> "rda-api": Dead Letter Queue (DLQ) Processing: \n For each failed claim, process each claim individually \n via the Process 'DLQGrpcRdaSource' job
+"rda-api" -> "bfd-pipeline"
+"bfd-pipeline" -> "rda-api": Dead Letter Queue (DLQ) Processing: \n Update error state in db for each claim as RESOLVED/OBSOLETE
+"rda-api" --> "bfd-pipeline"
+"bfd-pipeline" -> "rda-api": Get Version: receive RDA API version and verify compatibility with BFD pipeline
+"rda-api" --> "bfd-pipeline"
+"bfd-pipeline" -> "bfd-db": Get starting sequence number to process claims
+"bfd-db" --> "bfd-pipeline"
+end
+"bfd-pipeline" -> "rda-api": Open stream, and receive messages for processing/to ingest claims \n via RdaFissClaimLoadJob and RdaMcsClaimLoadJob
+"rda-api" --> "bfd-pipeline"
+alt successful processing
+"bfd-pipeline" -> "bfd-db": Store fiss and mcs claim data for BFD consumption \n and update starting sequence number value for future runs.
+"bfd-db" --> "bfd-pipeline"
+else failed processing
+"bfd-pipeline" -> "bfd-db": Any messages that can't be processed written to DLQ table
+"bfd-db" --> "bfd-pipeline"
+end
+"bfd-pipeline" -> "rda-api": Close stream when complete
+"rda-api"--> "bfd-pipeline"
+@enduml
