@@ -31,8 +31,6 @@ RATE_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-every-"
 
 
 class AlarmState(str, Enum):
-    """"""
-
     ALARMING = "ALARM"
     OK = "OK"
 

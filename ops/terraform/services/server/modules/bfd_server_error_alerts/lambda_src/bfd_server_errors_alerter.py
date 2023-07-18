@@ -69,22 +69,17 @@ try:
     logs_client = boto3.client("logs", config=BOTO_CONFIG)  # type: ignore
 except Exception as exc:
     logger.error(
-        "Unrecoverable exception occurred when attempting to create boto3"
-        " clients/resources:",
+        "Unrecoverable exception occurred when attempting to create boto3 clients/resources:",
         exc_info=True,
     )
     sys.exit(0)
 
 
-def __get_value_by_key(
-    cell_key: str, row_list: list[LogInsightsQueryResultTypeDef]
-) -> str:
+def __get_value_by_key(cell_key: str, row_list: list[LogInsightsQueryResultTypeDef]) -> str:
     return next(
         result_cell
         for result_cell in row_list
-        if "field" in result_cell
-        and "value" in result_cell
-        and result_cell["field"] == cell_key
+        if "field" in result_cell and "value" in result_cell and result_cell["field"] == cell_key
     )["value"]
 
 
@@ -101,10 +96,10 @@ def __gen_log_insights_url(
     # them.
 
     url_prefix = f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#logsV2:logs-insights$3FqueryDetail$3D~"
-    start_time_iso = f"{__escape_log_insights_url_str(start_time.isoformat(timespec='seconds'))}.000Z"
-    end_time_iso = (
-        f"{__escape_log_insights_url_str(end_time.isoformat(timespec='seconds'))}.000Z"
+    start_time_iso = (
+        f"{__escape_log_insights_url_str(start_time.isoformat(timespec='seconds'))}.000Z"
     )
+    end_time_iso = f"{__escape_log_insights_url_str(end_time.isoformat(timespec='seconds'))}.000Z"
     editor_string = __escape_log_insights_url_str(editor_string)
     query_params = {
         "end": end_time_iso,
@@ -161,24 +156,18 @@ def handler(event: Any, context: Any):
         return
 
     try:
-        response = logs_client.get_query_results(
-            queryId=start_query_response["queryId"]
-        )
+        response = logs_client.get_query_results(queryId=start_query_response["queryId"])
         while response["status"] == "Running" or response["status"] == "Scheduled":
             logger.info(
-                'Query "%s" has not finished running (current status: %s), waiting 1'
-                " second...",
+                'Query "%s" has not finished running (current status: %s), waiting 1 second...',
                 start_query_response["queryId"],
                 response["status"],
             )
             time.sleep(1)
-            response = logs_client.get_query_results(
-                queryId=start_query_response["queryId"]
-            )
+            response = logs_client.get_query_results(queryId=start_query_response["queryId"])
     except logs_client.exceptions.ClientError:
         logger.error(
-            'Retrieving results for query ID "%s" has failed due to an unrecoverable'
-            " error:",
+            'Retrieving results for query ID "%s" has failed due to an unrecoverable error:',
             exc_info=True,
         )
         return
@@ -292,12 +281,8 @@ def handler(event: Any, context: Any):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": (
-                        "\n_*Per-partner, per-operation breakdown(s)*_:\n\n"
-                        + "\n".join(
-                            f"*{partner}*\n{table}"
-                            for partner, table in per_partner_tables.items()
-                        )
+                    "text": "\n_*Per-partner, per-operation breakdown(s)*_:\n\n" + "\n".join(
+                        f"*{partner}*\n{table}" for partner, table in per_partner_tables.items()
                     ),
                 },
             },
@@ -321,9 +306,7 @@ def handler(event: Any, context: Any):
     request = Request(SLACK_WEBHOOK, method="POST")
     request.add_header("Content-Type", "application/json")
     try:
-        with urlopen(
-            request, data=json.dumps(slack_message).encode("utf-8")
-        ) as response:
+        with urlopen(request, data=json.dumps(slack_message).encode("utf-8")) as response:
             if response.status == 200:
                 logger.info("Message posted successfully")
             else:
