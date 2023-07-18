@@ -104,8 +104,7 @@ try:
     scheduler_client = boto3.client("scheduler", config=BOTO_CONFIG)  # type: ignore
 except Exception as exc:
     logger.error(
-        "Unrecoverable exception occurred when attempting to create boto3"
-        " clients/resources:",
+        "Unrecoverable exception occurred when attempting to create boto3 clients/resources:",
         exc_info=True,
     )
     sys.exit(0)
@@ -176,14 +175,9 @@ def handler(event: Any, context: Any):
                 NamePrefix=ONETIME_SCHEDULE_NAME_PREFIX,
             )["Schedules"]
             if "Name" in schedule
-            and (
-                (one_time_schedule := OnetimeSchedule.from_name(schedule["Name"]))
-                is not None
-            )
+            and ((one_time_schedule := OnetimeSchedule.from_name(schedule["Name"])) is not None)
         ]
-        all_schedules_to_delete = [
-            x for x in all_onetime_schedules if x.time <= datetime.utcnow()
-        ]
+        all_schedules_to_delete = [x for x in all_onetime_schedules if x.time <= datetime.utcnow()]
         for schedule in all_schedules_to_delete:
             logger.info(
                 "Deleting schedule %s as its invocation time has passed...",
@@ -195,8 +189,7 @@ def handler(event: Any, context: Any):
             logger.info("Schedule %s deleted successfully", schedule.name)
     except scheduler_client.exceptions.ClientError:
         logger.error(
-            "An error occurred when trying to delete old OnetimeSchedules; continuing."
-            " Err: ",
+            "An error occurred when trying to delete old OnetimeSchedules; continuing. Err: ",
             exc_info=True,
         )
 
@@ -247,12 +240,9 @@ def handler(event: Any, context: Any):
                 scheduler_client.delete_schedule(
                     GroupName=EVENTBRIDGE_SCHEDULES_GROUP, Name=rate_schedule["Name"]
                 )
-                logger.info(
-                    "Rate schedule %s deleted successfully", rate_schedule["Name"]
-                )
+                logger.info("Rate schedule %s deleted successfully", rate_schedule["Name"])
         except scheduler_client.exceptions.ClientError:
             logger.error(
-                "An unrecoverable error occurred when trying to delete rate"
-                " schedules: ",
+                "An unrecoverable error occurred when trying to delete rate schedules: ",
                 exc_info=True,
             )
