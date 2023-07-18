@@ -142,7 +142,7 @@ def handler(event: Any, context: Any):
             RECURRING_SCHEDULE_RATE_STR,
         ]
     ):
-        print("Not all necessary environment variables were defined, exiting...")
+        logger.error("Not all necessary environment variables were defined, exiting...")
         return
 
     try:
