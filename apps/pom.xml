@@ -199,6 +199,23 @@
         <!-- Default number of threads that we can overridden as needed in module poms. -->
         <compile.thread.count>4</compile.thread.count>
         <tests.thread.count>4</tests.thread.count>
+        <!-- The jib maven plugin produces optimized docker images from maven projects. -->
+        <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
+        <jib.version>3.3.2</jib.version>
+        <!-- The base image (FROM) used to build images with jib. -->
+        <jib.from>amazoncorretto:17.0.7-alpine</jib.from>
+        <!--
+          The goal to use with the jib plugin.   Override on command line to change behavior:
+          dockerBuild: build on local docker only
+          build: build and push to container repository
+        -->
+        <jib.goal>dockerBuild</jib.goal>
+        <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
+        <jib.tag>latest</jib.tag>
+        <!-- Optional image namespace. -->
+        <jib.namespace/>
+        <!-- Skip by default.  Override to allow images to be built. -->
+        <jib.skip>true</jib.skip>
     </properties>
 
     <dependencyManagement>
@@ -679,88 +696,23 @@
                     <version>2.18</version>
                 </plugin>
                 <plugin>
-                    <groupId>io.github.phillipuniverse</groupId>
-                    <artifactId>githook-maven-plugin</artifactId>
-                    <version>1.0.4</version>
+                    <groupId>com.rudikershaw.gitbuildhook</groupId>
+                    <artifactId>git-build-hook-maven-plugin</artifactId>
+                    <version>3.4.1</version>
                     <configuration>
-                        <hooks>
-                            <pre-commit><![CDATA[
-#!/usr/bin/env bash
-set -e
-
-checkSecretFilesForPlainText() {
-  echo 'Verifying secret files are not in plaintext...'
-  set +e
-  # read list of files containing secrets
-  IFS=$'\n' read -d '' -r -a secrets < .secrets
-
-  # make list of files to be committed by printing out a newline
-  # separated list of files staged for commit to a temporary file
-  # and reading it as an array
-  tmpfile=$(mktemp)
-  git diff --cached --name-only --diff-filter=ACM > $tmpfile
-  IFS=$'\n' read -d '' -r -a commits < $tmpfile
-
-  # for all files to be committed which are a secret file,
-  # grep for the header "$ANSIBLE_VAULT;1.1;AES256"
-  # if it's not there, abort.
-  for commitFile in ${commits[@]}; do
-    for secretFile in ${secrets[@]}; do
-      if [ $commitFile == $secretFile ]; then
-        header=$(echo "$(git show :./$secretFile)" | grep "\$ANSIBLE_VAULT;1.1;AES256")
-        if [ -z $header ]; then
-          echo "attempting to commit an unencrypted secret: $secretFile; aborting"
-          exit 1
-        fi
-      fi
-    done
-  done
-  set -e
-}
-
-checkSecretFilesForPlainText
-							]]></pre-commit>
-                            <pre-push><![CDATA[
-#!/usr/bin/env bash
-set -e
-
-checkJavaFormat() {
-  echo 'Verifying Java source code format...'
-  branch_name="$(git rev-parse --abbrev-ref HEAD 2>&1)"
-
-  git fetch origin 2>&1
-  localChanges=''
-  doesRemoteExist="$(git ls-remote origin ${branch_name})"
-
-  if [ "$doesRemoteExist" = '' ]; then
-    echo 'No Remote exists, checking apps directory on local for changes.'
-    localChanges="$(git log origin/master..HEAD apps)"
-  else
-     localChanges="$(git diff --name-only "origin/${branch_name}:apps" "${branch_name}:apps" 2>&1)"
-  fi
-
-  echo "Verifying Java source code format for branch: ${branch_name} ..."
-  if [ "$localChanges" = '' ]; then
-    echo 'No changes detected. Exiting.'
-  else
-    set +e
-
-    echo 'Relevant app-directory changes detected. Running fmt plugin check.'
-    if mvn -f apps/ com.spotify.fmt:fmt-maven-plugin:check >/dev/null 2>&1; then
-      echo 'Verified Java source code format: a-okay.'
-    else
-      echo "Inconsistencies discovered in formatting check. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
-      return 1
-    fi
-  fi
-  return 0
-}
-
-checkJavaFormat
-							]]>
-                            </pre-push>
-                        </hooks>
+                        <installHooks>
+                            <!-- Install git hooks; this only works from the top apps directory during an install (build). -->
+                            <pre-commit>../.github/scripts/pre-commit.sh</pre-commit>
+                            <pre-push>../.github/scripts/pre-push.sh</pre-push>
+                        </installHooks>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>install</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -912,6 +864,24 @@ checkJavaFormat
                         </dependency>
                     </dependencies>
                 </plugin>
+                <plugin>
+                    <!-- Used to build docker images for a project. -->
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>${jib.version}</version>
+                    <configuration>
+                        <to>
+                            <image>${jib.namespace}${project.artifactId}:${project.version}</image>
+                            <tags>
+                                <tag>${jib.tag}</tag>
+                            </tags>
+                        </to>
+                        <from>
+                            <image>${jib.from}</image>
+                        </from>
+                        <containerizingMode>packaged</containerizingMode>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -927,6 +897,10 @@ checkJavaFormat
                 <configuration>
                     <rulesUri>file://${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.rudikershaw.gitbuildhook</groupId>
+                <artifactId>git-build-hook-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -978,19 +952,6 @@ checkJavaFormat
                                 on every build, which will auto-format all of our Java source code. Note
                                 that we have a Git pre-commit hook that will also do this. -->
                             <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>io.github.phillipuniverse</groupId>
-                <artifactId>githook-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <inherited>false</inherited>
-                        <goals>
-                            <!-- Verify source code formatting prior to commit. -->
-                            <goal>install</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -1150,20 +1111,6 @@ checkJavaFormat
                                                 <versionRange>[2.18,)</versionRange>
                                                 <goals>
                                                     <goal>format</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <!-- Don't run this plugin automatically on every build inside m2e. -->
-                                                <ignore/>
-                                            </action>
-                                        </pluginExecution>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>io.github.phillipuniverse</groupId>
-                                                <artifactId>githook-maven-plugin</artifactId>
-                                                <versionRange>[1.0.4,)</versionRange>
-                                                <goals>
-                                                    <goal>install</goal>
                                                 </goals>
                                             </pluginExecutionFilter>
                                             <action>

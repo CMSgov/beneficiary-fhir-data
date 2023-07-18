@@ -33,6 +33,7 @@
         <module>bfd-server-launcher</module>
         <module>bfd-server-shared-utils</module>
         <module>bfd-server-war</module>
+        <module>bfd-server-image</module>
     </modules>
 
     <dependencyManagement>
