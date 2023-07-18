@@ -17,8 +17,6 @@ EVENTBRIDGE_SCHEDULES_GROUP = os.environ.get("EVENTBRIDGE_SCHEDULES_GROUP", "")
 RECURRING_SCHEDULE_RATE_STR = os.environ.get("RECURRING_SCHEDULE_RATE_STR", "")
 SCHEDULER_ROLE_ARN = os.environ.get("SCHEDULER_ROLE_ARN", "")
 ALERTER_LAMBDA_ARN = os.environ.get("ALERTER_LAMBDA_ARN", "")
-ONETIME_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-at-"
-RATE_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-every-"
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -27,6 +25,9 @@ BOTO_CONFIG = Config(
         "mode": "adaptive",
     },
 )
+
+ONETIME_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-at-"
+RATE_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-every-"
 
 
 class AlarmState(str, Enum):
