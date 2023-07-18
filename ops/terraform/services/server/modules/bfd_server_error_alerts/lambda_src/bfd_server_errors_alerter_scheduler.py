@@ -104,8 +104,8 @@ try:
 except Exception as exc:
     logger.error(
         "Unrecoverable exception occurred when attempting to create boto3"
-        " clients/resources: %s",
-        repr(exc),
+        " clients/resources:",
+        exc_info=True,
     )
     sys.exit(0)
 
