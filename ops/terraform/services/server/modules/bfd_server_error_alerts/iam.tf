@@ -31,8 +31,9 @@ resource "aws_iam_policy" "logs" {
 resource "aws_iam_policy" "scheduler" {
   name = "${local.alert_lambda_scheduler_name}-scheduler"
   description = join("", [
-    "Permissions for ${local.alert_lambda_scheduler_name} to create schedules within the ",
-    "${aws_scheduler_schedule_group.this.name} schedule group"
+    "Permissions for ${local.alert_lambda_scheduler_name} to create and delete schedules within ",
+    "the ${aws_scheduler_schedule_group.this.name} schedule group, list all schedules, and pass ",
+    "the ${aws_iam_role.scheduler_assume_role.name} role to EventBridge Scheduler"
   ])
 
   policy = jsonencode(
@@ -40,15 +41,20 @@ resource "aws_iam_policy" "scheduler" {
       Version = "2012-10-17"
       Statement = [
         {
-          Effect = "Allow"
-          Action = ["scheduler:CreateSchedule"]
-          Resource = [
-            "arn:aws:scheduler:${local.region}:${local.account_id}:schedule/${aws_scheduler_schedule_group.this.name}/*"
-          ]
+          Effect   = "Allow"
+          Action   = ["scheduler:CreateSchedule", "scheduler:DeleteSchedule"]
+          Resource = ["arn:aws:scheduler:${local.region}:${local.account_id}:schedule/${aws_scheduler_schedule_group.this.name}/*"]
+        },
+        # Unfortunately, ListSchedules does not support any resource-level restrictions
+        # See https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazoneventbridgescheduler.html#amazoneventbridgescheduler-schedule
+        {
+          Effect   = "Allow"
+          Action   = ["scheduler:ListSchedules"]
+          Resource = ["*"]
         },
         {
-          Effect = "Allow"
-          Action = ["iam:PassRole"]
+          Effect   = "Allow"
+          Action   = ["iam:PassRole"]
           Resource = [aws_iam_role.scheduler_assume_role.arn]
         }
       ]
