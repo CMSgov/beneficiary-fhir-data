@@ -167,29 +167,36 @@ def handler(event: Any, context: Any):
 
     # Delete old OnetimeSchedules by listing all OnetimeSchedules within the group and deleting
     # those with names indicating times that have since passed
-    all_onetime_schedules = [
-        one_time_schedule
-        for schedule in scheduler_client.list_schedules(
-            GroupName=EVENTBRIDGE_SCHEDULES_GROUP,
-            NamePrefix=ONETIME_SCHEDULE_NAME_PREFIX,
-        )["Schedules"]
-        if "Name" in schedule
-        and (
-            (one_time_schedule := OnetimeSchedule.from_name(schedule["Name"]))
-            is not None
+    try:
+        all_onetime_schedules = [
+            one_time_schedule
+            for schedule in scheduler_client.list_schedules(
+                GroupName=EVENTBRIDGE_SCHEDULES_GROUP,
+                NamePrefix=ONETIME_SCHEDULE_NAME_PREFIX,
+            )["Schedules"]
+            if "Name" in schedule
+            and (
+                (one_time_schedule := OnetimeSchedule.from_name(schedule["Name"]))
+                is not None
+            )
+        ]
+        all_schedules_to_delete = [
+            x for x in all_onetime_schedules if x.time <= datetime.utcnow()
+        ]
+        for schedule in all_schedules_to_delete:
+            logger.info(
+                "Deleting schedule %s as its invocation time has passed...",
+                schedule.name,
+            )
+            scheduler_client.delete_schedule(
+                GroupName=EVENTBRIDGE_SCHEDULES_GROUP, Name=schedule.name
+            )
+            logger.info("Schedule %s deleted successfully", schedule.name)
+    except scheduler_client.exceptions.ClientError:
+        logger.error(
+            "An error occurred when trying to delete old OnetimeSchedules; continuing. Err: ",
+            exc_info=True,
         )
-    ]
-    all_schedules_to_delete = [
-        x for x in all_onetime_schedules if x.time <= datetime.utcnow()
-    ]
-    for schedule in all_schedules_to_delete:
-        logger.info(
-            "Deleting schedule %s as its invocation time has passed...", schedule.name
-        )
-        scheduler_client.delete_schedule(
-            GroupName=EVENTBRIDGE_SCHEDULES_GROUP, Name=schedule.name
-        )
-        logger.info("Schedule %s deleted successfully", schedule.name)
 
     # The scheduler always schedules the alerter to run within the next minute in order to capture
     # any errors that may have occurred between the alarm going into ALARM and invoking this Lambda
@@ -219,4 +226,30 @@ def handler(event: Any, context: Any):
             return
     elif alarm_state == AlarmState.OK:
         # delete rate schedules
-        logger.info("%s", alarm_state)
+        logger.info(
+            "Alarm state is %s, indicating that server operation has returned to"
+            " normal. Deleting all rate schedules in group %s...",
+            alarm_state.value,
+            EVENTBRIDGE_SCHEDULES_GROUP,
+        )
+        try:
+            for rate_schedule in [
+                schedule
+                for schedule in scheduler_client.list_schedules(
+                    GroupName=EVENTBRIDGE_SCHEDULES_GROUP,
+                    NamePrefix=RATE_SCHEDULE_NAME_PREFIX,
+                )["Schedules"]
+                if "Name" in schedule
+            ]:
+                logger.info("Deleting rate schedule %s...", rate_schedule["Name"])
+                scheduler_client.delete_schedule(
+                    GroupName=EVENTBRIDGE_SCHEDULES_GROUP, Name=rate_schedule["Name"]
+                )
+                logger.info(
+                    "Rate schedule %s deleted successfully", rate_schedule["Name"]
+                )
+        except scheduler_client.exceptions.ClientError:
+            logger.error(
+                "An unrecoverable error occurred when trying to delete rate schedules: ",
+                exc_info=True,
+            )
