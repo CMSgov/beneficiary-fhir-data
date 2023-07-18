@@ -14,7 +14,7 @@ The BB2 specific components are setup under the following service areas:
   - Includes components used for reporting via QuickSight.
 
 - `services/common`:
-  - Includes components that are currently common to `test/impl/prod` enviornments. Uses the `allenv` workspace.
+  - Includes components that are currently common to `test/impl/prod` environments. Uses the `allenv` workspace.
 
 - `services/log_steam`:
   - Includes components for streaming application log events from BB2 CloudWatch through to the related Glue tables.

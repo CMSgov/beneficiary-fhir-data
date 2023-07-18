@@ -39,7 +39,7 @@ resource "aws_lambda_function" "firehose_log_processor_lambda" {
   source_code_hash               = data.archive_file.zip_archive_format_firehose_logs.output_base64sha256
 
   tags = {
-    "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python",
+    "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python"
   }
 
   timeout = 60
