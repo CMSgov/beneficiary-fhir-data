@@ -199,6 +199,23 @@
         <!-- Default number of threads that we can overridden as needed in module poms. -->
         <compile.thread.count>4</compile.thread.count>
         <tests.thread.count>4</tests.thread.count>
+        <!-- The jib maven plugin produces optimized docker images from maven projects. -->
+        <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
+        <jib.version>3.3.2</jib.version>
+        <!-- The base image (FROM) used to build images with jib. -->
+        <jib.from>amazoncorretto:17.0.7-alpine</jib.from>
+        <!--
+          The goal to use with the jib plugin.   Override on command line to change behavior:
+          dockerBuild: build on local docker only
+          build: build and push to container repository
+        -->
+        <jib.goal>dockerBuild</jib.goal>
+        <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
+        <jib.tag>latest</jib.tag>
+        <!-- Optional image namespace. -->
+        <jib.namespace/>
+        <!-- Skip by default.  Override to allow images to be built. -->
+        <jib.skip>true</jib.skip>
     </properties>
 
     <dependencyManagement>
@@ -846,6 +863,24 @@
                             <version>${checkstyle.version}</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <!-- Used to build docker images for a project. -->
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>${jib.version}</version>
+                    <configuration>
+                        <to>
+                            <image>${jib.namespace}${project.artifactId}:${project.version}</image>
+                            <tags>
+                                <tag>${jib.tag}</tag>
+                            </tags>
+                        </to>
+                        <from>
+                            <image>${jib.from}</image>
+                        </from>
+                        <containerizingMode>packaged</containerizingMode>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
