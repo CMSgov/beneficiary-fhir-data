@@ -1,5 +1,7 @@
 package gov.cms.model.dsl.codegen.plugin;
 
+import static gov.cms.model.dsl.codegen.plugin.PoetUtil.OptionalClassName;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -24,7 +26,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -51,6 +55,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -209,6 +214,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
     classBuilder.addFields(fieldSpecs);
     classBuilder.addMethods(accessorSpecs);
     classBuilder.addMethods(joinPropertySpecs);
+    classBuilder.addMethods(createMethodSpecsForGroupedProperties(mapping));
     classBuilder.addAnnotations(annotationSpecs);
     if (primaryKeySpecs.size() > 1) {
       final var primaryKeyClassName = computePrimaryKeyClassName(mapping);
@@ -1018,11 +1024,40 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   }
 
   /**
+   * TODO:2598.
+   *
+   * @param mapping todo
+   * @return todo
+   */
+  @VisibleForTesting
+  List<MethodSpec> createMethodSpecsForGroupedProperties(MappingBean mapping) {
+    List<MethodSpec> methodSpecs = new LinkedList<>();
+    Map<String, List<ColumnBean>> groupedColumns =
+        mapping.getTable().getColumns().stream()
+            .filter(columnBean -> columnBean.hasGroupName())
+            .collect(Collectors.groupingBy(ColumnBean::getGroupName));
+    for (Map.Entry<String, List<ColumnBean>> entry : groupedColumns.entrySet()) {
+      final var columnBean = entry.getValue().stream().findFirst().get();
+      final var propertyType =
+          columnBean.isNullable()
+              ? ParameterizedTypeName.get(OptionalClassName, columnBean.computeJavaAccessorType())
+              : columnBean.computeJavaAccessorType();
+      final var methodSpec =
+          PoetUtil.createGroupedPropertiesGetter(
+              entry.getKey(),
+              entry.getValue().stream().map(c -> c.getName()).collect(Collectors.toList()),
+              propertyType);
+      methodSpecs.add(methodSpec);
+    }
+    return methodSpecs;
+  }
+
+  /**
    * Data class holding all of the information required to create accessor methods (setter/getter)
    * for a field.
    */
   @Data
-  @AllArgsConstructor
+  @RequiredArgsConstructor
   @VisibleForTesting
   static class AccessorSpec {
     /** Name of the field. */
@@ -1035,6 +1070,8 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
     private final boolean isNullableColumn;
     /** True if the column is read only. (No setter should be generated.) */
     private final boolean isReadOnly;
+    /** TODO:2598. */
+    private String groupName;
   }
 
   /** Wrapper for the properties of every field to be generated in the entity class. */

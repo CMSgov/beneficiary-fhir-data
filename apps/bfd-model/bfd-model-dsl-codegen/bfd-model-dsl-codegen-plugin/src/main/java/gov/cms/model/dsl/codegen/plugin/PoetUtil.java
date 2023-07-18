@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
@@ -191,6 +192,30 @@ public class PoetUtil {
             joinFieldName,
             fieldToMethodName("get", joinPropertyName))
         .build();
+  }
+
+  /**
+   * TODO:2598.
+   *
+   * @param groupedPropertiesName todo
+   * @param propertyNames todo
+   * @param getterResultType todo
+   * @return todo
+   */
+  public static MethodSpec createGroupedPropertiesGetter(
+      String groupedPropertiesName, List<String> propertyNames, TypeName getterResultType) {
+    MethodSpec.Builder methodSpecBuilder =
+        MethodSpec.methodBuilder(fieldToMethodName("get", groupedPropertiesName))
+            .returns(
+                ParameterizedTypeName.get(ClassName.get("java.util", "List"), getterResultType))
+            .addStatement("final var $L = new LinkedList()", groupedPropertiesName);
+    propertyNames.stream()
+        .forEach(
+            property ->
+                methodSpecBuilder.addStatement(
+                    "$L.add(" + fieldToMethodName("get", property) + "())", groupedPropertiesName));
+    methodSpecBuilder.addStatement("return $L", groupedPropertiesName);
+    return methodSpecBuilder.build();
   }
 
   /**

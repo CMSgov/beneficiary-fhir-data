@@ -186,234 +186,284 @@ mappings:
       dbName: icd_dgns_cd1
       name: diagnosis1Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code I Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd1.txt)
       dbName: icd_dgns_vrsn_cd1
       javaType: Character
       name: diagnosis1CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code II (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd2.txt)
       dbName: icd_dgns_cd2
       name: diagnosis2Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code II Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd2.txt)
       dbName: icd_dgns_vrsn_cd2
       javaType: Character
       name: diagnosis2CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code III (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd3.txt)
       dbName: icd_dgns_cd3
       name: diagnosis3Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code III Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd3.txt)
       dbName: icd_dgns_vrsn_cd3
       javaType: Character
       name: diagnosis3CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code IV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd4.txt)
       dbName: icd_dgns_cd4
       name: diagnosis4Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code IV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd4.txt)
       dbName: icd_dgns_vrsn_cd4
       javaType: Character
       name: diagnosis4CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code V (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd5.txt)
       dbName: icd_dgns_cd5
       name: diagnosis5Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code V Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd5.txt)
       dbName: icd_dgns_vrsn_cd5
       javaType: Character
       name: diagnosis5CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code VI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd6.txt)
       dbName: icd_dgns_cd6
       name: diagnosis6Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code VI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd6.txt)
       dbName: icd_dgns_vrsn_cd6
       javaType: Character
       name: diagnosis6CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code VII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd7.txt)
       dbName: icd_dgns_cd7
       name: diagnosis7Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code VII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd7.txt)
       dbName: icd_dgns_vrsn_cd7
       javaType: Character
       name: diagnosis7CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code VIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd8.txt)
       dbName: icd_dgns_cd8
       name: diagnosis8Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code VIII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd8.txt)
       dbName: icd_dgns_vrsn_cd8
       javaType: Character
       name: diagnosis8CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code IX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd9.txt)
       dbName: icd_dgns_cd9
       name: diagnosis9Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code IX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd9.txt)
       dbName: icd_dgns_vrsn_cd9
       javaType: Character
       name: diagnosis9CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code X (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd10.txt)
       dbName: icd_dgns_cd10
       name: diagnosis10Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code X Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd10.txt)
       dbName: icd_dgns_vrsn_cd10
       javaType: Character
       name: diagnosis10CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd11.txt)
       dbName: icd_dgns_cd11
       name: diagnosis11Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd11.txt)
       dbName: icd_dgns_vrsn_cd11
       javaType: Character
       name: diagnosis11CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd12.txt)
       dbName: icd_dgns_cd12
       name: diagnosis12Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XII Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd12.txt)
       dbName: icd_dgns_vrsn_cd12
       javaType: Character
       name: diagnosis12CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd13.txt)
       dbName: icd_dgns_cd13
       name: diagnosis13Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XIII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd13.txt)
       dbName: icd_dgns_vrsn_cd13
       javaType: Character
       name: diagnosis13CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XIV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd14.txt)
       dbName: icd_dgns_cd14
       name: diagnosis14Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XIV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd14.txt)
       dbName: icd_dgns_vrsn_cd14
       javaType: Character
       name: diagnosis14CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd15.txt)
       dbName: icd_dgns_cd15
       name: diagnosis15Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd15.txt)
       dbName: icd_dgns_vrsn_cd15
       javaType: Character
       name: diagnosis15CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XVI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd16.txt)
       dbName: icd_dgns_cd16
       name: diagnosis16Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XVI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd16.txt)
       dbName: icd_dgns_vrsn_cd16
       javaType: Character
       name: diagnosis16CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XVII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd17.txt)
       dbName: icd_dgns_cd17
       name: diagnosis17Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XVII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd17.txt)
       dbName: icd_dgns_vrsn_cd17
       javaType: Character
       name: diagnosis17CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XVIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd18.txt)
       dbName: icd_dgns_cd18
       name: diagnosis18Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XVIII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd18.txt)
       dbName: icd_dgns_vrsn_cd18
       javaType: Character
       name: diagnosis18CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XIX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd19.txt)
       dbName: icd_dgns_cd19
       name: diagnosis19Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XIX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd19.txt)
       dbName: icd_dgns_vrsn_cd19
       javaType: Character
       name: diagnosis19CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XX (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd20.txt)
       dbName: icd_dgns_cd20
       name: diagnosis20Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XX Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd20.txt)
       dbName: icd_dgns_vrsn_cd20
       javaType: Character
       name: diagnosis20CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XXI (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd21.txt)
       dbName: icd_dgns_cd21
       name: diagnosis21Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XXI Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd21.txt)
       dbName: icd_dgns_vrsn_cd21
       javaType: Character
       name: diagnosis21CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XXII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd22.txt)
       dbName: icd_dgns_cd22
       name: diagnosis22Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XXII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd22.txt)
       dbName: icd_dgns_vrsn_cd22
       javaType: Character
       name: diagnosis22CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XXIII (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd23.txt)
       dbName: icd_dgns_cd23
       name: diagnosis23Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XXIII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd23.txt)
       dbName: icd_dgns_vrsn_cd23
       javaType: Character
       name: diagnosis23CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XXIV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd24.txt)
       dbName: icd_dgns_cd24
       name: diagnosis24Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XXIV Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd24.txt)
       dbName: icd_dgns_vrsn_cd24
       javaType: Character
       name: diagnosis24CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: Claim Diagnosis Code XXV (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd25.txt)
       dbName: icd_dgns_cd25
       name: diagnosis25Code
       sqlType: varchar(7)
+      groupName: diagnosisCodes
     - comment: Claim Diagnosis Code XXV Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd25.txt)
       dbName: icd_dgns_vrsn_cd25
       javaType: Character
       name: diagnosis25CodeVersion
       sqlType: char
+      groupName: diagnosisCodeVersions
     - comment: First Claim Diagnosis E Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fst_dgns_e_cd.txt)
       dbName: fst_dgns_e_cd
       name: diagnosisExternalFirstCode
@@ -428,6 +478,7 @@ mappings:
       dbName: icd_dgns_e_cd1
       name: diagnosisExternal1Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code I Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd1.txt)
       dbName: icd_dgns_e_vrsn_cd1
       javaType: Character
@@ -437,6 +488,7 @@ mappings:
       dbName: icd_dgns_e_cd2
       name: diagnosisExternal2Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code II Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd2.txt)
       dbName: icd_dgns_e_vrsn_cd2
@@ -447,6 +499,7 @@ mappings:
       dbName: icd_dgns_e_cd3
       name: diagnosisExternal3Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code III Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd3.txt)
       dbName: icd_dgns_e_vrsn_cd3
@@ -457,6 +510,7 @@ mappings:
       dbName: icd_dgns_e_cd4
       name: diagnosisExternal4Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code IV Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd4.txt)
       dbName: icd_dgns_e_vrsn_cd4
@@ -467,6 +521,7 @@ mappings:
       dbName: icd_dgns_e_cd5
       name: diagnosisExternal5Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code V Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd5.txt)
       dbName: icd_dgns_e_vrsn_cd5
       javaType: Character
@@ -476,6 +531,7 @@ mappings:
       dbName: icd_dgns_e_cd6
       name: diagnosisExternal6Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code VI Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd6.txt)
       dbName: icd_dgns_e_vrsn_cd6
@@ -486,6 +542,7 @@ mappings:
       dbName: icd_dgns_e_cd7
       name: diagnosisExternal7Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code VII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd7.txt)
       dbName: icd_dgns_e_vrsn_cd7
@@ -496,6 +553,7 @@ mappings:
       dbName: icd_dgns_e_cd8
       name: diagnosisExternal8Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code VIII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd8.txt)
       dbName: icd_dgns_e_vrsn_cd8
@@ -506,6 +564,7 @@ mappings:
       dbName: icd_dgns_e_cd9
       name: diagnosisExternal9Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code IX Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd9.txt)
       dbName: icd_dgns_e_vrsn_cd9
@@ -516,6 +575,7 @@ mappings:
       dbName: icd_dgns_e_cd10
       name: diagnosisExternal10Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code X Diagnosis Version Code (ICD-9 or ICD-10) (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd10.txt)
       dbName: icd_dgns_e_vrsn_cd10
       javaType: Character
@@ -525,6 +585,7 @@ mappings:
       dbName: icd_dgns_e_cd11
       name: diagnosisExternal11Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code XI Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd11.txt)
       dbName: icd_dgns_e_vrsn_cd11
@@ -535,6 +596,7 @@ mappings:
       dbName: icd_dgns_e_cd12
       name: diagnosisExternal12Code
       sqlType: varchar(7)
+      groupName: diagnosisExternalCodes
     - comment: Claim Diagnosis E Code XII Diagnosis Version Code (ICD-9 or ICD-10)
         (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd12.txt)
       dbName: icd_dgns_e_vrsn_cd12

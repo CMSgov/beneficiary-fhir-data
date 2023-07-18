@@ -52,6 +52,8 @@ public class ColumnBean implements ModelBean {
   @SqlType private String sqlType;
   /** Specific java type for the field in the entity object corresponding to this column. */
   @JavaType private String javaType;
+  /** TODO:2598. */
+  private String groupName;
   /**
    * Alternative type for generated accessor methods (getter/setter) for the field in the entity
    * object corresponding to this column.
@@ -191,6 +193,15 @@ public class ColumnBean implements ModelBean {
    */
   public boolean hasComment() {
     return !Strings.isNullOrEmpty(comment);
+  }
+
+  /**
+   * TODO:2598.
+   *
+   * @return true
+   */
+  public boolean hasGroupName() {
+    return !Strings.isNullOrEmpty(groupName);
   }
 
   /**
