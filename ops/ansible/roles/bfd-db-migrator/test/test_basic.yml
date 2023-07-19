@@ -22,6 +22,7 @@
       vars:
         env: dev
         db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/1.0.0-SNAPSHOT/bfd-db-migrator-1.0.0-SNAPSHOT.zip"
+        db_migrator_db_host: db
         db_migrator_db_url: jdbc:postgresql://db:5432/fhirdb
         db_migrator_db_username: bfd
         db_migrator_db_password: bfd
