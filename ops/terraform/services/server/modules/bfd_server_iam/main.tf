@@ -57,9 +57,9 @@ resource "aws_iam_policy" "ssm" {
         "ssm:GetParameter"
       ],
       "Resource": [
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${var.service}/*"
+        "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
+        "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
+        "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${var.service}/*"
       ]
     },
     {
@@ -103,7 +103,7 @@ resource "aws_iam_policy" "ssm_mgmt" {
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/mgmt/common/sensitive/user/*"
+        "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/bfd/mgmt/common/sensitive/user/*"
       ],
       "Sid": "BFDProfile"
     }
@@ -143,4 +143,27 @@ POLICY
 resource "aws_iam_role_policy_attachment" "kms_mgmt" {
   role       = aws_iam_role.instance.id
   policy_arn = aws_iam_policy.kms_mgmt.arn
+}
+
+# Allow instances to generate RDS auth tokens
+data "aws_iam_policy_document" "rds" {
+  statement {
+    sid    = "AllowRdsIamAuth"
+    effect = "Allow"
+    actions = ["rds-db:connect"]
+    resources = [
+      "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${var.rds_cluster_resource_id}/${aws_iam_role.instance.name}"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "rds" {
+  name        = "bfd-${local.env}-${var.service}-rds-auth"
+  description = "IAM policy to allow instances to generate RDS auth tokens"
+  policy      = data.aws_iam_policy_document.rds.json
+}
+
+resource "aws_iam_role_policy_attachment" "rds-policy-attach" {
+  role       = aws_iam_role.instance.id
+  policy_arn = aws_iam_policy.rds.arn
 }
