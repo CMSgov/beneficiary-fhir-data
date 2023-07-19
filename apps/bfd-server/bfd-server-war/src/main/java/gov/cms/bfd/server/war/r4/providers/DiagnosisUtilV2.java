@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -187,10 +186,25 @@ public class DiagnosisUtilV2 {
    * @return a {@link Diagnosis} or {@link Optional#empty()}
    */
   public static Optional<Diagnosis> extractDiagnosis(
-      String substitution, Map<String, Optional<String>> codes, Map<String, Optional<Character>> codeVersions, Optional<Map<String, Optional<Character>>> presentOnAdms, Optional<CcwCodebookInterface> ccw, DiagnosisLabel label) {
-    Optional<String> code = codes.getOrDefault(String.format("diagnosis%sCode", substitution), Optional.empty());
-    Optional<Character> codeVersion = codeVersions.getOrDefault(String.format("diagnosis%sCodeVersion", substitution), Optional.empty());
-    Optional<Character> presentOnAdm = presentOnAdms.isPresent() ? presentOnAdms.get().getOrDefault(String.format("diagnosis%sPresentOnAdmissionCode", substitution), Optional.empty()) : Optional.empty();
+      String substitution,
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Optional<Map<String, Optional<Character>>> presentOnAdms,
+      Optional<CcwCodebookInterface> ccw,
+      DiagnosisLabel label) {
+    Optional<String> code =
+        codes.getOrDefault(String.format("diagnosis%sCode", substitution), Optional.empty());
+    Optional<Character> codeVersion =
+        codeVersions.getOrDefault(
+            String.format("diagnosis%sCodeVersion", substitution), Optional.empty());
+    Optional<Character> presentOnAdm =
+        presentOnAdms.isPresent()
+            ? presentOnAdms
+                .get()
+                .getOrDefault(
+                    String.format("diagnosis%sPresentOnAdmissionCode", substitution),
+                    Optional.empty())
+            : Optional.empty();
     return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label);
   }
 
@@ -202,12 +216,22 @@ public class DiagnosisUtilV2 {
    * @return the {@link Diagnosis} that can be extracted from the specified {@link
    *     gov.cms.bfd.model.rif.InpatientClaim}
    */
-  static List<Diagnosis> extractDiagnoses(Object claim, Map<String, Optional<String>> codes,
-                                          Map<String, Optional<Character>> codeVersions, Optional<Map<String, Optional<Character>>> presentOnAdms) {
+  static List<Diagnosis> extractDiagnoses(
+      Object claim,
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Optional<Map<String, Optional<Character>>> presentOnAdms) {
     List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
 
     // Handle the "special" diagnosis fields
-    diagnosis.add(extractDiagnosis("Admitting", codes, codeVersions, presentOnAdms, Optional.empty(), DiagnosisLabel.ADMITTING));
+    diagnosis.add(
+        extractDiagnosis(
+            "Admitting",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            DiagnosisLabel.ADMITTING));
     diagnosis.add(
         extractDiagnosis(
             "1",
@@ -216,7 +240,14 @@ public class DiagnosisUtilV2 {
             presentOnAdms,
             Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
             DiagnosisLabel.PRINCIPAL));
-    diagnosis.add(extractDiagnosis("Principal", codes, codeVersions, presentOnAdms Optional.empty(), DiagnosisLabel.PRINCIPAL));
+    diagnosis.add(
+        extractDiagnosis(
+            "Principal",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            DiagnosisLabel.PRINCIPAL));
 
     // Generically handle the rest (2-25)
     final int FIRST_DIAG = 2;
