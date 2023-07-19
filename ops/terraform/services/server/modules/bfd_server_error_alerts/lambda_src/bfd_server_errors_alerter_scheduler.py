@@ -191,16 +191,16 @@ def handler(event: Any, context: Any):
             exc_info=True,
         )
 
-    # The scheduler always schedules the alerter to run within the next minute in order to capture
-    # any errors that may have occurred between the alarm going into ALARM and invoking this Lambda
-    # or the time between the last run of the alerter and the alarm returning to its OK state
-    run_in_one_minute = OnetimeSchedule(time=datetime.utcnow() + timedelta(minutes=1))
+    # The scheduler always schedules the alerter to run within the next 10 seconds in order to
+    # capture any errors that may have occurred between the alarm going into ALARM and invoking this
+    # Lambda or the time between the last run of the alerter and the alarm returning to its OK state
+    run_in_ten_seconds = OnetimeSchedule(time=datetime.utcnow() + timedelta(seconds=10))
     logger.info(
-        "Scheduling %s to run in one minute (%s UTC) from now...",
+        "Scheduling %s to run in 10 seconds (%s UTC) from now...",
         ALERTER_LAMBDA_ARN,
-        run_in_one_minute.isoformat,
+        run_in_ten_seconds.isoformat,
     )
-    if not __create_schedule(schedule=run_in_one_minute):
+    if not __create_schedule(schedule=run_in_ten_seconds):
         return
 
     if alarm_state == AlarmState.ALARMING:
