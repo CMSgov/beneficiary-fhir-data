@@ -139,6 +139,24 @@ service_startup_check() {
 # Set some additional variables.
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 
+# If DB_USERNAME or DB_PASSWORD was not set, then try IAM auth
+if [[ -z "$DB_USERNAME" || -z "$DB_PASSWORD" ]]; then
+  # IAM auth. Get the instance profile role from the metadata service. This is the database username.
+  log "Retrieving RDS IAM authentication token for {{ data_server_db_host }}"
+  IMDSv2_TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  DB_USERNAME=$(curl -s -S -H "X-aws-ec2-metadata-token: $IMDSv2_TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/)
+  for i in {1..3}; do
+    if ! DB_PASSWORD="$(aws rds generate-db-auth-token --hostname {{ data_server_db_host }} --port 5432 --username=$DB_USERNAME)"; then
+      log "Failed to obtain rds auth token for {{ data_server_db_host }} retrying... (attempt $i/3)"
+      sleep 1
+    fi
+  done
+  if [[ -z "$DB_PASSWORD" ]]; then
+    log "Failed to obtain rds auth token for {{ data_server_db_host }} after 3 attempts, exiting..."
+    exit 1
+  fi
+fi
+
 # 3... 2... 1... launch!
 bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
