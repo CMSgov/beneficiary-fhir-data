@@ -29,6 +29,7 @@ Variables that must be defined to use the role:
     * `alias`: The alias to assign to the SSL client certificate in the server's Java trust store.
     * `certificate`: The contents of the public certificate for the SSL client to authorize.
 * `data_server_db_url`: The JDBC URL to connect to.
+* `data_server_db_host`: The hostname of the database server.
 * `data_server_db_username`: The DB username to connect as.
 * `data_server_db_password`: The DB user's password to connect with.
 * `test_client_cert`: Certificate portion of the test client keypair for use in readiness checks and regression tests
