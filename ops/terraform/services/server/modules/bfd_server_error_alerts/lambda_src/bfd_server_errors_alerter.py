@@ -15,7 +15,8 @@ from botocore.config import Config
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
-LOG_GROUP = os.environ.get("LOG_GROUP", "")
+ACCESS_JSON_LOG_GROUP = os.environ.get("ACCESS_JSON_LOG_GROUP", "")
+MESSAGES_JSON_LOG_GROUP = os.environ.get("MESSAGES_JSON_LOG_GROUP", "")
 LOG_LOOKBACK_SECONDS = int(os.environ.get("LOG_LOOKBACK_SECONDS", "310"))
 SLACK_WEBHOOK = os.environ.get("SLACK_WEBHOOK", "")
 BOTO_CONFIG = Config(
@@ -34,28 +35,25 @@ mdc.http_access_request_clientSSL_DN as partner,
 mdc.http_access_request_operation as op
 | filter status == 500
 | stats count(status) by partner, op
-"""
-LOG_INSIGHTS_ALL_ERRORS_QUERY = f"""
-# This query returns the details for all 500s in {BFD_ENVIRONMENT}'s BFD Server for the selected
-# period (top-right). If you've opened Log Insights from a Slack alert and would like to
-# cross-reference a particular 500 with its exception (only available in messages.json), you will
-# need to also click the "View in ... messages.json ..." link from the Slack alert. You will then
-# need to run this query, and copy the original timestamp to use as a unique value for cross-
-# referencing
-
+""".strip()
+LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY = """
 fields @message,
 mdc.http_access_response_status as status
 | filter status == 500
-"""
-LOG_INSIGHTS_CROSS_REF_MESSAGES_QUERY = """
-# To cross-reference the exception for a particular 500, you'll need to query on a field with a
-# matching and unique value that is logged in both access.json and messages.json. Fortunately, the
-# original query timestamp is such a field.
-
+| sort @timestamp desc
+""".strip()
+LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY = """
+fields @message
+| filter ispresent('exception')
+| filter ispresent('mdc.http_access_request_uri')
+| filter level = 'ERROR'
+| sort @timestamp desc
+""".strip()
+LOG_INSIGHTS_MESSAGES_JSON_CROSS_REF_QUERY = """
 fields @message,
 `mdc.http_access_request_header_Bluebutton-Originalquerytimestamp` as orig_timestamp
-| filter orig_timestamp == 'REPLACE WITH TIMESTAMP OF MESSAGE FROM ACCESS.JSON'
-"""
+| filter orig_timestamp == 'REPLACE WITH MDC ORIGINAL TIMESTAMP OF MESSAGE FROM ACCESS.JSON'
+""".strip()
 
 
 class LogInsightsQueryResultTypeDef(TypedDict, total=False):
@@ -130,19 +128,21 @@ def handler(event: Any, context: Any):
     utc_now = datetime.utcnow()
     start_time = utc_now - timedelta(seconds=LOG_LOOKBACK_SECONDS)
     start_time_timestamp = calendar.timegm(start_time.utctimetuple())
+    start_time_iso = start_time.isoformat(timespec="seconds")
     end_time = utc_now
     end_time_timestamp = calendar.timegm(end_time.utctimetuple())
+    end_time_iso = end_time.isoformat(timespec="seconds")
     logger.info(
         "Querying %s log group for 500 responses per-partner, per-operation between %s"
         " UTC and %s UTC (%s second(s) timespan)...",
-        LOG_GROUP,
-        start_time.isoformat(timespec="seconds"),
-        end_time.isoformat(timespec="seconds"),
+        ACCESS_JSON_LOG_GROUP,
+        start_time_iso,
+        end_time_iso,
         LOG_LOOKBACK_SECONDS,
     )
     try:
         start_query_response = logs_client.start_query(
-            logGroupName=LOG_GROUP,
+            logGroupName=ACCESS_JSON_LOG_GROUP,
             startTime=start_time_timestamp,
             endTime=end_time_timestamp,
             queryString=LOG_INSIGHTS_NOTIF_QUERY,
@@ -150,7 +150,7 @@ def handler(event: Any, context: Any):
     except logs_client.exceptions.ClientError:
         logger.error(
             "An unrecoverable error occurred when trying to query for 500s in %s:",
-            LOG_GROUP,
+            ACCESS_JSON_LOG_GROUP,
             exc_info=True,
         )
         return
@@ -243,14 +243,20 @@ def handler(event: Any, context: Any):
     log_insights_access_json_url = __gen_log_insights_url(
         start_time=start_time,
         end_time=end_time,
-        editor_string=LOG_INSIGHTS_ALL_ERRORS_QUERY,
-        source_log_group=LOG_GROUP,
+        editor_string=LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY,
+        source_log_group=ACCESS_JSON_LOG_GROUP,
     )
-    log_insights_messages_json_url = __gen_log_insights_url(
+    log_insights_messages_json_errors_url = __gen_log_insights_url(
         start_time=start_time,
         end_time=end_time,
-        editor_string=LOG_INSIGHTS_CROSS_REF_MESSAGES_QUERY,
-        source_log_group=f"/bfd/{BFD_ENVIRONMENT}/bfd-server/messages.json",
+        editor_string=LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY,
+        source_log_group=MESSAGES_JSON_LOG_GROUP,
+    )
+    log_insights_messages_json_cross_ref_url = __gen_log_insights_url(
+        start_time=start_time,
+        end_time=end_time,
+        editor_string=LOG_INSIGHTS_MESSAGES_JSON_CROSS_REF_QUERY,
+        source_log_group=MESSAGES_JSON_LOG_GROUP,
     )
     slack_message = {
         "blocks": [
@@ -271,8 +277,8 @@ def handler(event: Any, context: Any):
                     "text": (
                         f"*{total_errors}* `500` errors occurred in"
                         f" `{BFD_ENVIRONMENT}` BFD Server from"
-                        f" `{start_time.isoformat()} UTC` to"
-                        f" `{end_time.isoformat()} UTC` (approx. the past"
+                        f" `{start_time_iso} UTC` to"
+                        f" `{end_time_iso} UTC` (approx. the past"
                         f" {LOG_LOOKBACK_SECONDS} second(s))"
                     ),
                 },
@@ -291,10 +297,13 @@ def handler(event: Any, context: Any):
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        f"\n<{log_insights_access_json_url}|View"
-                        f" {BFD_ENVIRONMENT} access.json in Log"
-                        f" Insights>\n<{log_insights_messages_json_url}| View"
-                        f" {BFD_ENVIRONMENT} messages.json in Log Insights>"
+                        f"\n_For the time period of `{start_time_iso} UTC` to"
+                        f" `{end_time_iso} UTC`_:\n- <{log_insights_access_json_url}|Open Log"
+                        " Insights query for all 500s in access.json>\n-"
+                        f" <{log_insights_messages_json_errors_url}|Open Log Insights query for all"
+                        " HTTP request errors with exceptions in messages.json>\n-"
+                        f" <{log_insights_messages_json_cross_ref_url}|Open Log Insights query for"
+                        " cross referencing messages between access.json and messages.json>"
                     ),
                 },
             },
