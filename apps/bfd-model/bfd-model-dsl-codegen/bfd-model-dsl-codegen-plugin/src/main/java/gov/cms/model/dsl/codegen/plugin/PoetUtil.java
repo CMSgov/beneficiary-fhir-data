@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -204,16 +205,19 @@ public class PoetUtil {
    */
   public static MethodSpec createGroupedPropertiesGetter(
       String groupedPropertiesName, List<String> propertyNames, TypeName getterResultType) {
+    ParameterizedTypeName returnType =
+        ParameterizedTypeName.get(
+            ClassName.get("java.util", "Map"), ClassName.get(String.class), getterResultType);
     MethodSpec.Builder methodSpecBuilder =
         MethodSpec.methodBuilder(fieldToMethodName("get", groupedPropertiesName))
-            .returns(
-                ParameterizedTypeName.get(ClassName.get("java.util", "List"), getterResultType))
-            .addStatement("final var $L = new LinkedList()", groupedPropertiesName);
+            .returns(returnType)
+            .addStatement("$T $L = new $T<>()", returnType, groupedPropertiesName, HashMap.class);
     propertyNames.stream()
         .forEach(
             property ->
                 methodSpecBuilder.addStatement(
-                    "$L.add(" + fieldToMethodName("get", property) + "())", groupedPropertiesName));
+                    "$L.put(\"" + property + "\", " + fieldToMethodName("get", property) + "())",
+                    groupedPropertiesName));
     methodSpecBuilder.addStatement("return $L", groupedPropertiesName);
     return methodSpecBuilder.build();
   }

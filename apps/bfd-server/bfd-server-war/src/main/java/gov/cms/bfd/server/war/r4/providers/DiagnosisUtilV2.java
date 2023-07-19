@@ -5,7 +5,6 @@ import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.IcdCode;
-import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInpatientInstitutionalDiagnosisType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimOutpatientInstitutionalDiagnosisType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianDiagnosisType;
@@ -24,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -178,24 +178,19 @@ public class DiagnosisUtilV2 {
    * @param substitution The methods to retrive diagnosis information all follow a similar pattern.
    *     This value is used to substitute into that pattern when looking up the specific method to
    *     retrive information with.
-   * @param claim Passed as an Object because there is no top level `Claim` class that claims derive
-   *     from
+   * @param codes TODO: 2598.
+   * @param codeVersions TODO: 2598.
+   * @param presentOnAdms TODO: 2598.
    * @param ccw CCW Codebook value that represents which "PresentOnAdmissionCode" is being used.
    *     Example: {@link CcwCodebookVariable#CLM_POA_IND_SW5}
    * @param label One or more labels to use when mapping the diagnosis.
    * @return a {@link Diagnosis} or {@link Optional#empty()}
    */
   public static Optional<Diagnosis> extractDiagnosis(
-      String substitution, Object claim, Optional<CcwCodebookInterface> ccw, DiagnosisLabel label) {
-
-    Optional<String> code =
-        ReflectionUtils.tryMethod(claim, String.format("getDiagnosis%sCode", substitution));
-    Optional<Character> codeVersion =
-        ReflectionUtils.tryMethod(claim, String.format("getDiagnosis%sCodeVersion", substitution));
-    Optional<Character> presentOnAdm =
-        ReflectionUtils.tryMethod(
-            claim, String.format("getDiagnosis%sPresentOnAdmissionCode", substitution));
-
+      String substitution, Map<String, Optional<String>> codes, Map<String, Optional<Character>> codeVersions, Optional<Map<String, Optional<Character>>> presentOnAdms, Optional<CcwCodebookInterface> ccw, DiagnosisLabel label) {
+    Optional<String> code = codes.getOrDefault(String.format("diagnosis%sCode", substitution), Optional.empty());
+    Optional<Character> codeVersion = codeVersions.getOrDefault(String.format("diagnosis%sCodeVersion", substitution), Optional.empty());
+    Optional<Character> presentOnAdm = presentOnAdms.isPresent() ? presentOnAdms.get().getOrDefault(String.format("diagnosis%sPresentOnAdmissionCode", substitution), Optional.empty()) : Optional.empty();
     return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label);
   }
 
@@ -207,18 +202,21 @@ public class DiagnosisUtilV2 {
    * @return the {@link Diagnosis} that can be extracted from the specified {@link
    *     gov.cms.bfd.model.rif.InpatientClaim}
    */
-  static List<Diagnosis> extractDiagnoses(Object claim) {
+  static List<Diagnosis> extractDiagnoses(Object claim, Map<String, Optional<String>> codes,
+                                          Map<String, Optional<Character>> codeVersions, Optional<Map<String, Optional<Character>>> presentOnAdms) {
     List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
 
     // Handle the "special" diagnosis fields
-    diagnosis.add(extractDiagnosis("Admitting", claim, Optional.empty(), DiagnosisLabel.ADMITTING));
+    diagnosis.add(extractDiagnosis("Admitting", codes, codeVersions, presentOnAdms, Optional.empty(), DiagnosisLabel.ADMITTING));
     diagnosis.add(
         extractDiagnosis(
             "1",
-            claim,
+            codes,
+            codeVersions,
+            presentOnAdms,
             Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
             DiagnosisLabel.PRINCIPAL));
-    diagnosis.add(extractDiagnosis("Principal", claim, Optional.empty(), DiagnosisLabel.PRINCIPAL));
+    diagnosis.add(extractDiagnosis("Principal", codes, codeVersions, presentOnAdms Optional.empty(), DiagnosisLabel.PRINCIPAL));
 
     // Generically handle the rest (2-25)
     final int FIRST_DIAG = 2;
@@ -229,7 +227,9 @@ public class DiagnosisUtilV2 {
             i -> {
               return extractDiagnosis(
                   String.valueOf(i),
-                  claim,
+                  codes,
+                  codeVersions,
+                  presentOnAdms,
                   Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
                   DiagnosisLabel.OTHER);
             })
@@ -239,7 +239,9 @@ public class DiagnosisUtilV2 {
     diagnosis.add(
         extractDiagnosis(
             "External1",
-            claim,
+            codes,
+            codeVersions,
+            presentOnAdms,
             Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
             DiagnosisLabel.FIRSTEXTERNAL));
     diagnosis.add(
@@ -254,7 +256,9 @@ public class DiagnosisUtilV2 {
             i -> {
               return extractDiagnosis(
                   "External" + String.valueOf(i),
-                  claim,
+                  codes,
+                  codeVersions,
+                  presentOnAdms,
                   Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)),
                   DiagnosisLabel.EXTERNAL);
             })
