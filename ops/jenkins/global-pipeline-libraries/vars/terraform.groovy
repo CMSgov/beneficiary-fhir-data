@@ -47,18 +47,18 @@ terraform workspace select "$bfdEnv" -no-color
 }
 
 /* Destroys the specified terraservice
- * @param args a {@link Map} must include `env`, `directory`, `autoApprove`
+ * @param args a {@link Map} must include `env`, `directory`, `forcePlanApproval`
  * <ul>
  * <li>env string represents the targeted BFD SDLC Environment
  * <li>directory string relative path to terraservice module directory
- * <li>autoApprove boolean represents whether the tfplan should be applied automatically
+ * <li>forcePlanApproval boolean true if the tfplan should be manually applied
  * <li>tfVars optional map represents module's terraform input variables and their respective values
  * </ul>
 */
 void destroyTerraservice(Map args = [:]) {
     bfdEnv = args.env.trim().toLowerCase()
     serviceDirectory = args.directory
-    autoApprove = args.autoApprove
+    forcePlanApproval = args.forcePlanApproval
     tfVars = args.tfVars ?: [:]
 
     // Do not destroy protected environments
@@ -88,7 +88,7 @@ void destroyTerraservice(Map args = [:]) {
 
         echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
-        if (!autoApprove) {
+        if (forcePlanApproval) {
             input "Proceed with executing the terraform destroy plan?"
         }
 
