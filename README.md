@@ -24,7 +24,7 @@ The high-level purpose and location of each piece of the project is listed below
   * [utils](apps/utils) - non-application scripts used for testing, development, and database management
 * [insights](insights) - contains documentation and resources for maintaining BFD Insights, a platform using AWS Cloudwatch to provide analytics and metrics for BFD applications
 * [ops](ops) - contains the scripts and resources required for packaging and deploying BFD applications
-* [rfcs](rfcs) - holds the archived and active RFC (Request for Comment) documents for BFD
+* [rfcs](docs/rfcs) - holds the archived and active RFC (Request for Comment) documents for BFD
 * [runbooks](docs/runbooks) - contains maintenance documents for executing and troubleshooting various BFD scenarios 
 
 ## Documentation
