@@ -252,8 +252,7 @@ def handler(event: Any, context: Any):
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        ":notification-alert: *Error Alert for"
-                        f" `{BFD_ENVIRONMENT}` BFD Server* :notification-alert:\n"
+                        f":warning: *Error Alert for `{BFD_ENVIRONMENT}` BFD Server* :warning:\n"
                     ),
                 },
             },
