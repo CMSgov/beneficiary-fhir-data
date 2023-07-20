@@ -212,7 +212,9 @@ public class DiagnosisUtilV2 {
    * Extracts nearly all diagnosis types from a Claim. It does this with reflection, so if the
    * specific claim type doesn't have the given diagnosis it will just be skipped.
    *
-   * @param claim the Claim to extract the {@link Diagnosis}es from
+   * @param codes TODO: BFD-2598.
+   * @param codeVersions TODO: BFD-2598.
+   * @param presentOnAdms TODO: BFD-2598.
    * @return the {@link Diagnosis} that can be extracted from the specified {@link
    *     gov.cms.bfd.model.rif.InpatientClaim}
    */
