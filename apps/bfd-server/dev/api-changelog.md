@@ -932,7 +932,7 @@ Some examples:
 
 If the new parameter is not included, all EOBs will still be returned:
 
-For more details, please see the associated [RFC].(https://github.com/CMSgov/beneficiary-fhir-data/blob/master/rfcs/0007-service-date-filter.md)
+For more details, please see the associated [RFC].(https://github.com/CMSgov/beneficiary-fhir-data/blob/master/docs/rfcs/0007-service-date-filter.md)
 
 ## BFD-8: Add and map coverage fields dual01..dual12 and rfrnc_yr to the coverage resource
 

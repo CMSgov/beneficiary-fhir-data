@@ -8,7 +8,7 @@ This project provides a Maven plugin that reads meta data in a YAML based DSL an
 - `CsvWriter` classes for use with RIF pipeline.
 
 This project is the follow up
-to [RFC 0014-dsl-driven-rda-code-generation.md](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/rfcs/0014-dsl-driven-rda-code-generation.md)
+to [RFC 0014-dsl-driven-rda-code-generation.md](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/docs/rfcs/0014-dsl-driven-rda-code-generation.md)
 . This code is based on that concept but some features have evolved since that RFC was written.
 The plugin is used for both RDA and CCW/RIF data models.
 
