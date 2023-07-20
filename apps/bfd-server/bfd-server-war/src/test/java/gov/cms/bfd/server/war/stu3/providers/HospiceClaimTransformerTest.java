@@ -35,7 +35,7 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class HospiceClaimTransformerTest {
   /** The transformer under test. */
-  ClaimTransformerInterface transformerInterface;
+  HospiceClaimTransformer hospiceClaimTransformer;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The mock metric timer. */
@@ -49,7 +49,7 @@ public final class HospiceClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    transformerInterface = new HospiceClaimTransformer(metricRegistry, new NPIOrgLookup());
+    hospiceClaimTransformer = new HospiceClaimTransformer(metricRegistry, new NPIOrgLookup());
   }
 
   /**
@@ -69,7 +69,7 @@ public final class HospiceClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim);
+    ExplanationOfBenefit eob = hospiceClaimTransformer.transform(claim, false);
 
     assertMatches(claim, eob);
   }

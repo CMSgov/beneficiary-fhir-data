@@ -43,7 +43,7 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class CarrierClaimTransformerTest {
   /** The transformer under test. */
-  ClaimTransformerInterface transformerInterface;
+  CarrierClaimTransformer carrierClaimTransformer;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The FDA drug lookup to use for the test. */
@@ -65,7 +65,7 @@ public final class CarrierClaimTransformerTest {
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 
-    transformerInterface =
+    carrierClaimTransformer =
         new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, npiOrgLookup);
   }
 
@@ -88,12 +88,12 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit eobWithLastUpdated = transformerInterface.transform(claim, true);
+    ExplanationOfBenefit eobWithLastUpdated = carrierClaimTransformer.transform(claim, true);
 
     assertMatches(claim, eobWithLastUpdated, Boolean.TRUE);
 
     claim.setLastUpdated(Optional.empty());
-    ExplanationOfBenefit eobWithoutLastUpdated = transformerInterface.transform(claim, true);
+    ExplanationOfBenefit eobWithoutLastUpdated = carrierClaimTransformer.transform(claim, true);
 
     assertMatches(claim, eobWithoutLastUpdated, true);
   }
@@ -120,7 +120,7 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim, true);
+    ExplanationOfBenefit eob = carrierClaimTransformer.transform(claim, true);
 
     assertEquals(2, eob.getCareTeam().size());
   }
@@ -143,7 +143,7 @@ public final class CarrierClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim, true);
+    ExplanationOfBenefit eob = carrierClaimTransformer.transform(claim, true);
 
     assertMatches(claim, eob, true);
   }

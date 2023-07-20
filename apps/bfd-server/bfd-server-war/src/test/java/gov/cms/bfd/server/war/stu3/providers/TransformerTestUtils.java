@@ -2248,15 +2248,12 @@ final class TransformerTestUtils {
       NPIOrgLookup npiOrgLookup) {
 
     ClaimTransformerInterface claimTransformerInterface = null;
-    if (rifRecord instanceof CarrierClaim || rifRecord instanceof DMEClaim) {
+    if (rifRecord instanceof CarrierClaim) {
       claimTransformerInterface =
-          rifRecord instanceof CarrierClaim
-              ? new CarrierClaimTransformer(metricRegistry, drugCodeDisplayLookup, npiOrgLookup)
-              : new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup);
-
-      return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
-    }
-    if (rifRecord instanceof HHAClaim) {
+          new CarrierClaimTransformer(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
+    } else if (rifRecord instanceof DMEClaim) {
+      claimTransformerInterface = new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup);
+    } else if (rifRecord instanceof HHAClaim) {
       claimTransformerInterface = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
     } else if (rifRecord instanceof HospiceClaim) {
       claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
@@ -2271,6 +2268,6 @@ final class TransformerTestUtils {
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }
-    return claimTransformerInterface.transform(rifRecord);
+    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
   }
 }

@@ -37,7 +37,7 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class InpatientClaimTransformerTest {
   /** The transformer under test. */
-  ClaimTransformerInterface transformerInterface;
+  InpatientClaimTransformer inpatientClaimTransformer;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The mock metric timer. */
@@ -51,7 +51,7 @@ public final class InpatientClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    transformerInterface = new InpatientClaimTransformer(metricRegistry, new NPIOrgLookup());
+    inpatientClaimTransformer = new InpatientClaimTransformer(metricRegistry, new NPIOrgLookup());
   }
 
   /**
@@ -72,7 +72,7 @@ public final class InpatientClaimTransformerTest {
             .get();
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim);
+    ExplanationOfBenefit eob = inpatientClaimTransformer.transform(claim, false);
 
     assertMatches(claim, eob);
   }

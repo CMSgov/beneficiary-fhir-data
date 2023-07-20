@@ -37,7 +37,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Unit tests for {@link Stu3EobSamhsaMatcherTest}. Integration with {@link
  * ExplanationOfBenefitResourceProvider} is covered by {@link
- * ExplanationOfBenefitResourceProviderIT#searchForSamhsaEobsWithExcludeSamhsaTrue} and related
+ * ExplanationOfBenefitResourceProviderE2E#searchForSamhsaEobsWithExcludeSamhsaTrue} and related
  * integration tests.
  */
 public final class Stu3EobSamhsaMatcherTest {

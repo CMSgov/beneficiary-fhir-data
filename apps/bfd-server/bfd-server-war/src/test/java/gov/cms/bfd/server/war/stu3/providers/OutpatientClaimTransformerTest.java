@@ -46,7 +46,7 @@ public final class OutpatientClaimTransformerTest {
       LoggerFactory.getLogger(OutpatientClaimTransformerTest.class);
 
   /** The transformer under test. */
-  ClaimTransformerInterface transformerInterface;
+  OutpatientClaimTransformer outpatientClaimTransformer;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The mock metric timer. */
@@ -60,7 +60,7 @@ public final class OutpatientClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    transformerInterface = new OutpatientClaimTransformer(metricRegistry, new NPIOrgLookup());
+    outpatientClaimTransformer = new OutpatientClaimTransformer(metricRegistry, new NPIOrgLookup());
   }
 
   /**
@@ -81,7 +81,7 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim);
+    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(claim, false);
 
     assertMatches(claim, eob);
   }
@@ -108,7 +108,7 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim);
+    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(claim, false);
 
     assertMatches(claim, eob);
   }
@@ -142,7 +142,7 @@ public final class OutpatientClaimTransformerTest {
                   "Running at Bene-Id: {}, Claim-Id: {}",
                   claim.getBeneficiaryId(),
                   claim.getClaimId());
-              ExplanationOfBenefit eob = transformerInterface.transform(claim);
+              ExplanationOfBenefit eob = outpatientClaimTransformer.transform(claim, false);
               assertMatches(claim, eob);
             });
   }

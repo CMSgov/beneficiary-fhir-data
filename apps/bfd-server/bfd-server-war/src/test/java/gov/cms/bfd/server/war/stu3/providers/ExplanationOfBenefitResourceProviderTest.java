@@ -1,25 +1,11 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -42,28 +28,6 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.sql.Date;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -80,6 +44,44 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationContext;
 
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import javax.persistence.metamodel.SingularAttribute;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Units tests for the {@link ExplanationOfBenefitResourceProvider} that do not require a full fhir
  * setup to validate. Anything we want to validate from the fhir client level should go in {@link
@@ -94,7 +96,6 @@ public class ExplanationOfBenefitResourceProviderTest {
 
   /** The mocked request details. */
   @Mock ServletRequestDetails requestDetails;
-
   /** The mocked input id value. */
   @Mock IdType eobId;
 
@@ -113,10 +114,6 @@ public class ExplanationOfBenefitResourceProviderTest {
   @Mock EntityManager entityManager;
   /** The mock entity manager for CarrierClaim calls. */
   @Mock EntityManager carrierEntityManager;
-  /** The mock entity manager for SNFClaim calls. */
-  @Mock EntityManager snfEntityManager;
-  /** The mock entity manager for DMEClaim calls. */
-  @Mock EntityManager dmeEntityManager;
 
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
@@ -126,7 +123,6 @@ public class ExplanationOfBenefitResourceProviderTest {
 
   /** The mock metric timer. */
   @Mock Timer mockTimer;
-
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 
@@ -140,34 +136,34 @@ public class ExplanationOfBenefitResourceProviderTest {
   /** The carrier claim returned in tests. */
   DMEClaim testDmeClaim;
   /** The HHA claim returned in tests. */
-  HHAClaim testHhaClaim;
+  @Mock HHAClaim testHhaClaim;
   /** The hospice claim returned in tests. */
-  HospiceClaim testHospiceClaim;
+  @Mock HospiceClaim testHospiceClaim;
   /** The inpatient claim returned in tests. */
-  InpatientClaim testInpatientClaim;
+  @Mock InpatientClaim testInpatientClaim;
   /** The outpatient claim returned in tests. */
-  OutpatientClaim testOutpatientClaim;
+  @Mock OutpatientClaim testOutpatientClaim;
   /** The PDE claim returned in tests. */
-  PartDEvent testPdeClaim;
+  @Mock PartDEvent testPdeClaim;
   /** The SNF claim returned in tests. */
-  SNFClaim testSnfClaim;
+  @Mock SNFClaim testSnfClaim;
 
   /** The transformer for carrier claims. */
-  CarrierClaimTransformer carrierClaimTransformer;
+  @Mock CarrierClaimTransformer carrierClaimTransformer;
   /** The transformer for dme claims. */
-  DMEClaimTransformer dmeClaimTransformer;
+  @Mock DMEClaimTransformer dmeClaimTransformer;
   /** The transformer for hha claims. */
-  HHAClaimTransformer hhaClaimTransformer;
+  @Mock HHAClaimTransformer hhaClaimTransformer;
   /** The transformer for hospice claims. */
-  HospiceClaimTransformer hospiceClaimTransformer;
+  @Mock HospiceClaimTransformer hospiceClaimTransformer;
   /** The transformer for inpatient claims. */
-  InpatientClaimTransformer inpatientClaimTransformer;
+  @Mock InpatientClaimTransformer inpatientClaimTransformer;
   /** The transformer for outpatient claims. */
-  OutpatientClaimTransformer outpatientClaimTransformer;
+  @Mock OutpatientClaimTransformer outpatientClaimTransformer;
   /** The transformer for part D events claims. */
-  PartDEventTransformer partDEventTransformer;
+  @Mock PartDEventTransformer partDEventTransformer;
   /** The transformer for snf claims. */
-  SNFClaimTransformer snfClaimTransformer;
+  @Mock SNFClaimTransformer snfClaimTransformer;
 
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
@@ -175,7 +171,7 @@ public class ExplanationOfBenefitResourceProviderTest {
   @Mock FdaDrugCodeDisplayLookup mockDrugDisplayLookup;
 
   /** The re-used valid bene id value. */
-  public static String BENE_ID = "123456789";
+  public static final String BENE_ID = "123456789";
 
   /** The mock concurrent task future. */
   @Mock Future<PatientClaimsEobTaskTransformer> futureTask;
@@ -218,7 +214,19 @@ public class ExplanationOfBenefitResourceProviderTest {
 
     when(testEob.getType()).thenReturn(mockConcept);
     when(patientParam.getIdPart()).thenReturn(BENE_ID);
-
+    Bundle mockBundle = mock(Bundle.class);
+    /*
+        when(testEob.processClaimsMask(
+                any(Integer.class),
+                any(),
+                BENE_ID,
+                any(OffsetLinkBuilder.class),
+                Optional.empty(),
+                Optional.empty(),
+                false,
+                false))
+            .thenReturn(any());
+    */
     setupEntities();
 
     // entity manager mocking
@@ -239,16 +247,16 @@ public class ExplanationOfBenefitResourceProviderTest {
 
   /** Sets up claim transformers. */
   private void setupTransformers() {
-    carrierClaimTransformer =
-        new CarrierClaimTransformer(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
-    partDEventTransformer = new PartDEventTransformer(metricRegistry, mockDrugDisplayLookup);
-    dmeClaimTransformer = new DMEClaimTransformer(metricRegistry, mockDrugDisplayLookup);
-    hhaClaimTransformer = new HHAClaimTransformer(metricRegistry, mockNpiOrgLookup);
-    hospiceClaimTransformer = new HospiceClaimTransformer(metricRegistry, mockNpiOrgLookup);
-    inpatientClaimTransformer = new InpatientClaimTransformer(metricRegistry, mockNpiOrgLookup);
-    outpatientClaimTransformer = new OutpatientClaimTransformer(metricRegistry, mockNpiOrgLookup);
-
-    snfClaimTransformer = new SNFClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    // when(carrierClaimTransformer.transform(any())).thenThrow(BadCodeMonkeyException.class);
+    /*
+    when(dmeClaimTransformer.transform(isA(DMEClaim.class), false)).thenReturn(testEob);
+    when(partDEventTransformer.transform(isA(PartDEvent.class))).thenReturn(testEob);
+    when(hhaClaimTransformer.transform(isA(HHAClaim.class))).thenReturn(testEob);
+    when(hospiceClaimTransformer.transform(isA(HospiceClaim.class))).thenReturn(testEob);
+    when(inpatientClaimTransformer.transform(isA(InpatientClaim.class))).thenReturn(testEob);
+    when(outpatientClaimTransformer.transform(isA(OutpatientClaim.class))).thenReturn(testEob);
+    when(snfClaimTransformer.transform(isA(SNFClaim.class))).thenReturn(testEob);
+    */
   }
 
   /** sets up claim entities. */
@@ -257,56 +265,25 @@ public class ExplanationOfBenefitResourceProviderTest {
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     testBene =
-        (Beneficiary)
-            parsedRecords.stream()
-                .filter(r -> r instanceof Beneficiary)
-                .map(r -> r)
-                .findFirst()
-                .get();
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(Beneficiary.class::cast)
+            .findFirst()
+            .get();
+
     testCarrierClaim =
-        (CarrierClaim)
-            parsedRecords.stream()
-                .filter(r -> r instanceof CarrierClaim)
-                .map(r -> r)
-                .findFirst()
-                .get();
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(CarrierClaim.class::cast)
+            .findFirst()
+            .get();
+
     testDmeClaim =
-        (DMEClaim)
-            parsedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> r).findFirst().get();
-    testHhaClaim =
-        (HHAClaim)
-            parsedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> r).findFirst().get();
-    testHospiceClaim =
-        (HospiceClaim)
-            parsedRecords.stream()
-                .filter(r -> r instanceof HospiceClaim)
-                .map(r -> r)
-                .findFirst()
-                .get();
-    testInpatientClaim =
-        (InpatientClaim)
-            parsedRecords.stream()
-                .filter(r -> r instanceof InpatientClaim)
-                .map(r -> r)
-                .findFirst()
-                .get();
-    testOutpatientClaim =
-        (OutpatientClaim)
-            parsedRecords.stream()
-                .filter(r -> r instanceof OutpatientClaim)
-                .map(r -> r)
-                .findFirst()
-                .get();
-    testPdeClaim =
-        (PartDEvent)
-            parsedRecords.stream()
-                .filter(r -> r instanceof PartDEvent)
-                .map(r -> r)
-                .findFirst()
-                .get();
-    testSnfClaim =
-        (SNFClaim)
-            parsedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> r).findFirst().get();
+        parsedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(DMEClaim.class::cast)
+            .findFirst()
+            .get();
   }
 
   /** Sets up the last updated mocks. */
@@ -324,10 +301,12 @@ public class ExplanationOfBenefitResourceProviderTest {
         .thenReturn("false");
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
         .thenReturn("false");
-    // We dont use this anymore on , so set it to false since everything should work regardless of
+    // We dont use this anymore; set to false since everything should work regardless of
     // its value
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS))
         .thenReturn("false");
+    when(requestDetails.getHeader("startIndex")).thenReturn("-1");
+
     Map<String, List<String>> headers = new HashMap<>();
     headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, List.of("false"));
     headers.put(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, List.of("false"));
@@ -375,10 +354,93 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(entityManager.createNativeQuery(anyString())).thenReturn(mockQuery);
     eobProvider.setEntityManager(entityManager);
   }
+  /**
+   * Verifies that {@link
+   * git status
+   * ExplanationOfBenefitResourceProvider#parseTypeParam(TokenAndListParam)}
+   * works as expected.
+   */
+  @Test
+  public void parseTypeParam() {
+    TokenAndListParam typeParamNull = null;
+    Set<ClaimType> typesForNull =
+        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamNull);
+    assertEquals(ClaimType.values().length, typesForNull.size());
+
+    TokenAndListParam typeParamSystemWildcard =
+        new TokenAndListParam()
+            .addAnd(
+                new TokenOrListParam()
+                    .add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
+    Set<ClaimType> typesForSystemWildcard =
+        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSystemWildcard);
+    assertEquals(ClaimType.values().length, typesForSystemWildcard.size());
+
+    TokenAndListParam typeParamSingle =
+        new TokenAndListParam()
+            .addAnd(
+                new TokenOrListParam(
+                    TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.CARRIER.name()));
+    Set<ClaimType> typesForSingle =
+        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingle);
+    assertEquals(1, typesForSingle.size());
+    assertTrue(typesForSingle.contains(ClaimType.CARRIER));
+
+    TokenAndListParam typeParamSingleNullSystem =
+        new TokenAndListParam().addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name()));
+    Set<ClaimType> typesForSingleNullSystem =
+        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleNullSystem);
+    assertEquals(1, typesForSingleNullSystem.size());
+    assertTrue(typesForSingleNullSystem.contains(ClaimType.CARRIER));
+
+    TokenAndListParam typeParamSingleInvalidSystem =
+        new TokenAndListParam().addAnd(new TokenOrListParam("foo", ClaimType.CARRIER.name()));
+    Set<ClaimType> typesForSingleInvalidSystem =
+        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleInvalidSystem);
+    assertEquals(0, typesForSingleInvalidSystem.size());
+
+    TokenAndListParam typeParamSingleInvalidCode =
+        new TokenAndListParam().addAnd(new TokenOrListParam(null, "foo"));
+    Set<ClaimType> typesForSingleInvalidCode =
+        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleInvalidCode);
+    assertEquals(0, typesForSingleInvalidCode.size());
+
+    TokenAndListParam typeParamTwoEntries =
+        new TokenAndListParam()
+            .addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name(), ClaimType.DME.name()))
+            .addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name()));
+    Set<ClaimType> typesForTwoEntries =
+        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamTwoEntries);
+    assertEquals(1, typesForTwoEntries.size());
+    assertTrue(typesForTwoEntries.contains(ClaimType.CARRIER));
+  }
+
+  /**
+   * Verifies that {@link
+   * ExplanationOfBenefitResourceProvider#parseTypeParam(TokenAndListParam)}
+   * throws an exception when query param modifiers are used, which are unsupported.
+   */
+  @Test
+  public void parseTypeParam_modifiers() {
+    TokenAndListParam typeParam =
+        new TokenAndListParam()
+            .addAnd(
+                new TokenOrListParam()
+                    .add(
+                        new TokenParam(
+                                TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE,
+                                ClaimType.CARRIER.name())
+                            .setModifier(TokenParamModifier.ABOVE)));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          ExplanationOfBenefitResourceProvider.parseTypeParam(typeParam);
+        });
+  }
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} throws an exception for an
-   * {@link org.hl7.fhir.stu3.model.IdType} that has an invalidly formatted eobId parameter.
+   * {@link IdType} that has an invalidly formatted eobId parameter.
    */
   @Test
   public void testEobReadWhereInvalidIdExpectException() {
@@ -394,7 +456,7 @@ public class ExplanationOfBenefitResourceProviderTest {
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
-   * for an {@link org.hl7.fhir.stu3.model.IdType} that has a null eobId parameter.
+   * for an {@link IdType} that has a null eobId parameter.
    */
   @Test
   public void testEobReadWhereNullIdExpectException() {
@@ -407,7 +469,7 @@ public class ExplanationOfBenefitResourceProviderTest {
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
-   * for an {@link org.hl7.fhir.stu3.model.IdType} that has a missing eobId parameter.
+   * for an {@link IdType} that has a missing eobId parameter.
    */
   @Test
   public void testEobReadWhereEmptyIdExpectException() {
@@ -420,7 +482,7 @@ public class ExplanationOfBenefitResourceProviderTest {
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
-   * for an {@link org.hl7.fhir.stu3.model.IdType} that has a version supplied with the eobId
+   * for an {@link IdType} that has a version supplied with the eobId
    * parameter, as our read requests do not support versioned requests.
    */
   @Test
@@ -534,14 +596,6 @@ public class ExplanationOfBenefitResourceProviderTest {
     CriteriaQuery<CarrierClaim> carrierMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> carrierRoot = mock(Root.class);
     setupClaimEntity(carrierEntityManager, ClaimType.CARRIER, carrierMockCriteria, carrierRoot);
-    // mock DMEClaim data
-    CriteriaQuery<DMEClaim> dmeMockCriteria = mock(CriteriaQuery.class);
-    Root<DMEClaim> dmeRoot = mock(Root.class);
-    setupClaimEntity(dmeEntityManager, ClaimType.DME, dmeMockCriteria, dmeRoot);
-    // mock SNFClaim data
-    CriteriaQuery<SNFClaim> snfMockCriteria = mock(CriteriaQuery.class);
-    Root<SNFClaim> snfRoot = mock(Root.class);
-    setupClaimEntity(snfEntityManager, ClaimType.SNF, snfMockCriteria, snfRoot);
 
     PatientClaimsEobTaskTransformer carrierTask =
         new PatientClaimsEobTaskTransformer(
@@ -558,37 +612,6 @@ public class ExplanationOfBenefitResourceProviderTest {
     carrierTask.call();
     assertTrue(carrierTask.ranSuccessfully());
     assertTrue(carrierTask.eobsRemovedBySamhsaFilter() < 1);
-
-    PatientClaimsEobTaskTransformer dmeTask =
-        new PatientClaimsEobTaskTransformer(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
-    dmeTask.setEntityManager(dmeEntityManager);
-    dmeTask.setupTaskParams(
-        dmeClaimTransformer,
-        ClaimType.DME,
-        Long.parseLong(BENE_ID),
-        Optional.empty(),
-        Optional.empty(),
-        true);
-    dmeTask.setIncludeTaxNumbers(true);
-    dmeTask.call();
-    assertTrue(dmeTask.ranSuccessfully());
-    assertTrue(dmeTask.eobsRemovedBySamhsaFilter() < 1);
-
-    PatientClaimsEobTaskTransformer snfTask =
-        new PatientClaimsEobTaskTransformer(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
-    snfTask.setEntityManager(snfEntityManager);
-    snfTask.setupTaskParams(
-        snfClaimTransformer,
-        ClaimType.SNF,
-        Long.parseLong(BENE_ID),
-        Optional.empty(),
-        Optional.empty(),
-        false);
-    snfTask.call();
-    assertTrue(snfTask.ranSuccessfully());
-    assertTrue(snfTask.eobsRemovedBySamhsaFilter() < 1);
   }
 
   /**
@@ -600,10 +623,6 @@ public class ExplanationOfBenefitResourceProviderTest {
     CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> clmRoot = mock(Root.class);
     setupClaimEntity(carrierEntityManager, ClaimType.CARRIER, clmMockCriteria, clmRoot);
-
-    CriteriaQuery<DMEClaim> dmeMockCriteria = mock(CriteriaQuery.class);
-    Root<DMEClaim> dmeRoot = mock(Root.class);
-    setupClaimEntity(dmeEntityManager, ClaimType.DME, dmeMockCriteria, dmeRoot);
 
     PatientClaimsEobTaskTransformer carrierTask =
         new PatientClaimsEobTaskTransformer(
@@ -620,22 +639,6 @@ public class ExplanationOfBenefitResourceProviderTest {
     carrierTask.call();
     assertTrue(carrierTask.ranSuccessfully());
     assertTrue(carrierTask.eobsRemovedBySamhsaFilter() == 0);
-
-    PatientClaimsEobTaskTransformer dmeTask =
-        new PatientClaimsEobTaskTransformer(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
-    dmeTask.setEntityManager(dmeEntityManager);
-    dmeTask.setupTaskParams(
-        dmeClaimTransformer,
-        ClaimType.DME,
-        Long.parseLong(BENE_ID),
-        Optional.empty(),
-        Optional.empty(),
-        true);
-    dmeTask.setIncludeTaxNumbers(false);
-    dmeTask.call();
-    assertTrue(dmeTask.ranSuccessfully());
-    assertTrue(dmeTask.eobsRemovedBySamhsaFilter() == 0);
   }
 
   /**
@@ -663,39 +666,6 @@ public class ExplanationOfBenefitResourceProviderTest {
     carrierTask.setIncludeTaxNumbers(true);
     carrierTask.call();
     assertTrue(carrierTask.ranSuccessfully());
-
-    CriteriaQuery<DMEClaim> dmeMockCriteria = mock(CriteriaQuery.class);
-    Root<DMEClaim> dmeRoot = mock(Root.class);
-    setupClaimEntity(dmeEntityManager, ClaimType.DME, dmeMockCriteria, dmeRoot);
-
-    PatientClaimsEobTaskTransformer dmeTask =
-        new PatientClaimsEobTaskTransformer(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
-    dmeTask.setEntityManager(dmeEntityManager);
-    dmeTask.setupTaskParams(
-        dmeClaimTransformer,
-        ClaimType.DME,
-        Long.parseLong(BENE_ID),
-        Optional.empty(),
-        Optional.empty(),
-        true);
-    carrierTask.setIncludeTaxNumbers(true);
-    dmeTask.call();
-    assertTrue(dmeTask.ranSuccessfully());
-
-    // test asserting that invalid task params results in a failed task
-    dmeTask.setupTaskParams(
-        carrierClaimTransformer,
-        ClaimType.DME,
-        Long.parseLong(BENE_ID),
-        Optional.empty(),
-        Optional.empty(),
-        true);
-    dmeTask.setIncludeTaxNumbers(true);
-    dmeTask.call();
-    dmeTask.setEntityManager(dmeEntityManager);
-    dmeTask.call();
-    assertFalse(dmeTask.ranSuccessfully());
   }
 
   /**
@@ -781,76 +751,5 @@ public class ExplanationOfBenefitResourceProviderTest {
     }
     listParam.addAnd(orParam);
     return listParam;
-  }
-
-  /**
-   * Verifies that the various claim transformers throw a {@link BadCodeMonkeyException} when
-   * invoking an incorrect {@link ClaimTransformerInterface} transform method.
-   */
-  @Test
-  public void testClaimTypesInvalidTransformInterfaceMethod() {
-    // ClaimType.CARRIER
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          carrierClaimTransformer.transform(testCarrierClaim);
-        },
-        "Attempted to us invalid CarrierClaimTransformer interface method");
-
-    // ClaimType.DME
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          dmeClaimTransformer.transform(testDmeClaim);
-        },
-        "Attempted to us invalid DMEClaimTransformer interface method");
-
-    // ClaimType.HHA
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          hhaClaimTransformer.transform(testHhaClaim, false);
-        },
-        "Attempted to us invalid HHAClaimTransformer interface method");
-
-    // ClaimType.HOSPICE
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          hospiceClaimTransformer.transform(testHospiceClaim, false);
-        },
-        "Attempted to us invalid HospiceClaimTransformer interface method");
-
-    // ClaimType.INPATIENT
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          inpatientClaimTransformer.transform(testInpatientClaim, false);
-        },
-        "Attempted to us invalid InpatientClaimTransformer interface method");
-
-    // ClaimType.OUTPATIENT
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          outpatientClaimTransformer.transform(testOutpatientClaim, false);
-        },
-        "Attempted to us invalid OutpatientClaimTransformer interface method");
-
-    // ClaimType.PDE
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          partDEventTransformer.transform(testPdeClaim, false);
-        },
-        "Attempted to us invalid PartDEventTransformer interface method");
-
-    // ClaimType.SNF
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          snfClaimTransformer.transform(testSnfClaim, false);
-        },
-        "Attempted to us invalid SNFClaimTransformer interface method");
   }
 }

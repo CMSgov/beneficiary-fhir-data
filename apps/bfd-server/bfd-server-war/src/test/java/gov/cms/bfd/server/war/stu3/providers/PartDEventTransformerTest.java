@@ -38,7 +38,7 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class PartDEventTransformerTest {
   /** The transformer under test. */
-  ClaimTransformerInterface transformerInterface;
+  PartDEventTransformer partdEventTransformer;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The mock metric timer. */
@@ -51,7 +51,7 @@ public final class PartDEventTransformerTest {
   protected void setup() {
     when(metricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
-    transformerInterface =
+    partdEventTransformer =
         new PartDEventTransformer(
             metricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
   }
@@ -65,7 +65,7 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
-    ExplanationOfBenefit eob = transformerInterface.transform(claim);
+    ExplanationOfBenefit eob = partdEventTransformer.transform(claim, false);
 
     assertMatches(claim, eob);
   }
@@ -152,7 +152,7 @@ public final class PartDEventTransformerTest {
       throws IOException {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
-    ExplanationOfBenefit eob = transformerInterface.transform(claim);
+    ExplanationOfBenefit eob = partdEventTransformer.transform(claim, false);
 
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());

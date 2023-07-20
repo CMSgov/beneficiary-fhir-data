@@ -40,7 +40,7 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class DMEClaimTransformerTest {
   /** The transformer under test. */
-  ClaimTransformerInterface transformerInterface;
+  DMEClaimTransformer dmeClaimTransformer;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The FDA drug lookup to use for the test. */
@@ -58,7 +58,7 @@ public final class DMEClaimTransformerTest {
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 
-    transformerInterface = new DMEClaimTransformer(metricRegistry, drugDisplayLookup);
+    dmeClaimTransformer = new DMEClaimTransformer(metricRegistry, drugDisplayLookup);
   }
 
   /**
@@ -75,7 +75,7 @@ public final class DMEClaimTransformerTest {
         (DMEClaim)
             parsedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> r).findFirst().get();
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim, true);
+    ExplanationOfBenefit eob = dmeClaimTransformer.transform(claim, true);
 
     assertMatches(claim, eob, true);
   }

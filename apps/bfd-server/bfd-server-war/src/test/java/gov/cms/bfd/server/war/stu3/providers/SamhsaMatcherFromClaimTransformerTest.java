@@ -91,13 +91,13 @@ public class SamhsaMatcherFromClaimTransformerTest {
     ClaimTransformerInterface claimTransformerInterface =
         new InpatientClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit inpatientEob =
-        claimTransformerInterface.transform(getClaim(InpatientClaim.class));
+        claimTransformerInterface.transform(getClaim(InpatientClaim.class), false);
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
 
     claimTransformerInterface =
         new OutpatientClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit outpatientEob =
-        claimTransformerInterface.transform(getClaim(OutpatientClaim.class));
+        claimTransformerInterface.transform(getClaim(OutpatientClaim.class), false);
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
 
     claimTransformerInterface =
@@ -108,17 +108,19 @@ public class SamhsaMatcherFromClaimTransformerTest {
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
     claimTransformerInterface = new HHAClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
-    ExplanationOfBenefit hhaEob = claimTransformerInterface.transform(getClaim(HHAClaim.class));
+    ExplanationOfBenefit hhaEob =
+        claimTransformerInterface.transform(getClaim(HHAClaim.class), false);
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
     claimTransformerInterface =
         new HospiceClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit hospiceEob =
-        claimTransformerInterface.transform(getClaim(HospiceClaim.class));
+        claimTransformerInterface.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
     claimTransformerInterface = new SNFClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
-    ExplanationOfBenefit snfEob = claimTransformerInterface.transform(getClaim(SNFClaim.class));
+    ExplanationOfBenefit snfEob =
+        claimTransformerInterface.transform(getClaim(SNFClaim.class), false);
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
     claimTransformerInterface =
@@ -133,7 +135,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
     claimTransformerInterface =
         new PartDEventTransformer(
             new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
-    ExplanationOfBenefit pdeEob = claimTransformerInterface.transform(getClaim(PartDEvent.class));
+    ExplanationOfBenefit pdeEob =
+        claimTransformerInterface.transform(getClaim(PartDEvent.class), false);
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
 
     // TODO - check why inpatient and outpatient aren't included here

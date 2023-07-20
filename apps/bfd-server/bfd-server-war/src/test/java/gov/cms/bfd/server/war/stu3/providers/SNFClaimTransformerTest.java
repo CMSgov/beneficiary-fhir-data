@@ -38,7 +38,7 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class SNFClaimTransformerTest {
   /** The transformer under test. */
-  ClaimTransformerInterface transformerInterface;
+  SNFClaimTransformer snfClaimTransformer;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The mock metric timer. */
@@ -52,7 +52,7 @@ public final class SNFClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    transformerInterface = new SNFClaimTransformer(metricRegistry, new NPIOrgLookup());
+    snfClaimTransformer = new SNFClaimTransformer(metricRegistry, new NPIOrgLookup());
   }
 
   /**
@@ -72,7 +72,7 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim);
+    ExplanationOfBenefit eob = snfClaimTransformer.transform(claim, false);
 
     assertMatches(claim, eob);
   }

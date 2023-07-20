@@ -58,7 +58,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link ExplanationOfBenefitResourceProvider}. */
-public final class ExplanationOfBenefitResourceProviderIT extends ServerRequiredTest {
+public final class ExplanationOfBenefitResourceProviderE2E extends ServerRequiredTest {
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for a {@link

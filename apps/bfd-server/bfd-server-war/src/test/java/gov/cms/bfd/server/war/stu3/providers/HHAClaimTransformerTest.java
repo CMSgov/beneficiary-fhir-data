@@ -36,7 +36,7 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class HHAClaimTransformerTest {
   /** The transformer under test. */
-  ClaimTransformerInterface transformerInterface;
+  HHAClaimTransformer hhaClaimTransformer;
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
   /** The NPI org lookup to use for the test. */
@@ -54,7 +54,7 @@ public final class HHAClaimTransformerTest {
     when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
         .thenReturn(Optional.of("UNKNOWN"));
 
-    transformerInterface = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
+    hhaClaimTransformer = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
   }
 
   /**
@@ -74,7 +74,7 @@ public final class HHAClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = transformerInterface.transform(claim);
+    ExplanationOfBenefit eob = hhaClaimTransformer.transform(claim, false);
 
     assertMatches(claim, eob);
   }
