@@ -6,10 +6,15 @@ The BB2 BFD-Insights AWS components are setup under this directory.
 
 The configurations for the base components are located under `base_config`. This utilizes the original modules shared with other projects under `../../../modules/`.
 
+The Terraform workspaces feature is used for switching between `test/impl/prod/allenv` environments. The `allenv` workspace is for components that are shared between `test/impl/prod` environments.
+
 The BB2 specific components are setup under the following service areas:
 
 - `services/analytics`:
   - Includes components used for reporting via QuickSight.
+
+- `services/common`:
+  - Includes components that are currently common to `test/impl/prod` environments. Uses the `allenv` workspace.
 
 - `services/log_steam`:
   - Includes components for streaming application log events from BB2 CloudWatch through to the related Glue tables.
