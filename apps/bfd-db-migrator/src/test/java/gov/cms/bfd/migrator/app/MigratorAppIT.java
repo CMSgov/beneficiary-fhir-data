@@ -1,5 +1,11 @@
 package gov.cms.bfd.migrator.app;
 
+import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_ACCESS_KEY;
+import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_ENDPOINT;
+import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_QUEUE_NAME;
+import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_REGION;
+import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_SECRET_KEY;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,11 +13,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
+import gov.cms.bfd.TestContainerConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -24,11 +35,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /** Tests the migrator app under various conditions to ensure it works correctly. */
+@Testcontainers
 public final class MigratorAppIT {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
+
+  /** Name of SQS queue created in localstack to receive progress messages via SQS. */
+  private static final String SQS_QUEUE_NAME = "migrator-progress.fifo";
+
+  /** Automatically creates and destroys a localstack SQS service container. */
+  @Container
+  LocalStackContainer localstack =
+      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withServices(LocalStackContainer.Service.SQS);
+
+  /** Used to communicate with the localstack SQS service. */
+  private SqsDao sqsDao;
 
   /** Enum for determining which flyway script directory to run a test against. */
   private enum TestDirectory {
@@ -75,13 +101,20 @@ public final class MigratorAppIT {
     DatabaseTestUtils.get().dropSchemaForDataSource();
   }
 
+  /** Create our progress queue in the localstack SQS service before each test. */
+  @BeforeEach
+  void createQueue() {
+    sqsDao = new SqsDao(SqsDaoIT.createSqsClientForLocalStack(localstack));
+    sqsDao.createFifoQueue(SQS_QUEUE_NAME);
+  }
+
   /**
    * Test when the migration app runs and there are no errors with the scripts, the exit code is 0.
    *
    * @throws IOException if there is an issue starting the app
    */
   @Test
-  public void testMigrationRunWhenNoErrorsAndAllFilesRunExpectExitCodeZeroAndSchemaMigrationsRun()
+  void testMigrationRunWhenNoErrorsAndAllFilesRunExpectExitCodeZeroAndSchemaMigrationsRun()
       throws IOException {
     // Setup
     ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.REAL);
@@ -122,6 +155,26 @@ public final class MigratorAppIT {
       assertTrue(
           hasLogLine(appRunConsumer, String.format("now at version v%s", expectedVersion)),
           "Did not find log entry for expected final version (v" + expectedVersion + ")");
+
+      // verify that progress messages were passed to SQS
+      final var progressMessages = readProgressMessagesFromSQSQueue();
+      assertThat(progressMessages)
+          .first()
+          .asString()
+          .contains(MigratorProgress.Stage.Started.name());
+      assertThat(progressMessages)
+          .hasAtLeastOneElementOfType(String.class)
+          .asString()
+          .contains(MigratorProgress.Stage.Connected.name());
+      assertThat(progressMessages)
+          .hasAtLeastOneElementOfType(String.class)
+          .asString()
+          .contains(MigratorProgress.Stage.Migrating.name());
+      assertThat(progressMessages)
+          .last()
+          .asString()
+          .contains(MigratorProgress.Stage.Finished.name());
+
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException(
           "Migration application failed to start within timeout, STDOUT:\n"
@@ -137,8 +190,7 @@ public final class MigratorAppIT {
    * @throws IOException if there is an issue starting the app
    */
   @Test
-  public void testMigrationRunWhenSchemaDoesntMatchTablesExpectValidationError()
-      throws IOException {
+  void testMigrationRunWhenSchemaDoesntMatchTablesExpectValidationError() throws IOException {
     // Setup
     ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.VALIDATION_FAILURE);
     appRunBuilder.redirectErrorStream(true);
@@ -172,7 +224,7 @@ public final class MigratorAppIT {
    * @throws IOException if there is an issue starting the app
    */
   @Test
-  public void testMigrationRunWhenConfigErrorExpectExitCodeOne() throws IOException {
+  void testMigrationRunWhenConfigErrorExpectExitCodeOne() throws IOException {
     // Setup
     // Run the process without configuring the app
     ProcessBuilder appRunBuilder = new ProcessBuilder(createCommandForMigratorApp());
@@ -204,7 +256,7 @@ public final class MigratorAppIT {
    * @throws IOException if there is an issue starting the app
    */
   @Test
-  public void testMigrationRunWhenSchemaFileErrorExpectFailedExitCodeAndMigrationsNotRun()
+  void testMigrationRunWhenSchemaFileErrorExpectFailedExitCodeAndMigrationsNotRun()
       throws IOException {
     // Setup
     ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.BAD_SQL);
@@ -252,9 +304,8 @@ public final class MigratorAppIT {
    * @throws IOException if there is an issue starting the app
    */
   @Test
-  public void
-      testMigrationRunWhenSchemaFileDuplicateVersionExpectFailedExitCodeAndMigrationsNotRun()
-          throws IOException {
+  void testMigrationRunWhenSchemaFileDuplicateVersionExpectFailedExitCodeAndMigrationsNotRun()
+      throws IOException {
     // Setup
     ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.DUPLICATE_VERSION);
     appRunBuilder.redirectErrorStream(true);
@@ -299,6 +350,7 @@ public final class MigratorAppIT {
    * the files.
    *
    * @return the number migration scripts
+   * @throws IOException pass through
    */
   public int getNumMigrationScripts() throws IOException {
 
@@ -336,7 +388,7 @@ public final class MigratorAppIT {
    * @param testDirectory the directory the flyway scripts to run for this test are located
    * @return ProcessBuilder ready with common values set
    */
-  private static ProcessBuilder createAppProcessBuilder(TestDirectory testDirectory) {
+  private ProcessBuilder createAppProcessBuilder(TestDirectory testDirectory) {
     String[] command = createCommandForMigratorApp();
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
@@ -346,29 +398,50 @@ public final class MigratorAppIT {
     DatabaseTestUtils.get().dropSchemaForDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
+    Map<String, String> environment = appRunBuilder.environment();
+    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
+    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
+
+    // add SQS related configuration settings
+    environment.put(ENV_VAR_KEY_SQS_QUEUE_NAME, SQS_QUEUE_NAME);
+    environment.put(
+        ENV_VAR_KEY_SQS_ENDPOINT,
+        localstack.getEndpointOverride(LocalStackContainer.Service.SQS).toString());
+    environment.put(ENV_VAR_KEY_SQS_REGION, localstack.getRegion());
+    environment.put(ENV_VAR_KEY_SQS_ACCESS_KEY, localstack.getAccessKey());
+    environment.put(ENV_VAR_KEY_SQS_SECRET_KEY, localstack.getSecretKey());
+
     Path testFilePath =
         Path.of(".", "src", "test", "resources", "db", "migration-test", "error-scenarios");
     String testFileDir = testFilePath.toAbsolutePath().toString();
     // If real we'll use the default flyway path, else use the test path
     if (testDirectory != TestDirectory.REAL) {
-      appRunBuilder
-          .environment()
-          .put(
-              AppConfiguration.ENV_VAR_FLYWAY_SCRIPT_LOCATION,
-              "filesystem:" + testFileDir + testDirectory.getPath());
+      environment.put(
+          AppConfiguration.ENV_VAR_FLYWAY_SCRIPT_LOCATION,
+          "filesystem:" + testFileDir + testDirectory.getPath());
     }
 
     return appRunBuilder;
+  }
+
+  /**
+   * Read back all of the progress messages (JSON strings) from the SQS queue in localstack.
+   *
+   * @return the list
+   */
+  private List<String> readProgressMessagesFromSQSQueue() {
+    final var queueUrl = sqsDao.lookupQueueUrl(SQS_QUEUE_NAME);
+    var messages = new ArrayList<String>();
+    for (Optional<String> message = sqsDao.nextMessage(queueUrl);
+        message.isPresent();
+        message = sqsDao.nextMessage(queueUrl)) {
+      message.ifPresent(messages::add);
+    }
+    return messages;
   }
 
   /**
