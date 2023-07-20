@@ -127,6 +127,11 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   export SSM_REGION=us-east-1
   export SSM_ENDPOINT=http://${localstack_ip}:4566
   export SSM_PARAMETER_PATH=/bfd-db-migrator
+  export DB_MIGRATOR_SQS_REGION=$SSM_REGION
+  export DB_MIGRATOR_SQS_ENDPOINT=$SSM_ENDPOINT
+  export DB_MIGRATOR_SQS_QUEUE=migrator-status.fifo
+  echo "ensuring migrator progress queue exists in SQS"
+  aws --endpoint-url=$DB_MIGRATOR_SQS_ENDPOINT sqs create-queue --queue-name=migrator-status.fifo --attributes '{"FifoQueue":"true","VisibilityTimeout":"1"}'
 fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
@@ -231,6 +236,9 @@ else
     --env SSM_REGION \
     --env SSM_ENDPOINT \
     --env SSM_PARAMETER_PATH \
+    --env DB_MIGRATOR_SQS_REGION \
+    --env DB_MIGRATOR_SQS_ENDPOINT \
+    --env DB_MIGRATOR_SQS_QUEUE \
     --env HOME=/home/app \
     -v $HOME/.aws/credentials:/home/app/.aws/credentials:ro \
     $image_name:$image_tag

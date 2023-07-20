@@ -5,7 +5,7 @@
 !.gitignore
 !.gitattributes
 !.github
-!.secrets
+!.sensitive-files
 
 # OSX system files
 .DS_Store
