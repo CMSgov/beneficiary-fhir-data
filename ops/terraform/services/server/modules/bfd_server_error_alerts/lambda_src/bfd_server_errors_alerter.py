@@ -44,9 +44,7 @@ mdc.http_access_response_status as status
 """.strip()
 LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY = """
 fields @message
-| filter ispresent('exception')
-| filter ispresent('mdc.http_access_request_uri')
-| filter level = 'ERROR'
+| filter ispresent(exception) and ispresent(mdc.http_access_request_uri) and level = 'ERROR'
 | sort @timestamp desc
 """.strip()
 
