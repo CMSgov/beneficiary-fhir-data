@@ -42,7 +42,6 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -781,76 +780,5 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     }
     listParam.addAnd(orParam);
     return listParam;
-  }
-
-  /**
-   * Verifies that the various claim transformers throw a {@link BadCodeMonkeyException} when
-   * invoking an incorrect {@link ClaimTransformerInterfaceV2} transform method.
-   */
-  @Test
-  public void testClaimTypesInvalidTransformInterfaceMethod() {
-    // ClaimTypeV2.CARRIER
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          carrierClaimTransformer.transform(testCarrierClaim);
-        },
-        "Attempted to us invalid CarrierClaimTransformerV2 interface method");
-
-    // ClaimTypeV2.DME
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          dmeClaimTransformer.transform(testDmeClaim);
-        },
-        "Attempted to us invalid DMEClaimTransformerV2 interface method");
-
-    // ClaimTypeV2.HHA
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          hhaClaimTransformer.transform(testHhaClaim, false);
-        },
-        "Attempted to us invalid HHAClaimTransformerV2 interface method");
-
-    // ClaimTypeV2.HOSPICE
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          hospiceClaimTransformer.transform(testHospiceClaim, false);
-        },
-        "Attempted to us invalid HospiceClaimTransformerV2 interface method");
-
-    // ClaimTypeV2.INPATIENT
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          inpatientClaimTransformer.transform(testInpatientClaim, false);
-        },
-        "Attempted to us invalid InpatientClaimTransformerV2 interface method");
-
-    // ClaimTypeV2.OUTPATIENT
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          outpatientClaimTransformer.transform(testOutpatientClaim, false);
-        },
-        "Attempted to us invalid OutpatientClaimTransformerV2 interface method");
-
-    // ClaimTypeV2.PDE
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          partDEventTransformer.transform(testPdeClaim, false);
-        },
-        "Attempted to us invalid PartDEventTransformerV2 interface method");
-
-    // ClaimTypeV2.SNF
-    assertThrows(
-        BadCodeMonkeyException.class,
-        () -> {
-          snfClaimTransformer.transform(testSnfClaim, false);
-        },
-        "Attempted to us invalid SNFClaimTransformerV2 interface method");
   }
 }

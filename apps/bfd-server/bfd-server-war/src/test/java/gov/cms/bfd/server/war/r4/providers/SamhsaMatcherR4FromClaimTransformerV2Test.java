@@ -113,33 +113,34 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
         new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
 
     ExplanationOfBenefit inpatientEob =
-        inpatientClaimTransformerV2.transform(getClaim(InpatientClaim.class));
+        inpatientClaimTransformerV2.transform(getClaim(InpatientClaim.class), false);
     String inpatientClaimType = TransformerUtilsV2.getClaimType(inpatientEob).toString();
 
     ExplanationOfBenefit outpatientEob =
-        outpatientClaimTransformerV2.transform(getClaim(OutpatientClaim.class));
+        outpatientClaimTransformerV2.transform(getClaim(OutpatientClaim.class), false);
     String outpatientClaimType = TransformerUtilsV2.getClaimType(outpatientEob).toString();
 
     ExplanationOfBenefit dmeEob = dmeClaimTransformerV2.transform(getClaim(DMEClaim.class), false);
     String dmeClaimType = TransformerUtilsV2.getClaimType(dmeEob).toString();
 
-    ExplanationOfBenefit hhaEob = hhaClaimTransformerV2.transform(getClaim(HHAClaim.class));
+    ExplanationOfBenefit hhaEob = hhaClaimTransformerV2.transform(getClaim(HHAClaim.class), false);
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
     HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
         new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
     ExplanationOfBenefit hospiceEob =
-        hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class));
+        hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();
 
-    ExplanationOfBenefit snfEob = snfClaimTransformerV2.transform(getClaim(SNFClaim.class));
+    ExplanationOfBenefit snfEob = snfClaimTransformerV2.transform(getClaim(SNFClaim.class), false);
     String snfClaimType = TransformerUtilsV2.getClaimType(snfEob).toString();
 
     ExplanationOfBenefit carrierEob =
         carrierClaimTransformerV2.transform(getClaim(CarrierClaim.class), false);
     String carrierClaimType = TransformerUtilsV2.getClaimType(carrierEob).toString();
 
-    ExplanationOfBenefit pdeEob = partDEventTransformer.transform(getClaim(PartDEvent.class));
+    ExplanationOfBenefit pdeEob =
+        partDEventTransformer.transform(getClaim(PartDEvent.class), false);
 
     String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString();
 

@@ -72,7 +72,7 @@ public class HHAClaimTransformerV2Test {
   /** The eob loaded before each test from a file. */
   ExplanationOfBenefit eob;
   /** The transformer under test. */
-  ClaimTransformerInterfaceV2 claimTransformerInterface;
+  HHAClaimTransformerV2 hhaClaimTransformer;
   /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
   /** The mock metric registry. */
@@ -95,12 +95,10 @@ public class HHAClaimTransformerV2Test {
     HHAClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-
     return claim;
   }
 
@@ -114,9 +112,9 @@ public class HHAClaimTransformerV2Test {
     when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    claimTransformerInterface = new HHAClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
+    hhaClaimTransformer = new HHAClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
+    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -195,15 +193,14 @@ public class HHAClaimTransformerV2Test {
     HHAClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
     claim.setClaimQueryCode(Optional.empty());
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
+    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -224,18 +221,11 @@ public class HHAClaimTransformerV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
-            .findFirst()
-            .get();
-
-    claim.setLastUpdated(Instant.now());
+    HHAClaim claim = generateClaim();
     claim.setClaimQueryCode(Optional.of('3'));
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
+    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1183,7 +1173,7 @@ public class HHAClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = claimTransformerInterface.transform(generateClaim());
+    ExplanationOfBenefit eob = hhaClaimTransformer.transform(generateClaim(), false);
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

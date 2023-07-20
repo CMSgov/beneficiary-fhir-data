@@ -771,36 +771,45 @@ public class TransformerUtilsV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    Object hhaClaim =
-        parsedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> r).findFirst().get();
-
-    ((HHAClaim) hhaClaim).setLastUpdated(Instant.now());
+    HHAClaim hhaClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(HHAClaim.class::cast)
+            .findFirst()
+            .get();
+    hhaClaim.setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    Object hospiceClaim =
-        parsedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> r).findFirst().get();
-
-    ((HospiceClaim) hospiceClaim).setLastUpdated(Instant.now());
+    HospiceClaim hospiceClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HospiceClaim)
+            .map(HospiceClaim.class::cast)
+            .findFirst()
+            .get();
+    hospiceClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
         new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
-    genEob = claimTransformerInterface.transform(hospiceClaim);
+    genEob = claimTransformerInterface.transform(hospiceClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    Object dmeClaim =
-        parsedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> r).findFirst().get();
-
-    ((DMEClaim) dmeClaim).setLastUpdated(Instant.now());
+    DMEClaim dmeClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(DMEClaim.class::cast)
+            .findFirst()
+            .get();
+    dmeClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
         new DMEClaimTransformerV2(
@@ -810,18 +819,17 @@ public class TransformerUtilsV2Test {
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
-    Object inpatientClaim =
+    InpatientClaim inpatientClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
-
-    ((InpatientClaim) inpatientClaim).setLastUpdated(Instant.now());
+    inpatientClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
         new InpatientClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
-    genEob = claimTransformerInterface.transform(inpatientClaim);
+    genEob = claimTransformerInterface.transform(inpatientClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -856,15 +864,18 @@ public class TransformerUtilsV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    Object hhaClaim =
-        parsedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> r).findFirst().get();
-
-    ((HHAClaim) hhaClaim).setLastUpdated(Instant.now());
+    HHAClaim hhaClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(HHAClaim.class::cast)
+            .findFirst()
+            .get();
+    hhaClaim.setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();

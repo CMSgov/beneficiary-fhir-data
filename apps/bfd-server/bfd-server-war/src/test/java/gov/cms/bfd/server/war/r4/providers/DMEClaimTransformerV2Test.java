@@ -1,5 +1,11 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
@@ -10,6 +16,13 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -39,20 +52,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 /** Unit tests for {@link DMEClaimTransformerV2}. */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -62,7 +61,7 @@ public final class DMEClaimTransformerV2Test {
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
   /** The transformer under test. */
-  ClaimTransformerInterfaceV2 claimTransformerInterface;
+  DMEClaimTransformerV2 dmeClaimTransformer;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
   /** The mock metric registry. */
@@ -85,12 +84,10 @@ public final class DMEClaimTransformerV2Test {
     DMEClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
+            .map(DMEClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-
     return claim;
   }
 
@@ -104,11 +101,11 @@ public final class DMEClaimTransformerV2Test {
     when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    claimTransformerInterface =
+    dmeClaimTransformer =
         new DMEClaimTransformerV2(
             mockMetricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, false);
+    ExplanationOfBenefit genEob = dmeClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1256,7 +1253,7 @@ public final class DMEClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException {
-    ExplanationOfBenefit eob = claimTransformerInterface.transform(generateClaim(), false);
+    ExplanationOfBenefit eob = dmeClaimTransformer.transform(generateClaim(), false);
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

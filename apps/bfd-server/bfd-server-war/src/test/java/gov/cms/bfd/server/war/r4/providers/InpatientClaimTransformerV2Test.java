@@ -68,7 +68,7 @@ public final class InpatientClaimTransformerV2Test {
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
   /** The transformer under test. */
-  ClaimTransformerInterfaceV2 claimTransformerInterface;
+  InpatientClaimTransformerV2 inpatientClaimTransformer;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
   /** The mock metric registry. */
@@ -91,12 +91,10 @@ public final class InpatientClaimTransformerV2Test {
     InpatientClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-
     return claim;
   }
 
@@ -110,10 +108,10 @@ public final class InpatientClaimTransformerV2Test {
     when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    claimTransformerInterface =
+    inpatientClaimTransformer =
         new InpatientClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
+    ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -431,12 +429,12 @@ public final class InpatientClaimTransformerV2Test {
     InpatientClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
+
+    ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1983,7 +1981,7 @@ public final class InpatientClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = claimTransformerInterface.transform(generateClaim());
+    ExplanationOfBenefit eob = inpatientClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

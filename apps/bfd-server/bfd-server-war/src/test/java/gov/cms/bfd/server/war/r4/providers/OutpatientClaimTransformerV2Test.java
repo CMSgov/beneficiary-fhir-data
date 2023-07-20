@@ -66,7 +66,7 @@ public final class OutpatientClaimTransformerV2Test {
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
   /** The transformer under test. */
-  ClaimTransformerInterfaceV2 claimTransformerInterface;
+  OutpatientClaimTransformerV2 outpatientClaimTransformer;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
   /** The mock metric registry. */
@@ -89,12 +89,10 @@ public final class OutpatientClaimTransformerV2Test {
     OutpatientClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof OutpatientClaim)
-            .map(r -> (OutpatientClaim) r)
+            .map(OutpatientClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-
     return claim;
   }
 
@@ -108,13 +106,13 @@ public final class OutpatientClaimTransformerV2Test {
     when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    claimTransformerInterface =
+    outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(
             mockMetricRegistry,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
+    ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1484,7 +1482,7 @@ public final class OutpatientClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = claimTransformerInterface.transform(generateClaim());
+    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

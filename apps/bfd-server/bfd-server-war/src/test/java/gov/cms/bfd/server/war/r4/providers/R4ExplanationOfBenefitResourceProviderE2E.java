@@ -305,7 +305,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
             new MetricRegistry(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
-    assertEobEquals(outpatientClaimTransformer.transform(claim), eob);
+    assertEobEquals(outpatientClaimTransformer.transform(claim, false), eob);
   }
 
   /**
@@ -1100,7 +1100,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         new PartDEventTransformerV2(
             new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertEobEquals(
-        partDEventTransformer.transform(partDEvent),
+        partDEventTransformer.transform(partDEvent, false),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -1696,12 +1696,12 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         switch (claimType) {
           case CARRIER -> carrierClaimTransformer.transform(claim, false);
           case DME -> dmeClaimTransformer.transform(claim, false);
-          case HHA -> hhaClaimTransformer.transform(claim);
-          case HOSPICE -> hospiceClaimTransformer.transform(claim);
-          case INPATIENT -> inpatientClaimTransformer.transform(claim);
-          case OUTPATIENT -> outpatientClaimTransformer.transform(claim);
-          case PDE -> partDEventTransformer.transform(claim);
-          case SNF -> snfClaimTransformer.transform(claim);
+          case HHA -> hhaClaimTransformer.transform(claim, false);
+          case HOSPICE -> hospiceClaimTransformer.transform(claim, false);
+          case INPATIENT -> inpatientClaimTransformer.transform(claim, false);
+          case OUTPATIENT -> outpatientClaimTransformer.transform(claim, false);
+          case PDE -> partDEventTransformer.transform(claim, false);
+          case SNF -> snfClaimTransformer.transform(claim, false);
         };
 
     assertEobEquals(expectedEob, searchResults);

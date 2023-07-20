@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -67,7 +68,7 @@ public class SNFClaimTransformerV2Test {
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
   /** The transformer under test. */
-  ClaimTransformerInterfaceV2 claimTransformerInterface;
+  SNFClaimTransformerV2 snfClaimTransformer;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
   /** The mock metric registry. */
@@ -90,10 +91,10 @@ public class SNFClaimTransformerV2Test {
     SNFClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof SNFClaim)
-            .map(r -> (SNFClaim) r)
+            .map(SNFClaim.class::cast)
             .findFirst()
             .get();
-
+    claim.setLastUpdated(Instant.now());
     return claim;
   }
 
@@ -107,9 +108,9 @@ public class SNFClaimTransformerV2Test {
     when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
     when(mockTimer.time()).thenReturn(mockTimerContext);
 
-    claimTransformerInterface = new SNFClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
+    snfClaimTransformer = new SNFClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
+    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -468,10 +469,11 @@ public class SNFClaimTransformerV2Test {
     SNFClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof SNFClaim)
-            .map(r -> (SNFClaim) r)
+            .map(SNFClaim.class::cast)
             .findFirst()
             .get();
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim);
+    claim.setLastUpdated(Instant.now());
+    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1626,7 +1628,7 @@ public class SNFClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = claimTransformerInterface.transform(generateClaim());
+    ExplanationOfBenefit eob = snfClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }
