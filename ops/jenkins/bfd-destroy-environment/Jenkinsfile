@@ -6,8 +6,6 @@
  * </p>
  */
 
-@Library("bfd@bfd-2646-support-ephemeral-environment-destruction")
-
 // These variables are accessible throughout this file (except inside methods and classes).
 def gitBranchName
 def trimmedEnv
