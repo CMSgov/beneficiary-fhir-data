@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -29,21 +31,6 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -59,8 +46,20 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static java.util.Objects.requireNonNull;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link ExplanationOfBenefit} resources,
@@ -231,13 +230,11 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
             .time();
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
-
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(0);
-
       throw new ResourceNotFoundException(eobId);
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
@@ -246,10 +243,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     }
 
     ClaimTransformerInterface transformer = deriveTransformer(eobIdType.get());
-    ExplanationOfBenefit eob =
-        (claimType == ClaimType.CARRIER || claimType == ClaimType.DME)
-            ? transformer.transform(claimEntity, includeTaxNumbers)
-            : transformer.transform(claimEntity);
+    ExplanationOfBenefit eob = transformer.transform(claimEntity, includeTaxNumbers);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -372,7 +366,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     }
 
     // See if we have claims data for the beneficiary.
-    Integer claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
+    int claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
     Bundle bundle = null;
     if (claimTypesThatHaveData > 0) {
       try {
@@ -417,9 +411,12 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
    *     matching resources, or may also be empty.
    */
+  // * @throws {@link InterruptedException}.
+  // * @throws {@link RuntimeException}.
+  // * @throws {@link ExecutionException}.
   @VisibleForTesting
-  private Bundle processClaimsMask(
-      Integer claimTypesThatHaveData,
+  public Bundle processClaimsMask(
+      int claimTypesThatHaveData,
       Set<ClaimType> claimTypesRequested,
       long beneficiaryId,
       OffsetLinkBuilder paging,
@@ -427,7 +424,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       Optional<DateRangeParam> serviceDate,
       boolean excludeSamhsa,
       boolean includeTaxNumbers)
-      throws InterruptedException, ExecutionException {
+      throws InterruptedException, RuntimeException, ExecutionException {
 
     EnumSet<ClaimType> claimsToProcess =
         TransformerUtils.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
@@ -536,7 +533,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * @return the transformed explanation of benefit
    */
   @VisibleForTesting
-  private ClaimTransformerInterface deriveTransformer(ClaimType eobIdType) {
+  public ClaimTransformerInterface deriveTransformer(ClaimType eobIdType) {
     switch (eobIdType) {
       case CARRIER:
         return carrierClaimTransformer;

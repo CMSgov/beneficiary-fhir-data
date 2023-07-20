@@ -57,7 +57,6 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
    * @param claim the {@link PartDEvent} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource.
-   * @throws {@link Exception}
    */
   @Trace
   @Override

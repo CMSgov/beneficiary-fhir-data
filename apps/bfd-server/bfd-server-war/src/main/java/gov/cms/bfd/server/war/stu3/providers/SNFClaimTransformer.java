@@ -55,7 +55,6 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
    * @param claim the {@link SNFClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource.
-   * @throws {@link Exception}
    */
   @Trace
   @Override

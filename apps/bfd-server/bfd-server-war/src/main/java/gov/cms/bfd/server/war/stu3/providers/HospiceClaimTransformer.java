@@ -51,7 +51,6 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
    * @param claim the {@link HospiceClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource.
-   * @throws {@link Exception}
    */
   @Trace
   @Override

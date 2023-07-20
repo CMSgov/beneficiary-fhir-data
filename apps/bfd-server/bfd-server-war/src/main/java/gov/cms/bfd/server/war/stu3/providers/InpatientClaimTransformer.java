@@ -56,7 +56,6 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
    * @param claim the {@link InpatientClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource.
-   * @throws {@link Exception}
    */
   @Trace
   @Override

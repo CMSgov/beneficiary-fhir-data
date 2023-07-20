@@ -64,7 +64,6 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
    * @param claim the {@link CarrierClaim} to use
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource.
-   * @throws {@link Exception}
    */
   @Trace
   @Override
