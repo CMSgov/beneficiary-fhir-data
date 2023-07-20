@@ -12,7 +12,6 @@ public interface ClaimTransformerInterfaceV2 {
    * @param claimEntity generic entity {@link Object} associated with a claim type.
    * @param includeTaxNumbers {@link boolean} denoting inclusion of tax numbers.
    * @return {@link ExplanationOfBenefit}
-   * @throws {@link Exception}
    */
   ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumbers);
 }

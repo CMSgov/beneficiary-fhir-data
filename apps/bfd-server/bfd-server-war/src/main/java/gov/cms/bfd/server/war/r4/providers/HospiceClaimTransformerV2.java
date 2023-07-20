@@ -52,7 +52,7 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
-   * Transforms a @link HospiceClaim} into an {@link ExplanationOfBenefit}
+   * Transforms a @link HospiceClaim} into an {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored

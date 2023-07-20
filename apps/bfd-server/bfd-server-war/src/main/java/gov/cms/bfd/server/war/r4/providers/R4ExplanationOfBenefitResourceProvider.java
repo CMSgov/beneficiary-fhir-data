@@ -367,7 +367,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     }
 
     // See if we have any claims data for the beneficiary.
-    Integer claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
+    int claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
     Bundle bundle = null;
     if (claimTypesThatHaveData > 0) {
       try {
@@ -414,7 +414,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    */
   @VisibleForTesting
   private Bundle processClaimsMask(
-      Integer claimTypesThatHaveData,
+      int claimTypesThatHaveData,
       Set<ClaimTypeV2> claimTypesRequested,
       long beneficiaryId,
       OffsetLinkBuilder paging,
