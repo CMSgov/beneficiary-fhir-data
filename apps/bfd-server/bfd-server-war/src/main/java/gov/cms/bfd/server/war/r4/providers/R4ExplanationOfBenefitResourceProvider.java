@@ -244,10 +244,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     }
 
     ClaimTransformerInterfaceV2 transformer = deriveTransformer(claimType);
-    ExplanationOfBenefit eob =
-        (claimType == ClaimTypeV2.CARRIER || claimType == ClaimTypeV2.DME)
-            ? transformer.transform(claimEntity, includeTaxNumbers)
-            : transformer.transform(claimEntity);
+    ExplanationOfBenefit eob = transformer.transform(claimEntity, includeTaxNumbers);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
