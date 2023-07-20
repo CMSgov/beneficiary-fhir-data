@@ -217,8 +217,10 @@ public class PoetUtil {
         .forEach(
             property ->
                 methodSpecBuilder.addStatement(
-                    "$L.put(\"" + property + "\", " + fieldToMethodName("get", property) + "())",
-                    groupedPropertiesName));
+                    "$L.put(\"$L\", $L())",
+                    groupedPropertiesName,
+                    property,
+                    fieldToMethodName("get", property)));
     methodSpecBuilder.addStatement("return $L", groupedPropertiesName);
     return methodSpecBuilder.build();
   }
