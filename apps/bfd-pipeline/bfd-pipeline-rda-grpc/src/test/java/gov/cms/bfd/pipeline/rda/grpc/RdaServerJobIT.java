@@ -22,9 +22,9 @@ import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
-import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
+import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -46,7 +46,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 /** Integration tests for the RDA server. */
 @Testcontainers
-public class RdaServerJobIT extends MinioTestContainer {
+public class RdaServerJobIT {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
   /** The Fiss claim source. */
@@ -71,14 +71,18 @@ public class RdaServerJobIT extends MinioTestContainer {
   @Container
   LocalStackContainer localstack =
       new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withReuse(true)
           .withServices(LocalStackContainer.Service.S3);
 
+  private AwsServiceConfig s3ServiceConfig;
+  private S3ClientFactory s3ClientFactory;
   private S3Client s3Client;
 
   @BeforeEach
   void createS3Client() {
-    S3ClientFactory s3ClientFactory = new LocalStackS3ClientFactory(localstack);
-    s3Client = s3ClientFactory.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+    s3ServiceConfig = LocalStackS3ClientFactory.createServiceConfig(localstack);
+    s3ClientFactory = new AwsS3ClientFactory(s3ServiceConfig);
+    s3Client = s3ClientFactory.createS3Client();
   }
 
   /**
@@ -157,11 +161,12 @@ public class RdaServerJobIT extends MinioTestContainer {
       bucket = createTestBucket(s3Client);
       final String directoryPath = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3Dao = new S3DirectoryDao(s3Client, bucket, directoryPath, cacheDirectoryPath, true);
+      s3Dao = new S3DirectoryDao(s3ClientFactory, bucket, directoryPath, cacheDirectoryPath, true);
       final RdaServerJob.Config config =
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
               .serverName(SERVER_NAME)
+              .s3ServiceConfig(s3ServiceConfig)
               .s3Bucket(bucket)
               .s3Directory(directoryPath)
               .s3CacheDirectory(cacheDirectoryPath.toString())

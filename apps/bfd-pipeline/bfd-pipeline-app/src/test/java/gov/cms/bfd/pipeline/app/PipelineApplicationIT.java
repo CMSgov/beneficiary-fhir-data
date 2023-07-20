@@ -3,12 +3,15 @@ package gov.cms.bfd.pipeline.app;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
+import gov.cms.bfd.TestContainerConstants;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -20,8 +23,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaMcsClaimLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -30,6 +32,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -38,10 +41,14 @@ import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import software.amazon.awssdk.utils.StringUtils;
@@ -54,14 +61,28 @@ import software.amazon.awssdk.utils.StringUtils;
  * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
-public final class PipelineApplicationIT extends MinioTestContainer {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MinioTestContainer.class);
+@Testcontainers
+public final class PipelineApplicationIT {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplicationIT.class);
 
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
 
-  /** only need a single instance of the S3 client. */
-  private static S3Client s3Client = createS3MinioClient();
+  /** Automatically creates and destroys a localstack S3 service container. */
+  @Container
+  LocalStackContainer localstack =
+      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withReuse(true)
+          .withServices(S3);
+
+  private S3ClientFactory s3ClientFactory;
+  private S3Client s3Client;
+
+  @BeforeEach
+  void createS3Client() {
+    s3ClientFactory = new LocalStackS3ClientFactory(localstack);
+    s3Client = s3ClientFactory.createS3Client();
+  }
 
   /**
    * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
@@ -576,7 +597,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    *
    * @return ProcessBuilder ready for more env vars to be added
    */
-  private static ProcessBuilder createAppProcessBuilder() {
+  private ProcessBuilder createAppProcessBuilder() {
     String[] command = createCommandForPipelineApp();
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
@@ -585,6 +606,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     // Remove inherited environment variables that could affect the test in some local environments.
+    Map<String, String> environment = appRunBuilder.environment();
     List.of(
             AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED,
             AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED,
@@ -592,37 +614,32 @@ public final class PipelineApplicationIT extends MinioTestContainer {
             AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT,
             AppConfiguration.ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN,
             AppConfiguration.ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE)
-        .forEach(envVarName -> appRunBuilder.environment().remove(envVarName));
+        .forEach(environment::remove);
 
-    appRunBuilder
-        .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
-            String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
-    appRunBuilder
-        .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
-            Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    appRunBuilder
-        .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_LOADER_THREADS,
-            String.valueOf(LoadAppOptions.DEFAULT_LOADER_THREADS));
-    appRunBuilder
-        .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
-            String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
+        String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
+        Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
+    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_LOADER_THREADS,
+        String.valueOf(LoadAppOptions.DEFAULT_LOADER_THREADS));
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
+        String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
+
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URL,
+        localstack.getEndpointOverride(S3).toString());
+    environment.put(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY, localstack.getAccessKey());
+    environment.put(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY, localstack.getSecretKey());
+
     /*
      * Note: Not explicitly providing AWS credentials here, as the child
      * process will inherit any that are present in this build/test process.
@@ -637,7 +654,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    *     data from
    * @return a {@link ProcessBuilder} that can be used to launch the application
    */
-  private static ProcessBuilder createCcwRifAppProcessBuilder(String bucket) {
+  private ProcessBuilder createCcwRifAppProcessBuilder(String bucket) {
     ProcessBuilder appRunBuilder = createAppProcessBuilder();
 
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket);
@@ -656,7 +673,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    * @param port the TCP/IP port that the RDA mock server is listening on
    * @return a {@link ProcessBuilder} that can be used to launch the application
    */
-  private static ProcessBuilder createRdaAppProcessBuilder(int port) {
+  private ProcessBuilder createRdaAppProcessBuilder(int port) {
     ProcessBuilder appRunBuilder = createAppProcessBuilder();
 
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED, "false");
@@ -675,7 +692,7 @@ public final class PipelineApplicationIT extends MinioTestContainer {
    * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
    *     the application via its <code>.x</code> assembly executable script
    */
-  private static String[] createCommandForPipelineApp() {
+  private String[] createCommandForPipelineApp() {
     try {
       Path assemblyDirectory =
           Files.list(Paths.get(".", "target", "pipeline-app"))
@@ -684,16 +701,6 @@ public final class PipelineApplicationIT extends MinioTestContainer {
               .get();
       Path pipelineAppScript = assemblyDirectory.resolve("bfd-pipeline-app.sh");
 
-      S3MinioConfig minioConfig = S3MinioConfig.Singleton();
-      if (minioConfig.useMinio) {
-        return new String[] {
-          pipelineAppScript.toAbsolutePath().toString(),
-          "-Ds3.local=true",
-          String.format("-Ds3.localUser=%s", minioConfig.minioUserName),
-          String.format("-Ds3.localPass=%s", minioConfig.minioPassword),
-          String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress)
-        };
-      }
       return new String[] {pipelineAppScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);

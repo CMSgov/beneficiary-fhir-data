@@ -54,11 +54,9 @@ public final class S3TaskManager {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.s3Client = s3Factory.createS3Client(options.getS3Region());
+    this.s3Client = s3Factory.createS3Client();
     this.s3TransferManager =
-        DefaultS3TransferManager.builder()
-            .s3Client(s3Factory.createS3AsyncClient(options.getS3Region()))
-            .build();
+        DefaultS3TransferManager.builder().s3Client(s3Factory.createS3AsyncClient()).build();
 
     this.downloadTasksExecutor = new TaskExecutor("Download RIF Executor", 1);
     this.moveTasksExecutor = new TaskExecutor("Move Completed RIF Executor", 2);

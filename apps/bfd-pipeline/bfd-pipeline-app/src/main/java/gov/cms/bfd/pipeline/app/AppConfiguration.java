@@ -18,6 +18,8 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
@@ -26,6 +28,7 @@ import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -586,6 +589,19 @@ public final class AppConfiguration extends BaseAppConfiguration {
         databaseOptions.getDatabasePassword(), databaseMaxPoolSize.orElse(1));
   }
 
+  public static final String ENV_VAR_KEY_S3_ENDPOINT_URL = "S3_ENDPOINT_URL";
+  public static final String ENV_VAR_KEY_S3_ACCESS_KEY = "S3_ACCESS_KEY";
+  public static final String ENV_VAR_KEY_S3_SECRET_KEY = "S3_SECRET_KEY";
+
+  static AwsServiceConfig loadS3ServiceConfig(ConfigLoader config) {
+    return AwsServiceConfig.builder()
+        .region(Optional.of(SharedS3Utilities.REGION_DEFAULT))
+        .endpointOverride(config.parsedOption(ENV_VAR_KEY_S3_ENDPOINT_URL, URI.class, URI::create))
+        .accessKey(config.stringOption(ENV_VAR_KEY_S3_ACCESS_KEY))
+        .secretKey(config.stringOption(ENV_VAR_KEY_S3_SECRET_KEY))
+        .build();
+  }
+
   /**
    * Reads the ccw rif load options from the {@link ConfigLoader}.
    *
@@ -616,9 +632,11 @@ public final class AppConfiguration extends BaseAppConfiguration {
     } else {
       allowedRifFileType = Optional.empty();
     }
+    final AwsServiceConfig s3ClientConfig = loadS3ServiceConfig(config);
 
     LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
-    ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
+    ExtractionOptions extractionOptions =
+        new ExtractionOptions(s3BucketName, allowedRifFileType, Optional.empty(), s3ClientConfig);
     return new CcwRifLoadOptions(extractionOptions, loadOptions);
   }
 
@@ -714,7 +732,10 @@ public final class AppConfiguration extends BaseAppConfiguration {
         .ifPresent(serverJobConfigBuilder::randomMaxClaims);
     config
         .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
-        .ifPresent(serverJobConfigBuilder::s3Region);
+        .ifPresent(
+            region ->
+                serverJobConfigBuilder.s3ServiceConfig(
+                    AwsServiceConfig.builder().region(Optional.of(region)).build()));
     config
         .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
         .ifPresent(serverJobConfigBuilder::s3Bucket);

@@ -402,7 +402,9 @@ public final class PipelineApplication {
      */
     s3TaskManager =
         new S3TaskManager(
-            appState.getMetrics(), loadOptions.getExtractionOptions(), new AwsS3ClientFactory());
+            appState.getMetrics(),
+            loadOptions.getExtractionOptions(),
+            new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig()));
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 

@@ -25,9 +25,9 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
+import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -51,22 +51,25 @@ import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
 @Testcontainers
-final class SyntheaRifLoadJobIT extends MinioTestContainer {
+final class SyntheaRifLoadJobIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
 
   /** Automatically creates and destroys a localstack S3 service container. */
   @Container
   LocalStackContainer localstack =
       new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withReuse(true)
           .withServices(LocalStackContainer.Service.S3);
 
+  private AwsServiceConfig awsServiceConfig;
   private S3ClientFactory s3ClientFactory;
   private S3Client s3Client;
 
   @BeforeEach
   void createS3Client() {
-    s3ClientFactory = new LocalStackS3ClientFactory(localstack);
-    s3Client = s3ClientFactory.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+    awsServiceConfig = LocalStackS3ClientFactory.createServiceConfig(localstack);
+    s3ClientFactory = new AwsS3ClientFactory(awsServiceConfig);
+    s3Client = s3ClientFactory.createS3Client();
   }
 
   /**
@@ -118,7 +121,8 @@ final class SyntheaRifLoadJobIT extends MinioTestContainer {
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), awsServiceConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest =
@@ -272,7 +276,8 @@ final class SyntheaRifLoadJobIT extends MinioTestContainer {
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), awsServiceConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest =

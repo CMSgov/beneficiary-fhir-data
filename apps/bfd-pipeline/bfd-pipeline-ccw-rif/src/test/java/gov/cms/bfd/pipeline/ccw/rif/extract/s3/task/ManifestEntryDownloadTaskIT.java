@@ -14,7 +14,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -49,6 +48,7 @@ final class ManifestEntryDownloadTaskIT {
   @Container
   LocalStackContainer localstack =
       new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withReuse(true)
           .withServices(LocalStackContainer.Service.S3);
 
   private S3ClientFactory s3ClientFactory;
@@ -57,7 +57,7 @@ final class ManifestEntryDownloadTaskIT {
   @BeforeEach
   void createS3Client() {
     s3ClientFactory = new LocalStackS3ClientFactory(localstack);
-    s3Client = s3ClientFactory.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+    s3Client = s3ClientFactory.createS3Client();
   }
 
   /**

@@ -2,10 +2,11 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
+import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.util.Optional;
 import java.util.function.Predicate;
-import software.amazon.awssdk.regions.Region;
+import lombok.Getter;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
 /** Models the user-configurable options for extraction of RIF data from S3. */
@@ -18,6 +19,8 @@ public final class ExtractionOptions {
   /** The max keys for S3. */
   private final Integer s3ListMaxKeys;
 
+  @Getter private final AwsServiceConfig s3ClientConfig;
+
   /**
    * Constructs a new {@link ExtractionOptions} instance.
    *
@@ -25,7 +28,11 @@ public final class ExtractionOptions {
    * @param allowedRifFileType the value to use for {@link #getDataSetFilter()}
    */
   public ExtractionOptions(String s3BucketName, Optional<RifFileType> allowedRifFileType) {
-    this(s3BucketName, allowedRifFileType, Optional.empty());
+    this(
+        s3BucketName,
+        allowedRifFileType,
+        Optional.empty(),
+        AwsServiceConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build());
   }
 
   /**
@@ -38,10 +45,12 @@ public final class ExtractionOptions {
   public ExtractionOptions(
       String s3BucketName,
       Optional<RifFileType> allowedRifFileType,
-      Optional<Integer> s3ListMaxKeys) {
+      Optional<Integer> s3ListMaxKeys,
+      AwsServiceConfig s3ClientConfig) {
     this.s3BucketName = s3BucketName;
     this.allowedRifFileType = allowedRifFileType.orElse(null);
     this.s3ListMaxKeys = s3ListMaxKeys.orElse(null);
+    this.s3ClientConfig = s3ClientConfig;
   }
 
   /**
@@ -52,21 +61,6 @@ public final class ExtractionOptions {
    */
   public ExtractionOptions(String s3BucketName) {
     this(s3BucketName, Optional.empty());
-  }
-
-  /**
-   * Gets the S3 region.
-   *
-   * @return the AWS {@link Region} that should be used when interacting with S3
-   */
-  public Region getS3Region() {
-    /*
-     * NOTE: This is hardcoded for now, unless/until we have a need to
-     * support other regions. If that happens, just make the region a field
-     * and add a new constructor param here for it.
-     */
-
-    return SharedS3Utilities.REGION_DEFAULT;
   }
 
   /**
@@ -115,7 +109,6 @@ public final class ExtractionOptions {
     return Optional.ofNullable(s3ListMaxKeys);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
