@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codahale.metrics.Slf4jReporter;
+import gov.cms.bfd.TestContainerConstants;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -24,6 +26,8 @@ import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -38,16 +42,32 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
-public final class SyntheaRifLoadJobIT extends MinioTestContainer {
+@Testcontainers
+final class SyntheaRifLoadJobIT extends MinioTestContainer {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
 
-  /** only need a single instance of the S3 client. */
-  private static S3Client s3Client = createS3MinioClient();
+  /** Automatically creates and destroys a localstack S3 service container. */
+  @Container
+  LocalStackContainer localstack =
+      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withServices(LocalStackContainer.Service.S3);
+
+  private S3ClientFactory s3ClientFactory;
+  private S3Client s3Client;
+
+  @BeforeEach
+  void createS3Client() {
+    s3ClientFactory = new LocalStackS3ClientFactory(localstack);
+    s3Client = s3ClientFactory.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+  }
 
   /**
    * Ensures that each test case here starts with a clean/empty database, with the right schema.
@@ -143,7 +163,9 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
@@ -295,7 +317,9 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),

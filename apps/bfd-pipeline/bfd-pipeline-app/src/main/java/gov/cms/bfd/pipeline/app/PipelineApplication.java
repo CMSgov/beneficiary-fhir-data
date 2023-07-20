@@ -24,6 +24,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
@@ -399,7 +400,9 @@ public final class PipelineApplication {
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
      */
-    s3TaskManager = new S3TaskManager(appState.getMetrics(), loadOptions.getExtractionOptions());
+    s3TaskManager =
+        new S3TaskManager(
+            appState.getMetrics(), loadOptions.getExtractionOptions(), new AwsS3ClientFactory());
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 

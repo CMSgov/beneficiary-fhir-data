@@ -9,8 +9,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
+import gov.cms.bfd.TestContainerConstants;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaS3JsonMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
@@ -21,6 +23,8 @@ import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -33,10 +37,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.services.s3.S3Client;
 
 /** Integration tests for the RDA server. */
+@Testcontainers
 public class RdaServerJobIT extends MinioTestContainer {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
@@ -58,8 +67,19 @@ public class RdaServerJobIT extends MinioTestContainer {
   private final McsClaimTransformer mcsTransformer =
       new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
-  /** only need a single instance of the S3 client. */
-  private static final S3Client s3Client = createS3MinioClient();
+  /** Automatically creates and destroys a localstack S3 service container. */
+  @Container
+  LocalStackContainer localstack =
+      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withServices(LocalStackContainer.Service.S3);
+
+  private S3Client s3Client;
+
+  @BeforeEach
+  void createS3Client() {
+    S3ClientFactory s3ClientFactory = new LocalStackS3ClientFactory(localstack);
+    s3Client = s3ClientFactory.createS3Client(SharedS3Utilities.REGION_DEFAULT);
+  }
 
   /**
    * Tests the server job in {@link RdaServerJob.Config.ServerMode#Random} configuration (generating

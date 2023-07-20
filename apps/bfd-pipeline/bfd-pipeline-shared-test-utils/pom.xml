@@ -33,8 +33,30 @@
         </dependency>
         <dependency>
             <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-shared-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Compile time only -->
+        <dependency>
+            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-shared-test-utils</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>localstack</artifactId>
+            <version>${testcontainers.version}</version>
         </dependency>
 
         <dependency>

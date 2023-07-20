@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.sharedutils.s3;
 
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -27,17 +28,8 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
-import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
-import software.amazon.awssdk.services.s3.model.PutBucketEncryptionRequest;
-import software.amazon.awssdk.services.s3.model.PutBucketPolicyRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
-import software.amazon.awssdk.services.s3.model.ServerSideEncryptionByDefault;
-import software.amazon.awssdk.services.s3.model.ServerSideEncryptionConfiguration;
-import software.amazon.awssdk.services.s3.model.ServerSideEncryptionRule;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 
@@ -47,23 +39,6 @@ public final class SharedS3Utilities {
   public static final Region REGION_DEFAULT = Region.US_EAST_1;
   /** The bucket prefix for AWS. */
   private static final String BUCKET_NAME_PREFIX = "bb-test";
-  /** The bucket policy for AWS. */
-  private static final String BUCKET_POLICY_TLS =
-      "{"
-          + " \"Version\": \"2012-10-17\","
-          + " \"Statement\": [{"
-          + "  \"Sid\": \"AllowSSLRequestsOnly\","
-          + "  \"Effect\": \"Deny\","
-          + "  \"Principal\": \"*\","
-          + "  \"Action\": \"s3:*\","
-          + "  \"Resource\": [\"arn:aws:s3:::%s\", \"arn:aws:s3:::%s/*\"],"
-          + "    \"Condition\": {"
-          + "	   \"Bool\": {"
-          + "	   \"aws:SecureTransport\": \"false\""
-          + "	  }"
-          + "   }"
-          + " }]"
-          + "}";
 
   /**
    * Creates a S3Client that connects to either a local Minio or real Amazon S3 based on the
@@ -182,60 +157,14 @@ public final class SharedS3Utilities {
 
     // if not running S3 inside minio (i.e., vs. real AWS S3 buckets), then we need
     // to be observant of CMS security constraints; inside minio, not so much!
-    CreateBucketRequest createBucketRequest = null;
-    if (S3MinioConfig.Singleton().useMinio) {
-      createBucketRequest = CreateBucketRequest.builder().bucket(bucketName).build();
-      s3Client.createBucket(createBucketRequest);
-    } else {
-      // per CMS security constraints, even ephemeral buckets should be configured
-      // for:
-      // - no public access
-      // - support only TLS-enabled connections
-      // - data is encrypted
-      createBucketRequest =
-          CreateBucketRequest.builder()
-              .bucket(bucketName)
-              .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL.toString())
-              .build();
-      s3Client.createBucket(createBucketRequest);
-
-      // block everything public related
-      PublicAccessBlockConfiguration publicAccessBlockConfiguration =
-          PublicAccessBlockConfiguration.builder()
-              .blockPublicAcls(true)
-              .ignorePublicAcls(true)
-              .blockPublicPolicy(true)
-              .restrictPublicBuckets(true)
-              .build();
-
-      PutPublicAccessBlockRequest putPublicAccessBlockRequest =
-          PutPublicAccessBlockRequest.builder()
-              .bucket(bucketName)
-              .publicAccessBlockConfiguration(publicAccessBlockConfiguration)
-              .build();
-      s3Client.putPublicAccessBlock(putPublicAccessBlockRequest);
-
-      ServerSideEncryptionByDefault serverSideEncryptionByDefault =
-          ServerSideEncryptionByDefault.builder().sseAlgorithm(ServerSideEncryption.AES256).build();
-      ServerSideEncryptionRule serverSideEncryptionRule =
-          ServerSideEncryptionRule.builder()
-              .applyServerSideEncryptionByDefault(serverSideEncryptionByDefault)
-              .build();
-      ServerSideEncryptionConfiguration serverSideEncryptionConfiguration =
-          ServerSideEncryptionConfiguration.builder().rules(serverSideEncryptionRule).build();
-      PutBucketEncryptionRequest putBucketEncryptionRequest =
-          PutBucketEncryptionRequest.builder()
-              .bucket(bucketName)
-              .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
-              .build();
-      s3Client.putBucketEncryption(putBucketEncryptionRequest);
-
-      // we'll shortcut this with a JSON policy
-      final String tlsPolicy = String.format(BUCKET_POLICY_TLS, bucketName, bucketName);
-      PutBucketPolicyRequest putBucketPolicyRequest =
-          PutBucketPolicyRequest.builder().bucket(bucketName).policy(tlsPolicy).build();
-      s3Client.putBucketPolicy(putBucketPolicyRequest);
+    // Ensure that we are not about to create a bucket in the cloud.
+    if (s3Client.serviceClientConfiguration().endpointOverride().isEmpty()) {
+      throw new BadCodeMonkeyException(
+          "s3Client has no endpoint override - it might be a real S3 service client");
     }
+    CreateBucketRequest createBucketRequest =
+        CreateBucketRequest.builder().bucket(bucketName).build();
+    s3Client.createBucket(createBucketRequest);
     S3Waiter s3Waiter = s3Client.waiter();
     HeadBucketRequest bucketRequestWait = HeadBucketRequest.builder().bucket(bucketName).build();
     s3Waiter.waitUntilBucketExists(bucketRequestWait);

@@ -2,8 +2,10 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import gov.cms.bfd.TestContainerConstants;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -11,6 +13,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
@@ -21,10 +24,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.CancellationException;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -35,29 +41,30 @@ import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Tests downloaded S3 file attributes such as MD5ChkSum. */
-public final class ManifestEntryDownloadTaskIT {
+@Testcontainers
+final class ManifestEntryDownloadTaskIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
-  /** only need a single instance of the S3 client. */
-  private static S3Client s3Client;
-  /** The S3 task manager. */
-  private S3TaskManager s3TaskManager;
-  /** Dummy S3 bucket name. */
-  private static final String DUMMY_S3_BUCKET_NAME = "foo";
+  /** Automatically creates and destroys a localstack S3 service container. */
+  @Container
+  LocalStackContainer localstack =
+      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
+          .withServices(LocalStackContainer.Service.S3);
 
-  /** Sets the minio test container. */
-  @BeforeAll
-  public static void setupMinioS3Client() {
-    s3Client =
-        SharedS3Utilities.createS3Client(new ExtractionOptions(DUMMY_S3_BUCKET_NAME).getS3Region());
+  private S3ClientFactory s3ClientFactory;
+  private S3Client s3Client;
+
+  @BeforeEach
+  void createS3Client() {
+    s3ClientFactory = new LocalStackS3ClientFactory(localstack);
+    s3Client = s3ClientFactory.createS3Client(SharedS3Utilities.REGION_DEFAULT);
   }
 
   /**
    * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated MD5ChkSum value.
    */
-  @SuppressWarnings("deprecation")
   @Test
-  public void testMD5ChkSum() throws Exception {
+  void testMD5ChkSum() throws Exception {
     String bucket = null;
     try {
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
@@ -94,10 +101,11 @@ public final class ManifestEntryDownloadTaskIT {
                       manifest.getEntries().get(0).getName()))
               .build();
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
-      s3TaskManager =
+      S3TaskManager s3TaskManager =
           new S3TaskManager(
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              new ExtractionOptions(options.getS3BucketName()));
+              new ExtractionOptions(options.getS3BucketName()),
+              s3ClientFactory);
       LOGGER.info(
           "Downloading '{}' to '{}'...",
           getObjectRequest.key(),
