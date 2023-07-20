@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
@@ -21,21 +22,21 @@ import org.slf4j.LoggerFactory;
  * Manages the schema of the database being used to store the Blue Button API backend's data.
  *
  * <p>This uses <a href="http://www.liquibase.org/">Liquibase</a> to manage the schema. The main
- * Liquibase changelog is in <code>src/main/resources/db-schema.xml</code>.
+ * Liquibase changelog is in {@code src/main/resources/db-schema.xml}.
  */
 public final class DatabaseSchemaManager {
   /** Logger for writing messages. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
-
   /**
    * Creates or updates, as appropriate, the backend database schema for the specified database.
+   * Does not report any progress.
    *
    * @param dataSource the JDBC {@link DataSource} for the database whose schema should be created
    *     or updated
    * @return {@code true} if the migration was successful
    */
   public static boolean createOrUpdateSchema(DataSource dataSource) {
-    return createOrUpdateSchema(dataSource, null);
+    return createOrUpdateSchema(dataSource, null, ignored -> {});
   }
 
   /**
@@ -46,16 +47,25 @@ public final class DatabaseSchemaManager {
    *     or updated
    * @param flywayScriptLocationOverride the flyway script location override, can be null if no
    *     override
+   * @param progressConsumer function to receive migration status updates
    * @return {@code true} if the migration was successful
    */
   public static boolean createOrUpdateSchema(
-      DataSource dataSource, String flywayScriptLocationOverride) {
+      DataSource dataSource,
+      String flywayScriptLocationOverride,
+      Consumer<DatabaseMigrationProgress> progressConsumer) {
     LOGGER.info("Schema create/upgrade: running...");
 
     Flyway flyway;
     try {
-      flyway = createFlyway(dataSource, flywayScriptLocationOverride);
+      flyway = createFlyway(dataSource, flywayScriptLocationOverride, progressConsumer);
+      progressConsumer.accept(
+          new DatabaseMigrationProgress(
+              DatabaseMigrationProgress.Stage.BeforeMigration, flyway.info().current()));
       flyway.migrate();
+      progressConsumer.accept(
+          new DatabaseMigrationProgress(
+              DatabaseMigrationProgress.Stage.AfterMigration, flyway.info().current()));
     } catch (FlywaySqlScriptException sqlException) {
       LOGGER.error("SQL Exception when running migration: ", sqlException);
       return false;
@@ -81,9 +91,13 @@ public final class DatabaseSchemaManager {
    * @param dataSource the {@link DataSource} to run {@link Flyway} against
    * @param flywayScriptLocationOverride the flyway script location override, can be null if no
    *     override
+   * @param progressConsumer function to receive migration status updates
    * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
    */
-  private static Flyway createFlyway(DataSource dataSource, String flywayScriptLocationOverride) {
+  private static Flyway createFlyway(
+      DataSource dataSource,
+      String flywayScriptLocationOverride,
+      Consumer<DatabaseMigrationProgress> progressConsumer) {
     FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
     flywayBuilder.placeholders(createScriptPlaceholdersMap(dataSource));
 
@@ -119,6 +133,9 @@ public final class DatabaseSchemaManager {
         .getPluginRegister()
         .getPlugin(PostgreSQLConfigurationExtension.class)
         .setTransactionalLock(false);
+
+    // Set up a callback to submit progress updates.
+    flywayBuilder.callbacks(new FlywayProgressCallback(progressConsumer));
 
     return flywayBuilder.load();
   }
