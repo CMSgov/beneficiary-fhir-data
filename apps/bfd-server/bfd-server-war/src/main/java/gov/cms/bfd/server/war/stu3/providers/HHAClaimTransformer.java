@@ -47,37 +47,24 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
   }
 
   /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
-   * HHAClaimTransformer#transform} method that does not take the includeTaxNumber parameter.
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link Object} to use
-   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HHAClaim}
-   */
-  @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
-    throw new BadCodeMonkeyException();
-  }
-
-  /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
-   *
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HHAClaim}
+   * @param claim the {@link OutpatientClaim} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
+   * @throws {@link Exception}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim) {
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof HHAClaim)) {
+      throw new BadCodeMonkeyException();
+    }
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform"))
             .time();
-
-    if (!(claim instanceof HHAClaim)) throw new BadCodeMonkeyException();
     ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
-
     timer.stop();
     return eob;
   }

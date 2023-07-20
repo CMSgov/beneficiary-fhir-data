@@ -51,39 +51,25 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
   }
 
   /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
-   * OutpatientClaimTransformer#transform} method that does not take the includeTaxNumber parameter.
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link Object} to use
-   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     OutpatientClaim}
+   * @param claim the {@link OutpatientClaim} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
+   * @throws {@link Exception}
    */
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
-    throw new BadCodeMonkeyException();
-  }
-
-  /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
-   *
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     OutpatientClaim}
-   */
-  @Trace
-  @Override
-  public ExplanationOfBenefit transform(Object claim) {
+    if (!(claim instanceof OutpatientClaim)) {
+      throw new BadCodeMonkeyException();
+    }
     Timer.Context timer =
         metricRegistry
             .timer(
                 MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform"))
             .time();
-
-    if (!(claim instanceof OutpatientClaim)) throw new BadCodeMonkeyException();
     ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim);
-
     timer.stop();
     return eob;
   }
