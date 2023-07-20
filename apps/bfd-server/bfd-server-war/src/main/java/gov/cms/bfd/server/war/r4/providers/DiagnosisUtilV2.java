@@ -276,7 +276,13 @@ public class DiagnosisUtilV2 {
             Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
             DiagnosisLabel.FIRSTEXTERNAL));
     diagnosis.add(
-        extractDiagnosis("ExternalFirst", claim, Optional.empty(), DiagnosisLabel.FIRSTEXTERNAL));
+        extractDiagnosis(
+            "ExternalFirst",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            DiagnosisLabel.FIRSTEXTERNAL));
 
     // Generically handle the rest (2-12)
     final int FIRST_EX_DIAG = 2;
