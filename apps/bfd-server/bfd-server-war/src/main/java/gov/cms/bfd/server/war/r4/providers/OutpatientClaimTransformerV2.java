@@ -245,7 +245,10 @@ public class OutpatientClaimTransformerV2 {
     // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+    for (Diagnosis diagnosis :
+        DiagnosisUtilV2.extractDiagnoses(diagnosisCodes, diagnosisCodeVersions, Optional.empty())) {
       DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.OUTPATIENT);
     }
 
@@ -255,7 +258,12 @@ public class OutpatientClaimTransformerV2 {
     DiagnosisUtilV2.addDiagnosisCode(
         eob,
         DiagnosisUtilV2.extractDiagnosis(
-            "Admission1", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
+            "Admission1",
+            diagnosisCodes,
+            diagnosisCodeVersions,
+            Optional.empty(),
+            Optional.empty(),
+            DiagnosisLabel.REASONFORVISIT),
         ClaimTypeV2.OUTPATIENT);
 
     // RSN_VISIT_CD2        => diagnosis.diagnosisCodeableConcept
@@ -263,7 +271,12 @@ public class OutpatientClaimTransformerV2 {
     DiagnosisUtilV2.addDiagnosisCode(
         eob,
         DiagnosisUtilV2.extractDiagnosis(
-            "Admission2", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
+            "Admission2",
+            diagnosisCodes,
+            diagnosisCodeVersions,
+            Optional.empty(),
+            Optional.empty(),
+            DiagnosisLabel.REASONFORVISIT),
         ClaimTypeV2.OUTPATIENT);
 
     // RSN_VISIT_CD3        => diagnosis.diagnosisCodeableConcept
@@ -271,7 +284,12 @@ public class OutpatientClaimTransformerV2 {
     DiagnosisUtilV2.addDiagnosisCode(
         eob,
         DiagnosisUtilV2.extractDiagnosis(
-            "Admission3", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
+            "Admission3",
+            diagnosisCodes,
+            diagnosisCodeVersions,
+            Optional.empty(),
+            Optional.empty(),
+            DiagnosisLabel.REASONFORVISIT),
         ClaimTypeV2.OUTPATIENT);
 
     // Handle Procedures

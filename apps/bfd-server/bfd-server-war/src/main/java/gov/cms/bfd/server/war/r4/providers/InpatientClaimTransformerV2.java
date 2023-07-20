@@ -311,7 +311,11 @@ public class InpatientClaimTransformerV2 {
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
-    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+    for (Diagnosis diagnosis :
+        DiagnosisUtilV2.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(),
+            claimGroup.getDiagnosisCodeVersions(),
+            Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes()))) {
       DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.INPATIENT);
     }
 

@@ -210,6 +210,7 @@ public class PoetUtil {
             ClassName.get("java.util", "Map"), ClassName.get(String.class), getterResultType);
     MethodSpec.Builder methodSpecBuilder =
         MethodSpec.methodBuilder(fieldToMethodName("get", groupedPropertiesName))
+            .addModifiers(Modifier.PUBLIC)
             .returns(returnType)
             .addStatement("$T $L = new $T<>()", returnType, groupedPropertiesName, HashMap.class);
     propertyNames.stream()

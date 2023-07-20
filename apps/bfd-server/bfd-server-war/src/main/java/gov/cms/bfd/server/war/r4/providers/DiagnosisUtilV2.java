@@ -217,7 +217,6 @@ public class DiagnosisUtilV2 {
    *     gov.cms.bfd.model.rif.InpatientClaim}
    */
   static List<Diagnosis> extractDiagnoses(
-      Object claim,
       Map<String, Optional<String>> codes,
       Map<String, Optional<Character>> codeVersions,
       Optional<Map<String, Optional<Character>>> presentOnAdms) {
