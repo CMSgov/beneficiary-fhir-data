@@ -3672,12 +3672,12 @@ public final class TransformerUtilsV2 {
       Map<String, Optional<Character>> codeVersions,
       Map<String, Optional<LocalDate>> dates) {
     Optional<String> code =
-        codes.getOrDefault(String.format("getProcedure%dCode", procedure), Optional.empty());
+        codes.getOrDefault(String.format("procedure%dCode", procedure), Optional.empty());
     Optional<Character> codeVersion =
         codeVersions.getOrDefault(
-            String.format("getProcedure%dCodeVersion", procedure), Optional.empty());
+            String.format("procedure%dCodeVersion", procedure), Optional.empty());
     Optional<LocalDate> date =
-        dates.getOrDefault(String.format("getProcedure%dDate", procedure), Optional.empty());
+        dates.getOrDefault(String.format("procedure%dDate", procedure), Optional.empty());
     return CCWProcedure.from(code, codeVersion, date);
   }
 
