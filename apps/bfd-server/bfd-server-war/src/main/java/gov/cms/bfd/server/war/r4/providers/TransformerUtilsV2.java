@@ -43,7 +43,6 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RaceCategory;
-import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
@@ -3661,19 +3660,24 @@ public final class TransformerUtilsV2 {
    * Generically attempts to retrieve a procedure from the current claim.
    *
    * @param procedure Procedure accessors all follow the same pattern except for an integer
-   *     difference. This value is used as a subtitution when looking up the method name.
-   * @param claim Passed as an Object because there is no top level `Claim` class that claims derive
-   *     from
+   *     difference. This value is used as a substitution when looking up the method name.
+   * @param codes TODO: BFD-2598.
+   * @param codeVersions TODO: BFD-2598.
+   * @param dates TODO: BFD-2598.
    * @return a {@link CCWProcedure} or {@link Optional#empty()}
    */
-  public static Optional<CCWProcedure> extractCCWProcedure(int procedure, Object claim) {
+  public static Optional<CCWProcedure> extractCCWProcedure(
+      int procedure,
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<LocalDate>> dates) {
     Optional<String> code =
-        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dCode", procedure));
+        codes.getOrDefault(String.format("getProcedure%dCode", procedure), Optional.empty());
     Optional<Character> codeVersion =
-        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dCodeVersion", procedure));
+        codeVersions.getOrDefault(
+            String.format("getProcedure%dCodeVersion", procedure), Optional.empty());
     Optional<LocalDate> date =
-        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dDate", procedure));
-
+        dates.getOrDefault(String.format("getProcedure%dDate", procedure), Optional.empty());
     return CCWProcedure.from(code, codeVersion, date);
   }
 

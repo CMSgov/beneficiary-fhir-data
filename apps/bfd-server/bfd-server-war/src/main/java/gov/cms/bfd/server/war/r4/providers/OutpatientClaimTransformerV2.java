@@ -300,7 +300,13 @@ public class OutpatientClaimTransformerV2 {
     final int LAST_PROCEDURE = 25;
 
     IntStream.range(FIRST_PROCEDURE, LAST_PROCEDURE + 1)
-        .mapToObj(i -> TransformerUtilsV2.extractCCWProcedure(i, claimGroup))
+        .mapToObj(
+            i ->
+                TransformerUtilsV2.extractCCWProcedure(
+                    i,
+                    claimGroup.getProcedureCodes(),
+                    claimGroup.getProcedureCodeVersions(),
+                    claimGroup.getProcedureDates()))
         .filter(p -> p.isPresent())
         .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p.get()));
 
