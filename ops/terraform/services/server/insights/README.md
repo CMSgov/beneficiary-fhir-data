@@ -92,7 +92,7 @@ OR
 This process will be done via a series of complex Athena queries, in order to reduce the amount of
 AWS Glue we have to perform. This approach is far more cost-effective and faster.
 
-The process is outlined in this [Runbook](../../../../../runbooks/how-to-load-cloudwatch-historical-data.md).
+The process is outlined in this [Runbook](../../../../../docs/runbooks/how-to-load-cloudwatch-historical-data.md).
 
 ## Analysis
 
@@ -133,5 +133,5 @@ The QuickSight dashboards are the portion that displays the data to users. They 
 the Athena views and are set up to run once per day, just before midnight UTC.
 
 Please see the
-["How to Create BFD Insights QuickSight"](../../../../../runbooks/how-to-create-bfd-insights-quicksight.md)
+["How to Create BFD Insights QuickSight"](../../../../../docs/runbooks/how-to-create-bfd-insights-quicksight.md)
 runbook for how to create these if they ever need to be recreated.

@@ -2,14 +2,14 @@ name: 'CI - Runbook'
 on:
   pull_request:
     paths:
-      - runbooks/*
+      - docs/runbooks/*
 
 jobs:
   build-runbook-readme:
     runs-on: ubuntu-20.04
     defaults:
       run:
-        working-directory: runbooks
+        working-directory: docs/runbooks
     steps:
       - uses: actions/checkout@v2
       - run: |

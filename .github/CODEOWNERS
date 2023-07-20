@@ -5,7 +5,7 @@
 @mackec1 @keithdadkins @lsmitchell @mjburling @brianburton 
 
 # BFD Pipeline and Server Codeowners
-/rfcs @mackec1 @keithdadkins @lsmitchell @mjburling
+/docs/rfcs @mackec1 @keithdadkins @lsmitchell @mjburling
 /ops @keithdadkins @mjburling @malessi @billie-rose
 /apps @mackec1 @mjburling @lsmitchell @brianburton
 

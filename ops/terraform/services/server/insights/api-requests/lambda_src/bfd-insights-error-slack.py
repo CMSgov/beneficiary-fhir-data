@@ -58,7 +58,7 @@ def handler(event, context):
                         f"Warning: A new file was found in the BFD Insights Error Folder from `{ENV}` environment:\n"
                         f"\t*File Path:* `{file_key}`\n"
                         f"\t*File Size:* `{file_size}`\n"
-                        f"For help troubleshooting, reference the following <https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-investigate-firehose-ingestion-processing-failures.md|runbook>\n"
+                        f"For help troubleshooting, reference the following <https://github.com/CMSgov/beneficiary-fhir-data/blob/master/docs/runbooks/how-to-investigate-firehose-ingestion-processing-failures.md|runbook>\n"
                     ),
                 },
             }

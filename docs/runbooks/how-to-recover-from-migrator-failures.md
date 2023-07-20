@@ -245,7 +245,7 @@ The application failed to validate the Hibernate models against the currently ap
 - [Splunk CloudTrail Errors][splunk-cloudtrail-errors] _(CMS VPN Required)_
 
 <!-- links in reference style for those destinations that may change over time -->
-[migrator-rfc]: https://github.com/CMSgov/beneficiary-fhir-data/blob/master/rfcs/0011-separate-flyway-from-pipeline.md "Original Migrator RFC Document"
+[migrator-rfc]: https://github.com/CMSgov/beneficiary-fhir-data/blob/master/docs/rfcs/0011-separate-flyway-from-pipeline.md "Original Migrator RFC Document"
 [migrator-java-source]: https://github.com/CMSgov/beneficiary-fhir-data/tree/master/apps/bfd-db-migrator "Migrator Java Artifact Source Code"
 [migrator-packer-manifest]: https://github.com/CMSgov/beneficiary-fhir-data/blob/master/ops/packer/build_bfd-all.json "Monolithic Packer Manifest"
 [migrator-terraform]: https://github.com/CMSgov/beneficiary-fhir-data/tree/master/ops/terraform/services/migrator "Migrator Terraform"
