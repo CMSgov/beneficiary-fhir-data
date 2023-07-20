@@ -63,41 +63,24 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
-   * CarrierClaimTransformerV2#transform} method that takes the includeTaxNumber parameter.
-   *
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     CarrierClaim}
-   */
-  @Override
-  public ExplanationOfBenefit transform(Object claim) {
-    throw new BadCodeMonkeyException();
-  }
-
-  /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   * Transforms a {@link CarrierClaim} into an {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     CarrierClaim}
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof CarrierClaim)) {
+      throw new BadCodeMonkeyException();
+    }
     Timer.Context timer =
         metricRegistry
             .timer(
                 MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
-
-    if (!(claim instanceof CarrierClaim)) {
-      throw new BadCodeMonkeyException();
-    }
-
     ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
-
     timer.stop();
     return eob;
   }

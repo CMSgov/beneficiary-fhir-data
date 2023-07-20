@@ -52,40 +52,24 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
-   * HospiceClaimTransformerV2#transform} method that does not take the includeTaxNumber parameter.
+   * Transforms a @link HospiceClaim} into an {@link ExplanationOfBenefit}
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HospiceClaim}
-   */
-  @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
-    throw new BadCodeMonkeyException();
-  }
-
-  /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
-   *
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HospiceClaim}
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim) {
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof HospiceClaim)) {
+      throw new BadCodeMonkeyException();
+    }
     Timer.Context timer =
         metricRegistry
             .timer(
                 MetricRegistry.name(HospiceClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
-
-    if (!(claim instanceof HospiceClaim)) {
-      throw new BadCodeMonkeyException();
-    }
     ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim);
-
     timer.stop();
     return eob;
   }

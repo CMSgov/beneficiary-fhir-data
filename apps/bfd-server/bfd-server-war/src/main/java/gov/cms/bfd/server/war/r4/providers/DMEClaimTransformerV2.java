@@ -56,40 +56,24 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
-   * Override required interface method; throws {@link BadCodeMonkeyException} since callers should
-   * use the method that supports tax number.
-   *
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     DMEClaim}
-   */
-  @Override
-  public ExplanationOfBenefit transform(Object claim) {
-    throw new BadCodeMonkeyException();
-  }
-
-  /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Transforms a {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
    * @param includeTaxNumber optional Boolean denoting whether to include tax numbers in the
    *     response
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     DMEClaim}
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof DMEClaim)) {
+      throw new BadCodeMonkeyException();
+    }
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
-
-    if (!(claim instanceof DMEClaim)) {
-      throw new BadCodeMonkeyException();
-    }
     ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumber);
-
     timer.stop();
     return eob;
   }

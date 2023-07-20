@@ -61,36 +61,21 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
    * PartDEventTransformerV2#transform} method that does not take the includeTaxNumber parameter.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     PartDEvent}
-   */
-  @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
-    throw new BadCodeMonkeyException();
-  }
-
-  /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
-   *
-   * @param claim the {@link Object} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim) {
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof PartDEvent)) {
+      throw new BadCodeMonkeyException();
+    }
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
             .time();
-
-    if (!(claim instanceof PartDEvent)) {
-      throw new BadCodeMonkeyException();
-    }
-
     ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
-
     timer.stop();
     return eob;
   }
