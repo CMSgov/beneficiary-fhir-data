@@ -49,11 +49,6 @@ fields @message
 | filter level = 'ERROR'
 | sort @timestamp desc
 """.strip()
-LOG_INSIGHTS_MESSAGES_JSON_CROSS_REF_QUERY = """
-fields @message,
-`mdc.http_access_request_header_Bluebutton-Originalquerytimestamp` as orig_timestamp
-| filter orig_timestamp == 'REPLACE WITH MDC ORIGINAL TIMESTAMP OF MESSAGE FROM ACCESS.JSON'
-""".strip()
 
 
 class LogInsightsQueryResultTypeDef(TypedDict, total=False):
@@ -252,12 +247,6 @@ def handler(event: Any, context: Any):
         editor_string=LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY,
         source_log_group=MESSAGES_JSON_LOG_GROUP,
     )
-    log_insights_messages_json_cross_ref_url = __gen_log_insights_url(
-        start_time=start_time,
-        end_time=end_time,
-        editor_string=LOG_INSIGHTS_MESSAGES_JSON_CROSS_REF_QUERY,
-        source_log_group=MESSAGES_JSON_LOG_GROUP,
-    )
     slack_message = {
         "blocks": [
             {
@@ -301,9 +290,7 @@ def handler(event: Any, context: Any):
                         f" `{end_time_iso} UTC`_:\n- <{log_insights_access_json_url}|Open Log"
                         " Insights query for all 500s in access.json>\n-"
                         f" <{log_insights_messages_json_errors_url}|Open Log Insights query for all"
-                        " HTTP request errors with exceptions in messages.json>\n-"
-                        f" <{log_insights_messages_json_cross_ref_url}|Open Log Insights query for"
-                        " cross referencing messages between access.json and messages.json>"
+                        " HTTP request errors with exceptions in messages.json>"
                     ),
                 },
             },
