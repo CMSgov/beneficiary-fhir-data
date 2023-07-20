@@ -212,10 +212,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   @VisibleForTesting
   private ExplanationOfBenefit transformEobClaim(Object claimEntity) {
-    if (claimType == ClaimType.CARRIER || claimType == ClaimType.DME) {
-      return claimTransformer.transform(claimEntity, includeTaxNumbers);
-    }
-    return claimTransformer.transform(claimEntity);
+    return claimTransformer.transform(claimEntity, includeTaxNumbers);
   }
 
   /**
