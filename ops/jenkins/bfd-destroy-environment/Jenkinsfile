@@ -178,7 +178,7 @@ spec:
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/server',
-                                    forcePlanApproval
+                                    forcePlanApproval: forcePlanApproval
                                 )
                             }
                             checkIfStageApprovalRequired(forceStageApproval)
@@ -188,7 +188,7 @@ spec:
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/server/server-load',
-                                    forcePlanApproval
+                                    forcePlanApproval: forcePlanApproval
                                 )
                             }
                             checkIfStageApprovalRequired(forceStageApproval)
@@ -198,7 +198,7 @@ spec:
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/server/server-regression',
-                                    forcePlanApproval
+                                    forcePlanApproval: forcePlanApproval
                                 )
                             }
                             checkIfStageApprovalRequired(forceStageApproval)
@@ -208,7 +208,7 @@ spec:
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/server/insights/api-requests',
-                                    forcePlanApproval
+                                    forcePlanApproval: forcePlanApproval
                                 )
                             }
                             checkIfStageApprovalRequired(forceStageApproval)
@@ -233,7 +233,7 @@ spec:
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/pipeline',
-                                    forcePlanApproval
+                                    forcePlanApproval: forcePlanApproval
                                 )
                             }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -257,7 +257,7 @@ spec:
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: "ops/terraform/services/migrator",
-                                    forcePlanApproval
+                                    forcePlanApproval: forcePlanApproval
                                 )
                             }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -282,7 +282,7 @@ spec:
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/common',
-                                    forcePlanApproval
+                                    forcePlanApproval: forcePlanApproval
                                 )
                             }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -307,7 +307,7 @@ spec:
                                 terraform.destroyTerraservice(
                                     env: trimmedEnv,
                                     directory: 'ops/terraform/services/base',
-                                    forcePlanApproval
+                                    forcePlanApproval: forcePlanApproval
                                 )
                             }
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
