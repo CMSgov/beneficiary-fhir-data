@@ -8,7 +8,7 @@ DATABASE_PASSWORD="${DATABASE_PASSWORD:-{{ db_migrator_db_password }}}"
 # If DATABASE_USERNAME or DATABASE_PASSWORD is not set, use IAM for db auth
 if [ -z "$DATABASE_USERNAME" ] || [ -z "$DATABASE_PASSWORD" ]; then
   # Get the instance profile role from the metadata service. This is the database username.
-  log "Retrieving RDS IAM authentication token for {{ data_server_db_host }}"
+  log "Retrieving RDS IAM authentication token for $DATABASE_HOST"
   IMDSv2_TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: $metadata_token_ttl_seconds")
   DATABASE_USERNAME=$(curl -s -S -H "X-aws-ec2-metadata-token: $IMDSv2_TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/)
   for i in {1..3}; do
