@@ -220,7 +220,11 @@ final class InpatientClaimTransformer {
         claimGroup.getBeneficiaryDischargeDate(),
         Optional.of(claimGroup.getUtilizationDayCount()));
 
-    for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses(claimGroup))
+    for (Diagnosis diagnosis :
+        TransformerUtils.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(),
+            claimGroup.getDiagnosisCodeVersions(),
+            Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes())))
       TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
     for (CCWProcedure procedure :
