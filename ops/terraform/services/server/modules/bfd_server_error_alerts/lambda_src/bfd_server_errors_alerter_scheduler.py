@@ -108,7 +108,20 @@ except Exception as exc:
     sys.exit(0)
 
 
-def __create_schedule(schedule: Schedule) -> bool:
+def __timedelta_from_rate_str(rate_str: str) -> timedelta:
+    try:
+        interval_str, unit_str = tuple(rate_str.split(" "))
+        interval = int(interval_str)
+
+        return timedelta(**{unit_str: interval})
+    except (ValueError, TypeError):
+        logging.getLogger().error(
+            'Unable to construct timedelta from rate string "%s":', rate_str, exc_info=True
+        )
+        return timedelta(seconds=0)
+
+
+def __create_schedule(schedule: Schedule, start_date: Optional[datetime] = None) -> bool:
     logger.info("Creating schedule %s to run %s...", schedule.name, ALERTER_LAMBDA_ARN)
     try:
         scheduler_client.create_schedule(
@@ -118,6 +131,7 @@ def __create_schedule(schedule: Schedule) -> bool:
             ScheduleExpressionTimezone="UTC",
             Target={"RoleArn": SCHEDULER_ROLE_ARN, "Arn": ALERTER_LAMBDA_ARN},
             FlexibleTimeWindow={"Mode": "OFF"},
+            StartDate=start_date or datetime.utcnow(),
         )
     except scheduler_client.exceptions.ClientError:
         logger.error(
@@ -215,7 +229,11 @@ def handler(event: Any, context: Any):
         )
 
         rate_schedule = RateSchedule(rate_str=RECURRING_SCHEDULE_RATE_STR)
-        if not __create_schedule(schedule=rate_schedule):
+        if not __create_schedule(
+            schedule=rate_schedule,
+            start_date=datetime.utcnow()
+            + __timedelta_from_rate_str(rate_str=rate_schedule.rate_str),
+        ):
             return
     elif alarm_state == AlarmState.OK:
         # delete rate schedules
