@@ -142,7 +142,6 @@ public class SpringConfiguration {
    * @param username the database username to use
    * @param password the database password to use
    * @param connectionsMaxText the maximum number of database connections to use
-   * @param schemaApplyText whether or not to create/update the DB schema
    * @param metricRegistry the {@link MetricRegistry} for the application
    * @return the {@link DataSource} that provides the application's database connection
    */
@@ -152,18 +151,11 @@ public class SpringConfiguration {
       @Value("${" + PROP_DB_USERNAME + "}") String username,
       @Value("${" + PROP_DB_PASSWORD + "}") String password,
       @Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText,
-      @Value("${" + PROP_DB_SCHEMA_APPLY + ":false}") String schemaApplyText,
       MetricRegistry metricRegistry) {
     DataSource poolingDataSource;
     if (url.startsWith(DatabaseTestUtils.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
       poolingDataSource =
-          DatabaseTestUtils.createTestDatabase(
-              url,
-              PROP_DB_URL,
-              PROP_DB_USERNAME,
-              PROP_DB_PASSWORD,
-              connectionsMaxText,
-              metricRegistry);
+          DatabaseTestUtils.createTestDatabase(PROP_DB_URL, PROP_DB_USERNAME, PROP_DB_PASSWORD);
     } else {
       HikariDataSource newDataSource = new HikariDataSource();
       newDataSource.setJdbcUrl(url);

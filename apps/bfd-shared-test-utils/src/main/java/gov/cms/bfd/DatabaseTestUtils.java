@@ -2,12 +2,8 @@ package gov.cms.bfd;
 
 import static java.util.Collections.singletonMap;
 
-import com.codahale.metrics.MetricRegistry;
-import com.zaxxer.hikari.HikariDataSource;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.net.Inet4Address;
@@ -24,9 +20,6 @@ import java.util.Optional;
 import java.util.Properties;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
-import org.hsqldb.jdbc.JDBCDataSource;
-import org.hsqldb.persist.HsqlProperties;
-import org.hsqldb.server.ServerAcl.AclFormatException;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +33,7 @@ public final class DatabaseTestUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseTestUtils.class);
 
   /**
-   * This fake JDBC URL prefix is used for custom database setups only used in integration tests,
-   * e.g. {@link #initUnpooledDataSourceForHsqlEmbeddedWithServer(String)}.
+   * This fake JDBC URL prefix is used for custom database setups only used in integration tests..
    */
   public static final String JDBC_URL_PREFIX_BLUEBUTTON_TEST = "jdbc:bfd-test:";
 
@@ -52,11 +44,6 @@ public final class DatabaseTestUtils {
    * <p>PUBLIC for hsql and public for postgres since they differ in caps sensitivity.
    */
   public static final List<String> FLYWAY_CLEAN_SCHEMAS = List.of("public", "PUBLIC", "rda", "RDA");
-
-  /** The username used for HSQL locally. */
-  public static final String HSQL_SERVER_USERNAME = "test";
-  /** The password used for HSQL locally. */
-  public static final String HSQL_SERVER_PASSWORD = "test";
 
   /** The default database type to use for the integration tests when nothing is provided. */
   public static final String DEFAULT_IT_DATABASE = "jdbc:bfd-test:tc";
@@ -134,21 +121,6 @@ public final class DatabaseTestUtils {
       url = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.url");
       username = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.username");
       password = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.password");
-    } else if (url.contains("hsql")) {
-      LOGGER.info("Setting up HSQL data source");
-      /*
-       * Build DB connection properties that use HSQL, just as they're configured in the
-       * parent POM.
-       */
-      String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
-
-      // Build the actual DB connection properties to use.
-      url = System.getProperty("its.db.url", urlDefault);
-
-      username = System.getProperty("its.db.username", usernameDefault);
-      if (username != null && username.trim().isEmpty()) username = usernameDefault;
-      password = System.getProperty("its.db.password", passwordDefault);
-      if (password != null && password.trim().isEmpty()) password = passwordDefault;
     } else {
       LOGGER.info("Setting up postgres test container data source");
       // Build the test container postgres db by default
@@ -163,57 +135,6 @@ public final class DatabaseTestUtils {
     }
 
     return initUnpooledDataSource(url, username, password);
-  }
-
-  /**
-   * Creates an unmigrated HSQL data source for testing specific migration logic.
-   *
-   * @return an unmigrated hsql data source
-   */
-  public static DataSource getUnpooledUnmigratedHsqlDataSource() {
-    int hsqldbPort = startLocalHsqlServerAndReturnPort();
-
-    JDBCDataSource dataSource = new JDBCDataSource();
-    dataSource.setUrl(String.format("jdbc:hsqldb:hsql://localhost:%d/test-embedded", hsqldbPort));
-    dataSource.setUser(HSQL_SERVER_USERNAME);
-    dataSource.setPassword(HSQL_SERVER_PASSWORD);
-
-    return dataSource;
-  }
-
-  /**
-   * Starts a local hsql server after setting various properties.
-   *
-   * @return the port the hsql server was started on
-   */
-  private static int startLocalHsqlServerAndReturnPort() {
-    /*
-     * Select a random local port to run the HSQL DB server on, so that one test run doesn't
-     * conflict with another.
-     */
-    int hsqldbPort = findFreePort();
-
-    HsqlProperties hsqlProperties = new HsqlProperties();
-    hsqlProperties.setProperty(
-        "server.database.0",
-        String.format(
-            "mem:test-embedded;user=%s;password=%s", HSQL_SERVER_USERNAME, HSQL_SERVER_PASSWORD));
-    hsqlProperties.setProperty("server.dbname.0", "test-embedded");
-    hsqlProperties.setProperty("server.address", "127.0.0.1");
-    hsqlProperties.setProperty("server.port", "" + hsqldbPort);
-    hsqlProperties.setProperty("hsqldb.tx", "mvcc");
-    org.hsqldb.server.Server server = new org.hsqldb.server.Server();
-
-    try {
-      server.setProperties(hsqlProperties);
-    } catch (IOException | AclFormatException e) {
-      throw new RuntimeException(e);
-    }
-
-    server.setLogWriter(new PrintWriter(new LoggerWriter(LOGGER, "HSQL Log: ")));
-    server.setErrWriter(new PrintWriter(new LoggerWriter(LOGGER, "HSQL Error Log: ")));
-    server.start();
-    return hsqldbPort;
   }
 
   /**
@@ -263,11 +184,7 @@ public final class DatabaseTestUtils {
    */
   private static DataSource initUnpooledDataSource(String url, String username, String password) {
     DataSource dataSource;
-    if (url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST + "hsqldb:mem")) {
-      dataSource = initUnpooledDataSourceForHsqlEmbeddedWithServer(url);
-    } else if (url.startsWith("jdbc:hsqldb:hsql://localhost")) {
-      dataSource = initUnpooledDataSourceForHsqlServer(url, username, password);
-    } else if (url.startsWith("jdbc:postgresql:")) {
+    if (url.startsWith("jdbc:postgresql:")) {
       dataSource = initUnpooledDataSourceForPostgresql(url, username, password);
     } else if (url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST + "tc")) {
       dataSource = initUnpooledDataSourceForTestContainerWithPostgres(username, password);
@@ -276,27 +193,6 @@ public final class DatabaseTestUtils {
     }
 
     return dataSource;
-  }
-
-  /**
-   * Creates an embedded HSQL DB that is also accessible on a local port (via {@link
-   * org.hsqldb.server.Server}).
-   *
-   * @param url the JDBC URL that the application was configured to use
-   * @return a HSQL {@link DataSource} for the test DB
-   */
-  private static DataSource initUnpooledDataSourceForHsqlEmbeddedWithServer(String url) {
-    if (!url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST + "hsqldb:mem")) {
-      throw new IllegalArgumentException();
-    }
-
-    int hsqldbPort = startLocalHsqlServerAndReturnPort();
-
-    // Create the DataSource to connect to that shiny new DB.
-    return initUnpooledDataSourceForHsqlServer(
-        String.format("jdbc:hsqldb:hsql://localhost:%d/test-embedded", hsqldbPort),
-        HSQL_SERVER_USERNAME,
-        HSQL_SERVER_PASSWORD);
   }
 
   /**
@@ -313,33 +209,6 @@ public final class DatabaseTestUtils {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-  }
-
-  /**
-   * Initiates a HSQL {@link DataSource} for the test DB.
-   *
-   * @param url the JDBC URL that the application was configured to use
-   * @param username the username for the test database to connect to
-   * @param password the password for the test database to connect to
-   * @return a HSQL {@link DataSource} for the test DB
-   */
-  private static DataSource initUnpooledDataSourceForHsqlServer(
-      String url, String username, String password) {
-    if (!url.startsWith("jdbc:hsqldb:hsql://localhost")) {
-      throw new IllegalArgumentException();
-    }
-
-    JDBCDataSource dataSource = new JDBCDataSource();
-    dataSource.setUrl(url);
-    if (username != null) dataSource.setUser(username);
-    if (password != null) dataSource.setPassword(password);
-
-    boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(dataSource);
-    if (!migrationSuccess) {
-      throw new RuntimeException("Schema migration failed during test setup");
-    }
-
-    return dataSource;
   }
 
   /**
@@ -470,19 +339,6 @@ public final class DatabaseTestUtils {
     return true;
   }
 
-  /** Cleans the database to prepare for the next test. */
-  public void cleanDataSource() {
-    String url;
-    try (Connection connection = getUnpooledDataSource().getConnection(); ) {
-      url = connection.getMetaData().getURL();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-    if (!url.contains("localhost") && !url.contains("127.0.0.1") && !url.contains("hsqldb:mem")) {
-      throw new RuntimeException("Our builds can only be run against local test DBs.");
-    }
-  }
-
   /** Sends output to a specified {@link Logger}. */
   private static final class LoggerWriter extends Writer {
     /** The logger to use for this writer. */
@@ -524,161 +380,19 @@ public final class DatabaseTestUtils {
   }
 
   /**
-   * Creates a HSQL database for use in testing.
-   *
-   * @param url the JDBC URL that the application was configured to use
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   * @return the hikari data source
-   */
-  public static DataSource createTestDatabase(
-      String url, String connectionsMaxText, MetricRegistry metricRegistry) {
-    return createTestDatabase(url, null, null, null, connectionsMaxText, metricRegistry);
-  }
-
-  /**
    * Some of the DBs we support using in local development and testing require special handling.
    * This method takes care of that.
    *
    * @param url the JDBC URL that the application was configured to use
-   * @param urlKey the test properties url key, may be null if not updating a server property file
-   * @param usernameKey the test properties username key, may be null if not updating a server
-   *     property file
-   * @param passwordKey the test properties database password, may be null if not updating a server
-   *     property file
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
+   * @param username the database username
+   * @param password the database password
    * @return the hikari data source
    */
-  public static DataSource createTestDatabase(
-      String url,
-      String urlKey,
-      String usernameKey,
-      String passwordKey,
-      String connectionsMaxText,
-      MetricRegistry metricRegistry) {
-    if (url.endsWith(":hsqldb:mem")) {
-      return createTestDatabaseForHsql(
-          connectionsMaxText, metricRegistry, urlKey, usernameKey, passwordKey);
-    } else if (url.endsWith(":tc")) {
-      return initUnpooledDataSourceForTestContainerWithPostgres(usernameKey, passwordKey);
+  public static DataSource createTestDatabase(String url, String username, String password) {
+    if (url.endsWith(":tc")) {
+      return initUnpooledDataSourceForTestContainerWithPostgres(username, password);
     } else {
       throw new RuntimeException("Unsupported test URL: " + url);
     }
-  }
-
-  /**
-   * Handles {@link #createTestDatabase} for HSQL. We need to special-case the HSQL DBs that are
-   * supported by our tests, so that they get handled correctly. Specifically, we need to ensure
-   * that the HSQL Server is started up, so that our test code can access the DB directly. In
-   * addition, we may need to ensure that connection details to that HSQL server get written out
-   * somewhere that the test code can find it.
-   *
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   * @param urlKey the url key of the key/value pair used when writing to the test properties file,
-   *     may be null if no test properties file is required
-   * @param usernameKey the username key of the key/value pair used when writing to the test
-   *     properties file, may be null if no test properties file is required
-   * @param passwordKey the password key of the key/value pair used when writing to the test
-   *     properties file, may be null if no test properties file is required
-   * @return the data source for the newly set up database
-   */
-  private static DataSource createTestDatabaseForHsql(
-      String connectionsMaxText,
-      MetricRegistry metricRegistry,
-      String urlKey,
-      String usernameKey,
-      String passwordKey) {
-
-    boolean writeDbPropsFile = usernameKey != null && passwordKey != null && urlKey != null;
-    Path testDbPropsPath = DatabaseTestUtils.findWarServerTestDatabaseProperties();
-    boolean hasTestPropsPath = Files.isReadable(testDbPropsPath);
-    if (writeDbPropsFile && hasTestPropsPath) {
-      /*
-       * Grab the path for the DB server properties, and remove it if found, as it'll be from an older
-       * run. We'll (re-)create it later in this method.
-       */
-      try {
-        Files.delete(testDbPropsPath);
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    }
-
-    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
-    DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
-    boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(dataSource);
-    if (!migrationSuccess) {
-      throw new RuntimeException("Schema migration failed during test setup");
-    }
-
-    // Create the DataSource to connect to that shiny new DB.
-    HikariDataSource dataSourcePool = new HikariDataSource();
-    dataSourcePool.setDataSource(dataSource);
-    configureDataSource(dataSourcePool, connectionsMaxText, metricRegistry);
-
-    if (writeDbPropsFile) {
-      /*
-       * Write out the DB properties for <code>ServerTestUtils</code> to use.
-       * This is primarily used in the BFD server IT tests.
-       */
-      Properties testDbProps = new Properties();
-      testDbProps.setProperty(urlKey, dataSourceComponents.getUrl());
-      testDbProps.setProperty(usernameKey, dataSourceComponents.getUsername());
-      testDbProps.setProperty(passwordKey, dataSourceComponents.getPassword());
-      try {
-        testDbProps.store(new FileWriter(testDbPropsPath.toFile()), null);
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    }
-
-    return dataSourcePool;
-  }
-
-  /**
-   * Configures a data source.
-   *
-   * @param poolingDataSource the {@link HikariDataSource} to be configured, which must already have
-   *     its basic connection properties (URL, username, password) configured
-   * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   */
-  public static void configureDataSource(
-      HikariDataSource poolingDataSource,
-      String connectionsMaxText,
-      MetricRegistry metricRegistry) {
-    int connectionsMax;
-    try {
-      connectionsMax = Integer.parseInt(connectionsMaxText);
-    } catch (NumberFormatException e) {
-      connectionsMax = -1;
-    }
-    if (connectionsMax < 1) {
-      // Assign a reasonable default value, if none was specified.
-      connectionsMax = Runtime.getRuntime().availableProcessors() * 5;
-    }
-
-    poolingDataSource.setMaximumPoolSize(connectionsMax);
-
-    /*
-     * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
-     * strongly worded letter instructing it to avoid sequential scans whenever
-     * possible.
-     */
-    if (poolingDataSource.getJdbcUrl() != null
-        && poolingDataSource.getJdbcUrl().contains("postgre"))
-      poolingDataSource.setConnectionInitSql(
-          "set application_name = 'bfd-server'; set enable_seqscan = false;");
-
-    poolingDataSource.setRegisterMbeans(true);
-    poolingDataSource.setMetricRegistry(metricRegistry);
-
-    /*
-     * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
-     * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
-     */
-    poolingDataSource.setLeakDetectionThreshold(60 * 1000);
   }
 }

@@ -19,8 +19,7 @@ Going to work on this project? Great! You can follow the instructions in [Develo
 This application has the following configuration parameters:
 
 * `bfdServer.logs.dir`: The directory that the application will write its log files out to, which defaults to `./target/bluebutton-server/`.
-* `bfdServer.db.url`: The JDBC URL of the database to use. Supports HSQL and PostgreSQL. Samples:
-    * `jdbc:hsqldb:mem:test`
+* `bfdServer.db.url`: The JDBC URL of the database to use. Uses PostgreSQL. Sample:
     * `jdbc:postgresql://example.com:5432/fhir`
 * `bfdServer.db.username`: The JDBC username to use with the database.
 * `bfdServer.db.password`: The JDBC password to use with the database.
