@@ -73,7 +73,8 @@ final class CcwRifLoadJobIT {
     try {
       // Create the (empty) bucket to run against.
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       // Run the job.
@@ -439,7 +440,9 @@ final class CcwRifLoadJobIT {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket, Optional.of(RifFileType.PDE));
+      ExtractionOptions options =
+          new ExtractionOptions(
+              bucket, Optional.of(RifFileType.PDE), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
@@ -519,7 +522,8 @@ final class CcwRifLoadJobIT {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
@@ -608,7 +612,8 @@ final class CcwRifLoadJobIT {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest = inManifest;

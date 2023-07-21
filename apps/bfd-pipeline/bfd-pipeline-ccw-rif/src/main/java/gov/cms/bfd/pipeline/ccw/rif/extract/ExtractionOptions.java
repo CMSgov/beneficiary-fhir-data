@@ -23,21 +23,6 @@ public final class ExtractionOptions {
   @Getter private final AwsClientConfig s3ClientConfig;
 
   /**
-   * Initializes an instance with the specified {@link RifFileType} filter and using default AWS
-   * region for S3.
-   *
-   * @param s3BucketName the value to use for {@link #s3BucketName}
-   * @param allowedRifFileType the value to use for {@link #getDataSetFilter()}
-   */
-  public ExtractionOptions(String s3BucketName, Optional<RifFileType> allowedRifFileType) {
-    this(
-        s3BucketName,
-        allowedRifFileType,
-        Optional.empty(),
-        AwsClientConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build());
-  }
-
-  /**
    * Initializes an instance.
    *
    * @param s3BucketName the value to use for {@link #s3BucketName}
@@ -63,7 +48,11 @@ public final class ExtractionOptions {
    * @param s3BucketName the value to use for {@link #s3BucketName}
    */
   public ExtractionOptions(String s3BucketName) {
-    this(s3BucketName, Optional.empty());
+    this(
+        s3BucketName,
+        Optional.empty(),
+        Optional.empty(),
+        AwsClientConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build());
   }
 
   /**

@@ -13,6 +13,8 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
+import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
@@ -22,6 +24,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +54,8 @@ final class ManifestEntryDownloadTaskIT {
           .withReuse(true)
           .withServices(LocalStackContainer.Service.S3);
 
+  /** Configuration settings to connect to localstack container. */
+  private AwsClientConfig s3ClientConfig;
   /** Factory to create clients connected to localstack container. */
   private S3ClientFactory s3ClientFactory;
   /** A client connected to the localstack container for use in test methods. */
@@ -59,7 +64,8 @@ final class ManifestEntryDownloadTaskIT {
   /** Populates S3 related fields based on localstack container. */
   @BeforeEach
   void initializeS3RelatedFields() {
-    s3ClientFactory = new LocalStackS3ClientFactory(localstack);
+    s3ClientConfig = LocalStackS3ClientFactory.createAwsClientConfig(localstack);
+    s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
     s3Client = s3ClientFactory.createS3Client();
   }
 
@@ -71,7 +77,8 @@ final class ManifestEntryDownloadTaskIT {
     String bucket = null;
     try {
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
@@ -107,7 +114,8 @@ final class ManifestEntryDownloadTaskIT {
       S3TaskManager s3TaskManager =
           new S3TaskManager(
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              new ExtractionOptions(options.getS3BucketName()),
+              new ExtractionOptions(
+                  options.getS3BucketName(), Optional.empty(), Optional.empty(), s3ClientConfig),
               s3ClientFactory);
       LOGGER.info(
           "Downloading '{}' to '{}'...",
