@@ -73,14 +73,15 @@ public final class PipelineApplicationIT {
   LocalStackContainer localstack =
       new LocalStackContainer(TestContainerConstants.LocalStackImageName)
           .withReuse(true)
-          .withServices(S3);
+          .withServices(LocalStackContainer.Service.S3);
 
-  private S3ClientFactory s3ClientFactory;
+  /** A client connected to the localstack container for use in test methods. */
   private S3Client s3Client;
 
+  /** Populates S3 related fields based on localstack container. */
   @BeforeEach
-  void createS3Client() {
-    s3ClientFactory = new LocalStackS3ClientFactory(localstack);
+  void initializeS3RelatedFields() {
+    S3ClientFactory s3ClientFactory = new LocalStackS3ClientFactory(localstack);
     s3Client = s3ClientFactory.createS3Client();
   }
 
@@ -635,7 +636,7 @@ public final class PipelineApplicationIT {
         String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
 
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URL,
+        AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URI,
         localstack.getEndpointOverride(S3).toString());
     environment.put(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY, localstack.getAccessKey());
     environment.put(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY, localstack.getSecretKey());

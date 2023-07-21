@@ -377,6 +377,16 @@ public final class AppConfiguration extends BaseAppConfiguration {
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
   /**
+   * Optional endpoint override URI used to connect to S3. Intended for use with localstack based
+   * tests.
+   */
+  public static final String ENV_VAR_KEY_S3_ENDPOINT_URI = "S3_ENDPOINT_URI";
+  /** Optional access key used to connect to S3. Intended for use with localstack based tests. */
+  public static final String ENV_VAR_KEY_S3_ACCESS_KEY = "S3_ACCESS_KEY";
+  /** Optional secret key used to connect to S3. Intended for use with localstack based tests. */
+  public static final String ENV_VAR_KEY_S3_SECRET_KEY = "S3_SECRET_KEY";
+
+  /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
    */
@@ -589,14 +599,17 @@ public final class AppConfiguration extends BaseAppConfiguration {
         databaseOptions.getDatabasePassword(), databaseMaxPoolSize.orElse(1));
   }
 
-  public static final String ENV_VAR_KEY_S3_ENDPOINT_URL = "S3_ENDPOINT_URL";
-  public static final String ENV_VAR_KEY_S3_ACCESS_KEY = "S3_ACCESS_KEY";
-  public static final String ENV_VAR_KEY_S3_SECRET_KEY = "S3_SECRET_KEY";
-
+  /**
+   * Loads {@link AwsClientConfig} for use in configuring S3 clients. These settings are generally
+   * only changed from defaults during localstack based tests.
+   *
+   * @param config used to load configuration values
+   * @return the aws client settings
+   */
   static AwsClientConfig loadS3ServiceConfig(ConfigLoader config) {
     return AwsClientConfig.builder()
         .region(Optional.of(SharedS3Utilities.REGION_DEFAULT))
-        .endpointOverride(config.parsedOption(ENV_VAR_KEY_S3_ENDPOINT_URL, URI.class, URI::create))
+        .endpointOverride(config.parsedOption(ENV_VAR_KEY_S3_ENDPOINT_URI, URI.class, URI::create))
         .accessKey(config.stringOption(ENV_VAR_KEY_S3_ACCESS_KEY))
         .secretKey(config.stringOption(ENV_VAR_KEY_S3_SECRET_KEY))
         .build();

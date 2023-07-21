@@ -51,11 +51,14 @@ final class ManifestEntryDownloadTaskIT {
           .withReuse(true)
           .withServices(LocalStackContainer.Service.S3);
 
+  /** Factory to create clients connected to localstack container. */
   private S3ClientFactory s3ClientFactory;
+  /** A client connected to the localstack container for use in test methods. */
   private S3Client s3Client;
 
+  /** Populates S3 related fields based on localstack container. */
   @BeforeEach
-  void createS3Client() {
+  void initializeS3RelatedFields() {
     s3ClientFactory = new LocalStackS3ClientFactory(localstack);
     s3Client = s3ClientFactory.createS3Client();
   }
