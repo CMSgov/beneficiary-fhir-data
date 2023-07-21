@@ -11,7 +11,6 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
@@ -153,17 +152,13 @@ public class SpringConfiguration {
       @Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText,
       MetricRegistry metricRegistry) {
     DataSource poolingDataSource;
-    if (url.startsWith(DatabaseTestUtils.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
-      poolingDataSource =
-          DatabaseTestUtils.createTestDatabase(PROP_DB_URL, PROP_DB_USERNAME, PROP_DB_PASSWORD);
-    } else {
-      HikariDataSource newDataSource = new HikariDataSource();
-      newDataSource.setJdbcUrl(url);
-      if (username != null && !username.isEmpty()) newDataSource.setUsername(username);
-      if (password != null && !password.isEmpty()) newDataSource.setPassword(password);
-      DatabaseUtils.configureDataSource(newDataSource, connectionsMaxText, metricRegistry);
-      poolingDataSource = newDataSource;
-    }
+
+    HikariDataSource newDataSource = new HikariDataSource();
+    newDataSource.setJdbcUrl(url);
+    if (username != null && !username.isEmpty()) newDataSource.setUsername(username);
+    if (password != null && !password.isEmpty()) newDataSource.setPassword(password);
+    DatabaseUtils.configureDataSource(newDataSource, connectionsMaxText, metricRegistry);
+    poolingDataSource = newDataSource;
 
     // Wrap the pooled DataSource in a proxy that records performance data.
     return ProxyDataSourceBuilder.create(poolingDataSource)
