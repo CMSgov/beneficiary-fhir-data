@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
+import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -19,7 +19,7 @@ public final class ExtractionOptions {
   /** The max keys for S3. */
   private final Integer s3ListMaxKeys;
 
-  @Getter private final AwsServiceConfig s3ClientConfig;
+  @Getter private final AwsClientConfig s3ClientConfig;
 
   /**
    * Constructs a new {@link ExtractionOptions} instance.
@@ -32,7 +32,7 @@ public final class ExtractionOptions {
         s3BucketName,
         allowedRifFileType,
         Optional.empty(),
-        AwsServiceConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build());
+        AwsClientConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build());
   }
 
   /**
@@ -46,7 +46,7 @@ public final class ExtractionOptions {
       String s3BucketName,
       Optional<RifFileType> allowedRifFileType,
       Optional<Integer> s3ListMaxKeys,
-      AwsServiceConfig s3ClientConfig) {
+      AwsClientConfig s3ClientConfig) {
     this.s3BucketName = s3BucketName;
     this.allowedRifFileType = allowedRifFileType.orElse(null);
     this.s3ListMaxKeys = s3ListMaxKeys.orElse(null);

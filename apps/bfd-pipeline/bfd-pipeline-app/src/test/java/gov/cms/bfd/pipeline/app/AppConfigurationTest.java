@@ -44,7 +44,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
+import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
@@ -384,8 +384,8 @@ public class AppConfigurationTest {
     verify(configBuilder).randomSeed(42L);
     verify(configBuilder).randomMaxClaims(17);
     verify(configBuilder)
-        .s3ServiceConfig(
-            AwsServiceConfig.builder().region(Optional.of(Region.of("us-east-1"))).build());
+        .s3ClientConfig(
+            AwsClientConfig.builder().region(Optional.of(Region.of("us-east-1"))).build());
     verify(configBuilder).s3Bucket("my-bucket");
     verify(configBuilder).s3Directory("/my-directory");
     verify(configBuilder).build();

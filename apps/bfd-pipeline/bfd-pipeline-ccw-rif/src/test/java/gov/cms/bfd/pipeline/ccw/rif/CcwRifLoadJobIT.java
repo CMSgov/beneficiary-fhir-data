@@ -14,8 +14,8 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import java.net.URL;
 import java.time.Instant;
@@ -47,14 +47,14 @@ final class CcwRifLoadJobIT {
           .withReuse(true)
           .withServices(LocalStackContainer.Service.S3);
 
-  private AwsServiceConfig awsServiceConfig;
+  private AwsClientConfig s3ClientConfig;
   private S3ClientFactory s3ClientFactory;
   private S3Client s3Client;
 
   @BeforeEach
   void createS3Client() {
-    awsServiceConfig = LocalStackS3ClientFactory.createServiceConfig(localstack);
-    s3ClientFactory = new AwsS3ClientFactory(awsServiceConfig);
+    s3ClientConfig = LocalStackS3ClientFactory.createAwsClientConfig(localstack);
+    s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
     s3Client = s3ClientFactory.createS3Client();
   }
 
@@ -147,7 +147,7 @@ final class CcwRifLoadJobIT {
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
       ExtractionOptions options =
-          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), awsServiceConfig);
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest =
@@ -326,7 +326,7 @@ final class CcwRifLoadJobIT {
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
       ExtractionOptions options =
-          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), awsServiceConfig);
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifestA =
           new DataSetManifest(

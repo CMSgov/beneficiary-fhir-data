@@ -20,10 +20,10 @@ import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
+import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
@@ -74,14 +74,14 @@ public class RdaServerJobIT {
           .withReuse(true)
           .withServices(LocalStackContainer.Service.S3);
 
-  private AwsServiceConfig s3ServiceConfig;
+  private AwsClientConfig s3ClientConfig;
   private S3ClientFactory s3ClientFactory;
   private S3Client s3Client;
 
   @BeforeEach
   void createS3Client() {
-    s3ServiceConfig = LocalStackS3ClientFactory.createServiceConfig(localstack);
-    s3ClientFactory = new AwsS3ClientFactory(s3ServiceConfig);
+    s3ClientConfig = LocalStackS3ClientFactory.createAwsClientConfig(localstack);
+    s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
     s3Client = s3ClientFactory.createS3Client();
   }
 
@@ -166,7 +166,7 @@ public class RdaServerJobIT {
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
               .serverName(SERVER_NAME)
-              .s3ServiceConfig(s3ServiceConfig)
+              .s3ClientConfig(s3ClientConfig)
               .s3Bucket(bucket)
               .s3Directory(directoryPath)
               .s3CacheDirectory(cacheDirectoryPath.toString())

@@ -6,8 +6,8 @@ import static java.lang.String.format;
 import com.google.common.base.Strings;
 import com.google.common.io.CharSource;
 import com.google.common.io.Files;
+import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -67,8 +67,8 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
         RandomClaimGeneratorConfig.builder().build();
     /** Used to create {@link S3Client} when necessary. */
     @Builder.Default
-    private final AwsServiceConfig awsServiceConfig =
-        AwsServiceConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build();
+    private final AwsClientConfig s3ClientConfig =
+        AwsClientConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build();
     /** NDJSON fiss claim data for the RDA Server. */
     @Nullable private final CharSource fissClaimJson;
     /** NDJSON mcs claim data for the RDI Server. */
@@ -148,7 +148,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
           useTempDirectoryForCache
               ? java.nio.file.Files.createTempDirectory("s3cache")
               : Path.of(s3CacheDirectory);
-      final S3ClientFactory s3ClientFactory = new AwsS3ClientFactory(awsServiceConfig);
+      final S3ClientFactory s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
       final S3DirectoryDao s3Dao =
           new S3DirectoryDao(
               s3ClientFactory, s3Bucket, directory, cacheDirectory, useTempDirectoryForCache);

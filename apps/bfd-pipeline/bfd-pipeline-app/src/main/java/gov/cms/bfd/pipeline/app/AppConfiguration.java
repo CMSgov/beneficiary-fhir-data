@@ -17,8 +17,8 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
+import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
@@ -593,8 +593,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final String ENV_VAR_KEY_S3_ACCESS_KEY = "S3_ACCESS_KEY";
   public static final String ENV_VAR_KEY_S3_SECRET_KEY = "S3_SECRET_KEY";
 
-  static AwsServiceConfig loadS3ServiceConfig(ConfigLoader config) {
-    return AwsServiceConfig.builder()
+  static AwsClientConfig loadS3ServiceConfig(ConfigLoader config) {
+    return AwsClientConfig.builder()
         .region(Optional.of(SharedS3Utilities.REGION_DEFAULT))
         .endpointOverride(config.parsedOption(ENV_VAR_KEY_S3_ENDPOINT_URL, URI.class, URI::create))
         .accessKey(config.stringOption(ENV_VAR_KEY_S3_ACCESS_KEY))
@@ -632,7 +632,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
     } else {
       allowedRifFileType = Optional.empty();
     }
-    final AwsServiceConfig s3ClientConfig = loadS3ServiceConfig(config);
+    final AwsClientConfig s3ClientConfig = loadS3ServiceConfig(config);
 
     LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
     ExtractionOptions extractionOptions =
@@ -734,8 +734,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
         .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
         .ifPresent(
             region ->
-                serverJobConfigBuilder.s3ServiceConfig(
-                    AwsServiceConfig.builder().region(Optional.of(region)).build()));
+                serverJobConfigBuilder.s3ClientConfig(
+                    AwsClientConfig.builder().region(Optional.of(region)).build()));
     config
         .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
         .ifPresent(serverJobConfigBuilder::s3Bucket);

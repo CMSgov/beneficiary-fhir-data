@@ -6,10 +6,10 @@ import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsServiceConfig;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -160,7 +160,7 @@ public class RdaServerJob implements PipelineJob {
      * @param runInterval optional run interval
      * @param randomSeed optional random seed
      * @param randomMaxClaims optional random max claims
-     * @param s3ClientFactory optional factory used to create S3Clients
+     * @param s3ClientConfig optional configuration used to create S3Clients
      * @param s3Bucket optional s3 bucket
      * @param s3Directory optional s3 directory
      * @param s3CacheDirectory optional s3 cache directory
@@ -172,7 +172,7 @@ public class RdaServerJob implements PipelineJob {
         @Nullable Duration runInterval,
         @Nullable Long randomSeed,
         @Nullable Integer randomMaxClaims,
-        @Nullable AwsServiceConfig s3ServiceConfig,
+        @Nullable AwsClientConfig s3ClientConfig,
         @Nullable String s3Bucket,
         @Nullable String s3Directory,
         @Nullable String s3CacheDirectory) {
@@ -191,7 +191,7 @@ public class RdaServerJob implements PipelineJob {
                       .seed(randomSeed == null ? DEFAULT_SEED : randomSeed)
                       .maxToSend(randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims)
                       .build())
-              .awsServiceConfig(s3ServiceConfig)
+              .s3ClientConfig(s3ClientConfig)
               .s3Bucket(s3Bucket)
               .s3Directory(s3Directory)
               .s3CacheDirectory(s3CacheDirectory)
