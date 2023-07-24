@@ -252,63 +252,31 @@ public class OutpatientClaimTransformerV2 {
       DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.OUTPATIENT);
     }
 
-    // Handle Inpatient Diagnosis.  Only three, so just brute force it
-    // RSN_VISIT_CD1        => diagnosis.diagnosisCodeableConcept
-    // RSN_VISIT_VRSN_CD1   => diagnosis.diagnosisCodeableConcept
-    DiagnosisUtilV2.addDiagnosisCode(
-        eob,
-        DiagnosisUtilV2.extractDiagnosis(
-            "Admission1",
-            diagnosisCodes,
-            diagnosisCodeVersions,
-            Optional.empty(),
-            Optional.empty(),
-            DiagnosisLabel.REASONFORVISIT),
-        ClaimTypeV2.OUTPATIENT);
-
-    // RSN_VISIT_CD2        => diagnosis.diagnosisCodeableConcept
-    // RSN_VISIT_VRSN_CD2   => diagnosis.diagnosisCodeableConcept
-    DiagnosisUtilV2.addDiagnosisCode(
-        eob,
-        DiagnosisUtilV2.extractDiagnosis(
-            "Admission2",
-            diagnosisCodes,
-            diagnosisCodeVersions,
-            Optional.empty(),
-            Optional.empty(),
-            DiagnosisLabel.REASONFORVISIT),
-        ClaimTypeV2.OUTPATIENT);
-
-    // RSN_VISIT_CD3        => diagnosis.diagnosisCodeableConcept
-    // RSN_VISIT_VRSN_CD3   => diagnosis.diagnosisCodeableConcept
-    DiagnosisUtilV2.addDiagnosisCode(
-        eob,
-        DiagnosisUtilV2.extractDiagnosis(
-            "Admission3",
-            diagnosisCodes,
-            diagnosisCodeVersions,
-            Optional.empty(),
-            Optional.empty(),
-            DiagnosisLabel.REASONFORVISIT),
-        ClaimTypeV2.OUTPATIENT);
-
-    // Handle Procedures
-    // ICD_PRCDR_CD(1-25)        => ExplanationOfBenefit.procedure.procedureCodableConcept
-    // ICD_PRCDR_VRSN_CD(1-25)   => ExplanationOfBenefit.procedure.procedureCodableConcept
-    // PRCDR_DT(1-25)            => ExplanationOfBenefit.procedure.date
-    final int FIRST_PROCEDURE = 1;
-    final int LAST_PROCEDURE = 25;
-
-    IntStream.range(FIRST_PROCEDURE, LAST_PROCEDURE + 1)
+    // Handle Inpatient Diagnosis.
+    // RSN_VISIT_CD(1-3)        => diagnosis.diagnosisCodeableConcept
+    // RSN_VISIT_VRSN_CD(1-3)   => diagnosis.diagnosisCodeableConcept
+    final int FIRST_INPATIENT_DIAGNOSIS = 1;
+    final int LAST_INPATIENT_DIAGNOSIS = 3;
+    IntStream.range(FIRST_INPATIENT_DIAGNOSIS, LAST_INPATIENT_DIAGNOSIS + 1)
         .mapToObj(
             i ->
-                TransformerUtilsV2.extractCCWProcedure(
-                    i,
-                    claimGroup.getProcedureCodes(),
-                    claimGroup.getProcedureCodeVersions(),
-                    claimGroup.getProcedureDates()))
-        .filter(p -> p.isPresent())
-        .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p.get()));
+                DiagnosisUtilV2.extractDiagnosis(
+                    String.format("Admission%d", i),
+                    diagnosisCodes,
+                    diagnosisCodeVersions,
+                    Optional.empty(),
+                    Optional.empty(),
+                    DiagnosisLabel.REASONFORVISIT))
+        .filter(d -> d.isPresent())
+        .forEach(d -> DiagnosisUtilV2.addDiagnosisCode(eob, d, ClaimTypeV2.OUTPATIENT));
+
+    // Handle Procedures
+    TransformerUtilsV2.extractCCWProcedures(
+            claimGroup.getProcedureCodes(),
+            claimGroup.getProcedureCodeVersions(),
+            claimGroup.getProcedureDates())
+        .stream()
+        .map(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     // ClaimLine => ExplanationOfBenefit.item
     for (OutpatientClaimLine line : claimGroup.getLines()) {

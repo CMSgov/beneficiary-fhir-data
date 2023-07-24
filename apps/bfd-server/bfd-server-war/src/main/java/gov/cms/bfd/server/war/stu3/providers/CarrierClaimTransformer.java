@@ -6,7 +6,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -100,22 +99,10 @@ final class CarrierClaimTransformer {
         claimGroup.getClaimDispositionCode(),
         claimGroup.getClaimCarrierControlNumber());
 
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractDiagnoses1Thru12(
-            claimGroup.getDiagnosisPrincipalCode(), claimGroup.getDiagnosisPrincipalCodeVersion(),
-            claimGroup.getDiagnosis1Code(), claimGroup.getDiagnosis1CodeVersion(),
-            claimGroup.getDiagnosis2Code(), claimGroup.getDiagnosis2CodeVersion(),
-            claimGroup.getDiagnosis3Code(), claimGroup.getDiagnosis3CodeVersion(),
-            claimGroup.getDiagnosis4Code(), claimGroup.getDiagnosis4CodeVersion(),
-            claimGroup.getDiagnosis5Code(), claimGroup.getDiagnosis5CodeVersion(),
-            claimGroup.getDiagnosis6Code(), claimGroup.getDiagnosis6CodeVersion(),
-            claimGroup.getDiagnosis7Code(), claimGroup.getDiagnosis7CodeVersion(),
-            claimGroup.getDiagnosis8Code(), claimGroup.getDiagnosis8CodeVersion(),
-            claimGroup.getDiagnosis9Code(), claimGroup.getDiagnosis9CodeVersion(),
-            claimGroup.getDiagnosis10Code(), claimGroup.getDiagnosis10CodeVersion(),
-            claimGroup.getDiagnosis11Code(), claimGroup.getDiagnosis11CodeVersion(),
-            claimGroup.getDiagnosis12Code(), claimGroup.getDiagnosis12CodeVersion()))
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
+    TransformerUtils.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
+        .stream()
+        .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     for (CarrierClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();

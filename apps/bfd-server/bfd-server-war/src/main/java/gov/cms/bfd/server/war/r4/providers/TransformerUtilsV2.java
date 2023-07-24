@@ -79,6 +79,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -3679,6 +3680,31 @@ public final class TransformerUtilsV2 {
     Optional<LocalDate> date =
         dates.getOrDefault(String.format("procedure%dDate", procedure), Optional.empty());
     return CCWProcedure.from(code, codeVersion, date);
+  }
+
+  /**
+   * TODO: BFD-2598.
+   *
+   * @param codes TODO: BFD-2598.
+   * @param codeVersions TODO: BFD-2598.
+   * @param dates TODO: BFD-2598.
+   * @return TODO: BFD-2598.
+   */
+  public static List<CCWProcedure> extractCCWProcedures(
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<LocalDate>> dates) {
+    // Handle Procedures
+    // ICD_PRCDR_CD(1-25)        => ExplanationOfBenefit.procedure.procedureCodableConcept
+    // ICD_PRCDR_VRSN_CD(1-25)   => ExplanationOfBenefit.procedure.procedureCodableConcept
+    // PRCDR_DT(1-25)            => ExplanationOfBenefit.procedure.date
+    final int FIRST_PROCEDURE = 1;
+    final int LAST_PROCEDURE = 25;
+    return IntStream.range(FIRST_PROCEDURE, LAST_PROCEDURE + 1)
+        .mapToObj(i -> TransformerUtilsV2.extractCCWProcedure(i, codes, codeVersions, dates))
+        .filter(p -> p.isPresent())
+        .map(p -> p.get())
+        .toList();
   }
 
   /**

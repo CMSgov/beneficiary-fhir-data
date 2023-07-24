@@ -49,6 +49,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerContext;
+import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
@@ -2992,227 +2993,29 @@ public final class TransformerUtils {
 
     return diagnoses;
   }
-
   /**
-   * Extract the Procedure values for codes 1-25.
+   * TODO: BFD-2598.
    *
-   * @param procedure1Code through procedure25Code,
-   * @param procedure1CodeVersion through procedure25CodeVersion
-   * @param procedure1Date through procedure25Date
-   * @param procedure2Code the procedure 2 code
-   * @param procedure2CodeVersion the procedure 2 code version
-   * @param procedure2Date the procedure 2 date
-   * @param procedure3Code the procedure 3 code
-   * @param procedure3CodeVersion the procedure 3 code version
-   * @param procedure3Date the procedure 3 date
-   * @param procedure4Code the procedure 4 code
-   * @param procedure4CodeVersion the procedure 4 code version
-   * @param procedure4Date the procedure 4 date
-   * @param procedure5Code the procedure 5 code
-   * @param procedure5CodeVersion the procedure 5 code version
-   * @param procedure5Date the procedure 5 date
-   * @param procedure6Code the procedure 6 code
-   * @param procedure6CodeVersion the procedure 6 code version
-   * @param procedure6Date the procedure 6 date
-   * @param procedure7Code the procedure 7 code
-   * @param procedure7CodeVersion the procedure 7 code version
-   * @param procedure7Date the procedure 7 date
-   * @param procedure8Code the procedure 8 code
-   * @param procedure8CodeVersion the procedure 8 code version
-   * @param procedure8Date the procedure 8 date
-   * @param procedure9Code the procedure 9 code
-   * @param procedure9CodeVersion the procedure 9 code version
-   * @param procedure9Date the procedure 9 date
-   * @param procedure10Code the procedure 10 code
-   * @param procedure10CodeVersion the procedure 10 code version
-   * @param procedure10Date the procedure 10 date
-   * @param procedure11Code the procedure 11 code
-   * @param procedure11CodeVersion the procedure 11 code version
-   * @param procedure11Date the procedure 11 date
-   * @param procedure12Code the procedure 12 code
-   * @param procedure12CodeVersion the procedure 12 code version
-   * @param procedure12Date the procedure 12 date
-   * @param procedure13Code the procedure 13 code
-   * @param procedure13CodeVersion the procedure 13 code version
-   * @param procedure13Date the procedure 13 date
-   * @param procedure14Code the procedure 14 code
-   * @param procedure14CodeVersion the procedure 14 code version
-   * @param procedure14Date the procedure 14 date
-   * @param procedure15Code the procedure 15 code
-   * @param procedure15CodeVersion the procedure 15 code version
-   * @param procedure15Date the procedure 15 date
-   * @param procedure16Code the procedure 16 code
-   * @param procedure16CodeVersion the procedure 16 code version
-   * @param procedure16Date the procedure 16 date
-   * @param procedure17Code the procedure 17 code
-   * @param procedure17CodeVersion the procedure 17 code version
-   * @param procedure17Date the procedure 17 date
-   * @param procedure18Code the procedure 18 code
-   * @param procedure18CodeVersion the procedure 18 code version
-   * @param procedure18Date the procedure 18 date
-   * @param procedure19Code the procedure 19 code
-   * @param procedure19CodeVersion the procedure 19 code version
-   * @param procedure19Date the procedure 19 date
-   * @param procedure20Code the procedure 20 code
-   * @param procedure20CodeVersion the procedure 20 code version
-   * @param procedure20Date the procedure 20 date
-   * @param procedure21Code the procedure 21 code
-   * @param procedure21CodeVersion the procedure 21 code version
-   * @param procedure21Date the procedure 21 date
-   * @param procedure22Code the procedure 22 code
-   * @param procedure22CodeVersion the procedure 22 code version
-   * @param procedure22Date the procedure 22 date
-   * @param procedure23Code the procedure 23 code
-   * @param procedure23CodeVersion the procedure 23 code version
-   * @param procedure23Date the procedure 23 date
-   * @param procedure24Code the procedure 24 code
-   * @param procedure24CodeVersion the procedure 24 code version
-   * @param procedure24Date the procedure 24 date
-   * @param procedure25Code the procedure 25 code
-   * @param procedure25CodeVersion the procedure 25 code version
-   * @param procedure25Date the procedure 25 date
-   * @return the {@link CCWProcedure}es that can be extracted from the specified claim types
+   * @param codes TODO: BFD-2598.
+   * @param codeVersions TODO: BFD-2598.
+   * @param dates TODO: BFD-2598.
+   * @return TODO: BFD-2598.
    */
   public static List<CCWProcedure> extractCCWProcedures(
-      Optional<String> procedure1Code,
-      Optional<Character> procedure1CodeVersion,
-      Optional<LocalDate> procedure1Date,
-      Optional<String> procedure2Code,
-      Optional<Character> procedure2CodeVersion,
-      Optional<LocalDate> procedure2Date,
-      Optional<String> procedure3Code,
-      Optional<Character> procedure3CodeVersion,
-      Optional<LocalDate> procedure3Date,
-      Optional<String> procedure4Code,
-      Optional<Character> procedure4CodeVersion,
-      Optional<LocalDate> procedure4Date,
-      Optional<String> procedure5Code,
-      Optional<Character> procedure5CodeVersion,
-      Optional<LocalDate> procedure5Date,
-      Optional<String> procedure6Code,
-      Optional<Character> procedure6CodeVersion,
-      Optional<LocalDate> procedure6Date,
-      Optional<String> procedure7Code,
-      Optional<Character> procedure7CodeVersion,
-      Optional<LocalDate> procedure7Date,
-      Optional<String> procedure8Code,
-      Optional<Character> procedure8CodeVersion,
-      Optional<LocalDate> procedure8Date,
-      Optional<String> procedure9Code,
-      Optional<Character> procedure9CodeVersion,
-      Optional<LocalDate> procedure9Date,
-      Optional<String> procedure10Code,
-      Optional<Character> procedure10CodeVersion,
-      Optional<LocalDate> procedure10Date,
-      Optional<String> procedure11Code,
-      Optional<Character> procedure11CodeVersion,
-      Optional<LocalDate> procedure11Date,
-      Optional<String> procedure12Code,
-      Optional<Character> procedure12CodeVersion,
-      Optional<LocalDate> procedure12Date,
-      Optional<String> procedure13Code,
-      Optional<Character> procedure13CodeVersion,
-      Optional<LocalDate> procedure13Date,
-      Optional<String> procedure14Code,
-      Optional<Character> procedure14CodeVersion,
-      Optional<LocalDate> procedure14Date,
-      Optional<String> procedure15Code,
-      Optional<Character> procedure15CodeVersion,
-      Optional<LocalDate> procedure15Date,
-      Optional<String> procedure16Code,
-      Optional<Character> procedure16CodeVersion,
-      Optional<LocalDate> procedure16Date,
-      Optional<String> procedure17Code,
-      Optional<Character> procedure17CodeVersion,
-      Optional<LocalDate> procedure17Date,
-      Optional<String> procedure18Code,
-      Optional<Character> procedure18CodeVersion,
-      Optional<LocalDate> procedure18Date,
-      Optional<String> procedure19Code,
-      Optional<Character> procedure19CodeVersion,
-      Optional<LocalDate> procedure19Date,
-      Optional<String> procedure20Code,
-      Optional<Character> procedure20CodeVersion,
-      Optional<LocalDate> procedure20Date,
-      Optional<String> procedure21Code,
-      Optional<Character> procedure21CodeVersion,
-      Optional<LocalDate> procedure21Date,
-      Optional<String> procedure22Code,
-      Optional<Character> procedure22CodeVersion,
-      Optional<LocalDate> procedure22Date,
-      Optional<String> procedure23Code,
-      Optional<Character> procedure23CodeVersion,
-      Optional<LocalDate> procedure23Date,
-      Optional<String> procedure24Code,
-      Optional<Character> procedure24CodeVersion,
-      Optional<LocalDate> procedure24Date,
-      Optional<String> procedure25Code,
-      Optional<Character> procedure25CodeVersion,
-      Optional<LocalDate> procedure25Date) {
-
-    List<CCWProcedure> ccwProcedures = new LinkedList<>();
-
-    /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
-     * if-blocks.
-     */
-    Consumer<Optional<CCWProcedure>> ccwProcedureAdder =
-        p -> {
-          if (p.isPresent()) ccwProcedures.add(p.get());
-        };
-
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure1Code, procedure1CodeVersion, procedure1Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure2Code, procedure2CodeVersion, procedure2Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure3Code, procedure3CodeVersion, procedure3Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure4Code, procedure4CodeVersion, procedure4Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure5Code, procedure5CodeVersion, procedure5Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure6Code, procedure6CodeVersion, procedure6Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure7Code, procedure7CodeVersion, procedure7Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure8Code, procedure8CodeVersion, procedure8Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure9Code, procedure9CodeVersion, procedure9Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure10Code, procedure10CodeVersion, procedure10Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure11Code, procedure11CodeVersion, procedure11Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure12Code, procedure12CodeVersion, procedure12Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure13Code, procedure13CodeVersion, procedure13Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure14Code, procedure14CodeVersion, procedure14Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure15Code, procedure15CodeVersion, procedure15Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure16Code, procedure16CodeVersion, procedure16Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure17Code, procedure17CodeVersion, procedure17Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure18Code, procedure18CodeVersion, procedure18Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure19Code, procedure19CodeVersion, procedure19Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure20Code, procedure20CodeVersion, procedure20Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure21Code, procedure21CodeVersion, procedure21Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure22Code, procedure22CodeVersion, procedure22Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure23Code, procedure23CodeVersion, procedure23Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure24Code, procedure24CodeVersion, procedure24Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure25Code, procedure25CodeVersion, procedure25Date));
-
-    return ccwProcedures;
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<LocalDate>> dates) {
+    // Handle Procedures
+    // ICD_PRCDR_CD(1-25)        => ExplanationOfBenefit.procedure.procedureCodableConcept
+    // ICD_PRCDR_VRSN_CD(1-25)   => ExplanationOfBenefit.procedure.procedureCodableConcept
+    // PRCDR_DT(1-25)            => ExplanationOfBenefit.procedure.date
+    final int FIRST_PROCEDURE = 1;
+    final int LAST_PROCEDURE = 25;
+    return IntStream.range(FIRST_PROCEDURE, LAST_PROCEDURE + 1)
+        .mapToObj(i -> TransformerUtilsV2.extractCCWProcedure(i, codes, codeVersions, dates))
+        .filter(p -> p.isPresent())
+        .map(p -> p.get())
+        .toList();
   }
 
   /**

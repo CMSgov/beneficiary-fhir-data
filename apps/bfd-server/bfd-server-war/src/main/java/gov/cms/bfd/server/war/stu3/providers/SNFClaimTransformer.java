@@ -7,7 +7,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
-import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerContext;
@@ -174,163 +173,20 @@ final class SNFClaimTransformer {
         claimGroup.getFiOriginalClaimControlNumber());
 
     for (Diagnosis diagnosis :
-        TransformerUtils.extractDiagnoses1Thru12(
-            claimGroup.getDiagnosisAdmittingCode(),
-            claimGroup.getDiagnosisAdmittingCodeVersion(),
-            claimGroup.getDiagnosisPrincipalCode(),
-            claimGroup.getDiagnosisPrincipalCodeVersion(),
-            claimGroup.getDiagnosis1Code(),
-            claimGroup.getDiagnosis1CodeVersion(),
-            claimGroup.getDiagnosis2Code(),
-            claimGroup.getDiagnosis2CodeVersion(),
-            claimGroup.getDiagnosis3Code(),
-            claimGroup.getDiagnosis3CodeVersion(),
-            claimGroup.getDiagnosis4Code(),
-            claimGroup.getDiagnosis4CodeVersion(),
-            claimGroup.getDiagnosis5Code(),
-            claimGroup.getDiagnosis5CodeVersion(),
-            claimGroup.getDiagnosis6Code(),
-            claimGroup.getDiagnosis6CodeVersion(),
-            claimGroup.getDiagnosis7Code(),
-            claimGroup.getDiagnosis7CodeVersion(),
-            claimGroup.getDiagnosis8Code(),
-            claimGroup.getDiagnosis8CodeVersion(),
-            claimGroup.getDiagnosis9Code(),
-            claimGroup.getDiagnosis9CodeVersion(),
-            claimGroup.getDiagnosis10Code(),
-            claimGroup.getDiagnosis10CodeVersion(),
-            claimGroup.getDiagnosis11Code(),
-            claimGroup.getDiagnosis11CodeVersion(),
-            claimGroup.getDiagnosis12Code(),
-            claimGroup.getDiagnosis12CodeVersion()))
+        TransformerUtils.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(),
+            claimGroup.getDiagnosisCodeVersions(),
+            Optional.empty())) {
       TransformerUtils.addDiagnosisCode(eob, diagnosis);
+    }
 
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractDiagnoses13Thru25(
-            claimGroup.getDiagnosis13Code(),
-            claimGroup.getDiagnosis13CodeVersion(),
-            claimGroup.getDiagnosis14Code(),
-            claimGroup.getDiagnosis14CodeVersion(),
-            claimGroup.getDiagnosis15Code(),
-            claimGroup.getDiagnosis15CodeVersion(),
-            claimGroup.getDiagnosis16Code(),
-            claimGroup.getDiagnosis16CodeVersion(),
-            claimGroup.getDiagnosis17Code(),
-            claimGroup.getDiagnosis17CodeVersion(),
-            claimGroup.getDiagnosis18Code(),
-            claimGroup.getDiagnosis18CodeVersion(),
-            claimGroup.getDiagnosis19Code(),
-            claimGroup.getDiagnosis19CodeVersion(),
-            claimGroup.getDiagnosis20Code(),
-            claimGroup.getDiagnosis20CodeVersion(),
-            claimGroup.getDiagnosis21Code(),
-            claimGroup.getDiagnosis21CodeVersion(),
-            claimGroup.getDiagnosis22Code(),
-            claimGroup.getDiagnosis22CodeVersion(),
-            claimGroup.getDiagnosis23Code(),
-            claimGroup.getDiagnosis23CodeVersion(),
-            claimGroup.getDiagnosis24Code(),
-            claimGroup.getDiagnosis24CodeVersion(),
-            claimGroup.getDiagnosis25Code(),
-            claimGroup.getDiagnosis25CodeVersion()))
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
-
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractExternalDiagnoses1Thru12(
-            claimGroup.getDiagnosisExternalFirstCode(),
-                claimGroup.getDiagnosisExternalFirstCodeVersion(),
-            claimGroup.getDiagnosisExternal1Code(), claimGroup.getDiagnosisExternal1CodeVersion(),
-            claimGroup.getDiagnosisExternal2Code(), claimGroup.getDiagnosisExternal2CodeVersion(),
-            claimGroup.getDiagnosisExternal3Code(), claimGroup.getDiagnosisExternal3CodeVersion(),
-            claimGroup.getDiagnosisExternal4Code(), claimGroup.getDiagnosisExternal4CodeVersion(),
-            claimGroup.getDiagnosisExternal5Code(), claimGroup.getDiagnosisExternal5CodeVersion(),
-            claimGroup.getDiagnosisExternal6Code(), claimGroup.getDiagnosisExternal6CodeVersion(),
-            claimGroup.getDiagnosisExternal7Code(), claimGroup.getDiagnosisExternal7CodeVersion(),
-            claimGroup.getDiagnosisExternal8Code(), claimGroup.getDiagnosisExternal8CodeVersion(),
-            claimGroup.getDiagnosisExternal9Code(), claimGroup.getDiagnosisExternal9CodeVersion(),
-            claimGroup.getDiagnosisExternal10Code(), claimGroup.getDiagnosisExternal10CodeVersion(),
-            claimGroup.getDiagnosisExternal11Code(), claimGroup.getDiagnosisExternal11CodeVersion(),
-            claimGroup.getDiagnosisExternal12Code(),
-                claimGroup.getDiagnosisExternal12CodeVersion()))
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
-
-    for (CCWProcedure procedure :
-        TransformerUtils.extractCCWProcedures(
-            claimGroup.getProcedure1Code(),
-            claimGroup.getProcedure1CodeVersion(),
-            claimGroup.getProcedure1Date(),
-            claimGroup.getProcedure2Code(),
-            claimGroup.getProcedure2CodeVersion(),
-            claimGroup.getProcedure2Date(),
-            claimGroup.getProcedure3Code(),
-            claimGroup.getProcedure3CodeVersion(),
-            claimGroup.getProcedure3Date(),
-            claimGroup.getProcedure4Code(),
-            claimGroup.getProcedure4CodeVersion(),
-            claimGroup.getProcedure4Date(),
-            claimGroup.getProcedure5Code(),
-            claimGroup.getProcedure5CodeVersion(),
-            claimGroup.getProcedure5Date(),
-            claimGroup.getProcedure6Code(),
-            claimGroup.getProcedure6CodeVersion(),
-            claimGroup.getProcedure6Date(),
-            claimGroup.getProcedure7Code(),
-            claimGroup.getProcedure7CodeVersion(),
-            claimGroup.getProcedure7Date(),
-            claimGroup.getProcedure8Code(),
-            claimGroup.getProcedure8CodeVersion(),
-            claimGroup.getProcedure8Date(),
-            claimGroup.getProcedure9Code(),
-            claimGroup.getProcedure9CodeVersion(),
-            claimGroup.getProcedure9Date(),
-            claimGroup.getProcedure10Code(),
-            claimGroup.getProcedure10CodeVersion(),
-            claimGroup.getProcedure10Date(),
-            claimGroup.getProcedure11Code(),
-            claimGroup.getProcedure11CodeVersion(),
-            claimGroup.getProcedure11Date(),
-            claimGroup.getProcedure12Code(),
-            claimGroup.getProcedure12CodeVersion(),
-            claimGroup.getProcedure12Date(),
-            claimGroup.getProcedure13Code(),
-            claimGroup.getProcedure13CodeVersion(),
-            claimGroup.getProcedure13Date(),
-            claimGroup.getProcedure14Code(),
-            claimGroup.getProcedure14CodeVersion(),
-            claimGroup.getProcedure14Date(),
-            claimGroup.getProcedure15Code(),
-            claimGroup.getProcedure15CodeVersion(),
-            claimGroup.getProcedure15Date(),
-            claimGroup.getProcedure16Code(),
-            claimGroup.getProcedure16CodeVersion(),
-            claimGroup.getProcedure16Date(),
-            claimGroup.getProcedure17Code(),
-            claimGroup.getProcedure17CodeVersion(),
-            claimGroup.getProcedure17Date(),
-            claimGroup.getProcedure18Code(),
-            claimGroup.getProcedure18CodeVersion(),
-            claimGroup.getProcedure18Date(),
-            claimGroup.getProcedure19Code(),
-            claimGroup.getProcedure19CodeVersion(),
-            claimGroup.getProcedure19Date(),
-            claimGroup.getProcedure20Code(),
-            claimGroup.getProcedure20CodeVersion(),
-            claimGroup.getProcedure20Date(),
-            claimGroup.getProcedure21Code(),
-            claimGroup.getProcedure21CodeVersion(),
-            claimGroup.getProcedure21Date(),
-            claimGroup.getProcedure22Code(),
-            claimGroup.getProcedure22CodeVersion(),
-            claimGroup.getProcedure22Date(),
-            claimGroup.getProcedure23Code(),
-            claimGroup.getProcedure23CodeVersion(),
-            claimGroup.getProcedure23Date(),
-            claimGroup.getProcedure24Code(),
-            claimGroup.getProcedure24CodeVersion(),
-            claimGroup.getProcedure24Date(),
-            claimGroup.getProcedure25Code(),
-            claimGroup.getProcedure25CodeVersion(),
-            claimGroup.getProcedure25Date())) TransformerUtils.addProcedureCode(eob, procedure);
+    // Handle Procedures
+    TransformerUtils.extractCCWProcedures(
+            claimGroup.getProcedureCodes(),
+            claimGroup.getProcedureCodeVersions(),
+            claimGroup.getProcedureDates())
+        .stream()
+        .map(p -> TransformerUtils.addProcedureCode(eob, p));
 
     for (SNFClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();

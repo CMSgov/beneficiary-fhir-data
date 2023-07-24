@@ -21,7 +21,6 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Period;
@@ -323,22 +322,12 @@ public class SNFClaimTransformerV2 {
     }
 
     // Handle Procedures
-    // ICD_PRCDR_CD(1-25)        => ExplanationOfBenefit.procedure.procedureCodableConcept
-    // ICD_PRCDR_VRSN_CD(1-25)   => ExplanationOfBenefit.procedure.procedureCodableConcept
-    // PRCDR_DT(1-25)            => ExplanationOfBenefit.procedure.date
-    final int FIRST_PROCEDURE = 1;
-    final int LAST_PROCEDURE = 25;
-
-    IntStream.range(FIRST_PROCEDURE, LAST_PROCEDURE + 1)
-        .mapToObj(
-            i ->
-                TransformerUtilsV2.extractCCWProcedure(
-                    i,
-                    claimGroup.getProcedureCodes(),
-                    claimGroup.getProcedureCodeVersions(),
-                    claimGroup.getProcedureDates()))
-        .filter(p -> p.isPresent())
-        .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p.get()));
+    TransformerUtilsV2.extractCCWProcedures(
+            claimGroup.getProcedureCodes(),
+            claimGroup.getProcedureCodeVersions(),
+            claimGroup.getProcedureDates())
+        .stream()
+        .map(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     for (SNFClaimLine line : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();

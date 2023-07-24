@@ -256,15 +256,14 @@ public class DiagnosisUtilV2 {
 
     IntStream.range(FIRST_DIAG, LAST_DIAG + 1)
         .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  String.valueOf(i),
-                  codes,
-                  codeVersions,
-                  presentOnAdms,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
-                  DiagnosisLabel.OTHER);
-            })
+            i ->
+                extractDiagnosis(
+                    String.valueOf(i),
+                    codes,
+                    codeVersions,
+                    presentOnAdms,
+                    Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
+                    DiagnosisLabel.OTHER))
         .forEach(diagnosis::add);
 
     // Handle first external diagnosis
