@@ -1,15 +1,15 @@
 package gov.cms.bfd.sharedutils.database;
 
+import gov.cms.bfd.DatabaseTestUtils;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link DatabaseSchemaManager}. */
 public final class DatabaseSchemaManagerTest {
-
-  /** Verifies that {@link DatabaseSchemaManager} runs correctly against a postgres database. */
+  /** Verifies that {@link DatabaseSchemaManager} runs correctly against an HSQL database. */
   @Test
-  public void createOrUpdateSchema() {
+  public void createOrUpdateSchemaOnHsql() {
     // Ensure that this runs without errors.
-    // TODO: Fix this by using a mock and ensuring flyway got called against the data source
-    // DatabaseSchemaManager.createOrUpdateSchema(DatabaseTestUtils.get().getUnpooledDataSource());
+    DatabaseSchemaManager.createOrUpdateSchema(
+        DatabaseTestUtils.getUnpooledUnmigratedHsqlDataSource());
   }
 }
