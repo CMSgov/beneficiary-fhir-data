@@ -3,13 +3,11 @@ package gov.cms.bfd.migrator.app;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.TestContainerConstants;
+import gov.cms.bfd.AbstractLocalStackTest;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -17,14 +15,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
 /** Integration tests for {@link SqsDao}. */
-@Testcontainers
-class SqsDaoIT {
-  /** Automatically creates and destroys a localstack SQS service container. */
-  @Container
-  LocalStackContainer localstack =
-      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
-          .withServices(LocalStackContainer.Service.SQS);
-
+class SqsDaoIT extends AbstractLocalStackTest {
   /** Will be connected to the localstack SQS service. */
   private SqsDao dao;
 

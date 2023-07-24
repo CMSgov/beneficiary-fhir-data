@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.TestContainerConstants;
+import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
@@ -30,9 +30,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -43,16 +40,8 @@ import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Tests downloaded S3 file attributes such as MD5ChkSum. */
-@Testcontainers
-final class ManifestEntryDownloadTaskIT {
+final class ManifestEntryDownloadTaskIT extends AbstractLocalStackTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
-
-  /** Automatically creates and destroys a localstack S3 service container. */
-  @Container
-  LocalStackContainer localstack =
-      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
-          .withReuse(true)
-          .withServices(LocalStackContainer.Service.S3);
 
   /** Configuration settings to connect to localstack container. */
   private S3ClientConfig s3ClientConfig;

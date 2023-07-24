@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.io.ByteSource;
-import gov.cms.bfd.TestContainerConstants;
+import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import java.io.FileNotFoundException;
@@ -22,22 +22,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 
 /** Integration test for {@link S3DirectoryDao}. */
-@Testcontainers
-class S3DirectoryDaoIT {
-  /** Automatically creates and destroys a localstack S3 service container. */
-  @Container
-  LocalStackContainer localstack =
-      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
-          .withReuse(true)
-          .withServices(LocalStackContainer.Service.S3);
-
+class S3DirectoryDaoIT extends AbstractLocalStackTest {
   /** Factory to create clients connected to localstack container. */
   private S3ClientFactory s3ClientFactory;
   /** A client connected to the localstack container for use in test methods. */

@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
+import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
-import gov.cms.bfd.TestContainerConstants;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
@@ -46,9 +46,6 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import software.amazon.awssdk.utils.StringUtils;
@@ -61,19 +58,11 @@ import software.amazon.awssdk.utils.StringUtils;
  * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
-@Testcontainers
-public final class PipelineApplicationIT {
+public final class PipelineApplicationIT extends AbstractLocalStackTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplicationIT.class);
 
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
-
-  /** Automatically creates and destroys a localstack S3 service container. */
-  @Container
-  LocalStackContainer localstack =
-      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
-          .withReuse(true)
-          .withServices(LocalStackContainer.Service.S3);
 
   /** A client connected to the localstack container for use in test methods. */
   private S3Client s3Client;

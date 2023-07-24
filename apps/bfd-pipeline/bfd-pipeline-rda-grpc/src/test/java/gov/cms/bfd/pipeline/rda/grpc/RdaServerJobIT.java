@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
-import gov.cms.bfd.TestContainerConstants;
+import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
 import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
@@ -39,14 +39,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.services.s3.S3Client;
 
 /** Integration tests for the RDA server. */
-@Testcontainers
-public class RdaServerJobIT {
+public class RdaServerJobIT extends AbstractLocalStackTest {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
   /** The Fiss claim source. */
@@ -66,13 +62,6 @@ public class RdaServerJobIT {
   /** The MCS claim transformer to test the server data. */
   private final McsClaimTransformer mcsTransformer =
       new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
-
-  /** Automatically creates and destroys a localstack S3 service container. */
-  @Container
-  LocalStackContainer localstack =
-      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
-          .withReuse(true)
-          .withServices(LocalStackContainer.Service.S3);
 
   /** Configuration settings to connect to localstack container. */
   private S3ClientConfig s3ClientConfig;
