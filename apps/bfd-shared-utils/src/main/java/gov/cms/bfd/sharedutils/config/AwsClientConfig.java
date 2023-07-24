@@ -61,7 +61,7 @@ public class AwsClientConfig {
    *
    * @param builder the builder to update
    */
-  public void configureS3Service(AwsClientBuilder<?, ?> builder) {
+  public void configureAwsService(AwsClientBuilder<?, ?> builder) {
     region.ifPresent(builder::region);
     endpointOverride.ifPresent(builder::endpointOverride);
     if (accessKey.isPresent() && secretKey.isPresent()) {
