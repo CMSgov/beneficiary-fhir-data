@@ -389,7 +389,6 @@ case $run_mode in
     setvar RDA_JOB_ENABLED "true"
     setvar RDA_GRPC_SERVER_TYPE "InProcess"
     setvar RDA_GRPC_INPROC_SERVER_MODE "S3"
-    setvar RDA_GRPC_INPROC_SERVER_S3_REGION ""
     setvar RDA_GRPC_INPROC_SERVER_S3_BUCKET "$s3_bucket"
     setvar RDA_GRPC_INPROC_SERVER_S3_DIRECTORY "$s3_directory"
     ;;
