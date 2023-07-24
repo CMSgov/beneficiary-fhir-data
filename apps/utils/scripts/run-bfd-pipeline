@@ -77,7 +77,7 @@ interval_seconds=60
 rda_host=localhost
 rda_port=5003
 rda_token=
-s3_mode=minio
+s3_mode=local
 s3_bucket="bfd-pipeline"
 s3_directory=test
 threads=20
@@ -105,7 +105,7 @@ $(basename $0) [options] run_mode
 -l localstack_ip          Localstack IP address (for bridge networking).
 -r run_interval           Job execution interval in seconds.
 -R host:port:token        Host name, port, and token to call RDA API remote server.
--s mode:bucket:directory  S3 mode (minio or aws), bucket and directory.
+-s mode:bucket:directory  S3 mode (local or aws), bucket and directory.
 -t threads                Number of threads for RIF/RDA jobs.
 -x                        Do not install latest version before running.
 -z                        Enable debugger support but start immediately.
@@ -204,8 +204,10 @@ if [[ x$image_tag != x ]] ; then
 fi
 
 # Autodetect if localstack is running based on whether we can connect to its port locally.
+localstack_running=false
 if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   echo "using localstack"
+  localstack_running=true
   export SSM_REGION=us-east-1
   export SSM_ENDPOINT=http://${localstack_ip}:4566
   export SSM_PARAMETER_PATH=/bfd-pipeline
@@ -217,7 +219,7 @@ fi
 function setvar() {
   name="$1"
   value="$2"
-  if [[ -z "$SSM_REGION" ]] ; then
+  if [[ $localstack_running = "false" ]] ; then
     eval "export ${name}=\"${value}\""
   else
     echo put-parameter $name
@@ -241,9 +243,16 @@ if [[ $debug_enabled = "true" ]] ; then
 fi
 
 case $s3_mode in
-minio) ARGS="$ARGS -Ds3.local=true" ;;
+local)
+  if [[ $localstack_running = "false" ]] ; then
+    echo error: s3 mode must be '"local" or "aws"' 1>&2
+    usage
+    exit 1
+  fi
+  setvar S3_ENDPOINT_URI "$SSM_ENDPOINT"
+  ;;
 aws) ;;
-*) echo error: s3 mode must be '"minio" or "aws"' 1>&2 ; usage ; exit 1 ;;
+*) echo error: s3 mode must be '"local" or "aws"' 1>&2 ; usage ; exit 1 ;;
 esac
 
 if [[ $s3_directory != "" ]] && [[ $s3_bucket = "" ]] ; then
@@ -379,6 +388,7 @@ case $run_mode in
     setvar RDA_GRPC_SERVER_TYPE "InProcess"
     setvar RDA_GRPC_INPROC_SERVER_MODE "S3"
     setvar RDA_GRPC_INPROC_SERVER_S3_REGION ""
+    setvar RDA_GRPC_INPROC_SERVER_S3_ENDPOINT "$S3_ENDPOINT_URI"
     setvar RDA_GRPC_INPROC_SERVER_S3_BUCKET "$s3_bucket"
     setvar RDA_GRPC_INPROC_SERVER_S3_DIRECTORY "$s3_directory"
     ;;

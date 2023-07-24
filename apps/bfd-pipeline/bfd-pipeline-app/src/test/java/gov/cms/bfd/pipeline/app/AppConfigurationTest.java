@@ -375,6 +375,7 @@ public class AppConfigurationTest {
     AppConfiguration.loadRdaServerJobConfig(configLoader, sourceConfig, configBuilder);
     verify(configBuilder).serverMode(RdaServerJob.Config.ServerMode.Random);
     verify(configBuilder).serverName("server-name");
+    verify(configBuilder).s3ClientConfig(S3ClientConfig.s3Builder().build());
     verify(configBuilder).build();
     verifyNoMoreInteractions(configBuilder);
 
