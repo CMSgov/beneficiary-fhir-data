@@ -79,6 +79,30 @@ resource "aws_s3_bucket" "this" {
   tags   = { Name = local.full_name }
 }
 
+resource "aws_s3_bucket_versioning" "this" {
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Disabled"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  rule {
+    id = "${local.full_name}-72hour-object-retention"
+
+    # An empty filter means that this lifecycle applies to _all_ objects within the bucket.
+    filter {}
+
+    expiration {
+      days = 3 # This bucket has no versioning and so objects will be permanently deleted on expiry
+    }
+
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_policy" "this" {
   bucket = aws_s3_bucket.this.id
   policy = jsonencode(
@@ -122,6 +146,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
       kms_master_key_id = local.kms_key_id
       sse_algorithm     = "aws:kms"
     }
+
+    bucket_key_enabled = true
   }
 }
 
