@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -22,7 +21,6 @@ import software.amazon.awssdk.services.s3.S3CrtAsyncClientBuilder;
  */
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
 public class S3ClientConfig extends AwsClientConfig {
   /**
    * Initializes an instance. Any variable can be null. Region defaults to {@link #REGION_DEFAULT}.
@@ -55,5 +53,27 @@ public class S3ClientConfig extends AwsClientConfig {
           StaticCredentialsProvider.create(
               AwsBasicCredentials.create(accessKey.get(), secretKey.get())));
     }
+  }
+
+  /**
+   * This implementation only provides length of access and secret keys to prevent leaking sensitive
+   * info to logs.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @return string representation of object
+   */
+  @Override
+  public String toString() {
+    return "S3ClientConfig{"
+        + "region="
+        + region
+        + ", endpointOverride="
+        + endpointOverride
+        + ", accessKeyLength="
+        + accessKey.map(String::length)
+        + ", secretKeyLength="
+        + secretKey.map(String::length)
+        + '}';
   }
 }

@@ -245,7 +245,7 @@ fi
 case $s3_mode in
 local)
   if [[ $localstack_running = "false" ]] ; then
-    echo error: s3 mode must be '"local" or "aws"' 1>&2
+    echo error: s3 local mode requires localstack to be running 1>&2
     usage
     exit 1
   fi
@@ -388,7 +388,6 @@ case $run_mode in
     setvar RDA_GRPC_SERVER_TYPE "InProcess"
     setvar RDA_GRPC_INPROC_SERVER_MODE "S3"
     setvar RDA_GRPC_INPROC_SERVER_S3_REGION ""
-    setvar RDA_GRPC_INPROC_SERVER_S3_ENDPOINT "$S3_ENDPOINT_URI"
     setvar RDA_GRPC_INPROC_SERVER_S3_BUCKET "$s3_bucket"
     setvar RDA_GRPC_INPROC_SERVER_S3_DIRECTORY "$s3_directory"
     ;;

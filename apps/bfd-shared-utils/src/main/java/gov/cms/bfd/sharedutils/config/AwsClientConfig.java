@@ -4,7 +4,8 @@ import java.net.URI;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
@@ -15,7 +16,8 @@ import software.amazon.awssdk.regions.Region;
  * are optional. Normally construction is via a builder object. The builder class and object have *
  * custom names to differentiate from the builder in derived classes.
  */
-@Data
+@Getter
+@EqualsAndHashCode
 public class AwsClientConfig {
   /** The default AWS {@link Region} to interact with. */
   public static final Region REGION_DEFAULT = Region.US_EAST_1;
@@ -50,7 +52,7 @@ public class AwsClientConfig {
       @Nullable URI endpointOverride,
       @Nullable String accessKey,
       @Nullable String secretKey) {
-    this.region = region == null ? Optional.empty() : Optional.of(region);
+    this.region = region == null ? Optional.of(REGION_DEFAULT) : Optional.of(region);
     this.endpointOverride = Optional.ofNullable(endpointOverride);
     this.accessKey = Optional.ofNullable(accessKey);
     this.secretKey = Optional.ofNullable(secretKey);
@@ -79,5 +81,27 @@ public class AwsClientConfig {
    */
   public boolean isCredentialCheckUseful() {
     return endpointOverride.isEmpty() && accessKey.isEmpty();
+  }
+
+  /**
+   * This implementation only provides length of access and secret keys to prevent leaking sensitive
+   * info to logs.
+   *
+   * <p>{@inheritDoc}
+   *
+   * @return string representation of object
+   */
+  @Override
+  public String toString() {
+    return "AwsClientConfig{"
+        + "region="
+        + region
+        + ", endpointOverride="
+        + endpointOverride
+        + ", accessKeyLength="
+        + accessKey.map(String::length)
+        + ", secretKeyLength="
+        + secretKey.map(String::length)
+        + '}';
   }
 }

@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 
 /**
  * Models the configuration options for the application.
@@ -316,32 +315,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS =
       "RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS";
-
-  /**
-   * The name of the environment variable that should be used to provide the name of the S3 region
-   * containing the bucket used to serve claims by the in-process RDA API server job's S3 mode.
-   */
-  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION =
-      "RDA_GRPC_INPROC_SERVER_S3_REGION";
-
-  /**
-   * Optional endpoint override URI used to connect to S3 to serve claims by the in-process RDA API
-   * server job's S3 mode. Intended for use with localstack based tests.
-   */
-  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_ENDPOINT_URI =
-      "RDA_GRPC_INPROC_SERVER_S3_ENDPOINT_URI";
-  /**
-   * Optional access key used to connect to S3 to serve claims by the in-process RDA API server
-   * job's S3 mode. Intended for use with localstack based tests.
-   */
-  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_ACCESS_KEY =
-      "RDA_GRPC_INPROC_SERVER_S3_ACCESS_KEY";
-  /**
-   * Optional secret key used to connect to S3 to serve claims by the in-process RDA API server
-   * job's S3 mode. Intended for use with localstack based tests.
-   */
-  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_SECRET_KEY =
-      "RDA_GRPC_INPROC_SERVER_S3_SECRET_KEY";
 
   /**
    * The name of the environment variable that should be used to provide the name of the S3 bucket
@@ -634,30 +607,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
-   * Loads {@link S3ClientConfig} for use in configuring S3 clients for use by RDA in-process
-   * server. These settings are generally only changed from defaults during localstack based tests.
-   *
-   * @param config used to load configuration values
-   * @return the aws client settings
-   */
-  static S3ClientConfig loadS3ServiceConfigForInprocRdaServer(ConfigLoader config) {
-    return S3ClientConfig.s3Builder()
-        .region(
-            config
-                .parsedOption(
-                    ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
-                .orElse(null))
-        .endpointOverride(
-            config
-                .parsedOption(
-                    ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_ENDPOINT_URI, URI.class, URI::create)
-                .orElse(null))
-        .accessKey(config.stringValue(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_ACCESS_KEY, null))
-        .secretKey(config.stringValue(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_SECRET_KEY, null))
-        .build();
-  }
-
-  /**
    * Reads the ccw rif load options from the {@link ConfigLoader}.
    *
    * @param config used to load configuration values
@@ -776,7 +725,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
                 ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
             .orElse(RdaServerJob.Config.ServerMode.Random));
     serverJobConfigBuilder.serverName(grpcConfig.getInProcessServerName());
-    serverJobConfigBuilder.s3ClientConfig(loadS3ServiceConfigForInprocRdaServer(config));
+    S3ClientConfig s3ClientConfig = loadS3ServiceConfig(config);
+    serverJobConfigBuilder.s3ClientConfig(s3ClientConfig);
     config
         .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS)
         .map(Duration::ofSeconds)

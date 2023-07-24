@@ -9,7 +9,6 @@ import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INP
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP;
@@ -58,7 +57,6 @@ import java.util.HashMap;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.regions.Region;
 
 /** Unit tests for {@link AppConfiguration}. */
 public class AppConfigurationTest {
@@ -372,10 +370,11 @@ public class AppConfigurationTest {
 
     // verify minimal required options load as expected and check defaults
     RdaServerJob.Config.ConfigBuilder configBuilder = mock(RdaServerJob.Config.ConfigBuilder.class);
+    S3ClientConfig expectedS3ClientConfig = S3ClientConfig.s3Builder().build();
     AppConfiguration.loadRdaServerJobConfig(configLoader, sourceConfig, configBuilder);
     verify(configBuilder).serverMode(RdaServerJob.Config.ServerMode.Random);
     verify(configBuilder).serverName("server-name");
-    verify(configBuilder).s3ClientConfig(S3ClientConfig.s3Builder().build());
+    verify(configBuilder).s3ClientConfig(expectedS3ClientConfig);
     verify(configBuilder).build();
     verifyNoMoreInteractions(configBuilder);
 
@@ -385,9 +384,17 @@ public class AppConfigurationTest {
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS, "360");
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED, "42");
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS, "17");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, "us-east-1");
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET, "my-bucket");
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY, "/my-directory");
+    settingsMap.put(AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URI, "http://localhost:999999");
+    settingsMap.put(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY, "unreal-access-key");
+    settingsMap.put(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY, "unreal-secret-key");
+    expectedS3ClientConfig =
+        S3ClientConfig.s3Builder()
+            .endpointOverride(URI.create("http://localhost:999999"))
+            .accessKey("unreal-access-key")
+            .secretKey("unreal-secret-key")
+            .build();
     configBuilder = mock(RdaServerJob.Config.ConfigBuilder.class);
     AppConfiguration.loadRdaServerJobConfig(configLoader, sourceConfig, configBuilder);
     verify(configBuilder).serverMode(RdaServerJob.Config.ServerMode.S3);
@@ -395,8 +402,7 @@ public class AppConfigurationTest {
     verify(configBuilder).runInterval(Duration.ofSeconds(360));
     verify(configBuilder).randomSeed(42L);
     verify(configBuilder).randomMaxClaims(17);
-    verify(configBuilder)
-        .s3ClientConfig(S3ClientConfig.s3Builder().region(Region.of("us-east-1")).build());
+    verify(configBuilder).s3ClientConfig(expectedS3ClientConfig);
     verify(configBuilder).s3Bucket("my-bucket");
     verify(configBuilder).s3Directory("/my-directory");
     verify(configBuilder).build();
