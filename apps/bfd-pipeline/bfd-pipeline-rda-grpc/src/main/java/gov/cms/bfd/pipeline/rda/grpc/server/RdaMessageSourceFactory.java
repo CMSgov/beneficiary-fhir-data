@@ -6,17 +6,15 @@ import static java.lang.String.format;
 import com.google.common.base.Strings;
 import com.google.common.io.CharSource;
 import com.google.common.io.Files;
-import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -67,8 +65,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
         RandomClaimGeneratorConfig.builder().build();
     /** Used to create {@link S3Client} when necessary. */
     @Builder.Default
-    private final AwsClientConfig s3ClientConfig =
-        AwsClientConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build();
+    private final S3ClientConfig s3ClientConfig = S3ClientConfig.s3Builder().build();
     /** NDJSON fiss claim data for the RDA Server. */
     @Nullable private final CharSource fissClaimJson;
     /** NDJSON mcs claim data for the RDI Server. */

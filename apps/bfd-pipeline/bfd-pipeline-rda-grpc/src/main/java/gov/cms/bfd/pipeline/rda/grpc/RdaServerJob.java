@@ -6,10 +6,10 @@ import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -172,7 +172,7 @@ public class RdaServerJob implements PipelineJob {
         @Nullable Duration runInterval,
         @Nullable Long randomSeed,
         @Nullable Integer randomMaxClaims,
-        @Nullable AwsClientConfig s3ClientConfig,
+        @Nullable S3ClientConfig s3ClientConfig,
         @Nullable String s3Bucket,
         @Nullable String s3Directory,
         @Nullable String s3CacheDirectory) {

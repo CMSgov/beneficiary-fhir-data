@@ -2,8 +2,7 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -20,7 +19,7 @@ public final class ExtractionOptions {
   /** The max keys for S3. */
   @Nullable private final Integer s3ListMaxKeys;
   /** Common config settings used to configure S3 clients. */
-  @Getter private final AwsClientConfig s3ClientConfig;
+  @Getter private final S3ClientConfig s3ClientConfig;
 
   /**
    * Initializes an instance.
@@ -34,7 +33,7 @@ public final class ExtractionOptions {
       String s3BucketName,
       Optional<RifFileType> allowedRifFileType,
       Optional<Integer> s3ListMaxKeys,
-      AwsClientConfig s3ClientConfig) {
+      S3ClientConfig s3ClientConfig) {
     this.s3BucketName = s3BucketName;
     this.allowedRifFileType = allowedRifFileType.orElse(null);
     this.s3ListMaxKeys = s3ListMaxKeys.orElse(null);
@@ -48,11 +47,7 @@ public final class ExtractionOptions {
    * @param s3BucketName the value to use for {@link #s3BucketName}
    */
   public ExtractionOptions(String s3BucketName) {
-    this(
-        s3BucketName,
-        Optional.empty(),
-        Optional.empty(),
-        AwsClientConfig.builder().region(Optional.of(SharedS3Utilities.REGION_DEFAULT)).build());
+    this(s3BucketName, Optional.empty(), Optional.empty(), S3ClientConfig.s3Builder().build());
   }
 
   /**

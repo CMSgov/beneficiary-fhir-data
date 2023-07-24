@@ -17,9 +17,8 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
-import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
@@ -600,18 +599,18 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
-   * Loads {@link AwsClientConfig} for use in configuring S3 clients. These settings are generally
+   * Loads {@link S3ClientConfig} for use in configuring S3 clients. These settings are generally
    * only changed from defaults during localstack based tests.
    *
    * @param config used to load configuration values
    * @return the aws client settings
    */
-  static AwsClientConfig loadS3ServiceConfig(ConfigLoader config) {
-    return AwsClientConfig.builder()
-        .region(Optional.of(SharedS3Utilities.REGION_DEFAULT))
-        .endpointOverride(config.parsedOption(ENV_VAR_KEY_S3_ENDPOINT_URI, URI.class, URI::create))
-        .accessKey(config.stringOption(ENV_VAR_KEY_S3_ACCESS_KEY))
-        .secretKey(config.stringOption(ENV_VAR_KEY_S3_SECRET_KEY))
+  static S3ClientConfig loadS3ServiceConfig(ConfigLoader config) {
+    return S3ClientConfig.s3Builder()
+        .endpointOverride(
+            config.parsedOption(ENV_VAR_KEY_S3_ENDPOINT_URI, URI.class, URI::create).orElse(null))
+        .accessKey(config.stringValue(ENV_VAR_KEY_S3_ACCESS_KEY, null))
+        .secretKey(config.stringValue(ENV_VAR_KEY_S3_SECRET_KEY, null))
         .build();
   }
 
@@ -645,7 +644,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
     } else {
       allowedRifFileType = Optional.empty();
     }
-    final AwsClientConfig s3ClientConfig = loadS3ServiceConfig(config);
+    final S3ClientConfig s3ClientConfig = loadS3ServiceConfig(config);
     if (s3ClientConfig.isCredentialCheckUseful()) {
       LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
     }
@@ -749,7 +748,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
         .ifPresent(
             region ->
                 serverJobConfigBuilder.s3ClientConfig(
-                    AwsClientConfig.builder().region(Optional.of(region)).build()));
+                    S3ClientConfig.s3Builder().region(region).build()));
     config
         .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
         .ifPresent(serverJobConfigBuilder::s3Bucket);

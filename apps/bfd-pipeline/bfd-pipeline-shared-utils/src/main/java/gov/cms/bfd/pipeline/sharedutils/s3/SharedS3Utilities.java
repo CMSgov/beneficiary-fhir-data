@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
@@ -24,8 +23,6 @@ import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 
 /** Contains utility/helper methods for AWS S3 that can be used in application and test code. */
 public final class SharedS3Utilities {
-  /** The default AWS {@link Region} to interact with. */
-  public static final Region REGION_DEFAULT = Region.US_EAST_1;
   /** The bucket prefix for AWS. */
   private static final String BUCKET_NAME_PREFIX = "bb-test";
 

@@ -1,0 +1,83 @@
+package gov.cms.bfd.sharedutils.config;
+
+import java.net.URI;
+import java.util.Optional;
+import javax.annotation.Nullable;
+import lombok.Builder;
+import lombok.Data;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
+import software.amazon.awssdk.regions.Region;
+
+/**
+ * Value object containing some common settings required to initialize AWS SDK clients. All settings
+ * are optional. Normally construction is via a builder object. The builder class and object have *
+ * custom names to differentiate from the builder in derived classes.
+ */
+@Data
+public class AwsClientConfig {
+  /** The default AWS {@link Region} to interact with. */
+  public static final Region REGION_DEFAULT = Region.US_EAST_1;
+
+  /** The AWS region to connect to. Defaults to {@link #REGION_DEFAULT}. */
+  protected final Optional<Region> region;
+
+  /** Alternative endpoint URI for service. Generally only used for testing with localstack. */
+  protected final Optional<URI> endpointOverride;
+
+  /**
+   * Access key for authenticating with service. Generally only used for testing with localstack.
+   */
+  protected final Optional<String> accessKey;
+
+  /**
+   * Secret key for authenticating with service. Generally only used for testing with localstack.
+   */
+  protected final Optional<String> secretKey;
+
+  /**
+   * Initializes an instance. Any variable can be null. Region defaults to {@link #REGION_DEFAULT}.
+   *
+   * @param region an AWS {@link Region}
+   * @param endpointOverride alternative URI for accessing AWS services (used with localstack)
+   * @param accessKey optional access key
+   * @param secretKey optional secret key
+   */
+  @Builder(builderClassName = "AwsBuilder", builderMethodName = "awsBuilder")
+  public AwsClientConfig(
+      @Nullable Region region,
+      @Nullable URI endpointOverride,
+      @Nullable String accessKey,
+      @Nullable String secretKey) {
+    this.region = region == null ? Optional.empty() : Optional.of(region);
+    this.endpointOverride = Optional.ofNullable(endpointOverride);
+    this.accessKey = Optional.ofNullable(accessKey);
+    this.secretKey = Optional.ofNullable(secretKey);
+  }
+
+  /**
+   * Updates a {@link AwsClientBuilder} with settings from this config.
+   *
+   * @param builder the builder to update
+   */
+  public void configureS3Service(AwsClientBuilder<?, ?> builder) {
+    region.ifPresent(builder::region);
+    endpointOverride.ifPresent(builder::endpointOverride);
+    if (accessKey.isPresent() && secretKey.isPresent()) {
+      builder.credentialsProvider(
+          StaticCredentialsProvider.create(
+              AwsBasicCredentials.create(accessKey.get(), secretKey.get())));
+    }
+  }
+
+  /**
+   * Determines if AWS credentials will be needed to communicate with AWS. Only true if we are using
+   * real AWS endpoint and we have no access key defined.
+   *
+   * @return true if credential check will be useful given our configuration
+   */
+  public boolean isCredentialCheckUseful() {
+    return endpointOverride.isEmpty() && accessKey.isEmpty();
+  }
+}

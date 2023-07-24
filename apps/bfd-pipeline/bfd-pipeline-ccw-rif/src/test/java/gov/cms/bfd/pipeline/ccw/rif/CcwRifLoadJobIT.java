@@ -14,7 +14,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
-import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import java.net.URL;
@@ -48,7 +48,7 @@ final class CcwRifLoadJobIT {
           .withServices(LocalStackContainer.Service.S3);
 
   /** Configuration settings to connect to localstack container. */
-  private AwsClientConfig s3ClientConfig;
+  private S3ClientConfig s3ClientConfig;
   /** Factory to create clients connected to localstack container. */
   private S3ClientFactory s3ClientFactory;
   /** A client connected to the localstack container for use in test methods. */
@@ -57,7 +57,7 @@ final class CcwRifLoadJobIT {
   /** Populates S3 related fields based on localstack container. */
   @BeforeEach
   void initializeS3RelatedFields() {
-    s3ClientConfig = LocalStackS3ClientFactory.createAwsClientConfig(localstack);
+    s3ClientConfig = LocalStackS3ClientFactory.createS3ClientConfig(localstack);
     s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
     s3Client = s3ClientFactory.createS3Client();
   }
