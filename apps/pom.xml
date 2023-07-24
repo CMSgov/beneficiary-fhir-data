@@ -79,8 +79,8 @@
         <metrics.version>4.2.19</metrics.version>
         <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-        <aws-java-sdk-bom.version>2.20.108</aws-java-sdk-bom.version>
-        <aws.crt.version>0.21.17</aws.crt.version>
+        <aws-java-sdk-bom.version>2.20.109</aws-java-sdk-bom.version>
+        <aws.crt.version>0.23.2</aws.crt.version>
         <spring-data-jpa.version>2.7.11</spring-data-jpa.version>
         <spring-framework.version>5.3.23</spring-framework.version>
 
@@ -88,7 +88,7 @@
         but not all (in particular, entity-manager does not have a 6.0 version available yet).
         Staying on latest 5.x version until all components have 6.0 versions available. -->
         <hibernate.version>5.6.10.Final</hibernate.version>
-        <junit.version>5.10.0-M1</junit.version>
+        <junit.version>5.10.0</junit.version>
         <javadoc.version>3.5.0</javadoc.version>
         <testcontainers.version>1.18.3</testcontainers.version>
         <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
@@ -159,7 +159,7 @@
         <commons.csv.version>1.10.0</commons.csv.version>
         <commons.io.version>2.13.0</commons.io.version>
         <commons.collections4.version>4.4</commons.collections4.version>
-        <commons-codec.version>1.16</commons-codec.version>
+        <commons-codec.version>1.16.0</commons-codec.version>
         <hamcrest-library.version>2.2</hamcrest-library.version>
         <awaitility.version>4.2.0</awaitility.version>
         <lombok.version>1.18.28</lombok.version>
@@ -172,9 +172,9 @@
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
 
         <!-- Dependencies required for connecting to a gRPC API -->
-        <grpc_java.version>1.54.1</grpc_java.version>
+        <grpc_java.version>1.56.1</grpc_java.version>
         <protoc.version>3.21.12</protoc.version>
-        <protobuf.version>3.22.4</protobuf.version>
+        <protobuf.version>3.23.4</protobuf.version>
 
         <!-- The default DB that will be used in integration tests. -->
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details

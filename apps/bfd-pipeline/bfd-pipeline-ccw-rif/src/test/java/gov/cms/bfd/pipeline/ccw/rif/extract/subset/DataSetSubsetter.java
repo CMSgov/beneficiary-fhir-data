@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
-import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
@@ -298,7 +297,7 @@ public final class DataSetSubsetter {
   private static List<RifFile> downloadDataSet(
       ExtractionOptions options, String dataSetS3KeyPrefix, Path downloadDirectory) {
     S3TransferManager transferManager =
-        DefaultS3TransferManager.builder()
+        S3TransferManager.builder()
             .s3Client(SharedS3Utilities.createS3AsyncClient(options.getS3Region()))
             .build();
     String dataSetPrefix = "data-random/" + dataSetS3KeyPrefix;
