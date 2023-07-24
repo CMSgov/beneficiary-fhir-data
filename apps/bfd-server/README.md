@@ -28,20 +28,22 @@ These parameters should be specified as Java system properties on the command li
 
 ## Running Locally
 
-This project can be built and run, as follows:
+This project can be built and run using the scripts in apps/utils/scripts:
 
     $ mvn clean install
-    $ mvn --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
+    $ cd apps/utils/scripts
+    $ ./run-bfd-server
 
-This will start the server using a local, in-memory database that will be deleted once the server is stopped. The server can take a few minutes to finish starting up, and Maven will exit with a "`BUILD SUCCESSFUL`" message once it's ready. 
+See https://github.com/CMSgov/beneficiary-fhir-data/wiki/Local-Environment-Setup-for-BFD-Development and https://github.com/CMSgov/beneficiary-fhir-data/wiki/Testing-Your-Local-Environment-Setup for
+help setting up your local environment with the needed tools to run the bfd-server.
+
+This will start the server using your local container DB. The server can take a few minutes to finish starting up. 
 
 There are currently two versions of the API available. V1 is based on FHIR dstu3 while V2 is based on FHIR R4 with considerations made to adhere to the CARIN Blue Button Implementation Guide. 
 
 The server will be running at <https://localhost:9094/v1/fhir> or at <https://localhost:9094/v2/fhir>. Please note that it is set by default to require SSL mutual authentication, so accessing it via a browser isn't simple. See [Development Environment Setup](./dev/devenv-readme.md) for details on how to work with this, if needed.
 
-Once the server is no longer needed, you can stop it by running the following command:
-
-    $ mvn --projects bfd-server-war org.codehaus.mojo:exec-maven-plugin:exec@server-stop
+Once the server is no longer needed, you can stop it by exiting the server run script, which will continue running as long as the server is running.
 
 ## Profiling Performance
 
