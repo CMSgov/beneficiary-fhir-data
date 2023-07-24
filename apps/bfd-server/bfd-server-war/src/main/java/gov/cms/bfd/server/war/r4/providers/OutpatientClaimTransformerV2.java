@@ -276,7 +276,7 @@ public class OutpatientClaimTransformerV2 {
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
         .stream()
-        .map(p -> TransformerUtilsV2.addProcedureCode(eob, p));
+        .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     // ClaimLine => ExplanationOfBenefit.item
     for (OutpatientClaimLine line : claimGroup.getLines()) {

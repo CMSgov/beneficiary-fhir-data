@@ -149,6 +149,7 @@ final class OutpatientClaimTransformer {
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
         .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
+
     // RSN_VISIT_CD(1-3)        => diagnosis.diagnosisCodeableConcept
     // RSN_VISIT_VRSN_CD(1-3)   => diagnosis.diagnosisCodeableConcept
     final int FIRST_INPATIENT_DIAGNOSIS = 1;
@@ -172,7 +173,7 @@ final class OutpatientClaimTransformer {
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
         .stream()
-        .map(p -> TransformerUtils.addProcedureCode(eob, p));
+        .forEach(p -> TransformerUtils.addProcedureCode(eob, p));
 
     for (OutpatientClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();

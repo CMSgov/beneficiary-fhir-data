@@ -6,7 +6,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
-import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -215,19 +214,19 @@ final class InpatientClaimTransformer {
         claimGroup.getBeneficiaryDischargeDate(),
         Optional.of(claimGroup.getUtilizationDayCount()));
 
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractDiagnoses(
+    TransformerUtils.extractDiagnoses(
             claimGroup.getDiagnosisCodes(),
             claimGroup.getDiagnosisCodeVersions(),
-            Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes())))
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
+            Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes()))
+        .stream()
+        .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     TransformerUtils.extractCCWProcedures(
             claimGroup.getProcedureCodes(),
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
         .stream()
-        .map(p -> TransformerUtils.addProcedureCode(eob, p));
+        .forEach(p -> TransformerUtils.addProcedureCode(eob, p));
 
     for (InpatientClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();

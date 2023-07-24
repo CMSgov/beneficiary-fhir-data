@@ -1045,7 +1045,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
       final var methodSpec =
           PoetUtil.createGroupedPropertiesGetter(
               entry.getKey(),
-              entry.getValue().stream().map(c -> c.getName()).collect(Collectors.toList()),
+              entry.getValue().stream().map(c -> c.getName()).toList(),
               propertyType);
       methodSpecs.add(methodSpec);
     }

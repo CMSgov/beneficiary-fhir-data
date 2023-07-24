@@ -324,7 +324,7 @@ public class InpatientClaimTransformerV2 {
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
         .stream()
-        .map(p -> TransformerUtilsV2.addProcedureCode(eob, p));
+        .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
     TransformerUtilsV2.addInformation(

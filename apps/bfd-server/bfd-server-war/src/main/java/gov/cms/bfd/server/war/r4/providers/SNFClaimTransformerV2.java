@@ -327,7 +327,7 @@ public class SNFClaimTransformerV2 {
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
         .stream()
-        .map(p -> TransformerUtilsV2.addProcedureCode(eob, p));
+        .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     for (SNFClaimLine line : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();

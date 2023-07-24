@@ -7,7 +7,6 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
-import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -172,13 +171,10 @@ final class SNFClaimTransformer {
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiOriginalClaimControlNumber());
 
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractDiagnoses(
-            claimGroup.getDiagnosisCodes(),
-            claimGroup.getDiagnosisCodeVersions(),
-            Optional.empty())) {
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
-    }
+    TransformerUtils.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
+        .stream()
+        .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     // Handle Procedures
     TransformerUtils.extractCCWProcedures(
@@ -186,7 +182,7 @@ final class SNFClaimTransformer {
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
         .stream()
-        .map(p -> TransformerUtils.addProcedureCode(eob, p));
+        .forEach(p -> TransformerUtils.addProcedureCode(eob, p));
 
     for (SNFClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
