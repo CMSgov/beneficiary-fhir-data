@@ -646,8 +646,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
       allowedRifFileType = Optional.empty();
     }
     final AwsClientConfig s3ClientConfig = loadS3ServiceConfig(config);
-
-    LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
+    if (s3ClientConfig.isCredentialCheckUseful()) {
+      LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
+    }
     ExtractionOptions extractionOptions =
         new ExtractionOptions(s3BucketName, allowedRifFileType, Optional.empty(), s3ClientConfig);
     return new CcwRifLoadOptions(extractionOptions, loadOptions);

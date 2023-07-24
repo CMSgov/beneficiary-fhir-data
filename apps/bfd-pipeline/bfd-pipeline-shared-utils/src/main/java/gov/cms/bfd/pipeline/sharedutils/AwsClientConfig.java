@@ -6,7 +6,7 @@ import java.net.URI;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
+import lombok.Data;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -18,8 +18,8 @@ import software.amazon.awssdk.services.s3.S3CrtAsyncClientBuilder;
  * are optional. Normally construction is via a builder object.
  */
 @Builder
+@Data
 @AllArgsConstructor
-@EqualsAndHashCode
 public class AwsClientConfig {
   /** The AWS region to connect to. Defaults to {@link SharedS3Utilities#REGION_DEFAULT}. */
   @Builder.Default
@@ -67,5 +67,15 @@ public class AwsClientConfig {
           StaticCredentialsProvider.create(
               AwsBasicCredentials.create(accessKey.get(), secretKey.get())));
     }
+  }
+
+  /**
+   * Determines if AWS credentials will be needed to communicate with AWS. Only true if we are using
+   * real AWS endpoint and we have no access key defined.
+   *
+   * @return true if credential check will be useful given our configuration
+   */
+  public boolean isCredentialCheckUseful() {
+    return endpointOverride.isEmpty() && accessKey.isEmpty();
   }
 }

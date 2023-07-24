@@ -88,7 +88,10 @@ public final class LayeredConfiguration {
     // load parameters from AWS SSM if configured
     final var ssmPath = baseConfig.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "");
     if (ssmPath.length() > 0) {
-      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ACCESS_KEY).isEmpty()) {
+      // Only check credentials if we are using real AWS endpoint and no access key is defined.
+      // Otherwise the credentials will not be needed to access SSM.
+      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ENDPOINT).isEmpty()
+          && baseConfig.stringOption(ENV_VAR_KEY_SSM_ACCESS_KEY).isEmpty()) {
         ensureAwsCredentialsConfiguredCorrectly();
       }
       final var ssmClient = SsmClient.builder();

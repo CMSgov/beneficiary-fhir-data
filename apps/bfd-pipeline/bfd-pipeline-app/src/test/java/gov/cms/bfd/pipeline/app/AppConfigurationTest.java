@@ -45,10 +45,12 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.AwsClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import io.micrometer.core.instrument.config.validate.ValidationException;
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -83,6 +85,9 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "some_password");
     envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
     envVars.put(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URI, "http://localhost:999999");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY, "unreal-access-key");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY, "unreal-secret-key");
     final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
     AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
 
@@ -135,6 +140,15 @@ public class AppConfigurationTest {
     assertEquals(
         envVars.get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED),
         "" + testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().isIdempotencyRequired());
+    assertEquals(
+        AwsClientConfig.builder()
+            .region(Optional.of(SharedS3Utilities.REGION_DEFAULT))
+            .endpointOverride(
+                Optional.of(URI.create(envVars.get(AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URI))))
+            .accessKey(Optional.of(envVars.get(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY)))
+            .secretKey(Optional.of(envVars.get(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY)))
+            .build(),
+        testAppConfig.getCcwRifLoadOptions().get().getExtractionOptions().getS3ClientConfig());
   }
 
   /**
