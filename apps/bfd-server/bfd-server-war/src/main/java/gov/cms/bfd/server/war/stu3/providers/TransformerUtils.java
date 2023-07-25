@@ -74,7 +74,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -2499,7 +2498,7 @@ public final class TransformerUtils {
       Map<String, Optional<Character>> codeVersions,
       Optional<Map<String, Optional<Character>>> presentOnAdms,
       Optional<CcwCodebookInterface> ccw,
-      DiagnosisLabel label) {
+      Optional<DiagnosisLabel> label) {
     Optional<String> code =
         codes.getOrDefault(String.format("diagnosis%sCode", substitution), Optional.empty());
     Optional<Character> codeVersion =
@@ -2513,7 +2512,11 @@ public final class TransformerUtils {
                     String.format("diagnosis%sPresentOnAdmissionCode", substitution),
                     Optional.empty())
             : Optional.empty();
-    return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label);
+    if (presentOnAdm.isEmpty() && ccw.isEmpty() && label.isEmpty())
+      return Diagnosis.from(code, codeVersion);
+    if (presentOnAdm.isEmpty() && ccw.isEmpty())
+      return Diagnosis.from(code, codeVersion, label.get());
+    return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label.get());
   }
 
   /**
@@ -2525,9 +2528,15 @@ public final class TransformerUtils {
    * @return the {@link Diagnosis} that can be extracted from the specified {@link InpatientClaim}
    */
   static List<Diagnosis> extractDiagnoses(
+      Object claim,
       Map<String, Optional<String>> codes,
       Map<String, Optional<Character>> codeVersions,
       Optional<Map<String, Optional<Character>>> presentOnAdms) {
+
+    // v1 InpatientClaims use the CCW Codebook, the others do not, therefore some logic must be
+    // tailored for it.
+    final var isInpatientClaim = claim instanceof InpatientClaim;
+
     List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
     // Handle the "special" diagnosis fields
     diagnosis.add(
@@ -2537,15 +2546,15 @@ public final class TransformerUtils {
             codeVersions,
             presentOnAdms,
             Optional.empty(),
-            DiagnosisLabel.ADMITTING));
+            Optional.of(DiagnosisLabel.ADMITTING)));
     diagnosis.add(
         extractDiagnosis(
             "1",
             codes,
             codeVersions,
             presentOnAdms,
-            Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
-            DiagnosisLabel.PRINCIPAL));
+            isInpatientClaim ? Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1) : Optional.empty(),
+            Optional.of(DiagnosisLabel.PRINCIPAL)));
     diagnosis.add(
         extractDiagnosis(
             "Principal",
@@ -2553,7 +2562,7 @@ public final class TransformerUtils {
             codeVersions,
             presentOnAdms,
             Optional.empty(),
-            DiagnosisLabel.PRINCIPAL));
+            Optional.of(DiagnosisLabel.PRINCIPAL)));
 
     // Generically handle the rest (2-25)
     final int FIRST_DIAG = 2;
@@ -2561,15 +2570,16 @@ public final class TransformerUtils {
 
     IntStream.range(FIRST_DIAG, LAST_DIAG + 1)
         .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  String.valueOf(i),
-                  codes,
-                  codeVersions,
-                  presentOnAdms,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
-                  DiagnosisLabel.OTHER);
-            })
+            i ->
+                extractDiagnosis(
+                    String.valueOf(i),
+                    codes,
+                    codeVersions,
+                    presentOnAdms,
+                    isInpatientClaim
+                        ? Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i))
+                        : Optional.empty(),
+                    Optional.of(DiagnosisLabel.OTHER)))
         .forEach(diagnosis::add);
 
     // Handle first external diagnosis
@@ -2579,8 +2589,10 @@ public final class TransformerUtils {
             codes,
             codeVersions,
             presentOnAdms,
-            Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
-            DiagnosisLabel.FIRSTEXTERNAL));
+            isInpatientClaim
+                ? Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1)
+                : Optional.empty(),
+            Optional.of(DiagnosisLabel.FIRSTEXTERNAL)));
     diagnosis.add(
         extractDiagnosis(
             "ExternalFirst",
@@ -2588,23 +2600,23 @@ public final class TransformerUtils {
             codeVersions,
             presentOnAdms,
             Optional.empty(),
-            DiagnosisLabel.FIRSTEXTERNAL));
+            Optional.of(DiagnosisLabel.FIRSTEXTERNAL)));
 
     // Generically handle the rest (2-12)
     final int FIRST_EX_DIAG = 2;
     final int LAST_EX_DIAG = 12;
-
     IntStream.range(FIRST_EX_DIAG, LAST_EX_DIAG + 1)
         .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  "External" + String.valueOf(i),
-                  codes,
-                  codeVersions,
-                  presentOnAdms,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)),
-                  DiagnosisLabel.EXTERNAL);
-            })
+            i ->
+                extractDiagnosis(
+                    "External" + i,
+                    codes,
+                    codeVersions,
+                    presentOnAdms,
+                    isInpatientClaim
+                        ? Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i))
+                        : Optional.empty(),
+                    Optional.of(DiagnosisLabel.EXTERNAL)))
         .forEach(diagnosis::add);
 
     // Some may be empty.  Convert from List<Optional<Diagnosis>> to List<Diagnosis>
@@ -3228,29 +3240,5 @@ public final class TransformerUtils {
       // Remove _count parameter from the current request details
       requestDetails.setParameters(params);
     }
-  }
-
-  /**
-   * Adds the principal diagnosis labels.
-   *
-   * @param diagnoses the diagnoses to add to
-   * @return the list of updated diagnosis
-   */
-  public static Consumer<Optional<Diagnosis>> addPrincipalDiagnosis(List<Diagnosis> diagnoses) {
-    return diagnosisToAdd -> {
-      if (diagnosisToAdd.isPresent()) {
-        Optional<Diagnosis> matchingDiagnosis =
-            diagnoses.stream()
-                .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
-                .findFirst();
-        if (matchingDiagnosis.isPresent()) {
-          // append labels
-          matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
-          diagnoses.add(matchingDiagnosis.get());
-        } else {
-          diagnoses.add(diagnosisToAdd.get());
-        }
-      }
-    };
   }
 }

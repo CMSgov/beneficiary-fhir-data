@@ -30,6 +30,12 @@ public class PoetUtil {
    */
   public static final ClassName LongClassName = ClassName.get(Long.class);
 
+  /**
+   * Shortcut for an instance of {@link ClassName} for {@link java.util.Map} since the library
+   * doesn't provide one.
+   */
+  public static final ClassName MapClassName = ClassName.get("java.util", "Map");
+
   /** Prevent instantiation of utility class. */
   private PoetUtil() {}
 
@@ -206,8 +212,7 @@ public class PoetUtil {
   public static MethodSpec createGroupedPropertiesGetter(
       String groupedPropertiesName, List<String> propertyNames, TypeName getterResultType) {
     ParameterizedTypeName returnType =
-        ParameterizedTypeName.get(
-            ClassName.get("java.util", "Map"), ClassName.get(String.class), getterResultType);
+        ParameterizedTypeName.get(MapClassName, StringClassName, getterResultType);
     MethodSpec.Builder methodSpecBuilder =
         MethodSpec.methodBuilder(fieldToMethodName("get", groupedPropertiesName))
             .addModifiers(Modifier.PUBLIC)

@@ -25,6 +25,7 @@ import gov.cms.model.dsl.codegen.plugin.model.SequenceBean;
 import gov.cms.model.dsl.codegen.plugin.model.TableBean;
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -799,5 +800,42 @@ public class GenerateEntitiesFromDslMojoTest {
     // separate accessor type for the setter/getter
     column = ColumnBean.builder().javaType("String").javaAccessorType("long").build();
     assertEquals(TypeName.LONG, mojo.createAccessorTypeForColumn(mapping, column));
+  }
+  
+  /** Test for {@link GenerateEntitiesFromDslMojo#createMethodSpecsForGroupedProperties}. */
+  @Test
+  public void testCreateMethodSpecsForGroupedProperties() {
+    TableBean table =
+        TableBean.builder()
+            .quoteNames(false)
+            .name("records")
+            .column(
+                ColumnBean.builder()
+                    .name("diagnosis1Code")
+                    .groupName("diagnosisCodes")
+                    .javaAccessorType("String")
+                    .build())
+            .column(
+                ColumnBean.builder()
+                    .name("diagnosis2Code")
+                    .groupName("diagnosisCodes")
+                    .javaAccessorType("String")
+                    .build())
+            .column(
+                ColumnBean.builder()
+                    .name("diagnosis3Code")
+                    .groupName("diagnosisCodes")
+                    .javaAccessorType("String")
+                    .build())
+            .build();
+
+    MappingBean mappingBean = MappingBean.builder().table(table).build();
+    assertEquals(
+        List.of(
+            PoetUtil.createGroupedPropertiesGetter(
+                "diagnosisCodes",
+                Arrays.asList("diagnosis1Code", "diagnosis2Code", "diagnosis3Code"),
+                ParameterizedTypeName.get(PoetUtil.OptionalClassName, PoetUtil.StringClassName))),
+        mojo.createMethodSpecsForGroupedProperties(mappingBean));
   }
 }

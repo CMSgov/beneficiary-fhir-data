@@ -146,7 +146,10 @@ final class OutpatientClaimTransformer {
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
     TransformerUtils.extractDiagnoses(
-            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
+            claimGroup,
+            claimGroup.getDiagnosisCodes(),
+            claimGroup.getDiagnosisCodeVersions(),
+            Optional.empty())
         .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
@@ -163,7 +166,7 @@ final class OutpatientClaimTransformer {
                     diagnosisCodeVersions,
                     Optional.empty(),
                     Optional.empty(),
-                    DiagnosisLabel.REASONFORVISIT))
+                    Optional.of(DiagnosisLabel.REASONFORVISIT)))
         .filter(d -> d.isPresent())
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d.get()));
 
