@@ -9,17 +9,17 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.TaskExecutor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.transfer.s3.S3TransferManager;
-import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
 
 /** Handles the execution and management of S3-related tasks. */
 public final class S3TaskManager {
@@ -29,10 +29,8 @@ public final class S3TaskManager {
   private final MetricRegistry appMetrics;
   /** The extraction options. */
   private final ExtractionOptions options;
-  /** The amazon s3 client. */
-  private final S3Client s3Client;
-  /** The s3 transfer manager. */
-  private final S3TransferManager s3TransferManager;
+  /** Used for accessing objects in S3. */
+  @Getter private final S3Dao s3Dao;
   /** The executor for file downloads. */
   private final TaskExecutor downloadTasksExecutor;
   /** The executor for file moves. */
@@ -56,31 +54,10 @@ public final class S3TaskManager {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.s3Client = s3Factory.createS3Client();
-    this.s3TransferManager =
-        DefaultS3TransferManager.builder().s3Client(s3Factory.createS3AsyncClient()).build();
-
+    this.s3Dao = new S3Dao(s3Factory);
     this.downloadTasksExecutor = new TaskExecutor("Download RIF Executor", 1);
     this.moveTasksExecutor = new TaskExecutor("Move Completed RIF Executor", 2);
     this.downloadTasks = new HashMap<>();
-  }
-
-  /**
-   * Gets the {@link S3Client}.
-   *
-   * @return the {@link S3Client} client being used by this {@link S3TaskManager}
-   */
-  public S3Client getS3Client() {
-    return s3Client;
-  }
-
-  /**
-   * Gets the {@link #s3TransferManager}.
-   *
-   * @return the Amazon S3 {@link S3TransferManager} being used by this {@link S3TaskManager}
-   */
-  public S3TransferManager getS3TransferManager() {
-    return s3TransferManager;
   }
 
   /**
@@ -162,7 +139,7 @@ public final class S3TaskManager {
         LOGGER.info("All in-progress downloads are complete.");
       }
 
-      s3TransferManager.close();
+      s3Dao.close();
     } catch (InterruptedException e) {
       // We're not expecting interrupts here, so go boom.
       throw new BadCodeMonkeyException(e);

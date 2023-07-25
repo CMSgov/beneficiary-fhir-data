@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
-import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,10 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
-import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
-import software.amazon.awssdk.transfer.s3.model.FileDownload;
-import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Tests downloaded S3 file attributes such as MD5ChkSum. */
@@ -68,54 +65,35 @@ final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
 
       // download file from S3 that was just uploaded above
 
+      String s3Key =
+          String.format(
+              "%s/%s/%s",
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              manifest.getEntries().get(0).getParentManifest().getTimestampText(),
+              manifest.getEntries().get(0).getName());
       GetObjectRequest getObjectRequest =
-          GetObjectRequest.builder()
-              .bucket(bucket)
-              .key(
-                  String.format(
-                      "%s/%s/%s",
-                      CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-                      manifest.getEntries().get(0).getParentManifest().getTimestampText(),
-                      manifest.getEntries().get(0).getName()))
-              .build();
+          GetObjectRequest.builder().bucket(bucket).key(s3Key).build();
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
-      S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              new ExtractionOptions(
-                  options.getS3BucketName(), Optional.empty(), Optional.empty(), s3ClientConfig),
-              s3ClientFactory);
-      LOGGER.info(
-          "Downloading '{}' to '{}'...",
-          getObjectRequest.key(),
-          localTempFile.toAbsolutePath().toString());
+      try (S3Dao s3Dao = new S3Dao(s3ClientFactory)) {
+        LOGGER.info(
+            "Downloading '{}' to '{}'...", getObjectRequest.key(), localTempFile.toAbsolutePath());
 
-      DownloadFileRequest downloadFileRequest =
-          DownloadFileRequest.builder()
-              .getObjectRequest(getObjectRequest)
-              .addTransferListener(LoggingTransferListener.create())
-              .destination(localTempFile.toFile())
-              .build();
+        GetObjectResponse downloadFileResponse = s3Dao.downloadObject(bucket, s3Key, localTempFile);
 
-      FileDownload downloadFile =
-          s3TaskManager.getS3TransferManager().downloadFile(downloadFileRequest);
-      CompletedFileDownload downloadResult = downloadFile.completionFuture().join();
+        InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
+        String generatedMD5ChkSum =
+            ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
+        LOGGER.info("The generated MD5 value from Java (Base64 encoded) is:" + generatedMD5ChkSum);
 
-      InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
-      String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
-      LOGGER.info("The generated MD5 value from Java (Base64 encoded) is:" + generatedMD5ChkSum);
-
-      String downloadedFileMD5ChkSum = downloadResult.response().metadata().get("md5chksum");
-      LOGGER.info("The MD5 value from AWS S3 file's metadata is: " + downloadedFileMD5ChkSum);
-      assertEquals(
-          downloadedFileMD5ChkSum,
-          generatedMD5ChkSum,
-          "Checksum doesn't match on downloaded file " + getObjectRequest.key());
-      LOGGER.info(
-          "Downloaded '{}' to '{}'.",
-          getObjectRequest.key(),
-          localTempFile.toAbsolutePath().toString());
-
+        String downloadedFileMD5ChkSum = downloadFileResponse.metadata().get("md5chksum");
+        LOGGER.info("The MD5 value from AWS S3 file's metadata is: " + downloadedFileMD5ChkSum);
+        assertEquals(
+            downloadedFileMD5ChkSum,
+            generatedMD5ChkSum,
+            "Checksum doesn't match on downloaded file " + getObjectRequest.key());
+        LOGGER.info(
+            "Downloaded '{}' to '{}'.", getObjectRequest.key(), localTempFile.toAbsolutePath());
+      }
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (SdkClientException e) {

@@ -23,11 +23,7 @@ import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
-import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
-import software.amazon.awssdk.transfer.s3.model.FileDownload;
-import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 /**
  * Represents an asynchronous operation to download the contents of a specific {@link
@@ -64,38 +60,25 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
     this.manifestEntry = manifestEntry;
   }
 
-  /** {@inheritDoc} */
+  /** Performs the download and returns the result. {@inheritDoc} */
   @Override
   public ManifestEntryDownloadResult call() throws Exception {
     try {
-      GetObjectRequest objectRequest =
-          GetObjectRequest.builder()
-              .bucket(options.getS3BucketName())
-              .key(
-                  String.format(
-                      "%s/%s/%s",
-                      manifestEntry.getParentManifest().getManifestKeyIncomingLocation(),
-                      manifestEntry.getParentManifest().getTimestampText(),
-                      manifestEntry.getName()))
-              .build();
+      String s3Key =
+          String.format(
+              "%s/%s/%s",
+              manifestEntry.getParentManifest().getManifestKeyIncomingLocation(),
+              manifestEntry.getParentManifest().getTimestampText(),
+              manifestEntry.getName());
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
       Timer.Context downloadTimer =
           appMetrics
               .timer(MetricRegistry.name(getClass().getSimpleName(), "downloadSystemTime"))
               .time();
-      LOGGER.debug(
-          "Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
-      DownloadFileRequest downloadFileRequest =
-          DownloadFileRequest.builder()
-              .getObjectRequest(objectRequest)
-              .addTransferListener(LoggingTransferListener.create())
-              .destination(localTempFile.toFile())
-              .build();
-
-      FileDownload downloadFile =
-          s3TaskManager.getS3TransferManager().downloadFile(downloadFileRequest);
-      CompletedFileDownload downloadResult = downloadFile.completionFuture().join();
+      LOGGER.debug("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath());
+      GetObjectResponse downloadResult =
+          s3TaskManager.getS3Dao().downloadObject(options.getS3BucketName(), s3Key, localTempFile);
       LOGGER.debug(
           "Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
       downloadTimer.close();
@@ -108,7 +91,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
       InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
       String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
       md5ChkSumTimer.close();
-      String downloadedFileMD5ChkSum = downloadResult.response().metadata().get("md5chksum");
+      String downloadedFileMD5ChkSum = downloadResult.metadata().get("md5chksum");
       // TODO Remove null check below once Jira CBBD-368 is completed
       if ((downloadedFileMD5ChkSum != null)
           && (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum)))

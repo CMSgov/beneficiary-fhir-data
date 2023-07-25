@@ -7,7 +7,7 @@ import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.exception.SdkServiceException;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 /** Represents and manages the queue of data sets in S3 to be processed. */
@@ -143,10 +142,8 @@ public final class DataSetQueue {
      * we're loading synthetic data,
      * as it checks the regular incoming folder for the manifest first.)
      */
-    HeadObjectRequest headObjectRequest =
-        HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(manifestS3Key).build();
     try {
-      s3TaskManager.getS3Client().headObject(headObjectRequest);
+      s3TaskManager.getS3Dao().readObjectMetaData(options.getS3BucketName(), manifestS3Key);
     } catch (NoSuchKeyException | NoSuchBucketException e) {
       LOGGER.debug(
           "Unable to find keyspace {} in bucket {} while scanning for manifests.",
@@ -157,7 +154,7 @@ public final class DataSetQueue {
 
     DataSetManifest manifest;
     try {
-      manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
+      manifest = readManifest(s3TaskManager.getS3Dao(), options, manifestS3Key);
     } catch (JAXBException | SAXException e) {
       /*
        * We want to terminate the ETL load process if an invalid manifest was found
@@ -204,11 +201,11 @@ public final class DataSetQueue {
      * (In the results, we'll be looking for the oldest manifest file, if
      * any.)
      */
-    ListObjectsV2Request.Builder s3BucketListRequestBuilder =
-        ListObjectsV2Request.builder().bucket(options.getS3BucketName());
-    if (options.getS3ListMaxKeys().isPresent()) {
-      s3BucketListRequestBuilder.maxKeys(options.getS3ListMaxKeys().get());
-    }
+    final S3Dao.ListObjectsSettings listSettings =
+        S3Dao.ListObjectsSettings.builder()
+            .bucket(options.getS3BucketName())
+            .pageSize(options.getS3ListMaxKeys().orElse(0))
+            .build();
 
     /*
      * Loop through all of the pages, looking for manifests.
@@ -231,8 +228,7 @@ public final class DataSetQueue {
             completedManifestsCount.incrementAndGet();
           }
         };
-    SharedS3Utilities.onListObjectsV2Stream(
-        s3TaskManager.getS3Client(), s3BucketListRequestBuilder.build(), addToManifest);
+    s3TaskManager.getS3Dao().listObjectsAsStream(listSettings).forEach(addToManifest);
 
     this.completedManifestsCount = completedManifestsCount.get();
 
@@ -245,7 +241,7 @@ public final class DataSetQueue {
   /**
    * Reads the {@link DataSetManifest} that was contained in the specified S3 object.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param options the {@link ExtractionOptions} to use
    * @param manifestToProcessKey the {@link S3Object#key()} of the S3 object for the manifest to be
    *     read
@@ -259,16 +255,11 @@ public final class DataSetQueue {
    *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
    *     production, and care should be taken to account for its possibility.
    */
-  public static DataSetManifest readManifest(
-      S3Client s3Client, ExtractionOptions options, String manifestToProcessKey)
+  public DataSetManifest readManifest(
+      S3Dao s3Dao, ExtractionOptions options, String manifestToProcessKey)
       throws JAXBException, SAXException {
-    GetObjectRequest getObjectRequest =
-        GetObjectRequest.builder()
-            .bucket(options.getS3BucketName())
-            .key(manifestToProcessKey)
-            .build();
     try (InputStream dataManifestStream =
-        s3Client.getObjectAsBytes(getObjectRequest).asInputStream()) {
+        s3Dao.readObject(options.getS3BucketName(), manifestToProcessKey)) {
       DataSetManifest manifest =
           DataSetManifestFactory.newInstance().parseManifest(dataManifestStream);
       // Setup the manifest incoming/outgoing location
