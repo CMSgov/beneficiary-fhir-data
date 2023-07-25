@@ -1024,10 +1024,10 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   }
 
   /**
-   * TODO:2598.
+   * Generates an accessor method for fields of the same group to be returned together.
    *
-   * @param mapping todo
-   * @return todo
+   * @param mapping {@link MappingBean} for the entity with the new fields
+   * @return the list of {@link MethodSpec}
    */
   @VisibleForTesting
   List<MethodSpec> createMethodSpecsForGroupedProperties(MappingBean mapping) {
@@ -1070,7 +1070,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
     private final boolean isNullableColumn;
     /** True if the column is read only. (No setter should be generated.) */
     private final boolean isReadOnly;
-    /** TODO:2598. */
+    /** The name of the group of fields to which the field belongs. */
     private String groupName;
   }
 

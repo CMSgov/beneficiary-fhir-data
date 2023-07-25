@@ -52,8 +52,6 @@ public class ColumnBean implements ModelBean {
   @SqlType private String sqlType;
   /** Specific java type for the field in the entity object corresponding to this column. */
   @JavaType private String javaType;
-  /** TODO:2598. */
-  private String groupName;
   /**
    * Alternative type for generated accessor methods (getter/setter) for the field in the entity
    * object corresponding to this column.
@@ -66,6 +64,11 @@ public class ColumnBean implements ModelBean {
   @EnumExistsInSameMapping @JavaName private String enumType;
   /** Text for insertion into the generated entity as a javadoc comment on the field. */
   private String comment;
+  /**
+   * Optional text describing fields of the same group to be returned together via a generated
+   * accessor method.
+   */
+  private String groupName;
   /** Indicates whether the column in the database is nullable. */
   @Builder.Default private boolean nullable = true;
   /** Indicates whether the column in the database is an {@link GenerationType#IDENTITY} column. */
@@ -196,9 +199,9 @@ public class ColumnBean implements ModelBean {
   }
 
   /**
-   * TODO:2598.
+   * Determines if the field can be grouped with other fields.
    *
-   * @return true
+   * @return true if the field can be grouped with other fields
    */
   public boolean hasGroupName() {
     return !Strings.isNullOrEmpty(groupName);

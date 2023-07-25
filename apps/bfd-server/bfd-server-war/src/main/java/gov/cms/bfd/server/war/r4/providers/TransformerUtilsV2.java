@@ -3662,9 +3662,10 @@ public final class TransformerUtilsV2 {
    *
    * @param procedure Procedure accessors all follow the same pattern except for an integer
    *     difference. This value is used as a substitution when looking up the method name.
-   * @param codes TODO: BFD-2598.
-   * @param codeVersions TODO: BFD-2598.
-   * @param dates TODO: BFD-2598.
+   * @param codes The mapping of procedure codes by their property name and respective value
+   * @param codeVersions The mapping of procedure code versions by their property name and
+   *     respective value
+   * @param dates The mapping of procedure dates by their property name and respective value
    * @return a {@link CCWProcedure} or {@link Optional#empty()}
    */
   public static Optional<CCWProcedure> extractCCWProcedure(
@@ -3683,12 +3684,13 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * TODO: BFD-2598.
+   * Generically attempts to retrieve the procedures from the current claim.
    *
-   * @param codes TODO: BFD-2598.
-   * @param codeVersions TODO: BFD-2598.
-   * @param dates TODO: BFD-2598.
-   * @return TODO: BFD-2598.
+   * @param codes The mapping of procedure codes by their property name and respective value
+   * @param codeVersions The mapping of procedure code versions by their property name and
+   *     respective value
+   * @param dates The mapping of procedure dates by their property name and respective value
+   * @return a list of {@link CCWProcedure}
    */
   public static List<CCWProcedure> extractCCWProcedures(
       Map<String, Optional<String>> codes,

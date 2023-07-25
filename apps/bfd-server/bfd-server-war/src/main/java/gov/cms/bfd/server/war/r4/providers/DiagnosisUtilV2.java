@@ -177,9 +177,11 @@ public class DiagnosisUtilV2 {
    * @param substitution The methods to retrive diagnosis information all follow a similar pattern.
    *     This value is used to substitute into that pattern when looking up the specific method to
    *     retrive information with.
-   * @param codes TODO: 2598.
-   * @param codeVersions TODO: 2598.
-   * @param presentOnAdms TODO: 2598.
+   * @param codes The mapping of diagnosis codes by their property name and respective value
+   * @param codeVersions The mapping of diagnosis code versions by their property name and
+   *     respective value
+   * @param presentOnAdms The mapping of diagnosis "PresentOnAdmissionCode" codes by their property
+   *     name and respective value
    * @param ccw CCW Codebook value that represents which "PresentOnAdmissionCode" is being used.
    *     Example: {@link CcwCodebookVariable#CLM_POA_IND_SW5}
    * @param label One or more labels to use when mapping the diagnosis.
@@ -212,9 +214,11 @@ public class DiagnosisUtilV2 {
    * Extracts nearly all diagnosis types from a Claim. It does this with reflection, so if the
    * specific claim type doesn't have the given diagnosis it will just be skipped.
    *
-   * @param codes TODO: BFD-2598.
-   * @param codeVersions TODO: BFD-2598.
-   * @param presentOnAdms TODO: BFD-2598.
+   * @param codes The mapping of diagnosis codes by their property name and respective value
+   * @param codeVersions The mapping of diagnosis code versions by their property name and
+   *     respective value
+   * @param presentOnAdms The mapping of diagnosis "PresentOnAdmissionCode" codes by their property
+   *     name and respective value
    * @return the {@link Diagnosis} that can be extracted from the specified {@link
    *     gov.cms.bfd.model.rif.InpatientClaim}
    */

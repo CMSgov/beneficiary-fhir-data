@@ -202,12 +202,13 @@ public class PoetUtil {
   }
 
   /**
-   * TODO:2598.
+   * Generates a getter method that returns a mapping of fields by group, whose keys are the fields'
+   * names and whose values are the fields' values
    *
-   * @param groupedPropertiesName todo
-   * @param propertyNames todo
-   * @param getterResultType todo
-   * @return todo
+   * @param groupedPropertiesName the shared group name of the fields
+   * @param propertyNames the fields for the given group
+   * @param getterResultType the return type of the grouped fields
+   * @return a {@link MethodSpec} that generates the getter method
    */
   public static MethodSpec createGroupedPropertiesGetter(
       String groupedPropertiesName, List<String> propertyNames, TypeName getterResultType) {
