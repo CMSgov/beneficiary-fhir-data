@@ -7,13 +7,11 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
-import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -143,8 +141,6 @@ final class OutpatientClaimTransformer {
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiOriginalClaimControlNumber());
 
-    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
-    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
     TransformerUtils.extractDiagnoses(
             claimGroup,
             claimGroup.getDiagnosisCodes(),
@@ -152,23 +148,6 @@ final class OutpatientClaimTransformer {
             Optional.empty())
         .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
-
-    // RSN_VISIT_CD(1-3)        => diagnosis.diagnosisCodeableConcept
-    // RSN_VISIT_VRSN_CD(1-3)   => diagnosis.diagnosisCodeableConcept
-    final int FIRST_INPATIENT_DIAGNOSIS = 1;
-    final int LAST_INPATIENT_DIAGNOSIS = 3;
-    IntStream.range(FIRST_INPATIENT_DIAGNOSIS, LAST_INPATIENT_DIAGNOSIS + 1)
-        .mapToObj(
-            i ->
-                TransformerUtils.extractDiagnosis(
-                    String.format("Admission%d", i),
-                    diagnosisCodes,
-                    diagnosisCodeVersions,
-                    Optional.empty(),
-                    Optional.empty(),
-                    Optional.of(DiagnosisLabel.REASONFORVISIT)))
-        .filter(d -> d.isPresent())
-        .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d.get()));
 
     // Handle Procedures
     TransformerUtils.extractCCWProcedures(

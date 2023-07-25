@@ -12,7 +12,6 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
-import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
@@ -22,7 +21,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.springframework.stereotype.Component;
@@ -244,30 +242,11 @@ public class OutpatientClaimTransformerV2 {
     // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
-    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
-    DiagnosisUtilV2.extractDiagnoses(diagnosisCodes, diagnosisCodeVersions, Optional.empty())
+    DiagnosisUtilV2.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
         .stream()
         .forEach(
             diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.OUTPATIENT));
-
-    // Handle Inpatient Diagnosis.
-    // RSN_VISIT_CD(1-3)        => diagnosis.diagnosisCodeableConcept
-    // RSN_VISIT_VRSN_CD(1-3)   => diagnosis.diagnosisCodeableConcept
-    final int FIRST_INPATIENT_DIAGNOSIS = 1;
-    final int LAST_INPATIENT_DIAGNOSIS = 3;
-    IntStream.range(FIRST_INPATIENT_DIAGNOSIS, LAST_INPATIENT_DIAGNOSIS + 1)
-        .mapToObj(
-            i ->
-                DiagnosisUtilV2.extractDiagnosis(
-                    String.format("Admission%d", i),
-                    diagnosisCodes,
-                    diagnosisCodeVersions,
-                    Optional.empty(),
-                    Optional.empty(),
-                    DiagnosisLabel.REASONFORVISIT))
-        .filter(d -> d.isPresent())
-        .forEach(d -> DiagnosisUtilV2.addDiagnosisCode(eob, d, ClaimTypeV2.OUTPATIENT));
 
     // Handle Procedures
     TransformerUtilsV2.extractCCWProcedures(

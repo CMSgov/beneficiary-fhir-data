@@ -2568,7 +2568,6 @@ public final class TransformerUtils {
     // Generically handle the rest (2-25)
     final int FIRST_DIAG = 2;
     final int LAST_DIAG = 25;
-
     IntStream.range(FIRST_DIAG, LAST_DIAG + 1)
         .mapToObj(
             i ->
@@ -2618,6 +2617,22 @@ public final class TransformerUtils {
                         ? Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i))
                         : Optional.empty(),
                     Optional.of(DiagnosisLabel.EXTERNAL)))
+        .forEach(diagnosis::add);
+
+    // RSN_VISIT_CD(1-3)        => diagnosis.diagnosisCodeableConcept
+    // RSN_VISIT_VRSN_CD(1-3)   => diagnosis.diagnosisCodeableConcept
+    final int FIRST_INPATIENT_DIAGNOSIS = 1;
+    final int LAST_INPATIENT_DIAGNOSIS = 3;
+    IntStream.range(FIRST_INPATIENT_DIAGNOSIS, LAST_INPATIENT_DIAGNOSIS + 1)
+        .mapToObj(
+            i ->
+                TransformerUtils.extractDiagnosis(
+                    String.format("Admission%d", i),
+                    codes,
+                    codeVersions,
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.of(DiagnosisLabel.REASONFORVISIT)))
         .forEach(diagnosis::add);
 
     // Some may be empty.  Convert from List<Optional<Diagnosis>> to List<Diagnosis>
