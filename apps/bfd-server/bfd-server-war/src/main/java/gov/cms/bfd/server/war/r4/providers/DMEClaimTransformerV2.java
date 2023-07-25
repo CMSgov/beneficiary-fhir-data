@@ -182,13 +182,10 @@ final class DMEClaimTransformerV2 {
     // PRNCPAL_DGNS_VRSN_CD     => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_CD(1-12)        => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_VRSN_CD(1-12)   => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis :
-        DiagnosisUtilV2.extractDiagnoses(
-            claimGroup.getDiagnosisCodes(),
-            claimGroup.getDiagnosisCodeVersions(),
-            Optional.empty())) {
-      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.DME);
-    }
+    DiagnosisUtilV2.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
+        .stream()
+        .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.DME));
 
     // CARR_CLM_ENTRY_CD => ExplanationOfBenefit.extension
     eob.addExtension(

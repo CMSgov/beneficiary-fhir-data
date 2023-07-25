@@ -192,13 +192,11 @@ public class CarrierClaimTransformerV2 {
     // PRNCPAL_DGNS_CD => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis :
-        DiagnosisUtilV2.extractDiagnoses(
-            claimGroup.getDiagnosisCodes(),
-            claimGroup.getDiagnosisCodeVersions(),
-            Optional.empty())) {
-      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.CARRIER);
-    }
+    DiagnosisUtilV2.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
+        .stream()
+        .forEach(
+            diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.CARRIER));
 
     // CARR_CLM_RFRNG_PIN_NUM => ExplanationOfBenefit.careteam.provider
     TransformerUtilsV2.addCareTeamMember(

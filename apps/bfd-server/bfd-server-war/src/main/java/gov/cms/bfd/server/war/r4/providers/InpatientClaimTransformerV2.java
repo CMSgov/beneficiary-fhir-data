@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
-import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -310,13 +309,13 @@ public class InpatientClaimTransformerV2 {
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
-    for (Diagnosis diagnosis :
-        DiagnosisUtilV2.extractDiagnoses(
+    DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(),
             claimGroup.getDiagnosisCodeVersions(),
-            Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes()))) {
-      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.INPATIENT);
-    }
+            Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes()))
+        .stream()
+        .forEach(
+            diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.INPATIENT));
 
     // Handle Procedures
     TransformerUtilsV2.extractCCWProcedures(

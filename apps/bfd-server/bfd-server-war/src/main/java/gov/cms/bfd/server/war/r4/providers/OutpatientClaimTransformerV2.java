@@ -12,7 +12,6 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
-import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -247,10 +246,10 @@ public class OutpatientClaimTransformerV2 {
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
-    for (Diagnosis diagnosis :
-        DiagnosisUtilV2.extractDiagnoses(diagnosisCodes, diagnosisCodeVersions, Optional.empty())) {
-      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.OUTPATIENT);
-    }
+    DiagnosisUtilV2.extractDiagnoses(diagnosisCodes, diagnosisCodeVersions, Optional.empty())
+        .stream()
+        .forEach(
+            diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.OUTPATIENT));
 
     // Handle Inpatient Diagnosis.
     // RSN_VISIT_CD(1-3)        => diagnosis.diagnosisCodeableConcept

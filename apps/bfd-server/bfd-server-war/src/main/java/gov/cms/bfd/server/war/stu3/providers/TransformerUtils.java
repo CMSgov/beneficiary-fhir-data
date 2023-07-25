@@ -2580,7 +2580,7 @@ public final class TransformerUtils {
                     isInpatientClaim
                         ? Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i))
                         : Optional.empty(),
-                    Optional.of(DiagnosisLabel.OTHER)))
+                    isInpatientClaim ? Optional.of(DiagnosisLabel.OTHER) : Optional.empty()))
         .forEach(diagnosis::add);
 
     // Handle first external diagnosis
