@@ -90,3 +90,12 @@
 /bfd/${env}/server/nonsensitive/asg_instance_warmup_time: 430
 /bfd/${env}/server/nonsensitive/launch_template_instance_type: c6i.4xlarge
 /bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: 60
+# Indicates the amount of time between batched error alerts posted to Slack when 500s occur in BFD
+# Server. See https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html#rate-based
+# for format.
+/bfd/${env}/server/nonsensitive/500_errors_alerter_rate: 5 minutes
+# Indicates the amount of time, in seconds, that the 500 errors alert Lambda will scan the BFD
+# Server logs for errors between invocations. Should match "500_errors_alerter_rate" plus a few
+# seconds as the Lambda may not be invoked on exact intervals of the aforementioned rate
+/bfd/${env}/server/nonsensitive/500_errors_alerter_log_lookback_seconds: 330
+/bfd/${env}/server/nonsensitive/500_errors_alerter_slack_webhook: 'bfd_test' # #bfd-test channel
