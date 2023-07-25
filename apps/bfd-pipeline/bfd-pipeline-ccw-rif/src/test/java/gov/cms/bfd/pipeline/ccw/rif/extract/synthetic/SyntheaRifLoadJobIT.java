@@ -31,15 +31,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
@@ -97,7 +94,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       bucket = DataSetTestUtilities.createTestBucket(s3Dao);
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       DataSetManifest manifest =
           new DataSetManifest(
@@ -129,7 +126,6 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // upload data to Synthea S3 bucket
       putSampleFilesInTestBucket(
-          s3Client,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           manifest,
@@ -162,59 +158,38 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // Verify that the datasets were moved to their respective 'failed' locations.
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/0_manifest.xml")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/beneficiary.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/beneficiary.rif"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/carrier.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/carrier.rif"));
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
@@ -252,7 +227,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       bucket = DataSetTestUtilities.createTestBucket(s3Dao);
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       DataSetManifest manifest =
           new DataSetManifest(
@@ -284,7 +259,6 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // upload data to Synthea S3 bucket
       putSampleFilesInTestBucket(
-          s3Client,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           manifest,
@@ -319,60 +293,39 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify that the datasets were moved to their respective 'completed'
       // locations.
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/0_manifest.xml")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
 
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/beneficiary.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/beneficiary.rif"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/carrier.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/carrier.rif"));
 
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
@@ -454,7 +407,6 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
   /**
    * Put sample files in test specified bucket and key in s3.
    *
-   * @param s3Client the s3 client
    * @param bucket the bucket to use for the test
    * @param location the key under which to put the file
    * @param manifest the manifest to use for the load files
@@ -462,11 +414,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
    *     resource lists, should be in the order of the manifest
    */
   private void putSampleFilesInTestBucket(
-      S3Client s3Client,
-      String bucket,
-      String location,
-      DataSetManifest manifest,
-      List<URL> resourcesToAdd) {
+      String bucket, String location, DataSetManifest manifest, List<URL> resourcesToAdd) {
     DataSetTestUtilities.putObject(s3Dao, bucket, manifest, location);
     int index = 0;
     for (URL resource : resourcesToAdd) {

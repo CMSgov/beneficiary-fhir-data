@@ -7,18 +7,18 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 
 /**
  * Contains utilities that are useful when running tests that involve working with data sets in S3.
@@ -172,14 +172,11 @@ public class DataSetTestUtilities {
     String objectKey = String.format("%s/%s", keyPrefix, manifestEntry.getName());
 
     try {
-      long objectContentLength = objectContentsUrl.openConnection().getContentLength();
-
-      Map<String, String> metaData =
-          Map.of(
-              "md5chksum",
-              ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream()));
-      s3Dao.putObject(
-          bucket, objectKey, objectContentsUrl.openStream(), objectContentLength, metaData);
+      Map<String, String> metaData = new HashMap<>();
+      try (InputStream objectStream = objectContentsUrl.openStream()) {
+        metaData.put("md5chksum", ManifestEntryDownloadTask.computeMD5ChkSum(objectStream));
+      }
+      s3Dao.putObject(bucket, objectKey, objectContentsUrl, metaData);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (NoSuchAlgorithmException e) {
@@ -198,7 +195,7 @@ public class DataSetTestUtilities {
    * <p>This is needed because Amazon's S3 API is only <em>eventually</em> consistent for deletes,
    * per <a href="https://aws.amazon.com/s3/faqs/">Amazon S3 FAQs</a>.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to check
    * @param keyPrefix the S3 object key prefix of the objects to include in the count
    * @param expectedObjectCount the number of objects that should be in the specified {@link Bucket}
@@ -206,22 +203,20 @@ public class DataSetTestUtilities {
    *     error
    */
   public static void waitForBucketObjectCount(
-      S3Client s3Client,
+      S3Dao s3Dao,
       String bucket,
       String keyPrefix,
       int expectedObjectCount,
       Duration waitDuration) {
     Instant endTime = Instant.now().plus(waitDuration);
 
-    int actualObjectCount = -1;
+    final String prefix = String.format("%s/", keyPrefix);
+    long actualObjectCount = -1L;
     while (Instant.now().isBefore(endTime)) {
-      ListObjectsRequest listObjectsRequest =
-          ListObjectsRequest.builder()
-              .bucket(bucket)
-              .prefix(String.format("%s/", keyPrefix))
-              .build();
-      actualObjectCount = s3Client.listObjects(listObjectsRequest).contents().size();
-      if (expectedObjectCount == actualObjectCount) return;
+      actualObjectCount = s3Dao.listObjectsAsStream(bucket, prefix).count();
+      if (expectedObjectCount == actualObjectCount) {
+        return;
+      }
 
       try {
         Thread.sleep(500);

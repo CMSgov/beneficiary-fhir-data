@@ -43,7 +43,7 @@ final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
       bucket = DataSetTestUtilities.createTestBucket(s3Dao);
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now(),

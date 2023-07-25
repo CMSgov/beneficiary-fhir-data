@@ -4,7 +4,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
@@ -14,6 +17,7 @@ import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -42,10 +46,13 @@ import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
+@Slf4j
 @AllArgsConstructor
 public class S3Dao implements AutoCloseable {
   /** The bucket prefix for AWS. */
   private static final String BUCKET_NAME_PREFIX = "bb-test";
+
+  public static final int HTTP_STATUS_OK = 200;
 
   /** The client for interacting with AWS S3 buckets and files. */
   private final S3Client s3Client;
@@ -79,6 +86,23 @@ public class S3Dao implements AutoCloseable {
     return s3Client.getObjectAsBytes(getObjectRequest).asInputStream();
   }
 
+  /**
+   * Sends a HEAD request for the specified object and returns true if the result is a 200.
+   *
+   * @param s3Bucket the bucket containing the objects
+   * @param s3Key the S3 object key
+   * @return true if the object exists in S3
+   */
+  public boolean objectExists(String s3Bucket, String s3Key) {
+    HeadObjectRequest headObjectRequest =
+        HeadObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
+    return s3Client.headObject(headObjectRequest).sdkHttpResponse().statusCode() == HTTP_STATUS_OK;
+  }
+
+  public String readListBucketsOwner() {
+    return s3Client.listBuckets().owner().displayName();
+  }
+
   public PutObjectResponse putObject(String s3Bucket, String s3Key, byte[] objectBytes) {
     PutObjectRequest putObjectRequest =
         PutObjectRequest.builder()
@@ -91,21 +115,25 @@ public class S3Dao implements AutoCloseable {
   }
 
   public PutObjectResponse putObject(
-      String s3Bucket,
-      String s3Key,
-      InputStream objectBytes,
-      long objectLength,
-      Map<String, String> metaData) {
-    PutObjectRequest putObjectRequest =
-        PutObjectRequest.builder()
-            .bucket(s3Bucket)
-            .key(s3Key)
-            .contentLength(objectLength)
-            .metadata(metaData)
-            .build();
+      String s3Bucket, String s3Key, URL objectContentsUrl, Map<String, String> metaData) {
+    try {
+      final long objectContentLength = objectContentsUrl.openConnection().getContentLength();
 
-    return s3Client.putObject(
-        putObjectRequest, RequestBody.fromInputStream(objectBytes, objectLength));
+      PutObjectRequest putObjectRequest =
+          PutObjectRequest.builder()
+              .bucket(s3Bucket)
+              .key(s3Key)
+              .contentLength(objectContentLength)
+              .metadata(metaData)
+              .build();
+
+      try (InputStream objectStream = objectContentsUrl.openStream()) {
+        return s3Client.putObject(
+            putObjectRequest, RequestBody.fromInputStream(objectStream, objectContentLength));
+      }
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
   }
 
   /**
