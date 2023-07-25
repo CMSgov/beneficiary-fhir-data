@@ -6,6 +6,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
@@ -87,6 +88,24 @@ public class S3Dao implements AutoCloseable {
             .build();
 
     return s3Client.putObject(putObjectRequest, RequestBody.fromBytes(objectBytes));
+  }
+
+  public PutObjectResponse putObject(
+      String s3Bucket,
+      String s3Key,
+      InputStream objectBytes,
+      long objectLength,
+      Map<String, String> metaData) {
+    PutObjectRequest putObjectRequest =
+        PutObjectRequest.builder()
+            .bucket(s3Bucket)
+            .key(s3Key)
+            .contentLength(objectLength)
+            .metadata(metaData)
+            .build();
+
+    return s3Client.putObject(
+        putObjectRequest, RequestBody.fromInputStream(objectBytes, objectLength));
   }
 
   /**

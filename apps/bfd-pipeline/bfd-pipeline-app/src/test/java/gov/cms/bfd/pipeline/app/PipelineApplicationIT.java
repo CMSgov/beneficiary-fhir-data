@@ -142,7 +142,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     Process appProcess = null;
     try {
       // Create the (empty) bucket to run against.
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
 
       // Start the app.
       ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(bucket);
@@ -200,7 +200,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now(),
@@ -210,15 +210,15 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifest);
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(0),
           StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(1),
@@ -256,7 +256,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
       if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
     }
   }
 

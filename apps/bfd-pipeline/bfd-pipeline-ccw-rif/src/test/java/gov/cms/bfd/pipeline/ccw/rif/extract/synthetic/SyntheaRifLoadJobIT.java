@@ -94,7 +94,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
     String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
@@ -217,7 +217,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               == HttpStatus.SC_OK);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
       }
     }
   }
@@ -249,7 +249,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
     String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
@@ -376,7 +376,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
       }
     }
   }
@@ -467,11 +467,11 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       String location,
       DataSetManifest manifest,
       List<URL> resourcesToAdd) {
-    DataSetTestUtilities.putObject(s3Client, bucket, manifest, location);
+    DataSetTestUtilities.putObject(s3Dao, bucket, manifest, location);
     int index = 0;
     for (URL resource : resourcesToAdd) {
       DataSetTestUtilities.putObject(
-          s3Client, bucket, manifest, manifest.getEntries().get(index), resource, location);
+          s3Dao, bucket, manifest, manifest.getEntries().get(index), resource, location);
       index++;
     }
   }

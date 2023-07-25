@@ -4,26 +4,21 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
-import java.io.ByteArrayInputStream;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 /**
  * Contains utilities that are useful when running tests that involve working with data sets in S3.
@@ -35,41 +30,41 @@ public class DataSetTestUtilities {
   /**
    * Creates an S3 test bucket.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @return the bucket name of the new, random {@link Bucket} for use in an integration test
    */
-  public static String createTestBucket(S3Client s3Client) {
-    return SharedS3Utilities.createTestBucket(s3Client);
+  public static String createTestBucket(S3Dao s3Dao) {
+    return s3Dao.createTestBucket();
   }
 
   /**
    * Deletes the specified {@link Bucket} and all objects in it.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to empty and delete
    */
-  public static void deleteObjectsAndBucket(S3Client s3Client, String bucket) {
-    SharedS3Utilities.deleteTestBucket(s3Client, bucket);
+  public static void deleteObjectsAndBucket(S3Dao s3Dao, String bucket) {
+    s3Dao.deleteTestBucket(bucket);
   }
 
   /**
    * Creates a put request for the specified S3 bucket.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to push as an object
    */
-  public static void putObject(S3Client s3Client, String bucket, DataSetManifest manifest) {
+  public static void putObject(S3Dao s3Dao, String bucket, DataSetManifest manifest) {
     String keyPrefix =
         String.format(
             "%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
-    putObject(s3Client, bucket, keyPrefix, manifest);
+    putObject(s3Dao, bucket, keyPrefix, manifest);
   }
 
   /**
    * Create put request within a given bucket for a manifest at a keyed location.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to push as an object
    * @param location the location to store the manifest, should be {@link
@@ -77,21 +72,21 @@ public class DataSetTestUtilities {
    *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
    */
   public static void putObject(
-      S3Client s3Client, String bucket, DataSetManifest manifest, String location) {
+      S3Dao s3Dao, String bucket, DataSetManifest manifest, String location) {
     String keyPrefix = String.format("%s/%s", location, manifest.getTimestampText());
-    putObject(s3Client, bucket, keyPrefix, manifest);
+    putObject(s3Dao, bucket, keyPrefix, manifest);
   }
 
   /**
    * Create put request within a given bucket for a manifest at a keyed location.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param keyPrefix the key prefix of the object
    * @param manifest the {@link DataSetManifest} to push as an object
    */
   public static void putObject(
-      S3Client s3Client, String bucket, String keyPrefix, DataSetManifest manifest) {
+      S3Dao s3Dao, String bucket, String keyPrefix, DataSetManifest manifest) {
     String objectKey =
         String.format("%s/%d_%s", keyPrefix, manifest.getSequenceId(), "manifest.xml");
 
@@ -103,18 +98,7 @@ public class DataSetTestUtilities {
       marshaller.marshal(manifest, manifestOutputStream);
 
       byte[] manifestByteArray = manifestOutputStream.toByteArray();
-      InputStream manifestInputStream = new ByteArrayInputStream(manifestByteArray);
-
-      PutObjectRequest putObjectRequest =
-          PutObjectRequest.builder()
-              .bucket(bucket)
-              .key(objectKey)
-              .contentLength(Long.valueOf(manifestByteArray.length))
-              .build();
-
-      s3Client.putObject(
-          putObjectRequest,
-          RequestBody.fromInputStream(manifestInputStream, Long.valueOf(manifestByteArray.length)));
+      s3Dao.putObject(bucket, objectKey, manifestByteArray);
     } catch (JAXBException e) {
       throw new RuntimeException(e);
     }
@@ -124,20 +108,20 @@ public class DataSetTestUtilities {
    * Creates a put request, placing the items within the {@link
    * CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key inside the given bucket.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to create an object for
    * @param manifestEntry the {@link DataSetManifestEntry} to create an object for
    * @param objectContentsUrl a {@link URL} to the data to push as the new object's content
    */
   public static void putObject(
-      S3Client s3Client,
+      S3Dao s3Dao,
       String bucket,
       DataSetManifest manifest,
       DataSetManifestEntry manifestEntry,
       URL objectContentsUrl) {
     putObject(
-        s3Client,
+        s3Dao,
         bucket,
         manifest,
         manifestEntry,
@@ -148,7 +132,7 @@ public class DataSetTestUtilities {
   /**
    * Creates a put request, placing the items within the location key inside the given bucket.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to create an object for
    * @param manifestEntry the {@link DataSetManifestEntry} to create an object for
@@ -158,20 +142,20 @@ public class DataSetTestUtilities {
    *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
    */
   public static void putObject(
-      S3Client s3Client,
+      S3Dao s3Dao,
       String bucket,
       DataSetManifest manifest,
       DataSetManifestEntry manifestEntry,
       URL objectContentsUrl,
       String incomingLocation) {
     String keyPrefix = String.format("%s/%s", incomingLocation, manifest.getTimestampText());
-    putObject(s3Client, bucket, keyPrefix, manifest, manifestEntry, objectContentsUrl);
+    putObject(s3Dao, bucket, keyPrefix, manifest, manifestEntry, objectContentsUrl);
   }
 
   /**
    * Creates a put request for the specified S3 bucket.
    *
-   * @param s3Client the {@link S3Client} client to use
+   * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param keyPrefix the S3 key prefix to store the new object under
    * @param manifest the {@link DataSetManifest} to create an object for
@@ -179,7 +163,7 @@ public class DataSetTestUtilities {
    * @param objectContentsUrl a {@link URL} to the data to push as the new object's content
    */
   public static void putObject(
-      S3Client s3Client,
+      S3Dao s3Dao,
       String bucket,
       String keyPrefix,
       DataSetManifest manifest,
@@ -190,19 +174,12 @@ public class DataSetTestUtilities {
     try {
       long objectContentLength = objectContentsUrl.openConnection().getContentLength();
 
-      Map<String, String> metaData = new HashMap<>();
-      metaData.put(
-          "md5chksum", ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream()));
-      PutObjectRequest putObjectRequest =
-          PutObjectRequest.builder()
-              .bucket(bucket)
-              .key(objectKey)
-              .contentLength(objectContentLength)
-              .metadata(metaData)
-              .build();
-      s3Client.putObject(
-          putObjectRequest,
-          RequestBody.fromInputStream(objectContentsUrl.openStream(), objectContentLength));
+      Map<String, String> metaData =
+          Map.of(
+              "md5chksum",
+              ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream()));
+      s3Dao.putObject(
+          bucket, objectKey, objectContentsUrl.openStream(), objectContentLength, metaData);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (NoSuchAlgorithmException e) {

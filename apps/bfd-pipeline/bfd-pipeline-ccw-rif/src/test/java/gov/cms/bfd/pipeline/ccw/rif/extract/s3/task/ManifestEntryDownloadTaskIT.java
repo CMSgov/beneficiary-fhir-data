@@ -11,7 +11,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,7 +40,7 @@ final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
   void testMD5ChkSum() throws Exception {
     String bucket = null;
     try {
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
@@ -55,9 +54,9 @@ final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
 
       // upload beneficiary sample file to S3 bucket created above
-      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifest);
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(0),
@@ -74,26 +73,23 @@ final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
       GetObjectRequest getObjectRequest =
           GetObjectRequest.builder().bucket(bucket).key(s3Key).build();
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
-      try (S3Dao s3Dao = new S3Dao(s3ClientFactory)) {
-        LOGGER.info(
-            "Downloading '{}' to '{}'...", getObjectRequest.key(), localTempFile.toAbsolutePath());
+      LOGGER.info(
+          "Downloading '{}' to '{}'...", getObjectRequest.key(), localTempFile.toAbsolutePath());
 
-        GetObjectResponse downloadFileResponse = s3Dao.downloadObject(bucket, s3Key, localTempFile);
+      GetObjectResponse downloadFileResponse = s3Dao.downloadObject(bucket, s3Key, localTempFile);
 
-        InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
-        String generatedMD5ChkSum =
-            ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
-        LOGGER.info("The generated MD5 value from Java (Base64 encoded) is:" + generatedMD5ChkSum);
+      InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
+      String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
+      LOGGER.info("The generated MD5 value from Java (Base64 encoded) is:" + generatedMD5ChkSum);
 
-        String downloadedFileMD5ChkSum = downloadFileResponse.metadata().get("md5chksum");
-        LOGGER.info("The MD5 value from AWS S3 file's metadata is: " + downloadedFileMD5ChkSum);
-        assertEquals(
-            downloadedFileMD5ChkSum,
-            generatedMD5ChkSum,
-            "Checksum doesn't match on downloaded file " + getObjectRequest.key());
-        LOGGER.info(
-            "Downloaded '{}' to '{}'.", getObjectRequest.key(), localTempFile.toAbsolutePath());
-      }
+      String downloadedFileMD5ChkSum = downloadFileResponse.metadata().get("md5chksum");
+      LOGGER.info("The MD5 value from AWS S3 file's metadata is: " + downloadedFileMD5ChkSum);
+      assertEquals(
+          downloadedFileMD5ChkSum,
+          generatedMD5ChkSum,
+          "Checksum doesn't match on downloaded file " + getObjectRequest.key());
+      LOGGER.info(
+          "Downloaded '{}' to '{}'.", getObjectRequest.key(), localTempFile.toAbsolutePath());
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (SdkClientException e) {
@@ -103,7 +99,7 @@ final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
       throw new BadCodeMonkeyException(e);
     } finally {
       if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
     }
   }
 }
