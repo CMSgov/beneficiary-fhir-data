@@ -455,9 +455,7 @@ public class S3DirectoryDao implements AutoCloseable {
         Region.of(
             StringUtils.isNotBlank(bucketLocation) ? bucketLocation : Region.US_EAST_1.toString());
     S3TransferManager s3TransferManager =
-        S3TransferManager.builder()
-            .s3Client(SharedS3Utilities.createS3AsyncClient(region))
-            .build();
+        S3TransferManager.builder().s3Client(SharedS3Utilities.createS3AsyncClient(region)).build();
     GetObjectRequest getObjectRequest =
         GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
     DownloadFileRequest downloadFileRequest =
