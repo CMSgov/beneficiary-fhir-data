@@ -211,8 +211,8 @@ public class DiagnosisUtilV2 {
   }
 
   /**
-   * Extracts nearly all diagnosis types from a Claim. It does this with reflection, so if the
-   * specific claim type doesn't have the given diagnosis it will just be skipped.
+   * Extracts nearly all diagnosis types from a Claim. If the specific claim type doesn't have the
+   * given diagnosis it will just be skipped.
    *
    * @param codes The mapping of diagnosis codes by their property name and respective value
    * @param codeVersions The mapping of diagnosis code versions by their property name and
