@@ -9,6 +9,7 @@ import com.google.common.io.Files;
 import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.File;
@@ -146,14 +147,14 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
               ? java.nio.file.Files.createTempDirectory("s3cache")
               : Path.of(s3CacheDirectory);
       final S3ClientFactory s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
-      final S3DirectoryDao s3Dao =
-          new S3DirectoryDao(
-              s3ClientFactory, s3Bucket, directory, cacheDirectory, useTempDirectoryForCache);
+      final S3Dao s3Dao = new S3Dao(s3ClientFactory);
+      final S3DirectoryDao directoryDao =
+          new S3DirectoryDao(s3Dao, s3Bucket, directory, cacheDirectory, useTempDirectoryForCache);
       log.info(
           "serving claims using {} with data from S3 bucket {}",
           RdaS3JsonMessageSourceFactory.class.getSimpleName(),
-          s3Dao.getS3BucketName());
-      return new RdaS3JsonMessageSourceFactory(version, s3Dao);
+          directoryDao.getS3BucketName());
+      return new RdaS3JsonMessageSourceFactory(version, directoryDao);
     }
 
     /**

@@ -9,7 +9,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,14 +25,7 @@ import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.transfer.s3.S3TransferManager;
-import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
-import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
-import software.amazon.awssdk.transfer.s3.model.FileDownload;
-import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 /**
  * Front end for downloading files from an S3 bucket/directory and caching them locally. Once
@@ -69,13 +62,8 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   private static final String S3FileNameRegex = "[_a-z0-9][-_.a-z0-9]+";
 
-  /** Value returned by {@link S3Exception#statusCode()} to indicate object not found. */
-  private static final int AWS_NOT_FOUND_STATUS_CODE = 404;
-
-  /** The client for interacting with AWS S3 buckets and files. */
-  private final S3Client s3Client;
-  /** The client for interacting with AWS S3 buckets and files. */
-  private final S3AsyncClient s3AsyncClient;
+  /** The DAO for interacting with AWS S3 buckets and files. */
+  private final S3Dao s3Dao;
   /** The S3 bucket containing source files. */
   @Getter private final String s3BucketName;
   /** The directory path within bucket containing source files. */
@@ -96,20 +84,19 @@ public class S3DirectoryDao implements AutoCloseable {
   /**
    * Creates an instance.
    *
-   * @param s3ClientFactory used to access S3
+   * @param s3Dao used to access S3
    * @param s3BucketName the bucket to read from
    * @param s3DirectoryPath the directory inside the bucket to read from
    * @param cacheDirectory the local directory to store cached files in
    * @param deleteOnExit causes close to delete all cached files and directory when true
    */
   public S3DirectoryDao(
-      S3ClientFactory s3ClientFactory,
+      S3Dao s3Dao,
       String s3BucketName,
       String s3DirectoryPath,
       Path cacheDirectory,
       boolean deleteOnExit) {
-    this.s3Client = s3ClientFactory.createS3Client();
-    this.s3AsyncClient = s3ClientFactory.createS3AsyncClient();
+    this.s3Dao = s3Dao;
     this.s3BucketName = Preconditions.checkNotNull(s3BucketName);
     this.s3DirectoryPath = normalizeDirectoryPath(s3DirectoryPath);
     this.cacheDirectory = Preconditions.checkNotNull(cacheDirectory);
@@ -207,6 +194,7 @@ public class S3DirectoryDao implements AutoCloseable {
       var closer = new MultiCloser();
       closer.close(this::deleteAllFiles);
       closer.close(() -> Files.deleteIfExists(cacheDirectory));
+      closer.close(s3Dao::close);
       closer.finish();
     }
   }
@@ -325,14 +313,9 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   private List<S3Object> readS3ObjectListing() {
     if (Strings.isNullOrEmpty(s3DirectoryPath)) {
-      return s3Client
-          .listObjectsV2(ListObjectsV2Request.builder().bucket(s3BucketName).build())
-          .contents();
+      return s3Dao.listObjectsAsStream(s3BucketName).toList();
     } else {
-      return s3Client
-          .listObjectsV2(
-              ListObjectsV2Request.builder().bucket(s3BucketName).prefix(s3DirectoryPath).build())
-          .contents();
+      return s3Dao.listObjectsAsStream(s3BucketName, s3DirectoryPath).toList();
     }
   }
 
@@ -426,9 +409,7 @@ public class S3DirectoryDao implements AutoCloseable {
   private HeadObjectResponse readS3ObjectMetaData(String fileName, String s3Key)
       throws IOException {
     try {
-      HeadObjectRequest headObjectRequest =
-          HeadObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
-      return s3Client.headObject(headObjectRequest);
+      return s3Dao.readObjectMetaData(s3BucketName, s3Key);
     } catch (NoSuchKeyException | NoSuchBucketException e) {
       var fileNotFound = new FileNotFoundException(fileName);
       fileNotFound.addSuppressed(e);
@@ -443,25 +424,12 @@ public class S3DirectoryDao implements AutoCloseable {
    * @param s3Key the S3 object key
    * @param tempDataFile where to store the downloaded object
    * @return the meta data
-   * @throws IOException with {@link FileNotFoundException} or an AWS runtime exception
+   * @throws FileNotFoundException if object or key do not exist
    */
   private GetObjectResponse downloadS3Object(String s3Key, Path tempDataFile)
       throws FileNotFoundException {
-    /* Gather information needed to prepare the S3TransferManager */
-    S3TransferManager s3TransferManager =
-        DefaultS3TransferManager.builder().s3Client(s3AsyncClient).build();
-    GetObjectRequest getObjectRequest =
-        GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
-    DownloadFileRequest downloadFileRequest =
-        DownloadFileRequest.builder()
-            .getObjectRequest(getObjectRequest)
-            .destination(tempDataFile)
-            .addTransferListener(LoggingTransferListener.create())
-            .build();
-
     try {
-      FileDownload downloadFile = s3TransferManager.downloadFile(downloadFileRequest);
-      return downloadFile.completionFuture().join().response();
+      return s3Dao.downloadObject(s3BucketName, s3Key, tempDataFile);
     } catch (CompletionException e) {
       final var cause = e.getCause();
       if (cause instanceof NoSuchKeyException || cause instanceof NoSuchBucketException) {

@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,8 +32,7 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
       s3Bucket = s3Dao.createTestBucket();
       final String s3Directory = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      directoryDao =
-          new S3DirectoryDao(s3ClientFactory, s3Bucket, s3Directory, cacheDirectoryPath, true);
+      directoryDao = new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, true);
 
       // no files in the bucket yet
       assertEquals(List.of(), directoryDao.readFileNames());
@@ -113,8 +111,7 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
       s3Bucket = s3Dao.createTestBucket();
       final String s3Directory = "";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      directoryDao =
-          new S3DirectoryDao(s3ClientFactory, s3Bucket, s3Directory, cacheDirectoryPath, true);
+      directoryDao = new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, true);
 
       // add a couple of files
       aTag1 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-1");
@@ -160,8 +157,7 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
       s3Bucket = s3Dao.createTestBucket();
       final String s3Directory = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      directoryDao =
-          new S3DirectoryDao(s3ClientFactory, s3Bucket, s3Directory, cacheDirectoryPath, false);
+      directoryDao = new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, false);
 
       // add a couple of files
       aTag1 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-1");
@@ -206,14 +202,11 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
     try {
       s3Bucket = s3Dao.createTestBucket();
       final String s3Directory = "";
-      try (var s3Dao =
-          new S3DirectoryDao(
-              s3ClientFactory, s3Bucket, s3Directory, Files.createTempDirectory("test"), true)) {
-        assertThrows(
-            FileNotFoundException.class,
-            () -> {
-              s3Dao.downloadFile("a.txt");
-            });
+      try (var s3Dao = new S3Dao(s3ClientFactory);
+          var directoryDao =
+              new S3DirectoryDao(
+                  s3Dao, s3Bucket, s3Directory, Files.createTempDirectory("test"), true)) {
+        assertThrows(FileNotFoundException.class, () -> directoryDao.downloadFile("a.txt"));
       }
     } finally {
       s3Dao.deleteTestBucket(s3Bucket);
@@ -227,10 +220,8 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
    * @param objectKey the key for the object
    * @param fileData a string uploaded as a file
    * @return eTag assigned to the file by S3
-   * @throws IOException pass through if anything fails
    */
-  private String uploadFileToBucket(String bucket, String objectKey, String fileData)
-      throws IOException {
+  private String uploadFileToBucket(String bucket, String objectKey, String fileData) {
     s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8));
     var eTag = s3Dao.readObjectMetaData(bucket, objectKey).eTag();
     assertNotNull(eTag);
