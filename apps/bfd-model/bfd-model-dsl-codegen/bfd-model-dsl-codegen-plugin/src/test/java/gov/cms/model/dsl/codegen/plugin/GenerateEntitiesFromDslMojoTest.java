@@ -801,7 +801,7 @@ public class GenerateEntitiesFromDslMojoTest {
     column = ColumnBean.builder().javaType("String").javaAccessorType("long").build();
     assertEquals(TypeName.LONG, mojo.createAccessorTypeForColumn(mapping, column));
   }
-  
+
   /** Test for {@link GenerateEntitiesFromDslMojo#createMethodSpecsForGroupedProperties}. */
   @Test
   public void testCreateMethodSpecsForGroupedProperties() {

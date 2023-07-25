@@ -2522,6 +2522,7 @@ public final class TransformerUtils {
   /**
    * Extracts nearly all diagnosis types from a Claim.
    *
+   * @param claim TODO: BFD-2598.
    * @param codes TODO: BFD-2598.
    * @param codeVersions TODO: BFD-2598.
    * @param presentOnAdms TODO: BFD-2598.
