@@ -203,7 +203,7 @@ public class PoetUtil {
 
   /**
    * Generates a getter method that returns a mapping of fields by group, whose keys are the fields'
-   * names and whose values are the fields' values
+   * names and whose values are the fields' values.
    *
    * @param groupedPropertiesName the shared group name of the fields
    * @param propertyNames the fields for the given group
