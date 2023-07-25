@@ -11,9 +11,9 @@ data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_pipeline_new_relic_metric_path: '/metric/v1'
 data_pipeline_ccw_rif_job_enabled: true
 
-rif_thread_multiple: 25
-rif_job_batch_size: 100
-rif_job_queue_size_multiple: 10
+rif_thread_multiple: 3
+rif_job_batch_size: 7
+rif_job_queue_size_multiple: 5
 rif_thread_multiple_claims: 25
 rif_job_batch_size_claims: 100
 rif_job_queue_size_multiple_claims: 10
