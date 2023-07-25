@@ -44,9 +44,9 @@
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size: 3
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple: 7
 /bfd/${env}/pipeline/ccw/nonsensitive/rif_thread_multiple: 5
-/bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size_claims: 100
-/bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple_claims: 10
-/bfd/${env}/pipeline/ccw/nonsensitive/rif_thread_multiple_claims: 25
+#/bfd/${env}/pipeline/ccw/nonsensitive/rif_job_batch_size_claims: 100
+#/bfd/${env}/pipeline/ccw/nonsensitive/rif_job_queue_size_multiple_claims: 10
+#/bfd/${env}/pipeline/ccw/nonsensitive/rif_thread_multiple_claims: 25
 
 ## PIPELINE+RDA
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
