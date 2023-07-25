@@ -215,7 +215,6 @@ final class InpatientClaimTransformer {
         Optional.of(claimGroup.getUtilizationDayCount()));
 
     TransformerUtils.extractDiagnoses(
-            claimGroup,
             claimGroup.getDiagnosisCodes(),
             claimGroup.getDiagnosisCodeVersions(),
             Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes()))

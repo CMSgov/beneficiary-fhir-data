@@ -103,10 +103,7 @@ final class DMEClaimTransformer {
         claimGroup.getClaimCarrierControlNumber());
 
     TransformerUtils.extractDiagnoses(
-            claimGroup,
-            claimGroup.getDiagnosisCodes(),
-            claimGroup.getDiagnosisCodeVersions(),
-            Optional.empty())
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
         .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
