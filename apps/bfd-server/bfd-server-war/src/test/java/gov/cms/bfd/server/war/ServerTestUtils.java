@@ -130,10 +130,11 @@ public final class ServerTestUtils {
   }
 
   /**
-   * Returns the {@link Properties} from the <code>server-ports.properties</code> that should have
-   * been written out by the integration tests' <code>server-start.sh</code> script.
+   * Returns the server port {@link Properties} that are written to a file during the <code>
+   * reserve-server-ports</code> maven plugin step. This allows us to use the same server port
+   * during the entire test runtime.
    *
-   * @return the properties
+   * @return the server port properties
    */
   private static Properties initTestServerPortsProperties() {
     /*
