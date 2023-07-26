@@ -13,7 +13,7 @@ import software.amazon.awssdk.regions.Region;
 
 /**
  * Value object containing some common settings required to initialize AWS SDK clients. All settings
- * are optional. Normally construction is via a builder object. The builder class and object have *
+ * are optional. Normally construction is via a builder object. The builder class and object have
  * custom names to differentiate from the builder in derived classes.
  */
 @Getter
