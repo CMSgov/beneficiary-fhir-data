@@ -43,7 +43,7 @@
 ## PIPELINE RDA
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
 /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_job_enabled: false
-/bfd/${env}/pipeline/rda/nonsensitive/instance_type: c6i.large
+/bfd/${env}/pipeline/rda/nonsensitive/instance_type: m6i.large
 
 # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
 # /bfd/${env}/pipeline/rda/nonsensitive/data_pipeline_rda_grpc_max_idle_seconds: 600
