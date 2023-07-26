@@ -79,8 +79,8 @@
         <metrics.version>4.2.19</metrics.version>
         <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
-        <aws-java-sdk-bom.version>2.20.109</aws-java-sdk-bom.version>
-        <aws.crt.version>0.23.2</aws.crt.version>
+        <aws-java-sdk-bom.version>2.20.62</aws-java-sdk-bom.version>
+        <aws.crt.version>0.21.17</aws.crt.version>
         <spring-data-jpa.version>2.7.11</spring-data-jpa.version>
         <spring-framework.version>5.3.23</spring-framework.version>
 

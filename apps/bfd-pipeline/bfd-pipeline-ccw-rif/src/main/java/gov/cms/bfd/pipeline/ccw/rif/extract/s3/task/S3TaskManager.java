@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
 
 /** Handles the execution and management of S3-related tasks. */
 public final class S3TaskManager {
@@ -54,7 +55,7 @@ public final class S3TaskManager {
 
     this.s3Client = SharedS3Utilities.createS3Client(options.getS3Region());
     this.s3TransferManager =
-        S3TransferManager.builder()
+        DefaultS3TransferManager.builder()
             .s3Client(SharedS3Utilities.createS3AsyncClient(options.getS3Region()))
             .build();
 

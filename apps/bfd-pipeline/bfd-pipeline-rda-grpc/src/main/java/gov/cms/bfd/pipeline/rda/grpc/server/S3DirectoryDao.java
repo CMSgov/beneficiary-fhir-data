@@ -29,6 +29,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
@@ -455,7 +456,9 @@ public class S3DirectoryDao implements AutoCloseable {
         Region.of(
             StringUtils.isNotBlank(bucketLocation) ? bucketLocation : Region.US_EAST_1.toString());
     S3TransferManager s3TransferManager =
-        S3TransferManager.builder().s3Client(SharedS3Utilities.createS3AsyncClient(region)).build();
+        DefaultS3TransferManager.builder()
+            .s3Client(SharedS3Utilities.createS3AsyncClient(region))
+            .build();
     GetObjectRequest getObjectRequest =
         GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
     DownloadFileRequest downloadFileRequest =
