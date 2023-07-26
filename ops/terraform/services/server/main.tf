@@ -1,21 +1,19 @@
+module "terraservice" {
+  source = "../_modules/bfd-terraservice"
+
+  environment_name     = terraform.workspace
+  relative_module_root = "ops/terraform/services/common"
+}
+
 locals {
-  env              = terraform.workspace
-  established_envs = ["test", "prod-sbx", "prod"]
-  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  default_tags     = module.terraservice.default_tags
+  env              = module.terraservice.env
+  seed_env         = module.terraservice.seed_env
+  is_ephemeral_env = module.terraservice.is_ephemeral_env
 
   azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
   legacy_service = "fhir"
   service        = "server"
-
-  default_tags = {
-    application    = "bfd"
-    business       = "oeda"
-    stack          = local.env
-    Environment    = local.seed_env
-    Terraform      = true
-    tf_module_root = "ops/terraform/services/${local.service}"
-  }
 
   # NOTE: nonsensitive service-oriented and common config
   nonsensitive_common_map = zipmap(
