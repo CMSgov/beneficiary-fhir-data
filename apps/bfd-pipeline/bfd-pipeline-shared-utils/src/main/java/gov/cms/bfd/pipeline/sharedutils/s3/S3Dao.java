@@ -46,12 +46,17 @@ import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
+/**
+ * Data access object that encapsulates the AWS S3 API. All primitive S3 related operations in BFD
+ * are implemented through calls to an instance of this class.
+ */
 @Slf4j
 @AllArgsConstructor
 public class S3Dao implements AutoCloseable {
-  /** The bucket prefix for AWS. */
+  /** The test bucket prefix for AWS. */
   private static final String BUCKET_NAME_PREFIX = "bb-test";
 
+  /** HTTP status code from S3 API HEAD request that indicates the request was successful. */
   public static final int HTTP_STATUS_OK = 200;
 
   /** The client for interacting with AWS S3 buckets and files. */
@@ -61,12 +66,22 @@ public class S3Dao implements AutoCloseable {
   /** Used to perform high throughput downloads. */
   private final S3TransferManager s3TransferManager;
 
+  /**
+   * Initializes an instance using the provided factory.
+   *
+   * @param s3ClientFactory used to create necessary S3 related objects
+   */
   public S3Dao(S3ClientFactory s3ClientFactory) {
     s3Client = s3ClientFactory.createS3Client();
     s3AsyncClient = s3ClientFactory.createS3AsyncClient();
     s3TransferManager = DefaultS3TransferManager.builder().s3Client(s3AsyncClient).build();
   }
 
+  /**
+   * Closes the {@link #s3TransferManager}.
+   *
+   * <p>{@inheritDoc}
+   */
   @Override
   public void close() {
     s3TransferManager.close();
@@ -99,10 +114,24 @@ public class S3Dao implements AutoCloseable {
     return s3Client.headObject(headObjectRequest).sdkHttpResponse().statusCode() == HTTP_STATUS_OK;
   }
 
+  /**
+   * Gets the display name of the owner reported by {@link S3Client#listBuckets()}.
+   *
+   * @return the display name
+   */
   public String readListBucketsOwner() {
     return s3Client.listBuckets().owner().displayName();
   }
 
+  /**
+   * Uploads an object with the given key and bucket. The byte array contains the binary data for
+   * the uploaded object.
+   *
+   * @param s3Bucket the bucket containing the object
+   * @param s3Key the S3 object key
+   * @param objectBytes binary data contents of the object
+   * @return response from the S3 API
+   */
   public PutObjectResponse putObject(String s3Bucket, String s3Key, byte[] objectBytes) {
     PutObjectRequest putObjectRequest =
         PutObjectRequest.builder()
@@ -114,6 +143,16 @@ public class S3Dao implements AutoCloseable {
     return s3Client.putObject(putObjectRequest, RequestBody.fromBytes(objectBytes));
   }
 
+  /**
+   * Uploads an object with the given key and bucket. The URL contains the binary data for the
+   * uploaded object.
+   *
+   * @param s3Bucket the bucket containing the object
+   * @param s3Key the S3 object key
+   * @param objectContentsUrl URL form which binary data contents of the object can be obtained
+   * @param metaData key value pairs serving as meta data for the uploaded object
+   * @return response from the S3 API
+   */
   public PutObjectResponse putObject(
       String s3Bucket, String s3Key, URL objectContentsUrl, Map<String, String> metaData) {
     try {
@@ -233,6 +272,15 @@ public class S3Dao implements AutoCloseable {
     }
   }
 
+  /**
+   * Copies the object from the given source bucket and key to an object at the provided target
+   * bucket and key.
+   *
+   * @param s3SourceBucket the bucket containing source object
+   * @param s3SourceKey the S3 object key of source object
+   * @param s3TargetBucket the bucket to contain the target object
+   * @param s3TargetKey the S3 object key of the target object
+   */
   public void copyObject(
       String s3SourceBucket, String s3SourceKey, String s3TargetBucket, String s3TargetKey) {
     CopyObjectRequest copyObjectRequestRequest =
@@ -324,6 +372,14 @@ public class S3Dao implements AutoCloseable {
     }
   }
 
+  /**
+   * A {@link CompletionException} is just an implementation detail and irrelevant to callers of our
+   * methods. This obtains the actual cause and returns a {@link RuntimeException} which is either
+   * the actual cause or a wrapper around the cause.
+   *
+   * @param e exception to unwrap
+   * @return the {@link RuntimeException}
+   */
   private RuntimeException extractCompletionExceptionCause(CompletionException e) {
     final var cause = e.getCause();
     if (cause instanceof RuntimeException runtimeException) {
