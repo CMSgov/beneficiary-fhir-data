@@ -3,10 +3,9 @@ package gov.cms.bfd.pipeline.ccw.rif;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
+import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -14,16 +13,12 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,23 +28,8 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for {@link CcwRifLoadJob}. */
-final class CcwRifLoadJobIT extends AbstractLocalStackTest {
+final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
-
-  /** Configuration settings to connect to localstack container. */
-  private S3ClientConfig s3ClientConfig;
-  /** Factory to create clients connected to localstack container. */
-  private S3ClientFactory s3ClientFactory;
-  /** A client connected to the localstack container for use in test methods. */
-  private S3Client s3Client;
-
-  /** Populates S3 related fields based on localstack container. */
-  @BeforeEach
-  void initializeS3RelatedFields() {
-    s3ClientConfig = LocalStackS3ClientFactory.createS3ClientConfig(localstack);
-    s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
-    s3Client = s3ClientFactory.createS3Client();
-  }
 
   /**
    * Tests {@link CcwRifLoadJob} when run against an empty bucket.

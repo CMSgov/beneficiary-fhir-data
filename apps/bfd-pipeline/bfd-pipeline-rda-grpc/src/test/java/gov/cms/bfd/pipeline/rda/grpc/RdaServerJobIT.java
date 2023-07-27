@@ -9,10 +9,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
-import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
-import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
+import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaS3JsonMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
@@ -22,9 +21,6 @@ import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -37,12 +33,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.services.s3.S3Client;
 
 /** Integration tests for the RDA server. */
-public class RdaServerJobIT extends AbstractLocalStackTest {
+public class RdaServerJobIT extends AbstractLocalStackS3Test {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
   /** The Fiss claim source. */
@@ -62,21 +56,6 @@ public class RdaServerJobIT extends AbstractLocalStackTest {
   /** The MCS claim transformer to test the server data. */
   private final McsClaimTransformer mcsTransformer =
       new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
-
-  /** Configuration settings to connect to localstack container. */
-  private S3ClientConfig s3ClientConfig;
-  /** Factory to create clients connected to localstack container. */
-  private S3ClientFactory s3ClientFactory;
-  /** A client connected to the localstack container for use in test methods. */
-  private S3Client s3Client;
-
-  /** Populates S3 related fields based on localstack container. */
-  @BeforeEach
-  void initializeS3RelatedFields() {
-    s3ClientConfig = LocalStackS3ClientFactory.createS3ClientConfig(localstack);
-    s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
-    s3Client = s3ClientFactory.createS3Client();
-  }
 
   /**
    * Tests the server job in {@link RdaServerJob.Config.ServerMode#Random} configuration (generating

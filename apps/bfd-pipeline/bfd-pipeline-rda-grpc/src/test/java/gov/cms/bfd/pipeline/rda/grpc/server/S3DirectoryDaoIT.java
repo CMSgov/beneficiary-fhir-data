@@ -10,9 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.io.ByteSource;
-import gov.cms.bfd.AbstractLocalStackTest;
-import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
+import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,25 +18,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 
 /** Integration test for {@link S3DirectoryDao}. */
-class S3DirectoryDaoIT extends AbstractLocalStackTest {
-  /** Factory to create clients connected to localstack container. */
-  private S3ClientFactory s3ClientFactory;
-  /** A client connected to the localstack container for use in test methods. */
-  private S3Client s3Client;
-
-  /** Populates S3 related fields based on localstack container. */
-  @BeforeEach
-  void initializeS3RelatedFields() {
-    s3ClientFactory = new LocalStackS3ClientFactory(localstack);
-    s3Client = s3ClientFactory.createS3Client();
-  }
-
+class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
   /**
    * Tests all basic operations of the {@link S3DirectoryDao}. Uploads and accesses data to a bucket
    * and verifies that cached files are managed as expected.

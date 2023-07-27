@@ -2,10 +2,9 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.LocalStackS3ClientFactory;
+import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -13,9 +12,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
-import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,12 +22,10 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
@@ -40,23 +34,8 @@ import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Tests downloaded S3 file attributes such as MD5ChkSum. */
-final class ManifestEntryDownloadTaskIT extends AbstractLocalStackTest {
+final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
-
-  /** Configuration settings to connect to localstack container. */
-  private S3ClientConfig s3ClientConfig;
-  /** Factory to create clients connected to localstack container. */
-  private S3ClientFactory s3ClientFactory;
-  /** A client connected to the localstack container for use in test methods. */
-  private S3Client s3Client;
-
-  /** Populates S3 related fields based on localstack container. */
-  @BeforeEach
-  void initializeS3RelatedFields() {
-    s3ClientConfig = LocalStackS3ClientFactory.createS3ClientConfig(localstack);
-    s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
-    s3Client = s3ClientFactory.createS3Client();
-  }
 
   /**
    * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated MD5ChkSum value.
