@@ -14,6 +14,9 @@ data_pipeline_ccw_rif_job_enabled: true
 rif_thread_multiple: 3
 rif_job_batch_size: 7
 rif_job_queue_size_multiple: 5
+rif_thread_multiple_claims: 25
+rif_job_batch_size_claims: 100
+rif_job_queue_size_multiple_claims: 10
 
 ## RDA API Pipeline
 # Used to download FISS/MCS partially adjudicated claims data.
