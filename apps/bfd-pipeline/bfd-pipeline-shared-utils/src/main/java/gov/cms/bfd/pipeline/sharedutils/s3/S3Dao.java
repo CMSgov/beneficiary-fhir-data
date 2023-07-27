@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.sharedutils.s3;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileNotFoundException;
@@ -10,13 +9,11 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
@@ -179,18 +176,17 @@ public class S3Dao implements AutoCloseable {
    * Reads a list of objects and returns a lazy {@link Stream} of all of the objects. Lookups are
    * paginated so not all objects are read at once.
    *
-   * @param settings {@link ListObjectsSettings} defining how to request the objects
+   * @param s3Bucket the bucket containing the objects
+   * @param keyPrefix optional prefix string that all objects must match (usually a directory path)
+   * @param pageSize optional max number of objects returned per page (not per stream)
    * @return a {@link Stream} of objects
    */
-  public Stream<S3Object> listObjectsAsStream(ListObjectsSettings settings) {
+  public Stream<S3Object> listObjectsAsStream(
+      String s3Bucket, Optional<String> keyPrefix, Optional<Integer> pageSize) {
     ListObjectsV2Request.Builder objectRequestBuilder =
-        ListObjectsV2Request.builder().bucket(settings.bucket);
-    if (settings.prefix.length() > 0) {
-      objectRequestBuilder.prefix(settings.prefix);
-    }
-    if (settings.pageSize > 0) {
-      objectRequestBuilder.maxKeys(settings.pageSize);
-    }
+        ListObjectsV2Request.builder().bucket(s3Bucket);
+    keyPrefix.ifPresent(objectRequestBuilder::prefix);
+    pageSize.ifPresent(objectRequestBuilder::maxKeys);
     ListObjectsV2Request objectRequest = objectRequestBuilder.build();
     ListObjectsV2Iterable objectPaginator = s3Client.listObjectsV2Paginator(objectRequest);
     return objectPaginator.stream().flatMap(s -> s.contents().stream());
@@ -205,8 +201,7 @@ public class S3Dao implements AutoCloseable {
    * @return a {@link Stream} of objects
    */
   public Stream<S3Object> listObjectsAsStream(String s3Bucket, String keyPrefix) {
-    return listObjectsAsStream(
-        ListObjectsSettings.builder().bucket(s3Bucket).prefix(keyPrefix).build());
+    return listObjectsAsStream(s3Bucket, Optional.of(keyPrefix), Optional.empty());
   }
 
   /**
@@ -217,7 +212,7 @@ public class S3Dao implements AutoCloseable {
    * @return a {@link Stream} of objects
    */
   public Stream<S3Object> listObjectsAsStream(String s3Bucket) {
-    return listObjectsAsStream(ListObjectsSettings.builder().bucket(s3Bucket).build());
+    return listObjectsAsStream(s3Bucket, Optional.empty(), Optional.empty());
   }
 
   /**
@@ -386,31 +381,6 @@ public class S3Dao implements AutoCloseable {
       return runtimeException;
     } else {
       return new RuntimeException(cause);
-    }
-  }
-
-  /** Data object encapsulating all possible settings for listing objects from S3. */
-  @Data
-  public static class ListObjectsSettings {
-    /** Bucket name to list from. */
-    private final String bucket;
-    /** Optional prefix for keys within the bucket. */
-    private final String prefix;
-    /** Optional page size. */
-    private final int pageSize;
-
-    /**
-     * Constructs an instance.
-     *
-     * @param bucket required bucket name
-     * @param prefix optional key prefix (null or empty uses no prefix)
-     * @param pageSize optional page size (null, zero or negative uses S3 default value)
-     */
-    @Builder
-    public ListObjectsSettings(String bucket, @Nullable String prefix, @Nullable Integer pageSize) {
-      this.bucket = Preconditions.checkNotNull(bucket);
-      this.prefix = Strings.nullToEmpty(prefix);
-      this.pageSize = pageSize == null ? 0 : pageSize;
     }
   }
 }

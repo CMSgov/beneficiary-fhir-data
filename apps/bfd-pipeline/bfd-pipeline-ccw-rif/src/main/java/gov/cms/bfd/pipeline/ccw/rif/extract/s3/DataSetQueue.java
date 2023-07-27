@@ -197,17 +197,6 @@ public final class DataSetQueue {
     Set<DataSetManifestId> manifestIds = new HashSet<>();
 
     /*
-     * Request a list of all objects in the configured bucket and directory.
-     * (In the results, we'll be looking for the oldest manifest file, if
-     * any.)
-     */
-    final S3Dao.ListObjectsSettings listSettings =
-        S3Dao.ListObjectsSettings.builder()
-            .bucket(options.getS3BucketName())
-            .pageSize(options.getS3ListMaxKeys().orElse(0))
-            .build();
-
-    /*
      * Loop through all of the pages, looking for manifests.
      */
     AtomicInteger completedManifestsCount = new AtomicInteger();
@@ -228,7 +217,16 @@ public final class DataSetQueue {
             completedManifestsCount.incrementAndGet();
           }
         };
-    s3TaskManager.getS3Dao().listObjectsAsStream(listSettings).forEach(addToManifest);
+    /*
+     * Request a list of all objects in the configured bucket and directory.
+     * (In the results, we'll be looking for the oldest manifest file, if
+     * any.)
+     */
+    s3TaskManager
+        .getS3Dao()
+        .listObjectsAsStream(
+            options.getS3BucketName(), Optional.empty(), options.getS3ListMaxKeys())
+        .forEach(addToManifest);
 
     this.completedManifestsCount = completedManifestsCount.get();
 

@@ -15,7 +15,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -376,13 +375,6 @@ public final class CcwRifLoadJob implements PipelineJob {
         String.format(
             "%s/%s/", manifest.getManifestKeyIncomingLocation(), manifest.getTimestampText());
 
-    final S3Dao.ListObjectsSettings listSettings =
-        S3Dao.ListObjectsSettings.builder()
-            .bucket(options.getS3BucketName())
-            .prefix(dataSetKeyPrefix)
-            .pageSize(options.getS3ListMaxKeys().orElse(0))
-            .build();
-
     /*
      * Pull the object names from the keys that were returned, by
      * stripping the timestamp prefix and slash from each of them.
@@ -391,7 +383,10 @@ public final class CcwRifLoadJob implements PipelineJob {
     final Set<String> dataSetObjectNames =
         s3TaskManager
             .getS3Dao()
-            .listObjectsAsStream(listSettings)
+            .listObjectsAsStream(
+                options.getS3BucketName(),
+                Optional.of(dataSetKeyPrefix),
+                options.getS3ListMaxKeys())
             .peek(o -> LOGGER.debug("Found file: '{}', part of data set: '{}'.", o.key(), manifest))
             .map(o -> o.key().substring(dataSetKeyPrefix.length()))
             .collect(Collectors.toSet());
