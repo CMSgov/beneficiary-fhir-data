@@ -31,11 +31,6 @@
             <artifactId>bfd-pipeline-shared-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-shared-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- Compile time only -->
         <dependency>
             <!-- this allows the construction of POJOs without a lot of boilerplate code -->
