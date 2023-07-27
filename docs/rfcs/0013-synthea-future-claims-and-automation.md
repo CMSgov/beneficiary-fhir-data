@@ -6,15 +6,34 @@
 * RFC PR: [beneficiary-fhir-data/rfcs#0013]()
 * JIRA Ticket(s):
   * [BFD-1616](https://jira.cms.gov/browse/BFD-1616)
+  * [BFD-2100](https://jira.cms.gov/browse/BFD-2100)
 
-The demand for realistic synthetic beneficiaries with recent claim data, for BFD users, continues to grow after each Synthea release. While the process to generate, load, test, and release synthetic data has become more refined and convenient, it is prone to human error that can cause significant delays and miscommunication during release. This RFC proposes a streamlined, automated process for generating, loading, testing, and releasing Synthea data to BFD users, while taking into account changes to synthetic benficiary properties with recent and future claim dates. 
+The demand for realistic synthetic beneficiaries with recent claim data, for BFD users, continues to grow after each Synthea release. While the process to generate, load, test, and release synthetic data has become more refined and convenient, it is prone to human error that can cause significant delays and miscommunication during release. This RFC proposes a streamlined, automated process for generating, loading, testing, and releasing Synthea data to BFD users, while taking into account changes to synthetic beneficiary properties with recent and future claim dates. 
 
 ## Status
 [Status]: #status
 
-* Status: Proposed
+* Status: Implemented
 * Implementation JIRA Ticket(s):
-  * [BFD-XXXX](https://jira.cms.gov/browse/BFD-XXXX)
+  * [BFD-2526](https://jira.cms.gov/browse/BFD-2526)
+  * [BFD-2105](https://jira.cms.gov/browse/BFD-2105)
+  * [BFD-2281](https://jira.cms.gov/browse/BFD-2281)
+  * [BFD-2104](https://jira.cms.gov/browse/BFD-2104)
+  * [BFD-2106](https://jira.cms.gov/browse/BFD-2106)
+  * [BFD-2234](https://jira.cms.gov/browse/BFD-2234)
+  * [BFD-2099](https://jira.cms.gov/browse/BFD-2099)
+  * [BFD-2126](https://jira.cms.gov/browse/BFD-2126)
+  * [BFD-2196](https://jira.cms.gov/browse/BFD-2196)
+  * [BFD-2207](https://jira.cms.gov/browse/BFD-2207)
+  * [BFD-2208](https://jira.cms.gov/browse/BFD-2208)
+  * [BFD-2209](https://jira.cms.gov/browse/BFD-2209)
+  * [BFD-2210](https://jira.cms.gov/browse/BFD-2210)
+  * [BFD-2135](https://jira.cms.gov/browse/BFD-2135)
+  * [BFD-2158](https://jira.cms.gov/browse/BFD-2158)
+  * [BFD-2525](https://jira.cms.gov/browse/BFD-2525)
+  * [BFD-2450](https://jira.cms.gov/browse/BFD-2450)
+  
+See the [Synthetic Data Guide](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Synthetic-Data-Guide#datasets-with-weekly-updates) for details on the implementation of the rolling updates.
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents

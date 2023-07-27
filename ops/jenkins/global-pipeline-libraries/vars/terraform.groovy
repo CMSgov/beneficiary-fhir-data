@@ -1,5 +1,5 @@
 #!/usr/bin/env groovy
-// terraform.groovy contains global method for deploying various terraservice
+// terraform.groovy contains global method for managing various terraservice
 
 /* Deploys base terraservice
  * @param args a {@link Map} must include `env`, `directory`
@@ -16,7 +16,7 @@ void deployTerraservice(Map args = [:]) {
 
     // format terraform variables
     terraformVariables = tfVars.findAll { it.value != '' && it.value != null }
-                               .collect { k,v -> "\"-var=${k}=${v}\"" }.join(" ")
+            .collect { k,v -> "\"-var=${k}=${v}\"" }.join(" ")
 
     dir("${workspace}/${serviceDirectory}") {
         // Debug output terraform version
@@ -46,3 +46,60 @@ terraform workspace select "$bfdEnv" -no-color
     }
 }
 
+/* Destroys the specified terraservice
+ * @param args a {@link Map} must include `env`, `directory`, `forcePlanApproval`
+ * <ul>
+ * <li>env string represents the targeted BFD SDLC Environment
+ * <li>directory string relative path to terraservice module directory
+ * <li>forcePlanApproval boolean true if the tfplan should be manually applied
+ * <li>tfVars optional map represents module's terraform input variables and their respective values
+ * </ul>
+*/
+void destroyTerraservice(Map args = [:]) {
+    bfdEnv = args.env.trim().toLowerCase()
+    serviceDirectory = args.directory
+    forcePlanApproval = args.forcePlanApproval
+    tfVars = args.tfVars ?: [:]
+
+    // Do not destroy protected environments
+    if (bfdEnv in ["test", "prod-sbx", "prod"]) {
+        throw new Exception("Unable to destroy the restricted target environment: '${bfdEnv}'")
+    }
+
+    // format terraform variables
+    terraformVariables = tfVars.findAll { it.value != '' && it.value != null }
+        .collect { k,v -> "\"-var=${k}=${v}\"" }.join(" ")
+
+    dir("${workspace}/${serviceDirectory}") {
+        // Debug output terraform version
+        sh 'terraform --version'
+
+        // Initilize terraform
+        sh 'terraform init -no-color'
+
+        // Select the targeted environment's workspace
+        // NOTE: this is the terraform concept of workspace **NOT** Jenkins
+        sh "terraform workspace select $bfdEnv -no-color"
+
+        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+
+        // Gathering terraform plan
+        sh "terraform plan ${terraformVariables} -destroy -no-color -out=tfplan"
+
+        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+
+        if (forcePlanApproval) {
+            input "Proceed with executing the terraform destroy plan?"
+        }
+
+        // Apply Terraform plan
+        sh 'terraform apply -no-color tfplan'
+
+        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+
+        sh """
+terraform workspace select default -no-color
+terraform workspace delete $bfdEnv
+"""
+    }
+}
