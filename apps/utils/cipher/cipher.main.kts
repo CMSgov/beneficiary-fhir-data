@@ -11,10 +11,18 @@ import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKey
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKeyProvider
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf
-import okio.*
+import okio.Buffer
+import okio.BufferedSource
+import okio.ByteString
 import okio.ByteString.Companion.EMPTY
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
+import okio.Sink
+import okio.Source
+import okio.buffer
+import okio.sink
+import okio.source
+import okio.use
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.kms.KmsClient
 import java.io.ByteArrayInputStream
@@ -24,7 +32,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermissions
 import java.util.*
-import kotlin.io.use
 import kotlin.system.exitProcess
 
 
@@ -32,6 +39,7 @@ val APP_NAME = "cipher"
 val DEFAULT_REGION = "us-east-1"
 val DEFAULT_EDITOR = "vi"
 
+// Tokens mark regions of text in the file being processed.
 enum class Token(val bytes: ByteString) {
     SecureStart("<<SECURE>>".encodeUtf8()),
     SecureEnd("<</SECURE>>".encodeUtf8()),
@@ -39,6 +47,7 @@ enum class Token(val bytes: ByteString) {
     CipherEnd("<</CIPHER>>".encodeUtf8()),
     None(ByteString.of());
 
+    // The token expected to end a region that starts with this token, or null if there is none.
     val endsWith: Token? by lazy {
         when (this) {
             SecureStart -> SecureEnd
@@ -47,10 +56,12 @@ enum class Token(val bytes: ByteString) {
         }
     }
 
+    // String equivalent of this token.
     val text: String by lazy {
         bytes.utf8()
     }
 
+    // True if this token marks the end of a region.
     val isEnd: Boolean by lazy {
         when (this) {
             SecureEnd -> true
@@ -60,18 +71,22 @@ enum class Token(val bytes: ByteString) {
     }
 }
 
+// Pair of tokens that mark a valid region in a file being processed.
 enum class Span(val start: Token, val end: Token) {
     Secure(Token.SecureStart, Token.SecureEnd),
     Cipher(Token.CipherStart, Token.CipherEnd),
     Text(Token.None, Token.None)
 }
 
+// A sequence of bytes terminated by a token.
 data class Block(val endToken: Token, val bytes: ByteString) {
     override fun toString(): String = "($endToken: ${bytes.utf8()})"
 }
 
+// Exception thrown when user invokes script with invalid arguments.
 class UsageException(message: String) : Exception(message)
 
+// Exception thrown when  parsing an invalid file.
 class ParseException(message: String) : Exception(message) {
     companion object {
         fun noStartToken(token: Token) = ParseException("end token has no start token: ${token.text}")
@@ -79,14 +94,19 @@ class ParseException(message: String) : Exception(message) {
     }
 }
 
+// Immutable class that caches encrypted strings along with the context in which they appear in the file.
+// Used by edit command to leave unmodified secure blocks unchanged when re-encrypting the file.
 class CipherCache private constructor(private val map: PersistentMap<String, ByteString>) {
     constructor() : this(persistentMapOf())
 
+    // Returns a cache with the given secure text, context text, and cipher block.
     fun put(context: ByteString, secureText: ByteString, cipherText: ByteString) =
         CipherCache(map.put(makeKey(context, secureText), cipherText))
 
+    // Looks for a matching secure text and context.
     fun get(context: ByteString, secureText: ByteString): ByteString? = map[makeKey(context, secureText)]
 
+    // Creates a map key from a secure text string and its context.
     private fun makeKey(context: ByteString, secureText: ByteString): String {
         val newLineString = "\n".encodeUtf8()
         val source = context.toBuffer()
@@ -101,9 +121,11 @@ class CipherCache private constructor(private val map: PersistentMap<String, Byt
     }
 }
 
+// Extension method that converts a ByteString into a BufferedSource.
 fun ByteString.toBuffer(): BufferedSource =
     Buffer().readFrom(ByteArrayInputStream(toByteArray()))
 
+// Extension method that returns the next Block, if any, from a BufferedSource.
 fun BufferedSource.nextBlock(): Block? {
     if (this.exhausted()) {
         return null
@@ -140,16 +162,21 @@ fun BufferedSource.nextBlock(): Block? {
     return result
 }
 
+// Encapsulates KMS operations.
 class KmsCipher(private val endpoint: String?, region: String, keyArn: String) {
+    // AWS Crypto SDK client.
     private val crypto = AwsCrypto.standard()
 
+    // Used to look up keys in KMS.
     private val keyProvider = KmsMasterKeyProvider.builder()
         .customRegionalClientSupplier(::createKmsClient)
         .defaultRegion(Region.of(region))
         .buildStrict(keyArn)
 
+    // Context info used when encrypting strings.
     private val context = Collections.singletonMap("Application", APP_NAME)
 
+    // Creates a KMS SDK client object.
     private fun createKmsClient(region: Region): KmsClient {
         val builder = KmsClient.builder().region(region)
         if (endpoint != null) {
@@ -158,39 +185,52 @@ class KmsCipher(private val endpoint: String?, region: String, keyArn: String) {
         return builder.build()
     }
 
+    // Encrypts the provided plain text and returns the base 64 encoded cipher text.
     fun encrypt(plainText: ByteString): ByteString {
         val encryptResult: CryptoResult<ByteArray, KmsMasterKey> =
             crypto.encryptData(keyProvider, plainText.toByteArray(), context)
         return Base64.getUrlEncoder().encodeToString(encryptResult.result).encodeUtf8()
     }
 
+    // Decrypts the provided base 64 encoded cipher text and returns its equivalent plain text.
     fun decrypt(cipherText: ByteString): ByteString {
         val decryptResult = crypto.decryptData(keyProvider, Base64.getUrlDecoder().decode(cipherText.utf8()))
         return decryptResult.result.toByteString()
     }
 }
 
+// Immutable object representing a file being processed.  Stores the file as a ByteString and provides
+// methods for transforming the text into a new form.
 class Text(private val bytes: ByteString) {
+    // Writes the text to a sink.
     fun store(sink: Sink) = sink.buffer().use { it.write(bytes) }
 
+    // Converts all secure blocks into cipher blocks and returns modified file.
     fun encrypt(cipher: KmsCipher): Text =
         transform(Span.Secure, Span.Cipher) { _: ByteString, secureText: ByteString ->
             cipher.encrypt(secureText)
         }
 
+    // Converts all secure blocks into cipher blocks and returns modified file.
+    // Uses the provided cache to ensure known cipher blocks are resused.
     fun encrypt(cipher: KmsCipher, cipherCache: CipherCache): Text =
         transform(Span.Secure, Span.Cipher) { context: ByteString, secureText: ByteString ->
             cipherCache.get(context, secureText) ?: cipher.encrypt(secureText)
         }
 
+    // Converts all cipher blocks into plan text and returns modified file.
     fun decrypt(cipher: KmsCipher): Text = transform(Span.Cipher, Span.Text) { _: ByteString, secureText: ByteString ->
         cipher.decrypt(secureText)
     }
 
+    // Converts all cipher blocks into secure blocks and returns modified file.
     fun rewind(cipher: KmsCipher): Text = transform(Span.Cipher, Span.Secure) { _: ByteString, secureText: ByteString ->
         cipher.decrypt(secureText)
     }
 
+    // Builds and returns a CipherCache populated with all of the cipher blocks in this file.
+    // Called by edit before encrypting so that unmodified secure blocks can retain their
+    // previous encrypted values.
     fun extractCipherCache(cipher: KmsCipher): CipherCache {
         var cache = CipherCache()
         bytes.toBuffer().use { source ->
@@ -211,6 +251,8 @@ class Text(private val bytes: ByteString) {
         return cache
     }
 
+    // Processes every block of type from and converts them into blocks of type to
+    // using op and returns the modified file.
     private fun transform(
         from: Span,
         to: Span,
