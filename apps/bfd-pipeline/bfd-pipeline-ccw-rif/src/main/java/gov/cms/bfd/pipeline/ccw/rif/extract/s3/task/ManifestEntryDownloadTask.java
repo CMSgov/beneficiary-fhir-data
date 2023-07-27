@@ -7,6 +7,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,7 +24,6 @@ import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 /**
  * Represents an asynchronous operation to download the contents of a specific {@link
@@ -77,10 +77,9 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
               .timer(MetricRegistry.name(getClass().getSimpleName(), "downloadSystemTime"))
               .time();
       LOGGER.debug("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath());
-      GetObjectResponse downloadResult =
+      S3Dao.S3ObjectDetails downloadResult =
           s3TaskManager.getS3Dao().downloadObject(options.getS3BucketName(), s3Key, localTempFile);
-      LOGGER.debug(
-          "Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
+      LOGGER.debug("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath());
       downloadTimer.close();
 
       // generate MD5ChkSum value on file just downloaded
@@ -91,7 +90,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
       InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
       String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
       md5ChkSumTimer.close();
-      String downloadedFileMD5ChkSum = downloadResult.metadata().get("md5chksum");
+      String downloadedFileMD5ChkSum = downloadResult.getMetaData().get("md5chksum");
       // TODO Remove null check below once Jira CBBD-368 is completed
       if ((downloadedFileMD5ChkSum != null)
           && (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum)))

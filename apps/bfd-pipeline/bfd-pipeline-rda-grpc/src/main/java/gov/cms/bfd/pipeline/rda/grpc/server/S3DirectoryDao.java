@@ -10,6 +10,8 @@ import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -128,7 +130,7 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   public ByteSource downloadFile(String fileName) throws IOException {
     final String s3Key = s3DirectoryPath + fileName;
-    String eTag = readS3ObjectMetaData(fileName, s3Key).eTag();
+    String eTag = readS3ObjectMetaData(fileName, s3Key).getETag();
 
     Path cacheFile = cacheFilePath(fileName, eTag);
     if (Files.isRegularFile(cacheFile)) {
@@ -150,7 +152,7 @@ public class S3DirectoryDao implements AutoCloseable {
 
       // It is possible that the eTag changed between the time we fetched meta data and the
       // time we downloaded the object.
-      eTag = downloadS3Object(s3Key, tempDataFile).eTag();
+      eTag = downloadS3Object(s3Key, tempDataFile).getETag();
       cacheFile = cacheFilePath(fileName, eTag);
 
       try {
@@ -261,7 +263,7 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   private List<String> readFileNamesFromS3() {
     return readS3ObjectListing().stream()
-        .map(S3Object::key)
+        .map(S3ObjectSummary::getKey)
         .filter(this::isValidS3Key)
         .map(this::convertS3KeyToFileName)
         .collect(ImmutableList.toImmutableList());
@@ -275,7 +277,7 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   private Set<String> readCacheFileNamesFromS3() {
     return readS3ObjectListing().stream()
-        .filter(s3Object -> isValidS3Key(s3Object.key()))
+        .filter(s3Object -> isValidS3Key(s3Object.getKey()))
         .map(this::cacheFilePath)
         .map(Path::toString)
         .collect(ImmutableSet.toImmutableSet());
@@ -311,7 +313,7 @@ public class S3DirectoryDao implements AutoCloseable {
    *
    * @return the object listing
    */
-  private List<S3Object> readS3ObjectListing() {
+  private List<S3ObjectSummary> readS3ObjectListing() {
     if (Strings.isNullOrEmpty(s3DirectoryPath)) {
       return s3Dao.listObjectsAsStream(s3BucketName).toList();
     } else {
@@ -350,14 +352,15 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Convert an {@link S3Object} into a {@link Path} referencing a file in our cache directory.
+   * Convert an {@link S3ObjectSummary} into a {@link Path} referencing a file in our cache
+   * directory.
    *
-   * @param s3Object {@link S3Object} for object to store in cache
+   * @param s3Object {@link S3ObjectSummary} for object to store in cache
    * @return file handle
    */
-  private Path cacheFilePath(S3Object s3Object) {
-    final var fileName = convertS3KeyToFileName(s3Object.key());
-    return cacheFilePath(fileName, s3Object.eTag());
+  private Path cacheFilePath(S3ObjectSummary s3Object) {
+    final var fileName = convertS3KeyToFileName(s3Object.getKey());
+    return cacheFilePath(fileName, s3Object.getETag());
   }
 
   /**
@@ -398,7 +401,7 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Read {@link HeadObjectResponse} metadata for the given S3 key. Recognize the possible case of
+   * Read {@link S3ObjectDetails} metadata for the given S3 key. Recognize the possible case of
    * object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
    *
    * @param fileName the simple file name for the object
@@ -406,8 +409,7 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return the meta data
    * @throws IOException with {@link FileNotFoundException} or an AWS runtime exception
    */
-  private HeadObjectResponse readS3ObjectMetaData(String fileName, String s3Key)
-      throws IOException {
+  private S3ObjectDetails readS3ObjectMetaData(String fileName, String s3Key) throws IOException {
     try {
       return s3Dao.readObjectMetaData(s3BucketName, s3Key);
     } catch (NoSuchKeyException | NoSuchBucketException e) {
@@ -418,7 +420,7 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
-   * Download S3 object and return its {@link GetObjectResponse}. Recognize the possible case of
+   * Download S3 object and return its {@link S3ObjectDetails}. Recognize the possible case of
    * object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
    *
    * @param s3Key the S3 object key
@@ -426,7 +428,7 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return the meta data
    * @throws FileNotFoundException if object or key do not exist
    */
-  private GetObjectResponse downloadS3Object(String s3Key, Path tempDataFile)
+  private S3ObjectDetails downloadS3Object(String s3Key, Path tempDataFile)
       throws FileNotFoundException {
     try {
       return s3Dao.downloadObject(s3BucketName, s3Key, tempDataFile);

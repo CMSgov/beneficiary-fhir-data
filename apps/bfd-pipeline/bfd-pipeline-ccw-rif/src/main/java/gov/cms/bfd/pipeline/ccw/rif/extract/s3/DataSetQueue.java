@@ -8,6 +8,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -200,20 +201,20 @@ public final class DataSetQueue {
      * Loop through all of the pages, looking for manifests.
      */
     AtomicInteger completedManifestsCount = new AtomicInteger();
-    Consumer<S3Object> addToManifest =
+    Consumer<S3ObjectSummary> addToManifest =
         s3Object -> {
-          if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3Object.key()).matches()) {
+          if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3Object.getKey()).matches()) {
             /*
              * We've got an object that *looks like* it might be a
              * manifest file. But we need to parse the key to ensure
              * that it starts with a valid timestamp.
              */
             DataSetManifestId manifestId =
-                DataSetManifestId.parseManifestIdFromS3Key(s3Object.key());
+                DataSetManifestId.parseManifestIdFromS3Key(s3Object.getKey());
             if (manifestId != null) {
               manifestIds.add(manifestId);
             }
-          } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(s3Object.key()).matches()) {
+          } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(s3Object.getKey()).matches()) {
             completedManifestsCount.incrementAndGet();
           }
         };
@@ -241,8 +242,8 @@ public final class DataSetQueue {
    *
    * @param s3Dao the {@link S3Dao} client to use
    * @param options the {@link ExtractionOptions} to use
-   * @param manifestToProcessKey the {@link S3Object#key()} of the S3 object for the manifest to be
-   *     read
+   * @param manifestToProcessKey the {@link S3ObjectSummary#getKey()} of the S3 object for the
+   *     manifest to be read
    * @return the {@link DataSetManifest} that was contained in the specified S3 object
    * @throws JAXBException Any {@link JAXBException}s that are encountered will be bubbled up. These
    *     generally indicate that the {@link DataSetManifest} could not be parsed because its content

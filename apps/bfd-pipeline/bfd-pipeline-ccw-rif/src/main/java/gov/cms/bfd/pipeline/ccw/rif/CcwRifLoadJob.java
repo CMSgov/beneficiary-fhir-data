@@ -387,8 +387,10 @@ public final class CcwRifLoadJob implements PipelineJob {
                 options.getS3BucketName(),
                 Optional.of(dataSetKeyPrefix),
                 options.getS3ListMaxKeys())
-            .peek(o -> LOGGER.debug("Found file: '{}', part of data set: '{}'.", o.key(), manifest))
-            .map(o -> o.key().substring(dataSetKeyPrefix.length()))
+            .peek(
+                o ->
+                    LOGGER.debug("Found file: '{}', part of data set: '{}'.", o.getKey(), manifest))
+            .map(o -> o.getKey().substring(dataSetKeyPrefix.length()))
             .collect(Collectors.toSet());
 
     for (DataSetManifestEntry manifestEntry : manifest.getEntries()) {

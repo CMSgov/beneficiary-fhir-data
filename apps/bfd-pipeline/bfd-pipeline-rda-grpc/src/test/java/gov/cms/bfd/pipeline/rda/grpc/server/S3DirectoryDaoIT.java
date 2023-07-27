@@ -224,7 +224,7 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
    */
   private String uploadFileToBucket(String bucket, String objectKey, String fileData) {
     s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8));
-    var eTag = s3Dao.readObjectMetaData(bucket, objectKey).eTag();
+    var eTag = s3Dao.readObjectMetaData(bucket, objectKey).getETag();
     assertNotNull(eTag);
     return eTag;
   }

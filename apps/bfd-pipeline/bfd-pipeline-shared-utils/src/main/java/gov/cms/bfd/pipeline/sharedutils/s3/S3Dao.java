@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.sharedutils.s3;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
@@ -129,7 +131,7 @@ public class S3Dao implements AutoCloseable {
    * @param objectBytes binary data contents of the object
    * @return response from the S3 API
    */
-  public PutObjectResponse putObject(String s3Bucket, String s3Key, byte[] objectBytes) {
+  public S3ObjectSummary putObject(String s3Bucket, String s3Key, byte[] objectBytes) {
     PutObjectRequest putObjectRequest =
         PutObjectRequest.builder()
             .bucket(s3Bucket)
@@ -137,7 +139,9 @@ public class S3Dao implements AutoCloseable {
             .contentLength((long) objectBytes.length)
             .build();
 
-    return s3Client.putObject(putObjectRequest, RequestBody.fromBytes(objectBytes));
+    RequestBody requestBody = RequestBody.fromBytes(objectBytes);
+    return new S3ObjectSummary(
+        s3Key, objectBytes.length, s3Client.putObject(putObjectRequest, requestBody));
   }
 
   /**
@@ -150,22 +154,23 @@ public class S3Dao implements AutoCloseable {
    * @param metaData key value pairs serving as meta data for the uploaded object
    * @return response from the S3 API
    */
-  public PutObjectResponse putObject(
+  public S3ObjectSummary putObject(
       String s3Bucket, String s3Key, URL objectContentsUrl, Map<String, String> metaData) {
     try {
-      final long objectContentLength = objectContentsUrl.openConnection().getContentLength();
+      final long objectSize = objectContentsUrl.openConnection().getContentLength();
 
       PutObjectRequest putObjectRequest =
           PutObjectRequest.builder()
               .bucket(s3Bucket)
               .key(s3Key)
-              .contentLength(objectContentLength)
+              .contentLength(objectSize)
               .metadata(metaData)
               .build();
 
       try (InputStream objectStream = objectContentsUrl.openStream()) {
-        return s3Client.putObject(
-            putObjectRequest, RequestBody.fromInputStream(objectStream, objectContentLength));
+        RequestBody requestBody = RequestBody.fromInputStream(objectStream, objectSize);
+        PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, requestBody);
+        return new S3ObjectSummary(s3Key, objectSize, putObjectResponse);
       }
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
@@ -181,7 +186,7 @@ public class S3Dao implements AutoCloseable {
    * @param pageSize optional max number of objects returned per page (not per stream)
    * @return a {@link Stream} of objects
    */
-  public Stream<S3Object> listObjectsAsStream(
+  public Stream<S3ObjectSummary> listObjectsAsStream(
       String s3Bucket, Optional<String> keyPrefix, Optional<Integer> pageSize) {
     ListObjectsV2Request.Builder objectRequestBuilder =
         ListObjectsV2Request.builder().bucket(s3Bucket);
@@ -189,7 +194,7 @@ public class S3Dao implements AutoCloseable {
     pageSize.ifPresent(objectRequestBuilder::maxKeys);
     ListObjectsV2Request objectRequest = objectRequestBuilder.build();
     ListObjectsV2Iterable objectPaginator = s3Client.listObjectsV2Paginator(objectRequest);
-    return objectPaginator.stream().flatMap(s -> s.contents().stream());
+    return objectPaginator.stream().flatMap(s -> s.contents().stream()).map(S3ObjectSummary::new);
   }
 
   /**
@@ -200,7 +205,7 @@ public class S3Dao implements AutoCloseable {
    * @param keyPrefix a prefix string that all objects must match (usually a directory path)
    * @return a {@link Stream} of objects
    */
-  public Stream<S3Object> listObjectsAsStream(String s3Bucket, String keyPrefix) {
+  public Stream<S3ObjectSummary> listObjectsAsStream(String s3Bucket, String keyPrefix) {
     return listObjectsAsStream(s3Bucket, Optional.of(keyPrefix), Optional.empty());
   }
 
@@ -211,7 +216,7 @@ public class S3Dao implements AutoCloseable {
    * @param s3Bucket the bucket containing the objects
    * @return a {@link Stream} of objects
    */
-  public Stream<S3Object> listObjectsAsStream(String s3Bucket) {
+  public Stream<S3ObjectSummary> listObjectsAsStream(String s3Bucket) {
     return listObjectsAsStream(s3Bucket, Optional.empty(), Optional.empty());
   }
 
@@ -225,10 +230,10 @@ public class S3Dao implements AutoCloseable {
    * @throws NoSuchKeyException for bad key
    * @throws NoSuchBucketException for bad bucket name
    */
-  public HeadObjectResponse readObjectMetaData(String s3Bucket, String s3Key) {
+  public S3ObjectDetails readObjectMetaData(String s3Bucket, String s3Key) {
     HeadObjectRequest headObjectRequest =
         HeadObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
-    return s3Client.headObject(headObjectRequest);
+    return new S3ObjectDetails(s3Key, s3Client.headObject(headObjectRequest));
   }
 
   /**
@@ -242,7 +247,7 @@ public class S3Dao implements AutoCloseable {
    * @throws NoSuchKeyException for bad key
    * @throws NoSuchBucketException for bad bucket name
    */
-  public GetObjectResponse downloadObject(String s3Bucket, String s3Key, Path tempDataFile) {
+  public S3ObjectDetails downloadObject(String s3Bucket, String s3Key, Path tempDataFile) {
     try {
       GetObjectRequest getObjectRequest =
           GetObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
@@ -254,7 +259,8 @@ public class S3Dao implements AutoCloseable {
               .build();
 
       FileDownload downloadFile = s3TransferManager.downloadFile(downloadFileRequest);
-      return downloadFile.completionFuture().join().response();
+      GetObjectResponse getObjectResponse = downloadFile.completionFuture().join().response();
+      return new S3ObjectDetails(s3Key, getObjectResponse);
     } catch (CompletionException e) {
       final var cause = extractCompletionExceptionCause(e);
       try {
@@ -354,7 +360,7 @@ public class S3Dao implements AutoCloseable {
     }
 
     // delete the bucket contents
-    listObjectsAsStream(s3Bucket).forEach(s3Object -> deleteObject(s3Bucket, s3Object.key()));
+    listObjectsAsStream(s3Bucket).forEach(s3Object -> deleteObject(s3Bucket, s3Object.getKey()));
 
     // delete the bucket itself
     DeleteBucketRequest deleteBucketRequest =
@@ -381,6 +387,95 @@ public class S3Dao implements AutoCloseable {
       return runtimeException;
     } else {
       return new RuntimeException(cause);
+    }
+  }
+
+  /**
+   * Data object containing the few fields we use from an {@link S3Object} or {@link
+   * PutObjectResponse}.
+   *
+   * <p>Using this class removes a dependency on underlying API responses and simplifies use of the
+   * {@link S3Dao}.
+   */
+  @Data
+  @AllArgsConstructor
+  public static class S3ObjectSummary {
+    /** The object's key. */
+    private final String key;
+    /** The object's eTag. */
+    private final String eTag;
+    /** The object's size. */
+    private final long size;
+
+    /**
+     * Initializes an instance from a {@link S3Object}.
+     *
+     * @param object object returned by S3 API
+     */
+    private S3ObjectSummary(S3Object object) {
+      key = object.key();
+      eTag = object.eTag();
+      size = object.size();
+    }
+
+    /**
+     * Initializes an instance from a {@link PutObjectResponse}.
+     *
+     * @param key The object's key
+     * @param size The object's size
+     * @param response object returned by S3 API
+     */
+    private S3ObjectSummary(String key, long size, PutObjectResponse response) {
+      this.key = key;
+      eTag = response.eTag();
+      this.size = size;
+    }
+  }
+
+  /**
+   * Data object containing the few fields we use from an {@link HeadObjectResponse} or {@link
+   * GetObjectResponse}. Similar to {@link S3ObjectSummary} but also includes a {@link Map} or meta
+   * data key/value pairs.
+   *
+   * <p>Using this class removes a dependency on underlying API responses and simplifies use of the
+   * {@link S3Dao}.
+   */
+  @Data
+  @AllArgsConstructor
+  public static class S3ObjectDetails {
+    /** The object's key. */
+    private final String key;
+    /** The object's eTag. */
+    private final String eTag;
+    /** The object's size. */
+    private final long size;
+    /** Key/value pairs of metadata from the object. */
+    private final Map<String, String> metaData;
+
+    /**
+     * Initializes an instance from a {@link HeadObjectResponse}.
+     *
+     * @param key The object's key
+     * @param response object returned by S3 API
+     */
+    private S3ObjectDetails(String key, HeadObjectResponse response) {
+      this.key = key;
+      eTag = response.eTag();
+      size = response.contentLength();
+      metaData = ImmutableMap.copyOf(response.metadata());
+    }
+
+    /**
+     * Initializes an instance from a {@link GetObjectResponse}.
+     *
+     * @param key The object's key
+     * @param response object returned by S3 API
+     */
+    private S3ObjectDetails(String key, GetObjectResponse response) {
+      this.key = key;
+      eTag = response.eTag();
+      size = response.contentLength();
+      metaData = ImmutableMap.copyOf(response.metadata());
     }
   }
 }
