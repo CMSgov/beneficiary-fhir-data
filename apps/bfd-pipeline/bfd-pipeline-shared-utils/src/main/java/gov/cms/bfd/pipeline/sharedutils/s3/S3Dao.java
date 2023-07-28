@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +22,6 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -87,20 +87,6 @@ public class S3Dao implements AutoCloseable {
   }
 
   /**
-   * This downloads the entire file into memory and then returns an {@link InputStream} for reading
-   * the bytes. Do not use this for large files.
-   *
-   * @param s3Bucket the bucket containing the objects
-   * @param s3Key the S3 object key
-   * @return an {@link InputStream} suitable for processing the bytes
-   */
-  public InputStream readObject(String s3Bucket, String s3Key) {
-    GetObjectRequest getObjectRequest =
-        GetObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
-    return s3Client.getObjectAsBytes(getObjectRequest).asInputStream();
-  }
-
-  /**
    * Sends a HEAD request for the specified object and returns true if the result is a 200.
    *
    * @param s3Bucket the bucket containing the objects
@@ -108,9 +94,14 @@ public class S3Dao implements AutoCloseable {
    * @return true if the object exists in S3
    */
   public boolean objectExists(String s3Bucket, String s3Key) {
-    HeadObjectRequest headObjectRequest =
-        HeadObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
-    return s3Client.headObject(headObjectRequest).sdkHttpResponse().statusCode() == HTTP_STATUS_OK;
+    try {
+      HeadObjectRequest headObjectRequest =
+          HeadObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
+      return s3Client.headObject(headObjectRequest).sdkHttpResponse().statusCode()
+          == HTTP_STATUS_OK;
+    } catch (NoSuchBucketException | NoSuchKeyException ex) {
+      return false;
+    }
   }
 
   /**
@@ -130,6 +121,7 @@ public class S3Dao implements AutoCloseable {
    * @param s3Key the S3 object key
    * @param objectBytes binary data contents of the object
    * @return response from the S3 API
+   * @throws NoSuchBucketException for bad bucket name
    */
   public S3ObjectSummary putObject(String s3Bucket, String s3Key, byte[] objectBytes) {
     PutObjectRequest putObjectRequest =
@@ -153,6 +145,7 @@ public class S3Dao implements AutoCloseable {
    * @param objectContentsUrl URL form which binary data contents of the object can be obtained
    * @param metaData key value pairs serving as meta data for the uploaded object
    * @return response from the S3 API
+   * @throws NoSuchBucketException for bad bucket name
    */
   public S3ObjectSummary putObject(
       String s3Bucket, String s3Key, URL objectContentsUrl, Map<String, String> metaData) {
@@ -185,6 +178,7 @@ public class S3Dao implements AutoCloseable {
    * @param keyPrefix optional prefix string that all objects must match (usually a directory path)
    * @param pageSize optional max number of objects returned per page (not per stream)
    * @return a {@link Stream} of objects
+   * @throws NoSuchBucketException for bad bucket name
    */
   public Stream<S3ObjectSummary> listObjectsAsStream(
       String s3Bucket, Optional<String> keyPrefix, Optional<Integer> pageSize) {
@@ -204,6 +198,7 @@ public class S3Dao implements AutoCloseable {
    * @param s3Bucket the bucket containing the objects
    * @param keyPrefix a prefix string that all objects must match (usually a directory path)
    * @return a {@link Stream} of objects
+   * @throws NoSuchBucketException for bad bucket name
    */
   public Stream<S3ObjectSummary> listObjectsAsStream(String s3Bucket, String keyPrefix) {
     return listObjectsAsStream(s3Bucket, Optional.of(keyPrefix), Optional.empty());
@@ -215,6 +210,7 @@ public class S3Dao implements AutoCloseable {
    *
    * @param s3Bucket the bucket containing the objects
    * @return a {@link Stream} of objects
+   * @throws NoSuchBucketException for bad bucket name
    */
   public Stream<S3ObjectSummary> listObjectsAsStream(String s3Bucket) {
     return listObjectsAsStream(s3Bucket, Optional.empty(), Optional.empty());
@@ -237,8 +233,25 @@ public class S3Dao implements AutoCloseable {
   }
 
   /**
+   * This downloads the entire file into memory and then returns an {@link InputStream} for reading
+   * the bytes. Do not use this for large files.
+   *
+   * @param s3Bucket the bucket containing the objects
+   * @param s3Key the S3 object key
+   * @return an {@link InputStream} suitable for processing the bytes
+   * @throws NoSuchKeyException for bad key
+   * @throws NoSuchBucketException for bad bucket name
+   */
+  public InputStream readObject(String s3Bucket, String s3Key) {
+    GetObjectRequest getObjectRequest =
+        GetObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
+    return s3Client.getObjectAsBytes(getObjectRequest).asInputStream();
+  }
+
+  /**
    * Download S3 object and return its {@link GetObjectResponse}. Recognize the possible case of
-   * object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}.
+   * object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}. Uses a
+   * {@link S3TransferManager} for higher throughput and reliability than {@link #readObject}.
    *
    * @param s3Bucket the bucket containing the object
    * @param s3Key the S3 object key
@@ -249,11 +262,9 @@ public class S3Dao implements AutoCloseable {
    */
   public S3ObjectDetails downloadObject(String s3Bucket, String s3Key, Path tempDataFile) {
     try {
-      GetObjectRequest getObjectRequest =
-          GetObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
       DownloadFileRequest downloadFileRequest =
           DownloadFileRequest.builder()
-              .getObjectRequest(getObjectRequest)
+              .getObjectRequest(requestBuilder -> requestBuilder.bucket(s3Bucket).key(s3Key))
               .destination(tempDataFile)
               .addTransferListener(LoggingTransferListener.create())
               .build();
@@ -264,8 +275,8 @@ public class S3Dao implements AutoCloseable {
     } catch (CompletionException e) {
       final var cause = extractCompletionExceptionCause(e);
       try {
-        // delete the file if it partially exists, we don't care about the boolean result
-        tempDataFile.toFile().delete();
+        // Delete the file if it partially exists.
+        Files.deleteIfExists(tempDataFile);
       } catch (Exception ex) {
         cause.addSuppressed(ex);
       }
@@ -281,18 +292,21 @@ public class S3Dao implements AutoCloseable {
    * @param s3SourceKey the S3 object key of source object
    * @param s3TargetBucket the bucket to contain the target object
    * @param s3TargetKey the S3 object key of the target object
+   * @throws NoSuchKeyException for bad key
+   * @throws NoSuchBucketException for bad bucket name
    */
   public void copyObject(
       String s3SourceBucket, String s3SourceKey, String s3TargetBucket, String s3TargetKey) {
-    CopyObjectRequest copyObjectRequestRequest =
-        CopyObjectRequest.builder()
-            .sourceBucket(s3SourceBucket)
-            .sourceKey(s3SourceKey)
-            .destinationBucket(s3TargetBucket)
-            .destinationKey(s3TargetKey)
-            .build();
     CopyRequest copyRequest =
-        CopyRequest.builder().copyObjectRequest(copyObjectRequestRequest).build();
+        CopyRequest.builder()
+            .copyObjectRequest(
+                requestBuilder ->
+                    requestBuilder
+                        .sourceBucket(s3SourceBucket)
+                        .sourceKey(s3SourceKey)
+                        .destinationBucket(s3TargetBucket)
+                        .destinationKey(s3TargetKey))
+            .build();
     try {
       s3TransferManager.copy(copyRequest).completionFuture().join();
     } catch (CompletionException e) {
@@ -305,6 +319,8 @@ public class S3Dao implements AutoCloseable {
    *
    * @param s3Bucket the bucket containing the object
    * @param s3Key the S3 object key
+   * @throws NoSuchKeyException for bad key
+   * @throws NoSuchBucketException for bad bucket name
    */
   public void deleteObject(String s3Bucket, String s3Key) {
     DeleteObjectRequest request = DeleteObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();

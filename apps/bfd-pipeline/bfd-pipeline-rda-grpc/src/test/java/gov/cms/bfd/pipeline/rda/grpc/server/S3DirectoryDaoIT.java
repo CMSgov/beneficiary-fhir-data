@@ -1,13 +1,16 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -223,10 +226,13 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
    * @return eTag assigned to the file by S3
    */
   private String uploadFileToBucket(String bucket, String objectKey, String fileData) {
-    s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8));
-    var eTag = s3Dao.readObjectMetaData(bucket, objectKey).getETag();
-    assertNotNull(eTag);
-    return eTag;
+    S3ObjectSummary putResponse =
+        s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8));
+    assertFalse("eTag should be non-empty", Strings.isNullOrEmpty(putResponse.getETag()));
+
+    S3ObjectDetails readResponse = s3Dao.readObjectMetaData(bucket, objectKey);
+    assertEquals(putResponse.getETag(), readResponse.getETag());
+    return readResponse.getETag();
   }
 
   /**
