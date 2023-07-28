@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
-import gov.cms.bfd.TestContainerConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,22 +36,13 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /** Tests the migrator app under various conditions to ensure it works correctly. */
-@Testcontainers
-public final class MigratorAppIT {
+public final class MigratorAppIT extends AbstractLocalStackTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
 
   /** Name of SQS queue created in localstack to receive progress messages via SQS. */
   private static final String SQS_QUEUE_NAME = "migrator-progress.fifo";
-
-  /** Automatically creates and destroys a localstack SQS service container. */
-  @Container
-  LocalStackContainer localstack =
-      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
-          .withServices(LocalStackContainer.Service.SQS);
 
   /** Used to communicate with the localstack SQS service. */
   private SqsDao sqsDao;
