@@ -2,80 +2,52 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import java.util.Optional;
 import java.util.function.Predicate;
-import software.amazon.awssdk.regions.Region;
+import javax.annotation.Nullable;
+import lombok.Getter;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
 /** Models the user-configurable options for extraction of RIF data from S3. */
 public final class ExtractionOptions {
 
   /** The S3 bucket name. */
-  private final String s3BucketName;
+  @Getter private final String s3BucketName;
   /** The allowed rif file type for this extraction. */
-  private final RifFileType allowedRifFileType;
+  @Nullable private final RifFileType allowedRifFileType;
   /** The max keys for S3. */
-  private final Integer s3ListMaxKeys;
+  @Nullable private final Integer s3ListMaxKeys;
+  /** Common config settings used to configure S3 clients. */
+  @Getter private final S3ClientConfig s3ClientConfig;
 
   /**
-   * Constructs a new {@link ExtractionOptions} instance.
+   * Initializes an instance.
    *
-   * @param s3BucketName the value to use for {@link #getS3BucketName()}
-   * @param allowedRifFileType the value to use for {@link #getDataSetFilter()}
-   */
-  public ExtractionOptions(String s3BucketName, Optional<RifFileType> allowedRifFileType) {
-    this(s3BucketName, allowedRifFileType, Optional.empty());
-  }
-
-  /**
-   * Constructs a new {@link ExtractionOptions} instance.
-   *
-   * @param s3BucketName the value to use for {@link #getS3BucketName()}
+   * @param s3BucketName the value to use for {@link #s3BucketName}
    * @param allowedRifFileType the value to use for {@link #getDataSetFilter()}
    * @param s3ListMaxKeys the value to use for {@link #getS3ListMaxKeys()}
+   * @param s3ClientConfig used to configure S3 clients
    */
   public ExtractionOptions(
       String s3BucketName,
       Optional<RifFileType> allowedRifFileType,
-      Optional<Integer> s3ListMaxKeys) {
+      Optional<Integer> s3ListMaxKeys,
+      S3ClientConfig s3ClientConfig) {
     this.s3BucketName = s3BucketName;
     this.allowedRifFileType = allowedRifFileType.orElse(null);
     this.s3ListMaxKeys = s3ListMaxKeys.orElse(null);
+    this.s3ClientConfig = s3ClientConfig;
   }
 
   /**
-   * Constructs a new {@link ExtractionOptions} instance, with a {@link #getDataSetFilter()} that
-   * doesn't skip anything.
+   * Initializes an instance with a {@link #getDataSetFilter()} that doesn't skip anything and using
+   * default AWS region for S3.
    *
-   * @param s3BucketName the value to use for {@link #getS3BucketName()}
+   * @param s3BucketName the value to use for {@link #s3BucketName}
    */
   public ExtractionOptions(String s3BucketName) {
-    this(s3BucketName, Optional.empty());
-  }
-
-  /**
-   * Gets the S3 region.
-   *
-   * @return the AWS {@link Region} that should be used when interacting with S3
-   */
-  public Region getS3Region() {
-    /*
-     * NOTE: This is hardcoded for now, unless/until we have a need to
-     * support other regions. If that happens, just make the region a field
-     * and add a new constructor param here for it.
-     */
-
-    return SharedS3Utilities.REGION_DEFAULT;
-  }
-
-  /**
-   * Gets the S3 bucket name.
-   *
-   * @return the name of the AWS S3 bucket to monitor
-   */
-  public String getS3BucketName() {
-    return s3BucketName;
+    this(s3BucketName, Optional.empty(), Optional.empty(), S3ClientConfig.s3Builder().build());
   }
 
   /**
@@ -115,7 +87,6 @@ public final class ExtractionOptions {
     return Optional.ofNullable(s3ListMaxKeys);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

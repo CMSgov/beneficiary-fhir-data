@@ -8,7 +8,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.TaskExecutor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +16,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
@@ -48,16 +49,16 @@ public final class S3TaskManager {
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param options the {@link ExtractionOptions} to use
+   * @param s3Factory used to create instances of {@link S3Client} and {@link S3AsyncClient}
    */
-  public S3TaskManager(MetricRegistry appMetrics, ExtractionOptions options) {
+  public S3TaskManager(
+      MetricRegistry appMetrics, ExtractionOptions options, S3ClientFactory s3Factory) {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.s3Client = SharedS3Utilities.createS3Client(options.getS3Region());
+    this.s3Client = s3Factory.createS3Client();
     this.s3TransferManager =
-        DefaultS3TransferManager.builder()
-            .s3Client(SharedS3Utilities.createS3AsyncClient(options.getS3Region()))
-            .build();
+        DefaultS3TransferManager.builder().s3Client(s3Factory.createS3AsyncClient()).build();
 
     this.downloadTasksExecutor = new TaskExecutor("Download RIF Executor", 1);
     this.moveTasksExecutor = new TaskExecutor("Move Completed RIF Executor", 2);
