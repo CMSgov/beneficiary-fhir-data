@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -11,7 +12,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,13 +20,12 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
@@ -35,33 +34,19 @@ import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Tests downloaded S3 file attributes such as MD5ChkSum. */
-public final class ManifestEntryDownloadTaskIT {
+final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
-
-  /** only need a single instance of the S3 client. */
-  private static S3Client s3Client;
-  /** The S3 task manager. */
-  private S3TaskManager s3TaskManager;
-  /** Dummy S3 bucket name. */
-  private static final String DUMMY_S3_BUCKET_NAME = "foo";
-
-  /** Sets the minio test container. */
-  @BeforeAll
-  public static void setupMinioS3Client() {
-    s3Client =
-        SharedS3Utilities.createS3Client(new ExtractionOptions(DUMMY_S3_BUCKET_NAME).getS3Region());
-  }
 
   /**
    * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated MD5ChkSum value.
    */
-  @SuppressWarnings("deprecation")
   @Test
-  public void testMD5ChkSum() throws Exception {
+  void testMD5ChkSum() throws Exception {
     String bucket = null;
     try {
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
@@ -94,10 +79,12 @@ public final class ManifestEntryDownloadTaskIT {
                       manifest.getEntries().get(0).getName()))
               .build();
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
-      s3TaskManager =
+      S3TaskManager s3TaskManager =
           new S3TaskManager(
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              new ExtractionOptions(options.getS3BucketName()));
+              new ExtractionOptions(
+                  options.getS3BucketName(), Optional.empty(), Optional.empty(), s3ClientConfig),
+              s3ClientFactory);
       LOGGER.info(
           "Downloading '{}' to '{}'...",
           getObjectRequest.key(),

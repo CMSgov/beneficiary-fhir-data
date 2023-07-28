@@ -3,7 +3,7 @@ package gov.cms.bfd.sharedutils.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
-import gov.cms.bfd.TestContainerConstants;
+import gov.cms.bfd.AbstractLocalStackTest;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,8 +12,6 @@ import java.util.Optional;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -22,14 +20,7 @@ import software.amazon.awssdk.services.ssm.model.ParameterType;
 import software.amazon.awssdk.services.ssm.model.PutParameterRequest;
 
 /** Integration test for {@link AwsParameterStoreClient}. */
-@Testcontainers
-public class LayeredConfigurationIT {
-  /** Automatically creates and destroys a localstack SSM service container. */
-  @Container
-  LocalStackContainer localstack =
-      new LocalStackContainer(TestContainerConstants.LocalStackImageName)
-          .withServices(LocalStackContainer.Service.SSM);
-
+public class LayeredConfigurationIT extends AbstractLocalStackTest {
   /** Verifies that configuration sources are layered in the expected order. */
   @Test
   void shouldLayerConfigurationSources() throws IOException {

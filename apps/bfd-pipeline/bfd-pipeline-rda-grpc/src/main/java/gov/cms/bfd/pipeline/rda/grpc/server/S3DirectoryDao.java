@@ -9,7 +9,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
-import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
@@ -33,7 +33,6 @@ import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
-import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * Front end for downloading files from an S3 bucket/directory and caching them locally. Once
@@ -75,6 +74,8 @@ public class S3DirectoryDao implements AutoCloseable {
 
   /** The client for interacting with AWS S3 buckets and files. */
   private final S3Client s3Client;
+  /** The client for interacting with AWS S3 buckets and files. */
+  private final S3AsyncClient s3AsyncClient;
   /** The S3 bucket containing source files. */
   @Getter private final String s3BucketName;
   /** The directory path within bucket containing source files. */
@@ -95,19 +96,20 @@ public class S3DirectoryDao implements AutoCloseable {
   /**
    * Creates an instance.
    *
-   * @param s3Client used to access S3
+   * @param s3ClientFactory used to access S3
    * @param s3BucketName the bucket to read from
    * @param s3DirectoryPath the directory inside the bucket to read from
    * @param cacheDirectory the local directory to store cached files in
    * @param deleteOnExit causes close to delete all cached files and directory when true
    */
   public S3DirectoryDao(
-      S3Client s3Client,
+      S3ClientFactory s3ClientFactory,
       String s3BucketName,
       String s3DirectoryPath,
       Path cacheDirectory,
       boolean deleteOnExit) {
-    this.s3Client = Preconditions.checkNotNull(s3Client);
+    this.s3Client = s3ClientFactory.createS3Client();
+    this.s3AsyncClient = s3ClientFactory.createS3AsyncClient();
     this.s3BucketName = Preconditions.checkNotNull(s3BucketName);
     this.s3DirectoryPath = normalizeDirectoryPath(s3DirectoryPath);
     this.cacheDirectory = Preconditions.checkNotNull(cacheDirectory);
@@ -446,19 +448,8 @@ public class S3DirectoryDao implements AutoCloseable {
   private GetObjectResponse downloadS3Object(String s3Key, Path tempDataFile)
       throws FileNotFoundException {
     /* Gather information needed to prepare the S3TransferManager */
-    String bucketLocation =
-        s3Client
-            .getBucketLocation(GetBucketLocationRequest.builder().bucket(s3BucketName).build())
-            .locationConstraintAsString();
-    // bucketLocation is null if the location is us-east-1, so we need to handle that result
-    // specifically
-    Region region =
-        Region.of(
-            StringUtils.isNotBlank(bucketLocation) ? bucketLocation : Region.US_EAST_1.toString());
     S3TransferManager s3TransferManager =
-        DefaultS3TransferManager.builder()
-            .s3Client(SharedS3Utilities.createS3AsyncClient(region))
-            .build();
+        DefaultS3TransferManager.builder().s3Client(s3AsyncClient).build();
     GetObjectRequest getObjectRequest =
         GetObjectRequest.builder().bucket(s3BucketName).key(s3Key).build();
     DownloadFileRequest downloadFileRequest =

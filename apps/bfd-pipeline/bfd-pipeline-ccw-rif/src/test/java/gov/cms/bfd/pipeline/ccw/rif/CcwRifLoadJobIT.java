@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -12,7 +13,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
-import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -28,11 +28,8 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for {@link CcwRifLoadJob}. */
-public final class CcwRifLoadJobIT extends MinioTestContainer {
+final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
-
-  /** only need a single instance of the S3 client. */
-  private static S3Client s3Client = createS3MinioClient();
 
   /**
    * Tests {@link CcwRifLoadJob} when run against an empty bucket.
@@ -45,14 +42,17 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
     try {
       // Create the (empty) bucket to run against.
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
@@ -120,7 +120,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
        * two data sets.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest =
@@ -161,7 +162,9 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
@@ -296,7 +299,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
        * two data sets.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifestA =
           new DataSetManifest(
@@ -348,7 +352,9 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
@@ -403,7 +409,9 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket, Optional.of(RifFileType.PDE));
+      ExtractionOptions options =
+          new ExtractionOptions(
+              bucket, Optional.of(RifFileType.PDE), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
@@ -432,7 +440,9 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
@@ -481,7 +491,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
@@ -510,7 +521,9 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
@@ -568,7 +581,8 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
 
       DataSetManifest manifest = inManifest;
@@ -591,7 +605,9 @@ public final class CcwRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
