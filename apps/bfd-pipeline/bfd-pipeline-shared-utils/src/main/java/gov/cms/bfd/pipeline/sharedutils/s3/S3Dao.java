@@ -39,7 +39,6 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.services.s3.waiters.S3Waiter;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
-import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.CopyRequest;
 import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
 import software.amazon.awssdk.transfer.s3.model.FileDownload;
@@ -73,7 +72,7 @@ public class S3Dao implements AutoCloseable {
   public S3Dao(S3ClientFactory s3ClientFactory) {
     s3Client = s3ClientFactory.createS3Client();
     s3AsyncClient = s3ClientFactory.createS3AsyncClient();
-    s3TransferManager = DefaultS3TransferManager.builder().s3Client(s3AsyncClient).build();
+    s3TransferManager = S3TransferManager.builder().s3Client(s3AsyncClient).build();
   }
 
   /**
