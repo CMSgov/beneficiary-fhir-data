@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.sharedutils.s3;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -8,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
@@ -272,14 +272,7 @@ public class S3Dao implements AutoCloseable {
       GetObjectResponse getObjectResponse = downloadFile.completionFuture().join().response();
       return new S3ObjectDetails(s3Key, getObjectResponse);
     } catch (CompletionException e) {
-      final var cause = extractCompletionExceptionCause(e);
-      try {
-        // Delete the file if it partially exists.
-        Files.deleteIfExists(tempDataFile);
-      } catch (Exception ex) {
-        cause.addSuppressed(ex);
-      }
-      throw cause;
+      throw extractCompletionExceptionCause(e);
     }
   }
 
@@ -371,7 +364,7 @@ public class S3Dao implements AutoCloseable {
     }
 
     if (!s3Bucket.startsWith(BUCKET_NAME_PREFIX)) {
-      throw new IllegalArgumentException("only buckets created by this class can be deleted");
+      throw new BadCodeMonkeyException("only buckets created by this class can be deleted");
     }
 
     // delete the bucket contents
@@ -396,7 +389,8 @@ public class S3Dao implements AutoCloseable {
    * @param e exception to unwrap
    * @return the {@link RuntimeException}
    */
-  private RuntimeException extractCompletionExceptionCause(CompletionException e) {
+  @VisibleForTesting
+  RuntimeException extractCompletionExceptionCause(CompletionException e) {
     final var cause = e.getCause();
     if (cause instanceof RuntimeException runtimeException) {
       return runtimeException;
