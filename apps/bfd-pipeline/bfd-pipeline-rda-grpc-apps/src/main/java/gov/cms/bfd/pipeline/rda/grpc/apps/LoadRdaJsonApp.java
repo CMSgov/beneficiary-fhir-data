@@ -14,6 +14,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
@@ -271,7 +272,7 @@ public class LoadRdaJsonApp {
           .fissClaimJsonFile(fissFile.orElse(null))
           .mcsClaimJsonFile(mcsFile.orElse(null))
           .s3Bucket(s3Bucket.orElse(null))
-          .s3Region(s3Region.orElse(null))
+          .s3ClientConfig(S3ClientConfig.s3Builder().region(s3Region.orElse(null)).build())
           .s3Directory(s3Directory.orElse(null))
           .build();
     }
