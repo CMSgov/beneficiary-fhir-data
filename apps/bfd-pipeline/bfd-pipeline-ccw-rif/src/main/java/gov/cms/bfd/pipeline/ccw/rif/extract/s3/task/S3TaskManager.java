@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.S3Client;
 
 /** Handles the execution and management of S3-related tasks. */
 public final class S3TaskManager {
@@ -47,7 +45,7 @@ public final class S3TaskManager {
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param options the {@link ExtractionOptions} to use
-   * @param s3Factory used to create instances of {@link S3Client} and {@link S3AsyncClient}
+   * @param s3Factory used to create instance of {@link S3Dao}
    */
   public S3TaskManager(
       MetricRegistry appMetrics, ExtractionOptions options, S3ClientFactory s3Factory) {

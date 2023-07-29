@@ -126,7 +126,7 @@ public class S3Dao implements AutoCloseable {
   public S3ObjectSummary putObject(
       String s3Bucket, String s3Key, byte[] objectBytes, Map<String, String> metaData) {
     RequestBody requestBody = RequestBody.fromBytes(objectBytes);
-    return putObjectImpl(s3Bucket, s3Key, metaData, objectBytes.length, requestBody);
+    return putObjectImpl(s3Bucket, s3Key, objectBytes.length, requestBody, metaData);
   }
 
   /**
@@ -147,7 +147,7 @@ public class S3Dao implements AutoCloseable {
       final long objectSize = objectContentsUrl.openConnection().getContentLength();
       try (InputStream objectStream = objectContentsUrl.openStream()) {
         RequestBody requestBody = RequestBody.fromInputStream(objectStream, objectSize);
-        return putObjectImpl(s3Bucket, s3Key, metaData, objectSize, requestBody);
+        return putObjectImpl(s3Bucket, s3Key, objectSize, requestBody, metaData);
       }
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
@@ -160,6 +160,7 @@ public class S3Dao implements AutoCloseable {
    *
    * @param s3Bucket the bucket containing the object
    * @param s3Key the S3 object key
+   * @param objectSize size of object in bytes
    * @param requestBody source of the object's byte data
    * @param metaData key value pairs serving as meta data for the uploaded object
    * @return response from the S3 API
@@ -168,9 +169,9 @@ public class S3Dao implements AutoCloseable {
   private S3ObjectSummary putObjectImpl(
       String s3Bucket,
       String s3Key,
-      Map<String, String> metaData,
       long objectSize,
-      RequestBody requestBody) {
+      RequestBody requestBody,
+      Map<String, String> metaData) {
     PutObjectRequest putObjectRequest =
         PutObjectRequest.builder()
             .bucket(s3Bucket)
