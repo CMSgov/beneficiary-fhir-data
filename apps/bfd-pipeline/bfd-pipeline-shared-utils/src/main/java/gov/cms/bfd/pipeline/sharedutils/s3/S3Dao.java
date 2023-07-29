@@ -65,17 +65,6 @@ public class S3Dao implements AutoCloseable {
   private final S3TransferManager s3TransferManager;
 
   /**
-   * Initializes an instance using the provided factory.
-   *
-   * @param s3ClientFactory used to create necessary S3 related objects
-   */
-  public S3Dao(S3ClientFactory s3ClientFactory) {
-    s3Client = s3ClientFactory.createS3Client();
-    s3AsyncClient = s3ClientFactory.createS3AsyncClient();
-    s3TransferManager = S3TransferManager.builder().s3Client(s3AsyncClient).build();
-  }
-
-  /**
    * Closes the {@link #s3TransferManager}.
    *
    * <p>{@inheritDoc}

@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary;
 import java.io.FileNotFoundException;
@@ -207,10 +206,9 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
     try {
       s3Bucket = s3Dao.createTestBucket();
       final String s3Directory = "";
-      try (var s3Dao = new S3Dao(s3ClientFactory);
-          var directoryDao =
-              new S3DirectoryDao(
-                  s3Dao, s3Bucket, s3Directory, Files.createTempDirectory("test"), true)) {
+      try (var directoryDao =
+          new S3DirectoryDao(
+              s3Dao, s3Bucket, s3Directory, Files.createTempDirectory("test"), true)) {
         assertThrows(FileNotFoundException.class, () -> directoryDao.downloadFile("a.txt"));
       }
     } finally {

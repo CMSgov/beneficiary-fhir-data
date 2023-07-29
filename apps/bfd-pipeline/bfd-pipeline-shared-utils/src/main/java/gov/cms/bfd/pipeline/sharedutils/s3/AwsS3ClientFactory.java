@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3CrtAsyncClientBuilder;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
 
 /**
  * Implementation of {@link S3ClientFactory} that creates real S3 clients based on a {@link
@@ -37,5 +38,13 @@ public class AwsS3ClientFactory implements S3ClientFactory {
     s3ClientConfig.configureS3ServiceForAsyncS3(builder);
     builder.minimumPartSizeInBytes(MINIMUM_PART_SIZE_FOR_DOWNLOAD);
     return builder.build();
+  }
+
+  @Override
+  public S3Dao createS3Dao() {
+    var s3Client = createS3Client();
+    var s3AsyncClient = createS3AsyncClient();
+    var s3TransferManager = S3TransferManager.builder().s3Client(s3AsyncClient).build();
+    return new S3Dao(s3Client, s3AsyncClient, s3TransferManager);
   }
 }

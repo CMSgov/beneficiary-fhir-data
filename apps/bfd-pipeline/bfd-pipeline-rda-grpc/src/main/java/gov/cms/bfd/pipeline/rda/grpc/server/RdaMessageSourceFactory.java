@@ -146,7 +146,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
               ? java.nio.file.Files.createTempDirectory("s3cache")
               : Path.of(s3CacheDirectory);
       final S3ClientFactory s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
-      final S3Dao s3Dao = new S3Dao(s3ClientFactory);
+      final S3Dao s3Dao = s3ClientFactory.createS3Dao();
       final S3DirectoryDao directoryDao =
           new S3DirectoryDao(s3Dao, s3Bucket, directory, cacheDirectory, useTempDirectoryForCache);
       log.info(

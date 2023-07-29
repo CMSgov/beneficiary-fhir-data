@@ -52,7 +52,7 @@ public final class S3TaskManager {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.s3Dao = new S3Dao(s3Factory);
+    this.s3Dao = s3Factory.createS3Dao();
     this.downloadTasksExecutor = new TaskExecutor("Download RIF Executor", 1);
     this.moveTasksExecutor = new TaskExecutor("Move Completed RIF Executor", 2);
     this.downloadTasks = new HashMap<>();

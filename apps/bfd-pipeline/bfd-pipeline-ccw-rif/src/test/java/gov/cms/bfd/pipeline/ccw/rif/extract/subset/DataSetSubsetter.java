@@ -291,7 +291,7 @@ public final class DataSetSubsetter {
   private static List<RifFile> downloadDataSet(
       ExtractionOptions options, String dataSetS3KeyPrefix, Path downloadDirectory) {
     S3ClientFactory clientFactory = new AwsS3ClientFactory(options.getS3ClientConfig());
-    try (S3Dao s3Dao = new S3Dao(clientFactory)) {
+    try (S3Dao s3Dao = clientFactory.createS3Dao()) {
       String dataSetPrefix = "data-random/" + dataSetS3KeyPrefix;
       String manifestSuffix = "1_manifest.xml";
 

@@ -52,13 +52,13 @@ class S3DaoIT extends AbstractLocalStackTest {
   @BeforeEach
   void createDao() {
     s3Dao =
-        new S3Dao(
-            new AwsS3ClientFactory(
+        new AwsS3ClientFactory(
                 new S3ClientConfig(
                     Region.of(localstack.getRegion()),
                     localstack.getEndpointOverride(S3),
                     localstack.getAccessKey(),
-                    localstack.getSecretKey())));
+                    localstack.getSecretKey()))
+            .createS3Dao();
     bucket = s3Dao.createTestBucket();
   }
 
