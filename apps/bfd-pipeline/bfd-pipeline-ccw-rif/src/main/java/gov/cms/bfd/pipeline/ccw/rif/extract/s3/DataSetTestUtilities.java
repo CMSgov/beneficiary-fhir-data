@@ -19,12 +19,11 @@ import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import software.amazon.awssdk.services.s3.model.Bucket;
 
 /**
  * Contains utilities that are useful when running tests that involve working with data sets in S3.
  *
- * <p>This is being left in <code>src/main</code> so that it can be used from other modules' tests,
+ * <p>This is being left in {@code src/main} so that it can be used from other modules' tests,
  * without having to delve into classpath dark arts.
  */
 public class DataSetTestUtilities {
@@ -32,14 +31,14 @@ public class DataSetTestUtilities {
    * Creates an S3 test bucket.
    *
    * @param s3Dao the {@link S3Dao} client to use
-   * @return the bucket name of the new, random {@link Bucket} for use in an integration test
+   * @return the bucket name of the new, random bucket for use in an integration test
    */
   public static String createTestBucket(S3Dao s3Dao) {
     return s3Dao.createTestBucket();
   }
 
   /**
-   * Deletes the specified {@link Bucket} and all objects in it.
+   * Deletes the specified bucket and all objects in it.
    *
    * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to empty and delete
@@ -191,7 +190,7 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * Waits for the number of objects in the specified {@link Bucket} to equal the specified count.
+   * Waits for the number of objects in the specified bucket to equal the specified count.
    *
    * <p>This is needed because Amazon's S3 API is only <em>eventually</em> consistent for deletes,
    * per <a href="https://aws.amazon.com/s3/faqs/">Amazon S3 FAQs</a>.
@@ -199,7 +198,7 @@ public class DataSetTestUtilities {
    * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to check
    * @param keyPrefix the S3 object key prefix of the objects to include in the count
-   * @param expectedObjectCount the number of objects that should be in the specified {@link Bucket}
+   * @param expectedObjectCount the number of objects that should be in the specified bucket
    * @param waitDuration the length of time to wait for the condition to be met before throwing an
    *     error
    */

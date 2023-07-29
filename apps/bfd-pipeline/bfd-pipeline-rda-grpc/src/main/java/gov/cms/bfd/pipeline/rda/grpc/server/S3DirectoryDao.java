@@ -27,7 +27,8 @@ import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 /**
  * Front end for downloading files from an S3 bucket/directory and caching them locally. Once
