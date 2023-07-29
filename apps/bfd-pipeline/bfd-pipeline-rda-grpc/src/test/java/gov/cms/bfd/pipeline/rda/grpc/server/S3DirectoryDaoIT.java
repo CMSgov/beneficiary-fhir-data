@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
@@ -227,7 +228,7 @@ class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
    */
   private String uploadFileToBucket(String bucket, String objectKey, String fileData) {
     S3ObjectSummary putResponse =
-        s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8));
+        s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8), Map.of());
     assertFalse("eTag should be non-empty", Strings.isNullOrEmpty(putResponse.getETag()));
 
     S3ObjectDetails readResponse = s3Dao.readObjectMetaData(bucket, objectKey);

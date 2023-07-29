@@ -13,6 +13,7 @@ import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -145,6 +146,7 @@ class S3DaoIT extends AbstractLocalStackTest {
   @Test
   void shouldPutAndReadObjectsCorrectlyUsingByteArray() throws IOException {
     final var objectKey = "bytes-object-key";
+    final var metaData = Map.of("meta-data-1", "value-1", "meta-data-2", "value-2");
     final byte[] expectedBytes;
     try (var stream = SAMPLE_FILE_FOR_PUT_TEST.openStream()) {
       expectedBytes = ByteStreams.toByteArray(stream);
@@ -154,7 +156,7 @@ class S3DaoIT extends AbstractLocalStackTest {
     assertEquals(false, s3Dao.objectExists(bucket, objectKey));
 
     // upload the file to the bucket using byte array and verify the summary has valid values
-    final var uploadSummary = s3Dao.putObject(bucket, objectKey, expectedBytes);
+    final var uploadSummary = s3Dao.putObject(bucket, objectKey, expectedBytes, metaData);
     assertEquals(objectKey, uploadSummary.getKey());
     assertThat(uploadSummary.getETag()).isNotEmpty();
     assertEquals(expectedBytes.length, uploadSummary.getSize());
@@ -167,8 +169,7 @@ class S3DaoIT extends AbstractLocalStackTest {
     assertEquals(objectKey, objectDetails.getKey());
     assertEquals(expectedBytes.length, objectDetails.getSize());
     assertEquals(uploadSummary.getETag(), objectDetails.getETag());
-    // files uploaded using byte array do not include any meta data
-    assertEquals(Map.of(), objectDetails.getMetaData());
+    assertEquals(metaData, objectDetails.getMetaData());
 
     byte[] downloadedBytes;
     try (var stream = s3Dao.readObject(bucket, objectKey)) {
@@ -186,7 +187,7 @@ class S3DaoIT extends AbstractLocalStackTest {
     assertEquals(false, s3Dao.objectExists(bucket, objectKey));
 
     // upload it and verify it exists
-    s3Dao.putObject(bucket, objectKey, "hello, s3!".getBytes(StandardCharsets.UTF_8));
+    s3Dao.putObject(bucket, objectKey, "hello, s3!".getBytes(StandardCharsets.UTF_8), Map.of());
     assertEquals(true, s3Dao.objectExists(bucket, objectKey));
 
     // delete the file and verify it no longer exists
@@ -212,7 +213,7 @@ class S3DaoIT extends AbstractLocalStackTest {
       var key = directory + name;
 
       // upload the file and stash its summary for use below
-      var summary = s3Dao.putObject(bucket, key, new byte[size]);
+      var summary = s3Dao.putObject(bucket, key, new byte[size], Map.of());
       files.put(key, summary);
     }
 
@@ -254,7 +255,11 @@ class S3DaoIT extends AbstractLocalStackTest {
     Exception cause = new IOException("oops");
     RuntimeException unwrapped =
         s3Dao.extractCompletionExceptionCause(new CompletionException(cause));
-    assertSame(cause, unwrapped.getCause());
+    assertThat(unwrapped).isInstanceOf(UncheckedIOException.class).hasCause(cause);
+
+    cause = new InterruptedException("whoops");
+    unwrapped = s3Dao.extractCompletionExceptionCause(new CompletionException(cause));
+    assertThat(unwrapped).isInstanceOf(RuntimeException.class).hasCause(cause);
 
     cause = new RuntimeException("whoops");
     unwrapped = s3Dao.extractCompletionExceptionCause(new CompletionException(cause));
@@ -299,7 +304,7 @@ class S3DaoIT extends AbstractLocalStackTest {
     final var originalKey = "/a/original";
     final var duplicateKey = "/c/duplicate";
 
-    s3Dao.putObject(bucket, originalKey, originalBytes);
+    s3Dao.putObject(bucket, originalKey, originalBytes, Map.of());
     assertEquals(true, s3Dao.objectExists(bucket, originalKey));
     assertEquals(false, s3Dao.objectExists(bucket, duplicateKey));
 
@@ -327,7 +332,7 @@ class S3DaoIT extends AbstractLocalStackTest {
       final var originalKey = "/a/original";
       final var duplicateKey = "/c/duplicate";
 
-      s3Dao.putObject(bucket, originalKey, originalBytes);
+      s3Dao.putObject(bucket, originalKey, originalBytes, Map.of());
       assertEquals(true, s3Dao.objectExists(bucket, originalKey));
       assertEquals(false, s3Dao.objectExists(destBucket, duplicateKey));
 

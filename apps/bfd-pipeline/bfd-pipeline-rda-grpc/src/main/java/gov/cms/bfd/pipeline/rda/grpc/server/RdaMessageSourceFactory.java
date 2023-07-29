@@ -19,7 +19,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * Interface for objects that can provide information required by {@link RdaService} to generate
@@ -64,7 +63,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     @Builder.Default
     private final RandomClaimGeneratorConfig randomClaimConfig =
         RandomClaimGeneratorConfig.builder().build();
-    /** Used to create {@link S3Client} when necessary. */
+    /** Used to create {@link S3ClientFactory} when necessary. */
     @Builder.Default
     private final S3ClientConfig s3ClientConfig = S3ClientConfig.s3Builder().build();
     /** NDJSON fiss claim data for the RDA Server. */

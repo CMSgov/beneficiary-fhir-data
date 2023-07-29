@@ -5,6 +5,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
+import gov.cms.bfd.sharedutils.exceptions.UncheckedJaxbException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,9 +99,9 @@ public class DataSetTestUtilities {
       marshaller.marshal(manifest, manifestOutputStream);
 
       byte[] manifestByteArray = manifestOutputStream.toByteArray();
-      s3Dao.putObject(bucket, objectKey, manifestByteArray);
+      s3Dao.putObject(bucket, objectKey, manifestByteArray, Map.of());
     } catch (JAXBException e) {
-      throw new RuntimeException(e);
+      throw new UncheckedJaxbException(e);
     }
   }
 

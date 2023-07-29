@@ -4,10 +4,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Map;
@@ -119,20 +119,14 @@ public class S3Dao implements AutoCloseable {
    * @param s3Bucket the bucket containing the object
    * @param s3Key the S3 object key
    * @param objectBytes binary data contents of the object
+   * @param metaData key value pairs serving as meta data for the uploaded object
    * @return response from the S3 API
    * @throws NoSuchBucketException for bad bucket name
    */
-  public S3ObjectSummary putObject(String s3Bucket, String s3Key, byte[] objectBytes) {
-    PutObjectRequest putObjectRequest =
-        PutObjectRequest.builder()
-            .bucket(s3Bucket)
-            .key(s3Key)
-            .contentLength((long) objectBytes.length)
-            .build();
-
+  public S3ObjectSummary putObject(
+      String s3Bucket, String s3Key, byte[] objectBytes, Map<String, String> metaData) {
     RequestBody requestBody = RequestBody.fromBytes(objectBytes);
-    return new S3ObjectSummary(
-        s3Key, objectBytes.length, s3Client.putObject(putObjectRequest, requestBody));
+    return putObjectImpl(s3Bucket, s3Key, metaData, objectBytes.length, requestBody);
   }
 
   /**
@@ -145,28 +139,47 @@ public class S3Dao implements AutoCloseable {
    * @param metaData key value pairs serving as meta data for the uploaded object
    * @return response from the S3 API
    * @throws NoSuchBucketException for bad bucket name
+   * @throws UncheckedIOException for errors reading object data from URL
    */
   public S3ObjectSummary putObject(
       String s3Bucket, String s3Key, URL objectContentsUrl, Map<String, String> metaData) {
     try {
       final long objectSize = objectContentsUrl.openConnection().getContentLength();
-
-      PutObjectRequest putObjectRequest =
-          PutObjectRequest.builder()
-              .bucket(s3Bucket)
-              .key(s3Key)
-              .contentLength(objectSize)
-              .metadata(metaData)
-              .build();
-
       try (InputStream objectStream = objectContentsUrl.openStream()) {
         RequestBody requestBody = RequestBody.fromInputStream(objectStream, objectSize);
-        PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, requestBody);
-        return new S3ObjectSummary(s3Key, objectSize, putObjectResponse);
+        return putObjectImpl(s3Bucket, s3Key, metaData, objectSize, requestBody);
       }
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
+  }
+
+  /**
+   * Provides common implementation for the {@link #putObject} methods. Uploads an object with the
+   * given bucket, key, size, meta data, and body.
+   *
+   * @param s3Bucket the bucket containing the object
+   * @param s3Key the S3 object key
+   * @param requestBody source of the object's byte data
+   * @param metaData key value pairs serving as meta data for the uploaded object
+   * @return response from the S3 API
+   * @throws NoSuchBucketException for bad bucket name
+   */
+  private S3ObjectSummary putObjectImpl(
+      String s3Bucket,
+      String s3Key,
+      Map<String, String> metaData,
+      long objectSize,
+      RequestBody requestBody) {
+    PutObjectRequest putObjectRequest =
+        PutObjectRequest.builder()
+            .bucket(s3Bucket)
+            .key(s3Key)
+            .contentLength(objectSize)
+            .metadata(metaData)
+            .build();
+    PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, requestBody);
+    return new S3ObjectSummary(s3Key, objectSize, putObjectResponse);
   }
 
   /**
@@ -394,6 +407,8 @@ public class S3Dao implements AutoCloseable {
     final var cause = e.getCause();
     if (cause instanceof RuntimeException runtimeException) {
       return runtimeException;
+    } else if (cause instanceof IOException ioException) {
+      return new UncheckedIOException(ioException);
     } else {
       return new RuntimeException(cause);
     }
