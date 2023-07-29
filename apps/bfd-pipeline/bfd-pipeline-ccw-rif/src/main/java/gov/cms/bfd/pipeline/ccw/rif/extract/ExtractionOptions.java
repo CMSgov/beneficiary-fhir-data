@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;

@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.sharedutils;
+package gov.cms.bfd.pipeline.sharedutils.s3;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;

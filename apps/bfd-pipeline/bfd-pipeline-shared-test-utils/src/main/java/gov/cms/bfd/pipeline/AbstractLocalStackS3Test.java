@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline;
 
 import gov.cms.bfd.AbstractLocalStackTest;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;

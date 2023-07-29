@@ -10,7 +10,6 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 
 import com.google.common.io.ByteStreams;
 import gov.cms.bfd.AbstractLocalStackTest;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;

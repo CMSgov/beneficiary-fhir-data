@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.sharedutils.s3;
 
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.awscore.defaultsmode.DefaultsMode;
