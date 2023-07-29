@@ -8,13 +8,11 @@ import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedJaxbException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -152,10 +150,8 @@ public class DataSetTestUtilities {
     String objectKey = String.format("%s/%s", keyPrefix, manifestEntry.getName());
 
     try {
-      Map<String, String> metaData = new HashMap<>();
-      try (InputStream objectStream = objectContentsUrl.openStream()) {
-        metaData.put("md5chksum", ManifestEntryDownloadTask.computeMD5ChkSum(objectStream));
-      }
+      String md5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream());
+      Map<String, String> metaData = Map.of("md5chksum", md5ChkSum);
       s3Dao.putObject(bucket, objectKey, objectContentsUrl, metaData);
     } catch (IOException e) {
       throw new UncheckedIOException(e);

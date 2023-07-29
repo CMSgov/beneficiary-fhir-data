@@ -122,24 +122,24 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
    */
   public static String computeMD5ChkSum(InputStream downloadedS3File)
       throws IOException, NoSuchAlgorithmException {
-    // Create byte array to read data in chunks
-    byte[] byteArray = new byte[1024];
-    int bytesCount = 0;
-    MessageDigest md5Digest = MessageDigest.getInstance("MD5");
+    // ensure the stream is always closed
+    try (downloadedS3File) {
+      // Create byte array to read data in chunks
+      byte[] byteArray = new byte[1024];
+      int bytesCount = 0;
+      MessageDigest md5Digest = MessageDigest.getInstance("MD5");
 
-    // Read file data and update in message digest
-    while ((bytesCount = downloadedS3File.read(byteArray)) != -1) {
-      md5Digest.update(byteArray, 0, bytesCount);
+      // Read file data and update in message digest
+      while ((bytesCount = downloadedS3File.read(byteArray)) != -1) {
+        md5Digest.update(byteArray, 0, bytesCount);
+      }
+
+      // Get the hash's bytes
+      byte[] bytes = md5Digest.digest();
+
+      // return complete hash
+      return Base64.getEncoder().encodeToString(bytes);
     }
-
-    // close the stream
-    downloadedS3File.close();
-
-    // Get the hash's bytes
-    byte[] bytes = md5Digest.digest();
-
-    // return complete hash
-    return Base64.getEncoder().encodeToString(bytes);
   }
 
   /** Represents the results of a {@link ManifestEntryDownloadTask}. */
