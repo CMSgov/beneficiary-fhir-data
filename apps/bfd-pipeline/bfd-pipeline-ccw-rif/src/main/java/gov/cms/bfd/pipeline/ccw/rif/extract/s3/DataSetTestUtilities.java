@@ -28,26 +28,6 @@ import javax.xml.bind.Marshaller;
  */
 public class DataSetTestUtilities {
   /**
-   * Creates an S3 test bucket.
-   *
-   * @param s3Dao the {@link S3Dao} client to use
-   * @return the bucket name of the new, random bucket for use in an integration test
-   */
-  public static String createTestBucket(S3Dao s3Dao) {
-    return s3Dao.createTestBucket();
-  }
-
-  /**
-   * Deletes the specified bucket and all objects in it.
-   *
-   * @param s3Dao the {@link S3Dao} client to use
-   * @param bucket the name of the bucket to empty and delete
-   */
-  public static void deleteObjectsAndBucket(S3Dao s3Dao, String bucket) {
-    s3Dao.deleteTestBucket(bucket);
-  }
-
-  /**
    * Creates a put request for the specified S3 bucket.
    *
    * @param s3Dao the {@link S3Dao} client to use

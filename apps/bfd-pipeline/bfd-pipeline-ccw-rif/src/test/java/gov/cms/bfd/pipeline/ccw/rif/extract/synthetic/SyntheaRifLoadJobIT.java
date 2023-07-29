@@ -91,7 +91,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
     String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
@@ -192,7 +192,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
                   + "/carrier.rif"));
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+        s3Dao.deleteTestBucket(bucket);
       }
     }
   }
@@ -224,7 +224,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
     String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
@@ -329,7 +329,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+        s3Dao.deleteTestBucket(bucket);
       }
     }
   }

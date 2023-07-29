@@ -37,7 +37,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
     String bucket = null;
     try {
       // Create the (empty) bucket to run against.
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
@@ -112,7 +112,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with
        * two data sets.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
@@ -236,8 +236,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
                   + "/beneficiaries.rif"));
 
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -254,7 +253,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with
        * two data sets.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
@@ -345,8 +344,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           1 + manifestA.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -364,7 +362,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(
               bucket, Optional.of(RifFileType.PDE), Optional.empty(), s3ClientConfig);
@@ -427,8 +425,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           0,
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -446,7 +443,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
@@ -508,8 +505,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           0,
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -531,7 +527,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
@@ -584,8 +580,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 

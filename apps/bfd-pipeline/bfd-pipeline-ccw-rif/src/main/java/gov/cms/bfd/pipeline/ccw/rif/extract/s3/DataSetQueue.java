@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.exception.SdkServiceException;
-import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 /** Represents and manages the queue of data sets in S3 to be processed. */
 public final class DataSetQueue {
@@ -144,9 +142,7 @@ public final class DataSetQueue {
      * we're loading synthetic data,
      * as it checks the regular incoming folder for the manifest first.)
      */
-    try {
-      s3TaskManager.getS3Dao().readObjectMetaData(options.getS3BucketName(), manifestS3Key);
-    } catch (NoSuchKeyException | NoSuchBucketException e) {
+    if (!s3TaskManager.getS3Dao().objectExists(options.getS3BucketName(), manifestS3Key)) {
       LOGGER.debug(
           "Unable to find keyspace {} in bucket {} while scanning for manifests.",
           manifestS3Key,

@@ -39,7 +39,7 @@ final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
   void testMD5ChkSum() throws Exception {
     String bucket = null;
     try {
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
@@ -94,8 +94,7 @@ final class ManifestEntryDownloadTaskIT extends AbstractLocalStackS3Test {
       // Shouldn't happen, as our apps don't use thread interrupts.
       throw new BadCodeMonkeyException(e);
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 }

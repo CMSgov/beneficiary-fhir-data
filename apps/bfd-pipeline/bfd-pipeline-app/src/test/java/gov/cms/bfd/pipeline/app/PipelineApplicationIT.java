@@ -140,7 +140,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     Process appProcess = null;
     try {
       // Create the (empty) bucket to run against.
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
 
       // Start the app.
       ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(bucket);
@@ -197,7 +197,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Dao);
+      bucket = s3Dao.createTestBucket();
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now(),
@@ -252,8 +252,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       verifyExitValueMatchesSignal(SIGTERM, appProcess);
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Dao, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
