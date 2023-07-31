@@ -83,6 +83,11 @@ class PACUser(BFDUserBase):
         """Get single Claim with last updated and service date"""
         self.__get("Claim", "claimServiceDateLastUpdated", self.SERVICE_DATE_LAST_UPDATED)
 
+    @tag("claim", "exclude-samsa")
+    @task
+    def get_claim_with_exclude_samsa(self):
+        self.__get("Claim", "excludeSAMSA", True)
+
     @tag("claim-response")
     @task
     def get_claim_response(self):
@@ -110,3 +115,8 @@ class PACUser(BFDUserBase):
             "claimResponseServiceDateLastUpdated",
             self.SERVICE_DATE_LAST_UPDATED,
         )
+
+    @tag("claim", "exclude-samsa")
+    @task
+    def get_claim_response_with_exclude_samsa(self):
+        self.__get("ClaimResponse", "excludeSAMSA", True)
