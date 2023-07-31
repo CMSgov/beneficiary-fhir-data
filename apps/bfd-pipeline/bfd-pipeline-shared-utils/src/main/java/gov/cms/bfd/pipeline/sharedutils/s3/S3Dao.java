@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.sharedutils.s3;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.FileNotFoundException;
@@ -251,23 +250,22 @@ public class S3Dao implements AutoCloseable {
   }
 
   /**
-   * Download S3 object and return its {@link GetObjectResponse}. Recognize the possible case of
-   * object not found (HTTP 404) by throwing more useful {@link FileNotFoundException}. Uses a
-   * {@link S3TransferManager} for higher throughput and reliability than {@link #readObject}.
+   * Download S3 object and return its {@link GetObjectResponse}. Uses a {@link S3TransferManager}
+   * for higher throughput and reliability than {@link #readObject}.
    *
    * @param s3Bucket the bucket containing the object
    * @param s3Key the S3 object key
-   * @param tempDataFile where to store the downloaded object
+   * @param dataFile where to store the downloaded object
    * @return the meta data
    * @throws NoSuchKeyException for bad key
    * @throws NoSuchBucketException for bad bucket name
    */
-  public S3ObjectDetails downloadObject(String s3Bucket, String s3Key, Path tempDataFile) {
+  public S3ObjectDetails downloadObject(String s3Bucket, String s3Key, Path dataFile) {
     try {
       DownloadFileRequest downloadFileRequest =
           DownloadFileRequest.builder()
               .getObjectRequest(requestBuilder -> requestBuilder.bucket(s3Bucket).key(s3Key))
-              .destination(tempDataFile)
+              .destination(dataFile)
               .addTransferListener(LoggingTransferListener.create())
               .build();
 
@@ -453,8 +451,8 @@ public class S3Dao implements AutoCloseable {
 
   /**
    * Data object containing the few fields we use from an {@link HeadObjectResponse} or {@link
-   * GetObjectResponse}. Similar to {@link S3ObjectSummary} but also includes a {@link Map} or meta
-   * data key/value pairs.
+   * GetObjectResponse}. Similar to {@link S3ObjectSummary} but also includes an immutable {@link
+   * Map} of meta data key/value pairs.
    *
    * <p>Using this class removes a dependency on underlying API responses and simplifies use of the
    * {@link S3Dao}.
@@ -481,7 +479,7 @@ public class S3Dao implements AutoCloseable {
       this.key = key;
       eTag = response.eTag();
       size = response.contentLength();
-      metaData = ImmutableMap.copyOf(response.metadata());
+      metaData = Map.copyOf(response.metadata());
     }
 
     /**
@@ -494,7 +492,7 @@ public class S3Dao implements AutoCloseable {
       this.key = key;
       eTag = response.eTag();
       size = response.contentLength();
-      metaData = ImmutableMap.copyOf(response.metadata());
+      metaData = Map.copyOf(response.metadata());
     }
   }
 }

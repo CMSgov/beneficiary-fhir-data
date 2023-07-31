@@ -117,7 +117,7 @@ class S3DaoIT extends AbstractLocalStackTest {
     // we haven't uploaded the file yet
     assertEquals(false, s3Dao.objectExists(bucket, objectKey));
 
-    // upload the file to the bucket using URL and verify the summary has valid values
+    // upload the file to the bucket using URL and verify the summary has expected values
     final var uploadSummary =
         s3Dao.putObject(bucket, objectKey, SAMPLE_FILE_FOR_PUT_TEST, metaData);
     assertEquals(objectKey, uploadSummary.getKey());
@@ -127,19 +127,20 @@ class S3DaoIT extends AbstractLocalStackTest {
     // we have uploaded the file now
     assertEquals(true, s3Dao.objectExists(bucket, objectKey));
 
-    // read back details and verify they have valid values
+    // read back details and verify they have expected values
     final var readMetaDetails = s3Dao.readObjectMetaData(bucket, objectKey);
     assertEquals(objectKey, readMetaDetails.getKey());
     assertEquals(expectedBytes.length, readMetaDetails.getSize());
     assertEquals(uploadSummary.getETag(), readMetaDetails.getETag());
     assertEquals(metaData, readMetaDetails.getMetaData());
 
-    // download the file and ensure it has expected values
     final Path tempFile = File.createTempFile("s3dao", "dat").toPath();
     try {
-      // download the URL file and ensure its bytes are as expected
+      // download the file and ensure it has expected values
       S3ObjectDetails downloadObjectDetails = s3Dao.downloadObject(bucket, objectKey, tempFile);
       assertEquals(readMetaDetails, downloadObjectDetails);
+
+      // read back file contents and verify they match what we uploaded
       byte[] actualBytes = Files.readAllBytes(tempFile);
       assertThat(actualBytes).isEqualTo(expectedBytes);
     } finally {
@@ -165,7 +166,7 @@ class S3DaoIT extends AbstractLocalStackTest {
     // we haven't uploaded the file yet
     assertEquals(false, s3Dao.objectExists(bucket, objectKey));
 
-    // upload the file to the bucket using byte array and verify the summary has valid values
+    // upload the file to the bucket using byte array and verify the summary has expected values
     final var uploadSummary = s3Dao.putObject(bucket, objectKey, expectedBytes, metaData);
     assertEquals(objectKey, uploadSummary.getKey());
     assertThat(uploadSummary.getETag()).isNotEmpty();
@@ -174,13 +175,14 @@ class S3DaoIT extends AbstractLocalStackTest {
     // we have uploaded the file now
     assertEquals(true, s3Dao.objectExists(bucket, objectKey));
 
-    // read back byte array file details and verify they have valid values
+    // read back file details and verify they have expected values
     final var objectDetails = s3Dao.readObjectMetaData(bucket, objectKey);
     assertEquals(objectKey, objectDetails.getKey());
     assertEquals(expectedBytes.length, objectDetails.getSize());
     assertEquals(uploadSummary.getETag(), objectDetails.getETag());
     assertEquals(metaData, objectDetails.getMetaData());
 
+    // read back file contents and verify they match what we uploaded
     byte[] downloadedBytes;
     try (var stream = s3Dao.readObject(bucket, objectKey)) {
       downloadedBytes = ByteStreams.toByteArray(stream);
