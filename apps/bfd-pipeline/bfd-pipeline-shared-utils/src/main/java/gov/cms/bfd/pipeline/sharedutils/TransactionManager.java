@@ -33,6 +33,9 @@ public class TransactionManager implements AutoCloseable {
    */
   @Nullable private EntityManager entityManager;
 
+  /** random generator for function retry logic. */
+  private final Random random = new Random();
+
   /**
    * Creates a new instance using the provided {@link EntityManagerFactory}.
    *
@@ -108,7 +111,6 @@ public class TransactionManager implements AutoCloseable {
       return new RetryResult<>(result);
     } catch (Exception firstException) {
       if (isRetriableException.test(firstException)) {
-        final var random = new Random();
         for (int retryNumber = 1; retryNumber <= maxRetries; ++retryNumber) {
           try {
             int retryDelayMultiple = retryNumber + random.nextInt(MaxRetryDelayMultiple);

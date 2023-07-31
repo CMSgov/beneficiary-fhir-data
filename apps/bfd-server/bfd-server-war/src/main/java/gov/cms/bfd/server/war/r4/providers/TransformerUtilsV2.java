@@ -3767,10 +3767,12 @@ public final class TransformerUtilsV2 {
    */
   static Organization findOrCreateContainedOrganization(ExplanationOfBenefit eob, String id) {
     Optional<Resource> organization =
-        eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
+        eob.getContained().stream()
+            .filter(r -> r.getId() != null && r.getId().equals(id))
+            .findFirst();
 
     // If it isn't there, add one
-    if (!organization.isPresent()) {
+    if (organization.isEmpty()) {
       organization = Optional.of(new Organization().setId(id));
       organization.get().getMeta().addProfile(ProfileConstants.C4BB_ORGANIZATION_URL);
       eob.getContained().add(organization.get());
