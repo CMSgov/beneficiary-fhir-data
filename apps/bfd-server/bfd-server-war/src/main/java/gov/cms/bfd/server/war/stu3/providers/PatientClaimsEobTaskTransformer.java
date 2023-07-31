@@ -251,11 +251,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     return eobs;
   }
 
-  /**
-   * Fetch the claim type string.
-   *
-   * @return {@link String} identifying the {@link ClaimType} of task
-   */
   @Override
   public String toString() {
     return claimType.toString();
@@ -269,6 +264,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Trace
+  @VisibleForTesting
   private <T> List<T> findClaimTypeByPatient() {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery((Class) claimType.getEntityClass());
