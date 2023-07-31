@@ -302,8 +302,9 @@ class S3DaoIT extends AbstractLocalStackTest {
     final var originalBytes = "My original file had this string!".getBytes(StandardCharsets.UTF_8);
     final var originalKey = "/a/original";
     final var duplicateKey = "/c/duplicate";
+    final var metaData = Map.of("a", "acorn", "c", "carrot");
 
-    s3Dao.putObject(bucket, originalKey, originalBytes, Map.of());
+    s3Dao.putObject(bucket, originalKey, originalBytes, metaData);
     assertEquals(true, s3Dao.objectExists(bucket, originalKey));
     assertEquals(false, s3Dao.objectExists(bucket, duplicateKey));
 
@@ -315,6 +316,9 @@ class S3DaoIT extends AbstractLocalStackTest {
       duplicateBytes = ByteStreams.toByteArray(stream);
     }
     assertThat(duplicateBytes).isEqualTo(originalBytes);
+
+    // copying should preserve meta data
+    assertEquals(metaData, s3Dao.readObjectMetaData(bucket, duplicateKey).getMetaData());
   }
 
   /**
@@ -330,8 +334,9 @@ class S3DaoIT extends AbstractLocalStackTest {
           "My original file had this string!".getBytes(StandardCharsets.UTF_8);
       final var originalKey = "/a/original";
       final var duplicateKey = "/c/duplicate";
+      final var metaData = Map.of("a", "acorn", "c", "carrot");
 
-      s3Dao.putObject(bucket, originalKey, originalBytes, Map.of());
+      s3Dao.putObject(bucket, originalKey, originalBytes, metaData);
       assertEquals(true, s3Dao.objectExists(bucket, originalKey));
       assertEquals(false, s3Dao.objectExists(destBucket, duplicateKey));
 
@@ -343,6 +348,9 @@ class S3DaoIT extends AbstractLocalStackTest {
         duplicateBytes = ByteStreams.toByteArray(stream);
       }
       assertThat(duplicateBytes).isEqualTo(originalBytes);
+
+      // copying should preserve meta data
+      assertEquals(metaData, s3Dao.readObjectMetaData(destBucket, duplicateKey).getMetaData());
     } finally {
       s3Dao.deleteTestBucket(destBucket);
     }

@@ -292,6 +292,10 @@ public class S3Dao implements AutoCloseable {
    */
   public void copyObject(
       String s3SourceBucket, String s3SourceKey, String s3TargetBucket, String s3TargetKey) {
+    // Multipart copy can prevent the copying of meta data so we read meta data from source object
+    // and add it to the copy request to ensure it is preserved.
+    final var metaData = readObjectMetaData(s3SourceBucket, s3SourceKey).getMetaData();
+
     CopyRequest copyRequest =
         CopyRequest.builder()
             .copyObjectRequest(
@@ -300,7 +304,8 @@ public class S3Dao implements AutoCloseable {
                         .sourceBucket(s3SourceBucket)
                         .sourceKey(s3SourceKey)
                         .destinationBucket(s3TargetBucket)
-                        .destinationKey(s3TargetKey))
+                        .destinationKey(s3TargetKey)
+                        .metadata(metaData))
             .build();
     try {
       s3TransferManager.copy(copyRequest).completionFuture().join();
