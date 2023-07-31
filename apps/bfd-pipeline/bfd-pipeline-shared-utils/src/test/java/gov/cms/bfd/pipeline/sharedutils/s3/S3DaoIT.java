@@ -88,13 +88,13 @@ class S3DaoIT extends AbstractLocalStackTest {
     try {
       // Verify that the bucket exists by verifying we can list its contents without thrown an
       // exception.
-      var bucketContents = s3Dao.listObjectsAsStream(bucket).toList();
+      var bucketContents = s3Dao.listObjects(bucket).toList();
       assertThat(bucketContents).isEmpty();
     } finally {
       s3Dao.deleteTestBucket(bucket);
 
       // Verify that the bucket no longer exists.
-      assertThatThrownBy(() -> s3Dao.listObjectsAsStream(bucket).toList())
+      assertThatThrownBy(() -> s3Dao.listObjects(bucket).toList())
           .isInstanceOf(NoSuchBucketException.class);
     }
   }
@@ -237,7 +237,7 @@ class S3DaoIT extends AbstractLocalStackTest {
               .collect(Collectors.toSet());
 
       // download a list using default (large) page size
-      final var actual = s3Dao.listObjectsAsStream(bucket, directory).collect(Collectors.toSet());
+      final var actual = s3Dao.listObjects(bucket, directory).collect(Collectors.toSet());
       assertEquals(expected, actual);
     }
 
@@ -245,14 +245,12 @@ class S3DaoIT extends AbstractLocalStackTest {
     final var expected = Set.copyOf(files.values());
 
     // download a list with no prefix using default (large) page size
-    final var actual = s3Dao.listObjectsAsStream(bucket).collect(Collectors.toSet());
+    final var actual = s3Dao.listObjects(bucket).collect(Collectors.toSet());
     assertEquals(expected, actual);
 
     // download a list with no prefix using tiny page size, should still be the same
     final var paged =
-        s3Dao
-            .listObjectsAsStream(bucket, Optional.empty(), Optional.of(2))
-            .collect(Collectors.toSet());
+        s3Dao.listObjects(bucket, Optional.empty(), Optional.of(2)).collect(Collectors.toSet());
     assertEquals(expected, paged);
   }
 

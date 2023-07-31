@@ -222,8 +222,7 @@ public final class DataSetQueue {
      */
     s3TaskManager
         .getS3Dao()
-        .listObjectsAsStream(
-            options.getS3BucketName(), Optional.empty(), options.getS3ListMaxKeys())
+        .listObjects(options.getS3BucketName(), Optional.empty(), options.getS3ListMaxKeys())
         .forEach(addToManifest);
 
     this.completedManifestsCount = completedManifestsCount.get();

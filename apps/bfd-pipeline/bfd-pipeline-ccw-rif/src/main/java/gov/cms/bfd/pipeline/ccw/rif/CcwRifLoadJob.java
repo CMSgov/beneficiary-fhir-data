@@ -383,7 +383,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     final Set<String> dataSetObjectNames =
         s3TaskManager
             .getS3Dao()
-            .listObjectsAsStream(
+            .listObjects(
                 options.getS3BucketName(),
                 Optional.of(dataSetKeyPrefix),
                 options.getS3ListMaxKeys())

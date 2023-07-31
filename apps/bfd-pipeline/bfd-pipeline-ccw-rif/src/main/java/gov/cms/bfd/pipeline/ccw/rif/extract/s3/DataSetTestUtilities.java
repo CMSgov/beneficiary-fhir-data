@@ -189,7 +189,7 @@ public class DataSetTestUtilities {
     final String prefix = String.format("%s/", keyPrefix);
     long actualObjectCount = -1L;
     while (Instant.now().isBefore(endTime)) {
-      actualObjectCount = s3Dao.listObjectsAsStream(bucket, prefix).count();
+      actualObjectCount = s3Dao.listObjects(bucket, prefix).count();
       if (expectedObjectCount == actualObjectCount) {
         return;
       }

@@ -182,7 +182,7 @@ public class S3Dao implements AutoCloseable {
    * @return a {@link Stream} of objects
    * @throws NoSuchBucketException for bad bucket name
    */
-  public Stream<S3ObjectSummary> listObjectsAsStream(
+  public Stream<S3ObjectSummary> listObjects(
       String s3Bucket, Optional<String> keyPrefix, Optional<Integer> pageSize) {
     ListObjectsV2Request.Builder objectRequestBuilder =
         ListObjectsV2Request.builder().bucket(s3Bucket);
@@ -202,8 +202,8 @@ public class S3Dao implements AutoCloseable {
    * @return a {@link Stream} of objects
    * @throws NoSuchBucketException for bad bucket name
    */
-  public Stream<S3ObjectSummary> listObjectsAsStream(String s3Bucket, String keyPrefix) {
-    return listObjectsAsStream(s3Bucket, Optional.of(keyPrefix), Optional.empty());
+  public Stream<S3ObjectSummary> listObjects(String s3Bucket, String keyPrefix) {
+    return listObjects(s3Bucket, Optional.of(keyPrefix), Optional.empty());
   }
 
   /**
@@ -214,8 +214,8 @@ public class S3Dao implements AutoCloseable {
    * @return a {@link Stream} of objects
    * @throws NoSuchBucketException for bad bucket name
    */
-  public Stream<S3ObjectSummary> listObjectsAsStream(String s3Bucket) {
-    return listObjectsAsStream(s3Bucket, Optional.empty(), Optional.empty());
+  public Stream<S3ObjectSummary> listObjects(String s3Bucket) {
+    return listObjects(s3Bucket, Optional.empty(), Optional.empty());
   }
 
   /**
@@ -376,7 +376,7 @@ public class S3Dao implements AutoCloseable {
     }
 
     // delete the bucket contents
-    listObjectsAsStream(s3Bucket).forEach(s3Object -> deleteObject(s3Bucket, s3Object.getKey()));
+    listObjects(s3Bucket).forEach(s3Object -> deleteObject(s3Bucket, s3Object.getKey()));
 
     // delete the bucket itself
     DeleteBucketRequest deleteBucketRequest =

@@ -316,9 +316,9 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   private List<S3ObjectSummary> readS3ObjectListing() {
     if (Strings.isNullOrEmpty(s3DirectoryPath)) {
-      return s3Dao.listObjectsAsStream(s3BucketName).toList();
+      return s3Dao.listObjects(s3BucketName).toList();
     } else {
-      return s3Dao.listObjectsAsStream(s3BucketName, s3DirectoryPath).toList();
+      return s3Dao.listObjects(s3BucketName, s3DirectoryPath).toList();
     }
   }
 
