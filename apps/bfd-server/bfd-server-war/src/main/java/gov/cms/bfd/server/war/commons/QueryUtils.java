@@ -59,6 +59,9 @@ public class QueryUtils {
   /** bitwise value denoting PARTD_EVENTS data for a beneficiary. */
   public static final int V_PART_D_HAS_DATA = (1 << PART_D_HAS_DATA);
 
+  /** preclude construction from outsiders. */
+  private QueryUtils() {}
+
   /**
    * Create a predicate for the lastUpdate field based on the passed _lastUpdated parameter range.
    *
@@ -226,9 +229,9 @@ public class QueryUtils {
    *
    * @param entityManager {@link EntityManager} used to query database.
    * @param beneficiaryId used to identify the Beneficiary to check claims for.
-   * @return {@link Integer} bitmask denoting which claims have data.
+   * @return {@link int} bitmask denoting which claims have data.
    */
-  public static Integer availableClaimsData(EntityManager entityManager, long beneficiaryId) {
+  public static int availableClaimsData(EntityManager entityManager, long beneficiaryId) {
     /*
      * execute a database function that returns a bitwise mask value that denotes that the given
      * claim type will have data for the specified beneficiaryId. This represents fast and efficient
@@ -253,6 +256,6 @@ public class QueryUtils {
             .setParameter("beneIdValue", beneficiaryId)
             .getResultList();
 
-    return (Integer) (values != null && values.size() > 0 ? values.get(0) : 0);
+    return (int) (values != null && values.size() > 0 ? values.get(0) : 0);
   }
 }
