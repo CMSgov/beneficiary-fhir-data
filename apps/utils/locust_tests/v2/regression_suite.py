@@ -1,5 +1,6 @@
 """Regression test suite for V2 BFD Server endpoints."""
 
+import itertools
 from typing import Dict, List
 
 from locust import events, tag, task
@@ -8,6 +9,7 @@ from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
+from common.task_utils import params_to_str
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
@@ -48,6 +50,13 @@ def _(environment: Environment, **kwargs):
         data_type_name="hashed_mbis",
     )
 
+    global master_pac_hashed_mbis
+    master_pac_hashed_mbis = data.load_from_parsed_opts(
+        environment.parsed_options,
+        db.get_regression_pac_hashed_mbis,
+        data_type_name="pac_hashed_mbis",
+    )
+
 
 set_comparisons_metadata_path("./config/regression_suites_compare_meta.json")
 
@@ -66,12 +75,17 @@ class RegressionV2User(BFDUserBase):
 
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
+    PAC_SERVICE_DATE = {"service-date": "gt2020-01-05"}
+    PAC_LAST_UPDATED = {"_lastUpdated": "gt2020-05-05"}
+    PAC_SERVICE_DATE_LAST_UPDATED = PAC_SERVICE_DATE | PAC_LAST_UPDATED
+    PAC_EXCLUDE_SAMHSA = {"excludeSAMHSA": "true"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.bene_ids = master_bene_ids.copy()
-        self.contract_data = master_contract_data.copy()
-        self.hashed_mbis = master_hashed_mbis.copy()
+        self.bene_ids = itertools.cycle(master_bene_ids.copy())
+        self.contract_data = itertools.cycle(master_contract_data.copy())
+        self.hashed_mbis = itertools.cycle(master_hashed_mbis.copy())
+        self.pac_hashed_mbis = itertools.cycle(master_pac_hashed_mbis.copy())
 
     @tag("coverage", "coverage_test_id_count")
     @task
@@ -79,7 +93,7 @@ class RegressionV2User(BFDUserBase):
         """Coverage search by ID, Paginated"""
         self.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
-            params={"beneficiary": self.bene_ids.pop(), "_count": "10"},
+            params={"beneficiary": next(self.bene_ids), "_count": "10"},
             name="/v2/fhir/Coverage search by id / count=10",
         )
 
@@ -90,7 +104,7 @@ class RegressionV2User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
             params={
-                "beneficiary": self.bene_ids.pop(),
+                "beneficiary": next(self.bene_ids),
             },
             name="/v2/fhir/Coverage search by id",
         )
@@ -102,7 +116,7 @@ class RegressionV2User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient": next(self.bene_ids),
                 "_count": "10",
                 "_format": "application/fhir+json",
             },
@@ -116,7 +130,7 @@ class RegressionV2User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient": next(self.bene_ids),
                 "_IncludeTaxNumbers": "true",
                 "_format": "application/fhir+json",
             },
@@ -129,7 +143,7 @@ class RegressionV2User(BFDUserBase):
         """Explanation of Benefit search by ID"""
         self.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
-            params={"patient": self.bene_ids.pop(), "_format": "application/fhir+json"},
+            params={"patient": next(self.bene_ids), "_format": "application/fhir+json"},
             name="/v2/fhir/ExplanationOfBenefit search by id",
         )
 
@@ -139,9 +153,9 @@ class RegressionV2User(BFDUserBase):
         """Patient search by Coverage Contract, paginated"""
 
         def make_url():
-            contract = self.contract_data.pop()
+            contract = next(self.contract_data)
             return create_url_path(
-                f"/v2/fhir/Patient",
+                "/v2/fhir/Patient",
                 {
                     "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
                     "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
@@ -151,7 +165,7 @@ class RegressionV2User(BFDUserBase):
             )
 
         self.run_task(
-            name=f"/v2/fhir/Patient search by coverage contract (all pages)",
+            name="/v2/fhir/Patient search by coverage contract (all pages)",
             headers={"IncludeIdentifiers": "mbi"},
             url_callback=make_url,
         )
@@ -163,15 +177,15 @@ class RegressionV2User(BFDUserBase):
 
         def make_url():
             return create_url_path(
-                f"/v2/fhir/Patient/",
+                "/v2/fhir/Patient/",
                 {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{next(self.hashed_mbis)}",
                     "_IncludeIdentifiers": "mbi",
                 },
             )
 
         self.run_task(
-            name=f"/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
+            name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
             url_callback=make_url,
         )
 
@@ -182,7 +196,7 @@ class RegressionV2User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id": self.bene_ids.pop(),
+                "_id": next(self.bene_ids),
                 "_format": "application/fhir+json",
                 "_IncludeIdentifiers": "mbi",
             },
@@ -196,8 +210,123 @@ class RegressionV2User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id": self.bene_ids.pop(),
+                "_id": next(self.bene_ids),
                 "_format": "application/fhir+json",
             },
             name="/v2/fhir/Patient search by id",
+        )
+
+    @tag("claim")
+    @task
+    def claim(self):
+        """Get single Claim"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Claim",
+            params={"mbi": next(self.pac_hashed_mbis)},
+            name="/v2/fhir/claim search by mbi hash",
+        )
+
+    @tag("claim", "claim_with_service_date")
+    @task
+    def claim_with_service_date(self):
+        """Get single Claim with service date"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Claim",
+            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_SERVICE_DATE,
+            name=f"/v2/fhir/claim search by mbi hash / {params_to_str(self.PAC_SERVICE_DATE)}",
+        )
+
+    @tag("claim", "claim_with_last_updated")
+    @task
+    def claim_with_last_updated(self):
+        """Get single Claim with last updated"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Claim",
+            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_LAST_UPDATED,
+            name=f"/v2/fhir/claim search by mbi hash / {params_to_str(self.PAC_LAST_UPDATED)}",
+        )
+
+    @tag("claim", "claim_with_service_date_and_last_updated")
+    @task
+    def claim_with_service_date_and_last_updated(self):
+        """Get single Claim with last updated and service date"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Claim",
+            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_SERVICE_DATE_LAST_UPDATED,
+            name=(
+                "/v2/fhir/claim search by mbi hash /"
+                f" {params_to_str(self.PAC_SERVICE_DATE_LAST_UPDATED)}"
+            ),
+        )
+
+    @tag("claim", "claim_with_exclude_samhsa")
+    @task
+    def claim_with_exclude_samhsa(self):
+        """Get a single Claim specifying to exclude SAMHSA"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/Claim",
+            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_EXCLUDE_SAMHSA,
+            name=f"/v2/fhir/claim search by mbi hash / {params_to_str(self.PAC_EXCLUDE_SAMHSA)}",
+        )
+
+    @tag("claim_response")
+    @task
+    def claim_response(self):
+        """Get single ClaimResponse"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/ClaimResponse",
+            params={"mbi": next(self.pac_hashed_mbis)},
+            name="/v2/fhir/claimResponse search by mbi hash",
+        )
+
+    @tag("claim_response", "claim_response_with_service_date")
+    @task
+    def claim_response_with_service_date(self):
+        """Get single ClaimResponse with service date"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/ClaimResponse",
+            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_SERVICE_DATE,
+            name=(
+                "/v2/fhir/claimResponse search by mbi hash /"
+                f" {params_to_str(self.PAC_SERVICE_DATE)}"
+            ),
+        )
+
+    @tag("claim_response", "claim_response_with_last_updated")
+    @task
+    def claim_response_with_last_updated(self):
+        """Get single ClaimResponse with last updated"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/ClaimResponse",
+            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_LAST_UPDATED,
+            name=(
+                "/v2/fhir/claimResponse search by mbi hash /"
+                f" {params_to_str(self.PAC_LAST_UPDATED)}"
+            ),
+        )
+
+    @tag("claim_response", "claim_response_with_service_date_and_last_updated")
+    @task
+    def claim_response_with_service_date_and_last_updated(self):
+        """Get single ClaimResponse with last updated and service date"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/ClaimResponse",
+            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_SERVICE_DATE_LAST_UPDATED,
+            name=(
+                "/v2/fhir/claimResponse search by mbi hash /"
+                f" {params_to_str(self.PAC_SERVICE_DATE_LAST_UPDATED)}"
+            ),
+        )
+
+    @tag("claim", "claim_response_with_exclude_samhsa")
+    @task
+    def claim_response_with_exclude_samhsa(self):
+        """Get a single ClaimResponse specifying to exclude SAMHSA"""
+        self.run_task_by_parameters(
+            base_path="/v2/fhir/ClaimResponse",
+            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_EXCLUDE_SAMHSA,
+            name=(
+                "/v2/fhir/claimResponse search by mbi hash /"
+                f" {params_to_str(self.PAC_EXCLUDE_SAMHSA)}"
+            ),
         )
