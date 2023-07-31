@@ -411,9 +411,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
    *     matching resources, or may also be empty.
    */
-  // * @throws {@link InterruptedException}.
-  // * @throws {@link RuntimeException}.
-  // * @throws {@link ExecutionException}.
   @VisibleForTesting
   public Bundle processClaimsMask(
       int claimTypesThatHaveData,
@@ -584,7 +581,9 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
        */
       Set<ClaimType> claimTypesInner = new HashSet<ClaimType>();
       for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
-        if (codingToken.getModifier() != null) throw new IllegalArgumentException();
+        if (codingToken.getModifier() != null) {
+          throw new IllegalArgumentException();
+        }
 
         /*
          * Per the FHIR spec (https://www.hl7.org/fhir/search.html), there are lots of
