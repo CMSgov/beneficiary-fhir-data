@@ -27,11 +27,12 @@ public abstract class AbstractLocalStackS3Test extends AbstractLocalStackTest {
   @BeforeEach
   void initializeS3Fields() {
     s3ClientConfig =
-        new S3ClientConfig(
-            Region.of(localstack.getRegion()),
-            localstack.getEndpointOverride(LocalStackContainer.Service.S3),
-            localstack.getAccessKey(),
-            localstack.getSecretKey());
+        S3ClientConfig.s3Builder()
+            .region(Region.of(localstack.getRegion()))
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+            .accessKey(localstack.getAccessKey())
+            .secretKey(localstack.getSecretKey())
+            .build();
     s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
     s3Dao = s3ClientFactory.createS3Dao();
   }

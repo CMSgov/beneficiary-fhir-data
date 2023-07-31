@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 import com.google.common.io.ByteStreams;
 import gov.cms.bfd.AbstractLocalStackTest;
@@ -26,10 +25,12 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -39,6 +40,13 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager;
 
 /** Integration tests for {@link S3Dao}. */
 class S3DaoIT extends AbstractLocalStackTest {
+  /**
+   * {@link S3TransferManager#copy} does not preserve meta data when using multi-part transfers. To
+   * test with with reasonable overhead we need to reduce the partition size to the minimum allowed
+   * value and try to transfer more than that.
+   */
+  private static final int MIN_PART_SIZE_FOR_TESTING = 8 * 1024 * 1024;
+
   /** Provides access to a sample file to be uploaded to a bucket. */
   private static final URL SAMPLE_FILE_FOR_PUT_TEST =
       ClassLoader.getSystemResource("data-for-bucket-test.txt");
@@ -53,11 +61,14 @@ class S3DaoIT extends AbstractLocalStackTest {
   void createDao() {
     s3Dao =
         new AwsS3ClientFactory(
-                new S3ClientConfig(
-                    Region.of(localstack.getRegion()),
-                    localstack.getEndpointOverride(S3),
-                    localstack.getAccessKey(),
-                    localstack.getSecretKey()))
+                S3ClientConfig.s3Builder()
+                    .region(Region.of(localstack.getRegion()))
+                    .endpointOverride(
+                        localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+                    .accessKey(localstack.getAccessKey())
+                    .secretKey(localstack.getSecretKey())
+                    .minimumPartSizeForDownload((long) MIN_PART_SIZE_FOR_TESTING)
+                    .build())
             .createS3Dao();
     bucket = s3Dao.createTestBucket();
   }
@@ -299,7 +310,10 @@ class S3DaoIT extends AbstractLocalStackTest {
    */
   @Test
   void shouldCopyFileInSameBucket() throws IOException {
-    final var originalBytes = "My original file had this string!".getBytes(StandardCharsets.UTF_8);
+    // ensure copy requires two parts to be transferred
+    final var originalBytes = new byte[MIN_PART_SIZE_FOR_TESTING + 1000];
+    ThreadLocalRandom.current().nextBytes(originalBytes);
+
     final var originalKey = "/a/original";
     final var duplicateKey = "/c/duplicate";
     final var metaData = Map.of("a", "acorn", "c", "carrot");
@@ -330,8 +344,10 @@ class S3DaoIT extends AbstractLocalStackTest {
   void shouldCopyFileBetweenBuckets() throws IOException {
     final String destBucket = s3Dao.createTestBucket();
     try {
-      final var originalBytes =
-          "My original file had this string!".getBytes(StandardCharsets.UTF_8);
+      // ensure copy requires two parts to be transferred
+      final var originalBytes = new byte[MIN_PART_SIZE_FOR_TESTING + 1000];
+      ThreadLocalRandom.current().nextBytes(originalBytes);
+
       final var originalKey = "/a/original";
       final var duplicateKey = "/c/duplicate";
       final var metaData = Map.of("a", "acorn", "c", "carrot");
