@@ -43,7 +43,10 @@ def _get_regression_query(select_query: str) -> str:
     return " ".join(
         [
             select_query,
-            f'WHERE "bene_id" BETWEEN {REGRESSION_BENE_RANGE_START} AND {REGRESSION_BENE_RANGE_END}',
+            (
+                f'WHERE "bene_id" BETWEEN {REGRESSION_BENE_RANGE_START} AND'
+                f" {REGRESSION_BENE_RANGE_END}"
+            ),
             'ORDER BY "bene_id" ASC',
             f"LIMIT {LIMIT}",
         ]
@@ -104,6 +107,33 @@ def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
     ]
 
     return [contract for contract in unfiltered_contracts if contract["id"]]
+
+
+def get_regression_pac_hashed_mbis(uri: str) -> set[str]:
+    """Returns a list of MBI hashes within the set of static, synthetic PAC data
+
+    Args:
+        uri (str): The database connection string
+
+    Returns:
+        list[str]: A list of MBI hashes
+    """
+    mcs_claims_mbis_query = (
+        "SELECT m.hash FROM rda.mcs_claims c "
+        "LEFT JOIN rda.mbi_cache m ON c.mbi_id=m.mbi_id WHERE sequence_number < 0"
+        f"LIMIT {LIMIT}"
+    )
+    fiss_claims_mbis_query = (
+        "SELECT m.hash FROM rda.fiss_claims c "
+        "LEFT JOIN rda.mbi_cache m ON c.mbi_id=m.mbi_id WHERE sequence_number < 0"
+        f"LIMIT {LIMIT}"
+    )
+
+    # Execute both queries and join the results into a set which will automatically de-duplicate
+    # any duplicated hashes
+    return {str(r[0]) for r in _execute(uri, mcs_claims_mbis_query)} | {
+        str(r[0]) for r in _execute(uri, fiss_claims_mbis_query)
+    }
 
 
 def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
