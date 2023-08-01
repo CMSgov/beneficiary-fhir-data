@@ -1,6 +1,5 @@
 """Create a URL path from a base path and query parameters."""
-from collections.abc import Mapping
-from typing import List, Optional, Union
+from typing import List, Mapping, Optional, Union
 from urllib.parse import urlencode
 
 

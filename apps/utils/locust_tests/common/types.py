@@ -1,7 +1,6 @@
 """Defines common types"""
 
-from collections.abc import Collection
-from typing import Protocol, TypeVar
+from typing import Collection, Protocol, TypeVar
 
 TElement = TypeVar("TElement", covariant=True)
 T = TypeVar("T")

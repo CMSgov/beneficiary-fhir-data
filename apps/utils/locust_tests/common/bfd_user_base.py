@@ -5,8 +5,7 @@ import json
 import logging
 import re
 import ssl
-from collections.abc import Mapping
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Mapping, Optional, Union
 
 from locust import FastHttpUser, events
 from locust.argument_parser import LocustArgumentParser
