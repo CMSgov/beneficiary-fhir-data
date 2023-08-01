@@ -3,16 +3,34 @@
 import datetime
 import logging
 from argparse import Namespace
-from typing import Callable, List
+from typing import Any, Optional, Protocol, Union, runtime_checkable
+
+from common.types import CopyableEnumerable
+
+
+@runtime_checkable
+class NonSamplingLoadFunction(Protocol):
+    def __call__(self, uri: str) -> CopyableEnumerable[Any]:
+        ...
+
+
+@runtime_checkable
+class SamplingLoadFunction(Protocol):
+    def __call__(
+        self, uri: str, table_sample_pct: Optional[float] = None
+    ) -> CopyableEnumerable[Any]:
+        ...
+
+
+LoadFunction = Union[NonSamplingLoadFunction, SamplingLoadFunction]
 
 
 def load_from_parsed_opts(
     parsed_opts: Namespace,
-    load_function: Callable,
-    *args,
+    load_function: LoadFunction,
     use_table_sample: bool = False,
     data_type_name: str = "<unknown>",
-) -> List:
+) -> CopyableEnumerable[Any]:
     """Loads data from the database given the database load function provided. Gets the database URI and the
     table sampling percent from the given parsed options. Returns an empty list if database URI and/or table sample percent are not
     set in the given parsed options
@@ -35,7 +53,6 @@ def load_from_parsed_opts(
     return load_from_uri(
         database_constr,
         load_function,
-        *args,
         use_table_sample=use_table_sample,
         table_sample_percent=table_sample_percent,
         data_type_name=data_type_name,
@@ -44,21 +61,20 @@ def load_from_parsed_opts(
 
 def load_from_uri(
     database_constr: str,
-    load_function: Callable,
-    *args,
+    load_function: LoadFunction,
     use_table_sample: bool = False,
     table_sample_percent: float = 0.25,
     data_type_name: str = "<unknown>",
-) -> List:
+) -> CopyableEnumerable[Any]:
     """Loads all of the data from the database, using the database connection provided."""
     logger = logging.getLogger()
 
     logger.info("Collecting %s test data...", data_type_name)
-    if use_table_sample:
+    if use_table_sample and isinstance(load_function, SamplingLoadFunction):
         logger.info(f"Table Sampling at: {table_sample_percent}")
-        results = load_function(uri=database_constr, table_sample_pct=table_sample_percent, *args)
+        results = load_function(uri=database_constr, table_sample_pct=table_sample_percent)
     else:
-        results = load_function(uri=database_constr, *args)
+        results = load_function(uri=database_constr)
 
     logger.info(f"Loaded {len(results)} results from the database")
     return results

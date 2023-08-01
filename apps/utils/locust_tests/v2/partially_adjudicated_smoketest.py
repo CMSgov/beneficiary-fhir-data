@@ -1,4 +1,4 @@
-from typing import List
+import itertools
 
 from locust import events, tag, task
 from locust.env import Environment
@@ -6,9 +6,10 @@ from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
+from common.types import CopyableEnumerable
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
-master_pac_mbis: List[str] = []
+master_pac_mbis: CopyableEnumerable[str] = []
 
 
 @events.test_start.add_listener
@@ -51,7 +52,7 @@ class PACSmokeUser(BFDUserBase):
 
     def __get(self, resource, name, parameters=None):
         params = {} if parameters is None else parameters
-        params["mbi"] = self.hashed_mbis.pop()
+        params["mbi"] = itertools.cycle(self.hashed_mbis)
 
         self.run_task_by_parameters(base_path=f"/v2/fhir/{resource}", params=params, name=name)
 

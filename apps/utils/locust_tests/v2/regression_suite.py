@@ -1,7 +1,7 @@
 """Regression test suite for V2 BFD Server endpoints."""
 
 import itertools
-from typing import Dict, List
+from typing import Dict
 
 from locust import events, tag, task
 from locust.env import Environment
@@ -10,12 +10,14 @@ from common import data, db
 from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
 from common.task_utils import params_to_str
+from common.types import CopyableEnumerable
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
-master_bene_ids: List[str] = []
-master_contract_data: List[Dict[str, str]] = []
-master_hashed_mbis: List[str] = []
+master_bene_ids: CopyableEnumerable[str] = []
+master_contract_data: CopyableEnumerable[Dict[str, str]] = []
+master_hashed_mbis: CopyableEnumerable[str] = []
+master_pac_hashed_mbis: CopyableEnumerable[str] = []
 
 
 @events.test_start.add_listener

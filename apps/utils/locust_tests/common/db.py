@@ -97,19 +97,18 @@ def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
         'SELECT "partd_contract_number_id", "year_month" FROM "beneficiary_monthly"'
     )
 
-    unfiltered_contracts = [
+    return [
         {
-            "id": str(result[0]) if result[0] else None,
+            "id": str(result[0]),
             "month": f"{result[1].month:02}",
             "year": str(result[1].year),
         }
         for result in _execute(uri, contract_id_query)
+        if result[0]
     ]
 
-    return [contract for contract in unfiltered_contracts if contract["id"]]
 
-
-def get_regression_pac_hashed_mbis(uri: str) -> set[str]:
+def get_regression_pac_hashed_mbis(uri: str) -> List[str]:
     """Returns a list of MBI hashes within the set of static, synthetic PAC data
 
     Args:
@@ -131,9 +130,10 @@ def get_regression_pac_hashed_mbis(uri: str) -> set[str]:
 
     # Execute both queries and join the results into a set which will automatically de-duplicate
     # any duplicated hashes
-    return {str(r[0]) for r in _execute(uri, mcs_claims_mbis_query)} | {
-        str(r[0]) for r in _execute(uri, fiss_claims_mbis_query)
-    }
+    return list(
+        {str(r[0]) for r in _execute(uri, mcs_claims_mbis_query)}
+        | {str(r[0]) for r in _execute(uri, fiss_claims_mbis_query)}
+    )
 
 
 def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:

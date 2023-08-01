@@ -5,7 +5,8 @@ import json
 import logging
 import re
 import ssl
-from typing import Callable, Dict, List, Optional, Union
+from collections.abc import Mapping
+from typing import Any, Callable, List, Optional, Union
 
 from locust import FastHttpUser, events
 from locust.argument_parser import LocustArgumentParser
@@ -164,7 +165,7 @@ class BFDUserBase(FastHttpUser):
             context.load_verify_locations(cafile=self.server_public_key)
         return context
 
-    def get_by_url(self, url: str, headers: Optional[Dict[str, str]] = None, name: str = ""):
+    def get_by_url(self, url: str, headers: Optional[Mapping[str, str]] = None, name: str = ""):
         """Send one GET request and parse the response for pagination.
 
         This method extends Locust's HttpUser::client.get() method to make creating the requests
@@ -198,7 +199,7 @@ class BFDUserBase(FastHttpUser):
     def run_task(
         self,
         url_callback: Callable,
-        headers: Optional[Dict[str, str]] = None,
+        headers: Optional[Mapping[str, str]] = None,
         name: str = "",
     ):
         """Figure out which URL we should query next and query the server.
@@ -249,8 +250,8 @@ class BFDUserBase(FastHttpUser):
     def run_task_by_parameters(
         self,
         base_path: str,
-        params: Optional[Dict[str, Union[str, int, List]]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        params: Optional[Mapping[str, Union[str, int, List[Any]]]] = None,
+        headers: Optional[Mapping[str, str]] = None,
         name: str = "",
     ):
         """Run a task using a base path and parameters"""
