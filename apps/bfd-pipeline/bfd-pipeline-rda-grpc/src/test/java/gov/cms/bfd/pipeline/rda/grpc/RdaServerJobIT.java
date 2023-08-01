@@ -1,13 +1,11 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
-import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.RdaFissClaim;
 import gov.cms.bfd.model.rda.RdaMcsClaim;
@@ -24,11 +22,13 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -40,11 +40,9 @@ public class RdaServerJobIT extends AbstractLocalStackS3Test {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
   /** The Fiss claim source. */
-  private static final ByteSource fissClaimsSource =
-      Resources.asByteSource(Resources.getResource("FISS.ndjson"));
+  private static final URL fissClaimsSource = Resources.getResource("FISS.ndjson");
   /** The MCS claim source. */
-  private static final ByteSource mcsClaimsSource =
-      Resources.asByteSource(Resources.getResource("MCS.ndjson"));
+  private static final URL mcsClaimsSource = Resources.getResource("MCS.ndjson");
 
   /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
@@ -127,13 +125,13 @@ public class RdaServerJobIT extends AbstractLocalStackS3Test {
   @Test
   public void testS3() throws Exception {
     String bucket = null;
-    S3DirectoryDao s3Dao = null;
+    S3DirectoryDao s3DirDao = null;
     Path cacheDirectoryPath = null;
     try {
-      bucket = createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
       final String directoryPath = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3Dao = new S3DirectoryDao(s3ClientFactory, bucket, directoryPath, cacheDirectoryPath, true);
+      s3DirDao = new S3DirectoryDao(s3Dao, bucket, directoryPath, cacheDirectoryPath, true);
       final RdaServerJob.Config config =
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
@@ -145,8 +143,8 @@ public class RdaServerJobIT extends AbstractLocalStackS3Test {
               .build();
       final String fissObjectKey = RdaS3JsonMessageSourceFactory.createValidFissKeyForTesting();
       final String mcsObjectKey = RdaS3JsonMessageSourceFactory.createValidMcsKeyForTesting();
-      uploadJsonToBucket(s3Client, bucket, directoryPath + fissObjectKey, fissClaimsSource);
-      uploadJsonToBucket(s3Client, bucket, directoryPath + mcsObjectKey, mcsClaimsSource);
+      s3Dao.putObject(bucket, directoryPath + fissObjectKey, fissClaimsSource, Map.of());
+      s3Dao.putObject(bucket, directoryPath + mcsObjectKey, mcsClaimsSource, Map.of());
 
       final RdaServerJob job = new RdaServerJob(config);
       final ExecutorService exec = Executors.newCachedThreadPool();
@@ -198,9 +196,9 @@ public class RdaServerJobIT extends AbstractLocalStackS3Test {
         assertEquals(PipelineJobOutcome.WORK_DONE, outcome.get());
       }
     } finally {
-      deleteTestBucket(s3Client, bucket);
-      if (s3Dao != null) {
-        s3Dao.close();
+      s3Dao.deleteTestBucket(bucket);
+      if (s3DirDao != null) {
+        s3DirDao.close();
       }
     }
   }

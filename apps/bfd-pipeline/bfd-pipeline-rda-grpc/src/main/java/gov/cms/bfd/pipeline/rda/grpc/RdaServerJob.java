@@ -9,7 +9,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;

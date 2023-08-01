@@ -2,12 +2,11 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import lombok.Getter;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
 /** Models the user-configurable options for extraction of RIF data from S3. */
 public final class ExtractionOptions {
@@ -65,9 +64,9 @@ public final class ExtractionOptions {
   /**
    * Gets the data set filter.
    *
-   * @return a {@link Predicate} that returns <code>true</code> for {@link Predicate#test(Object)}
-   *     if the specified {@link DataSetManifest} matches the {@link #getAllowedRifFileType()}
-   *     value, and <code>false</code> if it does not (and thus should be skipped)
+   * @return a {@link Predicate} that returns {@code true} for {@link Predicate#test(Object)} if the
+   *     specified {@link DataSetManifest} matches the {@link #getAllowedRifFileType()} value, and
+   *     {@code false} if it does not (and thus should be skipped)
    */
   public Predicate<DataSetManifest> getDataSetFilter() {
     if (allowedRifFileType != null)
@@ -77,11 +76,10 @@ public final class ExtractionOptions {
   }
 
   /**
-   * Note: This method is intended for test purposes: setting this value to <code>1</code> in tests
-   * can help to verify the S3 paging logic.
+   * Note: This method is intended for test purposes: setting this value to {@code 1} in tests can
+   * help to verify the S3 paging logic.
    *
-   * @return the value to use for {@link ListObjectsV2Request.Builder#maxKeys(Integer)} in all S3
-   *     list operations
+   * @return the value to use for page size in all S3 list operations
    */
   public Optional<Integer> getS3ListMaxKeys() {
     return Optional.ofNullable(s3ListMaxKeys);
