@@ -18,6 +18,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
@@ -26,6 +27,7 @@ import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +36,6 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 
 /**
  * Models the configuration options for the application.
@@ -316,13 +317,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
       "RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS";
 
   /**
-   * The name of the environment variable that should be used to provide the name of the S3 region
-   * containing the bucket used to serve claims by the in-process RDA API server job's random mode.
-   */
-  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION =
-      "RDA_GRPC_INPROC_SERVER_S3_REGION";
-
-  /**
    * The name of the environment variable that should be used to provide the name of the S3 bucket
    * used to serve claims by the in-process RDA API server job's random mode.
    */
@@ -372,6 +366,16 @@ public final class AppConfiguration extends BaseAppConfiguration {
    */
   public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
+
+  /**
+   * Optional endpoint override URI used to connect to S3. Intended for use with localstack based
+   * tests.
+   */
+  public static final String ENV_VAR_KEY_S3_ENDPOINT_URI = "S3_ENDPOINT_URI";
+  /** Optional access key used to connect to S3. Intended for use with localstack based tests. */
+  public static final String ENV_VAR_KEY_S3_ACCESS_KEY = "S3_ACCESS_KEY";
+  /** Optional secret key used to connect to S3. Intended for use with localstack based tests. */
+  public static final String ENV_VAR_KEY_S3_SECRET_KEY = "S3_SECRET_KEY";
 
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
@@ -587,6 +591,22 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
+   * Loads {@link S3ClientConfig} for use in configuring S3 clients. These settings are generally
+   * only changed from defaults during localstack based tests.
+   *
+   * @param config used to load configuration values
+   * @return the aws client settings
+   */
+  static S3ClientConfig loadS3ServiceConfig(ConfigLoader config) {
+    return S3ClientConfig.s3Builder()
+        .endpointOverride(
+            config.parsedOption(ENV_VAR_KEY_S3_ENDPOINT_URI, URI.class, URI::create).orElse(null))
+        .accessKey(config.stringValue(ENV_VAR_KEY_S3_ACCESS_KEY, null))
+        .secretKey(config.stringValue(ENV_VAR_KEY_S3_SECRET_KEY, null))
+        .build();
+  }
+
+  /**
    * Reads the ccw rif load options from the {@link ConfigLoader}.
    *
    * @param config used to load configuration values
@@ -616,9 +636,12 @@ public final class AppConfiguration extends BaseAppConfiguration {
     } else {
       allowedRifFileType = Optional.empty();
     }
-
-    LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
-    ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
+    final S3ClientConfig s3ClientConfig = loadS3ServiceConfig(config);
+    if (s3ClientConfig.isCredentialCheckUseful()) {
+      LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
+    }
+    ExtractionOptions extractionOptions =
+        new ExtractionOptions(s3BucketName, allowedRifFileType, Optional.empty(), s3ClientConfig);
     return new CcwRifLoadOptions(extractionOptions, loadOptions);
   }
 
@@ -702,6 +725,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
                 ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.class)
             .orElse(RdaServerJob.Config.ServerMode.Random));
     serverJobConfigBuilder.serverName(grpcConfig.getInProcessServerName());
+    S3ClientConfig s3ClientConfig = loadS3ServiceConfig(config);
+    serverJobConfigBuilder.s3ClientConfig(s3ClientConfig);
     config
         .longOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS)
         .map(Duration::ofSeconds)
@@ -712,9 +737,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
     config
         .intOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS)
         .ifPresent(serverJobConfigBuilder::randomMaxClaims);
-    config
-        .parsedOption(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Region.class, Region::of)
-        .ifPresent(serverJobConfigBuilder::s3Region);
     config
         .stringOptionEmptyOK(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
         .ifPresent(serverJobConfigBuilder::s3Bucket);

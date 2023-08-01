@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.function.Function;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
@@ -88,26 +86,12 @@ public final class LayeredConfiguration {
     // load parameters from AWS SSM if configured
     final var ssmPath = baseConfig.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "");
     if (ssmPath.length() > 0) {
-      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ACCESS_KEY).isEmpty()) {
+      final AwsClientConfig ssmConfig = loadSsmConfig(baseConfig);
+      if (ssmConfig.isCredentialCheckUseful()) {
         ensureAwsCredentialsConfiguredCorrectly();
       }
       final var ssmClient = SsmClient.builder();
-      // either region or endpoint can be set on ssmClient but not both
-      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ENDPOINT).isPresent()) {
-        // region is required when defining endpoint
-        ssmClient
-            .region(baseConfig.parsedValue(ENV_VAR_KEY_SSM_REGION, Region.class, Region::of))
-            .endpointOverride(URI.create(baseConfig.stringValue(ENV_VAR_KEY_SSM_ENDPOINT)));
-      } else if (baseConfig.stringOption(ENV_VAR_KEY_SSM_REGION).isPresent()) {
-        ssmClient.region(baseConfig.parsedValue(ENV_VAR_KEY_SSM_REGION, Region.class, Region::of));
-      }
-      if (baseConfig.stringOption(ENV_VAR_KEY_SSM_ACCESS_KEY).isPresent()) {
-        ssmClient.credentialsProvider(
-            StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(
-                    baseConfig.stringValue(ENV_VAR_KEY_SSM_ACCESS_KEY),
-                    baseConfig.stringValue(ENV_VAR_KEY_SSM_SECRET_KEY))));
-      }
+      ssmConfig.configureAwsService(ssmClient);
       final var parameterStore =
           new AwsParameterStoreClient(
               ssmClient.build(), AwsParameterStoreClient.DEFAULT_BATCH_SIZE);
@@ -157,5 +141,22 @@ public final class LayeredConfiguration {
               DefaultCredentialsProvider.class.getName()),
           e);
     }
+  }
+
+  /**
+   * Loads {@link AwsClientConfig} for use in configuring SSM clients. These settings are generally
+   * only changed from defaults during localstack based tests.
+   *
+   * @param config used to load configuration values
+   * @return the aws client settings
+   */
+  private static AwsClientConfig loadSsmConfig(ConfigLoader config) {
+    return AwsClientConfig.awsBuilder()
+        .region(config.parsedOption(ENV_VAR_KEY_SSM_REGION, Region.class, Region::of).orElse(null))
+        .endpointOverride(
+            config.parsedOption(ENV_VAR_KEY_SSM_ENDPOINT, URI.class, URI::create).orElse(null))
+        .accessKey(config.stringValue(ENV_VAR_KEY_SSM_ACCESS_KEY, null))
+        .secretKey(config.stringValue(ENV_VAR_KEY_SSM_SECRET_KEY, null))
+        .build();
   }
 }

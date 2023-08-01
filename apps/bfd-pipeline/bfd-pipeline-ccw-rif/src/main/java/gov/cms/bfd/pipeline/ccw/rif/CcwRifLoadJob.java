@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,8 +29,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
 /**
  * This {@link PipelineJob} checks for and, if found, processes data that has been pushed from CMS'
@@ -374,32 +371,27 @@ public final class CcwRifLoadJob implements PipelineJob {
      * option #1.
      */
 
-    String dataSetKeyPrefix =
+    final String dataSetKeyPrefix =
         String.format(
             "%s/%s/", manifest.getManifestKeyIncomingLocation(), manifest.getTimestampText());
-
-    ListObjectsV2Request.Builder s3BucketListRequestBuilder =
-        ListObjectsV2Request.builder().bucket(options.getS3BucketName()).prefix(dataSetKeyPrefix);
-    if (options.getS3ListMaxKeys().isPresent()) {
-      s3BucketListRequestBuilder.maxKeys(options.getS3ListMaxKeys().get());
-    }
-
-    Set<String> dataSetObjectNames = new HashSet<>();
-    ListObjectsV2Iterable s3ObjectListingPaginator =
-        s3TaskManager.getS3Client().listObjectsV2Paginator(s3BucketListRequestBuilder.build());
 
     /*
      * Pull the object names from the keys that were returned, by
      * stripping the timestamp prefix and slash from each of them.
      */
 
-    Set<String> namesForObjectsInPage =
-        s3ObjectListingPaginator.stream()
-            .flatMap(s -> s.contents().stream())
-            .peek(o -> LOGGER.debug("Found file: '{}', part of data set: '{}'.", o.key(), manifest))
-            .map(o -> o.key().substring(dataSetKeyPrefix.length()))
+    final Set<String> dataSetObjectNames =
+        s3TaskManager
+            .getS3Dao()
+            .listObjects(
+                options.getS3BucketName(),
+                Optional.of(dataSetKeyPrefix),
+                options.getS3ListMaxKeys())
+            .peek(
+                o ->
+                    LOGGER.debug("Found file: '{}', part of data set: '{}'.", o.getKey(), manifest))
+            .map(o -> o.getKey().substring(dataSetKeyPrefix.length()))
             .collect(Collectors.toSet());
-    dataSetObjectNames.addAll(namesForObjectsInPage);
 
     for (DataSetManifestEntry manifestEntry : manifest.getEntries()) {
       if (!dataSetObjectNames.contains(manifestEntry.getName())) {
