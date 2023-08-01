@@ -97,6 +97,8 @@ public class PatientClaimsEobTaskTransformer implements Callable {
 
   /** capture exception if thrown. */
   private Exception taskException = null;
+  /** keep track of EOBs that were not removed (ignored) by SAMHSA iterations. */
+  private int samhsaIgnoredCount = 0;
   /** keep track of SAMHSA removals. */
   private int samhsaRemovedCount = 0;
   /** the list of EOBs that we'll return. */
@@ -222,6 +224,15 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   public boolean ranSuccessfully() {
     return (taskException == null);
+  }
+
+  /**
+   * Fetch count of EOBs that were not removed by SAMHSA filter.
+   *
+   * @return number of EOBs that SAMHSA filtering ignored.
+   */
+  public int eobsIgnoredBySamhsaFilter() {
+    return samhsaIgnoredCount;
   }
 
   /**
@@ -352,6 +363,8 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       if (samhsaMatcher.test(eob)) {
         eobsIter.remove();
         samhsaRemovedCount++;
+      } else {
+        samhsaIgnoredCount++;
       }
     }
   }
