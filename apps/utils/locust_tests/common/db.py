@@ -117,23 +117,12 @@ def get_regression_pac_hashed_mbis(uri: str) -> List[str]:
     Returns:
         list[str]: A list of MBI hashes
     """
-    mcs_claims_mbis_query = (
-        "SELECT m.hash FROM rda.mcs_claims c "
-        "LEFT JOIN rda.mbi_cache m ON c.mbi_id=m.mbi_id WHERE sequence_number < 0"
-        f"LIMIT {LIMIT}"
+    claims_mbis_query = (
+        "select distinct m.hash from rda.claim_message_meta_data c left join rda.mbi_cache m on"
+        " c.mbi_id=m.mbi_id where c.sequence_number < 0 and (claim_type='M' or claim_type='F')"
+        f" limit {LIMIT}"
     )
-    fiss_claims_mbis_query = (
-        "SELECT m.hash FROM rda.fiss_claims c "
-        "LEFT JOIN rda.mbi_cache m ON c.mbi_id=m.mbi_id WHERE sequence_number < 0"
-        f"LIMIT {LIMIT}"
-    )
-
-    # Execute both queries and join the results into a set which will automatically de-duplicate
-    # any duplicated hashes
-    return list(
-        {str(r[0]) for r in _execute(uri, mcs_claims_mbis_query)}
-        | {str(r[0]) for r in _execute(uri, fiss_claims_mbis_query)}
-    )
+    return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
 def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
