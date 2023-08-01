@@ -63,13 +63,14 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof OutpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
-    Timer.Context timer =
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
         metricRegistry
             .timer(
                 MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform"))
-            .time();
-    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim);
-    timer.stop();
+            .time()) {
+      eob = transformClaim((OutpatientClaim) claim);
+    }
     return eob;
   }
 

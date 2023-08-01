@@ -442,7 +442,12 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
      */
     List<Callable<PatientClaimsEobTaskTransformer>> callableTasks =
         new ArrayList<>(claimsToProcess.size());
-
+    /*
+     * We create the task bean by directly invoking the applications Spring
+     * ApplicationContext to provide the bean; this is necessary as the tasks
+     * will run concurrently and each task will need its own instance of an
+     * {@link EntityManager}.
+     */
     claimsToProcess.forEach(
         claimType -> {
           PatientClaimsEobTaskTransformer task =

@@ -67,12 +67,13 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof SNFClaim)) {
       throw new BadCodeMonkeyException();
     }
-    Timer.Context timer =
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-    ExplanationOfBenefit eob = transformClaim((SNFClaim) claim);
-    timer.stop();
+            .time()) {
+      eob = transformClaim((SNFClaim) claim);
+    }
     return eob;
   }
 

@@ -58,12 +58,13 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();
     }
-    Timer.Context timer =
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HospiceClaimTransformer.class.getSimpleName(), "transform"))
-            .time();
-    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim);
-    timer.stop();
+            .time()) {
+      eob = transformClaim((HospiceClaim) claim);
+    }
     return eob;
   }
 

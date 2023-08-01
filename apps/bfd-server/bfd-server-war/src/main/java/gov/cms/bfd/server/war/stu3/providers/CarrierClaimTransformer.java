@@ -71,12 +71,13 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
-    Timer.Context timer =
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
-            .time();
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
-    timer.stop();
+            .time()) {
+      eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
+    }
     return eob;
   }
 

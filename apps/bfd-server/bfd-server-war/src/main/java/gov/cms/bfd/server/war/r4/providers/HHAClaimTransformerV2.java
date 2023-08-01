@@ -62,12 +62,13 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    Timer.Context timer =
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
-    timer.stop();
+            .time()) {
+      eob = transformClaim((HHAClaim) claim);
+    }
     return eob;
   }
 

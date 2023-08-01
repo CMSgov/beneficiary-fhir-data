@@ -64,12 +64,13 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof PartDEvent)) {
       throw new BadCodeMonkeyException();
     }
-    Timer.Context timer =
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformer.class.getSimpleName(), "transform"))
-            .time();
-    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
-    timer.stop();
+            .time()) {
+      eob = transformClaim((PartDEvent) claim);
+    }
     return eob;
   }
 
