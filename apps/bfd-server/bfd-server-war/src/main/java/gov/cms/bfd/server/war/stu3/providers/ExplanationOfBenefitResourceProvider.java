@@ -410,6 +410,9 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    *     numbers in the response,
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
    *     matching resources, or may also be empty.
+   * @throws InterruptedException when thread processing task is interrupted.
+   * @throws ExecutionException when when executor fails to create thread.
+   * @throws RuntimeException when task encounters a generic error/exception.
    */
   @VisibleForTesting
   public Bundle processClaimsMask(
