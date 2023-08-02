@@ -10,6 +10,7 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -23,7 +24,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.sharedutils.s3.MinioTestContainer;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -31,23 +31,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
-public final class SyntheaRifLoadJobIT extends MinioTestContainer {
+final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
-
-  /** only need a single instance of the S3 client. */
-  private static S3Client s3Client = createS3MinioClient();
 
   /**
    * Ensures that each test case here starts with a clean/empty database, with the right schema.
@@ -97,9 +91,10 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
     String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      bucket = s3Dao.createTestBucket();
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       DataSetManifest manifest =
           new DataSetManifest(
@@ -131,7 +126,6 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
 
       // upload data to Synthea S3 bucket
       putSampleFilesInTestBucket(
-          s3Client,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           manifest,
@@ -143,7 +137,9 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
@@ -162,62 +158,41 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
 
       // Verify that the datasets were moved to their respective 'failed' locations.
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/0_manifest.xml")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/beneficiary.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/beneficiary.rif"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/carrier.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/carrier.rif"));
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+        s3Dao.deleteTestBucket(bucket);
       }
     }
   }
@@ -249,9 +224,10 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
     String bucket = null;
     try {
       // Create (empty) bucket to run against, and populate it with a data set.
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket, Optional.empty(), Optional.of(1));
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      bucket = s3Dao.createTestBucket();
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       DataSetManifest manifest =
           new DataSetManifest(
@@ -283,7 +259,6 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
 
       // upload data to Synthea S3 bucket
       putSampleFilesInTestBucket(
-          s3Client,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           manifest,
@@ -295,7 +270,9 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3ClientFactory);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
@@ -316,64 +293,43 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
       // Verify that the datasets were moved to their respective 'completed'
       // locations.
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/0_manifest.xml")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
 
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/beneficiary.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/beneficiary.rif"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/carrier.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/carrier.rif"));
 
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+        s3Dao.deleteTestBucket(bucket);
       }
     }
   }
@@ -451,7 +407,6 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
   /**
    * Put sample files in test specified bucket and key in s3.
    *
-   * @param s3Client the s3 client
    * @param bucket the bucket to use for the test
    * @param location the key under which to put the file
    * @param manifest the manifest to use for the load files
@@ -459,16 +414,12 @@ public final class SyntheaRifLoadJobIT extends MinioTestContainer {
    *     resource lists, should be in the order of the manifest
    */
   private void putSampleFilesInTestBucket(
-      S3Client s3Client,
-      String bucket,
-      String location,
-      DataSetManifest manifest,
-      List<URL> resourcesToAdd) {
-    DataSetTestUtilities.putObject(s3Client, bucket, manifest, location);
+      String bucket, String location, DataSetManifest manifest, List<URL> resourcesToAdd) {
+    DataSetTestUtilities.putObject(s3Dao, bucket, manifest, location);
     int index = 0;
     for (URL resource : resourcesToAdd) {
       DataSetTestUtilities.putObject(
-          s3Client, bucket, manifest, manifest.getEntries().get(index), resource, location);
+          s3Dao, bucket, manifest, manifest.getEntries().get(index), resource, location);
       index++;
     }
   }

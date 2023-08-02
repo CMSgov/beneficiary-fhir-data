@@ -57,6 +57,17 @@
         </dependency>
 
         <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3-transfer-manager</artifactId>
+        </dependency>
+        <!-- Allows use of AWS common runtime client for file copying, which has improved performance -->
+        <dependency>
+            <groupId>software.amazon.awssdk.crt</groupId>
+            <artifactId>aws-crt</artifactId>
+            <version>${aws.crt.version}</version>
+        </dependency>
+
+        <dependency>
             <!-- Hibernate's JPA implementation is used to load data into the BFD applications'
                 database. -->
             <groupId>org.hibernate</groupId>
@@ -97,11 +108,18 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Add support for testcontainers -->
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>${testcontainers.version}</version>
+            <!-- Used to write fluent assertions in unit tests. -->
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Delegates all JCL logging (typically from dependencies) to SLF4J. -->
+            <!-- Required during testing because S3 SDK uses JCL. -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
