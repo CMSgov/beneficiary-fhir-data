@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -41,9 +41,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,13 +53,13 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 /**
- * Units tests for the {@link PatientClaimsEobTaskTransformerV2Test}. Basically verifying that all
- * the task transformers work and return an EOB as well as some pertinent info such as SAMHSA
- * processing information.
+ * Units tests for the {@link PatientClaimsEobTaskTransformerTest}. Basically verifying that all the
+ * task transformers work and return an EOB as well as some pertinent info such as SAMHSA processing
+ * information.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class PatientClaimsEobTaskTransformerV2Test {
+class PatientClaimsEobTaskTransformerTest {
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
   /** The mock metric registry. */
@@ -73,7 +73,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   /** The FDA drug display lookup. */
   @Mock FdaDrugCodeDisplayLookup mockDrugDisplayLookup;
   /** The mock samhsa matcher. */
-  @Mock R4EobSamhsaMatcher mockSamhsaMatcher;
+  @Mock Stu3EobSamhsaMatcher mockSamhsaMatcher;
 
   /** The carrier claim returned in tests. */
   CarrierClaim testCarrierClaim;
@@ -177,7 +177,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * CarrierClaim} entity into a {@link ExplanationOfBenefit} FHIR resource and performs no SAMHSA
    * EOB filtering.
    */
@@ -185,20 +185,20 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingCarrierClaimNoSamhsaFilter() throws IOException {
     CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.CARRIER, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new CarrierClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new CarrierClaimTransformer(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.CARRIER, 1234L, Optional.empty(), Optional.empty(), false);
+        claimTransformer, ClaimType.CARRIER, 1234L, Optional.empty(), Optional.empty(), false);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -207,7 +207,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * CarrierClaim} entity into a {@link ExplanationOfBenefit} FHIR resource and performs SAMHSA EOB
    * filtering.
    */
@@ -215,20 +215,20 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingCarrierClaimWithSamhsa() throws IOException {
     CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.CARRIER, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new CarrierClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new CarrierClaimTransformer(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.CARRIER, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.CARRIER, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -237,7 +237,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * DMEClaim} entity into a {@link ExplanationOfBenefit} FHIR resource and performs no SAMHSA EOB
    * filtering.
    */
@@ -245,20 +245,20 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingDmeClaimNoSamhsaFilter() throws IOException {
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.DME, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new DMEClaimTransformerV2(metricRegistry, mockDrugDisplayLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new DMEClaimTransformer(metricRegistry, mockDrugDisplayLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.DME, 1234L, Optional.empty(), Optional.empty(), false);
+        claimTransformer, ClaimType.DME, 1234L, Optional.empty(), Optional.empty(), false);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -267,7 +267,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * DMEClaim} entity into a {@link ExplanationOfBenefit} FHIR resource and performs SAMHSA EOB
    * filtering.
    */
@@ -275,20 +275,20 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingDmeClaimWithSamhsa() throws IOException {
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.DME, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new DMEClaimTransformerV2(metricRegistry, mockDrugDisplayLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new DMEClaimTransformer(metricRegistry, mockDrugDisplayLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.DME, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.DME, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -297,7 +297,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * HHAClaim} entity into a {@link ExplanationOfBenefit} FHIR resource;performs SAMHSA filtering
    * flag when set to true.
    */
@@ -305,21 +305,21 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingHhaClaimWithSamhsa() throws IOException {
     CriteriaQuery<HHAClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<HHAClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.HHA, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.HHA, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new HHAClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new HHAClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.HHA, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.HHA, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -328,7 +328,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * HospiceClaim} entity into a {@link ExplanationOfBenefit} FHIR resource; performs SAMHSA
    * filtering flag when set to true.
    */
@@ -336,21 +336,21 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingHospiceClaimWithSamhsa() throws IOException {
     CriteriaQuery<HospiceClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<HospiceClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.HOSPICE, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.HOSPICE, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new HospiceClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new HospiceClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.HOSPICE, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.HOSPICE, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -359,7 +359,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * InpatientClaim} entity into a {@link ExplanationOfBenefit} FHIR resource; performs SAMHSA
    * filtering flag when set to true.
    */
@@ -367,21 +367,21 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingInpatientClaimWithSamhsa() throws IOException {
     CriteriaQuery<InpatientClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<InpatientClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.INPATIENT, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.INPATIENT, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new InpatientClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new InpatientClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.INPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.INPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -390,7 +390,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * OutpatientClaim} entity into a {@link ExplanationOfBenefit} FHIR resource; performs SAMHSA
    * filtering flag when set to true.
    */
@@ -398,21 +398,21 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingOutpatientClaimWithSamhsa() throws IOException {
     CriteriaQuery<OutpatientClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<OutpatientClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.OUTPATIENT, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.OUTPATIENT, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new OutpatientClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new OutpatientClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.OUTPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.OUTPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -421,7 +421,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * PartDEvent} entity into a {@link ExplanationOfBenefit} FHIR resource; performs SAMHSA filtering
    * flag when set to true.
    */
@@ -429,21 +429,21 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingPartDEventWithSamhsa() throws IOException {
     CriteriaQuery<PartDEvent> clmMockCriteria = mock(CriteriaQuery.class);
     Root<PartDEvent> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.PDE, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.PDE, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new PartDEventTransformerV2(metricRegistry, mockDrugDisplayLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new PartDEventTransformer(metricRegistry, mockDrugDisplayLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.PDE, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.PDE, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -452,7 +452,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} sucessfully transforms a {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} sucessfully transforms a {@link
    * SNFClaim} entity into a {@link ExplanationOfBenefit} FHIR resource; performs SAMHSA filtering
    * flag when set to true.
    */
@@ -460,21 +460,21 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingSnfClaimWithSamhsa() throws IOException {
     CriteriaQuery<SNFClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<SNFClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.SNF, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.SNF, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new SNFClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new SNFClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.SNF, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.SNF, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
@@ -483,7 +483,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   }
 
   /**
-   * Verify that the {@link PatientClaimsEobTaskTransformerV2} can handle internal processing {@link
+   * Verify that the {@link PatientClaimsEobTaskTransformer} can handle internal processing {@link
    * Exception} and can return it to the caller via its {@link
    * PatientClaimsEobTaskTransformer#getFailure()} method. The test sets up a {@link DMEClaim}
    * entity but invokes the task setup to process the entity using a {@link SNFClaimTransformer};
@@ -494,21 +494,21 @@ class PatientClaimsEobTaskTransformerV2Test {
     // purposely setup a DME clam
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.DME, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
-    ClaimTransformerInterfaceV2 claimTransformer =
-        new SNFClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
-    PatientClaimsEobTaskTransformerV2 taskTransformer =
-        new PatientClaimsEobTaskTransformerV2(
+    ClaimTransformerInterface claimTransformer =
+        new SNFClaimTransformer(metricRegistry, mockNpiOrgLookup);
+    PatientClaimsEobTaskTransformer taskTransformer =
+        new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.SNF, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.SNF, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
-    PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
+    PatientClaimsEobTaskTransformer rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertFalse(taskTransformer.ranSuccessfully());
     assertTrue(taskTransformer.getFailure().get() instanceof BadCodeMonkeyException);
@@ -518,12 +518,12 @@ class PatientClaimsEobTaskTransformerV2Test {
    * Sets up mock query of a given claim type.
    *
    * @param em the {@link EntityManager} claim data to mock.
-   * @param claimType the {@link ClaimTypeV2} claim data to mock.
+   * @param claimType the {@link ClaimType} claim data to mock.
    * @param clmMockCriteria the {@link CriteriaQuery} claim query criteria being mocked.
    * @param clmRoot the {@link Root} claim root being mocked.
    */
   private void setupClaimEntity(
-      EntityManager em, ClaimTypeV2 claimType, CriteriaQuery clmMockCriteria, Root clmRoot) {
+      EntityManager em, ClaimType claimType, CriteriaQuery clmMockCriteria, Root clmRoot) {
     CriteriaBuilder clmCriteriaBuilder = mock(CriteriaBuilder.class);
     Path clmMockPath = mock(Path.class);
     TypedQuery clmMockQuery = mock(TypedQuery.class);
