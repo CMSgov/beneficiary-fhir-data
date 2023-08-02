@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
@@ -10,6 +14,10 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
@@ -21,15 +29,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 /** Unit tests for {@link HospiceClaimTransformer}. */
 @ExtendWith(MockitoExtension.class)
@@ -64,11 +63,11 @@ public final class HospiceClaimTransformerTest {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     HospiceClaim claim =
-            parsedRecords.stream()
-                    .filter(r -> r instanceof HospiceClaim)
-                    .map(HospiceClaim.class::cast)
-                    .findFirst()
-                    .get();
+        parsedRecords.stream()
+            .filter(r -> r instanceof HospiceClaim)
+            .map(HospiceClaim.class::cast)
+            .findFirst()
+            .get();
 
     ExplanationOfBenefit eob = hospiceClaimTransformer.transform(claim, false);
     assertMatches(claim, eob);
