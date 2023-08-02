@@ -73,21 +73,21 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
   public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
 
   /** The transformer for carrier claims. */
-  private ClaimTransformerInterfaceV2 carrierClaimTransformer;
+  private CarrierClaimTransformerV2 carrierClaimTransformer;
   /** The transformer for dme claims. */
-  private ClaimTransformerInterfaceV2 dmeClaimTransformer;
+  private DMEClaimTransformerV2 dmeClaimTransformer;
   /** The transformer for hha claims. */
-  private ClaimTransformerInterfaceV2 hhaClaimTransformer;
+  private HHAClaimTransformerV2 hhaClaimTransformer;
   /** The transformer for hospice claims. */
-  private ClaimTransformerInterfaceV2 hospiceClaimTransformer;
+  private HospiceClaimTransformerV2 hospiceClaimTransformer;
   /** The transformer for inpatient claims. */
-  private ClaimTransformerInterfaceV2 inpatientClaimTransformer;
+  private InpatientClaimTransformerV2 inpatientClaimTransformer;
   /** The transformer for outpatient claims. */
-  private ClaimTransformerInterfaceV2 outpatientClaimTransformer;
+  private OutpatientClaimTransformerV2 outpatientClaimTransformer;
   /** The transformer for part D events claims. */
-  private ClaimTransformerInterfaceV2 partDEventTransformer;
+  private PartDEventTransformerV2 partDEventTransformer;
   /** The transformer for snf claims. */
-  private ClaimTransformerInterfaceV2 snfClaimTransformer;
+  private SNFClaimTransformerV2 snfClaimTransformer;
 
   /** Sets the test resources up for comparing the data. */
   @BeforeEach
