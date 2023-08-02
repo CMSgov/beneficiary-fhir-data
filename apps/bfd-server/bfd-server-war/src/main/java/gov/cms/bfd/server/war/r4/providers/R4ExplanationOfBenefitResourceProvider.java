@@ -411,6 +411,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    *     numbers in the response,
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
    *     matching resources, or may also be empty.
+   * @throws InterruptedException when thread processing task is interrupted.
+   * @throws ExecutionException when when executor fails to create thread.
    */
   @VisibleForTesting
   private Bundle processClaimsMask(
