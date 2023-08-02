@@ -44,11 +44,10 @@ public final class AuthenticationIT {
   @Test
   public void accessDeniedForNoClientCert() {
 
-    try {
-      ServerProcess serverProcess =
-          new ServerProcess(
-              ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
-      CloseableHttpClient httpClient = ServerTestUtils.createHttpClient(Optional.empty());
+    try (ServerProcess serverProcess =
+            new ServerProcess(
+                ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
+        CloseableHttpClient httpClient = ServerTestUtils.createHttpClient(Optional.empty())) {
 
       assertThrows(
           IOException.class,
@@ -79,12 +78,11 @@ public final class AuthenticationIT {
    */
   @Test
   public void accessDeniedForClientCertThatIsNotTrusted() {
-    try {
-      ServerProcess serverProcess =
-          new ServerProcess(
-              ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
-      CloseableHttpClient httpClient =
-          ServerTestUtils.createHttpClient(Optional.of(ClientSslIdentity.UNTRUSTED));
+    try (ServerProcess serverProcess =
+            new ServerProcess(
+                ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
+        CloseableHttpClient httpClient =
+            ServerTestUtils.createHttpClient(Optional.of(ClientSslIdentity.UNTRUSTED))) {
 
       assertThrows(
           IOException.class,

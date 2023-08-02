@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.apps;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.regions.Region;

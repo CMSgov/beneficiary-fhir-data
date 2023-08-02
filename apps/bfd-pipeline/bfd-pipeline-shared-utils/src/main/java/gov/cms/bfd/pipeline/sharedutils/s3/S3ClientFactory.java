@@ -18,4 +18,11 @@ public interface S3ClientFactory {
    * @return the client
    */
   S3AsyncClient createS3AsyncClient();
+
+  /**
+   * Create a {@link S3Dao}. Caller is responsible for closing the DAO.
+   *
+   * @return the DAO
+   */
+  S3Dao createS3Dao();
 }

@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import software.amazon.awssdk.utils.StringUtils;
 
 /**
@@ -70,7 +69,6 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   @Test
   public void missingConfig() throws IOException, InterruptedException {
     // Start the app with no config env vars.
-    LOGGER.info("s3Client: " + s3Client.toString());
     ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder("foo");
     String javaHome = System.getenv("JAVA_HOME");
     appRunBuilder.environment().clear();
@@ -142,7 +140,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     Process appProcess = null;
     try {
       // Create the (empty) bucket to run against.
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
 
       // Start the app.
       ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(bucket);
@@ -175,8 +173,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       verifyExitValueMatchesSignal(SIGTERM, appProcess);
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
-      if (StringUtils.isNotBlank(bucket))
-        s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build());
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -200,7 +197,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now(),
@@ -210,15 +207,15 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifest);
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(0),
           StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(1),
@@ -255,8 +252,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       verifyExitValueMatchesSignal(SIGTERM, appProcess);
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
