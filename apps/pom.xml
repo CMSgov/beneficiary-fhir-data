@@ -67,14 +67,11 @@
             they are reproducible bit-by-bit no matter when/where they are generated.
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
         <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
-
-        <!-- Configure Sonar such that projects evaluated by it against it will
-            use JaCoCo to compute the code coverage of any unit and integration tests. -->
+        <jacoco.version>0.8.10</jacoco.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
-
         <micrometer.version>1.11.2</micrometer.version>
         <metrics.version>4.2.19</metrics.version>
         <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
@@ -631,6 +628,14 @@
                 <artifactId>protobuf-java-util</artifactId>
                 <version>${protobuf.version}</version>
             </dependency>
+            <dependency>
+                <!--  must be on the classpath  -->
+                <groupId>org.jacoco</groupId>
+                <artifactId>org.jacoco.agent</artifactId>
+                <classifier>runtime</classifier>
+                <version>${jacoco.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -741,6 +746,9 @@
                         <parallel>all</parallel>
                         <threadCountClasses>8</threadCountClasses>
                         <threadCountMethods>10</threadCountMethods>
+                        <systemPropertyVariables>
+                            <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+                        </systemPropertyVariables>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -753,6 +761,7 @@
                             might want to configure the max heap size and/or proxy server settings for
                             tests run on a system. -->
                         <argLine>${maven-test.jvm-args.env-specific}</argLine>
+                        <argLine>${failsafeRunJacocoArg}</argLine>
                         <trimStackTrace>false</trimStackTrace>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <systemPropertyVariables>
@@ -760,6 +769,7 @@
                             <its.db.username>${its.db.username}</its.db.username>
                             <its.db.password>${its.db.password}</its.db.password>
                             <its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
+                            <jacoco-agent.destfile>target/jacoco-it.exec</jacoco-agent.destfile>
                         </systemPropertyVariables>
                         <includes>
                             <include>**/*IT.java</include>
@@ -771,13 +781,6 @@
                             <TZ>UTC</TZ>
                         </environmentVariables>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <!-- A test code coverage plugin that can operate as a Java agent (and
-                        thus doesn't require class file instrumentation). -->
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.5.201505241946</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1025,6 +1028,59 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <destFile>${project.build.directory}/jacoco.exec</destFile>
+                            <propertyName>surefireRunJacocoArg</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-prepare-agent-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                        <configuration>
+                            <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+                            <propertyName>failsafeRunJacocoArg</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                            <formats>
+                                <format>XML</format>
+                            </formats>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-report-integration</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report-integration</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco-it.exec</dataFile>
+                            <formats>
+                                <format>XML</format>
+                            </formats>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <extensions>
             <extension>
@@ -1081,21 +1137,6 @@
                                                 <versionRange>[1.1,)</versionRange>
                                                 <goals>
                                                     <goal>toolchain</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <!-- Don't run this plugin inside m2e; necessary to disable a
-                                                    POM warning in Eclipse. -->
-                                                <ignore/>
-                                            </action>
-                                        </pluginExecution>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>org.jacoco</groupId>
-                                                <artifactId>jacoco-maven-plugin</artifactId>
-                                                <versionRange>[0.6.5.201403032054,)</versionRange>
-                                                <goals>
-                                                    <goal>prepare-agent</goal>
                                                 </goals>
                                             </pluginExecutionFilter>
                                             <action>
