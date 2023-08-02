@@ -20,6 +20,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedJaxbException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -37,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -48,14 +48,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.transfer.s3.S3TransferManager;
-import software.amazon.awssdk.transfer.s3.internal.DefaultS3TransferManager;
-import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
-import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
-import software.amazon.awssdk.transfer.s3.model.FileDownload;
-import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 /**
  * Given some RIF data sets, extracts a random subset of beneficiaries and their claims. This is
@@ -299,74 +291,43 @@ public final class DataSetSubsetter {
   private static List<RifFile> downloadDataSet(
       ExtractionOptions options, String dataSetS3KeyPrefix, Path downloadDirectory) {
     S3ClientFactory clientFactory = new AwsS3ClientFactory(options.getS3ClientConfig());
-    S3TransferManager transferManager =
-        DefaultS3TransferManager.builder().s3Client(clientFactory.createS3AsyncClient()).build();
-    String dataSetPrefix = "data-random/" + dataSetS3KeyPrefix;
-    String manifestSuffix = "1_manifest.xml";
+    try (S3Dao s3Dao = clientFactory.createS3Dao()) {
+      String dataSetPrefix = "data-random/" + dataSetS3KeyPrefix;
+      String manifestSuffix = "1_manifest.xml";
 
-    Path manifestDownloadPath = downloadDirectory.resolve(manifestSuffix);
-    if (!Files.exists(manifestDownloadPath)) {
-      String manifestKey = String.format("%s/%s", dataSetPrefix, manifestSuffix);
-      DownloadFileRequest downloadFileRequest =
-          DownloadFileRequest.builder()
-              .getObjectRequest(
-                  GetObjectRequest.builder()
-                      .bucket(options.getS3BucketName())
-                      .key(manifestKey)
-                      .build())
-              .addTransferListener(LoggingTransferListener.create())
-              .destination(manifestDownloadPath)
-              .build();
+      Path manifestDownloadPath = downloadDirectory.resolve(manifestSuffix);
+      if (!Files.exists(manifestDownloadPath)) {
+        String manifestKey = String.format("%s/%s", dataSetPrefix, manifestSuffix);
+        s3Dao.downloadObject(options.getS3BucketName(), manifestKey, manifestDownloadPath);
+      }
+      LOGGER.info("Manifest downloaded.");
 
+      DataSetManifest dummyDataSetManifest;
       try {
-        FileDownload downloadFile = transferManager.downloadFile(downloadFileRequest);
-        CompletedFileDownload manifestDownload = downloadFile.completionFuture().join();
-      } catch (SdkClientException | CancellationException e) {
-        throw new RuntimeException(e);
+        JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        dummyDataSetManifest =
+            (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestDownloadPath.toFile());
+      } catch (JAXBException e) {
+        throw new UncheckedJaxbException(e);
       }
-    }
-    LOGGER.info("Manifest downloaded.");
 
-    DataSetManifest dummyDataSetManifest;
-    try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
-      Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-      dummyDataSetManifest =
-          (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestDownloadPath.toFile());
-    } catch (JAXBException e) {
-      throw new UncheckedJaxbException(e);
-    }
+      List<RifFile> rifFiles = new ArrayList<>();
+      for (DataSetManifestEntry manifestEntry : dummyDataSetManifest.getEntries()) {
+        String dataSetFileKey = String.format("%s/%s", dataSetPrefix, manifestEntry.getName());
+        Path dataSetFileDownloadPath = downloadDirectory.resolve(manifestEntry.getName());
 
-    List<RifFile> rifFiles = new ArrayList<>();
-    for (DataSetManifestEntry manifestEntry : dummyDataSetManifest.getEntries()) {
-      String dataSetFileKey = String.format("%s/%s", dataSetPrefix, manifestEntry.getName());
-      Path dataSetFileDownloadPath = downloadDirectory.resolve(manifestEntry.getName());
-
-      if (!Files.exists(dataSetFileDownloadPath)) {
-        LOGGER.info("Downloading RIF file: '{}'...", manifestEntry.getName());
-        DownloadFileRequest downloadFileRequest =
-            DownloadFileRequest.builder()
-                .getObjectRequest(
-                    GetObjectRequest.builder()
-                        .bucket(options.getS3BucketName())
-                        .key(dataSetFileKey)
-                        .build())
-                .addTransferListener(LoggingTransferListener.create())
-                .destination(manifestDownloadPath)
-                .build();
-        try {
-          FileDownload downloadFile = transferManager.downloadFile(downloadFileRequest);
-          CompletedFileDownload manifestDownload = downloadFile.completionFuture().join();
-        } catch (SdkClientException | CancellationException e) {
-          throw new RuntimeException(e);
+        if (!Files.exists(dataSetFileDownloadPath)) {
+          LOGGER.info("Downloading RIF file: '{}'...", manifestEntry.getName());
+          s3Dao.downloadObject(options.getS3BucketName(), dataSetFileKey, dataSetFileDownloadPath);
         }
+
+        RifFile dataSetFile = new LocalRifFile(dataSetFileDownloadPath, manifestEntry.getType());
+        rifFiles.add(dataSetFile);
       }
 
-      RifFile dataSetFile = new LocalRifFile(dataSetFileDownloadPath, manifestEntry.getType());
-      rifFiles.add(dataSetFile);
+      LOGGER.info("Original RIF files ready.");
+      return rifFiles;
     }
-
-    LOGGER.info("Original RIF files ready.");
-    return rifFiles;
   }
 }

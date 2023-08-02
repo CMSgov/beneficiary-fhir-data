@@ -7,6 +7,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,11 +24,6 @@ import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.transfer.s3.model.CompletedFileDownload;
-import software.amazon.awssdk.transfer.s3.model.DownloadFileRequest;
-import software.amazon.awssdk.transfer.s3.model.FileDownload;
-import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 /**
  * Represents an asynchronous operation to download the contents of a specific {@link
@@ -64,40 +60,26 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
     this.manifestEntry = manifestEntry;
   }
 
-  /** {@inheritDoc} */
+  /** Performs the download and returns the result. {@inheritDoc} */
   @Override
   public ManifestEntryDownloadResult call() throws Exception {
     try {
-      GetObjectRequest objectRequest =
-          GetObjectRequest.builder()
-              .bucket(options.getS3BucketName())
-              .key(
-                  String.format(
-                      "%s/%s/%s",
-                      manifestEntry.getParentManifest().getManifestKeyIncomingLocation(),
-                      manifestEntry.getParentManifest().getTimestampText(),
-                      manifestEntry.getName()))
-              .build();
+      String s3Key =
+          String.format(
+              "%s/%s/%s",
+              manifestEntry.getParentManifest().getManifestKeyIncomingLocation(),
+              manifestEntry.getParentManifest().getTimestampText(),
+              manifestEntry.getName());
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
       Timer.Context downloadTimer =
           appMetrics
               .timer(MetricRegistry.name(getClass().getSimpleName(), "downloadSystemTime"))
               .time();
-      LOGGER.debug(
-          "Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
-      DownloadFileRequest downloadFileRequest =
-          DownloadFileRequest.builder()
-              .getObjectRequest(objectRequest)
-              .addTransferListener(LoggingTransferListener.create())
-              .destination(localTempFile.toFile())
-              .build();
-
-      FileDownload downloadFile =
-          s3TaskManager.getS3TransferManager().downloadFile(downloadFileRequest);
-      CompletedFileDownload downloadResult = downloadFile.completionFuture().join();
-      LOGGER.debug(
-          "Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
+      LOGGER.debug("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath());
+      S3Dao.S3ObjectDetails downloadResult =
+          s3TaskManager.getS3Dao().downloadObject(options.getS3BucketName(), s3Key, localTempFile);
+      LOGGER.debug("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath());
       downloadTimer.close();
 
       // generate MD5ChkSum value on file just downloaded
@@ -108,7 +90,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
       InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
       String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
       md5ChkSumTimer.close();
-      String downloadedFileMD5ChkSum = downloadResult.response().metadata().get("md5chksum");
+      String downloadedFileMD5ChkSum = downloadResult.getMetaData().get("md5chksum");
       // TODO Remove null check below once Jira CBBD-368 is completed
       if ((downloadedFileMD5ChkSum != null)
           && (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum)))
@@ -140,24 +122,24 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
    */
   public static String computeMD5ChkSum(InputStream downloadedS3File)
       throws IOException, NoSuchAlgorithmException {
-    // Create byte array to read data in chunks
-    byte[] byteArray = new byte[1024];
-    int bytesCount = 0;
-    MessageDigest md5Digest = MessageDigest.getInstance("MD5");
+    // ensure the stream is always closed
+    try (downloadedS3File) {
+      // Create byte array to read data in chunks
+      byte[] byteArray = new byte[1024];
+      int bytesCount = 0;
+      MessageDigest md5Digest = MessageDigest.getInstance("MD5");
 
-    // Read file data and update in message digest
-    while ((bytesCount = downloadedS3File.read(byteArray)) != -1) {
-      md5Digest.update(byteArray, 0, bytesCount);
+      // Read file data and update in message digest
+      while ((bytesCount = downloadedS3File.read(byteArray)) != -1) {
+        md5Digest.update(byteArray, 0, bytesCount);
+      }
+
+      // Get the hash's bytes
+      byte[] bytes = md5Digest.digest();
+
+      // return complete hash
+      return Base64.getEncoder().encodeToString(bytes);
     }
-
-    // close the stream
-    downloadedS3File.close();
-
-    // Get the hash's bytes
-    byte[] bytes = md5Digest.digest();
-
-    // return complete hash
-    return Base64.getEncoder().encodeToString(bytes);
   }
 
   /** Represents the results of a {@link ManifestEntryDownloadTask}. */

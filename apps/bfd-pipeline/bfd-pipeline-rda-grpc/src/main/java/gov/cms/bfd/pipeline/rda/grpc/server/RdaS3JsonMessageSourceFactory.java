@@ -6,11 +6,10 @@ import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.services.s3.S3Client;
 
 /**
- * Uses an {@link S3Client} client and a bucket name to simplify creation of {@link MessageSource}s
- * that read FISS or MCS claims from the bucket.
+ * Uses an {@link S3DirectoryDao} client and a bucket name to simplify creation of {@link
+ * MessageSource}s that read FISS or MCS claims from the bucket.
  */
 @Slf4j
 public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
