@@ -18,13 +18,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for {@link CcwRifLoadJob}. */
@@ -41,10 +37,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
     String bucket = null;
     try {
       // Create the (empty) bucket to run against.
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -67,8 +63,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(0, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        s3Client.deleteBucket(DeleteBucketRequest.builder().bucket(bucket).build());
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -84,8 +79,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
         CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
         List.of(
             StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
-            StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()),
-        null);
+            StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
   }
 
   /**
@@ -101,8 +95,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
         CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
         List.of(
             StaticRifResource.SAMPLE_SYNTHEA_BENES2011.getResourceUrl(),
-            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()),
-        null);
+            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
   }
 
   /**
@@ -119,10 +112,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with
        * two data sets.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       DataSetManifest manifest =
           new DataSetManifest(
@@ -144,13 +137,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // Add files to each location the test wants them in
       putSampleFilesInTestBucket(
-          s3Client,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           manifest,
           List.of(StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
       putSampleFilesInTestBucket(
-          s3Client,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           manifestSynthetic,
@@ -185,103 +176,67 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Verify that the datasets were moved to their respective locations.
        */
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
           1 + manifestSynthetic.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifestSynthetic.getTimestampText()
-                                  + "/0_manifest.xml")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifestSynthetic.getTimestampText()
+                  + "/0_manifest.xml"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifestSynthetic.getTimestampText()
-                                  + "/carrier.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifestSynthetic.getTimestampText()
+                  + "/carrier.rif"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-                                  + "/"
-                                  + manifestSynthetic.getTimestampText()
-                                  + "/inpatient.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifestSynthetic.getTimestampText()
+                  + "/inpatient.rif"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/0_manifest.xml")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
       assertTrue(
-          s3Client
-                  .headObject(
-                      HeadObjectRequest.builder()
-                          .bucket(bucket)
-                          .key(
-                              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
-                                  + "/"
-                                  + manifest.getTimestampText()
-                                  + "/beneficiaries.rif")
-                          .build())
-                  .sdkHttpResponse()
-                  .statusCode()
-              == HttpStatus.SC_OK);
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/beneficiaries.rif"));
 
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -298,10 +253,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with
        * two data sets.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
       DataSetManifest manifestA =
           new DataSetManifest(
               Instant.now().minus(1L, ChronoUnit.HOURS),
@@ -310,9 +265,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
-      DataSetTestUtilities.putObject(s3Client, bucket, manifestA);
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestA);
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifestA,
           manifestA.getEntries().get(0),
@@ -325,9 +280,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("pde.rif", RifFileType.PDE));
-      DataSetTestUtilities.putObject(s3Client, bucket, manifestB);
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestB);
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifestB,
           manifestB.getEntries().get(0),
@@ -340,9 +295,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      DataSetTestUtilities.putObject(s3Client, bucket, manifestC);
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestC);
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifestC,
           manifestC.getEntries().get(0),
@@ -377,20 +332,19 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * still there.
        */
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           1 + manifestB.getEntries().size() + 1 + manifestC.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
           1 + manifestA.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -408,11 +362,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(
               bucket, Optional.of(RifFileType.PDE), Optional.empty(), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now(),
@@ -422,15 +376,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifest);
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(0),
           StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(1),
@@ -459,20 +413,19 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // Verify that the data set was not renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -490,10 +443,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now().plus(3, ChronoUnit.DAYS),
@@ -503,15 +456,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      DataSetTestUtilities.putObject(s3Client, bucket, manifest);
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifest);
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(0),
           StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
       DataSetTestUtilities.putObject(
-          s3Client,
+          s3Dao,
           bucket,
           manifest,
           manifest.getEntries().get(1),
@@ -540,20 +493,19 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // Verify that the data set was not renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
@@ -565,41 +517,33 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
    * @param expectedOutputLocation the expected output location (bucket key) where files are
    *     expected to be moved after processing
    * @param fileList the file list
-   * @param inManifest the in manifest
    * @throws Exception the exception
    */
   private void validateLoadAtLocations(
-      String inputLocation,
-      String expectedOutputLocation,
-      List<URL> fileList,
-      DataSetManifest inManifest)
-      throws Exception {
+      String inputLocation, String expectedOutputLocation, List<URL> fileList) throws Exception {
     String bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      bucket = s3Dao.createTestBucket();
       ExtractionOptions options =
           new ExtractionOptions(bucket, Optional.empty(), Optional.empty(), s3ClientConfig);
-      LOGGER.info("Bucket created: '{}:{}'", s3Client.listBuckets().owner().displayName(), bucket);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
-      DataSetManifest manifest = inManifest;
-      if (manifest == null) {
-        manifest =
-            new DataSetManifest(
-                Instant.now(),
-                0,
-                false,
-                inputLocation,
-                expectedOutputLocation,
-                new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
-                new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      }
+      DataSetManifest manifest =
+          new DataSetManifest(
+              Instant.now(),
+              0,
+              false,
+              inputLocation,
+              expectedOutputLocation,
+              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 
       // Add files to each location the test wants them in
-      putSampleFilesInTestBucket(s3Client, bucket, inputLocation, manifest, fileList);
+      putSampleFilesInTestBucket(bucket, inputLocation, manifest, fileList);
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -627,24 +571,22 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // Verify that the data set was renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client, bucket, inputLocation, 0, java.time.Duration.ofSeconds(10));
+          s3Dao, bucket, inputLocation, 0, java.time.Duration.ofSeconds(10));
 
       DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
+          s3Dao,
           bucket,
           expectedOutputLocation,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
-      if (StringUtils.isNotBlank(bucket))
-        DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
   }
 
   /**
    * Put sample files in test specified bucket and key in s3.
    *
-   * @param s3Client the s3 client
    * @param bucket the bucket to use for the test
    * @param location the key under which to put the file
    * @param manifest the manifest to use for the load files
@@ -652,16 +594,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
    *     resource lists, should be in the order of the manifest
    */
   private void putSampleFilesInTestBucket(
-      S3Client s3Client,
-      String bucket,
-      String location,
-      DataSetManifest manifest,
-      List<URL> resourcesToAdd) {
-    DataSetTestUtilities.putObject(s3Client, bucket, manifest, location);
+      String bucket, String location, DataSetManifest manifest, List<URL> resourcesToAdd) {
+    DataSetTestUtilities.putObject(s3Dao, bucket, manifest, location);
     int index = 0;
     for (URL resource : resourcesToAdd) {
       DataSetTestUtilities.putObject(
-          s3Client, bucket, manifest, manifest.getEntries().get(index), resource, location);
+          s3Dao, bucket, manifest, manifest.getEntries().get(index), resource, location);
       index++;
     }
   }

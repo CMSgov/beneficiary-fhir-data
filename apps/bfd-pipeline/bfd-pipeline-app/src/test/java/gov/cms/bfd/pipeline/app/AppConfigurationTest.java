@@ -43,7 +43,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import io.micrometer.cloudwatch2.CloudWatchConfig;

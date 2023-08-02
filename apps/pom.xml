@@ -87,7 +87,7 @@
         <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
         but not all (in particular, entity-manager does not have a 6.0 version available yet).
         Staying on latest 5.x version until all components have 6.0 versions available. -->
-        <hibernate.version>5.6.10.Final</hibernate.version>
+        <hibernate.version>5.6.15.Final</hibernate.version>
         <junit.version>5.10.0</junit.version>
         <javadoc.version>3.5.0</javadoc.version>
         <testcontainers.version>1.18.0</testcontainers.version>
@@ -127,7 +127,7 @@
         <newrelic.agent.version>8.4.0</newrelic.agent.version>
         <checkstyle.version>10.12.1</checkstyle.version>
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-        <guava.version>32.0.0-jre</guava.version>
+        <guava.version>32.1.1-jre</guava.version>
         <logback.classic.version>1.4.8</logback.classic.version>
         <zjsonpatch.version>0.4.14</zjsonpatch.version>
         <freemarker.version>2.3.32</freemarker.version>
@@ -143,7 +143,7 @@
         <poi.version>5.2.3</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
         <!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
-        <jetty.version>10.0.14</jetty.version>
+        <jetty.version>10.0.15</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
         <datasource-proxy.version>1.9</datasource-proxy.version>
