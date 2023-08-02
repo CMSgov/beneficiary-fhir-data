@@ -61,31 +61,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -126,6 +101,32 @@ import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -4232,39 +4233,37 @@ public final class TransformerUtilsV2 {
 
   /**
    * Process a {@link Set} of {@link ClaimTypeV2} entries and build an {@link EnumSet} of {@link
-   * ClaimTypeV2} entries that meet the criteria of having claims data (derived from {@link Integer}
-   * bitmask) and match claim(s) requested by caller.
+   * ClaimTypeV2} entries that meet the criteria of having claims data claims data (derived from
+   * int bitmask) and match claim(s) requested by caller.
    *
    * @param claimTypes {@link Set} set of {@link ClaimTypeV2} identifiers requested by client.
-   * @param val {@link Integer} bitmask denoting the claim types that have data.
+   * @param val int bitmask denoting the claim types that have data.
    * @return {@link EnumSet} of {@link ClaimTypeV2} types to process.
    */
   public static EnumSet<ClaimTypeV2> fetchClaimsAvailability(Set<ClaimTypeV2> claimTypes, int val) {
     EnumSet<ClaimTypeV2> availSet = EnumSet.noneOf(ClaimTypeV2.class);
-    if (claimTypes.contains(ClaimTypeV2.CARRIER) && (val & QueryUtils.V_CARRIER_HAS_DATA) != 0) {
+    if ((val & QueryUtils.V_CARRIER_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.CARRIER)) {
       availSet.add(ClaimTypeV2.CARRIER);
     }
-    if (claimTypes.contains(ClaimTypeV2.DME) && (val & QueryUtils.V_DME_HAS_DATA) != 0) {
+    if ((val & QueryUtils.V_DME_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.DME)) {
       availSet.add(ClaimTypeV2.DME);
     }
-    if (claimTypes.contains(ClaimTypeV2.PDE) && (val & QueryUtils.V_PART_D_HAS_DATA) != 0) {
+    if ((val & QueryUtils.V_PART_D_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.PDE)) {
       availSet.add(ClaimTypeV2.PDE);
     }
-    if (claimTypes.contains(ClaimTypeV2.INPATIENT)
-        && (val & QueryUtils.V_INPATIENT_HAS_DATA) != 0) {
+    if ((val & QueryUtils.V_INPATIENT_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.INPATIENT)) {
       availSet.add(ClaimTypeV2.INPATIENT);
     }
-    if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)
-        && (val & QueryUtils.V_OUTPATIENT_HAS_DATA) != 0) {
+    if ((val & QueryUtils.V_OUTPATIENT_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
       availSet.add(ClaimTypeV2.OUTPATIENT);
     }
-    if (claimTypes.contains(ClaimTypeV2.HOSPICE) && (val & QueryUtils.V_HOSPICE_HAS_DATA) != 0) {
+    if ((val & QueryUtils.V_HOSPICE_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.HOSPICE)) {
       availSet.add(ClaimTypeV2.HOSPICE);
     }
-    if (claimTypes.contains(ClaimTypeV2.SNF) && (val & QueryUtils.V_SNF_HAS_DATA) != 0) {
+    if ((val & QueryUtils.V_SNF_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.SNF)) {
       availSet.add(ClaimTypeV2.SNF);
     }
-    if (claimTypes.contains(ClaimTypeV2.HHA) && (val & QueryUtils.V_HHA_HAS_DATA) != 0) {
+    if ((val & QueryUtils.V_HHA_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.HHA)) {
       availSet.add(ClaimTypeV2.HHA);
     }
     return availSet;
