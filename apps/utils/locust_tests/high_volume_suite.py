@@ -2,7 +2,17 @@
 import inspect
 import random
 import sys
-from typing import Callable, Dict, List, Optional, Protocol, Set, Type, TypeVar
+from typing import (
+    Callable,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Set,
+    Type,
+    TypeVar,
+)
 
 from locust import TaskSet, User, events, tag, task
 from locust.env import Environment
@@ -10,14 +20,13 @@ from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
-from common.types import CopyableEnumerable
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
 TaskT = TypeVar("TaskT", Callable[..., None], Type["TaskSet"])
-MASTER_BENE_IDS: CopyableEnumerable[str] = []
-MASTER_CONTRACT_DATA: CopyableEnumerable[Dict[str, str]] = []
-MASTER_HASHED_MBIS: CopyableEnumerable[str] = []
+MASTER_BENE_IDS: Collection[str] = []
+MASTER_CONTRACT_DATA: Collection[Dict[str, str]] = []
+MASTER_HASHED_MBIS: Collection[str] = []
 TAGS: Set[str] = set()
 EXCLUDE_TAGS: Set[str] = set()
 
@@ -109,7 +118,7 @@ class EobTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": random.choice(self.user.bene_ids),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
                 "_count": "50",
                 "_types": "PDE",
@@ -124,7 +133,7 @@ class EobTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": random.choice(self.user.bene_ids),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
                 "_count": "100",
                 "_lastUpdated": f"gt{self.user.last_updated}",
@@ -139,7 +148,7 @@ class EobTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": random.choice(self.user.bene_ids),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
                 "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeTaxNumbers": "true",
@@ -154,7 +163,7 @@ class EobTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": random.choice(self.user.bene_ids),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
                 "_lastUpdated": f"gt{self.user.last_updated}",
             },
@@ -168,7 +177,7 @@ class EobTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": random.choice(self.user.bene_ids),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "application/fhir+json",
             },
             name="/v1/fhir/ExplanationOfBenefit search by id",
@@ -181,7 +190,7 @@ class EobTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "patient": random.choice(self.user.bene_ids),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "application/fhir+json",
             },
             name="/v2/fhir/ExplanationOfBenefit search by id",
@@ -194,7 +203,7 @@ class EobTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "patient": random.choice(self.user.bene_ids),
+                "patient": self.user.bene_ids.pop(),
                 "_count": "10",
                 "_format": "application/fhir+json",
             },
@@ -209,7 +218,7 @@ class EobTaskSet(HighVolumeTaskSet):
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
                 "_lastUpdated": f"gt{self.user.last_updated}",
-                "patient": random.choice(self.user.bene_ids),
+                "patient": self.user.bene_ids.pop(),
                 "_IncludeTaxNumbers": "true",
                 "_format": "application/fhir+json",
             },
@@ -229,7 +238,7 @@ class CoverageTaskSet(HighVolumeTaskSet):
         """Coverage search by ID, Paginated"""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/Coverage",
-            params={"beneficiary": random.choice(self.user.bene_ids), "_count": "10"},
+            params={"beneficiary": self.user.bene_ids.pop(), "_count": "10"},
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
@@ -241,7 +250,7 @@ class CoverageTaskSet(HighVolumeTaskSet):
             base_path="/v1/fhir/Coverage",
             params={
                 "_lastUpdated": f"gt{self.user.last_updated}",
-                "beneficiary": random.choice(self.user.bene_ids),
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v1/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
@@ -253,7 +262,7 @@ class CoverageTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
             params={
-                "beneficiary": random.choice(self.user.bene_ids),
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id",
         )
@@ -264,7 +273,7 @@ class CoverageTaskSet(HighVolumeTaskSet):
         """Coverage search by ID, Paginated"""
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
-            params={"beneficiary": random.choice(self.user.bene_ids), "_count": "10"},
+            params={"beneficiary": self.user.bene_ids.pop(), "_count": "10"},
             name="/v2/fhir/Coverage search by id / count=10",
         )
 
@@ -276,7 +285,7 @@ class CoverageTaskSet(HighVolumeTaskSet):
             base_path="/v2/fhir/Coverage",
             params={
                 "_lastUpdated": f"gt{self.user.last_updated}",
-                "beneficiary": random.choice(self.user.bene_ids),
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
@@ -294,7 +303,7 @@ class PatientTaskSet(HighVolumeTaskSet):
         """Patient search by coverage contract (all pages)"""
 
         def make_url():
-            contract = random.choice(self.user.contract_data)
+            contract = self.user.contract_data.pop()
             return create_url_path(
                 "/v1/fhir/Patient",
                 {
@@ -320,7 +329,7 @@ class PatientTaskSet(HighVolumeTaskSet):
             return create_url_path(
                 "/v1/fhir/Patient/",
                 {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{random.choice(self.user.hashed_mbis)}",
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.user.hashed_mbis.pop()}",
                     "_IncludeIdentifiers": "mbi",
                 },
             )
@@ -337,7 +346,7 @@ class PatientTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/Patient",
             params={
-                "_id": random.choice(self.user.bene_ids),
+                "_id": self.user.bene_ids.pop(),
                 "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeIdentifiers": "mbi",
                 "_IncludeTaxNumbers": "true",
@@ -351,7 +360,7 @@ class PatientTaskSet(HighVolumeTaskSet):
         """Patient search by ID"""
 
         def make_url():
-            return create_url_path(f"/v1/fhir/Patient/{random.choice(self.user.bene_ids)}", {})
+            return create_url_path(f"/v1/fhir/Patient/{self.user.bene_ids.pop()}", {})
 
         self.user.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
 
@@ -361,7 +370,7 @@ class PatientTaskSet(HighVolumeTaskSet):
         """Patient search by Coverage Contract, paginated"""
 
         def make_url():
-            contract = random.choice(self.user.contract_data)
+            contract = self.user.contract_data.pop()
             return create_url_path(
                 "/v2/fhir/Patient",
                 {
@@ -387,7 +396,7 @@ class PatientTaskSet(HighVolumeTaskSet):
             return create_url_path(
                 "/v2/fhir/Patient/",
                 {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{random.choice(self.user.hashed_mbis)}",
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.user.hashed_mbis.pop()}",
                     "_IncludeIdentifiers": "mbi",
                 },
             )
@@ -404,7 +413,7 @@ class PatientTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id": random.choice(self.user.bene_ids),
+                "_id": self.user.bene_ids.pop(),
                 "_format": "application/fhir+json",
                 "_IncludeIdentifiers": "mbi",
                 "_lastUpdated": f"gt{self.user.last_updated}",
@@ -419,7 +428,7 @@ class PatientTaskSet(HighVolumeTaskSet):
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id": random.choice(self.user.bene_ids),
+                "_id": self.user.bene_ids.pop(),
                 "_format": "application/fhir+json",
             },
             name="/v2/fhir/Patient search by id",
@@ -523,9 +532,15 @@ class HighVolumeUser(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.bene_ids = MASTER_BENE_IDS.copy()
-        self.contract_data = MASTER_CONTRACT_DATA.copy()
-        self.hashed_mbis = MASTER_HASHED_MBIS.copy()
+        self.bene_ids = list(MASTER_BENE_IDS)
+        self.contract_data = list(MASTER_CONTRACT_DATA)
+        self.hashed_mbis = list(MASTER_HASHED_MBIS)
+
+        # Shuffle the data to ensure each User isn't making requests with the same data in the same
+        # order
+        random.shuffle(self.bene_ids)
+        random.shuffle(self.contract_data)
+        random.shuffle(self.hashed_mbis)
 
         # As of 01/20/2023 there is an unresolved locust issue [1] with the --tags/--exclude-tags command line options.
         # Therefore, we have implemented custom arguments (--locust-tags/--locust-exclude-tags) to programmatically

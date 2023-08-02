@@ -1,4 +1,5 @@
 import random
+from typing import Collection
 
 from locust import events, tag, task
 from locust.env import Environment
@@ -6,10 +7,9 @@ from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
-from common.types import CopyableEnumerable
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
-master_pac_mbis: CopyableEnumerable[str] = []
+master_pac_mbis: Collection[str] = []
 
 
 @events.test_start.add_listener
@@ -50,7 +50,7 @@ class PACUser(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.hashed_mbis = master_pac_mbis.copy()
+        self.hashed_mbis = list(master_pac_mbis)
 
     def __get(self, resource, name, parameters=None):
         params = {} if parameters is None else parameters

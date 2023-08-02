@@ -3,22 +3,18 @@
 import datetime
 import logging
 from argparse import Namespace
-from typing import Any, Optional, Protocol, Union, runtime_checkable
-
-from common.types import CopyableEnumerable
+from typing import Any, Collection, Optional, Protocol, Union, runtime_checkable
 
 
 @runtime_checkable
 class NonSamplingLoadFunction(Protocol):
-    def __call__(self, uri: str) -> CopyableEnumerable[Any]:
+    def __call__(self, uri: str) -> Collection[Any]:
         ...
 
 
 @runtime_checkable
 class SamplingLoadFunction(Protocol):
-    def __call__(
-        self, uri: str, table_sample_pct: Optional[float] = None
-    ) -> CopyableEnumerable[Any]:
+    def __call__(self, uri: str, table_sample_pct: Optional[float] = None) -> Collection[Any]:
         ...
 
 
@@ -30,19 +26,23 @@ def load_from_parsed_opts(
     load_function: LoadFunction,
     use_table_sample: bool = False,
     data_type_name: str = "<unknown>",
-) -> CopyableEnumerable[Any]:
-    """Loads data from the database given the database load function provided. Gets the database URI and the
-    table sampling percent from the given parsed options. Returns an empty list if database URI and/or table sample percent are not
-    set in the given parsed options
+) -> Collection[Any]:
+    """Loads data from the database given the database load function provided. Gets the database URI
+    and the table sampling percent from the given parsed options. Returns an empty list if database
+    URI and/or table sample percent are not set in the given parsed options
 
     Args:
-        parsed_opts (Namespace): A collection of parsed options that includes the database URI and table sampling percentage
-        load_function (Callable): A database load function that will query the database to get the desired data
-        use_table_sample (bool, optional): Whether or not to use Postgres's table sampling to randomly sample a given table's data. Defaults to False.
-        data_type_name (str, optional): Name of the type of data being loaded, strictly used for logging. Defaults to "<unknown>".
+        parsed_opts (Namespace): A collection of parsed options that includes the database URI and
+        table sampling percentage
+        load_function (Callable): A database load function that will query the database to get the
+        desired data
+        use_table_sample (bool, optional): Whether or not to use Postgres's table sampling to
+        randomly sample a given table's data. Defaults to False.
+        data_type_name (str, optional): Name of the type of data being loaded, strictly used for
+        logging. Defaults to "<unknown>".
 
     Returns:
-        List: A list of data returned by the load function
+        Collection[Any]: A Collection of data returned by the load function
     """
     if not parsed_opts.database_constr:
         logging.getLogger().error('"database_constr" was not defined in parsed options')
@@ -65,7 +65,7 @@ def load_from_uri(
     use_table_sample: bool = False,
     table_sample_percent: float = 0.25,
     data_type_name: str = "<unknown>",
-) -> CopyableEnumerable[Any]:
+) -> Collection[Any]:
     """Loads all of the data from the database, using the database connection provided."""
     logger = logging.getLogger()
 
