@@ -162,7 +162,7 @@ public final class CarrierClaimTransformerTest {
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(
-      CarrierClaim claim, ExplanationOfBenefit eob, Boolean includedTaxNumbers)
+      CarrierClaim claim, ExplanationOfBenefit eob, boolean includedTaxNumbers)
       throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
