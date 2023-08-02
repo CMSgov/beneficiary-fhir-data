@@ -25,11 +25,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 /**
- * This {@link RifFile} implementation can be used for files that are backed by {@link S3Object}s.
- * Note that this lazy-loads the files, to ensure that connections are not opened until needed.
+ * This {@link RifFile} implementation can be used for files that are backed by S3 Objects. Note
+ * that this lazy-loads the files, to ensure that connections are not opened until needed.
  */
 public final class S3RifFile implements RifFile {
   private static final Logger LOGGER = LoggerFactory.getLogger(S3RifFile.class);

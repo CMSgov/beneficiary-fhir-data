@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.apps;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.regions.Region;
@@ -78,7 +79,11 @@ public class RdaServerApp {
               .fissClaimJsonFile(config.readableFileOption("file.fiss").orElse(null))
               .mcsClaimJsonFile(config.readableFileOption("file.mcs").orElse(null))
               .s3Bucket(config.stringOption("s3.bucket").orElse(null))
-              .s3Region(config.parsedOption("s3.region", Region.class, Region::of).orElse(null))
+              .s3ClientConfig(
+                  S3ClientConfig.s3Builder()
+                      .region(
+                          config.parsedOption("s3.region", Region.class, Region::of).orElse(null))
+                      .build())
               .s3Directory(config.stringOption("s3.directory").orElse(""))
               .s3CacheDirectory(config.stringOption("s3.cacheDirectory").orElse(""))
               .build();
