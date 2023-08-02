@@ -81,13 +81,13 @@
         <telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.20.62</aws-java-sdk-bom.version>
         <aws.crt.version>0.21.17</aws.crt.version>
-        <spring-data-jpa.version>2.7.11</spring-data-jpa.version>
+        <spring-data-jpa.version>2.7.13</spring-data-jpa.version>
         <spring-framework.version>5.3.23</spring-framework.version>
 
         <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
         but not all (in particular, entity-manager does not have a 6.0 version available yet).
         Staying on latest 5.x version until all components have 6.0 versions available. -->
-        <hibernate.version>5.6.10.Final</hibernate.version>
+        <hibernate.version>5.6.15.Final</hibernate.version>
         <junit.version>5.10.0</junit.version>
         <javadoc.version>3.5.0</javadoc.version>
         <testcontainers.version>1.18.0</testcontainers.version>
@@ -127,7 +127,7 @@
         <newrelic.agent.version>8.4.0</newrelic.agent.version>
         <checkstyle.version>10.12.1</checkstyle.version>
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-        <guava.version>32.0.0-jre</guava.version>
+        <guava.version>32.1.1-jre</guava.version>
         <logback.classic.version>1.4.8</logback.classic.version>
         <zjsonpatch.version>0.4.14</zjsonpatch.version>
         <freemarker.version>2.3.32</freemarker.version>
