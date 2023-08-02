@@ -127,7 +127,7 @@
         <newrelic.agent.version>8.4.0</newrelic.agent.version>
         <checkstyle.version>10.12.1</checkstyle.version>
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-        <guava.version>32.0.0-jre</guava.version>
+        <guava.version>32.1.1-jre</guava.version>
         <logback.classic.version>1.4.8</logback.classic.version>
         <zjsonpatch.version>0.4.14</zjsonpatch.version>
         <freemarker.version>2.3.32</freemarker.version>
