@@ -13,7 +13,7 @@ def serverScripts
 def trimmedEnv
 def lockResource
 def awsRegion = 'us-east-1'
-def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/runbooks/how-to-recover-from-migrator-failures.md"
+def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/blob/master/docs/runbooks/how-to-recover-from-migrator-failures.md"
 
 // send notifications to slack, email, etc
 def sendNotifications(String environment = '', String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = '') {

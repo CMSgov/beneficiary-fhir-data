@@ -31,10 +31,23 @@
             <artifactId>bfd-pipeline-shared-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Compile time only -->
+        <dependency>
+            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-shared-test-utils</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Used to run our unit and integration tests. -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
