@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.sharedutils;
+package gov.cms.bfd.pipeline.sharedutils.s3;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
@@ -23,20 +23,38 @@ import software.amazon.awssdk.services.s3.S3CrtAsyncClientBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class S3ClientConfig extends AwsClientConfig {
   /**
+   * Passed to {@link S3CrtAsyncClientBuilder#minimumPartSizeInBytes} to cause large files to be
+   * downloaded in parts of 200 mb. Default value used when no alternative value has been provided.
+   */
+  static final long DEFAULT_MINIMUM_PART_SIZE_FOR_DOWNLOAD = 8 * 1024L * 1024L;
+
+  /**
+   * Passed to {@link S3CrtAsyncClientBuilder#minimumPartSizeInBytes} to cause large files to be
+   * downloaded in parts.
+   */
+  private final long minimumPartSizeForDownload;
+
+  /**
    * Initializes an instance. Any variable can be null. Region defaults to {@link #REGION_DEFAULT}.
    *
    * @param region an AWS {@link Region}
    * @param endpointOverride alternative URI for accessing AWS services (used with localstack)
    * @param accessKey optional access key
    * @param secretKey optional secret key
+   * @param minimumPartSizeForDownload optional minimum part size
    */
   @Builder(builderClassName = "S3Builder", builderMethodName = "s3Builder")
-  public S3ClientConfig(
+  private S3ClientConfig(
       @Nullable Region region,
       @Nullable URI endpointOverride,
       @Nullable String accessKey,
-      @Nullable String secretKey) {
+      @Nullable String secretKey,
+      @Nullable Long minimumPartSizeForDownload) {
     super(region, endpointOverride, accessKey, secretKey);
+    this.minimumPartSizeForDownload =
+        minimumPartSizeForDownload != null
+            ? minimumPartSizeForDownload
+            : DEFAULT_MINIMUM_PART_SIZE_FOR_DOWNLOAD;
   }
 
   /**
@@ -53,6 +71,7 @@ public class S3ClientConfig extends AwsClientConfig {
           StaticCredentialsProvider.create(
               AwsBasicCredentials.create(accessKey.get(), secretKey.get())));
     }
+    builder.minimumPartSizeInBytes(minimumPartSizeForDownload);
   }
 
   /**
@@ -74,6 +93,8 @@ public class S3ClientConfig extends AwsClientConfig {
         + accessKey.map(String::length)
         + ", secretKeyLength="
         + secretKey.map(String::length)
+        + ", minimumPartSizeForDownload="
+        + minimumPartSizeForDownload
         + '}';
   }
 }

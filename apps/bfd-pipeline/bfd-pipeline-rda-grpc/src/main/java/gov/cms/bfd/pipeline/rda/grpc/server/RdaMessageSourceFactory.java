@@ -6,8 +6,8 @@ import static java.lang.String.format;
 import com.google.common.base.Strings;
 import com.google.common.io.CharSource;
 import com.google.common.io.Files;
-import gov.cms.bfd.pipeline.sharedutils.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
@@ -18,7 +18,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * Interface for objects that can provide information required by {@link RdaService} to generate
@@ -63,7 +62,7 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     @Builder.Default
     private final RandomClaimGeneratorConfig randomClaimConfig =
         RandomClaimGeneratorConfig.builder().build();
-    /** Used to create {@link S3Client} when necessary. */
+    /** Used to create {@link S3ClientFactory} when necessary. */
     @Builder.Default
     private final S3ClientConfig s3ClientConfig = S3ClientConfig.s3Builder().build();
     /** NDJSON fiss claim data for the RDA Server. */
@@ -148,7 +147,11 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
       final S3ClientFactory s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
       final S3DirectoryDao s3Dao =
           new S3DirectoryDao(
-              s3ClientFactory, s3Bucket, directory, cacheDirectory, useTempDirectoryForCache);
+              s3ClientFactory.createS3Dao(),
+              s3Bucket,
+              directory,
+              cacheDirectory,
+              useTempDirectoryForCache);
       log.info(
           "serving claims using {} with data from S3 bucket {}",
           RdaS3JsonMessageSourceFactory.class.getSimpleName(),
