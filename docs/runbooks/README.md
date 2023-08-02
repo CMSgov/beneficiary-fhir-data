@@ -73,6 +73,11 @@ Table of Contents
 
 * [How to Perform a BFD Deployment](./how-to-do-a-deployment.md#how-to-perform-a-bfd-deployment)
 
+* [How to Manage SonarQube Service Account](./how-to-manage-sonarqube-service-account.md#how-to-manage-sonarqube-service-account)
+   * [Prerequisites](./how-to-manage-sonarqube-service-account.md#prerequisites)
+   * [Instructions](./how-to-manage-sonarqube-service-account.md#instructions)
+      * [How to Login and Rotate the SonarQube Access Account Credentials](./how-to-manage-sonarqube-service-account.md#how-to-login-and-rotate-the-sonarqube-access-account-credentials)
+
 * [How to Load Cloudwatch Historical Data](./how-to-load-cloudwatch-historical-data.md#how-to-load-cloudwatch-historical-data)
    * [Export the data from Cloudwatch.](./how-to-load-cloudwatch-historical-data.md#export-the-data-from-cloudwatch)
    * [Create/Update the Glue export table.](./how-to-load-cloudwatch-historical-data.md#createupdate-the-glue-export-table)
