@@ -477,6 +477,12 @@ public class SpringConfiguration {
   @Bean
   public ExecutorService executorService(
       @Value("${bfdServer.executorService.threads:80}") Integer threadCount) {
-    return Executors.newFixedThreadPool(threadCount);
+    return Executors.newFixedThreadPool(
+        threadCount,
+        r -> {
+          Thread t = new Thread(r);
+          t.setName("eob_claims");
+          return t;
+        });
   }
 }
