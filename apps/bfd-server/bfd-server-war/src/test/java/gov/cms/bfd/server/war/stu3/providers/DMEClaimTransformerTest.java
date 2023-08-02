@@ -73,11 +73,13 @@ public final class DMEClaimTransformerTest {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     DMEClaim claim =
-        (DMEClaim)
-            parsedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> r).findFirst().get();
+            parsedRecords.stream()
+                    .filter(r -> r instanceof DMEClaim)
+                    .map(DMEClaim.class::cast)
+                    .findFirst()
+                    .get();
 
     ExplanationOfBenefit eob = dmeClaimTransformer.transform(claim, true);
-
     assertMatches(claim, eob, true);
   }
 
