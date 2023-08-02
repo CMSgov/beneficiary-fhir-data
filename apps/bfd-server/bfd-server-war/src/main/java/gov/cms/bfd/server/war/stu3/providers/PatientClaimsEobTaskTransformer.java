@@ -98,7 +98,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   /** capture exception if thrown. */
   private Exception taskException = null;
   /** keep track of EOBs that were not removed (ignored) by SAMHSA iterations. */
-  private int samhsaIgnoredCount = 0;
+  private int samhsaIgnoredCount = -1;
   /** keep track of SAMHSA removals. */
   private int samhsaRemovedCount = 0;
   /** the list of EOBs that we'll return. */
@@ -227,7 +227,8 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   }
 
   /**
-   * Fetch count of EOBs that were not removed by SAMHSA filter.
+   * Fetch count of EOBs that were not removed by SAMHSA filter. Returns -1 if no SAMHSA filtering
+   * was executed.
    *
    * @return number of EOBs that SAMHSA filtering ignored.
    */
@@ -358,6 +359,8 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   private void filterSamhsa(List<ExplanationOfBenefit> eobs) {
     ListIterator<ExplanationOfBenefit> eobsIter = eobs.listIterator();
+    // init to zero if doing SAMHSA filtering
+    samhsaIgnoredCount = 0;
     while (eobsIter.hasNext()) {
       ExplanationOfBenefit eob = eobsIter.next();
       if (samhsaMatcher.test(eob)) {
