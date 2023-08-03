@@ -464,10 +464,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               serviceDate,
               excludeSamhsa);
 
-          // only CARRIER & DME claims support NPI tax info
-          if (claimType == ClaimTypeV2.CARRIER || claimType == ClaimTypeV2.DME) {
-            task.setIncludeTaxNumbers(includeTaxNumbers);
-          }
+          task.setIncludeTaxNumbers(includeTaxNumbers);
           callableTasks.add(task);
         });
 
