@@ -15,8 +15,7 @@ locals {
   default_tags = module.terraservice.default_tags
   env          = module.terraservice.env
   seed_env     = module.terraservice.seed_env
-  established_envs = ["test", "prod-sbx", "prod"]
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  is_ephemeral_env = module.terraservice.is_ephemeral_env
 
 
   service = "eft"
