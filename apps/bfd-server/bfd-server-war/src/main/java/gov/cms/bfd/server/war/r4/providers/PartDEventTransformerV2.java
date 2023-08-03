@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static java.util.Objects.requireNonNull;
-
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -19,8 +17,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.math.BigDecimal;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
@@ -29,6 +25,11 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
 
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
@@ -57,8 +58,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
-   * PartDEventTransformerV2#transform} method that does not take the includeTaxNumber parameter.
+   * Transforms a {@link PartDEvent} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored

@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static java.util.Objects.requireNonNull;
-
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -18,14 +16,17 @@ import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Period;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.stream.IntStream;
+
+import static java.util.Objects.requireNonNull;
 
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
@@ -53,8 +54,7 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   }
 
   /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}; callers MUST USE the {@link
-   * PartDEventTransformerV2#transform} method that does not take the includeTaxNumber parameter.
+   * Transforms a {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored.
