@@ -257,6 +257,15 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   }
 
   /**
+   * true/false if SAMHSA filtering was invoked.
+   *
+   * @return true if SAMHSA filtering was invoked; false if not invoked.
+   */
+  public boolean wasSamhsaFilteringPerformed() {
+    return samhsaIgnoredCount.get() < 0;
+  }
+
+  /**
    * Fetch the {@link Exception} if the task encountered one.
    *
    * @return Exception if the task encountered one, Optional.Empty() otherwise.
