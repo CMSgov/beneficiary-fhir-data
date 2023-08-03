@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -10,6 +12,8 @@ import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.Arrays;
+import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
@@ -17,11 +21,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.Optional;
-
-import static java.util.Objects.requireNonNull;
 
 /** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component

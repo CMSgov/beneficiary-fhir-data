@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -16,17 +18,14 @@ import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.r4.model.Period;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.IntStream;
-
-import static java.util.Objects.requireNonNull;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.Period;
+import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
