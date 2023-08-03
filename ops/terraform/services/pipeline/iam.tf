@@ -273,13 +273,3 @@ resource "aws_iam_policy" "etl_s3_rda_paths_rw" {
       ]
   })
 }
-
-# attach the rda s3 policy to the paca engineer group
-data "aws_iam_group" "paca_engineers" {
-  group_name = "bfd-paca-app-engineers"
-}
-
-resource "aws_iam_group_policy_attachment" "etl_s3_rda_paths_rw" {
-  group      = data.aws_iam_group.paca_engineers.group_name
-  policy_arn = aws_iam_policy.etl_s3_rda_paths_rw.arn
-}
