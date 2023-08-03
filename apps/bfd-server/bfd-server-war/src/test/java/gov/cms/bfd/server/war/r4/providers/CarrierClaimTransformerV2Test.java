@@ -1350,7 +1350,6 @@ public class CarrierClaimTransformerV2Test {
             .get();
     claimWithoutNpi.setLastUpdated(Instant.now());
 
-    claimWithoutNpi.setLastUpdated(Instant.now());
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claimWithoutNpi, false);
     IParser parser = fhirContext.newJsonParser();
