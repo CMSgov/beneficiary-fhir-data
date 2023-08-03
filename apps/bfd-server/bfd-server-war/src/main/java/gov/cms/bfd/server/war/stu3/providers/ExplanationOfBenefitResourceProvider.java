@@ -472,7 +472,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     try {
       futures = executorService.invokeAll(callableTasks);
     } catch (InterruptedException e) {
-      LOGGER.error("Error invoking executor service", e);
       throw e;
     }
 
@@ -490,7 +489,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
           throw new RuntimeException(taskError);
         }
       } catch (InterruptedException | ExecutionException e) {
-        LOGGER.error("Error getting future result", e);
         throw e;
       }
     }
