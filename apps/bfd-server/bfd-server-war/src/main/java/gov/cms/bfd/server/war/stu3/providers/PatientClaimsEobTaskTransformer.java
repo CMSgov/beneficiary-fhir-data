@@ -20,6 +20,7 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -97,7 +98,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   // +++++++++++++++++++++++++++++++++++
 
   /** capture exception if thrown. */
-  private Exception taskException = null;
+  private final AtomicReference<Exception> taskException = new AtomicReference<>();
   /** keep track of EOBs that were not removed (ignored) by SAMHSA iterations. */
   private final AtomicInteger samhsaIgnoredCount = new AtomicInteger(-1);
   /** keep track of SAMHSA removals. */
@@ -189,11 +190,11 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       }
     } catch (NoResultException e) {
       LOGGER.warn(e.getMessage(), e);
-      setException(e);
+      taskException.set(e);
     } catch (Exception e) {
       // keep track of the Exception so we can provide to caller.
       LOGGER.error(e.getMessage(), e);
-      setException(e);
+      taskException.set(e);
     }
     return this;
   }
@@ -226,7 +227,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @return false if the task encountered an exception, true otherwise.
    */
   public boolean ranSuccessfully() {
-    return (taskException == null);
+    return (taskException.get() == null);
   }
 
   /**
@@ -248,15 +249,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   }
 
   /**
-   * Store a {@link Exception} if the task ecnountered one.
-   *
-   * @param exception ecountered by task transformer.
-   */
-  public synchronized void setException(Exception exception) {
-    taskException = exception;
-  }
-
-  /**
    * true/false if SAMHSA filtering was invoked.
    *
    * @return true if SAMHSA filtering was invoked; false if not invoked.
@@ -271,7 +263,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @return Exception if the task encountered one, Optional.Empty() otherwise.
    */
   public Optional<Exception> getFailure() {
-    return ranSuccessfully() ? Optional.empty() : Optional.of(taskException);
+    return ranSuccessfully() ? Optional.empty() : Optional.of(taskException.get());
   }
 
   /**
