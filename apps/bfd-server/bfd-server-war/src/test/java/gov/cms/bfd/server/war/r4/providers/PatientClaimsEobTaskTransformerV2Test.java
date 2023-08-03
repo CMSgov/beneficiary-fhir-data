@@ -202,6 +202,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertFalse(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(-1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -232,6 +233,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -262,6 +264,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertFalse(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(-1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -292,6 +295,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -323,6 +327,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -354,6 +359,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -385,6 +391,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -416,6 +423,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -447,6 +455,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
@@ -478,6 +487,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertNotNull(rslt);
     assertTrue(taskTransformer.ranSuccessfully());
     assertEquals(1, taskTransformer.fetchEOBs().size());
+    assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
   }
