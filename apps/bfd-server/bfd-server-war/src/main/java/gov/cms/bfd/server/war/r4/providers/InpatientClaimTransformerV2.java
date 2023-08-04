@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
  * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
 @Component
-public class InpatientClaimTransformerV2 {
+final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -56,27 +56,27 @@ public class InpatientClaimTransformerV2 {
   }
 
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Transforms a {@link InpatientClaim} into an {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(InpatientClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     if (!(claim instanceof InpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
-
-    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim);
-
-    timer.stop();
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(InpatientClaimTransformerV2.class.getSimpleName(), "transform"))
+            .time()) {
+      eob = transformClaim((InpatientClaim) claim);
+    }
     return eob;
   }
 

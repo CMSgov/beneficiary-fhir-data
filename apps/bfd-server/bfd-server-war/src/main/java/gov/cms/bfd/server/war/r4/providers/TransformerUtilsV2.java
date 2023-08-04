@@ -5,6 +5,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -42,6 +44,7 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -72,6 +75,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -81,6 +85,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -403,9 +408,7 @@ public final class TransformerUtilsV2 {
             c -> {
               if (!codingSystem.equals(c.getSystem())) return false;
               if (codingVersion != null && !codingVersion.equals(c.getVersion())) return false;
-              if (!codingCode.equals(c.getCode())) return false;
-
-              return true;
+              return codingCode.equals(c.getCode());
             });
   }
 
@@ -918,7 +921,7 @@ public final class TransformerUtilsV2 {
     }
 
     // We are assuming all locations are addresses
-    if (!Address.class.isInstance(item.getLocation())) {
+    if (!(item.getLocation() instanceof Address)) {
       throw new BadCodeMonkeyException();
     }
 
@@ -1504,9 +1507,7 @@ public final class TransformerUtilsV2 {
     }
 
     // log which NPI codes we couldn't find a match for in our downloaded NPI file
-    if (!npiCodeLookupMissingFailures.contains(npiCode)) {
-      npiCodeLookupMissingFailures.add(npiCode);
-    }
+    npiCodeLookupMissingFailures.add(npiCode);
 
     return null;
   }
@@ -1537,7 +1538,7 @@ public final class TransformerUtilsV2 {
       String line = "";
       npiCodesIn.readLine();
       while ((line = npiCodesIn.readLine()) != null) {
-        String npiColumns[] = line.split("\t");
+        String[] npiColumns = line.split("\t");
         if (npiColumns[4].isEmpty()) {
           String npiDisplayName =
               npiColumns[8].trim()
@@ -1621,7 +1622,7 @@ public final class TransformerUtilsV2 {
       String line = "";
       procedureCodesIn.readLine();
       while ((line = procedureCodesIn.readLine()) != null) {
-        String icdColumns[] = line.split("\t");
+        String[] icdColumns = line.split("\t");
         procedureCodeMap.put(icdColumns[0], icdColumns[1]);
       }
       procedureCodesIn.close();
@@ -3750,7 +3751,7 @@ public final class TransformerUtilsV2 {
     }
 
     // At this point `observation.get()` will always return
-    if (!Observation.class.isInstance(observation.get())) {
+    if (!(observation.get() instanceof Observation)) {
       throw new BadCodeMonkeyException();
     }
 
@@ -3777,7 +3778,7 @@ public final class TransformerUtilsV2 {
     }
 
     // At this point `organization.get()` will always return
-    if (!Organization.class.isInstance(organization.get())) {
+    if (!(organization.get() instanceof Organization)) {
       throw new BadCodeMonkeyException();
     }
 
@@ -4196,5 +4197,76 @@ public final class TransformerUtilsV2 {
     if (!Strings.isNullOrEmpty(mbiHash)) {
       BfdMDC.put("mbi_hash", mbiHash);
     }
+  }
+
+  /**
+   * Compares {@link LocalDate} a against {@link LocalDate} using the supplied {@link
+   * ParamPrefixEnum}.
+   *
+   * @param a the first item to compare
+   * @param b the second item to compare
+   * @param prefix prefix to use. Supported: {@link ParamPrefixEnum#GREATERTHAN_OR_EQUALS}, {@link
+   *     ParamPrefixEnum#GREATERTHAN}, {@link ParamPrefixEnum#LESSTHAN_OR_EQUALS}, {@link
+   *     ParamPrefixEnum#LESSTHAN}
+   * @return true if the comparison between a and b returned true
+   * @throws IllegalArgumentException if caller supplied an unsupported prefix
+   */
+  public static boolean compareLocalDate(
+      @Nullable LocalDate a, @Nullable LocalDate b, ParamPrefixEnum prefix) {
+    if (a == null || b == null) {
+      return false;
+    }
+    switch (prefix) {
+      case GREATERTHAN_OR_EQUALS:
+        return !a.isBefore(b);
+      case GREATERTHAN:
+        return a.isAfter(b);
+      case LESSTHAN_OR_EQUALS:
+        return !a.isAfter(b);
+      case LESSTHAN:
+        return a.isBefore(b);
+      default:
+        throw new InvalidRequestException(String.format("Unsupported prefix supplied: %s", prefix));
+    }
+  }
+
+  /**
+   * Process a {@link Set} of {@link ClaimTypeV2} entries and build an {@link EnumSet} of {@link
+   * ClaimTypeV2} entries that meet the criteria of having claims data claims data (derived from int
+   * bitmask) and match claim(s) requested by caller.
+   *
+   * @param claimTypes {@link Set} set of {@link ClaimTypeV2} identifiers requested by client.
+   * @param val int bitmask denoting the claim types that have data.
+   * @return {@link EnumSet} of {@link ClaimTypeV2} types to process.
+   */
+  public static EnumSet<ClaimTypeV2> fetchClaimsAvailability(Set<ClaimTypeV2> claimTypes, int val) {
+    EnumSet<ClaimTypeV2> availSet = EnumSet.noneOf(ClaimTypeV2.class);
+    if ((val & QueryUtils.V_CARRIER_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.CARRIER)) {
+      availSet.add(ClaimTypeV2.CARRIER);
+    }
+    if ((val & QueryUtils.V_DME_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.DME)) {
+      availSet.add(ClaimTypeV2.DME);
+    }
+    if ((val & QueryUtils.V_PART_D_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.PDE)) {
+      availSet.add(ClaimTypeV2.PDE);
+    }
+    if ((val & QueryUtils.V_INPATIENT_HAS_DATA) != 0
+        && claimTypes.contains(ClaimTypeV2.INPATIENT)) {
+      availSet.add(ClaimTypeV2.INPATIENT);
+    }
+    if ((val & QueryUtils.V_OUTPATIENT_HAS_DATA) != 0
+        && claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
+      availSet.add(ClaimTypeV2.OUTPATIENT);
+    }
+    if ((val & QueryUtils.V_HOSPICE_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.HOSPICE)) {
+      availSet.add(ClaimTypeV2.HOSPICE);
+    }
+    if ((val & QueryUtils.V_SNF_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.SNF)) {
+      availSet.add(ClaimTypeV2.SNF);
+    }
+    if ((val & QueryUtils.V_HHA_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.HHA)) {
+      availSet.add(ClaimTypeV2.HHA);
+    }
+    return availSet;
   }
 }

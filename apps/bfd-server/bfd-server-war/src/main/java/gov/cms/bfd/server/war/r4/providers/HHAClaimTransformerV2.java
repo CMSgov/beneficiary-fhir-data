@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
-public class HHAClaimTransformerV2 {
+final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -50,25 +50,25 @@ public class HHAClaimTransformerV2 {
   }
 
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Transforms a {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HHAClaim}
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored.
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
-
-    timer.stop();
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
+            .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))
+            .time()) {
+      eob = transformClaim((HHAClaim) claim);
+    }
     return eob;
   }
 

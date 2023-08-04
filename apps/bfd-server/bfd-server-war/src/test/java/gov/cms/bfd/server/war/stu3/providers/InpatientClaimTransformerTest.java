@@ -1,9 +1,11 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -14,7 +16,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
@@ -23,10 +24,36 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link InpatientClaimTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class InpatientClaimTransformerTest {
+  /** The transformer under test. */
+  InpatientClaimTransformer inpatientClaimTransformer;
+  /** The Metric Registry to use for the test. */
+  @Mock MetricRegistry metricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  protected void setup() {
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
+    inpatientClaimTransformer = new InpatientClaimTransformer(metricRegistry, new NPIOrgLookup());
+  }
+
   /**
    * Verifies that {@link InpatientClaimTransformer#transform} works as expected when run against
    * the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link InpatientClaim}.
@@ -40,20 +67,13 @@ public final class InpatientClaimTransformerTest {
     InpatientClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
+
     claim.setLastUpdated(Instant.now());
-
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
-
-    ExplanationOfBenefit eob = InpatientClaimTransformer.transform(transformerContext, claim);
-    assertMatches(claim, eob, transformerContext);
+    ExplanationOfBenefit eob = inpatientClaimTransformer.transform(claim, false);
+    assertMatches(claim, eob);
   }
 
   /**
@@ -64,13 +84,9 @@ public final class InpatientClaimTransformerTest {
    *     from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     InpatientClaim}
-   * @param transformerContext the {@link TransformerContext} that was generated from the specified
-   *     {@link InpatientClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      InpatientClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
-      throws FHIRException {
+  static void assertMatches(InpatientClaim claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -105,7 +121,8 @@ public final class InpatientClaimTransformerTest {
     TransformerTestUtils.assertAdjudicationTotalAmountEquals(
         CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claim.getDisproportionateShareAmount(), eob);
 
-    // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
+    // test common eob information between Inpatient, HHA, Hospice and SNF claims
+    // are set as
     // expected
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(
         eob,
@@ -113,7 +130,8 @@ public final class InpatientClaimTransformerTest {
         claim.getBeneficiaryDischargeDate(),
         Optional.of(claim.getUtilizationDayCount()));
 
-    // test common benefit components between SNF and Inpatient claims are set as expected
+    // test common benefit components between SNF and Inpatient claims are set as
+    // expected
     TransformerTestUtils.assertCommonGroupInpatientSNF(
         eob,
         claim.getCoinsuranceDayCount(),
@@ -130,7 +148,8 @@ public final class InpatientClaimTransformerTest {
         claim.getClaimPPSCapitalOutlierAmount(),
         claim.getClaimPPSOldCapitalHoldHarmlessAmount());
 
-    // test common eob information between SNF and Inpatient claims are set as expected
+    // test common eob information between SNF and Inpatient claims are set as
+    // expected
     TransformerTestUtils.assertCommonEobInformationInpatientSNF(
         eob,
         claim.getNoncoveredStayFromDate(),
@@ -159,7 +178,7 @@ public final class InpatientClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        (new NPIOrgLookup()).retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),
@@ -189,7 +208,7 @@ public final class InpatientClaimTransformerTest {
         new CCWProcedure(
             claim.getProcedure1Code(), claim.getProcedure1CodeVersion(), claim.getProcedure1Date());
     TransformerTestUtils.assertHasCoding(
-        ccwProcedure.getFhirSystem().toString(),
+        ccwProcedure.getFhirSystem(),
         claim.getProcedure1Code().get(),
         eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
     assertEquals(
@@ -201,7 +220,7 @@ public final class InpatientClaimTransformerTest {
         new CCWProcedure(
             claim.getProcedure6Code(), claim.getProcedure6CodeVersion(), claim.getProcedure6Date());
     TransformerTestUtils.assertHasCoding(
-        ccwProcedureDisplay.getFhirSystem().toString(),
+        ccwProcedureDisplay.getFhirSystem(),
         null,
         TransformerUtils.retrieveProcedureCodeDisplay(claim.getProcedure6Code().get()),
         claim.getProcedure6Code().get(),
@@ -222,7 +241,8 @@ public final class InpatientClaimTransformerTest {
         Optional.empty(),
         0 /* index */);
 
-    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
+    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice
+    // and SNF match
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(
         eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 

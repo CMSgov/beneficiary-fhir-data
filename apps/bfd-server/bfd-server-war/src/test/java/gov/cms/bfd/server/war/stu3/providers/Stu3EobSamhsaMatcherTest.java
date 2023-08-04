@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -38,7 +37,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Unit tests for {@link Stu3EobSamhsaMatcherTest}. Integration with {@link
  * ExplanationOfBenefitResourceProvider} is covered by {@link
- * ExplanationOfBenefitResourceProviderIT#searchForSamhsaEobsWithExcludeSamhsaTrue} and related
+ * ExplanationOfBenefitResourceProviderE2E#searchForSamhsaEobsWithExcludeSamhsaTrue} and related
  * integration tests.
  */
 public final class Stu3EobSamhsaMatcherTest {
@@ -135,7 +134,6 @@ public final class Stu3EobSamhsaMatcherTest {
     @Test
     public void nonSamhsaRelatedClaims() throws IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
-
       FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
           FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
       NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
@@ -149,12 +147,8 @@ public final class Stu3EobSamhsaMatcherTest {
                     // FIXME remove most `else if`s once filtering fully supports all claim types
                     if (r instanceof Beneficiary || r instanceof BeneficiaryHistory) return null;
 
-                    return TransformerUtils.transformRifRecordToEob(
-                        new MetricRegistry(),
-                        r,
-                        Optional.empty(),
-                        fdaDrugCodeDisplayLookup,
-                        npiOrgLookup);
+                    return TransformerTestUtils.transformRifRecordToEob(
+                        r, new MetricRegistry(), false, fdaDrugCodeDisplayLookup, npiOrgLookup);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -832,10 +826,10 @@ public final class Stu3EobSamhsaMatcherTest {
               .findFirst()
               .get();
       ExplanationOfBenefit sampleEobForClaimType =
-          TransformerUtils.transformRifRecordToEob(
-              new MetricRegistry(),
+          TransformerTestUtils.transformRifRecordToEob(
               sampleRifRecordForClaimType,
-              Optional.empty(),
+              new MetricRegistry(),
+              false,
               FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
               new NPIOrgLookup());
 

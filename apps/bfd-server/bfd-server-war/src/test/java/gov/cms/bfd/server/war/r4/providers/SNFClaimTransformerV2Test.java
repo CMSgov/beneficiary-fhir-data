@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
@@ -20,6 +23,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,17 +53,30 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link SNFClaimTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class SNFClaimTransformerV2Test {
   /** The parsed claim used to generate the EOB and for validating with. */
   SNFClaim claim;
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
-  /** The fhir context for parsing the test file. */
-  private static final FhirContext fhirContext = FhirContext.forR4();
   /** The transformer under test. */
   SNFClaimTransformerV2 snfClaimTransformer;
+  /** The fhir context for parsing the test file. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -74,10 +91,10 @@ public class SNFClaimTransformerV2Test {
     SNFClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof SNFClaim)
-            .map(r -> (SNFClaim) r)
+            .map(SNFClaim.class::cast)
             .findFirst()
             .get();
-
+    claim.setLastUpdated(Instant.now());
     return claim;
   }
 
@@ -88,9 +105,12 @@ public class SNFClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    snfClaimTransformer = new SNFClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
+    snfClaimTransformer = new SNFClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -449,10 +469,11 @@ public class SNFClaimTransformerV2Test {
     SNFClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof SNFClaim)
-            .map(r -> (SNFClaim) r)
+            .map(SNFClaim.class::cast)
             .findFirst()
             .get();
-    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim);
+    claim.setLastUpdated(Instant.now());
+    ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -858,7 +879,7 @@ public class SNFClaimTransformerV2Test {
         TransformerTestUtilsV2.createProcedure(
             proc1.getSequence(),
             List.of(new Coding("http://hl7.org/fhir/sid/icd-9-cm", "9214", "BONE SCAN")),
-            "2016-01-16T00:00:00+00:00");
+            "2016-01-16T00:00:00Z");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code 9214");
   }
@@ -869,7 +890,8 @@ public class SNFClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    // Only one insurance object if there is more than we need to fix the focal set to point to the
+    // Only one insurance object if there is more than we need to fix the focal set
+    // to point to the
     // correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
@@ -1606,7 +1628,7 @@ public class SNFClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = snfClaimTransformer.transform(generateClaim());
+    ExplanationOfBenefit eob = snfClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

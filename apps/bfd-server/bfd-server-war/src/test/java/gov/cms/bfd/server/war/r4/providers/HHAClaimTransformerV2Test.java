@@ -5,11 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
@@ -54,17 +57,30 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Tests the {@link HHAClaimTransformerV2Test}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class HHAClaimTransformerV2Test {
   /** The claim under test. */
   HHAClaim claim;
   /** The eob loaded before each test from a file. */
   ExplanationOfBenefit eob;
-  /** The fhir context for parsing the file data. */
-  private static final FhirContext fhirContext = FhirContext.forR4();
   /** The transformer under test. */
   HHAClaimTransformerV2 hhaClaimTransformer;
+  /** The fhir context for parsing the file data. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -79,12 +95,10 @@ public class HHAClaimTransformerV2Test {
     HHAClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-
     return claim;
   }
 
@@ -95,9 +109,12 @@ public class HHAClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    hhaClaimTransformer = new HHAClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
+    hhaClaimTransformer = new HHAClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -176,15 +193,14 @@ public class HHAClaimTransformerV2Test {
     HHAClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
     claim.setClaimQueryCode(Optional.empty());
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -205,18 +221,11 @@ public class HHAClaimTransformerV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
-            .findFirst()
-            .get();
-
-    claim.setLastUpdated(Instant.now());
+    HHAClaim claim = generateClaim();
     claim.setClaimQueryCode(Optional.of('3'));
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -654,7 +663,8 @@ public class HHAClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // // Only one insurance object if there is more than we need to fix the focal
+    // set to point
     // to the correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
@@ -1163,7 +1173,7 @@ public class HHAClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = hhaClaimTransformer.transform(generateClaim());
+    ExplanationOfBenefit eob = hhaClaimTransformer.transform(generateClaim(), false);
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

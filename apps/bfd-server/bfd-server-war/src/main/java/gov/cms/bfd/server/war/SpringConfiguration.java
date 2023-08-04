@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import javax.persistence.EntityManager;
@@ -444,5 +446,30 @@ public class SpringConfiguration {
    */
   public static ConfigLoader createConfigLoader(Function<String, String> getenv) {
     return LayeredConfiguration.createConfigLoader(Map.of(), getenv);
+  }
+
+  /**
+   * This bean provides an {@link ExecutorService} to enable EOB claim transformers to run in
+   * parallel (threads).
+   *
+   * <p>Using a fixed thread pool as ExplanationOfBenefit processing is broken into thread tasks,
+   * one per claim type; threads run concurrently, with each running in generally less than a
+   * second. So, while a fixed thread pool might represent wasted resources (memory allocated per
+   * thread at time of thread pool creation), retrieving EOB claims represents a high-volume service
+   * that will make good use of allocated threads.
+   *
+   * @param threadCount system parameter for the number of threads in the fixed thread pool.
+   * @return {@link ExecutorService} for the application.
+   */
+  @Bean
+  public ExecutorService executorService(
+      @Value("${bfdServer.executorService.threads:80}") Integer threadCount) {
+    return Executors.newFixedThreadPool(
+        threadCount,
+        r -> {
+          Thread t = new Thread(r);
+          t.setName("eob_claims");
+          return t;
+        });
   }
 }
