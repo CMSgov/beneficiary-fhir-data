@@ -43,7 +43,10 @@ def _get_regression_query(select_query: str) -> str:
     return " ".join(
         [
             select_query,
-            f'WHERE "bene_id" BETWEEN {REGRESSION_BENE_RANGE_START} AND {REGRESSION_BENE_RANGE_END}',
+            (
+                f'WHERE "bene_id" BETWEEN {REGRESSION_BENE_RANGE_START} AND'
+                f" {REGRESSION_BENE_RANGE_END}"
+            ),
             'ORDER BY "bene_id" ASC',
             f"LIMIT {LIMIT}",
         ]
@@ -94,16 +97,32 @@ def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
         'SELECT "partd_contract_number_id", "year_month" FROM "beneficiary_monthly"'
     )
 
-    unfiltered_contracts = [
+    return [
         {
-            "id": str(result[0]) if result[0] else None,
+            "id": str(result[0]),
             "month": f"{result[1].month:02}",
             "year": str(result[1].year),
         }
         for result in _execute(uri, contract_id_query)
+        if result[0]
     ]
 
-    return [contract for contract in unfiltered_contracts if contract["id"]]
+
+def get_regression_pac_hashed_mbis(uri: str) -> List[str]:
+    """Returns a list of MBI hashes within the set of static, synthetic PAC data
+
+    Args:
+        uri (str): The database connection string
+
+    Returns:
+        list[str]: A list of MBI hashes
+    """
+    claims_mbis_query = (
+        "select distinct m.hash from rda.claim_message_meta_data c left join rda.mbi_cache m on"
+        " c.mbi_id=m.mbi_id where c.sequence_number < 0 and (claim_type='M' or claim_type='F')"
+        f" limit {LIMIT}"
+    )
+    return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
 def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:

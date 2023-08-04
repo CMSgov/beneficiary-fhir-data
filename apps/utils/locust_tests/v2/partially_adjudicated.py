@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import Collection
 
 from locust import events, tag, task
 from locust.env import Environment
@@ -9,7 +9,7 @@ from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
-master_pac_mbis: List[str] = []
+master_pac_mbis: Collection[str] = []
 
 
 @events.test_start.add_listener
@@ -50,12 +50,11 @@ class PACUser(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.hashed_mbis = master_pac_mbis.copy()
-        random.shuffle(self.hashed_mbis)
+        self.hashed_mbis = list(master_pac_mbis)
 
     def __get(self, resource, name, parameters=None):
         params = {} if parameters is None else parameters
-        params["mbi"] = self.hashed_mbis.pop()
+        params["mbi"] = random.choice(self.hashed_mbis)
 
         self.run_task_by_parameters(base_path=f"/v2/fhir/{resource}", params=params, name=name)
 
@@ -82,6 +81,11 @@ class PACUser(BFDUserBase):
     def get_claim_with_service_date_and_last_updated(self):
         """Get single Claim with last updated and service date"""
         self.__get("Claim", "claimServiceDateLastUpdated", self.SERVICE_DATE_LAST_UPDATED)
+
+    @tag("claim", "exclude-samsa")
+    @task
+    def get_claim_with_exclude_samsa(self):
+        self.__get("Claim", "excludeSAMSA", True)
 
     @tag("claim-response")
     @task
@@ -110,3 +114,8 @@ class PACUser(BFDUserBase):
             "claimResponseServiceDateLastUpdated",
             self.SERVICE_DATE_LAST_UPDATED,
         )
+
+    @tag("claim", "exclude-samsa")
+    @task
+    def get_claim_response_with_exclude_samsa(self):
+        self.__get("ClaimResponse", "excludeSAMSA", True)
