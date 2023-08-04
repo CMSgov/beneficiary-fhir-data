@@ -68,7 +68,8 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
             "glue:*",
             "firehose:*",
             "athena:*",
-            "application-autoscaling:*"
+            "application-autoscaling:*",
+            "scheduler:*",
           ],
           "Effect" : "Allow",
           "Resource" : "*",

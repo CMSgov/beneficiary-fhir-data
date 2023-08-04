@@ -2,19 +2,11 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.s3.task;
 
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.waiters.S3Waiter;
-import software.amazon.awssdk.transfer.s3.model.Copy;
-import software.amazon.awssdk.transfer.s3.model.CopyRequest;
 
 /** Represents an asynchronous operation to move/rename a data set in S3. */
 public final class DataSetMoveTask implements Callable<Void> {
@@ -77,22 +69,9 @@ public final class DataSetMoveTask implements Callable<Void> {
           String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
       targetKey = String.format("%s/%s", manifest.getManifestKeyDoneLocation(), s3KeySuffixToMove);
 
-      CopyObjectRequest.Builder copyReqBuilder =
-          CopyObjectRequest.builder()
-              .sourceBucket(options.getS3BucketName())
-              .sourceKey(sourceKey)
-              .destinationBucket(options.getS3BucketName())
-              .destinationKey(targetKey);
-      Copy copy =
-          s3TaskManager
-              .getS3TransferManager()
-              .copy(CopyRequest.builder().copyObjectRequest(copyReqBuilder.build()).build());
-
-      try {
-        copy.completionFuture().join();
-      } catch (CompletionException e) {
-        throw new BadCodeMonkeyException(e);
-      }
+      s3TaskManager
+          .getS3Dao()
+          .copyObject(options.getS3BucketName(), sourceKey, options.getS3BucketName(), targetKey);
     }
     LOGGER.debug("Data set copied in S3 (step 1 of move).");
 
@@ -105,12 +84,7 @@ public final class DataSetMoveTask implements Callable<Void> {
       String sourceKey =
           String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
 
-      S3Waiter s3Waiter = s3TaskManager.getS3Client().waiter();
-      DeleteObjectRequest deleteObjectRequest =
-          DeleteObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build();
-      s3TaskManager.getS3Client().deleteObject(deleteObjectRequest);
-      s3Waiter.waitUntilObjectNotExists(
-          HeadObjectRequest.builder().bucket(options.getS3BucketName()).key(sourceKey).build());
+      s3TaskManager.getS3Dao().deleteObject(options.getS3BucketName(), sourceKey);
     }
     LOGGER.debug("Data set deleted in S3 (step 2 of move).");
 

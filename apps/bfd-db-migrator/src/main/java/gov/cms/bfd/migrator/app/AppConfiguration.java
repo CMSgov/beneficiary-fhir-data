@@ -1,5 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
@@ -11,8 +12,6 @@ import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import lombok.Getter;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
@@ -115,24 +114,26 @@ public class AppConfiguration extends BaseAppConfiguration {
    * @return the {@link SqsClient}
    */
   static SqsClient createSqsClient(ConfigLoader configLoader) {
+    final var sqsClientConfig = loadSqsConfig(configLoader);
     final var clientBuilder = SqsClient.builder();
-    // either region or endpoint can be set on ssmClient but not both
-    if (configLoader.stringOption(ENV_VAR_KEY_SQS_ENDPOINT).isPresent()) {
-      // region is required when defining endpoint
-      clientBuilder
-          .region(configLoader.parsedValue(ENV_VAR_KEY_SQS_REGION, Region.class, Region::of))
-          .endpointOverride(URI.create(configLoader.stringValue(ENV_VAR_KEY_SQS_ENDPOINT)));
-    } else if (configLoader.stringOption(ENV_VAR_KEY_SQS_REGION).isPresent()) {
-      clientBuilder.region(
-          configLoader.parsedValue(ENV_VAR_KEY_SQS_REGION, Region.class, Region::of));
-    }
-    if (configLoader.stringOption(ENV_VAR_KEY_SQS_ACCESS_KEY).isPresent()) {
-      clientBuilder.credentialsProvider(
-          StaticCredentialsProvider.create(
-              AwsBasicCredentials.create(
-                  configLoader.stringValue(ENV_VAR_KEY_SQS_ACCESS_KEY),
-                  configLoader.stringValue(ENV_VAR_KEY_SQS_SECRET_KEY))));
-    }
+    sqsClientConfig.configureAwsService(clientBuilder);
     return clientBuilder.build();
+  }
+
+  /**
+   * Loads {@link AwsClientConfig} for use in configuring SQS clients. These settings are generally
+   * only changed from defaults during localstack based tests.
+   *
+   * @param config used to load configuration values
+   * @return the aws client settings
+   */
+  private static AwsClientConfig loadSqsConfig(ConfigLoader config) {
+    return AwsClientConfig.awsBuilder()
+        .region(config.parsedOption(ENV_VAR_KEY_SQS_REGION, Region.class, Region::of).orElse(null))
+        .endpointOverride(
+            config.parsedOption(ENV_VAR_KEY_SQS_ENDPOINT, URI.class, URI::create).orElse(null))
+        .accessKey(config.stringValue(ENV_VAR_KEY_SQS_ACCESS_KEY, null))
+        .secretKey(config.stringValue(ENV_VAR_KEY_SQS_SECRET_KEY, null))
+        .build();
   }
 }
