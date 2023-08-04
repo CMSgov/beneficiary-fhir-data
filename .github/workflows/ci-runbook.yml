@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - docs/runbooks/*
+  merge_group:
 
 jobs:
   build-runbook-readme:
