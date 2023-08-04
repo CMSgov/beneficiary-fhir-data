@@ -90,7 +90,7 @@
         <hibernate.version>5.6.15.Final</hibernate.version>
         <junit.version>5.10.0</junit.version>
         <javadoc.version>3.5.0</javadoc.version>
-        <testcontainers.version>1.18.0</testcontainers.version>
+        <testcontainers.version>1.18.3</testcontainers.version>
         <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
         <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
         <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
