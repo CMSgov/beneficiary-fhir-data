@@ -139,7 +139,6 @@ public class SamhsaMatcherFromClaimTransformerTest {
         claimTransformerInterface.transform(getClaim(PartDEvent.class), false);
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
 
-    // TODO - check why inpatient and outpatient aren't included here
     return Stream.of(
         arguments(dmeClaimType, dmeEob),
         arguments(hhaClaimType, hhaEob),
