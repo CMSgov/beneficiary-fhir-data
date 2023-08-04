@@ -1,10 +1,7 @@
 name: 'CI - Java'
-on: pull_request
-
-permissions:
-  id-token: write   # This is required for requesting the AWS IAM OIDC JWT
-  contents: read    # This is required for actions/checkout
-  packages: write
+on:
+  pull_request:
+  merge_group:
 
 env:
   # workflow file matchers - workflow jobs will only run if matching files are found
@@ -78,12 +75,6 @@ jobs:
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
-      - name: 'Configure AWS credentials'
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: ci-java
-          aws-region: us-east-1
       - name: 'Checkout repo'
         uses: actions/checkout@v3
       - name: 'Setup JDK'
@@ -109,15 +100,15 @@ jobs:
           EOF
 
       - name: 'Run Maven Build on FDA Drug Utility'
-        run: mvn --batch-mode -Dmaven.build.cache.enabled=false install
+        run: mvn --threads 1C --batch-mode -Dmaven.build.cache.enabled=false install
         working-directory: ./apps/bfd-data-fda
 
       - name: 'Run Maven Build on NPI Org Utility'
-        run: mvn --batch-mode -Dmaven.build.cache.enabled=false install
+        run: mvn --threads 1C --batch-mode -Dmaven.build.cache.enabled=false install
         working-directory: ./apps/bfd-data-npi
 
       - name: 'Run Maven Build'
-        run: mvn --quiet --batch-mode -Dmaven.build.cache.enabled=false verify
+        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false verify
         working-directory: ./apps
 
       - name: Login to GitHub Container Registry

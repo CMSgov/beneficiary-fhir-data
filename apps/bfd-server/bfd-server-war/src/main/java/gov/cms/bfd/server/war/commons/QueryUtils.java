@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -59,6 +58,9 @@ public class QueryUtils {
   public static final int V_HOSPICE_HAS_DATA = (1 << HOSPICE_HAS_DATA);
   /** bitwise value denoting PARTD_EVENTS data for a beneficiary. */
   public static final int V_PART_D_HAS_DATA = (1 << PART_D_HAS_DATA);
+
+  /** preclude construction from outsiders. */
+  private QueryUtils() {}
 
   /**
    * Create a predicate for the lastUpdate field based on the passed _lastUpdated parameter range.
@@ -223,32 +225,13 @@ public class QueryUtils {
   }
 
   /**
-   * Convert an integer value into claims data available BitSet.
-   *
-   * @param maskVal integer value suitable for decomposing into a Claims BitSet.
-   * @return {@link BitSet} denoting which claims have data.
-   */
-  public static BitSet convertClaimsBitmaskValue(int maskVal) {
-    BitSet rslt = new BitSet(maskVal);
-    rslt.set(CARRIER_HAS_DATA, (maskVal & V_CARRIER_HAS_DATA) != 0);
-    rslt.set(INPATIENT_HAS_DATA, (maskVal & V_INPATIENT_HAS_DATA) != 0);
-    rslt.set(OUTPATIENT_HAS_DATA, (maskVal & V_OUTPATIENT_HAS_DATA) != 0);
-    rslt.set(SNF_HAS_DATA, (maskVal & V_SNF_HAS_DATA) != 0);
-    rslt.set(DME_HAS_DATA, (maskVal & V_DME_HAS_DATA) != 0);
-    rslt.set(HHA_HAS_DATA, (maskVal & V_HHA_HAS_DATA) != 0);
-    rslt.set(HOSPICE_HAS_DATA, (maskVal & V_HOSPICE_HAS_DATA) != 0);
-    rslt.set(PART_D_HAS_DATA, (maskVal & V_PART_D_HAS_DATA) != 0);
-    return rslt;
-  }
-
-  /**
    * Query database to determine which claim types have data for the specified beneficiary.
    *
    * @param entityManager {@link EntityManager} used to query database.
    * @param beneficiaryId used to identify the Beneficiary to check claims for.
-   * @return {@link BitSet} denoting which claims have data.
+   * @return int bitmask denoting which claims have data.
    */
-  public static BitSet hasClaimsData(EntityManager entityManager, long beneficiaryId) {
+  public static int availableClaimsData(EntityManager entityManager, long beneficiaryId) {
     /*
      * execute a database function that returns a bitwise mask value that denotes that the given
      * claim type will have data for the specified beneficiaryId. This represents fast and efficient
@@ -273,7 +256,6 @@ public class QueryUtils {
             .setParameter("beneIdValue", beneficiaryId)
             .getResultList();
 
-    Integer maskVal = (Integer) (values != null && values.size() > 0 ? values.get(0) : 0);
-    return convertClaimsBitmaskValue(maskVal);
+    return (int) (values != null && values.size() > 0 ? values.get(0) : 0);
   }
 }

@@ -1,8 +1,11 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
@@ -10,7 +13,6 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -19,30 +21,54 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
+import org.springframework.stereotype.Component;
 
-/** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
-final class DMEClaimTransformer {
+/** Transforms {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
+@Component
+final class DMEClaimTransformer implements ClaimTransformerInterface {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Instantiates a new transformer.
    *
-   * @param transformerContext the {@link TransformerContext} to use
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     DMEClaim}
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param drugCodeDisplayLookup the drug code display lookup
+   */
+  public DMEClaimTransformer(
+      MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+  }
+
+  /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
+   * @param claim the {@link DMEClaim} to use
+   * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
-    Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof DMEClaim)) {
+      throw new BadCodeMonkeyException();
+    }
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
-            .time();
-
-    if (!(claim instanceof DMEClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim(transformerContext, (DMEClaim) claim);
-
-    timer.stop();
+            .time()) {
+      eob = transformClaim((DMEClaim) claim, includeTaxNumber);
+    }
     return eob;
   }
 
@@ -50,12 +76,11 @@ final class DMEClaimTransformer {
    * Transforms a specified {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the {@link DMEClaim} to use
-   * @param transformerContext the {@link TransformerContext} to use
+   * @param includeTaxNumbers whether to include tax numbers in the transformed EOB
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      TransformerContext transformerContext, DMEClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, boolean includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -181,12 +206,11 @@ final class DMEClaimTransformer {
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
         boolean performingHasMatchingExtension =
-            (claimLine.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtils.careTeamHasMatchingExtension(
+            claimLine.getProviderParticipatingIndCode().isPresent()
+                && TransformerUtils.careTeamHasMatchingExtension(
                     performingCareTeamMember,
                     TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(claimLine.getProviderParticipatingIndCode()))
-                : false;
+                    String.valueOf(claimLine.getProviderParticipatingIndCode()));
 
         if (!performingHasMatchingExtension) {
           performingCareTeamMember.addExtension(
@@ -213,7 +237,7 @@ final class DMEClaimTransformer {
        * probably be mapped as an extra identifier with it (if/when that lands in a contained
        * Practitioner resource).
        */
-      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
+      if (includeTaxNumbers) {
         ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
             TransformerUtils.addCareTeamPractitioner(
                 eob,
@@ -281,9 +305,7 @@ final class DMEClaimTransformer {
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
           claimLine.getNationalDrugCode(),
-          transformerContext
-              .getDrugCodeDisplayLookup()
-              .retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
 
       if (!claimLine.getProviderStateCode().isEmpty()) {
         // FIXME Should this be pulled to a common mapping method?

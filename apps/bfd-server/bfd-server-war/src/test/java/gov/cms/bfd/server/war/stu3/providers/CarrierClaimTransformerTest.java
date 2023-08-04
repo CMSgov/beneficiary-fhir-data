@@ -3,8 +3,12 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -15,7 +19,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,10 +30,45 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class CarrierClaimTransformerTest {
+  /** The transformer under test. */
+  CarrierClaimTransformer carrierClaimTransformer;
+  /** The Metric Registry to use for the test. */
+  @Mock MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The NPI org lookup to use for the test. */
+  @Mock NPIOrgLookup npiOrgLookup;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  protected void setup() {
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
+        .thenReturn(Optional.of("UNKNOWN"));
+    when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
+        .thenReturn("UNKNOWN");
+
+    carrierClaimTransformer =
+        new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, npiOrgLookup);
+  }
+
   /**
    * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
    * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
@@ -50,26 +88,14 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit eobWithLastUpdated =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
-    assertMatches(claim, eobWithLastUpdated, Optional.of(true));
+    ExplanationOfBenefit eobWithLastUpdated = carrierClaimTransformer.transform(claim, true);
+
+    assertMatches(claim, eobWithLastUpdated, true);
 
     claim.setLastUpdated(Optional.empty());
-    ExplanationOfBenefit eobWithoutLastUpdated =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
-    assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
+    ExplanationOfBenefit eobWithoutLastUpdated = carrierClaimTransformer.transform(claim, true);
+
+    assertMatches(claim, eobWithoutLastUpdated, true);
   }
 
   /**
@@ -93,14 +119,8 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit eob =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
+
+    ExplanationOfBenefit eob = carrierClaimTransformer.transform(claim, true);
 
     assertEquals(2, eob.getCareTeam().size());
   }
@@ -119,19 +139,12 @@ public final class CarrierClaimTransformerTest {
     CarrierClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
-            .map(r -> (CarrierClaim) r)
+            .map(CarrierClaim.class::cast)
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        CarrierClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
-    assertMatches(claim, eob, Optional.of(true));
+    ExplanationOfBenefit eob = carrierClaimTransformer.transform(claim, true);
+    assertMatches(claim, eob, true);
   }
 
   /**
@@ -144,11 +157,11 @@ public final class CarrierClaimTransformerTest {
    * @param includedTaxNumbers whether or not to include tax numbers are expected to be included in
    *     the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code>)
+   *     false</code> )
    * @throws FHIRException (indicates test failure)
    */
   static void assertMatches(
-      CarrierClaim claim, ExplanationOfBenefit eob, Optional<Boolean> includedTaxNumbers)
+      CarrierClaim claim, ExplanationOfBenefit eob, boolean includedTaxNumbers)
       throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
@@ -214,7 +227,7 @@ public final class CarrierClaimTransformerTest {
     CareTeamComponent taxNumberCareTeamEntry =
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             claimLine1.getProviderTaxNumber(), eob.getCareTeam());
-    if (includedTaxNumbers.orElse(false)) {
+    if (includedTaxNumbers) {
       assertNotNull(taxNumberCareTeamEntry);
     } else {
       assertNull(taxNumberCareTeamEntry);

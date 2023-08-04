@@ -1,53 +1,56 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
-import gov.cms.bfd.model.rif.HHAClaim;
-import gov.cms.bfd.model.rif.HospiceClaim;
-import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
-import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
-import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -68,9 +71,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Units tests for the {@link R4ExplanationOfBenefitResourceProvider} that do not require a full
@@ -83,109 +88,111 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** The class under test. */
   R4ExplanationOfBenefitResourceProvider eobProvider;
+  /** ExecutorService for threading. */
+  ExecutorService mockExecutorService = spy(Executors.newFixedThreadPool(2));
 
   /** The mocked request details. */
   @Mock ServletRequestDetails requestDetails;
-
   /** The mocked input id value. */
   @Mock IdType eobId;
 
+  /** The mock spring application context. */
+  @Mock ApplicationContext appContext;
   /** The mocked reference param used for search by patient. */
   @Mock ReferenceParam patientParam;
-
   /** The mock metric registry. */
-  @Mock private MetricRegistry metricRegistry;
-  /** The mock samhsa matcher. */
-  @Mock private R4EobSamhsaMatcher samhsaMatcher;
+  @Mock MetricRegistry metricRegistry;
   /** The mock loaded filter manager. */
-  @Mock private LoadedFilterManager loadedFilterManager;
-
-  /** The mock entity manager for mocking database calls. */
-  @Mock private EntityManager entityManager;
+  @Mock LoadedFilterManager loadedFilterManager;
+  /** The mock executor service. */
+  @Mock ExecutorService executorService;
 
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
 
-  /** The test data bene. */
-  Beneficiary testBene;
-
   /** The mock EOB returned from a transformer. */
   @Mock ExplanationOfBenefit testEob;
+  /** The mock Bundle returned from a transformer. */
+  Bundle testBundle;
 
   /** The mock metric timer. */
   @Mock Timer mockTimer;
-
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 
-  // Mock transformers
-  /** The mock transformer for carrier claims. */
-  @Mock private CarrierClaimTransformerV2 carrierClaimTransformer;
+  /** The mock samhsa matcher. */
+  @Mock R4EobSamhsaMatcher mockSamhsaMatcher;
 
+  /** The test data bene. */
+  Beneficiary testBene;
   /** The carrier claim returned in tests. */
-  @Mock CarrierClaim testCarrierClaim;
-
-  /** The mock transformer for dme claims. */
-  @Mock private DMEClaimTransformerV2 dmeClaimTransformer;
-
+  CarrierClaim testCarrierClaim;
   /** The carrier claim returned in tests. */
-  @Mock DMEClaim testDmeClaim;
+  DMEClaim testDmeClaim;
+  /** The carrier claim returned in tests. */
+  PartDEvent testPdeClaim;
 
-  /** The mock transformer for hha claims. */
-  @Mock private HHAClaimTransformerV2 hhaClaimTransformer;
+  /** The mock entity manager for mocking database calls. */
+  @Mock EntityManager eobEntityManager;
 
-  /** The HHA claim returned in tests. */
-  @Mock HHAClaim testHhaClaim;
+  /** The transformer for carrier claims. */
+  @Mock CarrierClaimTransformerV2 mockCarrierClaimTransformer;
+  /** The mock entity manager for CarrierClaim claims. */
+  @Mock EntityManager carrierEntityManager;
 
-  /** The mock transformer for hospice claims. */
-  @Mock private HospiceClaimTransformerV2 hospiceClaimTransformer;
+  /** The transformer for dme claims. */
+  @Mock DMEClaimTransformerV2 mockDmeClaimTransformer;
+  /** The mock entity manager for DMEClaim claims. */
+  @Mock EntityManager dmeEntityManager;
 
-  /** The hospice claim returned in tests. */
-  @Mock HospiceClaim testHospiceClaim;
+  /** The transformer for Part D events. */
+  @Mock PartDEventTransformerV2 mockPdeTransformer;
+  /** The mock entity manager for Part D events. */
+  @Mock EntityManager pdeEntityManager;
 
-  /** The mock transformer for inpatient claims. */
-  @Mock private InpatientClaimTransformerV2 inpatientClaimTransformer;
-
-  /** The inpatient claim returned in tests. */
-  @Mock InpatientClaim testInpatientClaim;
-
-  /** The mock transformer for outpatient claims. */
-  @Mock private OutpatientClaimTransformerV2 outpatientClaimTransformer;
-
-  /** The outpatient claim returned in tests. */
-  @Mock OutpatientClaim testOutpatientClaim;
-
-  /** The mock transformer for part D events claims. */
-  @Mock private PartDEventTransformerV2 partDEventTransformer;
-
-  /** The PDE claim returned in tests. */
-  @Mock PartDEvent testPdeClaim;
-
-  /** The mock transformer for snf claims. */
-  @Mock private SNFClaimTransformerV2 snfClaimTransformer;
-
-  /** The SNF claim returned in tests. */
-  @Mock SNFClaim testSnfClaim;
+  /** The NPI Org lookup. */
+  @Mock NPIOrgLookup mockNpiOrgLookup;
+  /** The FDA drug display lookup. */
+  @Mock FdaDrugCodeDisplayLookup mockDrugDisplayLookup;
 
   /** The re-used valid bene id value. */
-  public static String BENE_ID = "123456789";
+  public static final String BENE_ID = "123456789";
 
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
+    setupEntities();
+
+    // metrics mocking
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    // NPI and FDA drug mocking
+    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
+    when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
+
+    when(mockCarrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(mockDmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+
+    // the EOB provider
     eobProvider =
         new R4ExplanationOfBenefitResourceProvider(
+            appContext,
             metricRegistry,
             loadedFilterManager,
-            samhsaMatcher,
-            carrierClaimTransformer,
-            dmeClaimTransformer,
-            hhaClaimTransformer,
-            hospiceClaimTransformer,
-            inpatientClaimTransformer,
-            outpatientClaimTransformer,
-            partDEventTransformer,
-            snfClaimTransformer);
+            executorService,
+            mockCarrierClaimTransformer,
+            mockDmeClaimTransformer,
+            Mockito.mock(HHAClaimTransformerV2.class),
+            Mockito.mock(HospiceClaimTransformerV2.class),
+            Mockito.mock(InpatientClaimTransformerV2.class),
+            Mockito.mock(OutpatientClaimTransformerV2.class),
+            mockPdeTransformer,
+            Mockito.mock(SNFClaimTransformerV2.class));
+
+    // entity manager mocking
+    mockEntityManager();
+
     lenient().when(eobId.getVersionIdPartAsLong()).thenReturn(null);
     when(eobId.getIdPart()).thenReturn("carrier-" + BENE_ID);
     Identifier mockId = mock(Identifier.class);
@@ -203,44 +210,50 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(testEob.getType()).thenReturn(mockConcept);
     when(patientParam.getIdPart()).thenReturn(BENE_ID);
 
-    List<Object> parsedRecords =
-        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    testBene =
-        parsedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
+    Bundle mockBundle = mock(Bundle.class);
 
-    // entity manager mocking
-    mockEntityManager();
-
-    // metrics mocking
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
-
-    // transformer mocking
-    when(carrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
-    when(inpatientClaimTransformer.transform(any())).thenReturn(testEob);
-    when(outpatientClaimTransformer.transform(any())).thenReturn(testEob);
-    when(partDEventTransformer.transform(any())).thenReturn(testEob);
-    when(hhaClaimTransformer.transform(any())).thenReturn(testEob);
-    when(snfClaimTransformer.transform(any())).thenReturn(testEob);
-    when(hospiceClaimTransformer.transform(any())).thenReturn(testEob);
-    when(dmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
-
-    setupLastUpdatedMocks();
-
-    mockHeaders();
-  }
-
-  /** Sets up the last updated mocks. */
-  private void setupLastUpdatedMocks() {
+    // Sets up the last updated mocks.
     Meta mockMeta = mock(Meta.class);
     when(mockMeta.getLastUpdated())
         .thenReturn(Date.from(Instant.now().minus(1, ChronoUnit.SECONDS)));
     when(testEob.getMeta()).thenReturn(mockMeta);
     when(loadedFilterManager.getTransactionTime()).thenReturn(Instant.now());
+
+    mockHeaders();
+  }
+
+  /** sets up claim entities. */
+  private void setupEntities() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    testBene =
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(Beneficiary.class::cast)
+            .findFirst()
+            .get();
+
+    testCarrierClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(CarrierClaim.class::cast)
+            .findFirst()
+            .get();
+
+    testDmeClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(DMEClaim.class::cast)
+            .findFirst()
+            .get();
+
+    testPdeClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof PartDEvent)
+            .map(PartDEvent.class::cast)
+            .findFirst()
+            .get();
   }
 
   /** Mocks the default header values. */
@@ -249,10 +262,12 @@ public class R4ExplanationOfBenefitResourceProviderTest {
         .thenReturn("false");
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
         .thenReturn("false");
-    // We dont use this anymore on v2, so set it to false since everything should work regardless of
+    // We dont use this anymore; set to false since everything should work regardless of
     // its value
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS))
         .thenReturn("false");
+    when(requestDetails.getHeader("startIndex")).thenReturn("-1");
+
     Map<String, List<String>> headers = new HashMap<>();
     headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, List.of("false"));
     headers.put(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, List.of("false"));
@@ -268,42 +283,116 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     Root<Beneficiary> root = mock(Root.class);
     Path mockPath = mock(Path.class);
     Subquery mockSubquery = mock(Subquery.class);
-    when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
+
+    when(eobEntityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
     doReturn(mockCriteria).when(criteriaBuilder).createQuery(any());
     when(mockCriteria.select(any())).thenReturn(mockCriteria);
     when(mockCriteria.from(any(Class.class))).thenReturn(root);
     when(root.get(isNull(SingularAttribute.class))).thenReturn(mockPath);
-    when(entityManager.createQuery(mockCriteria)).thenReturn(mockQuery);
+    when(eobEntityManager.createQuery(mockCriteria)).thenReturn(mockQuery);
+
     when(mockQuery.setHint(any(), anyBoolean())).thenReturn(mockQuery);
     when(mockQuery.setMaxResults(anyInt())).thenReturn(mockQuery);
     when(mockQuery.getSingleResult()).thenReturn(testBene);
     when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
+
     // Used for the check to see if claim data exists; needs a list of bitmask data
-    when(mockQuery.getResultList())
-        .thenReturn(
-            List.of(
-                QueryUtils.V_CARRIER_HAS_DATA
-                    + QueryUtils.V_SNF_HAS_DATA
-                    + QueryUtils.V_DME_HAS_DATA
-                    + QueryUtils.V_HHA_HAS_DATA
-                    + QueryUtils.V_HOSPICE_HAS_DATA
-                    + QueryUtils.V_INPATIENT_HAS_DATA
-                    + QueryUtils.V_OUTPATIENT_HAS_DATA
-                    + QueryUtils.V_PART_D_HAS_DATA));
+    when(mockQuery.getResultList()).thenReturn(List.of(0));
     when(mockCriteria.subquery(any())).thenReturn(mockSubquery);
     when(mockCriteria.distinct(anyBoolean())).thenReturn(mockCriteria);
     when(mockSubquery.select(any())).thenReturn(mockSubquery);
     when(mockSubquery.from(any(Class.class))).thenReturn(root);
-    when(entityManager.createNativeQuery(anyString())).thenReturn(mockQuery);
-    eobProvider.setEntityManager(entityManager);
+    when(eobEntityManager.createNativeQuery(anyString())).thenReturn(mockQuery);
+    eobProvider.setEntityManager(eobEntityManager);
+  }
+
+  /**
+   * Verifies that {@link TokenAndListParam} can be parsed correctly.
+   * R4ExplanationOfBenefitResourceProvider#parseTypeParam(TokenAndListParam)} works as expected.
+   */
+  @Test
+  void parseTypeParam() {
+    TokenAndListParam typeParamNull = null;
+    Set<ClaimTypeV2> typesForNull =
+        R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamNull);
+    assertEquals(ClaimTypeV2.values().length, typesForNull.size());
+
+    TokenAndListParam typeParamSystemWildcard =
+        new TokenAndListParam()
+            .addAnd(
+                new TokenOrListParam()
+                    .add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
+    Set<ClaimTypeV2> typesForSystemWildcard =
+        R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSystemWildcard);
+    assertEquals(ClaimTypeV2.values().length, typesForSystemWildcard.size());
+
+    TokenAndListParam typeParamSingle =
+        new TokenAndListParam()
+            .addAnd(
+                new TokenOrListParam(
+                    TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimTypeV2.CARRIER.name()));
+    Set<ClaimTypeV2> typesForSingle =
+        R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingle);
+    assertEquals(1, typesForSingle.size());
+    assertTrue(typesForSingle.contains(ClaimTypeV2.CARRIER));
+
+    TokenAndListParam typeParamSingleNullSystem =
+        new TokenAndListParam().addAnd(new TokenOrListParam(null, ClaimTypeV2.CARRIER.name()));
+    Set<ClaimTypeV2> typesForSingleNullSystem =
+        R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleNullSystem);
+    assertEquals(1, typesForSingleNullSystem.size());
+    assertTrue(typesForSingleNullSystem.contains(ClaimTypeV2.CARRIER));
+
+    TokenAndListParam typeParamSingleInvalidSystem =
+        new TokenAndListParam().addAnd(new TokenOrListParam("foo", ClaimTypeV2.CARRIER.name()));
+    Set<ClaimTypeV2> typesForSingleInvalidSystem =
+        R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleInvalidSystem);
+    assertEquals(0, typesForSingleInvalidSystem.size());
+
+    TokenAndListParam typeParamSingleInvalidCode =
+        new TokenAndListParam().addAnd(new TokenOrListParam(null, "foo"));
+    Set<ClaimTypeV2> typesForSingleInvalidCode =
+        R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleInvalidCode);
+    assertEquals(0, typesForSingleInvalidCode.size());
+
+    TokenAndListParam typeParamTwoEntries =
+        new TokenAndListParam()
+            .addAnd(new TokenOrListParam(null, ClaimTypeV2.CARRIER.name(), ClaimTypeV2.DME.name()))
+            .addAnd(new TokenOrListParam(null, ClaimTypeV2.CARRIER.name()));
+    Set<ClaimTypeV2> typesForTwoEntries =
+        R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamTwoEntries);
+    assertEquals(1, typesForTwoEntries.size());
+    assertTrue(typesForTwoEntries.contains(ClaimTypeV2.CARRIER));
+  }
+
+  /**
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#parseTypeParam(TokenAndListParam)}
+   * throws an exception when query param modifiers are used, which are unsupported.
+   */
+  @Test
+  void parseTypeParam_modifiers() {
+    TokenAndListParam typeParam =
+        new TokenAndListParam()
+            .addAnd(
+                new TokenOrListParam()
+                    .add(
+                        new TokenParam(
+                                TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE,
+                                ClaimTypeV2.CARRIER.name())
+                            .setModifier(TokenParamModifier.ABOVE)));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParam);
+        });
   }
 
   /**
    * Verifies that {@link R4ExplanationOfBenefitResourceProvider#read} throws an exception for an
-   * {@link org.hl7.fhir.r4.model.IdType} that has an invalidly formatted eobId parameter.
+   * {@link IdType} that has an invalidly formatted eobId parameter.
    */
   @Test
-  public void testEobReadWhereInvalidIdExpectException() {
+  void testEobReadWhereInvalidIdExpectException() {
     when(eobId.getIdPart()).thenReturn("1234");
 
     // Parameter is invalid, should throw exception
@@ -316,10 +405,10 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /**
    * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
-   * for an {@link org.hl7.fhir.r4.model.IdType} that has a null eobId parameter.
+   * for an {@link IdType} that has a null eobId parameter.
    */
   @Test
-  public void testEobReadWhereNullIdExpectException() {
+  void testEobReadWhereNullIdExpectException() {
     when(eobId.getIdPart()).thenReturn(null);
 
     InvalidRequestException exception =
@@ -329,10 +418,10 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /**
    * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
-   * for an {@link org.hl7.fhir.r4.model.IdType} that has a missing eobId parameter.
+   * for an {@link IdType} that has a missing eobId parameter.
    */
   @Test
-  public void testEobReadWhereEmptyIdExpectException() {
+  void testEobReadWhereEmptyIdExpectException() {
     when(eobId.getIdPart()).thenReturn("");
 
     InvalidRequestException exception =
@@ -342,11 +431,11 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /**
    * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
-   * for an {@link org.hl7.fhir.r4.model.IdType} that has a version supplied with the eobId
-   * parameter, as our read requests do not support versioned requests.
+   * for an {@link IdType} that has a version supplied with the eobId parameter, as our read
+   * requests do not support versioned requests.
    */
   @Test
-  public void testEobReadWhereVersionedIdExpectException() {
+  void testEobReadWhereVersionedIdExpectException() {
     when(eobId.getVersionIdPartAsLong()).thenReturn(1234L);
 
     InvalidRequestException exception =
@@ -360,7 +449,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
    * thrown.
    */
   @Test
-  public void testReadWhenNoClaimsFoundExpectException() {
+  void testReadWhenNoClaimsFoundExpectException() {
     // mock no result when making JPA call
     when(mockQuery.getSingleResult()).thenThrow(new NoResultException());
 
@@ -368,42 +457,56 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} works as expected for an {@link
-   * ExplanationOfBenefit} using a negative ID, which is used for synthetic data and should pass the
-   * id regex.
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#read} works as expected for an
+   * {@link ExplanationOfBenefit} using a negative ID, which is used for synthetic data and should
+   * pass the id regex.
    */
   @Test
-  public void testReadWhenNegativeIdExpectEobReturned() {
+  void testReadWhenNegativeIdExpectEobReturned() {
     when(eobId.getIdPart()).thenReturn("pde--123456789");
-
+    when(mockQuery.getSingleResult()).thenReturn(testPdeClaim);
+    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
     ExplanationOfBenefit eob = eobProvider.read(eobId, requestDetails);
-
-    assertEquals(testEob, eob);
+    assertNotNull(eob);
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} throws an exception when the
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#read} throws an exception when the
    * search id has an invalid id parameter.
    */
   @Test
-  public void testReadWhenInvalidIdExpectException() {
+  void testReadWhenInvalidIdExpectException() {
     when(eobId.getIdPart()).thenReturn("-1?234");
-
     assertThrows(InvalidRequestException.class, () -> eobProvider.read(eobId, requestDetails));
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} does not add paging
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
+   * when the search id has an invalid id parameter.
+   */
+  @Test
+  void testFindByPatientWhenInvalidIdExpectException() {
+    when(patientParam.getIdPart()).thenReturn("-1?234");
+
+    assertThrows(
+        NumberFormatException.class,
+        () ->
+            eobProvider.findByPatient(
+                patientParam, null, null, null, null, null, null, requestDetails));
+  }
+
+  /**
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} does not add paging
    * values when no paging is requested.
    */
   @Test
-  public void testFindByPatientWithPageSizeNotProvidedExpectNoPaging() {
+  void testFindByPatientWithPageSizeNotProvidedExpectNoPaging() {
+    when(mockQuery.getResultList()).thenReturn(List.of(0));
 
     Bundle response =
         eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
-
     assertNull(response.getLink(Constants.LINK_NEXT));
     assertNull(response.getLink(Constants.LINK_PREVIOUS));
     assertNull(response.getLink(Constants.LINK_FIRST));
@@ -411,12 +514,12 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} throws an exception
    * when using negative values for page size and start index parameters. This test expects to
    * receive a InvalidRequestException, as negative values should result in an HTTP 400.
    */
   @Test
-  public void testFindByPatientWithNegativeStartIndexExpectException() {
+  void testFindByPatientWithNegativeStartIndexExpectException() {
     // Set paging params to page size 0
     Map<String, String[]> params = new HashMap<>();
     params.put("startIndex", new String[] {"-1"});
@@ -430,11 +533,11 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Tests that {@link ExplanationOfBenefitResourceProvider#findByPatient} returns a bundle of size
-   * 0 if no claims are found.
+   * Tests that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} returns a bundle of
+   * size 0 if no claims are found.
    */
   @Test
-  public void testFindByPatientWhenNoClaimsFoundExpectEmptyBundle() {
+  void testFindByPatientWhenNoClaimsFoundExpectEmptyBundle() {
     // mock no result when making JPA call
     when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
     when(mockQuery.getResultList()).thenReturn(List.of(0));
@@ -446,53 +549,129 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} with <code>
-   * excludeSAMHSA=true</code> calls the samhsa matcher to determine if items should be removed.
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#parseTypeParam} ignores an invalid
+   * or unspecified claim type.
    */
   @Test
-  public void testFindByPatientWhenExcludeSamshaTrueExpectFilterMatcherCalled() {
-
-    // the bitmask determines which claims get returned for the test, so return three
-    when(mockQuery.getResultList())
-        .thenReturn(
-            List.of(
-                QueryUtils.V_CARRIER_HAS_DATA
-                    + QueryUtils.V_SNF_HAS_DATA
-                    + QueryUtils.V_DME_HAS_DATA));
-
-    eobProvider.findByPatient(patientParam, null, null, "true", null, null, null, requestDetails);
-
-    // we returned three claims, so we should see three samhsa filter tests
-    verify(samhsaMatcher, times(3)).test(testEob);
+  void testFindByPatientIgnoresInvalidClaimTypeV2() {
+    TokenAndListParam listParam = createClaimsTokenAndListParam(Arrays.asList("carriers", "dme"));
+    Set<ClaimTypeV2> result = R4ExplanationOfBenefitResourceProvider.parseTypeParam(listParam);
+    assertEquals(1, result.size());
+    assertFalse(result.contains(ClaimTypeV2.CARRIER)); // ignored carriers, should be carrier
+    assertTrue(result.contains(ClaimTypeV2.DME));
+    assertFalse(result.contains(ClaimTypeV2.SNF));
   }
 
   /**
-   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} with <code>
-   * excludeSAMHSA=false</code> does not call the filter for SAMHSA-related claims.
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#parseTypeParam} supports null claim
+   * type and returns all claim types in the EnumSet.
    */
   @Test
-  public void testFindByPatientWhenExcludeSamshaFalseExpectNoFiltering() {
-    eobProvider.findByPatient(patientParam, null, null, "false", null, null, null, requestDetails);
-
-    verify(samhsaMatcher, never()).test(testEob);
+  void testFindByPatientSupportsNullRequestedClaimTypeV2() {
+    Set<ClaimTypeV2> result = R4ExplanationOfBenefitResourceProvider.parseTypeParam(null);
+    assertEquals(8, result.size());
+    assertTrue(result.contains(ClaimTypeV2.CARRIER));
+    assertTrue(result.contains(ClaimTypeV2.DME));
+    assertTrue(result.contains(ClaimTypeV2.SNF));
+    assertTrue(result.contains(ClaimTypeV2.PDE));
+    assertTrue(result.contains(ClaimTypeV2.HHA));
+    assertTrue(result.contains(ClaimTypeV2.HOSPICE));
+    assertTrue(result.contains(ClaimTypeV2.INPATIENT));
+    assertTrue(result.contains(ClaimTypeV2.OUTPATIENT));
   }
 
   /**
-   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} passes the
-   * includeTaxNumbers value to the transformer for each claim type that uses the value (currently
-   * only carrier and DME).
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} supports wildcard
+   * claim type; returns empty Bundle since we return 0 for claims that have data in db.
    */
   @Test
-  public void testFindByPatientIncludeTaxNumberPassedToTransformer() {
+  void testFindByPatientSupportsWildcardClaimTypeV2() {
+    TokenAndListParam listParam =
+        createClaimsTokenAndListParam(Arrays.asList("carriers", "dme", "*"));
 
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn("true");
-    when(requestDetails.getHeaders(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn(List.of("true"));
+    Bundle response =
+        eobProvider.findByPatient(
+            patientParam, listParam, null, null, null, null, null, requestDetails);
 
-    eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
+    assertNotNull(response);
+    assertEquals(0, response.getTotal());
+  }
 
-    verify(carrierClaimTransformer, times(1)).transform(any(), eq(true));
-    verify(dmeClaimTransformer, times(1)).transform(any(), eq(true));
+  /**
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#findByPatient} supports null claim
+   * type; returns empty Bundle since we return 0 for claims that have data in db.
+   */
+  @Test
+  void testFindByPatientSupportsNullClaimTypeV2() {
+    Bundle response =
+        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
+
+    assertNotNull(response);
+    assertEquals(0, response.getTotal());
+  }
+
+  /**
+   * Sets up mock query of a given claim type.
+   *
+   * @param em the {@link EntityManager} claim data to mock.
+   * @param claimType the {@link ClaimTypeV2} claim data to mock.
+   * @param clmMockCriteria the {@link CriteriaQuery} claim query criteria being mocked.
+   * @param clmRoot the {@link Root} claim root being mocked.
+   */
+  private void setupClaimEntity(
+      EntityManager em, ClaimTypeV2 claimType, CriteriaQuery clmMockCriteria, Root clmRoot) {
+    CriteriaBuilder clmCriteriaBuilder = mock(CriteriaBuilder.class);
+    Path clmMockPath = mock(Path.class);
+    TypedQuery clmMockQuery = mock(TypedQuery.class);
+
+    when(em.getCriteriaBuilder()).thenReturn(clmCriteriaBuilder);
+    doReturn(clmMockCriteria).when(clmCriteriaBuilder).createQuery(any());
+    when(clmMockCriteria.select(any())).thenReturn(clmMockCriteria);
+    when(clmMockCriteria.from(any(Class.class))).thenReturn(clmRoot);
+    when(clmRoot.get(isNull(SingularAttribute.class))).thenReturn(clmMockPath);
+    when(em.createQuery(clmMockCriteria)).thenReturn(clmMockQuery);
+    when(clmMockQuery.setHint(any(), anyBoolean())).thenReturn(clmMockQuery);
+    when(clmMockQuery.setMaxResults(anyInt())).thenReturn(clmMockQuery);
+    when(clmMockQuery.setParameter(anyString(), any())).thenReturn(clmMockQuery);
+    when(clmMockCriteria.distinct(anyBoolean())).thenReturn(clmMockCriteria);
+
+    List list = null;
+    switch (claimType) {
+      case CARRIER:
+        list = new ArrayList<CarrierClaim>();
+        list.add(testCarrierClaim);
+        break;
+      case DME:
+        list = new ArrayList<DMEClaim>();
+        list.add(testDmeClaim);
+        break;
+      case PDE:
+        list = new ArrayList<PartDEvent>();
+        list.add(testPdeClaim);
+        break;
+      default:
+        break;
+    }
+    when(clmMockQuery.getResultList()).thenReturn(list);
+  }
+
+  /**
+   * Helper routine to build a FHIR {@link TokenAndListParam}.
+   *
+   * @param claimsList a {@link List} of claim {@link String} identifiers
+   * @return a {@link TokenAndListParam}
+   */
+  private TokenAndListParam createClaimsTokenAndListParam(List<String> claimsList) {
+    TokenAndListParam listParam = new TokenAndListParam();
+    if (claimsList.isEmpty()) {
+      return listParam;
+    }
+    TokenOrListParam orParam =
+        new TokenOrListParam(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE);
+    for (String val : claimsList) {
+      orParam.add(val.toLowerCase());
+    }
+    listParam.addAnd(orParam);
+    return listParam;
   }
 }

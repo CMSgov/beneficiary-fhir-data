@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -21,11 +20,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
-import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
@@ -34,29 +31,26 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -64,6 +58,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -76,24 +71,38 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
 
+  /** The entity manager. */
+  private EntityManager entityManager;
+  /** The metric registry. */
+  private final MetricRegistry metricRegistry;
+  /** The loaded filter manager. */
+  private final LoadedFilterManager loadedFilterManager;
+  /** The ExecutorService entity. */
+  private final ExecutorService executorService;
+  /** The mock spring application context. */
+  private final ApplicationContext appContext;
+  /** The transformer for carrier claims. */
+  private final CarrierClaimTransformer carrierClaimTransformer;
+  /** The transformer for dme claims. */
+  private final DMEClaimTransformer dmeClaimTransformer;
+  /** The transformer for hha claims. */
+  private final HHAClaimTransformer hhaClaimTransformer;
+  /** The transformer for hospice claims. */
+  private final HospiceClaimTransformer hospiceClaimTransformer;
+  /** The transformer for inpatient claims. */
+  private final InpatientClaimTransformer inpatientClaimTransformer;
+  /** The transformer for outpatient claims. */
+  private final OutpatientClaimTransformer outpatientClaimTransformer;
+  /** The transformer for part D events claims. */
+  private final PartDEventTransformer partDEventTransformer;
+  /** The transformer for snf claims. */
+  private final SNFClaimTransformer snfClaimTransformer;
+
   /**
    * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
   private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Digit}+)");
-
-  /** The entity manager. */
-  private EntityManager entityManager;
-  /** The metric registry. */
-  private final MetricRegistry metricRegistry;
-  /** The samhsa matcher. */
-  private final Stu3EobSamhsaMatcher samhsaMatcher;
-  /** The loaded filter manager. */
-  private final LoadedFilterManager loadedFilterManager;
-  /** The drug code display lookup entity. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-  /** The npi org lookup entity. */
-  private final NPIOrgLookup npiOrgLookup;
 
   /**
    * Instantiates a new {@link ExplanationOfBenefitResourceProvider}.
@@ -101,28 +110,44 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * <p>Spring will wire this class during the initial component scan, so this constructor should
    * only be explicitly called by tests.
    *
+   * @param appContext the spring application context
    * @param metricRegistry the metric registry bean
    * @param loadedFilterManager the loaded filter manager bean
-   * @param samhsaMatcher the samhsa matcher bean
-   * @param drugCodeDisplayLookup the drug code display lookup bean
-   * @param npiOrgLookup the npi org lookup bean
+   * @param executorService thread pool for running queries in parallel
+   * @param carrierClaimTransformer the carrier claim transformer
+   * @param dmeClaimTransformer the dme claim transformer
+   * @param hhaClaimTransformer the hha claim transformer
+   * @param hospiceClaimTransformer the hospice claim transformer
+   * @param inpatientClaimTransformer the inpatient claim transformer
+   * @param outpatientClaimTransformer the outpatient claim transformer
+   * @param partDEventTransformer the part d event transformer
+   * @param snfClaimTransformer the snf claim transformer
    */
   public ExplanationOfBenefitResourceProvider(
+      ApplicationContext appContext,
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
-      Stu3EobSamhsaMatcher samhsaMatcher,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
-    requireNonNull(metricRegistry);
-    requireNonNull(loadedFilterManager);
-    requireNonNull(samhsaMatcher);
-    requireNonNull(drugCodeDisplayLookup);
-    requireNonNull(npiOrgLookup);
-    this.metricRegistry = metricRegistry;
-    this.loadedFilterManager = loadedFilterManager;
-    this.samhsaMatcher = samhsaMatcher;
-    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
-    this.npiOrgLookup = npiOrgLookup;
+      ExecutorService executorService,
+      CarrierClaimTransformer carrierClaimTransformer,
+      DMEClaimTransformer dmeClaimTransformer,
+      HHAClaimTransformer hhaClaimTransformer,
+      HospiceClaimTransformer hospiceClaimTransformer,
+      InpatientClaimTransformer inpatientClaimTransformer,
+      OutpatientClaimTransformer outpatientClaimTransformer,
+      PartDEventTransformer partDEventTransformer,
+      SNFClaimTransformer snfClaimTransformer) {
+    this.appContext = requireNonNull(appContext);
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.loadedFilterManager = requireNonNull(loadedFilterManager);
+    this.executorService = requireNonNull(executorService);
+    this.carrierClaimTransformer = requireNonNull(carrierClaimTransformer);
+    this.dmeClaimTransformer = requireNonNull(dmeClaimTransformer);
+    this.hhaClaimTransformer = requireNonNull(hhaClaimTransformer);
+    this.hospiceClaimTransformer = requireNonNull(hospiceClaimTransformer);
+    this.inpatientClaimTransformer = requireNonNull(inpatientClaimTransformer);
+    this.outpatientClaimTransformer = requireNonNull(outpatientClaimTransformer);
+    this.partDEventTransformer = requireNonNull(partDEventTransformer);
+    this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
   }
 
   /**
@@ -180,12 +205,10 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     }
     String eobIdTypeText = eobIdMatcher.group(1);
     Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
-
-    Boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
-
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
+    ClaimType claimType = eobIdType.get();
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     String eobIdClaimIdText = eobIdMatcher.group(2);
-
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
     operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption("by", "id");
@@ -197,8 +220,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     Root root = criteria.from(entityClass);
     eobIdType.get().getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
     criteria.select(root);
-    criteria.where(
-        builder.equal(root.get(eobIdType.get().getEntityIdAttribute()), eobIdClaimIdText));
+    criteria.where(builder.equal(root.get(claimType.getEntityIdAttribute()), eobIdClaimIdText));
 
     Object claimEntity = null;
     Long eobByIdQueryNanoSeconds = null;
@@ -208,13 +230,11 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
             .time();
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
-
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(1);
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(0);
-
       throw new ResourceNotFoundException(eobId);
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
@@ -222,17 +242,8 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
 
-    ExplanationOfBenefit eob =
-        eobIdType
-            .get()
-            .getTransformer()
-            .transform(
-                new TransformerContext(
-                    metricRegistry,
-                    Optional.of(includeTaxNumbers),
-                    drugCodeDisplayLookup,
-                    npiOrgLookup),
-                claimEntity);
+    ClaimTransformerInterface transformer = deriveTransformer(eobIdType.get());
+    ExplanationOfBenefit eob = transformer.transform(claimEntity, includeTaxNumbers);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -314,20 +325,18 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
      * contained within requestDetails and parsed out along with other parameters
      * later.
      */
-
-    Long beneficiaryId = Long.parseLong(patient.getIdPart());
-    Set<ClaimType> claimTypes = parseTypeParam(type);
-    Boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
-
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
-
+    Long beneficiaryId = Long.parseLong(patient.getIdPart());
+    Set<ClaimType> claimTypesRequested = parseTypeParam(type);
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
+    boolean filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");
     operation.setOption(
         "types",
-        (claimTypes.size() == ClaimType.values().length)
+        (claimTypesRequested.size() == ClaimType.values().length)
             ? "*"
-            : claimTypes.stream()
+            : claimTypesRequested.stream()
                 .sorted(Comparator.comparing(ClaimType::name))
                 .collect(Collectors.toList())
                 .toString());
@@ -339,8 +348,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
         "service-date", Boolean.toString(serviceDate != null && !serviceDate.isEmpty()));
     operation.publishOperationName();
 
-    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
-
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
       // Add bene_id to MDC logs when _lastUpdated filter is in effect
@@ -348,101 +355,137 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(0);
 
-      return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
+      return TransformerUtils.createBundle(
+          paging, new ArrayList<IBaseResource>(), loadedFilterManager.getTransactionTime());
     }
 
     // See if we have claims data for the beneficiary.
-    BitSet bitSet = QueryUtils.hasClaimsData(entityManager, beneficiaryId);
+    int claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
+    Bundle bundle = null;
+    if (claimTypesThatHaveData > 0) {
+      try {
+        bundle =
+            processClaimsMask(
+                claimTypesThatHaveData,
+                claimTypesRequested,
+                beneficiaryId,
+                paging,
+                Optional.ofNullable(lastUpdated),
+                Optional.ofNullable(serviceDate),
+                filterSamhsa,
+                includeTaxNumbers);
+      } catch (Exception e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+    }
+    if (bundle == null) {
+      LoggingUtils.logBeneIdToMdc(beneficiaryId);
+      LoggingUtils.logResourceCountToMdc(0);
+      bundle =
+          TransformerUtils.createBundle(
+              paging, new ArrayList<IBaseResource>(), loadedFilterManager.getTransactionTime());
+    }
+    return bundle;
+  }
+
+  /**
+   * Process the available claims mask value denoting which claims to process in parallel.
+   *
+   * @param claimTypesThatHaveData an {@link Integer} denoting the claim types to process.
+   * @param claimTypesRequested a {@link Set} of {@link ClaimType} denoting requested claim types.
+   * @param beneficiaryId a {@link Long} patient bene_id value.
+   * @param paging a {@link OffsetLinkBuilder} for the startIndex (or offset) when using pagination.
+   * @param lastUpdated a {@link DateRangeParam} denoting inclusion of lastUpdated field.
+   * @param serviceDate a {@link DateRangeParam} specifying date range for the {@link
+   *     ExplanationOfBenefit}s that completed.
+   * @param excludeSamhsa optional {@link Boolean} denoting use of {@link Stu3EobSamhsaMatcher} *
+   *     filtering of all SAMHSA-related claims from the results.
+   * @param includeTaxNumbers an {@link Optional} boolean denoting includsio/exclusion of tax
+   *     numbers in the response,
+   * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
+   *     matching resources, or may also be empty.
+   * @throws InterruptedException when thread processing task is interrupted.
+   * @throws ExecutionException when when executor fails to create thread.
+   * @throws RuntimeException when task encounters a generic error/exception.
+   */
+  @VisibleForTesting
+  public Bundle processClaimsMask(
+      int claimTypesThatHaveData,
+      Set<ClaimType> claimTypesRequested,
+      long beneficiaryId,
+      OffsetLinkBuilder paging,
+      Optional<DateRangeParam> lastUpdated,
+      Optional<DateRangeParam> serviceDate,
+      boolean excludeSamhsa,
+      boolean includeTaxNumbers)
+      throws InterruptedException, RuntimeException, ExecutionException {
+
+    EnumSet<ClaimType> claimsToProcess =
+        TransformerUtils.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
+
     LOGGER.debug(
-        String.format("BitSet for V1 claims, bene_id %d: %s", beneficiaryId, bitSet.toString()));
+        String.format("EnumSet for claims, bene_id %d: %s", beneficiaryId, claimsToProcess));
+
+    // OK to return null, since fallback will create bundle and log things.
+    if (claimsToProcess.isEmpty()) {
+      return null;
+    }
+    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    if (claimTypes.contains(ClaimType.CARRIER) && bitSet.get(QueryUtils.CARRIER_HAS_DATA)) {
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.CARRIER,
-              findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
-    }
-    if (claimTypes.contains(ClaimType.DME) && bitSet.get(QueryUtils.DME_HAS_DATA)) {
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.DME,
-              findClaimTypeByPatient(ClaimType.DME, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
-    }
-    if (claimTypes.contains(ClaimType.HHA) && bitSet.get(QueryUtils.HHA_HAS_DATA)) {
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.HHA,
-              findClaimTypeByPatient(ClaimType.HHA, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
-    }
-    if (claimTypes.contains(ClaimType.HOSPICE) && bitSet.get(QueryUtils.HOSPICE_HAS_DATA)) {
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.HOSPICE,
-              findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
-    }
-    if (claimTypes.contains(ClaimType.INPATIENT) && bitSet.get(QueryUtils.INPATIENT_HAS_DATA)) {
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.INPATIENT,
-              findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
-    }
-    if (claimTypes.contains(ClaimType.OUTPATIENT) && bitSet.get(QueryUtils.OUTPATIENT_HAS_DATA)) {
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.OUTPATIENT,
-              findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
-    }
-    if (claimTypes.contains(ClaimType.PDE) && bitSet.get(QueryUtils.PART_D_HAS_DATA)) {
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.PDE,
-              findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
-    }
-    if (claimTypes.contains(ClaimType.SNF) && bitSet.get(QueryUtils.SNF_HAS_DATA)) {
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.SNF,
-              findClaimTypeByPatient(ClaimType.SNF, beneficiaryId, lastUpdated, serviceDate),
-              Optional.of(includeTaxNumbers),
-              drugCodeDisplayLookup,
-              npiOrgLookup));
+    List<Callable<PatientClaimsEobTaskTransformer>> callableTasks =
+        new ArrayList<>(claimsToProcess.size());
+    /*
+     * We create the task bean by directly invoking the applications Spring
+     * ApplicationContext to provide the bean; this is necessary as the tasks
+     * will run concurrently and each task will need its own instance of an
+     * {@link EntityManager}.
+     */
+    claimsToProcess.forEach(
+        claimType -> {
+          PatientClaimsEobTaskTransformer task =
+              appContext.getBean(PatientClaimsEobTaskTransformer.class);
+
+          task.setupTaskParams(
+              deriveTransformer(claimType),
+              claimType,
+              beneficiaryId,
+              lastUpdated,
+              serviceDate,
+              excludeSamhsa);
+
+          task.setIncludeTaxNumbers(includeTaxNumbers);
+          callableTasks.add(task);
+        });
+
+    List<Future<PatientClaimsEobTaskTransformer>> futures;
+    try {
+      futures = executorService.invokeAll(callableTasks);
+    } catch (InterruptedException e) {
+      throw e;
     }
 
-    if (Boolean.parseBoolean(excludeSamhsa)) {
-      filterSamhsa(eobs);
+    for (Future<PatientClaimsEobTaskTransformer> future : futures) {
+      try {
+        PatientClaimsEobTaskTransformer taskResult = future.get();
+        if (taskResult.ranSuccessfully()) {
+          eobs.addAll(taskResult.fetchEOBs());
+        } else {
+          Throwable taskError = taskResult.getFailure().get();
+          throw new RuntimeException(taskError);
+        }
+      } catch (InterruptedException | ExecutionException e) {
+        throw e;
+      }
     }
-
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
     LoggingUtils.logBeneIdToMdc(beneficiaryId);
-
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
 
@@ -474,169 +517,32 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   }
 
   /**
-   * Find claim type by patient list.
+   * Return the EOB transfromer based on claim type.
    *
-   * @param <T> the type parameter
-   * @param claimType the {@link ClaimType} to find
-   * @param patientId the {@link Beneficiary#getBeneficiaryId()} to filter by
-   * @param lastUpdated the update time to filter by
-   * @param serviceDate the service date
-   * @return the matching claim/event entities
+   * @param eobIdType the eob claim type
+   * @return the transformed explanation of benefit
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  @Trace
-  private <T> List<T> findClaimTypeByPatient(
-      ClaimType claimType, Long patientId, DateRangeParam lastUpdated, DateRangeParam serviceDate) {
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery criteria = builder.createQuery((Class) claimType.getEntityClass());
-    Root root = criteria.from(claimType.getEntityClass());
-    claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
-    criteria.select(root).distinct(true);
-
-    // Search for a beneficiary's records. Use lastUpdated if present
-    Predicate wherePredicate =
-        builder.equal(root.get(claimType.getEntityBeneficiaryIdAttribute()), patientId);
-    if (lastUpdated != null && !lastUpdated.isEmpty()) {
-      Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdated);
-      wherePredicate = builder.and(wherePredicate, predicate);
+  @VisibleForTesting
+  public ClaimTransformerInterface deriveTransformer(ClaimType eobIdType) {
+    switch (eobIdType) {
+      case CARRIER:
+        return carrierClaimTransformer;
+      case DME:
+        return dmeClaimTransformer;
+      case HHA:
+        return hhaClaimTransformer;
+      case HOSPICE:
+        return hospiceClaimTransformer;
+      case INPATIENT:
+        return inpatientClaimTransformer;
+      case OUTPATIENT:
+        return outpatientClaimTransformer;
+      case PDE:
+        return partDEventTransformer;
+      case SNF:
+        return snfClaimTransformer;
     }
-    criteria.where(wherePredicate);
-
-    List<T> claimEntities = null;
-    Long eobsByBeneIdQueryNanoSeconds = null;
-    Timer.Context timerEobQuery =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    metricRegistry.getClass().getSimpleName(),
-                    "query",
-                    "eobs_by_bene_id",
-                    claimType.name().toLowerCase()))
-            .time();
-    try {
-      claimEntities = entityManager.createQuery(criteria).getResultList();
-    } finally {
-      eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
-      TransformerUtils.recordQueryInMdc(
-          String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
-          eobsByBeneIdQueryNanoSeconds,
-          claimEntities == null ? 0 : claimEntities.size());
-    }
-
-    if (claimEntities != null && serviceDate != null && !serviceDate.isEmpty()) {
-      final Instant lowerBound =
-          serviceDate.getLowerBoundAsInstant() != null
-              ? serviceDate.getLowerBoundAsInstant().toInstant()
-              : null;
-      final Instant upperBound =
-          serviceDate.getUpperBoundAsInstant() != null
-              ? serviceDate.getUpperBoundAsInstant().toInstant()
-              : null;
-      final java.util.function.Predicate<LocalDate> lowerBoundCheck =
-          lowerBound == null
-              ? (date) -> true
-              : (date) ->
-                  compareLocalDate(
-                      date,
-                      lowerBound.atZone(ZoneId.systemDefault()).toLocalDate(),
-                      serviceDate.getLowerBound().getPrefix());
-      final java.util.function.Predicate<LocalDate> upperBoundCheck =
-          upperBound == null
-              ? (date) -> true
-              : (date) ->
-                  compareLocalDate(
-                      date,
-                      upperBound.atZone(ZoneId.systemDefault()).toLocalDate(),
-                      serviceDate.getUpperBound().getPrefix());
-      return claimEntities.stream()
-          .filter(
-              entity ->
-                  lowerBoundCheck.test(claimType.getServiceEndAttributeFunction().apply(entity))
-                      && upperBoundCheck.test(
-                          claimType.getServiceEndAttributeFunction().apply(entity)))
-          .collect(Collectors.toList());
-    }
-
-    return claimEntities;
-  }
-
-  /**
-   * Transform a list of claims to a list of {@link org.hl7.fhir.r4.model.ExplanationOfBenefit}
-   * objects.
-   *
-   * <p>TODO: This should likely not exist in the provider class and be moved somewhere else like a
-   * transformer class
-   *
-   * @param claimType the {@link ClaimType} being transformed
-   * @param claims the claims/events to transform
-   * @param includeTaxNumbers whether to include tax numbers in the response
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
-   * @return the transformed {@link ExplanationOfBenefit} instances, one for each specified
-   *     claim/event
-   */
-  @Trace
-  private List<ExplanationOfBenefit> transformToEobs(
-      ClaimType claimType,
-      List<?> claims,
-      Optional<Boolean> includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
-    return claims.stream()
-        .map(
-            c ->
-                claimType
-                    .getTransformer()
-                    .transform(
-                        new TransformerContext(
-                            metricRegistry, includeTaxNumbers, drugCodeDisplayLookup, npiOrgLookup),
-                        c))
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Removes all SAMHSA-related claims from the specified {@link List} of {@link
-   * ExplanationOfBenefit} resources.
-   *
-   * @param eobs the {@link List} of {@link ExplanationOfBenefit} resources (i.e. claims) to filter
-   */
-  private void filterSamhsa(List<IBaseResource> eobs) {
-    ListIterator<IBaseResource> eobsIter = eobs.listIterator();
-    while (eobsIter.hasNext()) {
-      ExplanationOfBenefit eob = (ExplanationOfBenefit) eobsIter.next();
-      if (samhsaMatcher.test(eob)) eobsIter.remove();
-    }
-  }
-
-  /**
-   * Compares {@link LocalDate} a against {@link LocalDate} using the supplied {@link
-   * ParamPrefixEnum}.
-   *
-   * @param a the first item to compare
-   * @param b the second item to compare
-   * @param prefix prefix to use. Supported: {@link ParamPrefixEnum#GREATERTHAN_OR_EQUALS}, {@link
-   *     ParamPrefixEnum#GREATERTHAN}, {@link ParamPrefixEnum#LESSTHAN_OR_EQUALS}, {@link
-   *     ParamPrefixEnum#LESSTHAN}
-   * @return true if the comparison between a and b returned true
-   * @throws IllegalArgumentException if caller supplied an unsupported prefix
-   */
-  private boolean compareLocalDate(
-      @Nullable LocalDate a, @Nullable LocalDate b, ParamPrefixEnum prefix) {
-    if (a == null || b == null) {
-      return false;
-    }
-    switch (prefix) {
-      case GREATERTHAN_OR_EQUALS:
-        return !a.isBefore(b);
-      case GREATERTHAN:
-        return a.isAfter(b);
-      case LESSTHAN_OR_EQUALS:
-        return !a.isAfter(b);
-      case LESSTHAN:
-        return a.isBefore(b);
-      default:
-        throw new InvalidRequestException(String.format("Unsupported prefix supplied: %s", prefix));
-    }
+    return null;
   }
 
   /**
@@ -646,13 +552,14 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    * @return The {@link ClaimType}s to be searched, as computed from the specified "type" {@link
    *     TokenAndListParam} search param
    */
-  static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
-    if (type == null)
+  public static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
+    if (type == null) {
       type =
           new TokenAndListParam()
               .addAnd(
                   new TokenOrListParam()
                       .add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
+    }
 
     /*
      * This logic kinda' stinks, but HAPI forces us to handle some odd query
@@ -668,7 +575,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       Set<ClaimType> claimTypesInner = new HashSet<ClaimType>();
       for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
         if (codingToken.getModifier() != null) {
-          throw new InvalidRequestException("Cannot set modifier on field 'type'");
+          throw new IllegalArgumentException();
         }
 
         /*
@@ -681,13 +588,16 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
             codingToken.getValue() != null
                 ? ClaimType.parse(codingToken.getValue().toLowerCase())
                 : Optional.empty();
+
         if (codingToken.getSystem() != null
             && codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
             && !claimType.isPresent()) {
           claimTypesInner.addAll(Arrays.asList(ClaimType.values()));
         } else if (codingToken.getSystem() == null
             || codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)) {
-          if (claimType.isPresent()) claimTypesInner.add(claimType.get());
+          if (claimType.isPresent()) {
+            claimTypesInner.add(claimType.get());
+          }
         }
       }
 
@@ -696,7 +606,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
        */
       claimTypes.retainAll(claimTypesInner);
     }
-
     return claimTypes;
   }
 }

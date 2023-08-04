@@ -1,9 +1,20 @@
 """High Volume Load test suite for BFD Server endpoints."""
-import sys, inspect
-from random import shuffle
-from typing import Callable, List, TypeVar, Optional, Type, Dict, Set, Protocol
+import inspect
+import random
+import sys
+from typing import (
+    Callable,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Set,
+    Type,
+    TypeVar,
+)
 
-from locust import TaskSet, events, tag, task
+from locust import TaskSet, User, events, tag, task
 from locust.env import Environment
 
 from common import data, db
@@ -13,11 +24,12 @@ from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
 TaskT = TypeVar("TaskT", Callable[..., None], Type["TaskSet"])
-MASTER_BENE_IDS: List[str] = []
-MASTER_CONTRACT_DATA: List[Dict[str, str]] = []
-MASTER_HASHED_MBIS: List[str] = []
-TAGS: Set[str] = []
-EXCLUDE_TAGS: Set[str] = []
+MASTER_BENE_IDS: Collection[str] = []
+MASTER_CONTRACT_DATA: Collection[Dict[str, str]] = []
+MASTER_HASHED_MBIS: Collection[str] = []
+TAGS: Set[str] = set()
+EXCLUDE_TAGS: Set[str] = set()
+
 
 @events.test_start.add_listener
 def _(environment: Environment, **kwargs):
@@ -39,10 +51,18 @@ def _(environment: Environment, **kwargs):
     )
 
     global TAGS
-    TAGS = environment.parsed_options.locust_tags.split() if hasattr(environment.parsed_options, "locust_tags") else []
+    TAGS = (
+        set(environment.parsed_options.locust_tags.split())
+        if hasattr(environment.parsed_options, "locust_tags")
+        else set()
+    )
 
     global EXCLUDE_TAGS
-    EXCLUDE_TAGS = environment.parsed_options.locust_exclude_tags.split() if hasattr(environment.parsed_options, "locust_exclude_tags") else []
+    EXCLUDE_TAGS = (
+        set(environment.parsed_options.locust_exclude_tags.split())
+        if hasattr(environment.parsed_options, "locust_exclude_tags")
+        else set()
+    )
 
     global MASTER_CONTRACT_DATA
     MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
@@ -60,24 +80,45 @@ def _(environment: Environment, **kwargs):
         data_type_name="hashed_mbis",
     )
 
+
 class TestLoadShape(UserInitAwareLoadShape):
     pass
+
 
 class TaskHolder(Protocol[TaskT]):
     tasks: List[TaskT]
 
+
+class HighVolumeTaskSet(TaskSet):
+    @property
+    def user(self) -> "HighVolumeUser":
+        # This forces the type of self.user for all derived TaskSets to narrow to HighVolumeUser,
+        # thus giving correct type hinting for all of HighVolumeUser's properties.
+        return self._high_volume_user
+
+    def __init__(self, parent: User) -> None:
+        if not isinstance(parent, HighVolumeUser):
+            raise ValueError(
+                f"User is {type(self.user).__name__}; expected {type(HighVolumeUser).__name__}"
+            )
+        self._high_volume_user: HighVolumeUser = parent
+        super().__init__(parent)
+
+
 EOB_TAG = "eob"
+
+
 @tag(EOB_TAG)
 @task
-class EobTaskSet(TaskSet):
+class EobTaskSet(HighVolumeTaskSet):
     @tag("eob_test_id_count_type_pde_v1", "v1")
     @task
     def eob_test_id_count_type_pde_v1(self):
         """Explanation of Benefit search by ID, type PDE, paginated"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient":  self.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
                 "_count": "50",
                 "_types": "PDE",
@@ -89,13 +130,13 @@ class EobTaskSet(TaskSet):
     @task
     def eob_test_id_last_updated_count_v1(self):
         """Explanation of Benefit search by ID, last updated, paginated"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient":  self.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
                 "_count": "100",
-                "_lastUpdated": f"gt{ self.last_updated}",
+                "_lastUpdated": f"gt{self.user.last_updated}",
             },
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100",
         )
@@ -104,12 +145,12 @@ class EobTaskSet(TaskSet):
     @task
     def eob_test_id_include_tax_number_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient":  self.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
-                "_lastUpdated": f"gt{ self.last_updated}",
+                "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeTaxNumbers": "true",
             },
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
@@ -119,12 +160,12 @@ class EobTaskSet(TaskSet):
     @task
     def eob_test_id_last_updated_v1(self):
         """Explanation of Benefit search by ID, Last Updated"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient":  self.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_format": "json",
-                "_lastUpdated": f"gt{ self.last_updated}",
+                "_lastUpdated": f"gt{self.user.last_updated}",
             },
             name="/v1/fhir/ExplanationOfBenefit search by id / lastUpdated",
         )
@@ -133,9 +174,12 @@ class EobTaskSet(TaskSet):
     @task
     def eob_test_id_v1(self):
         """Explanation of Benefit search by ID"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
-            params={"patient":  self.bene_ids.pop(), "_format": "application/fhir+json"},
+            params={
+                "patient": self.user.bene_ids.pop(),
+                "_format": "application/fhir+json",
+            },
             name="/v1/fhir/ExplanationOfBenefit search by id",
         )
 
@@ -143,9 +187,12 @@ class EobTaskSet(TaskSet):
     @task
     def eob_test_id(self):
         """Explanation of Benefit search by ID"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
-            params={"patient":  self.bene_ids.pop(), "_format": "application/fhir+json"},
+            params={
+                "patient": self.user.bene_ids.pop(),
+                "_format": "application/fhir+json",
+            },
             name="/v2/fhir/ExplanationOfBenefit search by id",
         )
 
@@ -153,10 +200,10 @@ class EobTaskSet(TaskSet):
     @task
     def eob_test_id_count(self):
         """Explanation of Benefit search by ID, Paginated"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "patient":  self.bene_ids.pop(),
+                "patient": self.user.bene_ids.pop(),
                 "_count": "10",
                 "_format": "application/fhir+json",
             },
@@ -167,28 +214,31 @@ class EobTaskSet(TaskSet):
     @task
     def eob_test_id_include_tax_number_last_updated(self):
         """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit",
             params={
-                "_lastUpdated": f"gt{ self.last_updated}",
-                "patient":  self.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.user.last_updated}",
+                "patient": self.user.bene_ids.pop(),
                 "_IncludeTaxNumbers": "true",
                 "_format": "application/fhir+json",
             },
             name="/v2/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers",
         )
 
+
 COVERAGE_TAG = "coverage"
+
+
 @tag(COVERAGE_TAG)
 @task
-class CoverageTaskSet(TaskSet):
+class CoverageTaskSet(HighVolumeTaskSet):
     @tag("coverage_test_id_count_v1", "v1")
     @task
     def coverage_test_id_count_v1(self):
         """Coverage search by ID, Paginated"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/Coverage",
-            params={"beneficiary":  self.bene_ids.pop(), "_count": "10"},
+            params={"beneficiary": self.user.bene_ids.pop(), "_count": "10"},
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
@@ -196,11 +246,11 @@ class CoverageTaskSet(TaskSet):
     @task
     def coverage_test_id_last_updated_v1(self):
         """Coverage search by ID, Last Updated"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/Coverage",
             params={
-                "_lastUpdated": f"gt{ self.last_updated}",
-                "beneficiary":  self.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.user.last_updated}",
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v1/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
@@ -209,10 +259,10 @@ class CoverageTaskSet(TaskSet):
     @task
     def coverage_test_id(self):
         """Coverage search by ID"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
             params={
-                "beneficiary":  self.bene_ids.pop(),
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id",
         )
@@ -221,9 +271,9 @@ class CoverageTaskSet(TaskSet):
     @task
     def coverage_test_id_count(self):
         """Coverage search by ID, Paginated"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
-            params={"beneficiary":  self.bene_ids.pop(), "_count": "10"},
+            params={"beneficiary": self.user.bene_ids.pop(), "_count": "10"},
             name="/v2/fhir/Coverage search by id / count=10",
         )
 
@@ -231,26 +281,29 @@ class CoverageTaskSet(TaskSet):
     @task
     def coverage_test_id_last_updated(self):
         """Coverage search by ID, Last Updated"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Coverage",
             params={
-                "_lastUpdated": f"gt{self.last_updated}",
-                "beneficiary":  self.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.user.last_updated}",
+                "beneficiary": self.user.bene_ids.pop(),
             },
             name="/v2/fhir/Coverage search by id / lastUpdated (2 weeks)",
         )
 
+
 PATIENT_TAG = "patient"
+
+
 @tag(PATIENT_TAG)
 @task
-class PatientTaskSet(TaskSet):
+class PatientTaskSet(HighVolumeTaskSet):
     @tag("patient_test_coverage_contract_v1", "v1")
     @task
     def patient_test_coverage_contract_v1(self):
         """Patient search by coverage contract (all pages)"""
 
         def make_url():
-            contract = self.contract_data.pop()
+            contract = self.user.contract_data.pop()
             return create_url_path(
                 "/v1/fhir/Patient",
                 {
@@ -261,7 +314,7 @@ class PatientTaskSet(TaskSet):
                 },
             )
 
-        self.run_task(
+        self.user.run_task(
             name="/v1/fhir/Patient search by coverage contract (all pages)",
             headers={"IncludeIdentifiers": "mbi"},
             url_callback=make_url,
@@ -276,12 +329,12 @@ class PatientTaskSet(TaskSet):
             return create_url_path(
                 "/v1/fhir/Patient/",
                 {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{ self.hashed_mbis.pop()}",
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.user.hashed_mbis.pop()}",
                     "_IncludeIdentifiers": "mbi",
                 },
             )
 
-        self.run_task(
+        self.user.run_task(
             name="/v1/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
             url_callback=make_url,
         )
@@ -290,11 +343,11 @@ class PatientTaskSet(TaskSet):
     @task
     def patient_test_id_last_updated_include_mbi_include_address_v1(self):
         """Patient search by ID, Last Updated, include MBI, include Address"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v1/fhir/Patient",
             params={
-                "_id":  self.bene_ids.pop(),
-                "_lastUpdated": f"gt{ self.last_updated}",
+                "_id": self.user.bene_ids.pop(),
+                "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeIdentifiers": "mbi",
                 "_IncludeTaxNumbers": "true",
             },
@@ -307,16 +360,17 @@ class PatientTaskSet(TaskSet):
         """Patient search by ID"""
 
         def make_url():
-            return create_url_path(f"/v1/fhir/Patient/{ self.bene_ids.pop()}", {})
+            return create_url_path(f"/v1/fhir/Patient/{self.user.bene_ids.pop()}", {})
 
-        self.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
+        self.user.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)
 
     @tag("patient_test_coverage_contract", "v2")
     @task
     def patient_test_coverage_contract(self):
         """Patient search by Coverage Contract, paginated"""
+
         def make_url():
-            contract =  self.contract_data.pop()
+            contract = self.user.contract_data.pop()
             return create_url_path(
                 "/v2/fhir/Patient",
                 {
@@ -327,7 +381,7 @@ class PatientTaskSet(TaskSet):
                 },
             )
 
-        self.run_task(
+        self.user.run_task(
             name="/v2/fhir/Patient search by coverage contract (all pages)",
             headers={"IncludeIdentifiers": "mbi"},
             url_callback=make_url,
@@ -337,16 +391,17 @@ class PatientTaskSet(TaskSet):
     @task
     def patient_test_hashed_mbi(self):
         """Patient search by hashed MBI, include identifiers"""
+
         def make_url():
             return create_url_path(
                 "/v2/fhir/Patient/",
                 {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{ self.hashed_mbis.pop()}",
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.user.hashed_mbis.pop()}",
                     "_IncludeIdentifiers": "mbi",
                 },
             )
 
-        self.run_task(
+        self.user.run_task(
             name="/v2/fhir/Patient search by hashed mbi / includeIdentifiers = mbi",
             url_callback=make_url,
         )
@@ -355,13 +410,13 @@ class PatientTaskSet(TaskSet):
     @task
     def patient_test_id_include_mbi_last_updated(self):
         """Patient search by ID with last updated, include MBI"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id":  self.bene_ids.pop(),
+                "_id": self.user.bene_ids.pop(),
                 "_format": "application/fhir+json",
                 "_IncludeIdentifiers": "mbi",
-                "_lastUpdated": f"gt{ self.last_updated}",
+                "_lastUpdated": f"gt{self.user.last_updated}",
             },
             name="/v2/fhir/Patient search by id / _IncludeIdentifiers=mbi / (2 weeks)",
         )
@@ -370,14 +425,15 @@ class PatientTaskSet(TaskSet):
     @task
     def patient_test_id(self):
         """Patient search by ID"""
-        self.run_task_by_parameters(
+        self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient",
             params={
-                "_id":  self.bene_ids.pop(),
+                "_id": self.user.bene_ids.pop(),
                 "_format": "application/fhir+json",
             },
             name="/v2/fhir/Patient search by id",
         )
+
 
 class HighVolumeUser(BFDUserBase):
     """High volume load test suite for V2 BFD Server endpoints.
@@ -415,13 +471,19 @@ class HighVolumeUser(BFDUserBase):
                 continue
             passing = True
             if hasattr(task, "tasks"):
-                self.filter_tasks_by_tags(task, tags, exclude_tags, checked)
+                HighVolumeUser.filter_tasks_by_tags(task, tags, exclude_tags, checked)
                 passing = len(task.tasks) > 0
             else:
                 if len(tags) > 0:
-                    passing &= "locust_tag_set" in dir(task) and len(task.locust_tag_set.intersection(tags)) > 0
+                    passing &= (
+                        "locust_tag_set" in dir(task)
+                        and len(task.locust_tag_set.intersection(tags)) > 0
+                    )
                 if len(exclude_tags) > 0:
-                    passing &= "locust_tag_set" not in dir(task) or len(task.locust_tag_set.intersection(exclude_tags)) == 0
+                    passing &= (
+                        "locust_tag_set" not in dir(task)
+                        or len(task.locust_tag_set.intersection(exclude_tags)) == 0
+                    )
 
             if passing:
                 filtered_tasks.append(task)
@@ -442,7 +504,13 @@ class HighVolumeUser(BFDUserBase):
 
         # Filter out the class members without a tasks attribute
         class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-        potential_tasks = list(filter(lambda potential_task: hasattr(potential_task[1], "tasks"), class_members))
+        potential_tasks = list(
+            filter(
+                lambda potential_task: hasattr(potential_task[1], "tasks")
+                and issubclass(potential_task[1], HighVolumeTaskSet),
+                class_members,
+            )
+        )
 
         # Filter each task holder's tasks by the given tags and exclude_tags
         tasks = []
@@ -464,21 +532,47 @@ class HighVolumeUser(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.bene_ids = MASTER_BENE_IDS.copy()
-        self.contract_data = MASTER_CONTRACT_DATA.copy()
-        self.hashed_mbis = MASTER_HASHED_MBIS.copy()
+        self.bene_ids = list(MASTER_BENE_IDS)
+        self.contract_data = list(MASTER_CONTRACT_DATA)
+        self.hashed_mbis = list(MASTER_HASHED_MBIS)
+
+        # Shuffle the data to ensure each User isn't making requests with the same data in the same
+        # order
+        random.shuffle(self.bene_ids)
+        random.shuffle(self.contract_data)
+        random.shuffle(self.hashed_mbis)
 
         # As of 01/20/2023 there is an unresolved locust issue [1] with the --tags/--exclude-tags command line options.
         # Therefore, we have implemented custom arguments (--locust-tags/--locust-exclude-tags) to programmatically
         # filter tasks by the given @tag(s) at runtime.
         # [1] https://github.com/locustio/locust/issues/1689
-        self.tasks = self.get_runnable_tasks(TAGS, EXCLUDE_TAGS)
 
-        # Shuffle all the data around so that each HighVolumeUser is _probably_
-        # not requesting the same data.
-        shuffle(self.bene_ids)
-        shuffle(self.contract_data)
-        shuffle(self.hashed_mbis)
+        # Looking at this, it's not obvious why we're dynamically generating a _class_ (not an
+        # instance) with its "tasks" _attribute_ (not field) set to the filtered list of tasks we
+        # want to run. Why not just pass the list of tasks directly, as Locust supports setting
+        # "tasks" to a List of Callables? A few reasons:
+        # 1. Locust does not support passing an _instance_ of a TaskSet as "tasks", as Locust
+        #    expects to instantiate the TaskSet itself when the User is ran (passing the User to the
+        #    TaskSet's __init__, as "parent"). If we want to pass a TaskSet where its "tasks" are a
+        #    _subset_ of all the tasks on the TaskSet, we need to generate a class with a "tasks"
+        #    attribute explicitly set. Otherwise, Locust will take all Callables tagged with "task"
+        #    from the TaskSet
+        # 2. If "tasks" is a list of function refs/Callables, Locust will pass the _User_ class as
+        #    the first arg to each task Callable. Each Callable, in this context, is a method of a
+        #    HighVolumeTaskSet, and so each Callable expects "self" to be an instance of said
+        #    HighVolumeTaskSet. However, in this case, "self" is actually an instance of
+        #    HighVolumeUser, and so this contract is broken and the benefit provided by static type
+        #    analysis is invalidated. Passing a dynamically generated Class deriving from
+        #    HighVolumeTaskSet with its "tasks" attribute set to the list of task function
+        #    references solves this "self" invalidation by ensuring "self" is _always_ an instance
+        #    of HighVolumeTaskSet in this context when Locust executes a given task Callable
+        self.tasks = [
+            type(
+                "HVUFilteredTaskSet",
+                (HighVolumeTaskSet,),
+                {"tasks": self.get_runnable_tasks(TAGS, EXCLUDE_TAGS)},
+            )
+        ]
 
         # Override the value for last_updated with a static value
         self.last_updated = "2022-06-29"

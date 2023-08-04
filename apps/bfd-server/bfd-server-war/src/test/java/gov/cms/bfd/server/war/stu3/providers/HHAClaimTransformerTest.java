@@ -1,9 +1,12 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
@@ -12,7 +15,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -21,10 +23,40 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link HHAClaimTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class HHAClaimTransformerTest {
+  /** The transformer under test. */
+  HHAClaimTransformer hhaClaimTransformer;
+  /** The Metric Registry to use for the test. */
+  @Mock MetricRegistry metricRegistry;
+  /** The NPI org lookup to use for the test. */
+  @Mock NPIOrgLookup npiOrgLookup;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  protected void setup() {
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
+        .thenReturn(Optional.of("UNKNOWN"));
+
+    hhaClaimTransformer = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
+  }
+
   /**
    * Verifies that {@link HHAClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_HHA} {@link HHAClaim}.
@@ -38,19 +70,12 @@ public final class HHAClaimTransformerTest {
     HHAClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
 
-    TransformerContext transformerContext =
-        new TransformerContext(
-            new MetricRegistry(),
-            Optional.empty(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
-
-    ExplanationOfBenefit eob = HHAClaimTransformer.transform(transformerContext, claim);
-    assertMatches(claim, eob, transformerContext);
+    ExplanationOfBenefit eob = hhaClaimTransformer.transform(claim, false);
+    assertMatches(claim, eob);
   }
 
   /**
@@ -60,13 +85,14 @@ public final class HHAClaimTransformerTest {
    * @param claim the {@link HHAClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     HHAClaim}
-   * @param transformerContext the {@link TransformerContext} that was generated from the specified
-   *     {@link HHAClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      HHAClaim claim, ExplanationOfBenefit eob, TransformerContext transformerContext)
-      throws FHIRException {
+  public static void assertMatches(HHAClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+    // interesting conumdrum here....we should be using Mock(s) for unit tests, but this static
+    // method is invoked from ITs (integration tests) which means that our BeforeEach setup will
+    // not create the NPIOrgLookup so we need to explicitly create one here.
+    NPIOrgLookup localNpiLookup = new NPIOrgLookup();
+
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -88,7 +114,7 @@ public final class HHAClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        localNpiLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),
@@ -148,12 +174,14 @@ public final class HHAClaimTransformerTest {
         claimLine1.getStatusCode().get(),
         eobItem0.getRevenue());
 
-    // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
+    // test common eob information between Inpatient, HHA, Hospice and SNF claims
+    // are set as
     // expected
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(
         eob, claim.getCareStartDate(), Optional.empty(), Optional.empty());
 
-    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
+    // Test to ensure common group field coinsurance between Inpatient, HHA, Hospice
+    // and SNF match
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(
         eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 

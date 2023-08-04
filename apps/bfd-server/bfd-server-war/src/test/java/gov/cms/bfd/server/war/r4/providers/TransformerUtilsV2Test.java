@@ -27,6 +27,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
@@ -41,6 +42,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -769,19 +771,18 @@ public class TransformerUtilsV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim claim =
+    HHAClaim hhaClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
-
-    claim.setLastUpdated(Instant.now());
+    hhaClaim.setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forR4();
-    HHAClaimTransformerV2 hhaClaimTransformer =
+    ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
-    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -790,56 +791,47 @@ public class TransformerUtilsV2Test {
     HospiceClaim hospiceClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof HospiceClaim)
-            .map(r -> (HospiceClaim) r)
+            .map(HospiceClaim.class::cast)
             .findFirst()
             .get();
+    hospiceClaim.setLastUpdated(Instant.now());
 
-    claim.setLastUpdated(Instant.now());
-
-    fhirContext = FhirContext.forR4();
-    HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
+    claimTransformerInterface =
         new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
-    genEob = hospiceClaimTransformerV2.transform(hospiceClaim);
+    genEob = claimTransformerInterface.transform(hospiceClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
-
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
     DMEClaim dmeClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
+            .map(DMEClaim.class::cast)
             .findFirst()
             .get();
+    dmeClaim.setLastUpdated(Instant.now());
 
-    claim.setLastUpdated(Instant.now());
-
-    fhirContext = FhirContext.forR4();
-    DMEClaimTransformerV2 dmeClaimTransformerV2 =
+    claimTransformerInterface =
         new DMEClaimTransformerV2(
             new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
-    genEob = dmeClaimTransformerV2.transform(dmeClaim, false);
+    genEob = claimTransformerInterface.transform(dmeClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
-
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
     InpatientClaim inpatientClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
+    inpatientClaim.setLastUpdated(Instant.now());
 
-    claim.setLastUpdated(Instant.now());
-
-    fhirContext = FhirContext.forR4();
-    InpatientClaimTransformerV2 inpatientClaimTransformerV2 =
+    claimTransformerInterface =
         new InpatientClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
-    genEob = inpatientClaimTransformerV2.transform(inpatientClaim);
+    genEob = claimTransformerInterface.transform(inpatientClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
-
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
 
     Bundle bundle = TransformerUtilsV2.createBundle(paging, eobs, Instant.now());
@@ -872,19 +864,18 @@ public class TransformerUtilsV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    HHAClaim claim =
+    HHAClaim hhaClaim =
         parsedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
-
-    claim.setLastUpdated(Instant.now());
+    hhaClaim.setLastUpdated(Instant.now());
 
     FhirContext fhirContext = FhirContext.forR4();
-    HHAClaimTransformerV2 hhaClaimTransformer =
+    ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
-    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -1049,5 +1040,39 @@ public class TransformerUtilsV2Test {
             .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
             .findFirst()
             .isPresent());
+  }
+
+  /**
+   * Verifies that providing a EnumSet of {@link ClaimTypeV2} and a bit mask integer denoting claim
+   * types that have data, the results is a filtered EnumSet.
+   */
+  @Test
+  public void verifyEnumSetFromListOfClaimTypesAndDatabaseBitmaskOfData() {
+    EnumSet<ClaimTypeV2> allClaimSet = EnumSet.allOf(ClaimTypeV2.class);
+
+    // resultant set only includes claim types that have data.
+    int testVal = QueryUtils.V_DME_HAS_DATA | QueryUtils.V_SNF_HAS_DATA | QueryUtils.V_HHA_HAS_DATA;
+    EnumSet<ClaimTypeV2> availSet =
+        TransformerUtilsV2.fetchClaimsAvailability(allClaimSet, testVal);
+
+    assertTrue(availSet.contains(ClaimTypeV2.HHA));
+    assertTrue(availSet.contains(ClaimTypeV2.SNF));
+    assertTrue(availSet.contains(ClaimTypeV2.DME));
+    assertFalse(availSet.contains(ClaimTypeV2.INPATIENT));
+
+    // check efficacy of EnumSet filter vs. bit mask of data.
+    EnumSet<ClaimTypeV2> someClaimSet = EnumSet.noneOf(ClaimTypeV2.class);
+    someClaimSet.add(ClaimTypeV2.CARRIER);
+    someClaimSet.add(ClaimTypeV2.PDE);
+
+    availSet = TransformerUtilsV2.fetchClaimsAvailability(someClaimSet, testVal);
+    assertFalse(availSet.contains(ClaimTypeV2.HHA));
+    assertFalse(availSet.contains(ClaimTypeV2.SNF));
+    assertFalse(availSet.contains(ClaimTypeV2.DME));
+    assertFalse(availSet.contains(ClaimTypeV2.CARRIER));
+    // adjust data bit mask and try again
+    testVal = testVal | QueryUtils.V_CARRIER_HAS_DATA;
+    availSet = TransformerUtilsV2.fetchClaimsAvailability(someClaimSet, testVal);
+    assertTrue(availSet.contains(ClaimTypeV2.CARRIER));
   }
 }

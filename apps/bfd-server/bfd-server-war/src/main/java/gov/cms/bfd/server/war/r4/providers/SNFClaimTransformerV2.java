@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
-public class SNFClaimTransformerV2 {
+public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -53,25 +53,27 @@ public class SNFClaimTransformerV2 {
   }
 
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Transforms a {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored.
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     if (!(claim instanceof SNFClaim)) {
       throw new BadCodeMonkeyException();
     }
-
-    timer.stop();
-    return transformClaim((SNFClaim) claim);
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
+            .timer(MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform"))
+            .time()) {
+      eob = transformClaim((SNFClaim) claim);
+    }
+    return eob;
   }
 
   /**
