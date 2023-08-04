@@ -331,12 +331,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimTypeV2> claimTypesRequested = parseTypeParam(type);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
-    boolean filterSamhsa = false;
-    try {
-      filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
-    } catch (Exception e) {
-      LOGGER.error("Invalid SAMHSA boolean {}, defaulting to FALSE", excludeSamhsa);
-    }
+    boolean filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_EOB);
     operation.setOption("by", "patient");
     operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
