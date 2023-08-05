@@ -1,8 +1,11 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
@@ -10,7 +13,6 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -20,32 +22,55 @@ import java.util.function.Consumer;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.stereotype.Component;
 
 /**
  * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
-final class InpatientClaimTransformer {
+@Component
+final class InpatientClaimTransformer implements ClaimTransformerInterface {
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
+  private final NPIOrgLookup npiOrgLookup;
+
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Instantiates a new transformer.
    *
-   * @param transformerContext the {@link TransformerContext} to use
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     InpatientClaim}
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param npiOrgLookup the npi org lookup
+   */
+  public InpatientClaimTransformer(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.npiOrgLookup = requireNonNull(npiOrgLookup);
+  }
+
+  /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
+   * @param claim the {@link InpatientClaim} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
-    Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof InpatientClaim)) {
+      throw new BadCodeMonkeyException();
+    }
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
             .timer(
                 MetricRegistry.name(InpatientClaimTransformer.class.getSimpleName(), "transform"))
-            .time();
-
-    if (!(claim instanceof InpatientClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim, transformerContext);
-
-    timer.stop();
+            .time()) {
+      eob = transformClaim((InpatientClaim) claim);
+    }
     return eob;
   }
 
@@ -53,12 +78,10 @@ final class InpatientClaimTransformer {
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
-   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      InpatientClaim claimGroup, TransformerContext transformerContext) {
+  private ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -94,7 +117,8 @@ final class InpatientClaimTransformer {
           claimGroup.getPatientStatusCd());
     }
 
-    // add EOB information to fields that are common between the Inpatient and SNF claim types
+    // add EOB information to fields that are common between the Inpatient and SNF
+    // claim types
     TransformerUtils.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),
@@ -199,7 +223,7 @@ final class InpatientClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

@@ -5,10 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
@@ -48,17 +51,30 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link OutpatientClaimTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class OutpatientClaimTransformerV2Test {
   /** The parsed claim used to generate the EOB and for validating with. */
   OutpatientClaim claim;
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
-  /** The fhir context for parsing the test file. */
-  private static final FhirContext fhirContext = FhirContext.forR4();
   /** The transformer under test. */
   OutpatientClaimTransformerV2 outpatientClaimTransformer;
+  /** The fhir context for parsing the test file. */
+  private static final FhirContext fhirContext = FhirContext.forR4();
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -73,12 +89,10 @@ public final class OutpatientClaimTransformerV2Test {
     OutpatientClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof OutpatientClaim)
-            .map(r -> (OutpatientClaim) r)
+            .map(OutpatientClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-
     return claim;
   }
 
@@ -89,13 +103,16 @@ public final class OutpatientClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
     outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(
-            new MetricRegistry(),
+            mockMetricRegistry,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim);
+    ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -528,7 +545,7 @@ public final class OutpatientClaimTransformerV2Test {
                     "http://hl7.org/fhir/sid/icd-10",
                     "CD1YYZZ",
                     "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE")),
-            "2016-01-16T00:00:00+00:00");
+            "2016-01-16T00:00:00Z");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code CD1YYZZ");
   }
@@ -539,7 +556,8 @@ public final class OutpatientClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // // Only one insurance object if there is more than we need to fix the focal
+    // set to point
     // to the correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
@@ -1464,7 +1482,7 @@ public final class OutpatientClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(generateClaim());
+    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

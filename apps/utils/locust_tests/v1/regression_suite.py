@@ -6,7 +6,8 @@ this test suite, all tests in this suite will be run in parallel, with
 equal weighting being applied to each.
 """
 
-from typing import Dict, List
+import itertools
+from typing import Collection, Dict
 
 from locust import events, tag, task
 from locust.env import Environment
@@ -17,10 +18,9 @@ from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
-
-master_bene_ids: List[str] = []
-master_contract_data: List[Dict[str, str]] = []
-master_hashed_mbis: List[str] = []
+master_bene_ids: Collection[str] = []
+master_contract_data: Collection[Dict[str, str]] = []
+master_hashed_mbis: Collection[str] = []
 
 
 @events.test_start.add_listener
@@ -77,9 +77,9 @@ class RegressionV1User(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.bene_ids = master_bene_ids.copy()
-        self.contract_data = master_contract_data.copy()
-        self.hashed_mbis = master_hashed_mbis.copy()
+        self.bene_ids = itertools.cycle(list(master_bene_ids))
+        self.contract_data = itertools.cycle(list(master_contract_data))
+        self.hashed_mbis = itertools.cycle(list(master_hashed_mbis))
 
     @tag("coverage", "coverage_test_id_count")
     @task
@@ -87,7 +87,7 @@ class RegressionV1User(BFDUserBase):
         """Coverage search by ID, Paginated"""
         self.run_task_by_parameters(
             base_path="/v1/fhir/Coverage",
-            params={"beneficiary": self.bene_ids.pop(), "_count": "10"},
+            params={"beneficiary": next(self.bene_ids), "_count": "10"},
             name="/v1/fhir/Coverage search by id / count=10",
         )
 
@@ -98,7 +98,7 @@ class RegressionV1User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient": next(self.bene_ids),
                 "_format": "json",
                 "_count": "50",
                 "_types": "PDE",
@@ -113,7 +113,7 @@ class RegressionV1User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient": next(self.bene_ids),
                 "_format": "json",
                 "_count": "100",
             },
@@ -127,7 +127,7 @@ class RegressionV1User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
             params={
-                "patient": self.bene_ids.pop(),
+                "patient": next(self.bene_ids),
                 "_format": "json",
                 "_IncludeTaxNumbers": "true",
             },
@@ -140,7 +140,7 @@ class RegressionV1User(BFDUserBase):
         """Explanation of Benefit search by ID"""
         self.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit",
-            params={"patient": self.bene_ids.pop(), "_format": "application/fhir+json"},
+            params={"patient": next(self.bene_ids), "_format": "application/fhir+json"},
             name="/v1/fhir/ExplanationOfBenefit search by id",
         )
 
@@ -150,7 +150,7 @@ class RegressionV1User(BFDUserBase):
         """Patient search by coverage contract (all pages)"""
 
         def make_url():
-            contract = self.contract_data.pop()
+            contract = next(self.contract_data)
             return create_url_path(
                 f"/v1/fhir/Patient",
                 {
@@ -176,7 +176,7 @@ class RegressionV1User(BFDUserBase):
             return create_url_path(
                 f"/v1/fhir/Patient/",
                 {
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{self.hashed_mbis.pop()}",
+                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{next(self.hashed_mbis)}",
                     "_IncludeIdentifiers": "mbi",
                 },
             )
@@ -193,7 +193,7 @@ class RegressionV1User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v1/fhir/Patient",
             params={
-                "_id": self.bene_ids.pop(),
+                "_id": next(self.bene_ids),
                 "_IncludeIdentifiers": "mbi",
                 "_IncludeTaxNumbers": "true",
             },
@@ -206,6 +206,6 @@ class RegressionV1User(BFDUserBase):
         """Patient search by ID"""
 
         def make_url():
-            return create_url_path(f"/v1/fhir/Patient/{self.bene_ids.pop()}", {})
+            return create_url_path(f"/v1/fhir/Patient/{next(self.bene_ids)}", {})
 
         self.run_task(name="/v1/fhir/Patient/id", url_callback=make_url)

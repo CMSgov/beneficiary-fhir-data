@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
@@ -45,17 +48,30 @@ import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link PartDEventTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class PartDEventTransformerV2Test {
   /** The parsed claim used to generate the EOB and for validating with. */
   PartDEvent claim;
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
+  /** The transformer under test. */
+  PartDEventTransformerV2 partdEventTransformer;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
-  /** The transformer under test. */
-  PartDEventTransformerV2 partDEventTransformer;
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -70,12 +86,10 @@ public final class PartDEventTransformerV2Test {
     PartDEvent claim =
         parsedRecords.stream()
             .filter(r -> r instanceof PartDEvent)
-            .map(r -> (PartDEvent) r)
+            .map(PartDEvent.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-
     return claim;
   }
 
@@ -86,11 +100,14 @@ public final class PartDEventTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    partDEventTransformer =
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
+    partdEventTransformer =
         new PartDEventTransformerV2(
-            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            mockMetricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     claim = generateClaim();
-    eob = partDEventTransformer.transform(claim);
+    eob = partdEventTransformer.transform(claim, false);
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -1032,7 +1049,7 @@ public final class PartDEventTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = partDEventTransformer.transform(generateClaim());
+    ExplanationOfBenefit eob = partdEventTransformer.transform(generateClaim(), false);
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

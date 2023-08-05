@@ -33,10 +33,12 @@ public class LoggingUtils {
    * @param beneId the {@link String} of beneficiary IDs top log
    */
   public static void logBeneIdToMdc(String beneId) {
-    try {
-      logBeneIdToMdc(Long.parseLong(beneId));
-    } catch (NumberFormatException e) {
-      LOGGER.warn("Could not parse long from bene_id: " + beneId);
+    if (!Strings.isNullOrEmpty(beneId)) {
+      try {
+        logBeneIdToMdc(Long.parseLong(beneId));
+      } catch (NumberFormatException e) {
+        LOGGER.warn("Could not parse long from bene_id: " + beneId);
+      }
     }
   }
 

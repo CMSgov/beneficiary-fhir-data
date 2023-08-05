@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -28,6 +30,7 @@ import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimColumn;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
+import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
@@ -771,15 +774,12 @@ final class TransformerTestUtils {
         actualCode.stream()
             .anyMatch(
                 c -> {
-                  if (!expectedSystem.equals(c.getSystem())
-                      || (expectedVersion != null && !expectedVersion.equals(c.getVersion()))
-                      || (expectedDisplay != null && !expectedDisplay.equals(c.getDisplay()))
-                      || !expectedCode.equals(c.getCode())) {
-                    return false;
-                  }
-                  return true;
+                  return expectedSystem.equals(c.getSystem())
+                      && (expectedVersion == null || expectedVersion.equals(c.getVersion()))
+                      && (expectedDisplay == null || expectedDisplay.equals(c.getDisplay()))
+                      && expectedCode.equals(c.getCode());
                 }),
-        "No matching Coding found: " + actualCode.toString());
+        "No matching Coding found: " + actualCode);
   }
 
   /**
@@ -1238,9 +1238,7 @@ final class TransformerTestUtils {
             c -> {
               if (!codingSystem.equals(c.getSystem())) return false;
               if (codingVersion != null && !codingVersion.equals(c.getVersion())) return false;
-              if (!codingCode.equals(c.getCode())) return false;
-
-              return true;
+              return codingCode.equals(c.getCode());
             });
   }
 
@@ -1266,9 +1264,7 @@ final class TransformerTestUtils {
             c -> {
               if (!CCWUtils.calculateVariableReferenceUrl(ccwVariable).equals(c.getSystem()))
                 return false;
-              if (!expectedCodeString.equals(c.getCode())) return false;
-
-              return true;
+              return expectedCodeString.equals(c.getCode());
             });
   }
 
@@ -2208,9 +2204,12 @@ final class TransformerTestUtils {
   static void assertLastUpdatedEquals(
       Optional<Instant> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
-      /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
+      /*
+       * Dev Note: We often run our tests in parallel, so there is subtle race
+       * condition because we
        * use one instance of an IT DB with the same resources for most tests.
-       * The actual resources a test finds may have a lastUpdated value slightly after the time the test wrote it
+       * The actual resources a test finds may have a lastUpdated value slightly after
+       * the time the test wrote it
        * because another test over wrote the same resource.
        * To handle this case, dates that are within a second of each other match.
        */
@@ -2226,5 +2225,49 @@ final class TransformerTestUtils {
           actualResource.getMeta().getLastUpdated().toInstant(),
           "Expect lastUpdated to be the fallback value");
     }
+  }
+
+  /**
+   * Transform rif record to eob explanation of benefit.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
+   *     includeTaxNumbers whether to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *          false</code> )
+   * @param includeTaxNumbers if tax numbers should be included in the response
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
+   * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
+   */
+  static ExplanationOfBenefit transformRifRecordToEob(
+      Object rifRecord,
+      MetricRegistry metricRegistry,
+      Boolean includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+
+    ClaimTransformerInterface claimTransformerInterface = null;
+    if (rifRecord instanceof CarrierClaim) {
+      claimTransformerInterface =
+          new CarrierClaimTransformer(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
+    } else if (rifRecord instanceof DMEClaim) {
+      claimTransformerInterface = new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup);
+    } else if (rifRecord instanceof HHAClaim) {
+      claimTransformerInterface = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof HospiceClaim) {
+      claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof InpatientClaim) {
+      claimTransformerInterface = new InpatientClaimTransformer(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof OutpatientClaim) {
+      claimTransformerInterface = new OutpatientClaimTransformer(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof PartDEvent) {
+      claimTransformerInterface = new PartDEventTransformer(metricRegistry, drugCodeDisplayLookup);
+    } else if (rifRecord instanceof SNFClaim) {
+      claimTransformerInterface = new SNFClaimTransformer(metricRegistry, npiOrgLookup);
+    } else {
+      throw new BadCodeMonkeyException("Unhandled RifRecord type!");
+    }
+    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
   }
 }
