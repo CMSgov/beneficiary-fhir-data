@@ -81,7 +81,7 @@
         <telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.20.62</aws-java-sdk-bom.version>
         <aws.crt.version>0.22.5</aws.crt.version>
-        <spring-data-jpa.version>2.7.13</spring-data-jpa.version>
+        <spring-data-jpa.version>2.7.14</spring-data-jpa.version>
         <spring-framework.version>5.3.23</spring-framework.version>
 
         <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
