@@ -29,6 +29,9 @@ public class ServerRequiredTest {
   /** The database url used to set up the tests. */
   private static final String dbUrl = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
 
+  /** The base url to use when hitting the container server endpoint. */
+  protected static String baseServerUrl;
+
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
   protected static void setup() throws IOException {
@@ -59,6 +62,7 @@ public class ServerRequiredTest {
 
       boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
       assertTrue(startedServer, "Could not startup server for tests.");
+      baseServerUrl = "https://localhost:" + ServerExecutor.testServerPort;
       // Setup a shutdown hook to shut down the server when we are finished with all tests
       Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
     }
