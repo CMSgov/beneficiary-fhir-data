@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.commons;
 
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -17,6 +17,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaim_;
+import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,7 +34,7 @@ import javax.persistence.metamodel.SingularAttribute;
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
  * {@link R4ExplanationOfBenefitResourceProvider}.
  */
-public enum ClaimTypeV2 {
+public enum ClaimType {
   /** Represents the carrier claim type. */
   CARRIER(
       CarrierClaim.class,
@@ -48,12 +49,20 @@ public enum ClaimTypeV2 {
       DMEClaim_.beneficiaryId,
       (entity) -> ((DMEClaim) entity).getDateThrough(),
       DMEClaim_.lines),
-  /** Represents the PDE claim type. */
-  PDE(
-      PartDEvent.class,
-      PartDEvent_.eventId,
-      PartDEvent_.beneficiaryId,
-      (entity) -> ((PartDEvent) entity).getPrescriptionFillDate()),
+  /** Represents the hha claim type. */
+  HHA(
+      HHAClaim.class,
+      HHAClaim_.claimId,
+      HHAClaim_.beneficiaryId,
+      (entity) -> ((HHAClaim) entity).getDateThrough(),
+      HHAClaim_.lines),
+  /** Represents the hospice claim type. */
+  HOSPICE(
+      HospiceClaim.class,
+      HospiceClaim_.claimId,
+      HospiceClaim_.beneficiaryId,
+      (entity) -> ((HospiceClaim) entity).getDateThrough(),
+      HospiceClaim_.lines),
   /** Represents the inpatient claim type. */
   INPATIENT(
       InpatientClaim.class,
@@ -68,27 +77,19 @@ public enum ClaimTypeV2 {
       OutpatientClaim_.beneficiaryId,
       (entity) -> ((OutpatientClaim) entity).getDateThrough(),
       OutpatientClaim_.lines),
-  /** Represents the hospice claim type. */
-  HOSPICE(
-      HospiceClaim.class,
-      HospiceClaim_.claimId,
-      HospiceClaim_.beneficiaryId,
-      (entity) -> ((HospiceClaim) entity).getDateThrough(),
-      HospiceClaim_.lines),
+  /** Represents the PDE claim type. */
+  PDE(
+      PartDEvent.class,
+      PartDEvent_.eventId,
+      PartDEvent_.beneficiaryId,
+      (entity) -> ((PartDEvent) entity).getPrescriptionFillDate()),
   /** Represents the SNF claim type. */
   SNF(
       SNFClaim.class,
       SNFClaim_.claimId,
       SNFClaim_.beneficiaryId,
       (entity) -> ((SNFClaim) entity).getDateThrough(),
-      SNFClaim_.lines),
-  /** Represents the hha claim type. */
-  HHA(
-      HHAClaim.class,
-      HHAClaim_.claimId,
-      HHAClaim_.beneficiaryId,
-      (entity) -> ((HHAClaim) entity).getDateThrough(),
-      HHAClaim_.lines);
+      SNFClaim_.lines);
 
   /** The entity class. */
   private final Class<?> entityClass;
@@ -105,13 +106,13 @@ public enum ClaimTypeV2 {
    * Enum constant constructor.
    *
    * @param entityClass the value to use for {@link #getEntityClass()}
-   * @param entityIdAttribute the value to u e for {@link #getEntityIdAttribute()}
+   * @param entityIdAttribute the value to use for {@link #getEntityIdAttribute()}
    * @param entityBeneficiaryIdAttribute the value to use for {@link
    *     #getEntityBeneficiaryIdAttribute()}
    * @param serviceEndAttributeFunction the service end attribute function
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
-  ClaimTypeV2(
+  ClaimType(
       Class<?> entityClass,
       SingularAttribute<?, Long> entityIdAttribute,
       SingularAttribute<?, Long> entityBeneficiaryIdAttribute,
@@ -131,7 +132,7 @@ public enum ClaimTypeV2 {
    * Gets the {@link #entityClass}.
    *
    * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
-   *     ClaimTypeV2} in the database
+   *     gov.cms.bfd.server.war.stu3.providers.ClaimType} in the database
    */
   public Class<?> getEntityClass() {
     return entityClass;
@@ -178,12 +179,13 @@ public enum ClaimTypeV2 {
   /**
    * Gets the claim type that matches the specified claim type text, if any.
    *
-   * @param claimTypeText the lower-cased {@link ClaimTypeV2#name()} value to parse back into a
-   *     {@link ClaimTypeV2}
-   * @return the {@link ClaimTypeV2} represented by the specified {@link String}
+   * @param claimTypeText the lower-cased {@link ClaimType#name()} value to parse back into a {@link
+   *     ClaimType}
+   * @return the {@link gov.cms.bfd.server.war.stu3.providers.ClaimType} represented by the
+   *     specified {@link String}
    */
-  public static Optional<ClaimTypeV2> parse(String claimTypeText) {
-    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
+  public static Optional<ClaimType> parse(String claimTypeText) {
+    for (ClaimType claimType : ClaimType.values()) {
       if (claimType.name().toLowerCase().equals(claimTypeText)) {
         return Optional.of(claimType);
       }
