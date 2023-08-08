@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -15,10 +18,17 @@ import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimColumn;
 import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.HospiceClaim;
+import gov.cms.bfd.model.rif.InpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaim;
+import gov.cms.bfd.model.rif.PartDEvent;
+import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -326,15 +336,12 @@ public final class TransformerTestUtilsV2 {
         actualCode.stream()
             .anyMatch(
                 c -> {
-                  if (!expectedSystem.equals(c.getSystem())
-                      || (expectedVersion != null && !expectedVersion.equals(c.getVersion()))
-                      || (expectedDisplay != null && !expectedDisplay.equals(c.getDisplay()))
-                      || !expectedCode.equals(c.getCode())) {
-                    return false;
-                  }
-                  return true;
+                  return expectedSystem.equals(c.getSystem())
+                      && (expectedVersion == null || expectedVersion.equals(c.getVersion()))
+                      && (expectedDisplay == null || expectedDisplay.equals(c.getDisplay()))
+                      && expectedCode.equals(c.getCode());
                 }),
-        "No matching Coding found: " + actualCode.toString());
+        "No matching Coding found: " + actualCode);
   }
 
   /**
@@ -543,7 +550,6 @@ public final class TransformerTestUtilsV2 {
       }
     }
     */
-
     assertFalse(hcpcsSecondModifierCode.isPresent());
   }
 
@@ -729,9 +735,7 @@ public final class TransformerTestUtilsV2 {
             c -> {
               if (!codingSystem.equals(c.getSystem())) return false;
               if (codingVersion != null && !codingVersion.equals(c.getVersion())) return false;
-              if (!codingCode.equals(c.getCode())) return false;
-
-              return true;
+              return codingCode.equals(c.getCode());
             });
   }
 
@@ -892,7 +896,8 @@ public final class TransformerTestUtilsV2 {
    */
   private static void assertMoneyValue(BigDecimal expectedAmountValue, Money actualValue) {
     /*
-     * TODO: Money coding? assertEquals(TransformerConstants.CODING_MONEY, actualValue.getSystem());
+     * TODO: Money coding? assertEquals(TransformerConstants.CODING_MONEY,
+     * actualValue.getSystem());
      * assertEquals(TransformerConstants.CODED_MONEY_USD, actualValue.getCode());
      */
     assertEquivalent(expectedAmountValue, actualValue.getValue());
@@ -1037,9 +1042,12 @@ public final class TransformerTestUtilsV2 {
   static void assertLastUpdatedEquals(
       Optional<Instant> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
-      /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
+      /*
+       * Dev Note: We often run our tests in parallel, so there is subtle race
+       * condition because we
        * use one instance of an IT DB with the same resources for most tests.
-       * The actual resources a test finds may have a lastUpdated value slightly after the time the test wrote it
+       * The actual resources a test finds may have a lastUpdated value slightly after
+       * the time the test wrote it
        * because another test over wrote the same resource.
        * To handle this case, dates that are within a second of each other match.
        */
@@ -1093,20 +1101,20 @@ public final class TransformerTestUtilsV2 {
     assertExtensionCodingEquals(CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode, eob);
 
     /*
-        ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-        assertEquals(
-            TransformerUtilsV2.referencePatient(beneficiaryId).getReference(),
-            referral.getSubject().getReference());
-        assertReferenceIdentifierEquals(
-            TransformerConstants.CODING_NPI_US,
-            referringPhysicianNpi.get(),
-            referral.getRequester().getAgent());
-        assertEquals(1, referral.getRecipient().size());
-        assertReferenceIdentifierEquals(
-            TransformerConstants.CODING_NPI_US,
-            referringPhysicianNpi.get(),
-            referral.getRecipientFirstRep());
-    */
+     * ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+     * assertEquals(
+     * TransformerUtilsV2.referencePatient(beneficiaryId).getReference(),
+     * referral.getSubject().getReference());
+     * assertReferenceIdentifierEquals(
+     * TransformerConstants.CODING_NPI_US,
+     * referringPhysicianNpi.get(),
+     * referral.getRequester().getAgent());
+     * assertEquals(1, referral.getRecipient().size());
+     * assertReferenceIdentifierEquals(
+     * TransformerConstants.CODING_NPI_US,
+     * referringPhysicianNpi.get(),
+     * referral.getRecipientFirstRep());
+     */
     assertExtensionCodingEquals(CcwCodebookVariable.ASGMNTCD, providerAssignmentIndicator, eob);
 
     assertExtensionIdentifierEquals(CcwCodebookVariable.CARR_NUM, carrierNumber, eob);
@@ -1579,5 +1587,51 @@ public final class TransformerTestUtilsV2 {
             .findFirst();
 
     assertEquals(false, extensionForUrl.isPresent());
+  }
+
+  /**
+   * Transform rif record to eob explanation of benefit.
+   *
+   * @param metricRegistry the {@link MetricRegistry} to use
+   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
+   *     includeTaxNumbers whether to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *          false</code> )
+   * @param includeTaxNumbers if tax numbers should be included in the response
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
+   * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
+   */
+  static ExplanationOfBenefit transformRifRecordToEob(
+      Object rifRecord,
+      MetricRegistry metricRegistry,
+      boolean includeTaxNumbers,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+
+    ClaimTransformerInterfaceV2 claimTransformerInterface = null;
+    if (rifRecord instanceof CarrierClaim) {
+      claimTransformerInterface =
+          new CarrierClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
+    } else if (rifRecord instanceof DMEClaim) {
+      claimTransformerInterface = new DMEClaimTransformerV2(metricRegistry, drugCodeDisplayLookup);
+    } else if (rifRecord instanceof HHAClaim) {
+      claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof HospiceClaim) {
+      claimTransformerInterface = new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof InpatientClaim) {
+      claimTransformerInterface = new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup);
+    } else if (rifRecord instanceof OutpatientClaim) {
+      claimTransformerInterface =
+          new OutpatientClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
+    } else if (rifRecord instanceof PartDEvent) {
+      claimTransformerInterface =
+          new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup);
+    } else if (rifRecord instanceof SNFClaim) {
+      claimTransformerInterface = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
+    } else {
+      throw new BadCodeMonkeyException("Unhandled RifRecord type!");
+    }
+    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
   }
 }

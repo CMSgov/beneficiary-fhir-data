@@ -26,73 +26,83 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.springframework.stereotype.Component;
 
 /**
- * Transforms CCW {@link OutpatientClaim} instances into FHIR {@link ExplanationOfBenefit}
+ * Transforms CCW {@link OutpatientClaim} instances into FHIR
+ * {@link ExplanationOfBenefit}
  * resources.
  */
 @Component
-public class OutpatientClaimTransformerV2 {
+final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
-  /** The Metric registry. */
-  private final MetricRegistry metricRegistry;
+    /** The Metric registry. */
+    private final MetricRegistry metricRegistry;
 
-  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+    /**
+     * The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to
+     * return.
+     */
+    private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
+    /**
+     * The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return.
+     */
+    private final NPIOrgLookup npiOrgLookup;
 
-  /**
-   * Instantiates a new transformer.
-   *
-   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
-   * be injected properly into places that need it, so this constructor should only be explicitly
-   * called by tests.
-   *
-   * @param metricRegistry the metric registry
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
-   */
-  public OutpatientClaimTransformerV2(
-      MetricRegistry metricRegistry,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
-    this.metricRegistry = requireNonNull(metricRegistry);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-  }
-
-  /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
-   *
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     InpatientClaim}
-   */
-  @Trace
-  ExplanationOfBenefit transform(Object claim) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    OutpatientClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-
-    if (!(claim instanceof OutpatientClaim)) {
-      throw new BadCodeMonkeyException();
+    /**
+     * Instantiates a new transformer.
+     *
+     * <p>
+     * Spring will wire this into a singleton bean during the initial component
+     * scan, and it will
+     * be injected properly into places that need it, so this constructor should
+     * only be explicitly
+     * called by tests.
+     *
+     * @param metricRegistry        the metric registry
+     * @param drugCodeDisplayLookup the drug code display lookup
+     * @param npiOrgLookup          the npi org lookup
+     */
+    public OutpatientClaimTransformerV2(
+            MetricRegistry metricRegistry,
+            FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+            NPIOrgLookup npiOrgLookup) {
+        this.metricRegistry = requireNonNull(metricRegistry);
+        this.npiOrgLookup = requireNonNull(npiOrgLookup);
+        this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     }
 
-    ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim);
-
-    timer.stop();
-    return eob;
-  }
+    /**
+     * Transforms a {@link OutpatientClaim} into an {@link ExplanationOfBenefit}.
+     *
+     * @param claim            the {@link Object} to use
+     * @param includeTaxNumber exists to satisfy
+     *                         {@link ClaimTransformerInterfaceV2}; ignored
+     * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
+     *         specified {@link
+     *         OutpatientClaim}
+     */
+    @Trace
+    @Override
+    public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+        if (!(claim instanceof OutpatientClaim)) {
+            throw new BadCodeMonkeyException();
+        }
+        ExplanationOfBenefit eob = null;
+        try (Timer.Context timer = metricRegistry
+                .timer(
+                        MetricRegistry.name(
+                                OutpatientClaimTransformerV2.class.getSimpleName(), "transform"))
+                .time()) {
+            eob = transformClaim((OutpatientClaim) claim);
+        }
+        return eob;
+    }
 
   /**
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     InpatientClaim}
+   *     OutpatientClaim}
    */
   private ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
@@ -101,13 +111,13 @@ public class OutpatientClaimTransformerV2 {
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_OUTPATIENT_PROFILE_URL);
 
     // Common group level fields between all claim types
-    // Claim Type + Claim ID    => ExplanationOfBenefit.id
-    // CLM_ID                   => ExplanationOfBenefit.identifier
-    // CLM_GRP_ID               => ExplanationOfBenefit.identifier
-    // FINAL_ACTION             => ExplanationOfBenefit.status
-    // CLM_FROM_DT              => ExplanationOfBenefit.billablePeriod.start
-    // CLM_THRU_DT              => ExplanationOfBenefit.billablePeriod.end
-    // CLM_PMT_AMT              => ExplanationOfBenefit.payment.amount
+    // Claim Type + Claim ID => ExplanationOfBenefit.id
+    // CLM_ID => ExplanationOfBenefit.identifier
+    // CLM_GRP_ID => ExplanationOfBenefit.identifier
+    // FINAL_ACTION => ExplanationOfBenefit.status
+    // CLM_FROM_DT => ExplanationOfBenefit.billablePeriod.start
+    // CLM_THRU_DT => ExplanationOfBenefit.billablePeriod.end
+    // CLM_PMT_AMT => ExplanationOfBenefit.payment.amount
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
         eob,
         claimGroup.getClaimId(),
@@ -129,12 +139,12 @@ public class OutpatientClaimTransformerV2 {
             Optional.of(claimGroup.getWeeklyProcessDate())));
 
     // Map care team
-    // AT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Primary)
-    // AT_PHYSN_UPIN    => ExplanationOfBenefit.careTeam.provider
-    // OP_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Assisting)
-    // OP_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider
-    // OT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Other)
-    // OT_PHYSN_UPIN    => ExplanationOfBenefit.careTeam.provider
+    // AT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider (Primary)
+    // AT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
+    // OP_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider (Assisting)
+    // OP_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
+    // OT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider (Other)
+    // OT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
@@ -201,19 +211,20 @@ public class OutpatientClaimTransformerV2 {
         eob, claimGroup.getBloodDeductibleLiabilityAmount(), claimGroup.getMcoPaidSw());
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
-    // ORG_NPI_NUM              => ExplanationOfBenefit.provider
-    // CLM_FAC_TYPE_CD          => ExplanationOfBenefit.facility.extension
-    // CLM_FREQ_CD              => ExplanationOfBenefit.supportingInfo
-    // CLM_MDCR_NON_PMT_RSN_CD  => ExplanationOfBenefit.extension
-    // PTNT_DSCHRG_STUS_CD      => ExplanationOfBenefit.supportingInfo
+    // ORG_NPI_NUM => ExplanationOfBenefit.provider
+    // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
+    // CLM_FREQ_CD => ExplanationOfBenefit.supportingInfo
+    // CLM_MDCR_NON_PMT_RSN_CD => ExplanationOfBenefit.extension
+    // PTNT_DSCHRG_STUS_CD => ExplanationOfBenefit.supportingInfo
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
-    // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
-    // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
-    // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
-    // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
-    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
+    // NCH_PRMRY_PYR_CD => ExplanationOfBenefit.supportingInfo
+    // CLM_TOT_CHRG_AMT => ExplanationOfBenefit.total.amount
+    // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // (PRPAYAMT)
+    // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
+    // FI_CLM_PROC_DT => ExplanationOfBenefit.extension
     // C4BBInstutionalClaimSubtypes.Outpatient for Outpatient Claims
-    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
+    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -234,13 +245,13 @@ public class OutpatientClaimTransformerV2 {
         Optional.of(claimGroup.getClaimQueryCode()));
 
     // Handle Diagnosis
-    // PRNCPAL_DGNS_CD          => diagnosis.diagnosisCodeableConcept
-    // PRNCPAL_DGNS_VRSN_CD     => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD(1-25)        => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_VRSN_CD(1-25)   => diagnosis.diagnosisCodeableConcept
-    // FST_DGNS_E_CD            => diagnosis.diagnosisCodeableConcept
-    // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
+    // PRNCPAL_DGNS_CD => diagnosis.diagnosisCodeableConcept
+    // PRNCPAL_DGNS_VRSN_CD => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_CD(1-25) => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_VRSN_CD(1-25) => diagnosis.diagnosisCodeableConcept
+    // FST_DGNS_E_CD => diagnosis.diagnosisCodeableConcept
+    // FST_DGNS_E_VRSN_CD => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_E_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
@@ -295,9 +306,9 @@ public class OutpatientClaimTransformerV2 {
           TransformerUtilsV2.createAdjudicationDenialReasonSlice(
               eob, CcwCodebookVariable.REV_CNTR_4TH_ANSI_CD, line.getRevCntr4thAnsiCd()));
 
-      // HCPCS_CD               => ExplanationOfBenefit.item.productOrService
-      // HCPCS_1ST_MDFR_CD      => ExplanationOfBenefit.item.modifier
-      // HCPCS_2ND_MDFR_CD      => ExplanationOfBenefit.item.modifier
+      // HCPCS_CD => ExplanationOfBenefit.item.productOrService
+      // HCPCS_1ST_MDFR_CD => ExplanationOfBenefit.item.modifier
+      // HCPCS_2ND_MDFR_CD => ExplanationOfBenefit.item.modifier
       TransformerUtilsV2.mapHcpcs(
           eob,
           item,
@@ -305,13 +316,13 @@ public class OutpatientClaimTransformerV2 {
           Optional.empty(),
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
 
-      // REV_CNTR                   => ExplanationOfBenefit.item.revenue
-      // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
-      // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
-      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.extension.valueQuantity
+      // REV_CNTR => ExplanationOfBenefit.item.revenue
+      // REV_CNTR_RATE_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_TOT_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NCVRD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
+      // REV_CNTR_NDC_QTY_QLFR_CD => ExplanationOfBenefit.modifier
+      // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.extension.valueQuantity
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
           eob,
@@ -396,12 +407,13 @@ public class OutpatientClaimTransformerV2 {
               line.getPatientResponsibilityAmount()));
 
       // Common item level fields between Outpatient, HHA and Hospice
-      // REV_CNTR_DT              => ExplanationOfBenefit.item.servicedDate
-      // REV_CNTR_PMT_AMT_AMT     => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_DT => ExplanationOfBenefit.item.servicedDate
+      // REV_CNTR_PMT_AMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.mapEobCommonItemRevenueOutHHAHospice(
           item, line.getRevenueCenterDate(), line.getPaymentAmount());
 
-      // REV_CNTR_IDE_NDC_UPC_NUM => ExplanationOfBenefit.item.productOrService.extension
+      // REV_CNTR_IDE_NDC_UPC_NUM =>
+      // ExplanationOfBenefit.item.productOrService.extension
       TransformerUtilsV2.addNationalDrugCode(
           item,
           line.getNationalDrugCode(),

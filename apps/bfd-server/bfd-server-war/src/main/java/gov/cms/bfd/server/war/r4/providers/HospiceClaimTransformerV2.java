@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
  * Transforms CCW {@link HospiceClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
 @Component
-public class HospiceClaimTransformerV2 {
+final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -51,26 +51,26 @@ public class HospiceClaimTransformerV2 {
   }
 
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Transforms a @link HospiceClaim} into an {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HospiceClaim}
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(HospiceClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim);
-
-    timer.stop();
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(HospiceClaimTransformerV2.class.getSimpleName(), "transform"))
+            .time()) {
+      eob = transformClaim((HospiceClaim) claim);
+    }
     return eob;
   }
 

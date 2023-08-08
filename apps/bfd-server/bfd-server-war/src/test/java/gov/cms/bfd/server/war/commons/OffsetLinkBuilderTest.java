@@ -70,12 +70,11 @@ public class OffsetLinkBuilderTest {
     String[] value = {"-1"};
     params.put("startIndex", value);
     when(requestDetails.getParameters()).thenReturn(params);
-    OffsetLinkBuilder linkBuilder = new OffsetLinkBuilder(requestDetails, "");
 
     assertThrows(
         InvalidRequestException.class,
         () -> {
-          linkBuilder.getStartIndex();
+          OffsetLinkBuilder linkBuilder = new OffsetLinkBuilder(requestDetails, "");
         },
         "Value for startIndex cannot be negative: -1");
   }

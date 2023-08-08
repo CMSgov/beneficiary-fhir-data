@@ -87,7 +87,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
   /** The transformer for part D events claims. */
   private PartDEventTransformerV2 partDEventTransformer;
   /** The transformer for snf claims. */
-  private SNFClaimTransformerV2 snfClaimTransformerV2;
+  private SNFClaimTransformerV2 snfClaimTransformer;
 
   /** Sets the test resources up for comparing the data. */
   @BeforeEach
@@ -108,7 +108,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     partDEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
-    snfClaimTransformerV2 = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
+    snfClaimTransformer = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
   }
 
   /**
@@ -127,7 +127,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     CarrierClaim claim =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
-            .map(r -> (CarrierClaim) r)
+            .map(CarrierClaim.class::cast)
             .findFirst()
             .get();
 
@@ -158,7 +158,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     DMEClaim claim =
         loadedRecords.stream()
             .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
+            .map(DMEClaim.class::cast)
             .findFirst()
             .get();
 
@@ -190,7 +190,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     HHAClaim claim =
         loadedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
 
@@ -223,7 +223,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     HospiceClaim claim =
         loadedRecords.stream()
             .filter(r -> r instanceof HospiceClaim)
-            .map(r -> (HospiceClaim) r)
+            .map(HospiceClaim.class::cast)
             .findFirst()
             .get();
 
@@ -255,7 +255,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     InpatientClaim claim =
         loadedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
 
@@ -287,7 +287,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     OutpatientClaim claim =
         loadedRecords.stream()
             .filter(r -> r instanceof OutpatientClaim)
-            .map(r -> (OutpatientClaim) r)
+            .map(OutpatientClaim.class::cast)
             .findFirst()
             .get();
 
@@ -305,7 +305,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
             new MetricRegistry(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
-    assertEobEquals(outpatientClaimTransformerV2.transform(claim), eob);
+    assertEobEquals(outpatientClaimTransformer.transform(claim, false), eob);
   }
 
   /**
@@ -324,7 +324,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     PartDEvent claim =
         loadedRecords.stream()
             .filter(r -> r instanceof PartDEvent)
-            .map(r -> (PartDEvent) r)
+            .map(PartDEvent.class::cast)
             .findFirst()
             .get();
 
@@ -356,7 +356,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     SNFClaim claim =
         loadedRecords.stream()
             .filter(r -> r instanceof SNFClaim)
-            .map(r -> (SNFClaim) r)
+            .map(SNFClaim.class::cast)
             .findFirst()
             .get();
 
@@ -388,7 +388,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
+            .map(Beneficiary.class::cast)
             .findFirst()
             .get();
 
@@ -447,7 +447,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
+            .map(Beneficiary.class::cast)
             .findFirst()
             .get();
 
@@ -492,7 +492,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
+            .map(Beneficiary.class::cast)
             .findFirst()
             .get();
 
@@ -564,7 +564,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
+            .map(Beneficiary.class::cast)
             .findFirst()
             .get();
     /*
@@ -630,7 +630,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
+            .map(Beneficiary.class::cast)
             .findFirst()
             .get();
 
@@ -724,7 +724,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     CarrierClaim carrierRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
-            .map(r -> (CarrierClaim) r)
+            .map(CarrierClaim.class::cast)
             .findFirst()
             .get();
 
@@ -749,7 +749,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     InpatientClaim inpatientRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
 
@@ -774,7 +774,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     OutpatientClaim outpatientRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof OutpatientClaim)
-            .map(r -> (OutpatientClaim) r)
+            .map(OutpatientClaim.class::cast)
             .findFirst()
             .get();
 
@@ -800,7 +800,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     HHAClaim hhaRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof HHAClaim)
-            .map(r -> (HHAClaim) r)
+            .map(HHAClaim.class::cast)
             .findFirst()
             .get();
 
@@ -825,7 +825,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     SNFClaim snfRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof SNFClaim)
-            .map(r -> (SNFClaim) r)
+            .map(SNFClaim.class::cast)
             .findFirst()
             .get();
 
@@ -850,7 +850,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     HospiceClaim hospiceRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof HospiceClaim)
-            .map(r -> (HospiceClaim) r)
+            .map(HospiceClaim.class::cast)
             .findFirst()
             .get();
 
@@ -875,7 +875,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     DMEClaim dmeRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
+            .map(DMEClaim.class::cast)
             .findFirst()
             .get();
 
@@ -974,19 +974,19 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
+            .map(Beneficiary.class::cast)
             .findFirst()
             .get();
     CarrierClaim carrierClaim =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
-            .map(r -> (CarrierClaim) r)
+            .map(CarrierClaim.class::cast)
             .findFirst()
             .get();
     DMEClaim dmeClaim =
         loadedRecords.stream()
             .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
+            .map(DMEClaim.class::cast)
             .findFirst()
             .get();
     Bundle searchResults;
@@ -1062,7 +1062,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
+            .map(Beneficiary.class::cast)
             .findFirst()
             .get();
     Bundle searchResults =
@@ -1091,7 +1091,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     PartDEvent partDEvent =
         loadedRecords.stream()
             .filter(r -> r instanceof PartDEvent)
-            .map(r -> (PartDEvent) r)
+            .map(PartDEvent.class::cast)
             .findFirst()
             .get();
 
@@ -1100,7 +1100,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         new PartDEventTransformerV2(
             new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertEobEquals(
-        partDEventTransformer.transform(partDEvent),
+        partDEventTransformer.transform(partDEvent, false),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -1242,7 +1242,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     Long claimId =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
-            .map(r -> (CarrierClaim) r)
+            .map(CarrierClaim.class::cast)
             .findFirst()
             .get()
             .getClaimId();
@@ -1389,7 +1389,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
   private static Beneficiary findFirstBeneficary(List<Object> loadedRecords) {
     return loadedRecords.stream()
         .filter(r -> r instanceof Beneficiary)
-        .map(r -> (Beneficiary) r)
+        .map(Beneficiary.class::cast)
         .findFirst()
         .get();
   }
@@ -1696,12 +1696,12 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         switch (claimType) {
           case CARRIER -> carrierClaimTransformer.transform(claim, false);
           case DME -> dmeClaimTransformer.transform(claim, false);
-          case HHA -> hhaClaimTransformer.transform(claim);
-          case HOSPICE -> hospiceClaimTransformer.transform(claim);
-          case INPATIENT -> inpatientClaimTransformer.transform(claim);
-          case OUTPATIENT -> outpatientClaimTransformer.transform(claim);
-          case PDE -> partDEventTransformer.transform(claim);
-          case SNF -> snfClaimTransformerV2.transform(claim);
+          case HHA -> hhaClaimTransformer.transform(claim, false);
+          case HOSPICE -> hospiceClaimTransformer.transform(claim, false);
+          case INPATIENT -> inpatientClaimTransformer.transform(claim, false);
+          case OUTPATIENT -> outpatientClaimTransformer.transform(claim, false);
+          case PDE -> partDEventTransformer.transform(claim, false);
+          case SNF -> snfClaimTransformer.transform(claim, false);
         };
 
     assertEobEquals(expectedEob, searchResults);

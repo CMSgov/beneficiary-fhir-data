@@ -1,44 +1,69 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaimLine;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.stereotype.Component;
 
 /**
  * Transforms CCW {@link HospiceClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
-final class HospiceClaimTransformer {
+@Component
+final class HospiceClaimTransformer implements ClaimTransformerInterface {
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
+  private final NPIOrgLookup npiOrgLookup;
+
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Instantiates a new transformer.
    *
-   * @param transformerContext the {@link TransformerContext} to use
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HospiceClaim}
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param npiOrgLookup the npi org lookup
+   */
+  public HospiceClaimTransformer(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.npiOrgLookup = requireNonNull(npiOrgLookup);
+  }
+
+  /**
+   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   *
+   * @param claim the {@link HospiceClaim} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
-    Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof HospiceClaim)) {
+      throw new BadCodeMonkeyException();
+    }
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
             .timer(MetricRegistry.name(HospiceClaimTransformer.class.getSimpleName(), "transform"))
-            .time();
-
-    if (!(claim instanceof HospiceClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim, transformerContext);
-
-    timer.stop();
+            .time()) {
+      eob = transformClaim((HospiceClaim) claim);
+    }
     return eob;
   }
 
@@ -46,12 +71,10 @@ final class HospiceClaimTransformer {
    * Transforms a specified {@link HospiceClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link HospiceClaim} to transform
-   * @param transformerContext the transformer context
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HospiceClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      HospiceClaim claimGroup, TransformerContext transformerContext) {
+  private ExplanationOfBenefit transformClaim(HospiceClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -105,7 +128,7 @@ final class HospiceClaimTransformer {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        transformerContext.getNPIOrgLookup().retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),

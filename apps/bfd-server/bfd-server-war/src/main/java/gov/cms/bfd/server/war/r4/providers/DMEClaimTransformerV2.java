@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
-final class DMEClaimTransformerV2 {
+final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -49,35 +49,33 @@ final class DMEClaimTransformerV2 {
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
    */
-  public DMEClaimTransformerV2(
+  DMEClaimTransformerV2(
       MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
-    requireNonNull(metricRegistry);
-    requireNonNull(drugCodeDisplayLookup);
-    this.metricRegistry = metricRegistry;
-    this.drugCodeDisplayLookup = drugCodeDisplayLookup;
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
   }
 
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Transforms a {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumbers whether to include tax numbers in the response
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     DMEClaim}
+   * @param includeTaxNumber optional Boolean denoting whether to include tax numbers in the
+   *     response
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim, boolean includeTaxNumbers) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim(includeTaxNumbers, (DMEClaim) claim);
-
-    timer.stop();
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
+            .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
+            .time()) {
+      eob = transformClaim((DMEClaim) claim, includeTaxNumber);
+    }
     return eob;
   }
 
@@ -89,7 +87,7 @@ final class DMEClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private ExplanationOfBenefit transformClaim(boolean includeTaxNumbers, DMEClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, boolean includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -245,12 +243,11 @@ final class DMEClaimTransformerV2 {
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
         boolean performingHasMatchingExtension =
-            (line.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtilsV2.careTeamHasMatchingExtension(
+            line.getProviderParticipatingIndCode().isPresent()
+                && TransformerUtilsV2.careTeamHasMatchingExtension(
                     performing.get(),
                     TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(line.getProviderParticipatingIndCode().get()))
-                : false;
+                    String.valueOf(line.getProviderParticipatingIndCode().get()));
 
         if (!performingHasMatchingExtension) {
           performing

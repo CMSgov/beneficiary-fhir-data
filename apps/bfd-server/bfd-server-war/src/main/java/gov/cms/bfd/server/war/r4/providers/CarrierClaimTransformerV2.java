@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
  */
 @Component
-public class CarrierClaimTransformerV2 {
+final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -63,28 +63,26 @@ public class CarrierClaimTransformerV2 {
   }
 
   /**
-   * Transforms a claim into an {@link ExplanationOfBenefit}.
+   * Transforms a {@link CarrierClaim} into an {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
-   * @param includeTaxNumbers whether to include tax numbers in the response
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     CarrierClaim}
+   * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim, boolean includeTaxNumbers) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
-
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
-
-    timer.stop();
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform"))
+            .time()) {
+      eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
+    }
     return eob;
   }
 
@@ -275,13 +273,15 @@ public class CarrierClaimTransformerV2 {
         }
 
         performingHasMatchingExtension =
-            (line.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtilsV2.careTeamHasMatchingExtension(
+            line.getProviderParticipatingIndCode().isPresent()
+                && TransformerUtilsV2.careTeamHasMatchingExtension(
                     performing.get(),
                     TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(line.getProviderParticipatingIndCode().get()))
-                : false;
+                    String.valueOf(line.getProviderParticipatingIndCode().get()));
 
+        // TODO - following code is wrong and needs to be fixed; this error may be
+        //        for both CARRIER and DME claims, stu3 and r4.
+        // JIRA ticket: https://jira.cms.gov/browse/BFD-2815
         if (!performingHasMatchingExtension) {
           // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
           performing

@@ -3,10 +3,13 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
@@ -15,7 +18,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +27,40 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class DMEClaimTransformerTest {
+  /** The transformer under test. */
+  DMEClaimTransformer dmeClaimTransformer;
+  /** The Metric Registry to use for the test. */
+  @Mock MetricRegistry metricRegistry;
+  /** The FDA drug lookup to use for the test. */
+  @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  protected void setup() {
+    when(metricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
+        .thenReturn("UNKNOWN");
+
+    dmeClaimTransformer = new DMEClaimTransformer(metricRegistry, drugDisplayLookup);
+  }
+
   /**
    * Verifies that {@link DMEClaimTransformer#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
@@ -42,19 +74,12 @@ public final class DMEClaimTransformerTest {
     DMEClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
+            .map(DMEClaim.class::cast)
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob =
-        DMEClaimTransformer.transform(
-            new TransformerContext(
-                new MetricRegistry(),
-                Optional.of(true),
-                FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-                new NPIOrgLookup()),
-            claim);
-    assertMatches(claim, eob, Optional.of(true));
+    ExplanationOfBenefit eob = dmeClaimTransformer.transform(claim, true);
+    assertMatches(claim, eob, true);
   }
 
   /**
@@ -66,13 +91,12 @@ public final class DMEClaimTransformerTest {
    *     DMEClaim}@param includedTaxNumbers whether or not to include tax numbers are expected to be
    *     included in the result (see {@link
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   * false</code>)
+   * false</code> )
    * @param includedTaxNumbers the value for IncludeTaxNumbers in the request to inform the expected
    *     result
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      DMEClaim claim, ExplanationOfBenefit eob, Optional<Boolean> includedTaxNumbers)
+  static void assertMatches(DMEClaim claim, ExplanationOfBenefit eob, boolean includedTaxNumbers)
       throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
@@ -136,7 +160,7 @@ public final class DMEClaimTransformerTest {
     CareTeamComponent taxNumberCareTeamEntry =
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             claimLine1.getProviderTaxNumber(), eob.getCareTeam());
-    if (includedTaxNumbers.orElse(false)) {
+    if (includedTaxNumbers) {
       assertNotNull(taxNumberCareTeamEntry);
     } else {
       assertNull(taxNumberCareTeamEntry);

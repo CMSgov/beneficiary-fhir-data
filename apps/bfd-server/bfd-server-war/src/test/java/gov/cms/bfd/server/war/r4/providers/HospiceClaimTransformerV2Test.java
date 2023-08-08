@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
@@ -53,19 +56,30 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link HospiceClaimTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class HospiceClaimTransformerV2Test {
-
+  /** The EOB under test created from the {@link #claim}. */
+  ExplanationOfBenefit eob = null;
+  /** The parsed claim used to generate the EOB and for validating with. */
+  HospiceClaim claim = null;
+  /** The transformer under test. */
+  HospiceClaimTransformerV2 hospiceClaimTransformer;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
-  /** The EOB under test created from the {@link #claim}. */
-  private ExplanationOfBenefit eob = null;
-  /** The parsed claim used to generate the EOB and for validating with. */
-  private HospiceClaim claim = null;
-  /** The transformer under test. */
-  private HospiceClaimTransformerV2 hospiceClaimTransformerV2;
-
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -73,18 +87,19 @@ public final class HospiceClaimTransformerV2Test {
    */
   @BeforeEach
   public void generateClaim() throws FHIRException, IOException {
-    hospiceClaimTransformerV2 =
-        new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
+    hospiceClaimTransformer = new HospiceClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     claim =
         parsedRecords.stream()
             .filter(r -> r instanceof HospiceClaim)
-            .map(r -> (HospiceClaim) r)
+            .map(HospiceClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
     createEOB();
   }
@@ -95,7 +110,7 @@ public final class HospiceClaimTransformerV2Test {
    * @throws IOException if there is an issue reading the test file
    */
   private void createEOB() throws IOException {
-    ExplanationOfBenefit genEob = hospiceClaimTransformerV2.transform(claim);
+    ExplanationOfBenefit genEob = hospiceClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -121,7 +136,7 @@ public final class HospiceClaimTransformerV2Test {
    */
   @Test
   public void transformSampleARecord() throws FHIRException, IOException {
-    assertMatches(claim, hospiceClaimTransformerV2.transform(claim));
+    assertMatches(claim, hospiceClaimTransformer.transform(claim, false));
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -139,7 +154,8 @@ public final class HospiceClaimTransformerV2Test {
   /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
-    // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
+    // The base CanonicalType doesn't seem to compare correctly so lets convert it
+    // to a string
     assertTrue(
         eob.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
@@ -431,7 +447,7 @@ public final class HospiceClaimTransformerV2Test {
     claim.setClaimQueryCode(Optional.empty());
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = hospiceClaimTransformerV2.transform(claim);
+    ExplanationOfBenefit genEob = hospiceClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -519,7 +535,7 @@ public final class HospiceClaimTransformerV2Test {
 
     assertTrue(compare2.equalsDeep(member2));
 
-    //     // Third member
+    // // Third member
     CareTeamComponent member3 = TransformerTestUtilsV2.findCareTeamBySequence(3, eob.getCareTeam());
 
     CareTeamComponent compare3 =
@@ -636,7 +652,8 @@ public final class HospiceClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // // Only one insurance object if there is more than we need to fix the focal
+    // set to point
     // to the correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());

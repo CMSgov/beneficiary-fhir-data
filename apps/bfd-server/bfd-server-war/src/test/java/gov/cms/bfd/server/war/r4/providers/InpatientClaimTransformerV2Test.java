@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -50,17 +53,30 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link InpatientClaimTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class InpatientClaimTransformerV2Test {
   /** The parsed claim used to generate the EOB and for validating with. */
   InpatientClaim claim;
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
+  /** The transformer under test. */
+  InpatientClaimTransformerV2 inpatientClaimTransformer;
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
-  /** The transformer under test. */
-  InpatientClaimTransformerV2 inpatientClaimTransformerV2;
+  /** The mock metric registry. */
+  @Mock MetricRegistry mockMetricRegistry;
+  /** The mock metric timer. */
+  @Mock Timer mockTimer;
+  /** The mock metric timer context (used to stop the metric). */
+  @Mock Timer.Context mockTimerContext;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -75,12 +91,10 @@ public final class InpatientClaimTransformerV2Test {
     InpatientClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-
     return claim;
   }
 
@@ -91,10 +105,13 @@ public final class InpatientClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    inpatientClaimTransformerV2 =
-        new InpatientClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
+    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
+    when(mockTimer.time()).thenReturn(mockTimerContext);
+
+    inpatientClaimTransformer =
+        new InpatientClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
     claim = generateClaim();
-    ExplanationOfBenefit genEob = inpatientClaimTransformerV2.transform(claim);
+    ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -115,7 +132,8 @@ public final class InpatientClaimTransformerV2Test {
   /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
-    // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
+    // The base CanonicalType doesn't seem to compare correctly so lets convert it
+    // to a string
     assertTrue(
         eob.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
@@ -411,12 +429,12 @@ public final class InpatientClaimTransformerV2Test {
     InpatientClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .map(InpatientClaim.class::cast)
             .findFirst()
             .get();
-
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit genEob = inpatientClaimTransformerV2.transform(claim);
+
+    ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -951,7 +969,7 @@ public final class InpatientClaimTransformerV2Test {
                     "http://hl7.org/fhir/sid/icd-10",
                     "BQ0HZZZ",
                     "PLAIN RADIOGRAPHY OF LEFT ANKLE")),
-            "2016-01-16T00:00:00+00:00");
+            "2016-01-16T00:00:00Z");
 
     assertTrue(cmp1.equalsDeep(proc1), "Comparing Procedure code BQ0HZZZ");
 
@@ -970,7 +988,7 @@ public final class InpatientClaimTransformerV2Test {
                     "http://hl7.org/fhir/sid/icd-10",
                     "CD1YYZZ",
                     "PLANAR NUCL MED IMAG OF DIGESTIVE SYS USING OTH RADIONUCLIDE")),
-            "2016-01-16T00:00:00+00:00");
+            "2016-01-16T00:00:00Z");
 
     assertTrue(cmp2.equalsDeep(proc2), "Comparing Procedure code CD1YYZZ");
 
@@ -989,7 +1007,7 @@ public final class InpatientClaimTransformerV2Test {
                     "http://hl7.org/fhir/sid/icd-10",
                     "2W52X6Z",
                     "REMOVAL OF PRESSURE DRESSING ON NECK")),
-            "2016-01-15T00:00:00+00:00");
+            "2016-01-15T00:00:00Z");
 
     assertTrue(cmp3.equalsDeep(proc3), "Comparing Procedure code 2W52X6Z");
 
@@ -1006,7 +1024,7 @@ public final class InpatientClaimTransformerV2Test {
                     "FLUOROSCOPY OF LEFT SCAPULA"),
                 new Coding(
                     "http://hl7.org/fhir/sid/icd-10", "BP17ZZZ", "FLUOROSCOPY OF LEFT SCAPULA")),
-            "2016-01-17T00:00:00+00:00");
+            "2016-01-17T00:00:00Z");
 
     assertTrue(cmp4.equalsDeep(proc4), "Comparing Procedure code BP17ZZZ");
 
@@ -1023,7 +1041,7 @@ public final class InpatientClaimTransformerV2Test {
                     "HYPERTHERMIA OF NASOPHARYNX"),
                 new Coding(
                     "http://hl7.org/fhir/sid/icd-10", "D9YD8ZZ", "HYPERTHERMIA OF NASOPHARYNX")),
-            "2016-01-24T00:00:00+00:00");
+            "2016-01-24T00:00:00Z");
 
     assertTrue(cmp5.equalsDeep(proc5), "Comparing Procedure code D9YD8ZZ");
 
@@ -1042,7 +1060,7 @@ public final class InpatientClaimTransformerV2Test {
                     "http://hl7.org/fhir/sid/icd-10",
                     "F00ZCKZ",
                     "APHASIA ASSESSMENT USING AUDIOVISUAL EQUIPMENT")),
-            "2016-01-24T00:00:00+00:00");
+            "2016-01-24T00:00:00Z");
 
     assertTrue(cmp6.equalsDeep(proc6), "Comparing Procedure code F00ZCKZ");
   }
@@ -1053,7 +1071,8 @@ public final class InpatientClaimTransformerV2Test {
    */
   @Test
   public void shouldReferenceCoverageInInsurance() {
-    //     // Only one insurance object if there is more than we need to fix the focal set to point
+    // // Only one insurance object if there is more than we need to fix the focal
+    // set to point
     // to the correct insurance
     assertEquals(false, eob.getInsurance().size() > 1);
     assertEquals(1, eob.getInsurance().size());
@@ -1962,7 +1981,7 @@ public final class InpatientClaimTransformerV2Test {
   @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = inpatientClaimTransformerV2.transform(generateClaim());
+    ExplanationOfBenefit eob = inpatientClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }
