@@ -55,7 +55,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -448,7 +447,13 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
           .addAnnotation(Builder.Default.class);
     }
     final var accessorSpec =
-        new AccessorSpec(join.getFieldName(), fieldType, fieldType, false, join.isReadOnly());
+        AccessorSpec.builder()
+            .fieldName(join.getFieldName())
+            .fieldType(fieldType)
+            .accessorType(fieldType)
+            .isNullableColumn(false)
+            .isReadOnly(join.isReadOnly())
+            .build();
     return new FieldDefinition(fieldSpec.build(), accessorSpec);
   }
 
@@ -508,7 +513,13 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
       fieldSpec.addAnnotation(EqualsAndHashCode.Include.class);
     }
     final var accessorSpec =
-        new AccessorSpec(column.getName(), fieldType, accessorType, column.isNullable(), false);
+        AccessorSpec.builder()
+            .fieldName(column.getName())
+            .fieldType(fieldType)
+            .accessorType(accessorType)
+            .isNullableColumn(column.isNullable())
+            .isReadOnly(false)
+            .build();
     return new FieldDefinition(fieldSpec.build(), accessorSpec);
   }
 
@@ -640,11 +651,11 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
 
   /**
    * Creates a list containing a {@link MethodSpec} for every join property getter defined in {@link
-   * JoinBean#properties} within the mapping.
+   * JoinBean} properties within the mapping.
    *
    * @param mapping {@link MappingBean} containing the joins
    * @return the list of {@link MethodSpec} objects
-   * @throws MojoExecutionException if the any types cannot be mapped
+   * @throws MojoExecutionException if any types cannot be mapped
    */
   @VisibleForTesting
   List<MethodSpec> createMethodSpecsForJoinProperties(MappingBean mapping)
@@ -776,7 +787,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
 
   /**
    * Creates a {@link AnnotationSpec} for a join field. The type of the annotation is based on the
-   * {@link JoinBean#joinType} but will be one of {@link javax.persistence.OneToMany}, {@link
+   * {@link JoinBean} joinType but will be one of {@link javax.persistence.OneToMany}, {@link
    * javax.persistence.ManyToOne}, or {@link javax.persistence.OneToOne}.
    *
    * @param mapping {@link MappingBean} containing the join
@@ -1037,7 +1048,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
             .filter(columnBean -> columnBean.hasGroupName())
             .collect(Collectors.groupingBy(ColumnBean::getGroupName));
     for (Map.Entry<String, List<ColumnBean>> entry : groupedColumns.entrySet()) {
-      final var columnBean = entry.getValue().stream().findFirst().get();
+      final var columnBean = entry.getValue().get(0);
       final var propertyType =
           columnBean.isNullable()
               ? ParameterizedTypeName.get(OptionalClassName, columnBean.computeJavaAccessorType())
@@ -1053,26 +1064,26 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   }
 
   /**
-   * Data class holding all of the information required to create accessor methods (setter/getter)
-   * for a field.
+   * Data class holding all the information required to create accessor methods (setter/getter) for
+   * a field.
+   *
+   * @param fieldName Name of the field.
+   * @param fieldType Type of the field.
+   * @param accessorType Type of the accessor method parameter or return value.
+   * @param isNullableColumn True if the column is nullable.
+   * @param isReadOnly True if the column is read only. (No setter should be generated.)
+   * @param groupName The name of the group of fields to which the field belongs.
    */
   @Data
-  @RequiredArgsConstructor
+  @Builder
   @VisibleForTesting
-  static class AccessorSpec {
-    /** Name of the field. */
-    private final String fieldName;
-    /** Type of the field. */
-    private final TypeName fieldType;
-    /** Type of the accessor method parameter or return value. */
-    private final TypeName accessorType;
-    /** True if the column is nullable. */
-    private final boolean isNullableColumn;
-    /** True if the column is read only. (No setter should be generated.) */
-    private final boolean isReadOnly;
-    /** The name of the group of fields to which the field belongs. */
-    private String groupName;
-  }
+  record AccessorSpec(
+      String fieldName,
+      TypeName fieldType,
+      TypeName accessorType,
+      boolean isNullableColumn,
+      boolean isReadOnly,
+      String groupName) {}
 
   /** Wrapper for the properties of every field to be generated in the entity class. */
   @Data

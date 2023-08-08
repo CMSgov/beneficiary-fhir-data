@@ -26,76 +26,66 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.springframework.stereotype.Component;
 
 /**
- * Transforms CCW {@link OutpatientClaim} instances into FHIR
- * {@link ExplanationOfBenefit}
+ * Transforms CCW {@link OutpatientClaim} instances into FHIR {@link ExplanationOfBenefit}
  * resources.
  */
 @Component
 final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
-    /** The Metric registry. */
-    private final MetricRegistry metricRegistry;
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
 
-    /**
-     * The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to
-     * return.
-     */
-    private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
-    /**
-     * The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return.
-     */
-    private final NPIOrgLookup npiOrgLookup;
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
+  private final NPIOrgLookup npiOrgLookup;
 
-    /**
-     * Instantiates a new transformer.
-     *
-     * <p>
-     * Spring will wire this into a singleton bean during the initial component
-     * scan, and it will
-     * be injected properly into places that need it, so this constructor should
-     * only be explicitly
-     * called by tests.
-     *
-     * @param metricRegistry        the metric registry
-     * @param drugCodeDisplayLookup the drug code display lookup
-     * @param npiOrgLookup          the npi org lookup
-     */
-    public OutpatientClaimTransformerV2(
-            MetricRegistry metricRegistry,
-            FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-            NPIOrgLookup npiOrgLookup) {
-        this.metricRegistry = requireNonNull(metricRegistry);
-        this.npiOrgLookup = requireNonNull(npiOrgLookup);
-        this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
+   */
+  public OutpatientClaimTransformerV2(
+      MetricRegistry metricRegistry,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+  }
+
+  /**
+   * Transforms a {@link OutpatientClaim} into an {@link ExplanationOfBenefit}.
+   *
+   * @param claim the {@link Object} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
+   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
+   *     OutpatientClaim}
+   */
+  @Trace
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof OutpatientClaim)) {
+      throw new BadCodeMonkeyException();
     }
-
-    /**
-     * Transforms a {@link OutpatientClaim} into an {@link ExplanationOfBenefit}.
-     *
-     * @param claim            the {@link Object} to use
-     * @param includeTaxNumber exists to satisfy
-     *                         {@link ClaimTransformerInterfaceV2}; ignored
-     * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
-     *         specified {@link
-     *         OutpatientClaim}
-     */
-    @Trace
-    @Override
-    public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
-        if (!(claim instanceof OutpatientClaim)) {
-            throw new BadCodeMonkeyException();
-        }
-        ExplanationOfBenefit eob = null;
-        try (Timer.Context timer = metricRegistry
-                .timer(
-                        MetricRegistry.name(
-                                OutpatientClaimTransformerV2.class.getSimpleName(), "transform"))
-                .time()) {
-            eob = transformClaim((OutpatientClaim) claim);
-        }
-        return eob;
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(
+                    OutpatientClaimTransformerV2.class.getSimpleName(), "transform"))
+            .time()) {
+      eob = transformClaim((OutpatientClaim) claim);
     }
+    return eob;
+  }
 
   /**
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.

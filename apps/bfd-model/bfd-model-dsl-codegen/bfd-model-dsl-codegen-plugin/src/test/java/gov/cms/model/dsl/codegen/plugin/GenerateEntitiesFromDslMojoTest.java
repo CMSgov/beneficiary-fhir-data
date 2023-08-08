@@ -168,7 +168,13 @@ public class GenerateEntitiesFromDslMojoTest {
                 .addAnnotation(EqualsAndHashCode.Include.class)
                 .addAnnotation(OneToOne.class)
                 .build(),
-            new AccessorSpec("af", fieldType, fieldType, false, false)),
+            AccessorSpec.builder()
+                .fieldName("af")
+                .fieldType(fieldType)
+                .accessorType(fieldType)
+                .isNullableColumn(false)
+                .isReadOnly(false)
+                .build()),
         mojo.createFieldDefinitionForJoin(root, mapping, join));
   }
 
@@ -215,7 +221,13 @@ public class GenerateEntitiesFromDslMojoTest {
                         .build())
                 .addAnnotation(Builder.Default.class)
                 .build(),
-            new AccessorSpec("af", fieldType, fieldType, false, false)),
+            AccessorSpec.builder()
+                .fieldName("af")
+                .fieldType(fieldType)
+                .accessorType(fieldType)
+                .isNullableColumn(false)
+                .isReadOnly(false)
+                .build()),
         mojo.createFieldDefinitionForJoin(root, mapping, join));
 
     // missing package name throws
@@ -273,7 +285,13 @@ public class GenerateEntitiesFromDslMojoTest {
             FieldSpec.builder(fieldType, "c", Modifier.PRIVATE)
                 .addAnnotations(columnAnnotations)
                 .build(),
-            new AccessorSpec("c", fieldType, fieldType, true, false)),
+            AccessorSpec.builder()
+                .fieldName("c")
+                .fieldType(fieldType)
+                .accessorType(fieldType)
+                .isNullableColumn(true)
+                .isReadOnly(false)
+                .build()),
         mojo.createFieldDefinitionForColumn(mapping, column));
 
     // all the options
@@ -288,7 +306,13 @@ public class GenerateEntitiesFromDslMojoTest {
                 .addAnnotations(columnAnnotations)
                 .addAnnotation(EqualsAndHashCode.Include.class)
                 .build(),
-            new AccessorSpec("c", enumClass, enumClass, true, false)),
+            AccessorSpec.builder()
+                .fieldName("c")
+                .fieldType(enumClass)
+                .accessorType(enumClass)
+                .isNullableColumn(true)
+                .isReadOnly(false)
+                .build()),
         mojo.createFieldDefinitionForColumn(mapping, column));
   }
 
@@ -436,13 +460,27 @@ public class GenerateEntitiesFromDslMojoTest {
             PoetUtil.createStandardGetter(fieldName, fieldType, accessorType),
             PoetUtil.createStandardSetter(fieldName, fieldType, accessorType)),
         mojo.createMethodSpecsForAccessorSpec(
-            mapping, new AccessorSpec(fieldName, fieldType, accessorType, true, false)));
+            mapping,
+            AccessorSpec.builder()
+                .fieldName(fieldName)
+                .fieldType(fieldType)
+                .accessorType(accessorType)
+                .isNullableColumn(true)
+                .isReadOnly(false)
+                .build()));
 
     // read-only nullable using nulls
     assertEquals(
         List.of(PoetUtil.createStandardGetter(fieldName, fieldType, accessorType)),
         mojo.createMethodSpecsForAccessorSpec(
-            mapping, new AccessorSpec(fieldName, fieldType, accessorType, true, true)));
+            mapping,
+            AccessorSpec.builder()
+                .fieldName(fieldName)
+                .fieldType(fieldType)
+                .accessorType(accessorType)
+                .isNullableColumn(true)
+                .isReadOnly(true)
+                .build()));
 
     // not-nullable
     assertEquals(
@@ -450,13 +488,27 @@ public class GenerateEntitiesFromDslMojoTest {
             PoetUtil.createStandardGetter(fieldName, fieldType, accessorType),
             PoetUtil.createStandardSetter(fieldName, fieldType, accessorType)),
         mojo.createMethodSpecsForAccessorSpec(
-            mapping, new AccessorSpec(fieldName, fieldType, accessorType, false, false)));
+            mapping,
+            AccessorSpec.builder()
+                .fieldName(fieldName)
+                .fieldType(fieldType)
+                .accessorType(accessorType)
+                .isNullableColumn(false)
+                .isReadOnly(false)
+                .build()));
 
     // read-only not-nullable
     assertEquals(
         List.of(PoetUtil.createStandardGetter(fieldName, fieldType, accessorType)),
         mojo.createMethodSpecsForAccessorSpec(
-            mapping, new AccessorSpec(fieldName, fieldType, accessorType, false, true)));
+            mapping,
+            AccessorSpec.builder()
+                .fieldName(fieldName)
+                .fieldType(fieldType)
+                .accessorType(accessorType)
+                .isNullableColumn(false)
+                .isReadOnly(true)
+                .build()));
 
     // nullable using Optional
     mapping.setNullableFieldAccessorType(MappingBean.NullableFieldAccessorType.Optional);
@@ -465,13 +517,27 @@ public class GenerateEntitiesFromDslMojoTest {
             PoetUtil.createOptionalGetter(fieldName, fieldType, accessorType),
             PoetUtil.createOptionalSetter(fieldName, fieldType, accessorType)),
         mojo.createMethodSpecsForAccessorSpec(
-            mapping, new AccessorSpec(fieldName, fieldType, accessorType, true, false)));
+            mapping,
+            AccessorSpec.builder()
+                .fieldName(fieldName)
+                .fieldType(fieldType)
+                .accessorType(accessorType)
+                .isNullableColumn(true)
+                .isReadOnly(false)
+                .build()));
 
     // read-only nullable using Optional
     assertEquals(
         List.of(PoetUtil.createOptionalGetter(fieldName, fieldType, accessorType)),
         mojo.createMethodSpecsForAccessorSpec(
-            mapping, new AccessorSpec(fieldName, fieldType, accessorType, true, true)));
+            mapping,
+            AccessorSpec.builder()
+                .fieldName(fieldName)
+                .fieldType(fieldType)
+                .accessorType(accessorType)
+                .isNullableColumn(true)
+                .isReadOnly(true)
+                .build()));
   }
 
   /** Tests for {@link GenerateEntitiesFromDslMojo#createMethodSpecsForJoinProperties}. */
