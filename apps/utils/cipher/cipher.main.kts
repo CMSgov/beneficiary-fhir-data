@@ -455,7 +455,8 @@ fun main(args: Array<String>) {
         "edit" -> {
             val currentDirectory = Paths.get(".")
             val permissions = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"))
-            val tempFile = Files.createTempFile(currentDirectory, "edit-", ".txt", permissions).toFile()
+            val extension = if (inputFile.extension.length > 0) ".${inputFile.extension}" else ".txt"
+            val tempFile = Files.createTempFile(currentDirectory, "edit-", extension, permissions).toFile()
             tempFile.deleteOnExit()
             try {
                 val original = loadText(inputFile)
