@@ -20,6 +20,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
@@ -244,7 +245,7 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     // ICD_DGNS_E_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     DiagnosisUtilV2.extractDiagnoses(
-            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
         .stream()
         .forEach(
             diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.OUTPATIENT));

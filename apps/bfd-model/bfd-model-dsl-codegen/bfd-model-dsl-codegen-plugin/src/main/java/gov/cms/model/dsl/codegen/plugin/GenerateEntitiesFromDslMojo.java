@@ -1064,8 +1064,8 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   }
 
   /**
-   * Data class holding all the information required to create accessor methods (setter/getter) for
-   * a field.
+   * Immutable {@link Record} holding all the information required to create accessor methods
+   * (setter/getter) for a field.
    *
    * @param fieldName Name of the field.
    * @param fieldType Type of the field.
@@ -1074,7 +1074,6 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
    * @param isReadOnly True if the column is read only. (No setter should be generated.)
    * @param groupName The name of the group of fields to which the field belongs.
    */
-  @Data
   @Builder
   @VisibleForTesting
   record AccessorSpec(

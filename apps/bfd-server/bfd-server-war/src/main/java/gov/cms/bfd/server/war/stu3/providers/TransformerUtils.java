@@ -2514,7 +2514,7 @@ public final class TransformerUtils {
       String substitution,
       Map<String, Optional<String>> codes,
       Map<String, Optional<Character>> codeVersions,
-      Optional<Map<String, Optional<Character>>> presentOnAdms,
+      Map<String, Optional<Character>> presentOnAdms,
       Optional<CcwCodebookInterface> ccw,
       Optional<DiagnosisLabel> label) {
     Optional<String> code =
@@ -2523,13 +2523,10 @@ public final class TransformerUtils {
         codeVersions.getOrDefault(
             String.format("diagnosis%sCodeVersion", substitution), Optional.empty());
     Optional<Character> presentOnAdm =
-        presentOnAdms.isPresent()
-            ? presentOnAdms
-                .get()
-                .getOrDefault(
-                    String.format("diagnosis%sPresentOnAdmissionCode", substitution),
-                    Optional.empty())
-            : Optional.empty();
+        presentOnAdms.isEmpty()
+            ? Optional.empty()
+            : presentOnAdms.getOrDefault(
+                String.format("diagnosis%sPresentOnAdmissionCode", substitution), Optional.empty());
     if (presentOnAdm.isEmpty() && ccw.isEmpty() && label.isEmpty())
       return Diagnosis.from(code, codeVersion);
     if (presentOnAdm.isEmpty() && ccw.isEmpty())
@@ -2545,12 +2542,12 @@ public final class TransformerUtils {
    *     respective value
    * @param presentOnAdms The mapping of diagnosis "PresentOnAdmissionCode" codes by their property
    *     name and respective value
-   * @return the {@link Diagnosis} that can be extracted from the specified {@link InpatientClaim}
+   * @return the {@link Diagnosis} that can be extracted from the specified claim properties
    */
   static List<Diagnosis> extractDiagnoses(
       Map<String, Optional<String>> codes,
       Map<String, Optional<Character>> codeVersions,
-      Optional<Map<String, Optional<Character>>> presentOnAdms) {
+      Map<String, Optional<Character>> presentOnAdms) {
 
     List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
     // Handle the "special" diagnosis fields
@@ -2568,9 +2565,9 @@ public final class TransformerUtils {
             codes,
             codeVersions,
             presentOnAdms,
-            presentOnAdms.isPresent()
-                ? Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1)
-                : Optional.empty(),
+            presentOnAdms.isEmpty()
+                ? Optional.empty()
+                : Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
             Optional.of(DiagnosisLabel.PRINCIPAL)));
     diagnosis.add(
         extractDiagnosis(
@@ -2592,12 +2589,10 @@ public final class TransformerUtils {
                     codes,
                     codeVersions,
                     presentOnAdms,
-                    presentOnAdms.isPresent()
-                        ? Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i))
-                        : Optional.empty(),
-                    presentOnAdms.isPresent()
-                        ? Optional.of(DiagnosisLabel.OTHER)
-                        : Optional.empty()))
+                    presentOnAdms.isEmpty()
+                        ? Optional.empty()
+                        : Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
+                    presentOnAdms.isEmpty() ? Optional.empty() : Optional.of(DiagnosisLabel.OTHER)))
         .forEach(diagnosis::add);
 
     // Handle first external diagnosis
@@ -2607,9 +2602,9 @@ public final class TransformerUtils {
             codes,
             codeVersions,
             presentOnAdms,
-            presentOnAdms.isPresent()
-                ? Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1)
-                : Optional.empty(),
+            presentOnAdms.isEmpty()
+                ? Optional.empty()
+                : Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
             Optional.of(DiagnosisLabel.FIRSTEXTERNAL)));
     diagnosis.add(
         extractDiagnosis(
@@ -2631,9 +2626,9 @@ public final class TransformerUtils {
                     codes,
                     codeVersions,
                     presentOnAdms,
-                    presentOnAdms.isPresent()
-                        ? Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i))
-                        : Optional.empty(),
+                    presentOnAdms.isEmpty()
+                        ? Optional.empty()
+                        : Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)),
                     Optional.of(DiagnosisLabel.EXTERNAL)))
         .forEach(diagnosis::add);
 
@@ -2648,7 +2643,7 @@ public final class TransformerUtils {
                     String.format("Admission%d", i),
                     codes,
                     codeVersions,
-                    Optional.empty(),
+                    Map.of(),
                     Optional.empty(),
                     Optional.of(DiagnosisLabel.REASONFORVISIT)))
         .forEach(diagnosis::add);

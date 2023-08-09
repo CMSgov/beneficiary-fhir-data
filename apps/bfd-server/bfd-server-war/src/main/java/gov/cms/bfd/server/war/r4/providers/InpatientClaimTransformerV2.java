@@ -312,7 +312,7 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(),
             claimGroup.getDiagnosisCodeVersions(),
-            Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes()))
+            claimGroup.getDiagnosisPresentOnAdmissionCodes())
         .stream()
         .forEach(
             diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.INPATIENT));

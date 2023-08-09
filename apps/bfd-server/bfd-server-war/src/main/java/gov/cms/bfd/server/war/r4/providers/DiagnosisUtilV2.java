@@ -191,7 +191,7 @@ public class DiagnosisUtilV2 {
       String substitution,
       Map<String, Optional<String>> codes,
       Map<String, Optional<Character>> codeVersions,
-      Optional<Map<String, Optional<Character>>> presentOnAdms,
+      Map<String, Optional<Character>> presentOnAdms,
       Optional<CcwCodebookInterface> ccw,
       DiagnosisLabel label) {
     Optional<String> code =
@@ -200,13 +200,8 @@ public class DiagnosisUtilV2 {
         codeVersions.getOrDefault(
             String.format("diagnosis%sCodeVersion", substitution), Optional.empty());
     Optional<Character> presentOnAdm =
-        presentOnAdms.isPresent()
-            ? presentOnAdms
-                .get()
-                .getOrDefault(
-                    String.format("diagnosis%sPresentOnAdmissionCode", substitution),
-                    Optional.empty())
-            : Optional.empty();
+        presentOnAdms.getOrDefault(
+            String.format("diagnosis%sPresentOnAdmissionCode", substitution), Optional.empty());
     return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label);
   }
 
@@ -225,7 +220,7 @@ public class DiagnosisUtilV2 {
   static List<Diagnosis> extractDiagnoses(
       Map<String, Optional<String>> codes,
       Map<String, Optional<Character>> codeVersions,
-      Optional<Map<String, Optional<Character>>> presentOnAdms) {
+      Map<String, Optional<Character>> presentOnAdms) {
     List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
 
     // Handle the "special" diagnosis fields
@@ -314,7 +309,7 @@ public class DiagnosisUtilV2 {
                     String.format("Admission%d", i),
                     codes,
                     codeVersions,
-                    Optional.empty(),
+                    Map.of(),
                     Optional.empty(),
                     DiagnosisLabel.REASONFORVISIT))
         .forEach(diagnosis::add);

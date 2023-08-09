@@ -12,6 +12,7 @@ import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -122,7 +123,7 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
         claimGroup.getFiOriginalClaimControlNumber());
 
     TransformerUtils.extractDiagnoses(
-            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
         .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 

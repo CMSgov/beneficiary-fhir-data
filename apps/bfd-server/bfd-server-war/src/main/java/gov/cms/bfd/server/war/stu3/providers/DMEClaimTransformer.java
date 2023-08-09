@@ -14,6 +14,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -128,7 +129,7 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
         claimGroup.getClaimCarrierControlNumber());
 
     TransformerUtils.extractDiagnoses(
-            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Optional.empty())
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
         .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 

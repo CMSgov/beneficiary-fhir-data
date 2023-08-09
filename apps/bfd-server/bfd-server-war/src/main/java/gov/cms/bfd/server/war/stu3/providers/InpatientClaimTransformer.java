@@ -241,7 +241,7 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
     TransformerUtils.extractDiagnoses(
             claimGroup.getDiagnosisCodes(),
             claimGroup.getDiagnosisCodeVersions(),
-            Optional.ofNullable(claimGroup.getDiagnosisPresentOnAdmissionCodes()))
+            claimGroup.getDiagnosisPresentOnAdmissionCodes())
         .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
