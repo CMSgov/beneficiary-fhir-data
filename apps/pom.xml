@@ -68,6 +68,8 @@
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
         <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
         <maven.jacoco.plugin.version>0.8.10</maven.jacoco.plugin.version>
+        <!-- Disable jacoco until automated coverage generation is desired -->
+        <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
@@ -630,7 +632,8 @@
                 <version>${protobuf.version}</version>
             </dependency>
             <dependency>
-                <!--  must be on the classpath  -->
+                <!-- A test code coverage plugin that can operate as a Java agent (and thus doesn't require class
+                    file instrumentation). -->
                 <groupId>org.jacoco</groupId>
                 <artifactId>org.jacoco.agent</artifactId>
                 <classifier>runtime</classifier>
@@ -1031,7 +1034,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${maven.jacoco.plugin.version}</version>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>${maven.jacoco.skip}</skip>
                 </configuration>
                 <executions>
                     <!--
