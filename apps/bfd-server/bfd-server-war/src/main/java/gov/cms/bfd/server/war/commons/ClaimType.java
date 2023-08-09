@@ -131,8 +131,8 @@ public enum ClaimType {
   /**
    * Gets the {@link #entityClass}.
    *
-   * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
-   *     gov.cms.bfd.server.war.stu3.providers.ClaimType} in the database
+   * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link ClaimType}
+   *     in the database
    */
   public Class<?> getEntityClass() {
     return entityClass;
@@ -181,8 +181,7 @@ public enum ClaimType {
    *
    * @param claimTypeText the lower-cased {@link ClaimType#name()} value to parse back into a {@link
    *     ClaimType}
-   * @return the {@link gov.cms.bfd.server.war.stu3.providers.ClaimType} represented by the
-   *     specified {@link String}
+   * @return the {@link ClaimType} represented by the specified {@link String}
    */
   public static Optional<ClaimType> parse(String claimTypeText) {
     for (ClaimType claimType : ClaimType.values()) {
