@@ -27,7 +27,7 @@ public final class AppConfigurationIT {
    * configuration environment variables.
    */
   @Test
-  public void normalUsage() {
+  public void normalUsage() throws IOException {
     Map<String, String> envValues = new HashMap<>();
     envValues.put(AppConfiguration.ENV_VAR_KEY_PORT, "1");
     envValues.put(
@@ -40,11 +40,7 @@ public final class AppConfigurationIT {
         getProjectDirectory()
             .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.pfx"))
             .toString());
-    envValues.put(
-        AppConfiguration.ENV_VAR_KEY_WAR,
-        getProjectDirectory()
-            .resolve(Paths.get("target", "sample", "bfd-server-launcher-sample-1.0.0-SNAPSHOT.war"))
-            .toString());
+    envValues.put(AppConfiguration.ENV_VAR_KEY_WAR, getSampleWar().toString());
 
     ConfigLoader config = ConfigLoader.builder().addMap(envValues).build();
 
@@ -111,5 +107,26 @@ public final class AppConfigurationIT {
     assertEquals(
         "Configuration value error: name='BFD_PORT' detail='required option not provided'",
         exception.getMessage());
+  }
+
+  /**
+   * Gets the {@link Path} to the <code>bfd-server-launcher-sample</code> WAR.
+   *
+   * @return the {@link Path}
+   */
+  static Path getSampleWar() {
+    try {
+      final var sampleDirectory =
+          AppConfigurationIT.getProjectDirectory().resolve(Paths.get("target", "sample"));
+      return Files.find(
+              sampleDirectory,
+              5,
+              (path, attr) ->
+                  path.getFileName().toString().matches("bfd-server-launcher-sample-.*\\.war"))
+          .findFirst()
+          .orElseThrow();
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
   }
 }
