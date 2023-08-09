@@ -333,9 +333,11 @@ public final class RifFilesProcessorTest {
         13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
     // Test that there aren't any additional codes not included in the group
-    assertThrows(NoSuchFieldException.class, () -> CarrierClaim.class.getField("diagnosis13Code"));
     assertThrows(
-        NoSuchFieldException.class, () -> CarrierClaim.class.getField("diagnosis13CodeVersion"));
+        NoSuchMethodException.class, () -> CarrierClaim.class.getMethod("getDiagnosis13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> CarrierClaim.class.getMethod("getDiagnosis13CodeVersion"));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
@@ -503,43 +505,42 @@ public final class RifFilesProcessorTest {
     assertTrue(
         40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
     assertThrows(
-        NoSuchFieldException.class,
-        () ->
-            InpatientClaim.class.getField(
-                String.format("diagnosis%sCode", diagnosisCodes.size() + 1)));
+        NoSuchMethodException.class, () -> InpatientClaim.class.getMethod("getDiagnosis26Code"));
     assertThrows(
-        NoSuchFieldException.class,
-        () ->
-            InpatientClaim.class.getField(
-                String.format("diagnosis%sCodeVersion", diagnosisCodeVersions.size() + 1)));
-
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
     assertEquals(37, presentOnAdmissionCodes.size());
     assertThrows(
-        NoSuchFieldException.class,
-        () -> InpatientClaim.class.getField("diagnosis26PresentOnAdmissionCode"));
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosis26PresentOnAdmissionCode"));
     assertThrows(
-        NoSuchFieldException.class,
-        () -> InpatientClaim.class.getField("diagnosisExternal13PresentOnAdmissionCode"));
-
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13PresentOnAdmissionCode"));
     assertTrue(
         25 == procedureCodes.size()
             && procedureCodes.size() == procedureCodeVersions.size()
             && procedureCodeVersions.size() == procedureDates.size());
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            InpatientClaim.class.getField(
-                String.format("procedure%sCode", procedureCodes.size() + 1)));
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            InpatientClaim.class.getField(
-                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            InpatientClaim.class.getField(
-                String.format("procedure%sDates", procedureDates.size() + 1)));
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
@@ -548,23 +549,19 @@ public final class RifFilesProcessorTest {
     assertEquals(
         diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
         claimGroup.getDiagnosisAdmittingCodeVersion().get());
-
     assertEquals(
         diagnosisCodes.get("diagnosisPrincipalCode").get(),
         claimGroup.getDiagnosisPrincipalCode().get());
     assertEquals(
         diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
         claimGroup.getDiagnosisPrincipalCodeVersion().get());
-
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
     assertEquals(
         diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
         claimGroup.getDiagnosis1CodeVersion().get());
-
     assertEquals(
         presentOnAdmissionCodes.get("diagnosis1PresentOnAdmissionCode").get(),
         claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
-
     assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
     assertEquals(
         procedureCodeVersions.get("procedure1CodeVersion").get(),
@@ -649,10 +646,8 @@ public final class RifFilesProcessorTest {
 
     assertEquals("A37", claimGroup.getDiagnosisAdmittingCode().get());
     assertEquals('0', claimGroup.getDiagnosisAdmittingCodeVersion().get());
-
     assertEquals("A40", claimGroup.getDiagnosisPrincipalCode().get());
     assertEquals('0', claimGroup.getDiagnosisPrincipalCodeVersion().get());
-
     assertEquals("A40", claimGroup.getDiagnosis1Code().get());
     assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get());
     assertEquals('Y', claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
@@ -668,43 +663,42 @@ public final class RifFilesProcessorTest {
     assertTrue(
         40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
     assertThrows(
-        NoSuchFieldException.class,
-        () ->
-            InpatientClaim.class.getField(
-                String.format("diagnosis%sCode", diagnosisCodes.size() + 1)));
+        NoSuchMethodException.class, () -> InpatientClaim.class.getMethod("getDiagnosis26Code"));
     assertThrows(
-        NoSuchFieldException.class,
-        () ->
-            InpatientClaim.class.getField(
-                String.format("diagnosis%sCodeVersion", diagnosisCodeVersions.size() + 1)));
-
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
     assertEquals(37, presentOnAdmissionCodes.size());
     assertThrows(
-        NoSuchFieldException.class,
-        () -> InpatientClaim.class.getField("diagnosis26PresentOnAdmissionCode"));
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosis26PresentOnAdmissionCode"));
     assertThrows(
-        NoSuchFieldException.class,
-        () -> InpatientClaim.class.getField("diagnosisExternal13PresentOnAdmissionCode"));
-
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13PresentOnAdmissionCode"));
     assertTrue(
         25 == procedureCodes.size()
             && procedureCodes.size() == procedureCodeVersions.size()
             && procedureCodeVersions.size() == procedureDates.size());
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            InpatientClaim.class.getField(
-                String.format("procedure%sCode", procedureCodes.size() + 1)));
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            InpatientClaim.class.getField(
-                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            InpatientClaim.class.getField(
-                String.format("procedure%sDates", procedureDates.size() + 1)));
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
@@ -713,23 +707,19 @@ public final class RifFilesProcessorTest {
     assertEquals(
         diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
         claimGroup.getDiagnosisAdmittingCodeVersion().get());
-
     assertEquals(
         diagnosisCodes.get("diagnosisPrincipalCode").get(),
         claimGroup.getDiagnosisPrincipalCode().get());
     assertEquals(
         diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
         claimGroup.getDiagnosisPrincipalCodeVersion().get());
-
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
     assertEquals(
         diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
         claimGroup.getDiagnosis1CodeVersion().get());
-
     assertEquals(
         presentOnAdmissionCodes.get("diagnosis1PresentOnAdmissionCode").get(),
         claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
-
     assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
     assertEquals(
         procedureCodeVersions.get("procedure1CodeVersion").get(),
@@ -828,33 +818,31 @@ public final class RifFilesProcessorTest {
 
     // Test that there aren't any additional codes not included in the group
     assertThrows(
-        NoSuchFieldException.class, () -> OutpatientClaim.class.getField("diagnosis26Code"));
+        NoSuchMethodException.class, () -> OutpatientClaim.class.getMethod("getDiagnosis26Code"));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
+        () -> OutpatientClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> OutpatientClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> OutpatientClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
         () ->
-            OutpatientClaim.class.getField(
-                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+            OutpatientClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class,
-        () -> OutpatientClaim.class.getField("diagnosisExternal13Code"));
-    assertThrows(
-        NoSuchFieldException.class,
-        () -> OutpatientClaim.class.getField("diagnosisExternal13CodeVersion"));
-    assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            OutpatientClaim.class.getField(
-                String.format("procedure%sCode", procedureCodes.size() + 1)));
+            OutpatientClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            OutpatientClaim.class.getField(
-                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
-    assertThrows(
-        NoSuchFieldException.class,
-        () ->
-            OutpatientClaim.class.getField(
-                String.format("procedure%sDates", procedureDates.size() + 1)));
+            OutpatientClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
@@ -1002,29 +990,29 @@ public final class RifFilesProcessorTest {
             && procedureCodeVersions.size() == procedureDates.size());
 
     // Test that there aren't any additional codes not included in the group
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosis26Code"));
+    assertThrows(NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosis26Code"));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> SNFClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
         () ->
-            SNFClaim.class.getField(
-                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosisExternal13Code"));
-    assertThrows(
-        NoSuchFieldException.class,
-        () -> SNFClaim.class.getField("diagnosisExternal13CodeVersion"));
-    assertThrows(
-        NoSuchFieldException.class,
-        () -> SNFClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
-    assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            SNFClaim.class.getField(
-                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            SNFClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
@@ -1174,29 +1162,29 @@ public final class RifFilesProcessorTest {
             && procedureCodeVersions.size() == procedureDates.size());
 
     // Test that there aren't any additional codes not included in the group
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosis26Code"));
+    assertThrows(NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosis26Code"));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> SNFClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
         () ->
-            SNFClaim.class.getField(
-                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosisExternal13Code"));
-    assertThrows(
-        NoSuchFieldException.class,
-        () -> SNFClaim.class.getField("diagnosisExternal13CodeVersion"));
-    assertThrows(
-        NoSuchFieldException.class,
-        () -> SNFClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
-    assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            SNFClaim.class.getField(
-                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
     assertThrows(
-        NoSuchFieldException.class,
+        NoSuchMethodException.class,
         () ->
-            SNFClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
@@ -1303,17 +1291,17 @@ public final class RifFilesProcessorTest {
         39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
     // Test that there aren't any additional codes not included in the group
-    assertThrows(NoSuchFieldException.class, () -> HospiceClaim.class.getField("diagnosis26Code"));
     assertThrows(
-        NoSuchFieldException.class,
-        () ->
-            HospiceClaim.class.getField(
-                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+        NoSuchMethodException.class, () -> HospiceClaim.class.getMethod("getDiagnosis26Code"));
     assertThrows(
-        NoSuchFieldException.class, () -> HospiceClaim.class.getField("diagnosisExternal13Code"));
+        NoSuchMethodException.class,
+        () -> HospiceClaim.class.getMethod("getDiagnosis26CodeVersion"));
     assertThrows(
-        NoSuchFieldException.class,
-        () -> HospiceClaim.class.getField("diagnosisExternal13CodeVersion"));
+        NoSuchMethodException.class,
+        () -> HospiceClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> HospiceClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
@@ -1414,17 +1402,14 @@ public final class RifFilesProcessorTest {
         39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
     // Test that there aren't any additional codes not included in the group
-    assertThrows(NoSuchFieldException.class, () -> HHAClaim.class.getField("diagnosis26Code"));
+    assertThrows(NoSuchMethodException.class, () -> HHAClaim.class.getMethod("getDiagnosis26Code"));
     assertThrows(
-        NoSuchFieldException.class,
-        () ->
-            HHAClaim.class.getField(
-                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+        NoSuchMethodException.class, () -> HHAClaim.class.getMethod("getDiagnosis26CodeVersion"));
     assertThrows(
-        NoSuchFieldException.class, () -> HHAClaim.class.getField("diagnosisExternal13Code"));
+        NoSuchMethodException.class, () -> HHAClaim.class.getMethod("getDiagnosisExternal13Code"));
     assertThrows(
-        NoSuchFieldException.class,
-        () -> HHAClaim.class.getField("diagnosisExternal13CodeVersion"));
+        NoSuchMethodException.class,
+        () -> HHAClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
@@ -1523,9 +1508,9 @@ public final class RifFilesProcessorTest {
         13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
     // Test that there aren't any additional codes not included in the group
-    assertThrows(NoSuchFieldException.class, () -> DMEClaim.class.getField("diagnosis13Code"));
+    assertThrows(NoSuchMethodException.class, () -> DMEClaim.class.getMethod("getDiagnosis13Code"));
     assertThrows(
-        NoSuchFieldException.class, () -> DMEClaim.class.getField("diagnosis13CodeVersion"));
+        NoSuchMethodException.class, () -> DMEClaim.class.getMethod("getDiagnosis13CodeVersion"));
 
     // Test that grouped diagnoses properties are populated correctly
     assertEquals(
