@@ -329,6 +329,13 @@ public final class RifFilesProcessorTest {
     // Test that grouped properties exist with the expected number of properties per group
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
@@ -502,6 +509,12 @@ public final class RifFilesProcessorTest {
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
 
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
     assertThrows(
@@ -666,6 +679,12 @@ public final class RifFilesProcessorTest {
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
 
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
     assertThrows(
@@ -821,6 +840,13 @@ public final class RifFilesProcessorTest {
     final var procedureCodes = claimGroup.getProcedureCodes();
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         42 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
     assertTrue(
@@ -994,6 +1020,13 @@ public final class RifFilesProcessorTest {
     final var procedureCodes = claimGroup.getProcedureCodes();
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
     assertTrue(
@@ -1166,6 +1199,13 @@ public final class RifFilesProcessorTest {
     final var procedureCodes = claimGroup.getProcedureCodes();
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
     assertTrue(
@@ -1299,9 +1339,15 @@ public final class RifFilesProcessorTest {
     // Test that grouped properties exist with the expected number of properties per group
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
-
     // Test that there aren't any additional codes not included in the group
     assertThrows(
         NoSuchMethodException.class, () -> HospiceClaim.class.getMethod("getDiagnosis26Code"));
@@ -1410,6 +1456,13 @@ public final class RifFilesProcessorTest {
     // Test that grouped properties exist with the expected number of properties per group
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
@@ -1516,6 +1569,13 @@ public final class RifFilesProcessorTest {
     // Test that grouped properties exist with the expected number of properties per group
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
     assertTrue(
         13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
