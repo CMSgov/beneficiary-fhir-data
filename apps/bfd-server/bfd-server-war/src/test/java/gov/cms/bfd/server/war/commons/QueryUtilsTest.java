@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -165,19 +163,6 @@ public class QueryUtilsTest {
     testVal = QueryUtils.V_DME_HAS_DATA | QueryUtils.V_SNF_HAS_DATA | QueryUtils.V_HHA_HAS_DATA;
     assertEquals(
         testVal, QueryUtils.V_DME_HAS_DATA + QueryUtils.V_SNF_HAS_DATA + QueryUtils.V_HHA_HAS_DATA);
-
-    BitSet testBits = QueryUtils.convertClaimsBitmaskValue(testVal);
-    assertTrue(testBits.get(QueryUtils.CARRIER_HAS_DATA));
-    assertTrue(testBits.get(QueryUtils.INPATIENT_HAS_DATA));
-    assertTrue(testBits.get(QueryUtils.SNF_HAS_DATA));
-    assertTrue(testBits.get(QueryUtils.HHA_HAS_DATA));
-    assertTrue(testBits.get(QueryUtils.PART_D_HAS_DATA));
-    // the following bits were not set.
-    assertFalse(testBits.get(QueryUtils.OUTPATIENT_HAS_DATA));
-    assertFalse(testBits.get(QueryUtils.HOSPICE_HAS_DATA));
-    assertFalse(testBits.get(QueryUtils.DME_HAS_DATA));
-    // verify that the BitSet represents only those bit that are set.
-    assertEquals("{0, 1, 3, 5, 7}", testBits.toString());
   }
 
   /**

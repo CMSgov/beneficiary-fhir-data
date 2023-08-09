@@ -1,8 +1,12 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
@@ -10,7 +14,6 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.TransformerContext;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -18,31 +21,61 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
+import org.springframework.stereotype.Component;
 
-/**
- * Transforms CCW {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
- */
-final class CarrierClaimTransformer {
+/** Transforms {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
+@Component
+final class CarrierClaimTransformer implements ClaimTransformerInterface {
+
+  /** The Metric registry. */
+  private final MetricRegistry metricRegistry;
+
+  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
+  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
+  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
+  private final NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Instantiates a new transformer.
+   *
+   * <p>Spring will wire this into a singleton bean during the initial component scan, and it will
+   * be injected properly into places that need it, so this constructor should only be explicitly
+   * called by tests.
+   *
+   * @param metricRegistry the metric registry
+   * @param drugCodeDisplayLookup the drug code display lookup
+   * @param npiOrgLookup the npi org lookup
+   */
+  public CarrierClaimTransformer(
+      MetricRegistry metricRegistry,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      NPIOrgLookup npiOrgLookup) {
+    this.metricRegistry = requireNonNull(metricRegistry);
+    this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+  }
+
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param transformerContext the {@link TransformerContext} to use
-   * @param claim the {@link Object} to use
-   * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     CarrierClaim}
+   * @param claim the {@link CarrierClaim} to use
+   * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
+   * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
-  static ExplanationOfBenefit transform(TransformerContext transformerContext, Object claim) {
-    Timer.Context timer =
-        transformerContext
-            .getMetricRegistry()
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    if (!(claim instanceof CarrierClaim)) {
+      throw new BadCodeMonkeyException();
+    }
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
-            .time();
-
-    if (!(claim instanceof CarrierClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, transformerContext);
-
-    timer.stop();
+            .time()) {
+      eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
+    }
     return eob;
   }
 
@@ -50,12 +83,11 @@ final class CarrierClaimTransformer {
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
-   * @param transformerContext the {@TransformerContext} to use
+   * @param includeTaxNumbers whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, TransformerContext transformerContext) {
+  private ExplanationOfBenefit transformClaim(CarrierClaim claimGroup, boolean includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -166,12 +198,11 @@ final class CarrierClaimTransformer {
         }
 
         performingHasMatchingExtension =
-            (claimLine.getProviderParticipatingIndCode().isPresent())
-                ? TransformerUtils.careTeamHasMatchingExtension(
+            claimLine.getProviderParticipatingIndCode().isPresent()
+                && TransformerUtils.careTeamHasMatchingExtension(
                     performingCareTeamMember,
                     TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(claimLine.getProviderParticipatingIndCode().get()))
-                : false;
+                    String.valueOf(claimLine.getProviderParticipatingIndCode().get()));
 
         if (!performingHasMatchingExtension) {
           performingCareTeamMember.addExtension(
@@ -187,16 +218,14 @@ final class CarrierClaimTransformer {
               TransformerUtils.careTeamHasMatchingExtension(
                   performingCareTeamMember,
                   TransformerConstants.CODING_NPI_US,
-                  String.valueOf(claimLine.getOrganizationNpi().get()));
+                  claimLine.getOrganizationNpi().get());
 
           if (!performingHasMatchingExtension) {
             TransformerUtils.addExtensionCoding(
                 performingCareTeamMember,
                 TransformerConstants.CODING_NPI_US,
                 TransformerConstants.CODING_NPI_US,
-                transformerContext
-                    .getNPIOrgLookup()
-                    .retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
+                npiOrgLookup.retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
                 "" + claimLine.getOrganizationNpi().get());
           }
         }
@@ -207,7 +236,7 @@ final class CarrierClaimTransformer {
        * probably be mapped as an extra identifier with it (if/when that lands in a contained
        * Practitioner resource).
        */
-      if (transformerContext.getIncludeTaxNumbers().orElse(false)) {
+      if (includeTaxNumbers) {
         ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
             TransformerUtils.addCareTeamPractitioner(
                 eob,
@@ -280,9 +309,7 @@ final class CarrierClaimTransformer {
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
           claimLine.getNationalDrugCode(),
-          transformerContext
-              .getDrugCodeDisplayLookup()
-              .retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
+          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
 
       if (claimLine.getProviderStateCode().isPresent()) {
         item.getLocation()

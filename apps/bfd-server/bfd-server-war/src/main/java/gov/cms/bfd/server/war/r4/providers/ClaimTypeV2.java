@@ -111,7 +111,7 @@ public enum ClaimTypeV2 {
    * @param serviceEndAttributeFunction the service end attribute function
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
-  private ClaimTypeV2(
+  ClaimTypeV2(
       Class<?> entityClass,
       SingularAttribute<?, Long> entityIdAttribute,
       SingularAttribute<?, Long> entityBeneficiaryIdAttribute,

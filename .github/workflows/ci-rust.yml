@@ -4,6 +4,7 @@ on:
     paths:
       - .github/workflows/ci-rust.yml
       - apps/utils/db-query-checker/*
+  merge_group:
 
 jobs:
 

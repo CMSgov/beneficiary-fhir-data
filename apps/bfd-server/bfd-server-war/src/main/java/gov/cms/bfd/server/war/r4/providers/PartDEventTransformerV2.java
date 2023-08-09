@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
 @Component
-final class PartDEventTransformerV2 {
+final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
@@ -57,26 +57,26 @@ final class PartDEventTransformerV2 {
   }
 
   /**
-   * Transforms a specified claim into a FHIR {@link ExplanationOfBenefit}.
+   * Transforms a {@link PartDEvent} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claim the {@link Object} to use
+   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
-  ExplanationOfBenefit transform(Object claim) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
-            .time();
-
+  @Override
+  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
     if (!(claim instanceof PartDEvent)) {
       throw new BadCodeMonkeyException();
     }
-
-    ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
-
-    timer.stop();
+    ExplanationOfBenefit eob = null;
+    try (Timer.Context timer =
+        metricRegistry
+            .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
+            .time()) {
+      eob = transformClaim((PartDEvent) claim);
+    }
     return eob;
   }
 
