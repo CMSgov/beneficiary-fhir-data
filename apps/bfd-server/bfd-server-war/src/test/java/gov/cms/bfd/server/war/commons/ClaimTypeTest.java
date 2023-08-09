@@ -12,13 +12,12 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
-import gov.cms.bfd.server.war.stu3.providers.ClaimType;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for the {@link gov.cms.bfd.server.war.stu3.providers.ClaimType}. */
+/** Unit tests for the {@link ClaimType}. */
 public final class ClaimTypeTest {
   /**
    * Verifies that our service end date function is working as expected. Since we are type casting
@@ -60,18 +59,17 @@ public final class ClaimTypeTest {
     snfClaim.setDateFrom(start);
     snfClaim.setDateThrough(end);
 
-    ImmutableMap.Builder<gov.cms.bfd.server.war.stu3.providers.ClaimType, Object> builder =
-        ImmutableMap.builder();
-    builder.put(gov.cms.bfd.server.war.stu3.providers.ClaimType.CARRIER, carrierClaim);
-    builder.put(gov.cms.bfd.server.war.stu3.providers.ClaimType.DME, dmeClaim);
-    builder.put(gov.cms.bfd.server.war.stu3.providers.ClaimType.HHA, hhaClaim);
-    builder.put(gov.cms.bfd.server.war.stu3.providers.ClaimType.HOSPICE, hospiceClaim);
-    builder.put(gov.cms.bfd.server.war.stu3.providers.ClaimType.INPATIENT, inpatientClaim);
-    builder.put(gov.cms.bfd.server.war.stu3.providers.ClaimType.OUTPATIENT, outpatientClaim);
-    builder.put(gov.cms.bfd.server.war.stu3.providers.ClaimType.PDE, partDEvent);
-    builder.put(gov.cms.bfd.server.war.stu3.providers.ClaimType.SNF, snfClaim);
+    ImmutableMap.Builder<ClaimType, Object> builder = ImmutableMap.builder();
+    builder.put(ClaimType.CARRIER, carrierClaim);
+    builder.put(ClaimType.DME, dmeClaim);
+    builder.put(ClaimType.HHA, hhaClaim);
+    builder.put(ClaimType.HOSPICE, hospiceClaim);
+    builder.put(ClaimType.INPATIENT, inpatientClaim);
+    builder.put(ClaimType.OUTPATIENT, outpatientClaim);
+    builder.put(ClaimType.PDE, partDEvent);
+    builder.put(ClaimType.SNF, snfClaim);
 
-    Map<gov.cms.bfd.server.war.stu3.providers.ClaimType, Object> claimTypeToClaim = builder.build();
+    Map<ClaimType, Object> claimTypeToClaim = builder.build();
 
     // Verify that we're testing all of the ClaimTypes that are defined
     EnumSet.allOf(ClaimType.class).stream()
