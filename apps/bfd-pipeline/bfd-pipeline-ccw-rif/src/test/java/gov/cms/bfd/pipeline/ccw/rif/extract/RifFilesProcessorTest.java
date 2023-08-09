@@ -329,17 +329,25 @@ public final class RifFilesProcessorTest {
     // Test that grouped properties exist with the expected number of properties per group
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
-    assertTrue(13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
     // Test that there aren't any additional codes not included in the group
     assertThrows(NoSuchFieldException.class, () -> CarrierClaim.class.getField("diagnosis13Code"));
-    assertThrows(NoSuchFieldException.class, () -> CarrierClaim.class.getField("diagnosis13CodeVersion"));
+    assertThrows(
+        NoSuchFieldException.class, () -> CarrierClaim.class.getField("diagnosis13CodeVersion"));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
 
     // Verify one of the claim lines.
     CarrierClaimLine claimLine = claimGroup.getLines().get(0);
@@ -492,33 +500,75 @@ public final class RifFilesProcessorTest {
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
 
-    assertTrue(40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("diagnosis%sCode", diagnosisCodes.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("diagnosis%sCodeVersion", diagnosisCodeVersions.size() + 1)));
+    assertTrue(
+        40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("diagnosis%sCode", diagnosisCodes.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("diagnosis%sCodeVersion", diagnosisCodeVersions.size() + 1)));
 
     assertEquals(37, presentOnAdmissionCodes.size());
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField("diagnosis26PresentOnAdmissionCode"));
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField("diagnosisExternal13PresentOnAdmissionCode"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> InpatientClaim.class.getField("diagnosis26PresentOnAdmissionCode"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> InpatientClaim.class.getField("diagnosisExternal13PresentOnAdmissionCode"));
 
-    assertTrue(25 == procedureCodes.size() && procedureCodes.size() == procedureCodeVersions.size() && procedureCodeVersions.size() == procedureDates.size());
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("procedure%sCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("procedure%sDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisAdmittingCode").get(), claimGroup.getDiagnosisAdmittingCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(), claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmittingCode").get(),
+        claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
+        claimGroup.getDiagnosisAdmittingCodeVersion().get());
 
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
 
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
 
-    assertEquals(presentOnAdmissionCodes.get("diagnosis1PresentOnAdmissionCode").get(), claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
+    assertEquals(
+        presentOnAdmissionCodes.get("diagnosis1PresentOnAdmissionCode").get(),
+        claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
 
     assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
-    assertEquals(procedureCodeVersions.get("procedure1CodeVersion").get(), claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
     assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
   }
 
@@ -615,33 +665,75 @@ public final class RifFilesProcessorTest {
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
 
-    assertTrue(40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("diagnosis%sCode", diagnosisCodes.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("diagnosis%sCodeVersion", diagnosisCodeVersions.size() + 1)));
+    assertTrue(
+        40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("diagnosis%sCode", diagnosisCodes.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("diagnosis%sCodeVersion", diagnosisCodeVersions.size() + 1)));
 
     assertEquals(37, presentOnAdmissionCodes.size());
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField("diagnosis26PresentOnAdmissionCode"));
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField("diagnosisExternal13PresentOnAdmissionCode"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> InpatientClaim.class.getField("diagnosis26PresentOnAdmissionCode"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> InpatientClaim.class.getField("diagnosisExternal13PresentOnAdmissionCode"));
 
-    assertTrue(25 == procedureCodes.size() && procedureCodes.size() == procedureCodeVersions.size() && procedureCodeVersions.size() == procedureDates.size());
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> InpatientClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("procedure%sCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            InpatientClaim.class.getField(
+                String.format("procedure%sDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisAdmittingCode").get(), claimGroup.getDiagnosisAdmittingCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(), claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmittingCode").get(),
+        claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
+        claimGroup.getDiagnosisAdmittingCodeVersion().get());
 
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
 
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
 
-    assertEquals(presentOnAdmissionCodes.get("diagnosis1PresentOnAdmissionCode").get(), claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
+    assertEquals(
+        presentOnAdmissionCodes.get("diagnosis1PresentOnAdmissionCode").get(),
+        claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
 
     assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
-    assertEquals(procedureCodeVersions.get("procedure1CodeVersion").get(), claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
     assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
 
     assertEquals("BQ0HZZZ", claimGroup.getProcedure1Code().get());
@@ -727,31 +819,76 @@ public final class RifFilesProcessorTest {
     final var procedureCodes = claimGroup.getProcedureCodes();
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
-    assertTrue(42 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
-    assertTrue(25 == procedureCodes.size() && procedureCodes.size() == procedureCodeVersions.size() && procedureCodeVersions.size() == procedureDates.size());
+    assertTrue(
+        42 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
 
     // Test that there aren't any additional codes not included in the group
-    assertThrows(NoSuchFieldException.class, () -> OutpatientClaim.class.getField("diagnosis26Code"));
-    assertThrows(NoSuchFieldException.class, () -> OutpatientClaim.class.getField(String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> OutpatientClaim.class.getField("diagnosisExternal13Code"));
-    assertThrows(NoSuchFieldException.class, () -> OutpatientClaim.class.getField("diagnosisExternal13CodeVersion"));
-    assertThrows(NoSuchFieldException.class, () -> OutpatientClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> OutpatientClaim.class.getField(String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> OutpatientClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class, () -> OutpatientClaim.class.getField("diagnosis26Code"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            OutpatientClaim.class.getField(
+                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> OutpatientClaim.class.getField("diagnosisExternal13Code"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> OutpatientClaim.class.getField("diagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            OutpatientClaim.class.getField(
+                String.format("procedure%sCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            OutpatientClaim.class.getField(
+                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            OutpatientClaim.class.getField(
+                String.format("procedure%sDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisAdmission1Code").get(), claimGroup.getDiagnosisAdmission1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisAdmission1CodeVersion").get(), claimGroup.getDiagnosisAdmission1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmission1Code").get(),
+        claimGroup.getDiagnosisAdmission1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmission1CodeVersion").get(),
+        claimGroup.getDiagnosisAdmission1CodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternal1Code").get(), claimGroup.getDiagnosisExternal1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(), claimGroup.getDiagnosisExternal1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternalFirstCode").get(), claimGroup.getDiagnosisExternalFirstCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(), claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
     assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
-    assertEquals(procedureCodeVersions.get("procedure1CodeVersion").get(), claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
     assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
 
     assertEquals(1, claimGroup.getLines().size());
@@ -857,31 +994,71 @@ public final class RifFilesProcessorTest {
     final var procedureCodes = claimGroup.getProcedureCodes();
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
-    assertTrue(40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
-    assertTrue(25 == procedureCodes.size() && procedureCodes.size() == procedureCodeVersions.size() && procedureCodeVersions.size() == procedureDates.size());
+    assertTrue(
+        40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
 
     // Test that there aren't any additional codes not included in the group
     assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosis26Code"));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField(String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosisExternal13Code"));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosisExternal13CodeVersion"));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField(String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            SNFClaim.class.getField(
+                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosisExternal13Code"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> SNFClaim.class.getField("diagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> SNFClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            SNFClaim.class.getField(
+                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            SNFClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisAdmittingCode").get(), claimGroup.getDiagnosisAdmittingCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(), claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmittingCode").get(),
+        claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
+        claimGroup.getDiagnosisAdmittingCodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternal1Code").get(), claimGroup.getDiagnosisExternal1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(), claimGroup.getDiagnosisExternal1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternalFirstCode").get(), claimGroup.getDiagnosisExternalFirstCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(), claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
     assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
-    assertEquals(procedureCodeVersions.get("procedure1CodeVersion").get(), claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
     assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
 
     // Verify one of the claim lines.
@@ -989,31 +1166,71 @@ public final class RifFilesProcessorTest {
     final var procedureCodes = claimGroup.getProcedureCodes();
     final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
     final var procedureDates = claimGroup.getProcedureDates();
-    assertTrue(40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
-    assertTrue(25 == procedureCodes.size() && procedureCodes.size() == procedureCodeVersions.size() && procedureCodeVersions.size() == procedureDates.size());
+    assertTrue(
+        40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
 
     // Test that there aren't any additional codes not included in the group
     assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosis26Code"));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField(String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosisExternal13Code"));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosisExternal13CodeVersion"));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField(String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> SNFClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            SNFClaim.class.getField(
+                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class, () -> SNFClaim.class.getField("diagnosisExternal13Code"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> SNFClaim.class.getField("diagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> SNFClaim.class.getField(String.format("procedure%sCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            SNFClaim.class.getField(
+                String.format("procedure%sCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            SNFClaim.class.getField(String.format("procedure%sDates", procedureDates.size() + 1)));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisAdmittingCode").get(), claimGroup.getDiagnosisAdmittingCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(), claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmittingCode").get(),
+        claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
+        claimGroup.getDiagnosisAdmittingCodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternal1Code").get(), claimGroup.getDiagnosisExternal1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(), claimGroup.getDiagnosisExternal1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternalFirstCode").get(), claimGroup.getDiagnosisExternalFirstCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(), claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
     assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
-    assertEquals(procedureCodeVersions.get("procedure1CodeVersion").get(), claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
     assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
 
     // Verify one of the claim lines.
@@ -1070,7 +1287,7 @@ public final class RifFilesProcessorTest {
     assertEquals('C', claimGroup.getPatientStatusCd().get());
     assertEquals(BigDecimal.valueOf(30L), claimGroup.getUtilizationDayCount());
     assertEquals(LocalDate.of(2015, 6, 29), claimGroup.getBeneficiaryDischargeDate().get());
-     assertEquals(LocalDate.of(2014, 7, 06), claimGroup.getClaimHospiceStartDate().get());
+    assertEquals(LocalDate.of(2014, 7, 06), claimGroup.getClaimHospiceStartDate().get());
     assertEquals("38875439343923937", claimGroup.getFiOriginalClaimControlNumber().get());
     assertEquals("2718813985998", claimGroup.getFiDocumentClaimControlNumber().get());
     assertEquals('3', claimGroup.getClaimQueryCode().get());
@@ -1082,23 +1299,45 @@ public final class RifFilesProcessorTest {
     // Test that grouped properties exist with the expected number of properties per group
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
-    assertTrue(39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
     // Test that there aren't any additional codes not included in the group
     assertThrows(NoSuchFieldException.class, () -> HospiceClaim.class.getField("diagnosis26Code"));
-    assertThrows(NoSuchFieldException.class, () -> HospiceClaim.class.getField(String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> HospiceClaim.class.getField("diagnosisExternal13Code"));
-    assertThrows(NoSuchFieldException.class, () -> HospiceClaim.class.getField("diagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            HospiceClaim.class.getField(
+                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class, () -> HospiceClaim.class.getField("diagnosisExternal13Code"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> HospiceClaim.class.getField("diagnosisExternal13CodeVersion"));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternal1Code").get(), claimGroup.getDiagnosisExternal1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(), claimGroup.getDiagnosisExternal1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternalFirstCode").get(), claimGroup.getDiagnosisExternalFirstCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(), claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
 
     assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -1171,23 +1410,45 @@ public final class RifFilesProcessorTest {
     // Test that grouped properties exist with the expected number of properties per group
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
-    assertTrue(39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
     // Test that there aren't any additional codes not included in the group
     assertThrows(NoSuchFieldException.class, () -> HHAClaim.class.getField("diagnosis26Code"));
-    assertThrows(NoSuchFieldException.class, () -> HHAClaim.class.getField(String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
-    assertThrows(NoSuchFieldException.class, () -> HHAClaim.class.getField("diagnosisExternal13Code"));
-    assertThrows(NoSuchFieldException.class, () -> HHAClaim.class.getField("diagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () ->
+            HHAClaim.class.getField(
+                String.format("diagnosis26CodeVersion", diagnosisCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchFieldException.class, () -> HHAClaim.class.getField("diagnosisExternal13Code"));
+    assertThrows(
+        NoSuchFieldException.class,
+        () -> HHAClaim.class.getField("diagnosisExternal13CodeVersion"));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternal1Code").get(), claimGroup.getDiagnosisExternal1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(), claimGroup.getDiagnosisExternal1CodeVersion().get());
-    assertEquals(diagnosisCodes.get("diagnosisExternalFirstCode").get(), claimGroup.getDiagnosisExternalFirstCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(), claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
 
     // Verify one of the claim lines.
     HHAClaimLine claimLine = claimGroup.getLines().get(0);
@@ -1258,17 +1519,25 @@ public final class RifFilesProcessorTest {
     // Test that grouped properties exist with the expected number of properties per group
     final var diagnosisCodes = claimGroup.getDiagnosisCodes();
     final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
-    assertTrue(13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
 
     // Test that there aren't any additional codes not included in the group
     assertThrows(NoSuchFieldException.class, () -> DMEClaim.class.getField("diagnosis13Code"));
-    assertThrows(NoSuchFieldException.class, () -> DMEClaim.class.getField("diagnosis13CodeVersion"));
+    assertThrows(
+        NoSuchFieldException.class, () -> DMEClaim.class.getField("diagnosis13CodeVersion"));
 
     // Test that grouped diagnoses properties are populated correctly
-    assertEquals(diagnosisCodes.get("diagnosisPrincipalCode").get(), claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
-    assertEquals(diagnosisCodeVersions.get("diagnosis1CodeVersion").get(), claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
 
     // Verify one of the claim lines.
     DMEClaimLine claimLine = claimGroup.getLines().get(0);
