@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -38,19 +37,22 @@
 
     <scm>
         <!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-        <connection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</connection>
-        <developerConnection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</developerConnection>
-        <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
+        <connection>scm:git:git@github.com:brianburton/my-beneficiary-fhir-data.git</connection>
+        <developerConnection>scm:git:git@github.com:brianburton/my-beneficiary-fhir-data.git</developerConnection>
+        <url>https://github.com/brianburton/beneficiary-fhir-data</url>
         <tag>HEAD</tag>
     </scm>
 
     <modules>
+        <module>bfd-data-fda</module>
+        <module>bfd-data-npi</module>
         <module>bfd-shared-utils</module>
         <module>bfd-shared-test-utils</module>
         <module>bfd-model</module>
         <module>bfd-pipeline</module>
         <module>bfd-server</module>
         <module>bfd-db-migrator</module>
+        <module>bfd-ops</module>
     </modules>
 
     <properties>
@@ -66,7 +68,7 @@
         <!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
             they are reproducible bit-by-bit no matter when/where they are generated.
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
-        <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2023-08-09T18:20:42Z</project.build.outputTimestamp>
         <maven.jacoco.plugin.version>0.8.10</maven.jacoco.plugin.version>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
@@ -181,8 +183,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username/>
-        <its.db.password/>
+        <its.db.username />
+        <its.db.password />
         <its.testcontainer.db.image>postgres:14.7-alpine</its.testcontainer.db.image>
 
         <!-- Whether the partially adjudicated claims endpoints should be enabled -->
@@ -214,7 +216,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>latest</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace/>
+        <jib.namespace />
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
     </properties>
@@ -268,17 +270,6 @@
                 <version>${flyway.version}</version>
             </dependency>
             <dependency>
-                <!-- Used to create mock objects for unit tests. -->
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito-inline.version}</version>
-            </dependency>
-            <dependency>
                 <!-- Used to write fluent assertions in unit tests. -->
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
@@ -314,12 +305,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <!-- Adds convenience features for working with mocks in tests -->
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-junit-jupiter</artifactId>
-                <version>${mockito.version}</version>
             </dependency>
             <dependency>
                 <!-- An implementation of the Log4J API that routes everything through
@@ -846,12 +831,14 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>3.0.1</version>
                     <configuration>
                         <!-- Require manual pushes after releases. Makes it easier to clean
                             things up if releases fail. -->
                         <pushChanges>false</pushChanges>
                         <localCheckout>true</localCheckout>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <commitByProject>false</commitByProject>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1182,6 +1169,22 @@
 
     <profiles>
         <profile>
+            <id>test-release</id>
+            <properties>
+                <jib.skip>false</jib.skip>
+                <jib.goal>build</jib.goal>
+                <jib.namespace>577373831711.dkr.ecr.us-east-1.amazonaws.com/</jib.namespace>
+                <maven.build.cache.enabled>false</maven.build.cache.enabled>
+            </properties>
+            <distributionManagement>
+                <repository>
+                    <id>bfd-mgmt-bfd-release-hackathon</id>
+                    <url>https://bfd-mgmt-577373831711.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-release-hackathon/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+
+        <profile>
             <!-- This profile will only be active for builds inside of Eclipse (managed
                 by m2e). It's primarily used to manage the execution of plugins in that environment. -->
             <id>m2e-manage-executions</id>
@@ -1214,7 +1217,7 @@
                                             <action>
                                                 <!-- Don't run this plugin inside m2e; necessary to disable a
                                                     POM warning in Eclipse. -->
-                                                <ignore/>
+                                                <ignore />
                                             </action>
                                         </pluginExecution>
                                         <pluginExecution>
@@ -1229,7 +1232,7 @@
                                             <action>
                                                 <!-- Don't run this plugin inside m2e; necessary to disable a
                                                     POM warning in Eclipse. -->
-                                                <ignore/>
+                                                <ignore />
                                             </action>
                                         </pluginExecution>
                                         <pluginExecution>
@@ -1243,7 +1246,7 @@
                                             </pluginExecutionFilter>
                                             <action>
                                                 <!-- Don't run this plugin automatically on every build inside m2e. -->
-                                                <ignore/>
+                                                <ignore />
                                             </action>
                                         </pluginExecution>
                                     </pluginExecutions>

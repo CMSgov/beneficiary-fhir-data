@@ -145,7 +145,6 @@ public final class ServerTestUtils {
    * @return the {@link Path}
    */
   static Path getSampleWar() {
-    return AppConfigurationIT.getProjectDirectory()
-        .resolve(Paths.get("target", "sample", "bfd-server-launcher-sample-1.0.0-SNAPSHOT.war"));
+    return AppConfigurationIT.getSampleWar();
   }
 }

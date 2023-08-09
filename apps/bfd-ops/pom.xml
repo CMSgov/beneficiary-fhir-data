@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>gov.cms.bfd</groupId>
+        <artifactId>bfd-parent</artifactId>
+        <version>1.0.3-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>bfd-ops</artifactId>
+    <packaging>pom</packaging>
+
+    <description>
+        Produces a compressed GNU tar file containing the BFD ops tree.
+    </description>
+
+    <properties>
+        <!-- Path to the directory which contains the ops tree (outside of maven apps directory. -->
+        <assembly.orig.dir>${project.basedir}/../../ops</assembly.orig.dir>
+        <!-- Path to the directory that we copy ops tree into prior to assembly. -->
+        <!-- This copy is necessary to expand symbolic links into regular files. -->
+        <assembly.copy.dir>${project.build.directory}/ops-copy</assembly.copy.dir>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- Copies contents of the ops directory prior to assembly. -->
+            <!-- We have to use antrun for this because resource and assembly plugins preserve symlinks. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven.antrun.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy todir="${assembly.copy.dir}">
+                                    <fileset dir="${assembly.orig.dir}" />
+                                </copy>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Assembles the copied ops files into a compressed tar file. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven.assembly.plugin.version}</version>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <!-- Prevent warnings about long file paths.  GNU tar required to unpack the file. -->
+                    <tarLongFileMode>gnu</tarLongFileMode>
+                    <descriptors>
+                        <descriptor>src/main/assembly/tar.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
