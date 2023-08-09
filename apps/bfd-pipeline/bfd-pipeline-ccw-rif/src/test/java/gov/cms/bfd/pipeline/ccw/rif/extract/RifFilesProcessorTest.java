@@ -555,6 +555,12 @@ public final class RifFilesProcessorTest {
     assertEquals(
         diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
         claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
     assertEquals(
         diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
@@ -713,6 +719,12 @@ public final class RifFilesProcessorTest {
     assertEquals(
         diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
         claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
     assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
     assertEquals(
         diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
