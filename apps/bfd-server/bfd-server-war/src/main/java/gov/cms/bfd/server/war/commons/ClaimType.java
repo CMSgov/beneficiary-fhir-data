@@ -32,7 +32,8 @@ import javax.persistence.metamodel.SingularAttribute;
 
 /**
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
- * {@link R4ExplanationOfBenefitResourceProvider}.
+ * {@link gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider} {@link
+ * R4ExplanationOfBenefitResourceProvider}.
  */
 public enum ClaimType {
   /** Represents the carrier claim type. */
