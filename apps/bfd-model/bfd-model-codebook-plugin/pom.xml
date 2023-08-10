@@ -8,17 +8,18 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>bfd-model-codebook-extractor</artifactId>
+    <artifactId>bfd-model-codebook-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
     <description>
-        Converts the CCW Data Dictionary codebook PDFs to XML and an enum class.
+        Converts the CCW Data Dictionary codebook PDFs into XML files and an enum class.
     </description>
 
     <dependencies>
         <dependency>
+            <!-- Provides basic model classes required by generated enum class. -->
             <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-codegen</artifactId>
+            <artifactId>bfd-model-codebook-library</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -17,12 +17,10 @@
 
     <dependencies>
         <dependency>
-            <!-- Uses the Codebook XML files from `bluebutton-data-model-codebook-extractor`
-                to codegen related utility code. -->
+            <!-- Provides basic model classes required by generated enum class. -->
             <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-codegen</artifactId>
+            <artifactId>bfd-model-codebook-library</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -34,8 +32,9 @@
     <build>
         <plugins>
             <plugin>
+                <!-- Generates XML files and enum class for codebook variables using codebook pdfs. -->
                 <groupId>gov.cms.bfd</groupId>
-                <artifactId>bfd-model-codebook-extractor</artifactId>
+                <artifactId>bfd-model-codebook-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
                     <xmlFilesDirectory>${project.build.directory}/generated-resources</xmlFilesDirectory>

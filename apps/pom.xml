@@ -922,7 +922,7 @@
                                     </message>
                                     <banTimestamps>false</banTimestamps>
                                     <!-- Allow SNAPSHOT version of theses plugins since we build them in our own project rather than pulling from a repository. -->
-                                    <unCheckedPluginList>gov.cms.bfd:bfd-model-dsl-codegen-plugin,gov.cms.bfd:bfd-model-codebook-extractor</unCheckedPluginList>
+                                    <unCheckedPluginList>gov.cms.bfd:bfd-model-dsl-codegen-plugin,gov.cms.bfd:bfd-model-codebook-plugin</unCheckedPluginList>
                                 </requirePluginVersions>
                             </rules>
                         </configuration>

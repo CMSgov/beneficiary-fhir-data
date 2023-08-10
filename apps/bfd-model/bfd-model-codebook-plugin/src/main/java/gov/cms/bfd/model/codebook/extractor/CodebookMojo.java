@@ -29,6 +29,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+/** Maven plugin that processes codebook PDF files to produce XML files and enum class. */
 @Mojo(name = "codebooks", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -84,6 +85,12 @@ public class CodebookMojo extends AbstractMojo {
     }
   }
 
+  /**
+   * Generate XML files from our PDF files.
+   *
+   * @return list of generated files
+   * @throws IOException may be thrown while writing files
+   */
   List<Path> generateXmlFiles() throws IOException {
     final List<Path> outputFiles = new ArrayList<>();
 
@@ -116,6 +123,11 @@ public class CodebookMojo extends AbstractMojo {
     return outputFiles;
   }
 
+  /**
+   * Generate an enum class file from the previously generated XML files.
+   *
+   * @throws IOException may be thrown while writing files
+   */
   void generateEnumClassFile() throws IOException {
     CodebookEnumGenerator.builder()
         .javaDirectory(new File(javaFilesDirectory))

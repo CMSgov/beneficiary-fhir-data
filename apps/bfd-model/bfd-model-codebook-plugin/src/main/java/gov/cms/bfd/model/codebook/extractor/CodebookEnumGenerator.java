@@ -18,6 +18,10 @@ import java.util.Map;
 import javax.lang.model.element.Modifier;
 import lombok.Builder;
 
+/**
+ * Generates an enum class containing one possible enum value per variable defined in previously
+ * generated XML files.
+ */
 @Builder
 public class CodebookEnumGenerator {
   /**

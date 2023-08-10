@@ -8,7 +8,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>bfd-model-codegen</artifactId>
+    <artifactId>bfd-model-codebook-library</artifactId>
     <packaging>jar</packaging>
 
     <description>
