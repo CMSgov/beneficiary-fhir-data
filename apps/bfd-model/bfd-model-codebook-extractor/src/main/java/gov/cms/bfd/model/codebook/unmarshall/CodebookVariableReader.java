@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -32,12 +33,13 @@ public final class CodebookVariableReader {
   public static Map<String, Variable> buildVariablesMappedById() {
     Map<String, List<Variable>> variablesMultimapById = buildVariablesMultimappedById();
     Map<String, Variable> variablesMappedById = new LinkedHashMap<>(variablesMultimapById.size());
+    final Set<String> allowedMultipleDefinitionIds = Set.of("BENE_ID", "DOB_DT", "GNDR_CD");
     for (String id : variablesMultimapById.keySet()) {
       List<Variable> variablesForId = variablesMultimapById.get(id);
       if (variablesForId.size() == 1) {
         Variable variable = variablesForId.get(0);
         variablesMappedById.put(variable.getId(), variable);
-      } else if (Arrays.asList("BENE_ID", "DOB_DT", "GNDR_CD").contains(id)) {
+      } else if (allowedMultipleDefinitionIds.contains(id)) {
         Variable variable = variablesForId.get(0);
         variablesMappedById.put(variable.getId(), variable);
         /*
