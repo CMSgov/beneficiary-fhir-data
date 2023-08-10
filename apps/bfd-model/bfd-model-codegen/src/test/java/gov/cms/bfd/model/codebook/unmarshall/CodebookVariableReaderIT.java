@@ -4,15 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import gov.cms.bfd.model.codebook.extractor.CodebookPdfToXmlApp;
 import gov.cms.bfd.model.codebook.model.Variable;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/**
- * Integration tests for {@link gov.cms.bfd.model.codebook.unmarshall.CodebookVariableReader} (and
- * {@link CodebookPdfToXmlApp}, by extension).
- */
+/** Integration tests for {@link CodebookVariableReader}. */
 public final class CodebookVariableReaderIT {
   /**
    * Verifies that {@link

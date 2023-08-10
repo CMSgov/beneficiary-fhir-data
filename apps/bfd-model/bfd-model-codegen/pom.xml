@@ -26,24 +26,9 @@
         </dependency>
 
         <dependency>
-            <!-- Provides the Codebook XML and unmarshalling code for reading it. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-codebook-extractor</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <!-- Automatically generates META-INF/services files for service classes
-                annotated with `@AutoService`. -->
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service</artifactId>
-            <version>${auto-service.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!-- Makes programmatically generating Java sources much simpler. -->
-            <groupId>com.squareup</groupId>
-            <artifactId>javapoet</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

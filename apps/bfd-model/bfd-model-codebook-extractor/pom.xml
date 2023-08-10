@@ -12,10 +12,51 @@
     <packaging>jar</packaging>
 
     <description>
-        Converts the CCW Data Dictionary codebook PDFs to XML.
+        Converts the CCW Data Dictionary codebook PDFs to XML and an enum class.
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-codegen</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <!-- plugin interfaces and base classes -->
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>${maven-plugin-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- needed when injecting the Maven Project into a plugin  -->
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>${maven-core.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- annotations used to describe the plugin meta-data -->
+            <groupId>org.apache.maven.plugin-tools</groupId>
+            <artifactId>maven-plugin-annotations</artifactId>
+            <version>${maven-plugin-annotations.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <!-- Automatically generates META-INF/services files for service classes
+                annotated with `@AutoService`. -->
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>${auto-service.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- Makes programmatically generating Java sources much simpler. -->
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+        </dependency>
+
         <dependency>
             <!-- Logback is used as the logging target/backend for SLF4J: all logging
                 events will be sent to it. -->

@@ -1,4 +1,4 @@
-package gov.cms.bfd.model.codegen.codebook;
+package gov.cms.bfd.model.codebook.extractor;
 
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
@@ -14,7 +14,6 @@ import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Codebook;
 import gov.cms.bfd.model.codebook.model.Variable;
 import gov.cms.bfd.model.codebook.unmarshall.CodebookVariableReader;
-import gov.cms.bfd.model.codegen.RifLayoutProcessingException;
 import gov.cms.bfd.model.codegen.annotations.CodebookVariableEnumGeneration;
 import gov.cms.bfd.model.codegen.annotations.RifLayoutsGenerator;
 import java.io.IOException;

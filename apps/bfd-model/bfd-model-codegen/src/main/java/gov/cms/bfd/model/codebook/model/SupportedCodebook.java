@@ -1,4 +1,4 @@
-package gov.cms.bfd.model.codebook.extractor;
+package gov.cms.bfd.model.codebook.model;
 
 import java.io.InputStream;
 
@@ -52,8 +52,7 @@ public enum SupportedCodebook {
   /**
    * Gets the codebook xml resource name.
    *
-   * @return the file/resource name of the {@link SupportedCodebook} XML resource produced by {@link
-   *     CodebookPdfToXmlApp}
+   * @return the file/resource name of the {@link SupportedCodebook} XML resource
    */
   public String getCodebookXmlResourceName() {
     return codebookPdfResourceName.replace(".pdf", ".xml");

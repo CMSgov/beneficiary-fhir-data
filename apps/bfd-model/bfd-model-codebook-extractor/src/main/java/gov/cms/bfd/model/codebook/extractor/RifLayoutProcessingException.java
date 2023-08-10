@@ -1,6 +1,5 @@
-package gov.cms.bfd.model.codegen;
+package gov.cms.bfd.model.codebook.extractor;
 
-import gov.cms.bfd.model.codegen.codebook.CodebookVariablesEnumProcessor;
 import java.util.Objects;
 import javax.lang.model.element.Element;
 

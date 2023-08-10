@@ -3,6 +3,7 @@ package gov.cms.bfd.model.codebook.extractor;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 import gov.cms.bfd.model.codebook.model.Codebook;
+import gov.cms.bfd.model.codebook.model.SupportedCodebook;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.codebook.model.ValueGroup;
 import gov.cms.bfd.model.codebook.model.Variable;

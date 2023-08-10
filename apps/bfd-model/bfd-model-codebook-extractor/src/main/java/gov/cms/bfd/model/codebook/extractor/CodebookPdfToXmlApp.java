@@ -1,6 +1,7 @@
 package gov.cms.bfd.model.codebook.extractor;
 
 import gov.cms.bfd.model.codebook.model.Codebook;
+import gov.cms.bfd.model.codebook.model.SupportedCodebook;
 import gov.cms.bfd.model.codebook.model.Variable;
 import java.io.FileWriter;
 import java.io.IOException;

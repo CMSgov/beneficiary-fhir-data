@@ -1,6 +1,5 @@
 package gov.cms.bfd.model.codebook.model;
 
-import gov.cms.bfd.model.codebook.extractor.SupportedCodebook;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
