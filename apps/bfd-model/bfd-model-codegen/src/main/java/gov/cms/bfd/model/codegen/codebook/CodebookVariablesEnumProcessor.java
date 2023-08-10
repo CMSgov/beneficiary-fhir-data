@@ -135,7 +135,7 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
         annotatedPackage.getAnnotation(CodebookVariableEnumGeneration.class);
     logNote(annotatedPackage, "Processing package annotated with: '%s'.", annotation);
 
-    Map<String, Variable> variablesById = CodebookVariableReader.buildVariablesMappedById();
+    Map<String, Variable> variablesById = new CodebookVariableReader().buildVariablesMappedById();
     ClassName variableEnumName =
         ClassName.get(annotatedPackage.getQualifiedName().toString(), annotation.enumName());
     TypeSpec.Builder variablesEnumType =
@@ -210,7 +210,7 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
                 Modifier.PRIVATE,
                 Modifier.STATIC,
                 Modifier.FINAL)
-            .initializer("$T.buildVariablesMappedById()", CodebookVariableReader.class)
+            .initializer("new $T().buildVariablesMappedById()", CodebookVariableReader.class)
             .build());
     variablesEnumType.addMethod(
         MethodSpec.methodBuilder("getVariable")

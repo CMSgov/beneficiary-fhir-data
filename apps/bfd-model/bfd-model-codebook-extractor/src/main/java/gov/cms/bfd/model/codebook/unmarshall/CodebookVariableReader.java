@@ -2,10 +2,12 @@ package gov.cms.bfd.model.codebook.unmarshall;
 
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
+import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.codebook.extractor.SupportedCodebook;
 import gov.cms.bfd.model.codebook.model.Codebook;
 import gov.cms.bfd.model.codebook.model.Variable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -26,6 +28,37 @@ import javax.xml.bind.Unmarshaller;
 
 /** Can unmarshall {@link Codebook} XML and find {@link Variable}s. */
 public final class CodebookVariableReader {
+  /** A function that produces a {@link ByteSource} for every {@link SupportedCodebook}. */
+  private final Function<SupportedCodebook, ByteSource> byteSourceFactory;
+
+  /**
+   * Initializes an instance that reads XML for each {@link SupportedCodebook} from a classpath
+   * resource.
+   */
+  public CodebookVariableReader() {
+    this(CodebookVariableReader::getCodebookXMLFromResource);
+  }
+
+  /**
+   * Initializes an instance that reads XML for each {@link SupportedCodebook} from a file in the
+   * given directory.
+   *
+   * @param xmlDirectory directory containing the XML files
+   */
+  public CodebookVariableReader(File xmlDirectory) {
+    this(codebook -> getCodebookXMLFromFile(xmlDirectory, codebook));
+  }
+
+  /**
+   * Initializes an instance.
+   *
+   * @param byteSourceFactory function that produces a {@link ByteSource} for every {@link
+   *     SupportedCodebook}
+   */
+  public CodebookVariableReader(Function<SupportedCodebook, ByteSource> byteSourceFactory) {
+    this.byteSourceFactory = byteSourceFactory;
+  }
+
   /**
    * Builds a {@link Map} of the known {@link Codebook} {@link Variable}s, keyed by {@link
    * Variable#getId()} (with duplicates removed safely). Reads all values from XML already defined
@@ -33,23 +66,8 @@ public final class CodebookVariableReader {
    *
    * @return the de-duped map of {@link Variable}s
    */
-  public static Map<String, Variable> buildVariablesMappedById() {
-    return buildVariablesMappedById(CodebookVariableReader::getResourceURLForCodebook);
-  }
-
-  /**
-   * Builds a {@link Map} of the known {@link Codebook} {@link Variable}s, keyed by {@link
-   * Variable#getId()} (with duplicates removed safely). Uses the provided function to map {@link
-   * SupportedCodebook} to a {@link ByteSource} that returns its XML.
-   *
-   * @param byteSourceFactory function that produces a {@link ByteSource} for every {@link
-   *     SupportedCodebook}
-   * @return the de-duped map of {@link Variable}s
-   */
-  public static Map<String, Variable> buildVariablesMappedById(
-      Function<SupportedCodebook, ByteSource> byteSourceFactory) {
-    Map<String, List<Variable>> variablesMultimapById =
-        buildVariablesMultimappedById(byteSourceFactory);
+  public Map<String, Variable> buildVariablesMappedById() {
+    Map<String, List<Variable>> variablesMultimapById = buildVariablesMultimappedById();
     Map<String, Variable> variablesMappedById = new LinkedHashMap<>(variablesMultimapById.size());
     final Set<String> allowedMultipleDefinitionIds = Set.of("BENE_ID", "DOB_DT", "GNDR_CD");
     for (String id : variablesMultimapById.keySet()) {
@@ -78,12 +96,31 @@ public final class CodebookVariableReader {
   }
 
   /**
-   * Looks up the resource {@link URL} for the provided codebook's XML resource.
+   * Looks up XML file for the provided codebook and returns a {@link ByteSource} for that file.
+   *
+   * @param xmlDirectory the directory containing the xml files
+   * @param codebook the codebook to find
+   * @return {@link ByteSource} for the XML file
+   */
+  private static ByteSource getCodebookXMLFromFile(File xmlDirectory, SupportedCodebook codebook) {
+    final File xmlFile = new File(xmlDirectory, codebook.getCodebookXmlResourceName());
+    if (!xmlFile.exists()) {
+      throw new IllegalStateException(
+          String.format(
+              "Unable to locate XML file: '%s' for codebook %s.",
+              xmlFile.getAbsolutePath(), codebook));
+    }
+    return Files.asByteSource(xmlFile);
+  }
+
+  /**
+   * Looks up the resource {@link URL} for the provided codebook's XML resource and returns a {@link
+   * ByteSource} for that URL.
    *
    * @param codebook the codebook to find
-   * @return resource {@link URL} for the XML file
+   * @return {@link ByteSource} for the XML resource
    */
-  private static ByteSource getResourceURLForCodebook(SupportedCodebook codebook) {
+  private static ByteSource getCodebookXMLFromResource(SupportedCodebook codebook) {
     final ClassLoader contextClassLoader = Codebook.class.getClassLoader();
     final URL codebookUrl = contextClassLoader.getResource(codebook.getCodebookXmlResourceName());
     if (codebookUrl == null) {
@@ -106,12 +143,9 @@ public final class CodebookVariableReader {
    *
    * <p>A multimap is used because some {@link Variable}s appear in more than one {@link Codebook}.
    *
-   * @param byteSourceFactory function that produces a {@link ByteSource} for every {@link
-   *     SupportedCodebook}
    * @return A multimap of the known {@link Variable}s
    */
-  private static Map<String, List<Variable>> buildVariablesMultimappedById(
-      Function<SupportedCodebook, ByteSource> byteSourceFactory) {
+  private Map<String, List<Variable>> buildVariablesMultimappedById() {
     /*
      * Build a multimap of the known Variables. Why a multimap? Because some
      * Variables appear in more than one Codebook, and we need to cope with that.
@@ -142,8 +176,7 @@ public final class CodebookVariableReader {
    *     unmarshall
    * @return the {@link Codebook} that was unmarshalled from the specified XML
    */
-  private static Codebook unmarshallCodebookXml(ByteSource codebookXmlByteSource)
-      throws IOException {
+  private Codebook unmarshallCodebookXml(ByteSource codebookXmlByteSource) throws IOException {
     try {
       final JAXBContext jaxbContext =
           JAXBContext.newInstance(Codebook.class.getPackageName(), Codebook.class.getClassLoader());

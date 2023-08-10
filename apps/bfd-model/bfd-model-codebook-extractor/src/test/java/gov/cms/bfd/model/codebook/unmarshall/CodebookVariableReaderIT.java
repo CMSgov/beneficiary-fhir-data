@@ -21,7 +21,7 @@ public final class CodebookVariableReaderIT {
    */
   @Test
   public void buildVariablesMappedById() {
-    Map<String, Variable> variablesById = CodebookVariableReader.buildVariablesMappedById();
+    Map<String, Variable> variablesById = new CodebookVariableReader().buildVariablesMappedById();
     assertNotNull(variablesById);
     assertFalse(variablesById.isEmpty());
 
@@ -34,7 +34,7 @@ public final class CodebookVariableReaderIT {
    */
   @Test
   public void unmarshalling_variableCodebookField() {
-    Map<String, Variable> variablesById = CodebookVariableReader.buildVariablesMappedById();
+    Map<String, Variable> variablesById = new CodebookVariableReader().buildVariablesMappedById();
     for (Variable variable : variablesById.values()) {
       assertNotNull(variable.getCodebook());
       assertNotNull(variable.getCodebook().getId());
