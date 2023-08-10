@@ -14,6 +14,7 @@ import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.io.IOException;
 import java.util.Arrays;
