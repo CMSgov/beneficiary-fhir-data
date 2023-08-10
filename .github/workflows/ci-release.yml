@@ -1,0 +1,88 @@
+---
+name: 'CI - Release'
+on:
+  push:
+    #FIXME: remove push events
+    branches:
+     - brianburton/paca-2818-maven-release-plugin
+  workflow_dispatch:
+    inputs:
+      releaseBranch:
+        description: 'The branch on which a release is based.'
+        required: false
+        default: master
+      releaseVersion:
+        description: 'Version to be used as tag and release'
+        required: true
+      developmentVersion:
+        description: 'next release or current development version'
+        required: true
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: read  # This is required for actions/checkout
+
+jobs:
+  mvn-release-prepare:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: ci-release
+          aws-region: us-east-1
+      - name: Dispatched Checkout
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.releaseBranch }}
+      - name: Pushed Checkout
+        if: github.event_name == 'push'
+        uses: actions/checkout@v3
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: corretto
+      - name: Configure the git user
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+      - name: Generate maven toolchain config
+        run: |
+          cat << EOF > ~/.m2/toolchains.xml
+          <toolchains>
+            <toolchain>
+              <type>jdk</type>
+              <provides>
+                <version>17</version>
+                <vendor>OpenJDK</vendor>
+              </provides>
+              <configuration>
+                <jdkHome>$JAVA_HOME</jdkHome>
+              </configuration>
+            </toolchain>
+          </toolchains>
+          EOF
+      - name: 'Prepare and Perform PUSHED Release '
+        if: github.event_name == 'push'
+        run: mvn --batch-mode release:prepare release:perform
+        working-directory: ./apps
+      - name: 'Prepare and Perform DISPATCHED Release '
+        if: github.event_name == 'workflow_dispatch'
+        run: |-
+          mvn --batch-mode --threads 1C \
+              -Dtag="$BFD_RELEASE" \
+              -DreleaseVersion="$BFD_RELEASE" \
+              -DdevelopmentVersion="$BFD_DEV_VERSION" \
+              release:prepare release:perform \
+        working-directory: ./apps
+        env:
+          BFD_RELEASE: ${{ inputs.releaseVersion }}
+          BFD_DEV_VERSION: ${{ inputs.developmentVersion }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Perform Exceptional Rollback'
+        if: failure()
+        run: mvn release:rollback
+        working-directory: ./apps
