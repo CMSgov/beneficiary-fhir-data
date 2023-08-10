@@ -2,7 +2,6 @@ package gov.cms.bfd.model.codebook.extractor;
 
 import gov.cms.bfd.model.codebook.model.Codebook;
 import gov.cms.bfd.model.codebook.model.Variable;
-import gov.cms.bfd.sharedutils.exceptions.UncheckedJaxbException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -113,7 +112,7 @@ public final class CodebookPdfToXmlApp {
 
       jaxbMarshaller.marshal(codebook, outputWriter);
     } catch (JAXBException e) {
-      throw new UncheckedJaxbException(e);
+      throw new UncheckedIOException(new IOException(e));
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
