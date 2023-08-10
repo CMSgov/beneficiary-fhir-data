@@ -12,19 +12,10 @@
     <packaging>jar</packaging>
 
     <description>
-        Provides a javac annotation processor that automagically generates RIF model
-        classes and parsing code based on field layouts defined in Excel.
+        Provides model classes for codebook variables.
     </description>
 
     <dependencies>
-        <dependency>
-            <!-- The annotations are in a separate project, to avoid forcing all of
-                this project's dependencies onto codegen users. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-codegen-annotations</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

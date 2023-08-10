@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>bfd-model-codebook-extractor</artifactId>
-    <packaging>jar</packaging>
+    <packaging>maven-plugin</packaging>
 
     <description>
         Converts the CCW Data Dictionary codebook PDFs to XML and an enum class.
@@ -42,15 +42,12 @@
             <version>${maven-plugin-annotations.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
-            <!-- Automatically generates META-INF/services files for service classes
-                annotated with `@AutoService`. -->
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service</artifactId>
-            <version>${auto-service.version}</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <!-- Makes programmatically generating Java sources much simpler. -->
             <groupId>com.squareup</groupId>
@@ -78,13 +75,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven.resources.plugin.version}</version>
                     <configuration>
                         <nonFilteredFileExtensions>
                             <!-- Don't filter/corrupt the source PDFs. -->
@@ -93,75 +90,11 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <!-- Configure the plugin's 'java' goal to run the PDF-to-XML extraction
-                        process. -->
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>${exec.maven.plugin.version}</version>
-                    <configuration>
-                        <mainClass>gov.cms.bfd.model.codebook.extractor.CodebookPdfToXmlApp</mainClass>
-                        <arguments>
-                            <argument>${project.build.outputDirectory}</argument>
-                        </arguments>
-                        <systemProperties>
-                            <systemProperty>
-                                <!-- Ensure that the Logback config is loaded. (Can't just name this file
-                                    `logback.xml` and let it be found as normal, since this JAR file gets built
-                                    into other applications and thus that config file may conflict with their
-                                    configs. -->
-                                <key>logback.configurationFile</key>
-                                <value>logback-CodebookPdfToXmlApp.xml</value>
-                            </systemProperty>
-                        </systemProperties>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <!--This plugin's configuration is used to store Eclipse m2e settings
-                        only. It has no influence on the Maven build itself. -->
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>${lifecycle.mapping.version}</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.codehaus.mojo</groupId>
-                                        <artifactId>exec-maven-plugin</artifactId>
-                                        <versionRange>${lifecycle.mapping.versionRange}</versionRange>
-                                        <goals>
-                                            <goal>java</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <execute>
-                                            <runOnConfiguration>true</runOnConfiguration>
-                                            <runOnIncremental>false</runOnIncremental>
-                                        </execute>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>${maven.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <!-- Run the PDF-to-XML extraction process as part of the build, baking
-                            the resulting XML into the project's output JAR. -->
-                        <id>extract-codebook-pdfs-to-xml</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 </project>
