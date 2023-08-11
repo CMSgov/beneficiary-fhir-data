@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -52,7 +51,7 @@ public class CodebookMojo extends AbstractMojo {
   @Parameter(property = "enumPackage", defaultValue = "gov.cms.bfd.model.codebook")
   private String enumPackage;
 
-  /** Name of package containing the enum class. */
+  /** Name of the enum class. */
   @Parameter(property = "enumClass", defaultValue = "CcwCodebookVariable")
   private String enumClass;
 
@@ -78,29 +77,36 @@ public class CodebookMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException {
     try {
+      // Create the directories if they do not yet exist.
       new File(xmlFilesDirectory).mkdirs();
       new File(javaFilesDirectory).mkdirs();
+
+      // Ensure maven will compile our java enum class.
       project.addCompileSourceRoot(javaFilesDirectory);
+
+      // Ensure maven will include our XML files as resource files.
       var resource = new Resource();
       resource.setFiltering(false);
       resource.setDirectory(xmlFilesDirectory);
       project.addResource(resource);
+
+      // Generate all the things.
       generateXmlFiles();
       generateEnumClassFile();
     } catch (IOException ex) {
       throw new MojoExecutionException("I/O error during code generation", ex);
+    } catch (JAXBException ex) {
+      throw new MojoExecutionException("XML processing error during code generation", ex);
     }
   }
 
   /**
    * Generate XML files from our PDF files.
    *
-   * @return list of generated files
    * @throws IOException may be thrown while writing files
+   * @throws JAXBException if XML processing fails
    */
-  List<Path> generateXmlFiles() throws IOException {
-    final List<Path> outputFiles = new ArrayList<>();
-
+  void generateXmlFiles() throws IOException, JAXBException {
     final Path outputPath = Paths.get(xmlFilesDirectory);
 
     // Define the Variable fixers/modifiers
@@ -124,10 +130,7 @@ public class CodebookMojo extends AbstractMojo {
       // Finally, write out the final model objects to XML.
       Path outputFile = outputPath.resolve(supportedCodebook.getCodebookXmlResourceName());
       writeCodebookXmlToFile(codebook, outputFile);
-      outputFiles.add(outputFile);
     }
-
-    return outputFiles;
   }
 
   /**
@@ -178,9 +181,11 @@ public class CodebookMojo extends AbstractMojo {
    * @param codebook the {@link Codebook} to write out
    * @param outputFile the {@link Path} of the file to write the {@link Codebook} out as XML to
    *     (which will be overwritten if it already exists)
+   * @throws IOException if IO fails
+   * @throws JAXBException if XML processing fails
    */
   private static void writeCodebookXmlToFile(Codebook codebook, Path outputFile)
-      throws IOException {
+      throws IOException, JAXBException {
     try (FileWriter outputWriter = new FileWriter(outputFile.toFile()); ) {
       JAXBContext jaxbContext = JAXBContext.newInstance(Codebook.class);
       Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -188,8 +193,6 @@ public class CodebookMojo extends AbstractMojo {
       jaxbMarshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
 
       jaxbMarshaller.marshal(codebook, outputWriter);
-    } catch (JAXBException e) {
-      throw new IOException(e);
     }
   }
 }
