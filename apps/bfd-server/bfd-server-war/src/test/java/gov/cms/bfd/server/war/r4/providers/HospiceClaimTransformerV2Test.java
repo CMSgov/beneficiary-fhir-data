@@ -19,6 +19,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -1014,7 +1015,7 @@ public final class HospiceClaimTransformerV2Test {
         eob,
         claim.getClaimId(),
         claim.getBeneficiaryId(),
-        ClaimTypeV2.HOSPICE,
+        ClaimType.HOSPICE,
         String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),

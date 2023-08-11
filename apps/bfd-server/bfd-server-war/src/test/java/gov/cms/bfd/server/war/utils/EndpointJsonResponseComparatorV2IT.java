@@ -25,11 +25,11 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.r4.providers.ClaimTypeV2;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
@@ -966,7 +966,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, carrClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1005,7 +1005,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, carrClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1033,7 +1033,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, carrClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1067,7 +1067,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, dmeClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1095,7 +1095,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, dmeClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1123,7 +1123,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HHA, hhaClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1151,7 +1151,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HOSPICE, hosClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1179,7 +1179,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.INPATIENT, inpClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()))
         .execute();
     return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/diagnosis/7/type");
   }
@@ -1207,7 +1207,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.OUTPATIENT, outClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1235,7 +1235,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, pdeClaim.getEventId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.PDE, pdeClaim.getEventId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1263,7 +1263,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.SNF, snfClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimType.SNF, snfClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }

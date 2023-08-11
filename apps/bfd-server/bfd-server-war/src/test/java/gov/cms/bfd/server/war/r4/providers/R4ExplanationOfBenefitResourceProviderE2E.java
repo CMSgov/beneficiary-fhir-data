@@ -30,6 +30,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -135,11 +136,11 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         fhirClient
             .read()
             .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, claim.getClaimId()))
+            .withId(TransformerUtilsV2.buildEobId(ClaimType.CARRIER, claim.getClaimId()))
             .execute();
 
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.CARRIER, eob, loadedRecords);
+    compareEob(ClaimType.CARRIER, eob, loadedRecords);
   }
 
   /**
@@ -166,12 +167,12 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         fhirClient
             .read()
             .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, claim.getClaimId()))
+            .withId(TransformerUtilsV2.buildEobId(ClaimType.DME, claim.getClaimId()))
             .execute();
 
     assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.DME, eob, loadedRecords);
+    compareEob(ClaimType.DME, eob, loadedRecords);
   }
 
   /**
@@ -198,13 +199,13 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         fhirClient
             .read()
             .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HHA, claim.getClaimId()))
+            .withId(TransformerUtilsV2.buildEobId(ClaimType.HHA, claim.getClaimId()))
             .execute();
 
     assertNotNull(eob);
 
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.HHA, eob, loadedRecords);
+    compareEob(ClaimType.HHA, eob, loadedRecords);
   }
 
   /**
@@ -231,12 +232,12 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         fhirClient
             .read()
             .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HOSPICE, claim.getClaimId()))
+            .withId(TransformerUtilsV2.buildEobId(ClaimType.HOSPICE, claim.getClaimId()))
             .execute();
 
     assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.HOSPICE, eob, loadedRecords);
+    compareEob(ClaimType.HOSPICE, eob, loadedRecords);
   }
 
   /**
@@ -263,12 +264,12 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         fhirClient
             .read()
             .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.INPATIENT, claim.getClaimId()))
+            .withId(TransformerUtilsV2.buildEobId(ClaimType.INPATIENT, claim.getClaimId()))
             .execute();
 
     assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.INPATIENT, eob, loadedRecords);
+    compareEob(ClaimType.INPATIENT, eob, loadedRecords);
   }
 
   /**
@@ -295,7 +296,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         fhirClient
             .read()
             .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.OUTPATIENT, claim.getClaimId()))
+            .withId(TransformerUtilsV2.buildEobId(ClaimType.OUTPATIENT, claim.getClaimId()))
             .execute();
 
     assertNotNull(eob);
@@ -332,12 +333,12 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         fhirClient
             .read()
             .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, claim.getEventId()))
+            .withId(TransformerUtilsV2.buildEobId(ClaimType.PDE, claim.getEventId()))
             .execute();
 
     assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.PDE, eob, loadedRecords);
+    compareEob(ClaimType.PDE, eob, loadedRecords);
   }
 
   /**
@@ -364,12 +365,12 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
         fhirClient
             .read()
             .resource(ExplanationOfBenefit.class)
-            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.SNF, claim.getClaimId()))
+            .withId(TransformerUtilsV2.buildEobId(ClaimType.SNF, claim.getClaimId()))
             .execute();
 
     assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.SNF, eob, loadedRecords);
+    compareEob(ClaimType.SNF, eob, loadedRecords);
   }
 
   /**
@@ -912,12 +913,12 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
             .returnBundle(Bundle.class)
             .execute();
     assertNotNull(searchResults);
-    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
+    for (ClaimType claimType : ClaimType.values()) {
       /*
        * SAMHSA fields are present on all claim types except for PDE so we should not
        * get any claims back in the results except for PDE.
        */
-      if (claimType == ClaimTypeV2.PDE) {
+      if (claimType == ClaimType.PDE) {
         assertEquals(1, filterToClaimType(searchResults, claimType).size());
       } else {
         assertEquals(0, filterToClaimType(searchResults, claimType).size());
@@ -950,7 +951,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
             .returnBundle(Bundle.class)
             .execute();
     assertNotNull(searchResults);
-    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
+    for (ClaimType claimType : ClaimType.values()) {
       // None of the claims are SAMHSA so we expect one record per claim type in the results.
       assertEquals(
           1,
@@ -1005,13 +1006,13 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     assertNotNull(searchResults);
 
     // Verify that tax numbers aren't present for carrier claims.
-    carrierEob = filterToClaimType(searchResults, ClaimTypeV2.CARRIER).get(0);
+    carrierEob = filterToClaimType(searchResults, ClaimType.CARRIER).get(0);
     assertNull(
         TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
             carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
 
     // Verify that tax numbers aren't present for DME claims.
-    dmeEob = filterToClaimType(searchResults, ClaimTypeV2.DME).get(0);
+    dmeEob = filterToClaimType(searchResults, ClaimType.DME).get(0);
     assertNull(
         TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
             dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));
@@ -1031,14 +1032,14 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     assertNotNull(searchResults);
 
     // Verify that tax numbers are present for carrier claims.
-    carrierEob = filterToClaimType(searchResults, ClaimTypeV2.CARRIER).get(0);
+    carrierEob = filterToClaimType(searchResults, ClaimType.CARRIER).get(0);
     assertNotNull(carrierClaim.getLines().get(0).getProviderTaxNumber());
     assertNull(
         TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
             carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
 
     // Verify that tax numbers are present for DME claims.
-    dmeEob = filterToClaimType(searchResults, ClaimTypeV2.DME).get(0);
+    dmeEob = filterToClaimType(searchResults, ClaimType.DME).get(0);
     assertNotNull(dmeClaim.getLines().get(0).getProviderTaxNumber());
     // FIXME: investigate this, careTeam for tax number doesnt seem to be added correctly for DME?
     /*assertNotNull(
@@ -1071,7 +1072,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
             .forResource(ExplanationOfBenefit.class)
             .where(
                 ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
-            .where(new TokenClientParam("type").exactly().code(ClaimTypeV2.PDE.name()))
+            .where(new TokenClientParam("type").exactly().code(ClaimType.PDE.name()))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -1101,7 +1102,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
             new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     assertEobEquals(
         partDEventTransformer.transform(partDEvent, false),
-        filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
+        filterToClaimType(searchResults, ClaimType.PDE).get(0));
   }
 
   /**
@@ -1270,7 +1271,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
 
     assertEquals(
         Date.from(TransformerConstants.FALLBACK_LAST_UPDATED),
-        filterToClaimType(searchAll, ClaimTypeV2.CARRIER).get(0).getMeta().getLastUpdated(),
+        filterToClaimType(searchAll, ClaimType.CARRIER).get(0).getMeta().getLastUpdated(),
         "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED");
 
     // Find all EOBs with < now()
@@ -1285,10 +1286,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
 
     assertEquals(
         Date.from(TransformerConstants.FALLBACK_LAST_UPDATED),
-        filterToClaimType(searchWithLessThan, ClaimTypeV2.CARRIER)
-            .get(0)
-            .getMeta()
-            .getLastUpdated(),
+        filterToClaimType(searchWithLessThan, ClaimType.CARRIER).get(0).getMeta().getLastUpdated(),
         "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED");
 
     assertEquals(
@@ -1441,14 +1439,14 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
    * @param loadedRecords the loaded records
    */
   private void assertEachEob(Bundle searchResults, List<Object> loadedRecords) throws IOException {
-    compareEob(ClaimTypeV2.CARRIER, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.DME, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.HHA, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.HOSPICE, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.INPATIENT, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.OUTPATIENT, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.PDE, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.SNF, searchResults, loadedRecords);
+    compareEob(ClaimType.CARRIER, searchResults, loadedRecords);
+    compareEob(ClaimType.DME, searchResults, loadedRecords);
+    compareEob(ClaimType.HHA, searchResults, loadedRecords);
+    compareEob(ClaimType.HOSPICE, searchResults, loadedRecords);
+    compareEob(ClaimType.INPATIENT, searchResults, loadedRecords);
+    compareEob(ClaimType.OUTPATIENT, searchResults, loadedRecords);
+    compareEob(ClaimType.PDE, searchResults, loadedRecords);
+    compareEob(ClaimType.SNF, searchResults, loadedRecords);
   }
 
   /**
@@ -1650,12 +1648,11 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
    * Filter to claim type list.
    *
    * @param bundle the {@link Bundle} to filter
-   * @param claimType the {@link ClaimTypeV2} to use as a filter
+   * @param claimType the {@link ClaimType} to use as a filter
    * @return a filtered {@link List} of the {@link ExplanationOfBenefit}s from the specified {@link
-   *     Bundle} that match the specified {@link ClaimTypeV2}
+   *     Bundle} that match the specified {@link ClaimType}
    */
-  private static List<ExplanationOfBenefit> filterToClaimType(
-      Bundle bundle, ClaimTypeV2 claimType) {
+  private static List<ExplanationOfBenefit> filterToClaimType(Bundle bundle, ClaimType claimType) {
     List<ExplanationOfBenefit> results =
         bundle.getEntry().stream()
             .filter(
@@ -1683,7 +1680,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
    * @param loadedRecords the loaded records
    */
   public void compareEob(
-      ClaimTypeV2 claimType, ExplanationOfBenefit searchResults, List<Object> loadedRecords)
+      ClaimType claimType, ExplanationOfBenefit searchResults, List<Object> loadedRecords)
       throws IOException {
     Object claim =
         loadedRecords.stream()
@@ -1714,7 +1711,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
    * @param searchResults the search results
    * @param loadedRecords the loaded records
    */
-  public void compareEob(ClaimTypeV2 claimType, Bundle searchResults, List<Object> loadedRecords)
+  public void compareEob(ClaimType claimType, Bundle searchResults, List<Object> loadedRecords)
       throws IOException {
     // Find desired claim in the bundle
     List<ExplanationOfBenefit> eobs = filterToClaimType(searchResults, claimType);

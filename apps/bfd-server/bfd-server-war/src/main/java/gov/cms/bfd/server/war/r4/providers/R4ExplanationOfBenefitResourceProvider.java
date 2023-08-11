@@ -25,6 +25,7 @@ import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -204,9 +205,9 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     }
 
     String eobIdTypeText = eobIdMatcher.group(1);
-    Optional<ClaimTypeV2> eobIdType = ClaimTypeV2.parse(eobIdTypeText);
+    Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
     if (eobIdType.isEmpty()) throw new ResourceNotFoundException(eobId);
-    ClaimTypeV2 claimType = eobIdType.get();
+    ClaimType claimType = eobIdType.get();
     String eobIdClaimIdText = eobIdMatcher.group(2);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_EOB);
@@ -266,7 +267,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    *
    * @param patient a {@link ReferenceParam} for the {@link ExplanationOfBenefit#getPatient()} to
    *     try and find matches for {@link ExplanationOfBenefit}s
-   * @param type a list of {@link ClaimTypeV2} to include in the result. Defaults to all types.
+   * @param type a list of {@link ClaimType} to include in the result. Defaults to all types.
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
    * @param excludeSamhsa an {@link OptionalParam} that, if <code>"true"</code>, will use {@link
@@ -329,7 +330,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
      */
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
-    Set<ClaimTypeV2> claimTypesRequested = parseTypeParam(type);
+    Set<ClaimType> claimTypesRequested = parseTypeParam(type);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     boolean filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_EOB);
@@ -337,10 +338,10 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption(
         "types",
-        (claimTypesRequested.size() == ClaimTypeV2.values().length)
+        (claimTypesRequested.size() == ClaimType.values().length)
             ? "*"
             : claimTypesRequested.stream()
-                .sorted(Comparator.comparing(ClaimTypeV2::name))
+                .sorted(Comparator.comparing(ClaimType::name))
                 .collect(Collectors.toList())
                 .toString());
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
@@ -394,7 +395,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * Process the available claims mask value denoting which claims to process in parallel.
    *
    * @param claimTypesThatHaveData an {@link Integer} denoting the claim types to process.
-   * @param claimTypesRequested a {@link Set} of {@link ClaimTypeV2} denoting requested claim types.
+   * @param claimTypesRequested a {@link Set} of {@link ClaimType} denoting requested claim types.
    * @param beneficiaryId a {@link Long} patient bene_id value.
    * @param paging a {@link OffsetLinkBuilder} for the startIndex (or offset) when using pagination.
    * @param lastUpdated a {@link DateRangeParam} denoting inclusion of lastUpdated field.
@@ -412,7 +413,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @VisibleForTesting
   private Bundle processClaimsMask(
       int claimTypesThatHaveData,
-      Set<ClaimTypeV2> claimTypesRequested,
+      Set<ClaimType> claimTypesRequested,
       long beneficiaryId,
       OffsetLinkBuilder paging,
       Optional<DateRangeParam> lastUpdated,
@@ -421,7 +422,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
       boolean includeTaxNumbers)
       throws InterruptedException, ExecutionException {
 
-    EnumSet<ClaimTypeV2> claimsToProcess =
+    EnumSet<ClaimType> claimsToProcess =
         TransformerUtilsV2.fetchClaimsAvailability(claimTypesRequested, claimTypesThatHaveData);
     LOGGER.debug(
         String.format("EnumSet for V2 claims, bene_id %d: %s", beneficiaryId, claimsToProcess));
@@ -526,7 +527,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @return the transformed explanation of benefit
    */
   @VisibleForTesting
-  private ClaimTransformerInterfaceV2 deriveTransformer(ClaimTypeV2 eobIdType) {
+  private ClaimTransformerInterfaceV2 deriveTransformer(ClaimType eobIdType) {
     switch (eobIdType) {
       case CARRIER:
         return carrierClaimTransformer;
@@ -552,10 +553,10 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * Parses the claim types to return in the search by parsing out the type tokens parameters.
    *
    * @param type a {@link TokenAndListParam} for the "type" field in a search
-   * @return The {@link ClaimTypeV2}s to be searched, as computed from the specified "type" {@link
+   * @return The {@link ClaimType}s to be searched, as computed from the specified "type" {@link
    *     TokenAndListParam} search param
    */
-  public static Set<ClaimTypeV2> parseTypeParam(TokenAndListParam type) {
+  public static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
     if (type == null) {
       type =
           new TokenAndListParam()
@@ -569,13 +570,13 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
      * formulations, e.g. (in postfix notation):
      * "and(or(claimType==FOO, claimType==BAR), or(claimType==FOO))".
      */
-    Set<ClaimTypeV2> claimTypes = new HashSet<ClaimTypeV2>(Arrays.asList(ClaimTypeV2.values()));
+    Set<ClaimType> claimTypes = new HashSet<ClaimType>(Arrays.asList(ClaimType.values()));
     for (TokenOrListParam typeToken : type.getValuesAsQueryTokens()) {
       /*
        * Each OR entry is additive: we start with an empty set and add every (valid)
        * ClaimType that's encountered.
        */
-      Set<ClaimTypeV2> claimTypesInner = new HashSet<ClaimTypeV2>();
+      Set<ClaimType> claimTypesInner = new HashSet<ClaimType>();
       for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
         if (codingToken.getModifier() != null) throw new IllegalArgumentException();
 
@@ -585,15 +586,15 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
          * an exact or wildcard code. All of those need to be handled carefully -- see
          * the spec for details.
          */
-        Optional<ClaimTypeV2> claimType =
+        Optional<ClaimType> claimType =
             codingToken.getValue() != null
-                ? ClaimTypeV2.parse(codingToken.getValue().toLowerCase())
+                ? ClaimType.parse(codingToken.getValue().toLowerCase())
                 : Optional.empty();
 
         if (codingToken.getSystem() != null
             && codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
             && !claimType.isPresent()) {
-          claimTypesInner.addAll(Arrays.asList(ClaimTypeV2.values()));
+          claimTypesInner.addAll(Arrays.asList(ClaimType.values()));
         } else if (codingToken.getSystem() == null
             || codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)) {
           if (claimType.isPresent()) {
