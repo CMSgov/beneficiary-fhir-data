@@ -87,7 +87,7 @@ jobs:
           --query repositoryEndpoint --output text)" >> $GITHUB_ENV
       - name: Configure additional maven settings.xml
         run: |-
-          cat <<EOF > ~/.m2/settings.xml \
+          cat <<EOF > ~/.m2/settings.xml
           <settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
           xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
             <servers>
