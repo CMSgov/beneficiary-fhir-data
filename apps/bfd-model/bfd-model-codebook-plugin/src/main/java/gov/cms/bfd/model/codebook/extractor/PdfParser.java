@@ -75,7 +75,7 @@ public final class PdfParser {
    * @return a {@link Codebook} instance representing the data from the parsed codebook PDF
    */
   public Codebook parseCodebookPdf(SupportedCodebook codebookSource) {
-    try (InputStream codebookPdfStream = codebookSource.getCodebookPdfInputStream(); ) {
+    try (InputStream codebookPdfStream = openCodebookPdfInputStream(codebookSource)) {
       List<String> codebookTextLines = extractTextLinesFromPdf(codebookPdfStream);
 
       Codebook codebook = new Codebook(codebookSource);
@@ -97,6 +97,19 @@ public final class PdfParser {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+  }
+
+  /**
+   * Gets the codebook pdf as an input stream. Caller is responsible for closing the stream.
+   *
+   * @param codebookSource the codebook to be converted
+   * @return an {@link InputStream} for the {@link SupportedCodebook} PDF resource to be converted
+   */
+  static InputStream openCodebookPdfInputStream(SupportedCodebook codebookSource)
+      throws IOException {
+    return Thread.currentThread()
+        .getContextClassLoader()
+        .getResourceAsStream(codebookSource.getCodebookPdfResourceName());
   }
 
   /**

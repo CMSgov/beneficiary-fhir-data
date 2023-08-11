@@ -1,7 +1,5 @@
 package gov.cms.bfd.model.codebook.model;
 
-import java.io.InputStream;
-
 /** Enumerates the codebooks that are expected to be converted. */
 public enum SupportedCodebook {
   /** The Beneficiary summary codebook which includes Medicare parts A/B/D. */
@@ -43,7 +41,7 @@ public enum SupportedCodebook {
    * @param displayName the value to use for {@link #getDisplayName()}
    * @param version the value to use for {@link #getVersion()}
    */
-  private SupportedCodebook(String codebookPdfResourceName, String displayName, String version) {
+  SupportedCodebook(String codebookPdfResourceName, String displayName, String version) {
     this.codebookPdfResourceName = codebookPdfResourceName;
     this.displayName = displayName;
     this.version = version;
@@ -52,21 +50,19 @@ public enum SupportedCodebook {
   /**
    * Gets the codebook xml resource name.
    *
-   * @return the file/resource name of the {@link SupportedCodebook} XML resource
+   * @return the file/resource name of the XML resource
    */
   public String getCodebookXmlResourceName() {
     return codebookPdfResourceName.replace(".pdf", ".xml");
   }
 
   /**
-   * Gets the codebook pdf input stream.
+   * Gets the codebook pdf resource name.
    *
-   * @return an {@link InputStream} for the {@link SupportedCodebook} PDF resource to be converted
+   * @return the file/resource name of the PDF resource
    */
-  public InputStream getCodebookPdfInputStream() {
-    return Thread.currentThread()
-        .getContextClassLoader()
-        .getResourceAsStream(codebookPdfResourceName);
+  public String getCodebookPdfResourceName() {
+    return codebookPdfResourceName;
   }
 
   /**

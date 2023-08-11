@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.codebook.extractor;
 
+import static gov.cms.bfd.model.codebook.extractor.PdfParser.openCodebookPdfInputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -145,8 +146,7 @@ public final class PdfParserTest {
    */
   @Test
   public void extractTextLinesFromPdf_ffsClaims() throws IOException {
-    try (InputStream codebookPdfStream =
-        SupportedCodebook.FFS_CLAIMS.getCodebookPdfInputStream(); ) {
+    try (InputStream codebookPdfStream = openCodebookPdfInputStream(SupportedCodebook.FFS_CLAIMS)) {
       List<String> codebookTextLines = parser.extractTextLinesFromPdf(codebookPdfStream);
 
       /*
@@ -169,7 +169,7 @@ public final class PdfParserTest {
   @Test
   public void findVariableSections() throws IOException {
     for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
-      try (InputStream codebookPdfStream = supportedCodebook.getCodebookPdfInputStream(); ) {
+      try (InputStream codebookPdfStream = openCodebookPdfInputStream(supportedCodebook)) {
         LOGGER.info("Looking for sections in codebook: {}", supportedCodebook.name());
 
         /*
