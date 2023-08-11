@@ -17,7 +17,6 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaim_;
-import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,7 +32,7 @@ import javax.persistence.metamodel.SingularAttribute;
 /**
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
  * {@link gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider} {@link
- * R4ExplanationOfBenefitResourceProvider}.
+ * gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider}.
  */
 public enum ClaimType {
   /** Represents the carrier claim type. */
