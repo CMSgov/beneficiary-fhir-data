@@ -271,7 +271,7 @@ public final class MigratorApp {
     pooledDataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
     pooledDataSource.setUsername(dbOptions.getDatabaseUsername());
     pooledDataSource.setPassword(dbOptions.getDatabasePassword());
-    pooledDataSource.setMaximumPoolSize(dbOptions.getMaxPoolSize());
+    pooledDataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
     pooledDataSource.setRegisterMbeans(true);
     pooledDataSource.setMetricRegistry(metrics);
 
