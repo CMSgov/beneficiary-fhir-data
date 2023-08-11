@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
  * Converts a <a href="https://www.ccwdata.org/web/guest/data-dictionaries">CMS Chronic Conditions
  * Warehouse (CCW) data dictionary</a> codebook into a JAX-B model {@link Codebook} instance.
  */
+@AllArgsConstructor
 public final class PdfParser {
   private static final Logger LOGGER = LoggerFactory.getLogger(PdfParser.class);
   /** Primary prefix for various header field names. */
@@ -61,12 +63,18 @@ public final class PdfParser {
       Pattern.compile("^(\\S+)\\s+=\\s*(.*)$");
 
   /**
+   * Logs a warning about variables when this flag is true. Intended for use with new pdfs to detect
+   * potential issues with parsing them for the first time.
+   */
+  private final boolean warnAboutVariables;
+
+  /**
    * Parses a pdf codebook and returns the result.
    *
    * @param codebookSource the codebook to be converted
    * @return a {@link Codebook} instance representing the data from the parsed codebook PDF
    */
-  public static Codebook parseCodebookPdf(SupportedCodebook codebookSource) {
+  public Codebook parseCodebookPdf(SupportedCodebook codebookSource) {
     try (InputStream codebookPdfStream = codebookSource.getCodebookPdfInputStream(); ) {
       List<String> codebookTextLines = extractTextLinesFromPdf(codebookPdfStream);
 
@@ -98,7 +106,7 @@ public final class PdfParser {
    * @param variableSection the text section representing a single {@link Variable} to be parsed
    * @return the {@link Variable} that was parsed from the specified text section
    */
-  private static Variable parseVariable(Codebook codebook, List<String> variableSection) {
+  private Variable parseVariable(Codebook codebook, List<String> variableSection) {
     Variable variable = new Variable(codebook);
 
     variable.setId(parseId(variableSection));
@@ -122,7 +130,7 @@ public final class PdfParser {
    * @param pdfStream the {@link InputStream} for the PDF to extract the text lines of
    * @return the trimmed lines of text contained in the specified PDF {@link InputStream}
    */
-  static List<String> extractTextLinesFromPdf(InputStream pdfStream) {
+  List<String> extractTextLinesFromPdf(InputStream pdfStream) {
     PdfReader pdfReader = null;
     try {
       pdfReader = new PdfReader(pdfStream);
@@ -171,13 +179,11 @@ public final class PdfParser {
    * @return <code>true</code> if the specified line appears to be "junk" caused by problems with
    *     extracting text from a PDF, <code>false</code> if not
    */
-  private static boolean isTextLinePdfParsingJunk(String lineFromPage) {
-    if (lineFromPage.equals("st")
+  private boolean isTextLinePdfParsingJunk(String lineFromPage) {
+    return lineFromPage.equals("st")
         || lineFromPage.equals("nd")
         || lineFromPage.equals("rd")
-        || lineFromPage.equals("th")) return true;
-
-    return false;
+        || lineFromPage.equals("th");
   }
 
   /**
@@ -188,7 +194,7 @@ public final class PdfParser {
    * @return a {@link List} of {@link List}s, where each inner {@link List} contains the text lines
    *     for a single variable
    */
-  static List<List<String>> findVariableSections(List<String> codebookTextLines) {
+  List<List<String>> findVariableSections(List<String> codebookTextLines) {
     /*
      * The best mechanism for determining section delimiters seems to be this
      * strategy: 1) find the start and end of the variable sections, 2) within
@@ -242,7 +248,7 @@ public final class PdfParser {
    * @return the index of the first line of the first variable definition in the specified codebook
    *     lines {@link List}
    */
-  private static int findFirstVariableLine(List<String> codebookTextLines) {
+  private int findFirstVariableLine(List<String> codebookTextLines) {
     /*
      * There's a pretty simple algorithm here that applies to all the codebooks we
      * care about: find the first line that starts with "LABEL:", then walk back to
@@ -272,7 +278,7 @@ public final class PdfParser {
    * @return the index of the last line of the last variable definition in the specified codebook
    *     lines {@link List}
    */
-  private static int findLastVariableLine(List<String> codebookTextLines) {
+  private int findLastVariableLine(List<String> codebookTextLines) {
     /*
      * This is actually pretty simple. It's only pulled out into a method for
      * consistency's sake.
@@ -287,7 +293,7 @@ public final class PdfParser {
    * @return <code>true</code> if the line represents document metadata that should be left out of
    *     the parsing (e.g. page footers), <code>false</code> otherwise
    */
-  private static boolean isDocumentMetadata(String line) {
+  private boolean isDocumentMetadata(String line) {
     /*
      * We also skip blank lines, as those aren't reliably useful for parsing, given
      * the vagaries of extracting text from PDFs.
@@ -318,7 +324,7 @@ public final class PdfParser {
    * @return <code>true</code> if the specified line appears to be the "LABEL:" field in a variable
    *     section, <code>false</code> otherwise
    */
-  private static boolean containsVariableLabelField(String line) {
+  private boolean containsVariableLabelField(String line) {
     /*
      * Almost all variables use the "LABEL:" field name, but at least some instead
      * use "NAME:" for no apparent reason. (One example: the beneficiary "BUYIN01"
@@ -333,7 +339,7 @@ public final class PdfParser {
    * @param variableSection the variable section to parse the value from
    * @return the {@link Variable#getId()} value from the specified {@link Variable} raw text section
    */
-  private static String parseId(List<String> variableSection) {
+  private String parseId(List<String> variableSection) {
     // The first line of each section is always the ID, by itself.
     return variableSection.get(0);
   }
@@ -345,7 +351,7 @@ public final class PdfParser {
    * @return the {@link Variable#getLabel()} value from the specified {@link Variable} raw text
    *     section
    */
-  static String parseLabel(List<String> variableSection) {
+  String parseLabel(List<String> variableSection) {
     /*
      * Almost all variables use the "LABEL:" field name, but at least some instead
      * use "NAME:" for no apparent reason. (One example: the beneficiary "BUYIN01"
@@ -371,7 +377,7 @@ public final class PdfParser {
    * @return the {@link Variable#getDescription()} value from the specified {@link Variable} raw
    *     text section
    */
-  private static List<String> parseDescription(List<String> variableSection) {
+  private List<String> parseDescription(List<String> variableSection) {
     List<String> fieldText = extractFieldContent(variableSection, FIELD_NAME_DESCRIPTION);
     List<String> fieldParagraphs = extractParagraphs(fieldText);
 
@@ -385,7 +391,7 @@ public final class PdfParser {
    * @return the {@link Variable#getShortName()} value from the specified {@link Variable} raw text
    *     section, or <code>null</code> if none was specified
    */
-  private static String parseShortName(List<String> variableSection) {
+  private String parseShortName(List<String> variableSection) {
     List<String> fieldText = extractFieldContent(variableSection, FIELD_NAME_SHORT_NAME);
 
     if (fieldText.isEmpty()) return null;
@@ -406,7 +412,7 @@ public final class PdfParser {
    * @return the {@link Variable#getLongName()} value from the specified {@link Variable} raw text
    *     section
    */
-  private static String parseLongName(List<String> variableSection) {
+  private String parseLongName(List<String> variableSection) {
     List<String> fieldText = extractFieldContent(variableSection, FIELD_NAME_LONG_NAME);
     if (fieldText.size() != 1)
       throw new IllegalStateException(
@@ -423,7 +429,7 @@ public final class PdfParser {
    * @return the {@link Variable#getType()} value from the specified {@link Variable} raw text
    *     section
    */
-  private static VariableType parseType(List<String> variableSection) {
+  private VariableType parseType(List<String> variableSection) {
     List<String> fieldText = extractFieldContent(variableSection, FIELD_NAME_TYPE);
     if (fieldText == null) return null;
     if (fieldText.size() != 1)
@@ -441,7 +447,7 @@ public final class PdfParser {
    * @return the {@link Variable#getLength()} value from the specified {@link Variable} raw text
    *     section
    */
-  private static Integer parseLength(List<String> variableSection) {
+  private Integer parseLength(List<String> variableSection) {
     List<String> fieldText = extractFieldContent(variableSection, FIELD_NAME_LENGTH);
     if (fieldText.size() != 1)
       throw new IllegalStateException(
@@ -458,7 +464,7 @@ public final class PdfParser {
    * @return the {@link Variable#getSource()} value from the specified {@link Variable} raw text
    *     section, or <code>null</code> if none was present
    */
-  private static String parseSource(List<String> variableSection) {
+  private String parseSource(List<String> variableSection) {
     List<String> fieldText = extractFieldContent(variableSection, FIELD_NAME_SOURCE);
 
     if (fieldText.isEmpty()) return null;
@@ -478,7 +484,7 @@ public final class PdfParser {
    * @return the {@link Variable#getValueFormat()} value from the specified {@link Variable} raw
    *     text section, or <code>null</code> if it was not present
    */
-  private static String parseValueFormat(List<String> variableSection) {
+  private String parseValueFormat(List<String> variableSection) {
     /*
      * The parsing strategy here is basically this: 1) each Variable has EITHER a
      * valueFormat or valueGroups, 2) if the field value includes at least one
@@ -525,7 +531,7 @@ public final class PdfParser {
    * @return the {@link Variable#getValueGroups()} value from the specified {@link Variable} raw
    *     text section, or <code>null</code> if it was not present
    */
-  private static List<ValueGroup> parseValueGroups(List<String> variableSection) {
+  private List<ValueGroup> parseValueGroups(List<String> variableSection) {
     /*
      * The parsing strategy here is basically this: 1) each Variable has EITHER a
      * valueFormat or valueGroups, 2) if the field value includes at least one
@@ -627,7 +633,7 @@ public final class PdfParser {
    * @return <code>true</code> if the specified line is part of a {@link
    *     ValueGroup#getDescription()}, <code>false</code> otherwise
    */
-  private static boolean isValueGroupDescription(
+  private boolean isValueGroupDescription(
       String variableId, List<String> fieldLines, int fieldLineIndex) {
     /*
      * If the very first line for the field is an "XX = YY" line, it's safe to
@@ -679,7 +685,7 @@ public final class PdfParser {
      * be checked by hand, since there's no reliable algorithm for finding later
      * ValueGroup lines.
      */
-    if (!knownValueGroupDescriptionLinesByVariable.containsKey(variableId)) {
+    if (warnAboutVariables && !knownValueGroupDescriptionLinesByVariable.containsKey(variableId)) {
       LOGGER.warn(
           "The '{}' variable appears to have VALUE groups. Be sure to verify it parsed correctly!",
           variableId);
@@ -695,7 +701,7 @@ public final class PdfParser {
    * @param valueLines the lines of text representing a {@link Value} to be parsed
    * @return the {@link Value} parsed from those lines
    */
-  private static Value parseValue(List<String> valueLines) {
+  private Value parseValue(List<String> valueLines) {
     // Copy the list so we can bang on it safely.
     List<String> valueLinesCopy = new ArrayList<>(valueLines);
 
@@ -732,7 +738,7 @@ public final class PdfParser {
    * @return the {@link Variable#getComment()} value from the specified {@link Variable} raw text
    *     section, or <code>null</code> if none was present
    */
-  private static List<String> parseComment(List<String> variableSection) {
+  private List<String> parseComment(List<String> variableSection) {
     List<String> fieldText = extractFieldContent(variableSection, FIELD_NAME_COMMENT);
     if (fieldText.isEmpty()) return null;
     List<String> fieldParagraphs = extractParagraphs(fieldText);
@@ -762,8 +768,7 @@ public final class PdfParser {
    * @return the lines of text between the specified variable section field name and the next field,
    *     exclusive
    */
-  private static List<String> extractFieldContent(
-      List<String> variableSection, String... fieldNames) {
+  private List<String> extractFieldContent(List<String> variableSection, String... fieldNames) {
     StringBuilder fieldNamePattern = new StringBuilder();
     fieldNamePattern.append("(?:");
     for (int i = 0; i < fieldNames.length; i++) {
@@ -861,7 +866,7 @@ public final class PdfParser {
    * @return a new {@link List} of {@link String}s, with one entry per paragraph that was found in
    *     the original list of word-wrapped {@link String}s
    */
-  private static List<String> extractParagraphs(List<String> text) {
+  private List<String> extractParagraphs(List<String> text) {
     /*
      * So this is... a bit sketchy. There's no perfect method for extracting
      * paragraphs from a PDF, even if we weren't converting it to plain text first.

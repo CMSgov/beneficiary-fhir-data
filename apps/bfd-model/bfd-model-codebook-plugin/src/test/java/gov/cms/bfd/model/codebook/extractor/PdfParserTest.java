@@ -36,6 +36,12 @@ public final class PdfParserTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(PdfParserTest.class);
 
   /**
+   * The {@link PdfParser} instance used by tests. Class is immutable so all tests can use the same
+   * instance.
+   */
+  private static final PdfParser parser = new PdfParser(false);
+
+  /**
    * Parses all of the {@link SupportedCodebook}s using {@link
    * gov.cms.bfd.model.codebook.extractor.PdfParser}, looking for duplicate {@link Variable}s.
    *
@@ -47,7 +53,7 @@ public final class PdfParserTest {
 
     // Build the map of Variable IDs to the Codebooks they're seen in.
     for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
-      Codebook codebook = PdfParser.parseCodebookPdf(supportedCodebook);
+      Codebook codebook = parser.parseCodebookPdf(supportedCodebook);
       for (Variable variable : codebook.getVariables()) {
         if (!variablesById.containsKey(variable.getId()))
           variablesById.put(variable.getId(), new ArrayList<>());
@@ -95,7 +101,7 @@ public final class PdfParserTest {
   @Test
   public void findDuplicateCodes() throws IOException {
     for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
-      Codebook codebook = PdfParser.parseCodebookPdf(supportedCodebook);
+      Codebook codebook = parser.parseCodebookPdf(supportedCodebook);
       for (Variable variable : codebook.getVariables()) {
         if (!variable.getValueGroups().isPresent()) continue;
 
@@ -141,7 +147,7 @@ public final class PdfParserTest {
   public void extractTextLinesFromPdf_ffsClaims() throws IOException {
     try (InputStream codebookPdfStream =
         SupportedCodebook.FFS_CLAIMS.getCodebookPdfInputStream(); ) {
-      List<String> codebookTextLines = PdfParser.extractTextLinesFromPdf(codebookPdfStream);
+      List<String> codebookTextLines = parser.extractTextLinesFromPdf(codebookPdfStream);
 
       /*
        * This should be left disabled, except when needed for development/debugging
@@ -171,9 +177,9 @@ public final class PdfParserTest {
          * needed to debug a specific problem, as they add a ton of log noise.
          */
 
-        List<String> codebookTextLines = PdfParser.extractTextLinesFromPdf(codebookPdfStream);
+        List<String> codebookTextLines = parser.extractTextLinesFromPdf(codebookPdfStream);
         // printTextLinesToConsole(codebookTextLines);
-        List<List<String>> variableSections = PdfParser.findVariableSections(codebookTextLines);
+        List<List<String>> variableSections = parser.findVariableSections(codebookTextLines);
         // printSectionsToConsole(variableSections);
 
         for (List<String> variableSection : variableSections) {
@@ -222,7 +228,7 @@ public final class PdfParserTest {
     for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
       LOGGER.info("Looking for sections in codebook: {}", supportedCodebook.name());
 
-      Codebook codebook = PdfParser.parseCodebookPdf(supportedCodebook);
+      Codebook codebook = parser.parseCodebookPdf(supportedCodebook);
 
       /*
        * Since this test runs against all of the PDFs, it's mostly just a
@@ -257,7 +263,7 @@ public final class PdfParserTest {
      * has a somewhat unusual valueFormat.
      */
 
-    Codebook codebook = PdfParser.parseCodebookPdf(SupportedCodebook.BENEFICIARY_SUMMARY);
+    Codebook codebook = parser.parseCodebookPdf(SupportedCodebook.BENEFICIARY_SUMMARY);
 
     Variable variable =
         codebook.getVariables().stream().filter(v -> v.getId().equals("DUAL_MO")).findAny().get();
@@ -278,7 +284,7 @@ public final class PdfParserTest {
     assertEquals("DUAL_MO", variable.getShortName().get());
     assertEquals("DUAL_ELGBL_MOS_NUM", variable.getLongName());
     assertEquals(VariableType.CHAR, variable.getType().get());
-    assertEquals(new Integer(2), variable.getLength());
+    assertEquals(Integer.valueOf(2), variable.getLength());
     assertEquals("CMS Enrollment Database (EDB) (derived)", variable.getSource().get());
     assertEquals(
         "The value in this field is between '00' through '12'.", variable.getValueFormat().get());
@@ -304,7 +310,7 @@ public final class PdfParserTest {
      * has a long URL that line breaks with a hyphen.
      */
 
-    Codebook codebook = PdfParser.parseCodebookPdf(SupportedCodebook.FFS_CLAIMS);
+    Codebook codebook = parser.parseCodebookPdf(SupportedCodebook.FFS_CLAIMS);
 
     Variable variable =
         codebook.getVariables().stream()
@@ -343,7 +349,7 @@ public final class PdfParserTest {
     assertEquals("DSH_OP", variable.getShortName().get());
     assertEquals("DSH_OP_CLM_VAL_AMT", variable.getLongName());
     assertEquals(VariableType.NUM, variable.getType().get());
-    assertEquals(new Integer(12), variable.getLength());
+    assertEquals(Integer.valueOf(12), variable.getLength());
     assertEquals("NCH", variable.getSource().get());
     assertEquals("XXX.XX", variable.getValueFormat().get());
     assertFalse(variable.getValueGroups().isPresent());
@@ -368,7 +374,7 @@ public final class PdfParserTest {
      * COMMENT that's just "-".
      */
 
-    Codebook codebook = PdfParser.parseCodebookPdf(SupportedCodebook.FFS_CLAIMS);
+    Codebook codebook = parser.parseCodebookPdf(SupportedCodebook.FFS_CLAIMS);
     Variable variable =
         codebook.getVariables().stream()
             .filter(v -> v.getId().equals("CARR_LINE_PRVDR_TYPE_CD"))
@@ -384,7 +390,7 @@ public final class PdfParserTest {
     assertEquals("PRV_TYPE", variable.getShortName().get());
     assertEquals("CARR_LINE_PRVDR_TYPE_CD", variable.getLongName());
     assertEquals(VariableType.CHAR, variable.getType().get());
-    assertEquals(new Integer(1), variable.getLength());
+    assertEquals(Integer.valueOf(1), variable.getLength());
     assertEquals("NCH", variable.getSource().get());
     assertFalse(variable.getValueFormat().isPresent());
     assertEquals(2, variable.getValueGroups().get().size());
@@ -428,7 +434,7 @@ public final class PdfParserTest {
               + " related to",
         };
 
-    String parsedLabel = PdfParser.parseLabel(Arrays.asList(variableSection));
+    String parsedLabel = parser.parseLabel(Arrays.asList(variableSection));
     assertEquals(
         "Claim Next Generation (NG) Accountable Care Organization (ACO) Indicator Code – Population-Based"
             + " Payment (PBP)",

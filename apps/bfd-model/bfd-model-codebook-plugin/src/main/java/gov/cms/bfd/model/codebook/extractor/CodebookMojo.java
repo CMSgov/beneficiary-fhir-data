@@ -57,6 +57,13 @@ public class CodebookMojo extends AbstractMojo {
   private String enumClass;
 
   /**
+   * When true this causes the {@link PdfParser} to log a warning about variables it finds in pdfs.
+   * Intended for use when testing a new version of a pdf to detect potential problems with parsing.
+   */
+  @Parameter(property = "warnAboutVariables", defaultValue = "false")
+  private Boolean warnAboutVariables;
+
+  /**
    * Instance of {@link MavenProject} used to call {@link MavenProject#addCompileSourceRoot(String)}
    * to ensure our generated classes are compiled.
    */
@@ -101,7 +108,7 @@ public class CodebookMojo extends AbstractMojo {
 
     for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
       // First, parse the PDF to model objects.
-      Codebook codebook = PdfParser.parseCodebookPdf(supportedCodebook);
+      Codebook codebook = new PdfParser(warnAboutVariables).parseCodebookPdf(supportedCodebook);
 
       // Then, fix/modify those model objects as needed.
       ListIterator<Variable> variablesIter = codebook.getVariables().listIterator();
