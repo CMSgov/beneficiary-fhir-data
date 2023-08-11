@@ -38,6 +38,10 @@ jobs:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: ci-release
           aws-region: us-east-1
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: 'true'
       - name: Dispatched Checkout
         if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v3
