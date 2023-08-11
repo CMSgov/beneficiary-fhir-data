@@ -103,17 +103,15 @@ jobs:
       - name: 'Prepare and Perform PUSHED Release'
         if: github.event_name == 'push'
         run: |-
-          mvn --batch-mode release:prepare release:perform \
-          "-DaltDeploymentRepository=${CA_DOMAIN}-${CA_REPOSITORY}::default::${CA_REPOSITORY_ENDPOINT}"
+          mvn --batch-mode --activate-profiles test-release release:prepare release:perform
         working-directory: ./apps
       - name: 'Prepare and Perform DISPATCHED Release'
         if: github.event_name == 'workflow_dispatch'
         run: |-
-          mvn --batch-mode \
+          mvn --batch-mode --activate-profiles test-release \
               -Dtag="$BFD_RELEASE" \
               -DreleaseVersion="$BFD_RELEASE" \
               -DdevelopmentVersion="$BFD_DEV_VERSION" \
-              -DaltDeploymentRepository="${CA_DOMAIN}-${CA_REPOSITORY}::default::${CA_REPOSITORY_ENDPOINT}" \
               release:prepare release:perform
         working-directory: ./apps
         env:
