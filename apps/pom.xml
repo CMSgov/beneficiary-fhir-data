@@ -1178,8 +1178,8 @@
             </properties>
             <distributionManagement>
                 <repository>
-                    <id>bfd-mgmt-bfd-release-hackathon</id>
-                    <url>https://bfd-mgmt-577373831711.d.codeartifact.us-east-1.amazonaws.com/maven/bfd-release-hackathon/</url>
+                    <id>${env.CA_DOMAIN}-${env.CA_REPOSITORY}</id>
+                    <url>${env.CA_REPOSITORY_ENDPOINT}</url>
                 </repository>
             </distributionManagement>
         </profile>
