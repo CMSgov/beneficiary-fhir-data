@@ -22,9 +22,15 @@ permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: read  # This is required for actions/checkout
 
+env:
+  # AWS Code Artifact Repository
+  CA_REPOSITORY: bfd-release-hackathon #FIXME
+  CA_DOMAIN: bfd-mgmt
+
+
 jobs:
-  mvn-release-prepare:
-    runs-on: ubuntu-22.04
+  mvn-release:
+    runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -65,18 +71,49 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
-      - name: 'Prepare and Perform PUSHED Release '
+      - name: Set Authorization Token
+        #FIXME: Use non-hackathon domain/repository
+        run: >-
+          echo CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token
+          --domain "$CA_DOMAIN" --domain-owner ${{ secrets.AWS_ACCOUNT_ID }}
+          --query authorizationToken
+          --output text
+          --region us-east-1)" >> $GITHUB_ENV
+
+      - name: Get Repository Endpoint
+        run: >-
+          echo CA_REPOSITORY_ENDPOINT="$(aws codeartifact get-repository-endpoint
+          --domain "$CA_DOMAIN" --repository "$CA_REPOSITORY" --format maven
+          --query repositoryEndpoint --output text)" >> $GITHUB_ENV
+      - name: Configure additional maven settings.xml
+        run: |-
+          cat <<EOF > ~/.m2/settings.xml \
+          <settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
+          xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <username>aws</username>
+                <password>$CODEARTIFACT_AUTH_TOKEN</password>
+                <id>$CA_DOMAIN-$CA_REPOSITORY</id>
+              </server>
+            </servers>
+          </settings>
+          EOF
+      - name: 'Prepare and Perform PUSHED Release'
         if: github.event_name == 'push'
-        run: mvn --batch-mode release:prepare release:perform
+        run: |-
+          mvn --batch-mode --threads 1C release:prepare release:perform \
+          "-DaltDeploymentRepository=${CA_DOMAIN}-${CA_REPOSITORY}::default::${CA_REPOSITORY_ENDPOINT}"
         working-directory: ./apps
-      - name: 'Prepare and Perform DISPATCHED Release '
+      - name: 'Prepare and Perform DISPATCHED Release'
         if: github.event_name == 'workflow_dispatch'
         run: |-
           mvn --batch-mode --threads 1C \
               -Dtag="$BFD_RELEASE" \
               -DreleaseVersion="$BFD_RELEASE" \
               -DdevelopmentVersion="$BFD_DEV_VERSION" \
-              release:prepare release:perform \
+              -DaltDeploymentRepository="${CA_DOMAIN}-${CA_REPOSITORY}::default::${CA_REPOSITORY_ENDPOINT}" \
+              release:prepare release:perform
         working-directory: ./apps
         env:
           BFD_RELEASE: ${{ inputs.releaseVersion }}
