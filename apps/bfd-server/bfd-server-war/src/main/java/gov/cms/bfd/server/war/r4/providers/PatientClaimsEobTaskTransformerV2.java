@@ -9,6 +9,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -80,7 +81,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   /** the ClaimTransformer interface for execution. */
   private ClaimTransformerInterfaceV2 claimTransformer = null;
   /** the claim type to retreive data for. */
-  private ClaimTypeV2 claimType;
+  private ClaimType claimType;
   /** beneficiary identifier to process. */
   private Long id = 0L;
   /** date range that lastUpdate falls within. */
@@ -140,7 +141,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    */
   public void setupTaskParams(
       ClaimTransformerInterfaceV2 claimTransformer,
-      ClaimTypeV2 claimType,
+      ClaimType claimType,
       Long id,
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
@@ -277,7 +278,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   /**
    * Fetch the claim type string.
    *
-   * @return {@link String} identifying the {@link ClaimTypeV2} of task
+   * @return {@link String} identifying the {@link ClaimType} of task
    */
   @Override
   public String toString() {

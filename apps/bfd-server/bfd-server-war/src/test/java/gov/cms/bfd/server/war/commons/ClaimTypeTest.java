@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.commons;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,8 +17,8 @@ import java.util.EnumSet;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** Tests the {@link ClaimTypeV2} enum logic. */
-public final class ClaimTypeV2Test {
+/** Unit tests for the {@link ClaimType}. */
+public final class ClaimTypeTest {
   /**
    * Verifies that our service end date function is working as expected. Since we are type casting
    * our claim object, we need to verify that every ClaimType is tested.
@@ -36,12 +36,13 @@ public final class ClaimTypeV2Test {
     dmeClaim.setDateFrom(start);
     dmeClaim.setDateThrough(end);
 
+    HHAClaim hhaClaim = new HHAClaim();
+    hhaClaim.setDateFrom(start);
+    hhaClaim.setDateThrough(end);
+
     HospiceClaim hospiceClaim = new HospiceClaim();
     hospiceClaim.setDateFrom(start);
     hospiceClaim.setDateThrough(end);
-
-    PartDEvent partDEvent = new PartDEvent();
-    partDEvent.setPrescriptionFillDate(end);
 
     InpatientClaim inpatientClaim = new InpatientClaim();
     inpatientClaim.setDateFrom(start);
@@ -51,28 +52,27 @@ public final class ClaimTypeV2Test {
     outpatientClaim.setDateFrom(start);
     outpatientClaim.setDateThrough(end);
 
+    PartDEvent partDEvent = new PartDEvent();
+    partDEvent.setPrescriptionFillDate(end);
+
     SNFClaim snfClaim = new SNFClaim();
     snfClaim.setDateFrom(start);
     snfClaim.setDateThrough(end);
 
-    HHAClaim hhaClaim = new HHAClaim();
-    hhaClaim.setDateFrom(start);
-    hhaClaim.setDateThrough(end);
+    ImmutableMap.Builder<ClaimType, Object> builder = ImmutableMap.builder();
+    builder.put(ClaimType.CARRIER, carrierClaim);
+    builder.put(ClaimType.DME, dmeClaim);
+    builder.put(ClaimType.HHA, hhaClaim);
+    builder.put(ClaimType.HOSPICE, hospiceClaim);
+    builder.put(ClaimType.INPATIENT, inpatientClaim);
+    builder.put(ClaimType.OUTPATIENT, outpatientClaim);
+    builder.put(ClaimType.PDE, partDEvent);
+    builder.put(ClaimType.SNF, snfClaim);
 
-    ImmutableMap.Builder<ClaimTypeV2, Object> builder = ImmutableMap.builder();
-    builder.put(ClaimTypeV2.CARRIER, carrierClaim);
-    builder.put(ClaimTypeV2.DME, dmeClaim);
-    builder.put(ClaimTypeV2.PDE, partDEvent);
-    builder.put(ClaimTypeV2.INPATIENT, inpatientClaim);
-    builder.put(ClaimTypeV2.OUTPATIENT, outpatientClaim);
-    builder.put(ClaimTypeV2.HOSPICE, hospiceClaim);
-    builder.put(ClaimTypeV2.SNF, snfClaim);
-    builder.put(ClaimTypeV2.HHA, hhaClaim);
-
-    Map<ClaimTypeV2, Object> claimTypeToClaim = builder.build();
+    Map<ClaimType, Object> claimTypeToClaim = builder.build();
 
     // Verify that we're testing all of the ClaimTypes that are defined
-    EnumSet.allOf(ClaimTypeV2.class).stream()
+    EnumSet.allOf(ClaimType.class).stream()
         .forEach(
             claimType ->
                 assertTrue(

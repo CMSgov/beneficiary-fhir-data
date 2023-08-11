@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -107,7 +108,7 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimTypeV2.INPATIENT,
+        ClaimType.INPATIENT,
         String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
@@ -122,7 +123,7 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // NCH_NEAR_LINE_REC_IDENT_CD   => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimTypeV2.INPATIENT,
+        ClaimType.INPATIENT,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -312,7 +313,7 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
     for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
-      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.INPATIENT);
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.INPATIENT);
     }
 
     // Handle Procedures
