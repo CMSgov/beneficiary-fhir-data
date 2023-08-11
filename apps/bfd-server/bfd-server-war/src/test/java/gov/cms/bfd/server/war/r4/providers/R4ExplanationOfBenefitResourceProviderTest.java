@@ -36,6 +36,7 @@ import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -313,56 +314,56 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Test
   void parseTypeParam() {
     TokenAndListParam typeParamNull = null;
-    Set<ClaimTypeV2> typesForNull =
+    Set<ClaimType> typesForNull =
         R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamNull);
-    assertEquals(ClaimTypeV2.values().length, typesForNull.size());
+    assertEquals(ClaimType.values().length, typesForNull.size());
 
     TokenAndListParam typeParamSystemWildcard =
         new TokenAndListParam()
             .addAnd(
                 new TokenOrListParam()
                     .add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
-    Set<ClaimTypeV2> typesForSystemWildcard =
+    Set<ClaimType> typesForSystemWildcard =
         R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSystemWildcard);
-    assertEquals(ClaimTypeV2.values().length, typesForSystemWildcard.size());
+    assertEquals(ClaimType.values().length, typesForSystemWildcard.size());
 
     TokenAndListParam typeParamSingle =
         new TokenAndListParam()
             .addAnd(
                 new TokenOrListParam(
-                    TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimTypeV2.CARRIER.name()));
-    Set<ClaimTypeV2> typesForSingle =
+                    TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.CARRIER.name()));
+    Set<ClaimType> typesForSingle =
         R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingle);
     assertEquals(1, typesForSingle.size());
-    assertTrue(typesForSingle.contains(ClaimTypeV2.CARRIER));
+    assertTrue(typesForSingle.contains(ClaimType.CARRIER));
 
     TokenAndListParam typeParamSingleNullSystem =
-        new TokenAndListParam().addAnd(new TokenOrListParam(null, ClaimTypeV2.CARRIER.name()));
-    Set<ClaimTypeV2> typesForSingleNullSystem =
+        new TokenAndListParam().addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name()));
+    Set<ClaimType> typesForSingleNullSystem =
         R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleNullSystem);
     assertEquals(1, typesForSingleNullSystem.size());
-    assertTrue(typesForSingleNullSystem.contains(ClaimTypeV2.CARRIER));
+    assertTrue(typesForSingleNullSystem.contains(ClaimType.CARRIER));
 
     TokenAndListParam typeParamSingleInvalidSystem =
-        new TokenAndListParam().addAnd(new TokenOrListParam("foo", ClaimTypeV2.CARRIER.name()));
-    Set<ClaimTypeV2> typesForSingleInvalidSystem =
+        new TokenAndListParam().addAnd(new TokenOrListParam("foo", ClaimType.CARRIER.name()));
+    Set<ClaimType> typesForSingleInvalidSystem =
         R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleInvalidSystem);
     assertEquals(0, typesForSingleInvalidSystem.size());
 
     TokenAndListParam typeParamSingleInvalidCode =
         new TokenAndListParam().addAnd(new TokenOrListParam(null, "foo"));
-    Set<ClaimTypeV2> typesForSingleInvalidCode =
+    Set<ClaimType> typesForSingleInvalidCode =
         R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleInvalidCode);
     assertEquals(0, typesForSingleInvalidCode.size());
 
     TokenAndListParam typeParamTwoEntries =
         new TokenAndListParam()
-            .addAnd(new TokenOrListParam(null, ClaimTypeV2.CARRIER.name(), ClaimTypeV2.DME.name()))
-            .addAnd(new TokenOrListParam(null, ClaimTypeV2.CARRIER.name()));
-    Set<ClaimTypeV2> typesForTwoEntries =
+            .addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name(), ClaimType.DME.name()))
+            .addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name()));
+    Set<ClaimType> typesForTwoEntries =
         R4ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamTwoEntries);
     assertEquals(1, typesForTwoEntries.size());
-    assertTrue(typesForTwoEntries.contains(ClaimTypeV2.CARRIER));
+    assertTrue(typesForTwoEntries.contains(ClaimType.CARRIER));
   }
 
   /**
@@ -378,7 +379,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
                     .add(
                         new TokenParam(
                                 TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE,
-                                ClaimTypeV2.CARRIER.name())
+                                ClaimType.CARRIER.name())
                             .setModifier(TokenParamModifier.ABOVE)));
     assertThrows(
         IllegalArgumentException.class,
@@ -555,11 +556,11 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Test
   void testFindByPatientIgnoresInvalidClaimTypeV2() {
     TokenAndListParam listParam = createClaimsTokenAndListParam(Arrays.asList("carriers", "dme"));
-    Set<ClaimTypeV2> result = R4ExplanationOfBenefitResourceProvider.parseTypeParam(listParam);
+    Set<ClaimType> result = R4ExplanationOfBenefitResourceProvider.parseTypeParam(listParam);
     assertEquals(1, result.size());
-    assertFalse(result.contains(ClaimTypeV2.CARRIER)); // ignored carriers, should be carrier
-    assertTrue(result.contains(ClaimTypeV2.DME));
-    assertFalse(result.contains(ClaimTypeV2.SNF));
+    assertFalse(result.contains(ClaimType.CARRIER)); // ignored carriers, should be carrier
+    assertTrue(result.contains(ClaimType.DME));
+    assertFalse(result.contains(ClaimType.SNF));
   }
 
   /**
@@ -568,16 +569,16 @@ public class R4ExplanationOfBenefitResourceProviderTest {
    */
   @Test
   void testFindByPatientSupportsNullRequestedClaimTypeV2() {
-    Set<ClaimTypeV2> result = R4ExplanationOfBenefitResourceProvider.parseTypeParam(null);
+    Set<ClaimType> result = R4ExplanationOfBenefitResourceProvider.parseTypeParam(null);
     assertEquals(8, result.size());
-    assertTrue(result.contains(ClaimTypeV2.CARRIER));
-    assertTrue(result.contains(ClaimTypeV2.DME));
-    assertTrue(result.contains(ClaimTypeV2.SNF));
-    assertTrue(result.contains(ClaimTypeV2.PDE));
-    assertTrue(result.contains(ClaimTypeV2.HHA));
-    assertTrue(result.contains(ClaimTypeV2.HOSPICE));
-    assertTrue(result.contains(ClaimTypeV2.INPATIENT));
-    assertTrue(result.contains(ClaimTypeV2.OUTPATIENT));
+    assertTrue(result.contains(ClaimType.CARRIER));
+    assertTrue(result.contains(ClaimType.DME));
+    assertTrue(result.contains(ClaimType.SNF));
+    assertTrue(result.contains(ClaimType.PDE));
+    assertTrue(result.contains(ClaimType.HHA));
+    assertTrue(result.contains(ClaimType.HOSPICE));
+    assertTrue(result.contains(ClaimType.INPATIENT));
+    assertTrue(result.contains(ClaimType.OUTPATIENT));
   }
 
   /**
@@ -614,12 +615,12 @@ public class R4ExplanationOfBenefitResourceProviderTest {
    * Sets up mock query of a given claim type.
    *
    * @param em the {@link EntityManager} claim data to mock.
-   * @param claimType the {@link ClaimTypeV2} claim data to mock.
+   * @param claimType the {@link ClaimType} claim data to mock.
    * @param clmMockCriteria the {@link CriteriaQuery} claim query criteria being mocked.
    * @param clmRoot the {@link Root} claim root being mocked.
    */
   private void setupClaimEntity(
-      EntityManager em, ClaimTypeV2 claimType, CriteriaQuery clmMockCriteria, Root clmRoot) {
+      EntityManager em, ClaimType claimType, CriteriaQuery clmMockCriteria, Root clmRoot) {
     CriteriaBuilder clmCriteriaBuilder = mock(CriteriaBuilder.class);
     Path clmMockPath = mock(Path.class);
     TypedQuery clmMockQuery = mock(TypedQuery.class);

@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
@@ -1428,7 +1429,7 @@ public class CarrierClaimTransformerV2Test {
         eob,
         claim.getClaimId(),
         claim.getBeneficiaryId(),
-        ClaimTypeV2.CARRIER,
+        ClaimType.CARRIER,
         String.valueOf(claim.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),

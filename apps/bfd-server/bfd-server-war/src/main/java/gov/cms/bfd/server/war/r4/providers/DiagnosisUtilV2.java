@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -405,13 +406,13 @@ public class DiagnosisUtilV2 {
 
   /**
    * Translates from {@link DiagnosisLabel} to an EOB type specific Coding based on the {@link
-   * ClaimTypeV2}.
+   * ClaimType}.
    *
    * @param label the label to transform
    * @param claimType the claim type to use for the translation
    * @return the label translated to the specified type
    */
-  static Coding translateLabelCode(DiagnosisLabel label, ClaimTypeV2 claimType) {
+  static Coding translateLabelCode(DiagnosisLabel label, ClaimType claimType) {
     switch (claimType) {
       case PDE:
         return translateLabelPharmacy(label);
@@ -430,14 +431,14 @@ public class DiagnosisUtilV2 {
         return translateLabelProfessional(label);
 
       default:
-        // All options on ClaimTypeV2 are covered above, but this is there to appease linter
+        // All options on ClaimType are covered above, but this is there to appease linter
         throw new BadCodeMonkeyException("No match found for DiagnosisLabel");
     }
   }
 
   /**
    * Translates a list of {@link DiagnosisLabel} to an EOB type specific Coding based on the {@link
-   * ClaimTypeV2}.
+   * ClaimType}.
    *
    * <p>In practice, the list will only ever be one {@link DiagnosisLabel}. The {@link Diagnosis}
    * class allows multiple labels to be present, so we cover that case here. In V2, only a single
@@ -447,7 +448,7 @@ public class DiagnosisUtilV2 {
    * @param claimType the claim type to use for the label translation
    * @return a new {@link CodeableConcept} with the coding set based on the labels
    */
-  static CodeableConcept translateLabels(Set<DiagnosisLabel> labels, ClaimTypeV2 claimType) {
+  static CodeableConcept translateLabels(Set<DiagnosisLabel> labels, ClaimType claimType) {
     CodeableConcept diagType = new CodeableConcept();
 
     List<Coding> codings =
@@ -466,8 +467,7 @@ public class DiagnosisUtilV2 {
    * @param claimType the claim type to use when adding the diagnosis code
    * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
    */
-  static int addDiagnosisCode(
-      ExplanationOfBenefit eob, Diagnosis diagnosis, ClaimTypeV2 claimType) {
+  static int addDiagnosisCode(ExplanationOfBenefit eob, Diagnosis diagnosis, ClaimType claimType) {
     // Filter out if the diagnosis is already contained in the document
     Optional<DiagnosisComponent> existingDiagnosis =
         eob.getDiagnosis().stream()
@@ -509,7 +509,7 @@ public class DiagnosisUtilV2 {
    * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
    */
   static Optional<Integer> addDiagnosisCode(
-      ExplanationOfBenefit eob, Optional<Diagnosis> diagnosis, ClaimTypeV2 claimType) {
+      ExplanationOfBenefit eob, Optional<Diagnosis> diagnosis, ClaimType claimType) {
     return diagnosis.map(d -> new Integer(addDiagnosisCode(eob, d, claimType)));
   }
 
@@ -526,7 +526,7 @@ public class DiagnosisUtilV2 {
       ExplanationOfBenefit eob,
       ItemComponent item,
       Optional<Diagnosis> diagnosis,
-      ClaimTypeV2 claimType) {
+      ClaimType claimType) {
     diagnosis.ifPresent(diag -> item.addDiagnosisSequence(addDiagnosisCode(eob, diag, claimType)));
   }
 }

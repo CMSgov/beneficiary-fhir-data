@@ -39,6 +39,7 @@ import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.IdentifierType;

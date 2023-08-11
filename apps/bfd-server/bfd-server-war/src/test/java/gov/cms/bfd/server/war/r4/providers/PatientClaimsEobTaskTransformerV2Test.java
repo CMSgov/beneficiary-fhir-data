@@ -27,6 +27,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
@@ -185,7 +186,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingCarrierClaimNoSamhsaFilter() throws IOException {
     CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.CARRIER, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new CarrierClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -195,7 +196,7 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.CARRIER, 1234L, Optional.empty(), Optional.empty(), false);
+        claimTransformer, ClaimType.CARRIER, 1234L, Optional.empty(), Optional.empty(), false);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -216,7 +217,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingCarrierClaimWithSamhsa() throws IOException {
     CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.CARRIER, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.CARRIER, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new CarrierClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -226,7 +227,7 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.CARRIER, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.CARRIER, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -247,7 +248,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingDmeClaimNoSamhsaFilter() throws IOException {
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.DME, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new DMEClaimTransformerV2(metricRegistry, mockDrugDisplayLookup);
@@ -257,7 +258,7 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.DME, 1234L, Optional.empty(), Optional.empty(), false);
+        claimTransformer, ClaimType.DME, 1234L, Optional.empty(), Optional.empty(), false);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -278,7 +279,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingDmeClaimWithSamhsa() throws IOException {
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.DME, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new DMEClaimTransformerV2(metricRegistry, mockDrugDisplayLookup);
@@ -288,7 +289,7 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.DME, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.DME, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -309,7 +310,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingHhaClaimWithSamhsa() throws IOException {
     CriteriaQuery<HHAClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<HHAClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.HHA, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.HHA, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new HHAClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
@@ -320,7 +321,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.HHA, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.HHA, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -341,7 +342,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingHospiceClaimWithSamhsa() throws IOException {
     CriteriaQuery<HospiceClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<HospiceClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.HOSPICE, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.HOSPICE, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new HospiceClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
@@ -352,7 +353,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.HOSPICE, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.HOSPICE, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -373,7 +374,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingInpatientClaimWithSamhsa() throws IOException {
     CriteriaQuery<InpatientClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<InpatientClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.INPATIENT, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.INPATIENT, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new InpatientClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
@@ -384,7 +385,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.INPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.INPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -405,7 +406,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingOutpatientClaimWithSamhsa() throws IOException {
     CriteriaQuery<OutpatientClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<OutpatientClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.OUTPATIENT, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.OUTPATIENT, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new OutpatientClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -416,7 +417,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.OUTPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.OUTPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -437,7 +438,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingPartDEventWithSamhsa() throws IOException {
     CriteriaQuery<PartDEvent> clmMockCriteria = mock(CriteriaQuery.class);
     Root<PartDEvent> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.PDE, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.PDE, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new PartDEventTransformerV2(metricRegistry, mockDrugDisplayLookup);
@@ -448,7 +449,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.PDE, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.PDE, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -469,7 +470,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   void testTaskTransformerUsingSnfClaimWithSamhsa() throws IOException {
     CriteriaQuery<SNFClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<SNFClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.SNF, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.SNF, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new SNFClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
@@ -480,7 +481,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.SNF, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.SNF, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -504,7 +505,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     // purposely setup a DME clam
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
-    setupClaimEntity(mockEntityManager, ClaimTypeV2.DME, clmMockCriteria, clmRoot);
+    setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
         new SNFClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
@@ -515,7 +516,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimTypeV2.SNF, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.SNF, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
@@ -528,12 +529,12 @@ class PatientClaimsEobTaskTransformerV2Test {
    * Sets up mock query of a given claim type.
    *
    * @param em the {@link EntityManager} claim data to mock.
-   * @param claimType the {@link ClaimTypeV2} claim data to mock.
+   * @param claimType the {@link ClaimType} claim data to mock.
    * @param clmMockCriteria the {@link CriteriaQuery} claim query criteria being mocked.
    * @param clmRoot the {@link Root} claim root being mocked.
    */
   private void setupClaimEntity(
-      EntityManager em, ClaimTypeV2 claimType, CriteriaQuery clmMockCriteria, Root clmRoot) {
+      EntityManager em, ClaimType claimType, CriteriaQuery clmMockCriteria, Root clmRoot) {
     CriteriaBuilder clmCriteriaBuilder = mock(CriteriaBuilder.class);
     Path clmMockPath = mock(Path.class);
     TypedQuery clmMockQuery = mock(TypedQuery.class);

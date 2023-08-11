@@ -9,6 +9,7 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -108,7 +109,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
         eob,
         claimGroup.getEventId(),
         claimGroup.getBeneficiaryId(),
-        ClaimTypeV2.PDE,
+        ClaimType.PDE,
         String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_D,
         Optional.of(claimGroup.getPrescriptionFillDate()),
@@ -125,7 +126,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
     // map eob type codes into FHIR
     // EOB Type               => ExplanationOfBenefit.type.coding
     // Claim Type  (pharmacy) => ExplanationOfBenefit.type.coding
-    TransformerUtilsV2.mapEobType(eob, ClaimTypeV2.PDE, Optional.empty(), Optional.empty());
+    TransformerUtilsV2.mapEobType(eob, ClaimType.PDE, Optional.empty(), Optional.empty());
 
     // Coverage object is not optional, and we want to add extensions to it. This is safe.
 
