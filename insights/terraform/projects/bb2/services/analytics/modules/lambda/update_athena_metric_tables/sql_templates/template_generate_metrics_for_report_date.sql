@@ -1294,7 +1294,7 @@ SELECT
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
           'sdk_requests_node_count')
-        AND req_header_bluebutton_sdk = 'python'
+        AND req_header_bluebutton_sdk = 'node'
       )
   ) as sdk_requests_node_count
 
