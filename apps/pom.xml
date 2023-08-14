@@ -839,10 +839,7 @@
                         <localCheckout>true</localCheckout>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <commitByProject>false</commitByProject>
-                        <arguments>
-                            <argument>--threads</argument>
-                            <argument>1C</argument>
-                        </arguments>
+                        <arguments>--threads 1C</arguments>
                     </configuration>
                 </plugin>
                 <plugin>
