@@ -839,7 +839,7 @@
                         <localCheckout>true</localCheckout>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <commitByProject>false</commitByProject>
-                        <arguments>--threads 1C</arguments>
+                        <arguments>--threads 1C -DskipTests=true -DskipITs</arguments>
                     </configuration>
                 </plugin>
                 <plugin>

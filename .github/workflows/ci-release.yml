@@ -55,10 +55,6 @@ jobs:
         with:
           java-version: '17'
           distribution: corretto
-      - name: Configure the git user
-        run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
       - name: Generate maven toolchain config
         run: |
           cat << EOF > ~/.m2/toolchains.xml
