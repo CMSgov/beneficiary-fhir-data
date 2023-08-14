@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<codebook id="PARTD_EVENTS" name="Medicare Part D Event (PDE) / Drug Characteristics" version="May 2017, Version 1.0">
+    <!-- Chosen because it is unique to this file. -->
+    <variable id="ADJSTMT_DLTN_CD" label="Adjustment Deletion Code" shortName="ADJDELCD" longName="ADJSTMT_DLTN_CD" type="CHAR" length="1" source="PDE">
+        <description>
+            <p>This field distinguishes original from adjusted or deleted PDE records so CMS can adjust claims and make accurate payment for revised PDE records.</p>
+        </description>
+        <valueGroups>
+            <valueGroup>
+                <value code="Blank">Original PDE</value>
+                <value code="A">Adjustment</value>
+                <value code="D">Deletion</value>
+                <value code="R">Resubmitted</value>
+            </valueGroup>
+        </valueGroups>
+        <comment>
+            <p>Only the final version of the PDE at the time of payment reconciliation is included in the Part D standard analytic file (SAF).</p>
+        </comment>
+    </variable>
+    <!-- Chosen because it is in the Set of variables allowed in many files. -->
+    <variable id="BENE_ID" label="CCW Encrypted Beneficiary ID Number" shortName="BENE_ID" longName="BENE_ID" type="CHAR" length="15" source="CCW">
+        <description>
+            <p>The unique CCW identifier for a beneficiary.</p>
+            <p>The CCW assigns a unique beneficiary identification number to each individual who receives Medicare and/or Medicaid, and uses that number to identify an individual’s records in all CCW data files (e.g., Medicare claims, MAX claims, MDS assessment data).</p>
+            <p>This number does not change during a beneficiary’s lifetime and each number is used only once.</p>
+            <p>The BENE_ID is specific to the CCW and is not applicable to any other identification system or data source.</p>
+        </description>
+    </variable>
+    <!-- Chosen because it is present in two files. -->
+    <variable id="DOB_DT" label="Patient Date of Birth (DOB)" shortName="DOB_DT" longName="DOB_DT" type="DATE" length="8" source="PDE" valueFormat="Date formatted as CCYYMMDD">
+        <description>
+            <p>Date of birth of the patient as indicated on the event record.</p>
+        </description>
+        <comment>
+            <p>It is possible that this date may be different than the beneficiary date of birth (BENE_BIRTH_DT) variable that appears on the Master Beneficiary Summary File (MBSF).</p>
+        </comment>
+    </variable>
+    <!-- Chosen because it is in the Set of variables allowed in many files. -->
+    <variable id="GNDR_CD" label="Patient Gender" shortName="GNDR_CD" longName="GNDR_CD" type="CHAR" length="1" source="PDE">
+        <description>
+            <p>Gender of the patient as indicated on the event record.</p>
+        </description>
+        <valueGroups>
+            <valueGroup>
+                <value code="Blank">Unknown</value>
+                <value code="1">Male</value>
+                <value code="2">Female</value>
+            </valueGroup>
+        </valueGroups>
+    </variable>
+</codebook>
