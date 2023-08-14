@@ -835,10 +835,14 @@
                     <configuration>
                         <!-- Require manual pushes after releases. Makes it easier to clean
                             things up if releases fail. -->
-                        <pushChanges>false</pushChanges>
+                        <pushChanges>true</pushChanges>
                         <localCheckout>true</localCheckout>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <commitByProject>false</commitByProject>
+                        <arguments>
+                            <argument>--threads</argument>
+                            <argument>1C</argument>
+                        </arguments>
                     </configuration>
                 </plugin>
                 <plugin>
