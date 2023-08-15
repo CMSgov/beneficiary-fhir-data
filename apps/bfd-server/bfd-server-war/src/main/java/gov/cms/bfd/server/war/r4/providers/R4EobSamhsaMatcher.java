@@ -6,6 +6,7 @@ import gov.cms.bfd.server.war.adapters.Coding;
 import gov.cms.bfd.server.war.adapters.r4.ExplanationOfBenefitAdapter;
 import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Set;
@@ -45,7 +46,7 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
   public boolean test(ExplanationOfBenefit eob) {
     ExplanationOfBenefitAdapter adapter = new ExplanationOfBenefitAdapter(eob);
 
-    ClaimTypeV2 claimType = TransformerUtilsV2.getClaimType(eob);
+    ClaimType claimType = TransformerUtilsV2.getClaimType(eob);
 
     boolean containsSamhsa = false;
 

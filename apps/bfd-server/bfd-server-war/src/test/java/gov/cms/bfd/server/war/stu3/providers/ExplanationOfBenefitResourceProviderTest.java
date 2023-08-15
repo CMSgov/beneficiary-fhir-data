@@ -36,6 +36,7 @@ import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;

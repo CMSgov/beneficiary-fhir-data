@@ -25,6 +25,7 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
@@ -76,7 +77,7 @@ public final class TransformerTestUtilsV2 {
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimId CLM_ID
    * @param beneficiaryId BENE_ID
-   * @param claimType {@link ClaimTypeV2} to process
+   * @param claimType {@link ClaimType} to process
    * @param claimGroupId CLM_GRP_ID
    * @param coverageType {@link MedicareSegment}
    * @param dateFrom CLM_FROM_DT
@@ -88,7 +89,7 @@ public final class TransformerTestUtilsV2 {
       ExplanationOfBenefit eob,
       Long claimId,
       Long beneficiaryId,
-      ClaimTypeV2 claimType,
+      ClaimType claimType,
       String claimGroupId,
       MedicareSegment coverageType,
       Optional<LocalDate> dateFrom,
@@ -101,7 +102,7 @@ public final class TransformerTestUtilsV2 {
     assertEquals(TransformerUtilsV2.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
     assertHasIdentifier(
-        claimType.equals(ClaimTypeV2.PDE) ? CcwCodebookVariable.PDE_ID : CcwCodebookVariable.CLM_ID,
+        claimType.equals(ClaimType.PDE) ? CcwCodebookVariable.PDE_ID : CcwCodebookVariable.CLM_ID,
         String.valueOf(claimId),
         eob.getIdentifier());
 

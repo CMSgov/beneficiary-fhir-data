@@ -9,6 +9,7 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -107,7 +108,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimTypeV2.DME,
+        ClaimType.DME,
         String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
@@ -122,7 +123,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimTypeV2.DME,
+        ClaimType.DME,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -181,7 +182,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // ICD_DGNS_CD(1-12)        => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_VRSN_CD(1-12)   => diagnosis.diagnosisCodeableConcept
     for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
-      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.DME);
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.DME);
     }
 
     // CARR_CLM_ENTRY_CD => ExplanationOfBenefit.extension
@@ -418,7 +419,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           item,
           Diagnosis.from(
               line.getDiagnosisCode(), line.getDiagnosisCodeVersion(), DiagnosisLabel.OTHER),
-          ClaimTypeV2.CARRIER);
+          ClaimType.CARRIER);
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
       if (line.getProviderStateCode() != null) {

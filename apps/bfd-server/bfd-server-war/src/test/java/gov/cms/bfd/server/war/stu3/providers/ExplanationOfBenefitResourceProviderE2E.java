@@ -33,6 +33,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;

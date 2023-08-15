@@ -17,6 +17,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
@@ -162,8 +163,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -185,8 +186,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -208,8 +209,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+     * true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related CPT procedure codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -228,8 +229,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+     * true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related CPT procedure codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -249,8 +250,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#DME} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#DME} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -272,8 +273,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#DME} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#DME} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -295,8 +296,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#DME} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+     * true</code> for {@link ClaimType#DME} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * CPT procedure codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -315,8 +316,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#INPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -338,8 +339,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#INPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -361,8 +362,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#INPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -384,8 +385,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#INPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -407,8 +408,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related drg codes.
+     * true</code> for {@link ClaimType#INPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related drg codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -431,8 +432,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#OUTPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -454,8 +455,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#OUTPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -477,8 +478,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+     * true</code> for {@link ClaimType#OUTPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related CPT procedure codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -497,8 +498,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#OUTPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -520,8 +521,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#OUTPATIENT} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -543,8 +544,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HHA} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#HHA} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -566,8 +567,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HHA} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#HHA} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -589,8 +590,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HHA} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+     * true</code> for {@link ClaimType#HHA} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * CPT procedure codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -609,8 +610,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HOSPICE} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#HOSPICE} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -632,8 +633,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HOSPICE} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#HOSPICE} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -655,8 +656,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HOSPICE} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+     * true</code> for {@link ClaimType#HOSPICE} {@link ExplanationOfBenefit}s that have
+     * SAMHSA-related CPT procedure codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -675,8 +676,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#SNF} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -698,8 +699,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#SNF} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -721,8 +722,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+     * true</code> for {@link ClaimType#SNF} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * CPT procedure codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -741,8 +742,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+     * true</code> for {@link ClaimType#SNF} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * ICD 9 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -764,8 +765,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
+     * true</code> for {@link ClaimType#SNF} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * ICD 10 diagnosis codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -787,8 +788,8 @@ public final class Stu3EobSamhsaMatcherTest {
      * Verifies that {@link
      * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)}
      * returns <code>
-     * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
-     * ExplanationOfBenefit}s that have SAMHSA-related drg codes.
+     * true</code> for {@link ClaimType#SNF} {@link ExplanationOfBenefit}s that have SAMHSA-related
+     * drg codes.
      *
      * @throws FHIRException (indicates problem with test data)
      */
@@ -810,11 +811,9 @@ public final class Stu3EobSamhsaMatcherTest {
     /**
      * Gets the sample A claim from a file resource.
      *
-     * @param claimType the {@link gov.cms.bfd.server.war.stu3.providers.ClaimType} to get a sample
-     *     {@link ExplanationOfBenefit} for
-     * @return a sample {@link ExplanationOfBenefit} of the specified {@link
-     *     gov.cms.bfd.server.war.stu3.providers.ClaimType} (derived from the {@link
-     *     StaticRifResourceGroup#SAMPLE_A} sample RIF records)
+     * @param claimType the {@link ClaimType} to get a sample {@link ExplanationOfBenefit} for
+     * @return a sample {@link ExplanationOfBenefit} of the specified {@link ClaimType} (derived
+     *     from the {@link StaticRifResourceGroup#SAMPLE_A} sample RIF records)
      * @throws IOException the io exception
      */
     private ExplanationOfBenefit getSampleAClaim(ClaimType claimType) throws IOException {

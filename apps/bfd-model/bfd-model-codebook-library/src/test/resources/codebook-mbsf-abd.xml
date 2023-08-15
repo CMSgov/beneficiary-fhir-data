@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<codebook id="BENEFICIARY_SUMMARY" name="Master Beneficiary Summary File - Base With Medicare Part A/B/D" version="May 2017, Version 1.0">
+    <!-- Chosen because it is in the Set of variables allowed in many files. -->
+    <variable id="BENE_ID" label="Encrypted CCW Beneficiary ID" shortName="BENE_ID" longName="BENE_ID" type="CHAR" length="15" source="CCW">
+        <description>
+            <p>The unique CCW identifier for a beneficiary.</p>
+            <p>The CCW assigns a unique beneficiary identification number to each individual who receives Medicare and/ or Medicaid, and uses that number to identify an individual’s records in all CCW data files (e.g., Medicare claims, MAX claims, MDS assessment data).</p>
+            <p>This number does not change during a beneficiary’s lifetime and each number is used only once.</p>
+            <p>The BENE_ID is specific to the CCW and is not applicable to any other identification system or data source.</p>
+        </description>
+    </variable>
+    <!-- Chosen because it is present in two files. -->
+    <variable id="DUAL_01" label="Monthly Medicare-Medicaid dual eligibility code - January" shortName="DUAL_01" longName="DUAL_STUS_CD_01" type="CHAR" length="2" source="CMS Enrollment Database (EDB)">
+        <description>
+            <p>This variable indicates whether the beneficiary was eligible for both Medicare and Medicaid in a given month (January).</p>
+        </description>
+        <valueGroups>
+            <valueGroup>
+                <value code="**">Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)</value>
+                <value code="NA">Non-Medicaid</value>
+                <value code="00">Not enrolled in Medicare for the month</value>
+                <value code="01">Qualified Medicare Beneficiary (QMB)-only</value>
+                <value code="02">QMB and full Medicaid coverage, including prescription drugs</value>
+                <value code="03">Specified Low-Income Medicare Beneficiary (SLMB)-only</value>
+                <value code="04">SLMB and full Medicaid coverage, including prescription drugs</value>
+                <value code="05">Qualified Disabled Working Individual (QDWI)</value>
+                <value code="06">Qualifying individuals (QI)</value>
+                <value code="08">Other dual eligible (not QMB, SLMB, QWDI, or QI) with full Medicaid coverage, including prescription drugs</value>
+                <value code="09">Other dual eligible, but without Medicaid coverage</value>
+                <value code="99">Unknown</value>
+            </valueGroup>
+        </valueGroups>
+        <comment>
+            <p>The original source for this variable is the State Medicare Modernization Act (MMA) files that states submit to CMS. Those files are considered the “gold standard” for identifying dual eligibles because the information in them is used to determine the level of Medicare Part D low-income subsidies.</p>
+            <p>Dual eligibles are often divided into “full duals” and “partial duals” based on the level of Medicaid benefits they receive. CMS generally considers beneficiaries to be full duals if they have values of 02, 04, or 08, and to be partial duals if they have values of 01, 03, 05, or 06. Partial duals sometimes divided into the QMB-only population (01) and all other partial duals (03, 05, or 06). There are different ways to classify dually eligible beneficiaries.</p>
+            <p>Additional information regarding various ways to identify dually enrolled populations, refer to a CCW Technical Guidance document entitled: "Options in Determining Dual Eligibles".</p>
+            <p>There are 12 monthly variables - where the 01 through 12 at the end of the variable name correspond with the month (e.g., 01 is January and 12 is December).</p>
+        </comment>
+    </variable>
+</codebook>
