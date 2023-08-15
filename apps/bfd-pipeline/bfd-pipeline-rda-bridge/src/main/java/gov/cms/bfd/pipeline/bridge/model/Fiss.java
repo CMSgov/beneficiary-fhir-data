@@ -1,13 +1,13 @@
 package gov.cms.bfd.pipeline.bridge.model;
 
-import static gov.cms.bfd.model.rif.InpatientClaimColumn.CLM_POA_IND_SW1;
-import static gov.cms.bfd.model.rif.InpatientClaimColumn.ICD_DGNS_CD1;
-import static gov.cms.bfd.model.rif.InpatientClaimColumn.ICD_PRCDR_CD1;
-import static gov.cms.bfd.model.rif.InpatientClaimColumn.PRCDR_DT1;
+import static gov.cms.bfd.model.rif.entities.InpatientClaimColumn.CLM_POA_IND_SW1;
+import static gov.cms.bfd.model.rif.entities.InpatientClaimColumn.ICD_DGNS_CD1;
+import static gov.cms.bfd.model.rif.entities.InpatientClaimColumn.ICD_PRCDR_CD1;
+import static gov.cms.bfd.model.rif.entities.InpatientClaimColumn.PRCDR_DT1;
 import static gov.cms.bfd.pipeline.bridge.model.ModelUtil.listNumberedEnumNames;
 
-import gov.cms.bfd.model.rif.DMEClaimColumn;
-import gov.cms.bfd.model.rif.InpatientClaimColumn;
+import gov.cms.bfd.model.rif.entities.DMEClaimColumn;
+import gov.cms.bfd.model.rif.entities.InpatientClaimColumn;
 import java.util.List;
 
 /**

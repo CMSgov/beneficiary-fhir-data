@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.InpatientClaimLine
+- entityClassName: gov.cms.bfd.model.rif.entities.InpatientClaimLine
   id: InpatientClaimLine
   messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
@@ -71,7 +71,7 @@ mappings:
     compositeKeyClassName: LineId
     equalsNeeded: false
     joins:
-    - entityClass: gov.cms.bfd.model.rif.InpatientClaim
+    - entityClass: gov.cms.bfd.model.rif.entities.InpatientClaim
       fetchType: EAGER
       fieldName: parentClaim
       foreignKey: inpatient_claim_lines_clm_id_to_inpatient_claims
