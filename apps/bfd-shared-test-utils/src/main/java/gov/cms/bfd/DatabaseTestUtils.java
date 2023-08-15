@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 /** Provides utilities for managing the database in integration tests. */
 public final class DatabaseTestUtils {
@@ -388,7 +389,8 @@ public final class DatabaseTestUtils {
             .withDatabaseName("fhirdb")
             .withUsername(username)
             .withPassword(password)
-            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
+            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"))
+            .waitingFor(Wait.forListeningPort());
 
     container.start();
 

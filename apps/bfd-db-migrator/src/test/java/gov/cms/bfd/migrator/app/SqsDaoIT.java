@@ -29,8 +29,8 @@ class SqsDaoIT extends AbstractLocalStackTest {
   /** Test creating a queue. */
   @Test
   void createQueue() {
-    String queueName = "my-created-queue.fifo";
-    String createdQueueUri = dao.createFifoQueue(queueName);
+    String queueName = "my-created-queue";
+    String createdQueueUri = dao.createQueue(queueName);
     String lookupQueueUri = dao.lookupQueueUrl(queueName);
     assertEquals(createdQueueUri, lookupQueueUri);
   }
@@ -38,8 +38,8 @@ class SqsDaoIT extends AbstractLocalStackTest {
   /** Test sending and receiving. */
   @Test
   void sendAndReceiveMessages() {
-    String queueName = "my-test-queue.fifo";
-    String queueUri = dao.createFifoQueue(queueName);
+    String queueName = "my-test-queue";
+    String queueUri = dao.createQueue(queueName);
     String messageGroupId = "sendAndReceiveMessages";
     String message1 = "this is a first message";
     String message2 = "this is a second message";

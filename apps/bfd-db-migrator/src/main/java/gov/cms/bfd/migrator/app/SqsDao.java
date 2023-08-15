@@ -1,14 +1,12 @@
 package gov.cms.bfd.migrator.app;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
-import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
@@ -47,12 +45,7 @@ public class SqsDao {
   public void sendMessage(
       String queueUrl, String messageGroupId, String messageId, String messageBody) {
     final var request =
-        SendMessageRequest.builder()
-            .queueUrl(queueUrl)
-            .messageGroupId(messageGroupId)
-            .messageDeduplicationId(messageId)
-            .messageBody(messageBody)
-            .build();
+        SendMessageRequest.builder().queueUrl(queueUrl).messageBody(messageBody).build();
     sqsClient.sendMessage(request);
   }
 
@@ -64,12 +57,8 @@ public class SqsDao {
    * @return URL of created queue
    * @throws SqsException if the operation cannot be completed
    */
-  public String createFifoQueue(String queueName) {
-    final var createQueueRequest =
-        CreateQueueRequest.builder()
-            .attributes(Map.of(QueueAttributeName.FIFO_QUEUE, "true"))
-            .queueName(queueName)
-            .build();
+  public String createQueue(String queueName) {
+    final var createQueueRequest = CreateQueueRequest.builder().queueName(queueName).build();
     final var response = sqsClient.createQueue(createQueueRequest);
     return response.queueUrl();
   }

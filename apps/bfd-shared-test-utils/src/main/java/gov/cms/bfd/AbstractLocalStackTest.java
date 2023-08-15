@@ -11,7 +11,7 @@ import org.testcontainers.utility.DockerImageName;
 public abstract class AbstractLocalStackTest {
   /** The localstack image and version to use for integration tests. */
   public static final DockerImageName LocalStackImageName =
-      DockerImageName.parse("localstack/localstack:2.0.2");
+      DockerImageName.parse("localstack/localstack:2.2.0");
 
   /** Global container used by multiple tests. Will be destroyed automatically by test container. */
   protected static final LocalStackContainer localstack;
