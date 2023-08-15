@@ -54,6 +54,7 @@ coasting_time = int(os.environ.get("COASTING_TIME", 0))
 warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
 stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
+db_uri_override = os.environ.get("DB_URI_OVERRIDE", "")
 
 boto_config = Config(region_name=region)
 
@@ -107,7 +108,10 @@ def _main():
 
     password = urllib.parse.quote(raw_password)
     try:
-        db_uri = get_rds_db_uri(rds_client=rds_client, cluster_id=cluster_id)
+        if db_uri_override:
+            db_uri = db_uri_override
+        else:
+            db_uri = get_rds_db_uri(rds_client=rds_client, cluster_id=cluster_id)
     except ValueError as exc:
         print(exc)
         return

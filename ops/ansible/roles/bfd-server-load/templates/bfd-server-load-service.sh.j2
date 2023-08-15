@@ -64,5 +64,8 @@ source "{{ server_load_dir }}/venv/bin/activate"
 # LOCUST_EXCLUDE_TAGS defaults to '' in the server-load application
 {{ (server_load_locust_exclude_tags is defined) | ternary('', '#') }}export LOCUST_EXCLUDE_TAGS='{{ server_load_locust_exclude_tags | default('', true) }}'
 
+# DB_URI_OVERRIDE defaults to '' in the server-load application
+{{ (db_uri_override is defined) | ternary('', '#') }}export DB_URI_OVERRIDE='{{ server_load_db_uri_override | default('', true) }}'
+
 (cd "{{ server_load_dir }}/services/server-load/controller" && \
  python3 controller.py &>> "{{ server_load_dir }}/server-load-controller.log")
