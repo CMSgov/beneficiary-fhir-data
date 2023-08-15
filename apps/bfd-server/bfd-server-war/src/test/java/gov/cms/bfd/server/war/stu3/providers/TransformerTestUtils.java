@@ -35,6 +35,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -1079,7 +1080,7 @@ final class TransformerTestUtils {
    *
    * @param eobType the eobType {@link CodeableConcept} we are testing against for expected values
    * @param blueButtonClaimType expected blue button {@link
-   *     gov.cms.bfd.server.war.stu3.providers.ClaimType} value
+   *     gov.cms.bfd.server.war.commons.ClaimType} value
    * @param fhirClaimType optional expected fhir {@link
    *     org.hl7.fhir.dstu3.model.codesystems.ClaimType} value
    * @param ccwNearLineRecordIdCode optional expected ccw near line record id code {@link

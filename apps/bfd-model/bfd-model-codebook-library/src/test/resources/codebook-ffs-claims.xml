@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<codebook id="FFS_CLAIMS" name="Medicare Fee-For-Service Claims (for Version K)" version="December 2017, Version 1.4">
+    <!-- Chosen because it is in the Set of variables allowed in many files. -->
+    <variable id="BENE_ID" label="Encrypted CCW Beneficiary ID" shortName="BENE_ID" longName="BENE_ID" type="CHAR" length="15" source="CCW">
+        <description>
+            <p>The unique CCW identifier for a beneficiary.</p>
+            <p>The CCW assigns a unique beneficiary identification number to each individual who receives Medicare and/or Medicaid, and uses that number to identify an individual’s records in all CCW data files (e.g., Medicare claims, MAX claims, MDS assessment data).</p>
+            <p>This number does not change during a beneficiary’s lifetime and each number is used only once.</p>
+            <p>The BENE_ID is specific to the CCW and is not applicable to any other identification system or data source.</p>
+        </description>
+    </variable>
+    <!-- Chosen because it is present in two files. -->
+    <variable id="DOB_DT" label="Date of Birth from Claim" shortName="DOB_DT" longName="DOB_DT" type="DATE" length="8" source="NCH">
+        <description>
+            <p>The beneficiary's date of birth.</p>
+        </description>
+    </variable>
+    <!-- Chosen because it is unique to this file. -->
+    <variable id="RFR_PHYSN_SPCLTY_CD" label="Claim Referring Physician NPI Number" shortName="RFR_PHYSN_SPCLTY_CD" longName="RFR_PHYSN_SPCLTY_CD" type="CHAR" length="2" source="NCH">
+        <description>
+            <p>The code used to identify the CMS specialty code of the referring physician/practitioner.</p>
+        </description>
+        <valueGroups>
+            <valueGroup>
+                <value code="00">Carrier wide</value>
+                <value code="01">General practice</value>
+                <value code="02">General surgery</value>
+                <value code="03">Allergy/immunology</value>
+                <value code="04">Otolaryngology</value>
+                <value code="05">Anesthesiology</value>
+                <value code="06">Cardiology</value>
+                <value code="07">Dermatology</value>
+                <value code="08">Family practice</value>
+                <value code="09">Interventional Pain Management (IPM) (eff. 4/1/03)</value>
+                <value code="10">Gastroenterology</value>
+                <value code="11">Internal medicine</value>
+                <value code="12">Osteopathic manipulative therapy</value>
+                <value code="13">Neurology</value>
+                <value code="14">Neurosurgery</value>
+                <value code="15">Speech / language pathology</value>
+                <value code="16">Obstetrics/gynecology</value>
+                <value code="17">Hospice and Palliative Care</value>
+                <value code="18">Ophthalmology</value>
+                <value code="19">Oral surgery (dentists only)</value>
+                <value code="20">Orthopedic surgery</value>
+                <value code="21">Cardiac Electrophysiology</value>
+                <value code="22">Pathology</value>
+                <value code="24">Plastic and reconstructive surgery</value>
+                <value code="25">Physical medicine and rehabilitation</value>
+                <value code="26">Psychiatry</value>
+                <value code="27">General Psychiatry</value>
+                <value code="28">Colorectal surgery (formerly proctology)</value>
+                <value code="29">Pulmonary disease</value>
+                <value code="30">Diagnostic radiology</value>
+                <value code="31">Intensive cardiac rehabilitation</value>
+                <value code="32">Anesthesiologist Assistants (eff. 4/1/03--previously grouped with Certified Registered Nurse Anesthetists (CRNA))</value>
+                <value code="33">Thoracic surgery</value>
+                <value code="34">Urology</value>
+                <value code="35">Chiropractic</value>
+                <value code="36">Nuclear medicine</value>
+                <value code="37">Pediatric medicine</value>
+                <value code="38">Geriatric medicine</value>
+                <value code="39">Nephrology</value>
+                <value code="40">Hand surgery</value>
+                <value code="41">Optometrist</value>
+                <value code="42">Certified nurse midwife</value>
+                <value code="43">Certified Registered Nurse Anesthetist (CRNA) (Anesthesiologist Assistants were removed from this specialty 4/1/03)</value>
+                <value code="44">Infectious disease</value>
+                <value code="45">Mammography screening center</value>
+                <value code="46">Endocrinology</value>
+                <value code="47">Independent Diagnostic Testing Facility (IDTF)</value>
+                <value code="48">Podiatry</value>
+                <value code="49">Ambulatory surgical center (formerly miscellaneous)</value>
+                <value code="50">Nurse practitioner</value>
+                <value code="51">Medical supply company with certified orthotist (certified by American Board for Certification in Prosthetics and Orthotics)</value>
+                <value code="52">Medical supply company with certified prosthetist (certified by American Board for Certification in Prosthetics and Orthotics)</value>
+                <value code="53">Medical supply company with certified prosthetist-orthotist (certified by American Board for Certification in Prosthetics and Orthotics)</value>
+                <value code="54">Medical supply company for DMERC (and not included in 51-53)</value>
+                <value code="55">Individual certified orthotist</value>
+                <value code="56">Individual certified prosthetist</value>
+                <value code="57">Individual certified prosthetist-orthotist</value>
+                <value code="58">Medical supply company with registered pharmacist</value>
+                <value code="59">Ambulance service supplier, (e.g., private ambulance companies, funeral homes, etc.)</value>
+                <value code="60">Public health or welfare agencies (federal, state, and local)</value>
+                <value code="61">Voluntary health or charitable agencies (e.g. National Cancer Society, National Heart Association, Catholic Charities)</value>
+                <value code="62">Psychologist (billing independently)</value>
+                <value code="63">Portable X-ray supplier</value>
+                <value code="64">Audiologist (billing independently)</value>
+                <value code="65">Physical therapist (private practice added 4/1/03) (independently practicing removed 4/1/03)</value>
+                <value code="66">Rheumatology</value>
+                <value code="67">Occupational therapist (private practice added 4/1/03) (independently practicing removed 4/1/03)</value>
+                <value code="68">Clinical psychologist</value>
+                <value code="69">Clinical laboratory (billing independently)</value>
+                <value code="70">Multispecialty clinic or group practice</value>
+                <value code="71">Registered Dietician/Nutrition Professional (eff. 1/1/02)</value>
+                <value code="72">Pain Management (eff. 1/1/02)</value>
+                <value code="73">Mass Immunization Roster Biller</value>
+                <value code="74">Radiation Therapy Centers (prior to 4/2003 this included Independent Diagnostic Testing Facilities (IDTF)</value>
+                <value code="75">Slide Preparation Facilities (added to differentiate them from Independent Diagnostic Testing Facilities (IDTFs -- eff. 4/1/03)</value>
+                <value code="76">Peripheral vascular disease</value>
+                <value code="77">Vascular surgery</value>
+                <value code="78">Cardiac surgery</value>
+                <value code="79">Addiction medicine</value>
+                <value code="80">Licensed clinical social worker</value>
+                <value code="81">Critical care (intensivists)</value>
+                <value code="82">Hematology</value>
+                <value code="83">Hematology/oncology</value>
+                <value code="84">Preventive medicine</value>
+                <value code="85">Maxillofacial surgery</value>
+                <value code="86">Neuropsychiatry</value>
+                <value code="87">All other suppliers (e.g. drug and department stores)</value>
+                <value code="88">Unknown supplier/provider specialty</value>
+                <value code="89">Certified clinical nurse specialist</value>
+                <value code="90">Medical oncology</value>
+                <value code="91">Surgical oncology</value>
+                <value code="92">Radiation oncology</value>
+                <value code="93">Emergency medicine</value>
+                <value code="94">Interventional radiology</value>
+                <value code="95">Competitive Acquisition Program (CAP) Vendor (eff. 07/01/06). Prior to 07/01/06, known as Independent physiological laboratory</value>
+                <value code="96">Optician</value>
+                <value code="97">Physician assistant</value>
+                <value code="98">Gynecologist/oncologist</value>
+                <value code="99">Unknown physician specialty</value>
+                <value code="A0">Hospital (DMERCs only)</value>
+                <value code="A1">SNF (DMERCs only)</value>
+                <value code="A2">Intermediate care nursing facility (DMERCs only)</value>
+                <value code="A3">Nursing facility, other (DMERCs only)</value>
+                <value code="A4">Home Health Agency (DMERCs only)</value>
+                <value code="A5">Pharmacy (DMERC)</value>
+                <value code="A6">Medical supply company with respiratory therapist (DMERCs only)</value>
+                <value code="A7">Department store (DMERC)</value>
+                <value code="A8">Grocery store (DMERC)</value>
+                <value code="A9">Indian Health Service (IHS), tribe and tribal organizations (non-hospital or non-hospital based facilities, eff. 1/2005)</value>
+                <value code="B1">Supplier of oxygen and/or oxygen related equipment (eff. 10/2/07)</value>
+                <value code="B2">Pedorthic Personnel (eff. 10/2/07)</value>
+                <value code="B3">Medical Supply Company with pedorthic personnel (eff. 10/2/07)</value>
+                <value code="B4">Does not meet definition of health care provider (e.g., Rehabilitation agency, organ procurement organizations, histocompatibility labs) (eff. 10/2/07)</value>
+                <value code="B5">Ocularist</value>
+                <value code="C0">Sleep medicine</value>
+                <value code="C1">Centralized flu</value>
+                <value code="C2">Indirect payment procedure</value>
+                <value code="C3">Interventional cardiology</value>
+                <value code="C5">Dentist (eff. 7/2016)</value>
+            </valueGroup>
+        </valueGroups>
+    </variable>
+</codebook>

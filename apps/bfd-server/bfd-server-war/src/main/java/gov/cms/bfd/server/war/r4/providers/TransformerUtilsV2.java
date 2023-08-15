@@ -38,6 +38,7 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
@@ -1930,16 +1931,16 @@ public final class TransformerUtilsV2 {
    * Gets the claim type from the specified {@link ExplanationOfBenefit}.
    *
    * @param eob the {@link ExplanationOfBenefit} to extract the claim type from
-   * @return the {@link ClaimTypeV2}
+   * @return the {@link ClaimType}
    */
-  static ClaimTypeV2 getClaimType(ExplanationOfBenefit eob) {
+  static ClaimType getClaimType(ExplanationOfBenefit eob) {
     String type =
         eob.getType().getCoding().stream()
             .filter(c -> c.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE))
             .findFirst()
             .get()
             .getCode();
-    return ClaimTypeV2.valueOf(type);
+    return ClaimType.valueOf(type);
   }
 
   /**
@@ -1948,7 +1949,7 @@ public final class TransformerUtilsV2 {
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimId CLM_ID
    * @param beneficiaryId BENE_ID
-   * @param claimType {@link ClaimTypeV2} to process
+   * @param claimType {@link ClaimType} to process
    * @param claimGroupId CLM_GRP_ID
    * @param coverageType {@link MedicareSegment}
    * @param dateFrom CLM_FROM_DT || SRVC_DT (For Part D Events)
@@ -1960,7 +1961,7 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       Long claimId,
       Long beneficiaryId,
-      ClaimTypeV2 claimType,
+      ClaimType claimType,
       String claimGroupId,
       MedicareSegment coverageType,
       Optional<LocalDate> dateFrom,
@@ -1977,7 +1978,7 @@ public final class TransformerUtilsV2 {
     // "claim" => ExplanationOfBenefit.use
     eob.setUse(Use.CLAIM);
 
-    if (claimType.equals(ClaimTypeV2.PDE)) {
+    if (claimType.equals(ClaimType.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
       eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
     } else {
@@ -2404,26 +2405,26 @@ public final class TransformerUtilsV2 {
    * non-numeric handling may be used in integration tests to trigger {@link
    * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
    *
-   * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for
    * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
    *     </code> value
    */
-  public static String buildEobId(ClaimTypeV2 claimType, String claimId) {
+  public static String buildEobId(ClaimType claimType, String claimId) {
     return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
   }
 
   /**
    * Builds an id for an {@link ExplanationOfBenefit}.
    *
-   * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for
    * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>
    *     claimId     </code> value
    */
-  public static String buildEobId(ClaimTypeV2 claimType, Long claimId) {
+  public static String buildEobId(ClaimType claimType, Long claimId) {
     return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
   }
 
@@ -2431,7 +2432,7 @@ public final class TransformerUtilsV2 {
    * Maps a blue button claim type to a FHIR claim type.
    *
    * @param eob the {@link CodeableConcept} that will get remapped
-   * @param blueButtonClaimType the blue button {@link ClaimTypeV2} we are mapping from
+   * @param blueButtonClaimType the blue button {@link ClaimType} we are mapping from
    * @param ccwNearLineRecordIdCode if present, the blue button near line id code {@link
    *     Optional}&lt;{@link Character}&gt; gets remapped to a ccw record id code
    * @param ccwClaimTypeCode if present, the blue button claim type code {@link Optional}&lt;{@link
@@ -2439,7 +2440,7 @@ public final class TransformerUtilsV2 {
    */
   static void mapEobType(
       ExplanationOfBenefit eob,
-      ClaimTypeV2 blueButtonClaimType,
+      ClaimType blueButtonClaimType,
       Optional<Character> ccwNearLineRecordIdCode,
       Optional<String> ccwClaimTypeCode) {
 
@@ -2479,8 +2480,8 @@ public final class TransformerUtilsV2 {
         break;
 
       default:
-        // All options on ClaimTypeV2 are covered above, but this is there to appease linter
-        throw new BadCodeMonkeyException("No match found for ClaimTypeV2");
+        // All options on ClaimType are covered above, but this is there to appease linter
+        throw new BadCodeMonkeyException("No match found for ClaimType");
     }
 
     // Claim Type => ExplanationOfBenefit.type.coding
@@ -4263,41 +4264,40 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Process a {@link Set} of {@link ClaimTypeV2} entries and build an {@link EnumSet} of {@link
-   * ClaimTypeV2} entries that meet the criteria of having claims data claims data (derived from int
+   * Process a {@link Set} of {@link ClaimType} entries and build an {@link EnumSet} of {@link
+   * ClaimType} entries that meet the criteria of having claims data claims data (derived from int
    * bitmask) and match claim(s) requested by caller.
    *
-   * @param claimTypes {@link Set} set of {@link ClaimTypeV2} identifiers requested by client.
+   * @param claimTypes {@link Set} set of {@link ClaimType} identifiers requested by client.
    * @param val int bitmask denoting the claim types that have data.
-   * @return {@link EnumSet} of {@link ClaimTypeV2} types to process.
+   * @return {@link EnumSet} of {@link ClaimType} types to process.
    */
-  public static EnumSet<ClaimTypeV2> fetchClaimsAvailability(Set<ClaimTypeV2> claimTypes, int val) {
-    EnumSet<ClaimTypeV2> availSet = EnumSet.noneOf(ClaimTypeV2.class);
-    if ((val & QueryUtils.V_CARRIER_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.CARRIER)) {
-      availSet.add(ClaimTypeV2.CARRIER);
+  public static EnumSet<ClaimType> fetchClaimsAvailability(Set<ClaimType> claimTypes, int val) {
+    EnumSet<ClaimType> availSet = EnumSet.noneOf(ClaimType.class);
+    if ((val & QueryUtils.V_CARRIER_HAS_DATA) != 0 && claimTypes.contains(ClaimType.CARRIER)) {
+      availSet.add(ClaimType.CARRIER);
     }
-    if ((val & QueryUtils.V_DME_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.DME)) {
-      availSet.add(ClaimTypeV2.DME);
+    if ((val & QueryUtils.V_DME_HAS_DATA) != 0 && claimTypes.contains(ClaimType.DME)) {
+      availSet.add(ClaimType.DME);
     }
-    if ((val & QueryUtils.V_PART_D_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.PDE)) {
-      availSet.add(ClaimTypeV2.PDE);
+    if ((val & QueryUtils.V_PART_D_HAS_DATA) != 0 && claimTypes.contains(ClaimType.PDE)) {
+      availSet.add(ClaimType.PDE);
     }
-    if ((val & QueryUtils.V_INPATIENT_HAS_DATA) != 0
-        && claimTypes.contains(ClaimTypeV2.INPATIENT)) {
-      availSet.add(ClaimTypeV2.INPATIENT);
+    if ((val & QueryUtils.V_INPATIENT_HAS_DATA) != 0 && claimTypes.contains(ClaimType.INPATIENT)) {
+      availSet.add(ClaimType.INPATIENT);
     }
     if ((val & QueryUtils.V_OUTPATIENT_HAS_DATA) != 0
-        && claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
-      availSet.add(ClaimTypeV2.OUTPATIENT);
+        && claimTypes.contains(ClaimType.OUTPATIENT)) {
+      availSet.add(ClaimType.OUTPATIENT);
     }
-    if ((val & QueryUtils.V_HOSPICE_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.HOSPICE)) {
-      availSet.add(ClaimTypeV2.HOSPICE);
+    if ((val & QueryUtils.V_HOSPICE_HAS_DATA) != 0 && claimTypes.contains(ClaimType.HOSPICE)) {
+      availSet.add(ClaimType.HOSPICE);
     }
-    if ((val & QueryUtils.V_SNF_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.SNF)) {
-      availSet.add(ClaimTypeV2.SNF);
+    if ((val & QueryUtils.V_SNF_HAS_DATA) != 0 && claimTypes.contains(ClaimType.SNF)) {
+      availSet.add(ClaimType.SNF);
     }
-    if ((val & QueryUtils.V_HHA_HAS_DATA) != 0 && claimTypes.contains(ClaimTypeV2.HHA)) {
-      availSet.add(ClaimTypeV2.HHA);
+    if ((val & QueryUtils.V_HHA_HAS_DATA) != 0 && claimTypes.contains(ClaimType.HHA)) {
+      availSet.add(ClaimType.HHA);
     }
     return availSet;
   }

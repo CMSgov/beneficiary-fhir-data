@@ -25,6 +25,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -1043,36 +1044,35 @@ public class TransformerUtilsV2Test {
   }
 
   /**
-   * Verifies that providing a EnumSet of {@link ClaimTypeV2} and a bit mask integer denoting claim
+   * Verifies that providing a EnumSet of {@link ClaimType} and a bit mask integer denoting claim
    * types that have data, the results is a filtered EnumSet.
    */
   @Test
   public void verifyEnumSetFromListOfClaimTypesAndDatabaseBitmaskOfData() {
-    EnumSet<ClaimTypeV2> allClaimSet = EnumSet.allOf(ClaimTypeV2.class);
+    EnumSet<ClaimType> allClaimSet = EnumSet.allOf(ClaimType.class);
 
     // resultant set only includes claim types that have data.
     int testVal = QueryUtils.V_DME_HAS_DATA | QueryUtils.V_SNF_HAS_DATA | QueryUtils.V_HHA_HAS_DATA;
-    EnumSet<ClaimTypeV2> availSet =
-        TransformerUtilsV2.fetchClaimsAvailability(allClaimSet, testVal);
+    EnumSet<ClaimType> availSet = TransformerUtilsV2.fetchClaimsAvailability(allClaimSet, testVal);
 
-    assertTrue(availSet.contains(ClaimTypeV2.HHA));
-    assertTrue(availSet.contains(ClaimTypeV2.SNF));
-    assertTrue(availSet.contains(ClaimTypeV2.DME));
-    assertFalse(availSet.contains(ClaimTypeV2.INPATIENT));
+    assertTrue(availSet.contains(ClaimType.HHA));
+    assertTrue(availSet.contains(ClaimType.SNF));
+    assertTrue(availSet.contains(ClaimType.DME));
+    assertFalse(availSet.contains(ClaimType.INPATIENT));
 
     // check efficacy of EnumSet filter vs. bit mask of data.
-    EnumSet<ClaimTypeV2> someClaimSet = EnumSet.noneOf(ClaimTypeV2.class);
-    someClaimSet.add(ClaimTypeV2.CARRIER);
-    someClaimSet.add(ClaimTypeV2.PDE);
+    EnumSet<ClaimType> someClaimSet = EnumSet.noneOf(ClaimType.class);
+    someClaimSet.add(ClaimType.CARRIER);
+    someClaimSet.add(ClaimType.PDE);
 
     availSet = TransformerUtilsV2.fetchClaimsAvailability(someClaimSet, testVal);
-    assertFalse(availSet.contains(ClaimTypeV2.HHA));
-    assertFalse(availSet.contains(ClaimTypeV2.SNF));
-    assertFalse(availSet.contains(ClaimTypeV2.DME));
-    assertFalse(availSet.contains(ClaimTypeV2.CARRIER));
+    assertFalse(availSet.contains(ClaimType.HHA));
+    assertFalse(availSet.contains(ClaimType.SNF));
+    assertFalse(availSet.contains(ClaimType.DME));
+    assertFalse(availSet.contains(ClaimType.CARRIER));
     // adjust data bit mask and try again
     testVal = testVal | QueryUtils.V_CARRIER_HAS_DATA;
     availSet = TransformerUtilsV2.fetchClaimsAvailability(someClaimSet, testVal);
-    assertTrue(availSet.contains(ClaimTypeV2.CARRIER));
+    assertTrue(availSet.contains(ClaimType.CARRIER));
   }
 }

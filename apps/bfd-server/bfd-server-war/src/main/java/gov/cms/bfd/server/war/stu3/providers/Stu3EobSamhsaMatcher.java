@@ -4,6 +4,7 @@ import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.Coding;
 import gov.cms.bfd.server.war.adapters.stu3.ExplanationOfBenefitAdapter;
 import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Set;

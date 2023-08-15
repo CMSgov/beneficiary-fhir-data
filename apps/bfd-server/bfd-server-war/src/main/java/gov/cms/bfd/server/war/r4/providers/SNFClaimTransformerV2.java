@@ -11,6 +11,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
@@ -89,20 +90,20 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 
     // Common group level fields between all claim types
-    // Claim Type + Claim ID    => ExplanationOfBenefit.id
-    // CLM_ID                   => ExplanationOfBenefit.identifier
-    // CLM_GRP_ID               => ExplanationOfBenefit.identifier
-    // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage
-    // BENE_ID                  => ExplanationOfBenefit.patient (reference)
-    // FINAL_ACTION             => ExplanationOfBenefit.status
-    // CLM_FROM_DT              => ExplanationOfBenefit.billablePeriod.start
-    // CLM_THRU_DT              => ExplanationOfBenefit.billablePeriod.end
-    // CLM_PMT_AMT              => ExplanationOfBenefit.payment.amount
+    // Claim Type + Claim ID => ExplanationOfBenefit.id
+    // CLM_ID => ExplanationOfBenefit.identifier
+    // CLM_GRP_ID => ExplanationOfBenefit.identifier
+    // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage
+    // BENE_ID => ExplanationOfBenefit.patient (reference)
+    // FINAL_ACTION => ExplanationOfBenefit.status
+    // CLM_FROM_DT => ExplanationOfBenefit.billablePeriod.start
+    // CLM_THRU_DT => ExplanationOfBenefit.billablePeriod.end
+    // CLM_PMT_AMT => ExplanationOfBenefit.payment.amount
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimTypeV2.SNF,
+        ClaimType.SNF,
         String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
@@ -119,13 +120,13 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             Optional.of(claimGroup.getWeeklyProcessDate())));
 
     // map eob type codes into FHIR
-    // NCH_CLM_TYPE_CD            => ExplanationOfBenefit.type.coding
-    // EOB Type                   => ExplanationOfBenefit.type.coding
-    // Claim Type (Professional)  => ExplanationOfBenefit.type.coding
+    // NCH_CLM_TYPE_CD => ExplanationOfBenefit.type.coding
+    // EOB Type => ExplanationOfBenefit.type.coding
+    // Claim Type (Professional) => ExplanationOfBenefit.type.coding
     // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimTypeV2.SNF,
+        ClaimType.SNF,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -137,14 +138,14 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getLastUpdated());
 
     // add EOB information to fields that are common between the Inpatient and SNF claim types
-    // CLM_IP_ADMSN_TYPE_CD             => ExplanationOfBenefit.supportingInfo.code
-    // CLM_SRC_IP_ADMSN_CD              => ExplanationOfBenefit.supportingInfo.code
+    // CLM_IP_ADMSN_TYPE_CD => ExplanationOfBenefit.supportingInfo.code
+    // CLM_SRC_IP_ADMSN_CD => ExplanationOfBenefit.supportingInfo.code
     // NCH_VRFD_NCVRD_STAY_FROM_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
     // NCH_VRFD_NCVRD_STAY_THRU_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
     // NCH_ACTV_OR_CVRD_LVL_CARE_THRU   => ExplanationOfBenefit.supportingInfo.timingDate
     // NCH_BENE_MDCR_BNFTS_EXHTD_DT_I   => ExplanationOfBenefit.supportingInfo.timingDate
-    // CLM_DRG_CD                       => ExplanationOfBenefit.supportingInfo.code
-    // FI_CLM_ACTN_CD                   => ExplanationOfBenefit.extension
+    // CLM_DRG_CD => ExplanationOfBenefit.supportingInfo.code
+    // FI_CLM_ACTN_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),
@@ -167,7 +168,7 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
                     CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
                     c));
 
-    // CLM_ADMSN_DT       => ExplanationOfBenefit.supportingInfo:admissionperiod
+    // CLM_ADMSN_DT => ExplanationOfBenefit.supportingInfo:admissionperiod
     // NCH_BENE_DSCHRG_DT => ExplanationOfBenefit.supportingInfo:admissionperiod
     TransformerUtilsV2.addInformation(
         eob,
@@ -178,7 +179,7 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
         eob, CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, claimGroup.getUtilizationDayCount());
 
-    // This is messy but appears to be specific to SNF.  Maybe revisit and clean in the future
+    // This is messy but appears to be specific to SNF. Maybe revisit and clean in the future
     // NCH_QLFYD_STAY_FROM_DT => ExplanationOfBenefit.supportingInfo
     // NCH_QLFYD_STAY_THRU_DT => ExplanationOfBenefit.supportingInfo
     if (claimGroup.getQualifiedStayFromDate().isPresent()
@@ -220,19 +221,19 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
      * add field values to the benefit balances that are common between the
      * Inpatient and SNF claim types
      */
-    // BENE_TOT_COINSRNC_DAYS_CNT       => ExplanationOfBenefit.benefitBalance.financial
-    // CLM_NON_UTLZTN_DAYS_CNT          => ExplanationOfBenefit.benefitBalance.financial
-    // NCH_BENE_IP_DDCTBL_AMT           => ExplanationOfBenefit.benefitBalance.financial
+    // BENE_TOT_COINSRNC_DAYS_CNT => ExplanationOfBenefit.benefitBalance.financial
+    // CLM_NON_UTLZTN_DAYS_CNT => ExplanationOfBenefit.benefitBalance.financial
+    // NCH_BENE_IP_DDCTBL_AMT => ExplanationOfBenefit.benefitBalance.financial
     // NCH_BENE_PTA_COINSRNC_LBLTY_AMT  => ExplanationOfBenefit.benefitBalance.financial
     // NCH_BLOOD_PNTS_FRNSHD_QTY        => ExplanationOfBenefit.supportingInfo.valueQuantity
-    // NCH_IP_NCVRD_CHRG_AMT            => ExplanationOfBenefit.benefitBalance.financial
-    // NCH_IP_TOT_DDCTN_AMT             => ExplanationOfBenefit.benefitBalance.financial
+    // NCH_IP_NCVRD_CHRG_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // NCH_IP_TOT_DDCTN_AMT => ExplanationOfBenefit.benefitBalance.financial
     // CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT   => ExplanationOfBenefit.benefitBalance.financial
-    // CLM_PPS_CPTL_EXCPTN_AMT          => ExplanationOfBenefit.benefitBalance.financial
-    // CLM_PPS_CPTL_FSP_AMT             => ExplanationOfBenefit.benefitBalance.financial
-    // CLM_PPS_CPTL_IME_AMT             => ExplanationOfBenefit.benefitBalance.financial
-    // CLM_PPS_CPTL_OUTLIER_AMT         => ExplanationOfBenefit.benefitBalance.financial
-    // CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT   => ExplanationOfBenefit.benefitBalance.financial
+    // CLM_PPS_CPTL_EXCPTN_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // CLM_PPS_CPTL_FSP_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // CLM_PPS_CPTL_IME_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // CLM_PPS_CPTL_OUTLIER_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addCommonGroupInpatientSNF(
         eob,
         claimGroup.getCoinsuranceDayCount(),
@@ -250,12 +251,12 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getClaimPPSOldCapitalHoldHarmlessAmount());
 
     // Map care team
-    // AT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Primary)
-    // AT_PHYSN_UPIN    => ExplanationOfBenefit.careTeam.provider
-    // OP_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Assisting)
-    // OP_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider
-    // OT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Other)
-    // OT_PHYSN_UPIN    => ExplanationOfBenefit.careTeam.provider
+    // AT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider (Primary)
+    // AT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
+    // OP_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider (Assisting)
+    // OP_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
+    // OT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider (Other)
+    // OT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
@@ -266,26 +267,26 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getOtherPhysicianUpin());
 
     // Common group level fields between Inpatient, Outpatient and SNF
-    // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM   => ExplanationOfBenefit.benefitBalance.financial
-    // CLAIM_QUERY_CODE                 => ExplanationOfBenefit.billablePeriod.extension
-    // CLM_MCO_PD_SW                    => ExplanationOfBenefit.supportingInfo.code
+    // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM => ExplanationOfBenefit.benefitBalance.financial
+    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
+    // CLM_MCO_PD_SW => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.mapEobCommonGroupInpOutSNF(
         eob, claimGroup.getBloodDeductibleLiabilityAmount(), claimGroup.getMcoPaidSw());
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
-    // ORG_NPI_NUM              => ExplanationOfBenefit.provider
-    // CLM_FAC_TYPE_CD          => ExplanationOfBenefit.facility.extension
-    // CLM_FREQ_CD              => ExplanationOfBenefit.supportingInfo
-    // CLM_MDCR_NON_PMT_RSN_CD  => ExplanationOfBenefit.extension
-    // PTNT_DSCHRG_STUS_CD      => ExplanationOfBenefit.supportingInfo
+    // ORG_NPI_NUM => ExplanationOfBenefit.provider
+    // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
+    // CLM_FREQ_CD => ExplanationOfBenefit.supportingInfo
+    // CLM_MDCR_NON_PMT_RSN_CD => ExplanationOfBenefit.extension
+    // PTNT_DSCHRG_STUS_CD => ExplanationOfBenefit.supportingInfo
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
-    // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
-    // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
+    // NCH_PRMRY_PYR_CD => ExplanationOfBenefit.supportingInfo
+    // CLM_TOT_CHRG_AMT => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
-    // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
-    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
+    // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
+    // FI_CLM_PROC_DT => ExplanationOfBenefit.extension
     // C4BBInstutionalClaimSubtypes.Inpatient for SNF Claims
-    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
+    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -306,19 +307,19 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         Optional.of(claimGroup.getClaimQueryCode()));
 
     // Handle Diagnosis
-    // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept
-    // ADMTG_DGNS_VRSN_CD       => diagnosis.diagnosisCodeableConcept
-    // PRNCPAL_DGNS_CD          => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD(1-25)        => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_VRSN_CD(1-25)   => diagnosis.diagnosisCodeableConcept
-    // FST_DGNS_E_CD            => diagnosis.diagnosisCodeableConcept
-    // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
+    // ADMTG_DGNS_CD => diagnosis.diagnosisCodeableConcept
+    // ADMTG_DGNS_VRSN_CD => diagnosis.diagnosisCodeableConcept
+    // PRNCPAL_DGNS_CD => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_CD(1-25) => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_VRSN_CD(1-25) => diagnosis.diagnosisCodeableConcept
+    // FST_DGNS_E_CD => diagnosis.diagnosisCodeableConcept
+    // FST_DGNS_E_VRSN_CD => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_E_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
         .stream()
-        .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.SNF));
+        .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.SNF));
 
     // Handle Procedures
     TransformerUtilsV2.extractCCWProcedures(
@@ -342,13 +343,13 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
       TransformerUtilsV2.mapHcpcs(
           eob, item, line.getHcpcsCode(), Optional.empty(), Collections.emptyList());
 
-      // REV_CNTR                   => ExplanationOfBenefit.item.revenue
-      // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
-      // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
-      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.extension.valueQuantity
+      // REV_CNTR => ExplanationOfBenefit.item.revenue
+      // REV_CNTR_RATE_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_TOT_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NCVRD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
+      // REV_CNTR_NDC_QTY_QLFR_CD => ExplanationOfBenefit.modifier
+      // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.extension.valueQuantity
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
           eob,

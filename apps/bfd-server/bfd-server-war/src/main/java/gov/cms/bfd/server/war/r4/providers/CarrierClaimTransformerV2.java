@@ -10,6 +10,7 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -119,7 +120,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimTypeV2.CARRIER,
+        ClaimType.CARRIER,
         String.valueOf(claimGroup.getClaimGroupId()),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
@@ -136,13 +137,13 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             Optional.of(claimGroup.getWeeklyProcessDate())));
 
     // map eob type codes into FHIR
-    // NCH_CLM_TYPE_CD            => ExplanationOfBenefit.type.coding
-    // EOB Type                   => ExplanationOfBenefit.type.coding
-    // Claim Type (Professional)  => ExplanationOfBenefit.type.coding
+    // NCH_CLM_TYPE_CD => ExplanationOfBenefit.type.coding
+    // EOB Type => ExplanationOfBenefit.type.coding
+    // Claim Type (Professional) => ExplanationOfBenefit.type.coding
     // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimTypeV2.CARRIER,
+        ClaimType.CARRIER,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -157,21 +158,21 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     // Common group level fields between Carrier and DME
     // BENE_ID =>
-    // CARR_NUM                       => ExplanationOfBenefit.extension
-    // CLM_CLNCL_TRIL_NUM             => ExplanationOfBenefit.extension
-    // CARR_CLM_CASH_DDCTBL_APLD_AMT  => ExplanationOfBenefit.benefitBalance.financial
-    // CARR_CLM_PMT_DNL_CD            => ExplanationOfBenefit.extension
-    // RFR_PHYSN_NPI                  => ExplanationOfBenefit.referral.identifier
-    //                                => ExplanationOfBenefit.careteam.provider
-    // RFR_PHYSN_UPIN                 => ExplanationOfBenefit.referral.identifier
-    //                                => ExplanationOfBenefit.careteam.provider
-    // CARR_CLM_PRVDR_ASGNMT_IND_SW   => ExplanationOfBenefit.extension
-    // NCH_CLM_PRVDR_PMT_AMT          => ExplanationOfBenefit.benefitBalance.financial
-    // NCH_CLM_BENE_PMT_AMT           => ExplanationOfBenefit.benefitBalance.financial
-    // NCH_CARR_CLM_SBMTD_CHRG_AMT    => ExplanationOfBenefit.benefitBalance.financial
-    // NCH_CARR_CLM_ALOWD_AMT         => ExplanationOfBenefit.benefitBalance.financial
-    // CLM_DISP_CD                    => ExplanationOfBenefit.disposition
-    // CARR_CLM_CNTL_NUM              => ExplanationOfBenefit.extension
+    // CARR_NUM => ExplanationOfBenefit.extension
+    // CLM_CLNCL_TRIL_NUM => ExplanationOfBenefit.extension
+    // CARR_CLM_CASH_DDCTBL_APLD_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // CARR_CLM_PMT_DNL_CD => ExplanationOfBenefit.extension
+    // RFR_PHYSN_NPI => ExplanationOfBenefit.referral.identifier
+    // => ExplanationOfBenefit.careteam.provider
+    // RFR_PHYSN_UPIN => ExplanationOfBenefit.referral.identifier
+    // => ExplanationOfBenefit.careteam.provider
+    // CARR_CLM_PRVDR_ASGNMT_IND_SW => ExplanationOfBenefit.extension
+    // NCH_CLM_PRVDR_PMT_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // NCH_CLM_BENE_PMT_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // NCH_CARR_CLM_SBMTD_CHRG_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // NCH_CARR_CLM_ALOWD_AMT => ExplanationOfBenefit.benefitBalance.financial
+    // CLM_DISP_CD => ExplanationOfBenefit.disposition
+    // CARR_CLM_CNTL_NUM => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobCommonGroupCarrierDME(
         eob,
         claimGroup.getCarrierNumber(),
@@ -194,8 +195,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
         .stream()
-        .forEach(
-            diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.CARRIER));
+        .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.CARRIER));
 
     // CARR_CLM_RFRNG_PIN_NUM => ExplanationOfBenefit.careteam.provider
     TransformerUtilsV2.addCareTeamMember(
@@ -281,7 +281,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
                     String.valueOf(line.getProviderParticipatingIndCode().get()));
 
         // TODO - following code is wrong and needs to be fixed; this error may be
-        //        for both CARRIER and DME claims, stu3 and r4.
+        // for both CARRIER and DME claims, stu3 and r4.
         // JIRA ticket: https://jira.cms.gov/browse/BFD-2815
         if (!performingHasMatchingExtension) {
           // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
@@ -314,10 +314,10 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
               CcwCodebookVariable.CARR_LINE_RDCD_PMT_PHYS_ASTN_C,
               String.valueOf(line.getReducedPaymentPhysicianAsstCode())));
 
-      // HCPCS_CD               => ExplanationOfBenefit.item.productOrService
-      // HCPCS_1ST_MDFR_CD      => ExplanationOfBenefit.item.modifier
-      // HCPCS_2ND_MDFR_CD      => ExplanationOfBenefit.item.modifier
-      // CARR_CLM_HCPCS_YR_CD   => ExplanationOfBenefit.item.modifier.version
+      // HCPCS_CD => ExplanationOfBenefit.item.productOrService
+      // HCPCS_1ST_MDFR_CD => ExplanationOfBenefit.item.modifier
+      // HCPCS_2ND_MDFR_CD => ExplanationOfBenefit.item.modifier
+      // CARR_CLM_HCPCS_YR_CD => ExplanationOfBenefit.item.modifier.version
       TransformerUtilsV2.mapHcpcs(
           eob,
           item,
@@ -363,27 +363,27 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
                           eob, CcwCodebookVariable.CARR_LINE_MTUS_CD, code)));
 
       // Common item level fields between Carrier and DME
-      // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
-      // LINE_CMS_TYPE_SRVC_CD    => ExplanationOfBenefit.item.category
-      // LINE_PLACE_OF_SRVC_CD    => ExplanationOfBenefit.item.location
-      // BETOS_CD                 => ExplanationOfBenefit.item.extension
-      // LINE_1ST_EXPNS_DT        => ExplanationOfBenefit.item.servicedPeriod
-      // LINE_LAST_EXPNS_DT       => ExplanationOfBenefit.item.servicedPeriod
-      // LINE_NCH_PMT_AMT         => ExplanationOfBenefit.item.adjudication
-      // LINE_PMT_80_100_CD       => ExplanationOfBenefit.item.adjudication.extension
-      // PAID_TO_PATIENT          => ExplanationOfBenefit.item.adjudication
-      // LINE_PRVDR_PMT_AMT       => ExplanationOfBenefit.item.adjudication
+      // LINE_SRVC_CNT => ExplanationOfBenefit.item.quantity
+      // LINE_CMS_TYPE_SRVC_CD => ExplanationOfBenefit.item.category
+      // LINE_PLACE_OF_SRVC_CD => ExplanationOfBenefit.item.location
+      // BETOS_CD => ExplanationOfBenefit.item.extension
+      // LINE_1ST_EXPNS_DT => ExplanationOfBenefit.item.servicedPeriod
+      // LINE_LAST_EXPNS_DT => ExplanationOfBenefit.item.servicedPeriod
+      // LINE_NCH_PMT_AMT => ExplanationOfBenefit.item.adjudication
+      // LINE_PMT_80_100_CD => ExplanationOfBenefit.item.adjudication.extension
+      // PAID_TO_PATIENT => ExplanationOfBenefit.item.adjudication
+      // LINE_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
       // LINE_BENE_PTB_DDCTBL_AMT => ExplanationOfBenefit.item.adjudication
-      // LINE_BENE_PRMRY_PYR_CD   => ExplanationOfBenefit.item.extension
+      // LINE_BENE_PRMRY_PYR_CD => ExplanationOfBenefit.item.extension
       // LINE_BENE_PRMRY_PYR_PD_AMT => ExplanationOfBenefit.item.adjudication
-      // LINE_COINSRNC_AMT        => ExplanationOfBenefit.item.adjudication
-      // LINE_SBMTD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-      // LINE_ALOWD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-      // LINE_BENE_PRMRY_PYR_CD   => ExplanationOfBenefit.item.extension
-      // LINE_SERVICE_DEDUCTIBLE  => ExplanationOfBenefit.item.extension
-      // LINE_HCT_HGB_TYPE_CD     => Observation.code
-      // LINE_HCT_HGB_RSLT_NUM    => Observation.value
-      // LINE_NDC_CD              => ExplanationOfBenefit.item.productOrService
+      // LINE_COINSRNC_AMT => ExplanationOfBenefit.item.adjudication
+      // LINE_SBMTD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+      // LINE_ALOWD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+      // LINE_BENE_PRMRY_PYR_CD => ExplanationOfBenefit.item.extension
+      // LINE_SERVICE_DEDUCTIBLE => ExplanationOfBenefit.item.extension
+      // LINE_HCT_HGB_TYPE_CD => Observation.code
+      // LINE_HCT_HGB_RSLT_NUM => Observation.value
+      // LINE_NDC_CD => ExplanationOfBenefit.item.productOrService
       TransformerUtilsV2.mapEobCommonItemCarrierDME(
           item,
           eob,
@@ -412,14 +412,14 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           line.getNationalDrugCode(),
           drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
 
-      // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
+      // LINE_ICD_DGNS_CD => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
       DiagnosisUtilV2.addDiagnosisLink(
           eob,
           item,
           Diagnosis.from(
               line.getDiagnosisCode(), line.getDiagnosisCodeVersion(), DiagnosisLabel.OTHER),
-          ClaimTypeV2.CARRIER);
+          ClaimType.CARRIER);
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
       line.getProviderStateCode()
