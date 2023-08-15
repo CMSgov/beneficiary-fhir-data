@@ -113,6 +113,7 @@ resource "aws_instance" "this" {
     test_host            = var.test_host
     locust_tags          = var.locust_tags
     locust_exclude_tags  = var.locust_exclude_tags
+    db_uri_override      = var.db_uri_override
     initial_worker_nodes = var.initial_worker_nodes
     node_spawn_time      = var.node_spawn_time
     max_spawned_nodes    = var.max_spawned_nodes

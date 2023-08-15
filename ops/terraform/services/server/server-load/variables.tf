@@ -40,6 +40,12 @@ variable "locust_exclude_tags" {
   default     = ""
 }
 
+variable "db_uri_override" {
+  description = ""
+  type        = string
+  default     = ""
+}
+
 variable "initial_worker_nodes" {
   description = "The number of initial Locust worker nodes to spawn before checking for stop signals. Useful for static load tests"
   type        = number
