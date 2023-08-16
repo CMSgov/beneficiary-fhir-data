@@ -9,9 +9,10 @@ import org.testcontainers.utility.DockerImageName;
  * docs</a> for explanation of the singleton container pattern.
  */
 public abstract class AbstractLocalStackTest {
-  /** The localstack image and version to use for integration tests. */
-  public static final DockerImageName LocalStackImageName =
-      DockerImageName.parse("localstack/localstack:2.2.0");
+  /** The system property defined in pom.xml containing the image to use for test AWS stack. */
+  public static final String TEST_CONTAINER_AWS_IMAGE_PROPERTY = "its.testcontainer.aws.image";
+  /** The default test container image to use when nothing is provided. */
+  public static final String TEST_CONTAINER_AWS_IMAGE_DEFAULT = "localstack/localstack:2.2.0";
 
   /** Global container used by multiple tests. Will be destroyed automatically by test container. */
   protected static final LocalStackContainer localstack;
@@ -19,8 +20,10 @@ public abstract class AbstractLocalStackTest {
   // Creates the instance when first test class loads.   Starts all services that we use in BFD.
   // Add more here if we need any others.
   static {
+    var localStackImageName =
+        System.getProperty(TEST_CONTAINER_AWS_IMAGE_PROPERTY, TEST_CONTAINER_AWS_IMAGE_DEFAULT);
     localstack =
-        new LocalStackContainer(LocalStackImageName)
+        new LocalStackContainer(DockerImageName.parse(localStackImageName))
             .withServices(
                 LocalStackContainer.Service.S3,
                 LocalStackContainer.Service.SQS,
