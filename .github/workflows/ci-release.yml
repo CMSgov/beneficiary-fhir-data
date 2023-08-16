@@ -27,8 +27,6 @@ env:
   CA_DOMAIN: bfd-mgmt
   BRANCH_REF: ${{ format('refs/heads/{0}', github.event.pull_request.head.ref) }}
 
-
-
 jobs:
   mvn-release:
     runs-on: ubuntu-latest
@@ -136,6 +134,7 @@ jobs:
           BFD_RELEASE: ${{ inputs.releaseVersion }}
           BFD_DEV_VERSION: ${{ inputs.developmentVersion }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: 'Perform Exceptional Rollback'
         if: failure()
         run: mvn release:rollback
