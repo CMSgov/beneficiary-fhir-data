@@ -40,7 +40,6 @@
         <connection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</connection>
         <developerConnection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</developerConnection>
         <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
-        <tag>HEAD</tag>
     </scm>
 
     <modules>
