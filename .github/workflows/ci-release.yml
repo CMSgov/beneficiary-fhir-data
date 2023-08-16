@@ -45,10 +45,13 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v3
         with:
+          fetch-depth: 0
           ref: ${{ inputs.releaseBranch }}
       - name: Pull Checkout
         if: github.event_name == 'pull_request'
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
