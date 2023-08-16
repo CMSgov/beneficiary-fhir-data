@@ -64,6 +64,11 @@ public class ColumnBean implements ModelBean {
   @EnumExistsInSameMapping @JavaName private String enumType;
   /** Text for insertion into the generated entity as a javadoc comment on the field. */
   private String comment;
+  /**
+   * Optional text describing fields of the same group to be returned together via a generated
+   * accessor method.
+   */
+  private String groupName;
   /** Indicates whether the column in the database is nullable. */
   @Builder.Default private boolean nullable = true;
   /** Indicates whether the column in the database is an {@link GenerationType#IDENTITY} column. */
@@ -191,6 +196,15 @@ public class ColumnBean implements ModelBean {
    */
   public boolean hasComment() {
     return !Strings.isNullOrEmpty(comment);
+  }
+
+  /**
+   * Determines if the field can be grouped with other fields.
+   *
+   * @return true if the field can be grouped with other fields
+   */
+  public boolean hasGroupName() {
+    return !Strings.isNullOrEmpty(groupName);
   }
 
   /**

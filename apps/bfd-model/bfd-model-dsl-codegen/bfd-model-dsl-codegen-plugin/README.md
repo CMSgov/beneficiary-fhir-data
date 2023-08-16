@@ -167,6 +167,7 @@ The `table` objects contain the following properties:
 The `column` objects have the following properties:
 
 - name: Name of the column as it appears in the database and entity class.
+- groupName: Optional text describing columns of the same group to be returned together via a generated accessor method.
 - dbName: Name of the column in the database (if different than the field name in the entity).
 - sqlType: Type of the column as it would appear in SQL DDL defining the column.
 - javaType: Type of the field in the JPA entity class that holds this column's value.
