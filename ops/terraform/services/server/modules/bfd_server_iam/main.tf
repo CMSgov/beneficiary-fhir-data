@@ -23,10 +23,23 @@ resource "aws_iam_role" "instance" {
         },
         "Effect": "Allow",
         "Sid": ""
+      },
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "ssm.amazonaws.com"
+        },
+        "Sid": ""
       }
     ]
   }
   EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_service_role_attachment" {
+  role       = aws_iam_role.instance.id
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
 }
 
 # attach AWS managed CloudWatchAgentServerPolicy to all EC2 instances
