@@ -60,8 +60,6 @@ jobs:
         with:
           java-version: '17'
           distribution: corretto
-      - name: Diagnostics
-        run: cat ~/.m2/settings.xml
       - name: Configure the git user
         run: |
           git config --global user.email "actions@github.com"
@@ -115,6 +113,8 @@ jobs:
             </servers>
           </settings>
           EOF
+      - name: Diagnostics
+        run: cat ~/.m2/settings.xml
       #FIXME: Remove this PULL_REQUEST release
       - name: 'Prepare and Perform PULL_REQUEST Release'
         if: github.event_name == 'pull_request'
