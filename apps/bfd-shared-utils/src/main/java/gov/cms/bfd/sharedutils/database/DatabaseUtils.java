@@ -77,7 +77,7 @@ public final class DatabaseUtils {
     if (poolingDataSource.getJdbcUrl() != null
         && poolingDataSource.getJdbcUrl().contains("postgre"))
       poolingDataSource.setConnectionInitSql(
-          "set application_name = 'bfd-server'; set enable_seqscan = false;");
+          "set application_name = 'bfd-server'");
 
     poolingDataSource.setRegisterMbeans(true);
     poolingDataSource.setMetricRegistry(metricRegistry);
