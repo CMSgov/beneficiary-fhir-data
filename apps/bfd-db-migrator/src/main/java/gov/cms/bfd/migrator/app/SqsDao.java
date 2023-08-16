@@ -2,6 +2,7 @@ package gov.cms.bfd.migrator.app;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
@@ -36,14 +37,11 @@ public class SqsDao {
    * Sends a message to an SQS queue.
    *
    * @param queueUrl identifies the queue to post the message to
-   * @param messageGroupId identifies a specific sequence of messages within a FIFO queue
-   * @param messageId identifies a specific message within a sequence
    * @param messageBody text of the message to send
    * @throws QueueDoesNotExistException if queue does not exist
    * @throws SqsException if the operation cannot be completed
    */
-  public void sendMessage(
-      String queueUrl, String messageGroupId, String messageId, String messageBody) {
+  public void sendMessage(String queueUrl, String messageBody) {
     final var request =
         SendMessageRequest.builder().queueUrl(queueUrl).messageBody(messageBody).build();
     sqsClient.sendMessage(request);
@@ -77,5 +75,21 @@ public class SqsDao {
         ReceiveMessageRequest.builder().queueUrl(queueUrl).maxNumberOfMessages(1).build();
     List<Message> messages = sqsClient.receiveMessage(request).messages();
     return messages.isEmpty() ? Optional.empty() : Optional.of(messages.get(0).body());
+  }
+
+  /**
+   * Read all currently available messages and pass them to the provided function.
+   *
+   * @param queueUrl identifies the queue to read from
+   * @param consumer a function to receive each message
+   * @throws QueueDoesNotExistException if queue does not exist
+   * @throws SqsException if the operation cannot be completed
+   */
+  public void processAllMessages(String queueUrl, Consumer<String> consumer) {
+    for (Optional<String> message = nextMessage(queueUrl);
+        message.isPresent();
+        message = nextMessage(queueUrl)) {
+      consumer.accept(message.get());
+    }
   }
 }

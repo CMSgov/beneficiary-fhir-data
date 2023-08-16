@@ -14,6 +14,7 @@ import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
+import gov.cms.bfd.migrator.app.SqsProgressReporter.SqsProgressMessage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,11 +23,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import javax.sql.DataSource;
+import lombok.Getter;
 import org.awaitility.Awaitility;
 import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
@@ -48,6 +49,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   private SqsDao sqsDao;
 
   /** Enum for determining which flyway script directory to run a test against. */
+  @Getter
   private enum TestDirectory {
     /** Value that will not override the flyway script location, and use the real flyway scripts. */
     REAL(""),
@@ -62,21 +64,12 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     private final String path;
 
     /**
-     * Instantiates a new Test directory.
+     * Initializes an instance.
      *
      * @param path the path to the test files for this selection
      */
     TestDirectory(String path) {
       this.path = path;
-    }
-
-    /**
-     * Gets the path for this selection.
-     *
-     * @return the path override for the test files
-     */
-    public String getPath() {
-      return path;
     }
   }
 
@@ -151,20 +144,13 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
       final var progressMessages = readProgressMessagesFromSQSQueue();
       assertThat(progressMessages)
           .first()
-          .asString()
-          .contains(MigratorProgress.Stage.Started.name());
+          .matches(m -> m.getAppStage() == MigratorProgress.Stage.Started);
       assertThat(progressMessages)
-          .hasAtLeastOneElementOfType(String.class)
-          .asString()
-          .contains(MigratorProgress.Stage.Connected.name());
-      assertThat(progressMessages)
-          .hasAtLeastOneElementOfType(String.class)
-          .asString()
-          .contains(MigratorProgress.Stage.Migrating.name());
+          .anyMatch(m -> m.getAppStage() == MigratorProgress.Stage.Connected)
+          .anyMatch(m -> m.getAppStage() == MigratorProgress.Stage.Migrating);
       assertThat(progressMessages)
           .last()
-          .asString()
-          .contains(MigratorProgress.Stage.Finished.name());
+          .matches(m -> m.getAppStage() == MigratorProgress.Stage.Finished);
 
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException(
@@ -424,14 +410,13 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
    *
    * @return the list
    */
-  private List<String> readProgressMessagesFromSQSQueue() {
+  private List<SqsProgressMessage> readProgressMessagesFromSQSQueue() {
     final var queueUrl = sqsDao.lookupQueueUrl(SQS_QUEUE_NAME);
-    var messages = new ArrayList<String>();
-    for (Optional<String> message = sqsDao.nextMessage(queueUrl);
-        message.isPresent();
-        message = sqsDao.nextMessage(queueUrl)) {
-      message.ifPresent(messages::add);
-    }
+    var messages = new ArrayList<SqsProgressMessage>();
+    sqsDao.processAllMessages(
+        queueUrl,
+        messageJson -> messages.add(SqsProgressReporter.convertJsonToMessage(messageJson)));
+    messages.sort(SqsProgressMessage.SORT_BY_IDS);
     return messages;
   }
 

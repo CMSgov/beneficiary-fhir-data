@@ -106,6 +106,7 @@
         <jackson-datatype-jdk8.version>2.15.2</jackson-datatype-jdk8.version>
         <jackson-dataformat-yaml.version>2.15.2</jackson-dataformat-yaml.version>
         <jackson-datatype-jsr310.version>2.15.2</jackson-datatype-jsr310.version>
+        <jackson-annotations.version>2.15.2</jackson-annotations.version>
         <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
         <snakeyaml.version>2.0</snakeyaml.version>
 
@@ -249,6 +250,12 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson-datatype-jsr310.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to annotate classes for JSON deserialization. -->
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson-annotations.version}</version>
             </dependency>
             <dependency>
                 <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->

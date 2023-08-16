@@ -4,7 +4,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import gov.cms.bfd.AbstractLocalStackTest;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
@@ -40,13 +42,16 @@ class SqsDaoIT extends AbstractLocalStackTest {
   void sendAndReceiveMessages() {
     String queueName = "my-test-queue";
     String queueUri = dao.createQueue(queueName);
-    String messageGroupId = "sendAndReceiveMessages";
     String message1 = "this is a first message";
     String message2 = "this is a second message";
-    dao.sendMessage(queueUri, messageGroupId, "1", message1);
-    dao.sendMessage(queueUri, messageGroupId, "2", message2);
-    assertEquals(Optional.of(message1), dao.nextMessage(queueUri));
-    assertEquals(Optional.of(message2), dao.nextMessage(queueUri));
+    dao.sendMessage(queueUri, message1);
+    dao.sendMessage(queueUri, message2);
+
+    // SQS does not guarantee messages will be received in order so we just collect all
+    // of them and compare to all that we sent.
+    Set<String> receivedMessages = new HashSet<>();
+    dao.processAllMessages(queueUri, receivedMessages::add);
+    assertEquals(Set.of(message1, message2), receivedMessages);
     assertEquals(Optional.empty(), dao.nextMessage(queueUri));
   }
 
@@ -55,8 +60,7 @@ class SqsDaoIT extends AbstractLocalStackTest {
   void variousNonExistentQueueScenarios() {
     assertThatThrownBy(() -> dao.lookupQueueUrl("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);
-    assertThatThrownBy(
-            () -> dao.sendMessage("no-such-queue-exists", "g1", "m1", "not gonna make it there"))
+    assertThatThrownBy(() -> dao.sendMessage("no-such-queue-exists", "not gonna make it there"))
         .isInstanceOf(QueueDoesNotExistException.class);
     assertThatThrownBy(() -> dao.nextMessage("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);
