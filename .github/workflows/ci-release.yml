@@ -25,6 +25,8 @@ env:
   # AWS Code Artifact Repository
   CA_REPOSITORY: bfd-release-hackathon #FIXME
   CA_DOMAIN: bfd-mgmt
+  BRANCH_REF: ${{ format('refs/heads/{0}', github.event.pull_request.head.ref) }}
+
 
 
 jobs:
@@ -52,6 +54,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ env.BRANCH_REF}}
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
