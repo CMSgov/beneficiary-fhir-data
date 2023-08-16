@@ -4,6 +4,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
@@ -27,6 +29,12 @@ public class PoetUtil {
    * provide one.
    */
   public static final ClassName LongClassName = ClassName.get(Long.class);
+
+  /**
+   * Shortcut for an instance of {@link ClassName} for {@link java.util.Map} since the library
+   * doesn't provide one.
+   */
+  public static final ClassName MapClassName = ClassName.get("java.util", "Map");
 
   /** Prevent instantiation of utility class. */
   private PoetUtil() {}
@@ -191,6 +199,36 @@ public class PoetUtil {
             joinFieldName,
             fieldToMethodName("get", joinPropertyName))
         .build();
+  }
+
+  /**
+   * Generates a getter method that returns a mapping of fields by group, whose keys are the fields'
+   * names and whose values are the fields' values.
+   *
+   * @param groupedPropertiesName the shared group name of the fields
+   * @param propertyNames the fields for the given group
+   * @param getterResultType the return type of the grouped fields
+   * @return a {@link MethodSpec} that generates the getter method
+   */
+  public static MethodSpec createGroupedPropertiesGetter(
+      String groupedPropertiesName, List<String> propertyNames, TypeName getterResultType) {
+    ParameterizedTypeName returnType =
+        ParameterizedTypeName.get(MapClassName, StringClassName, getterResultType);
+    MethodSpec.Builder methodSpecBuilder =
+        MethodSpec.methodBuilder(fieldToMethodName("get", groupedPropertiesName))
+            .addModifiers(Modifier.PUBLIC)
+            .returns(returnType)
+            .addStatement("$T $L = new $T<>()", returnType, groupedPropertiesName, HashMap.class);
+    propertyNames.stream()
+        .forEach(
+            property ->
+                methodSpecBuilder.addStatement(
+                    "$L.put($S, $L())",
+                    groupedPropertiesName,
+                    property,
+                    fieldToMethodName("get", property)));
+    methodSpecBuilder.addStatement("return $L", groupedPropertiesName);
+    return methodSpecBuilder.build();
   }
 
   /**
