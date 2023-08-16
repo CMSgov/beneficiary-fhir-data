@@ -16,6 +16,6 @@ variable "kms_key_alias" {
 }
 
 variable "rds_cluster_resource_id" {
-  description = "RDS cluster resource ID (not the cluster identifier)"
+  description = "RDS Cluster Resource ID"
   type        = string
 }

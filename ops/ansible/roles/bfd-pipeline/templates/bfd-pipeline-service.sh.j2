@@ -1,12 +1,40 @@
 #!/bin/bash
+metadata_token_ttl_seconds=300
 
 export CCW_RIF_JOB_ENABLED='{{ data_pipeline_ccw_rif_job_enabled }}'
 export S3_BUCKET_NAME='{{ data_pipeline_s3_bucket }}'
 export HICN_HASH_ITERATIONS='{{ data_pipeline_hicn_hash_iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
 export HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
-export DATABASE_URL='{{ data_pipeline_db_url }}'
-export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
-export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
+
+DB_URL="${DB_URL:-{{ data_pipeline_db_url }}}"
+DB_USERNAME="${DB_USERNAME:-{{ data_pipeline_db_username }}}"
+DB_PASSWORD="${DB_PASSWORD:-{{ data_pipeline_db_password }}}"
+
+# If DB_PASSWORD is not set, use RDS IAM for db auth (overwrites DB_USERNAME with instance profile role name)
+if [ -z "$DB_PASSWORD" ]; then
+  # extract the database host from the jdbc url
+  trimmed_url="jdbc:postgresql://"
+  export DB_HOST="${DB_HOST:-"${trimmed_url%%[:/]*}"}" # extract everything up to the first colon or slash
+
+  # Get the instance profile role from the metadata service. This is the database username.
+  log "Retrieving RDS IAM authentication token for $DB_HOST"
+  IMDSv2_TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: $metadata_token_ttl_seconds")
+  DB_USERNAME=$(curl -s -S -H "X-aws-ec2-metadata-token: $IMDSv2_TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/)
+  for i in {1..3}; do
+    if ! DB_PASSWORD="$(aws rds generate-db-auth-token --hostname "$DB_HOST" --port 5432 --username="$DB_USERNAME")"; then
+      log "Failed to obtain rds auth token for $DB_HOST retrying... (attempt $i/3)"
+      sleep 1
+    fi
+  done
+  if [[ -z "$DB_PASSWORD" ]]; then
+    log "Failed to obtain rds auth token for $DB_HOST after 3 attempts, exiting..."
+    exit 1
+  fi
+fi
+export DB_URL
+export DB_USERNAME
+export DB_PASSWORD
+
 # NOTE: RIF Loader Threads are generally some multiple of available cpus/core, e.g. `$((3 * $(nproc)))`
 export LOADER_THREADS='{{ ansible_processor_vcpus * (rif_thread_multiple | int) }}'
 export RIF_JOB_BATCH_SIZE='{{ rif_job_batch_size }}'

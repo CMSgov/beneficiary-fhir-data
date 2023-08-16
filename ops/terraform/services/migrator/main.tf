@@ -88,7 +88,6 @@ resource "aws_instance" "this" {
 
   user_data = templatefile("${path.module}/user-data.tftpl", {
     account_id                                  = local.account_id
-    db_migrator_db_host                         = local.rds_writer_endpoint
     db_migrator_db_url                          = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
     env                                         = local.env
     migrator_monitor_enabled                    = local.migrator_monitor_enabled

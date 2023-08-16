@@ -10,18 +10,22 @@ export BFD_WAR='{{ data_server_dir }}/{{ data_server_war | basename }}'
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
 LOGS_DIR='{{ data_server_dir }}/'
-DB_URL='{{ data_server_db_url }}'
-DB_HOST="${DB_HOST:-{{ data_server_db_host }}}"
-DB_USERNAME="${DB_USERNAME:-{{ data_server_db_username }}}"
-DB_PASSWORD="${DB_PASSWORD:-{{ data_server_db_password }}}"
-DB_CONNECTIONS_MAX='{{ data_server_db_connections_max }}'
 BFD_PAC_ENABLED='{{ pac_resources_enabled }}'
 BFD_PAC_CLAIM_SOURCE_TYPES='{{ pac_claim_source_types }}'
 
-# If DB_USERNAME or DB_PASSWORD was not set, use IAM for db auth
-if  [ -z "$DB_USERNAME" ] || [ -z "$DB_PASSWORD" ]; then
-  # Get the instance profile role name from the metadata service. This is the database username.
-  log "Retrieving RDS IAM authentication token for {{ data_server_db_host }}"
+DB_URL="${DB_URL:-{{ data_server_db_url }}}"
+DB_USERNAME="${DB_USERNAME:-{{ data_server_db_username }}}"
+DB_PASSWORD="${DB_PASSWORD:-{{ data_server_db_password }}}"
+DB_CONNECTIONS_MAX="${DB_CONNECTIONS_MAX:-'{{ data_server_db_connections_max }}'}"
+
+# If DB_PASSWORD is not set, use IAM for db auth (overwrites DB_USERNAME with instance profile role name)
+if [ -z "$DB_PASSWORD" ]; then
+  # extract the database host from the jdbc url
+  trimmed_url="jdbc:postgresql://"
+  export DB_HOST="${DB_HOST:-"${trimmed_url%%[:/]*}"}" # extract everything up to the first colon or slash
+
+  # Get the instance profile role from the metadata service. This is the database username.
+  log "Retrieving RDS IAM authentication token for $DB_HOST"
   IMDSv2_TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: $metadata_token_ttl_seconds")
   DB_USERNAME=$(curl -s -S -H "X-aws-ec2-metadata-token: $IMDSv2_TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/)
   for i in {1..3}; do
@@ -31,10 +35,15 @@ if  [ -z "$DB_USERNAME" ] || [ -z "$DB_PASSWORD" ]; then
     fi
   done
   if [[ -z "$DB_PASSWORD" ]]; then
-    log "Failed to obtain an auth token for $DB_HOST after 3 attempts, exiting..."
+    log "Failed to obtain rds auth token for $DB_HOST after 3 attempts, exiting..."
     exit 1
   fi
 fi
+export DB_URL
+export DB_USERNAME
+export DB_PASSWORD
+export DB_CONNECTIONS_MAX
+
 # The New Relic agent running in the WAR needs some additional environment variables, so set those.
 {% if data_server_new_relic_license_key is defined %}
 export NEW_RELIC_HOST='gov-collector.newrelic.com'

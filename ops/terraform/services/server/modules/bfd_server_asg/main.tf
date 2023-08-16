@@ -101,7 +101,6 @@ resource "aws_launch_template" "main" {
     env                 = local.env
     port                = var.lb_config.port
     accountId           = var.launch_config.account_id
-    data_server_db_host = local.rds_reader_endpoint
     data_server_db_url  = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${var.jdbc_suffix}"
   }))
 

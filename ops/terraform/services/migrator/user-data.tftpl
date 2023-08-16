@@ -27,7 +27,6 @@ aws ssm get-parameters-by-path \
 cat <<EOF > extra_vars.json
 {
   "db_migrator_db_url": "${db_migrator_db_url}",
-  "db_migrator_db_host": "${db_migrator_db_host}",
   "env": "${env}",
   "migrator_monitor_enabled": ${migrator_monitor_enabled},
   "migrator_monitor_heartbeat_interval_seconds": ${migrator_monitor_heartbeat_interval_seconds},
