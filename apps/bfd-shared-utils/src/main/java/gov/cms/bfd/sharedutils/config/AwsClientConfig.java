@@ -1,7 +1,6 @@
 package gov.cms.bfd.sharedutils.config;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import lombok.Builder;
@@ -67,13 +66,6 @@ public class AwsClientConfig {
   public void configureAwsService(AwsClientBuilder<?, ?> builder) {
     region.ifPresent(builder::region);
     endpointOverride.ifPresent(builder::endpointOverride);
-    if (endpointOverride.isPresent()) {
-      builder.overrideConfiguration(
-          configBuilder ->
-              configBuilder
-                  .retryPolicy(b -> b.numRetries(10))
-                  .apiCallAttemptTimeout(Duration.ofSeconds(10)));
-    }
     if (accessKey.isPresent() && secretKey.isPresent()) {
       builder.credentialsProvider(
           StaticCredentialsProvider.create(
