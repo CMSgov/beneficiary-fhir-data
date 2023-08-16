@@ -3,7 +3,9 @@ package gov.cms.model.dsl.codegen.plugin;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link PoetUtil}. */
@@ -150,6 +152,26 @@ public class PoetUtilTest {
             + "  return mbiRecord == null ? null : mbiRecord.getMbi();\n"
             + "}\n",
         PoetUtil.createJoinPropertyGetter("mbi", PoetUtil.StringClassName, "mbiRecord", "mbi")
+            .toString());
+  }
+
+  /** Unit test for {@link PoetUtil#createGroupedPropertiesGetter}. */
+  @Test
+  public void testCreateGroupedPropertiesGetter() {
+    assertEquals(
+        """
+public java.util.Map<java.lang.String, java.util.Optional<java.lang.String>> getDiagnosisCodes() {
+  java.util.Map<java.lang.String, java.util.Optional<java.lang.String>> diagnosisCodes = new java.util.HashMap<>();
+  diagnosisCodes.put("diagnosis1Code", getDiagnosis1Code());
+  diagnosisCodes.put("diagnosis2Code", getDiagnosis2Code());
+  diagnosisCodes.put("diagnosis3Code", getDiagnosis3Code());
+  return diagnosisCodes;
+}
+""",
+        PoetUtil.createGroupedPropertiesGetter(
+                "diagnosisCodes",
+                Arrays.asList("diagnosis1Code", "diagnosis2Code", "diagnosis3Code"),
+                ParameterizedTypeName.get(PoetUtil.OptionalClassName, PoetUtil.StringClassName))
             .toString());
   }
 }

@@ -10,10 +10,10 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -123,84 +123,10 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiOriginalClaimControlNumber());
 
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractDiagnoses1Thru12(
-            claimGroup.getDiagnosisPrincipalCode(),
-            claimGroup.getDiagnosisPrincipalCodeVersion(),
-            claimGroup.getDiagnosis1Code(),
-            claimGroup.getDiagnosis1CodeVersion(),
-            claimGroup.getDiagnosis2Code(),
-            claimGroup.getDiagnosis2CodeVersion(),
-            claimGroup.getDiagnosis3Code(),
-            claimGroup.getDiagnosis3CodeVersion(),
-            claimGroup.getDiagnosis4Code(),
-            claimGroup.getDiagnosis4CodeVersion(),
-            claimGroup.getDiagnosis5Code(),
-            claimGroup.getDiagnosis5CodeVersion(),
-            claimGroup.getDiagnosis6Code(),
-            claimGroup.getDiagnosis6CodeVersion(),
-            claimGroup.getDiagnosis7Code(),
-            claimGroup.getDiagnosis7CodeVersion(),
-            claimGroup.getDiagnosis8Code(),
-            claimGroup.getDiagnosis8CodeVersion(),
-            claimGroup.getDiagnosis9Code(),
-            claimGroup.getDiagnosis9CodeVersion(),
-            claimGroup.getDiagnosis10Code(),
-            claimGroup.getDiagnosis10CodeVersion(),
-            claimGroup.getDiagnosis11Code(),
-            claimGroup.getDiagnosis11CodeVersion(),
-            claimGroup.getDiagnosis12Code(),
-            claimGroup.getDiagnosis12CodeVersion()))
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
-
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractDiagnoses13Thru25(
-            claimGroup.getDiagnosis13Code(),
-            claimGroup.getDiagnosis13CodeVersion(),
-            claimGroup.getDiagnosis14Code(),
-            claimGroup.getDiagnosis14CodeVersion(),
-            claimGroup.getDiagnosis15Code(),
-            claimGroup.getDiagnosis15CodeVersion(),
-            claimGroup.getDiagnosis16Code(),
-            claimGroup.getDiagnosis16CodeVersion(),
-            claimGroup.getDiagnosis17Code(),
-            claimGroup.getDiagnosis17CodeVersion(),
-            claimGroup.getDiagnosis18Code(),
-            claimGroup.getDiagnosis18CodeVersion(),
-            claimGroup.getDiagnosis19Code(),
-            claimGroup.getDiagnosis19CodeVersion(),
-            claimGroup.getDiagnosis20Code(),
-            claimGroup.getDiagnosis20CodeVersion(),
-            claimGroup.getDiagnosis21Code(),
-            claimGroup.getDiagnosis21CodeVersion(),
-            claimGroup.getDiagnosis22Code(),
-            claimGroup.getDiagnosis22CodeVersion(),
-            claimGroup.getDiagnosis23Code(),
-            claimGroup.getDiagnosis23CodeVersion(),
-            claimGroup.getDiagnosis24Code(),
-            claimGroup.getDiagnosis24CodeVersion(),
-            claimGroup.getDiagnosis25Code(),
-            claimGroup.getDiagnosis25CodeVersion()))
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
-
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractExternalDiagnoses1Thru12(
-            claimGroup.getDiagnosisExternalFirstCode(),
-                claimGroup.getDiagnosisExternalFirstCodeVersion(),
-            claimGroup.getDiagnosisExternal1Code(), claimGroup.getDiagnosisExternal1CodeVersion(),
-            claimGroup.getDiagnosisExternal2Code(), claimGroup.getDiagnosisExternal2CodeVersion(),
-            claimGroup.getDiagnosisExternal3Code(), claimGroup.getDiagnosisExternal3CodeVersion(),
-            claimGroup.getDiagnosisExternal4Code(), claimGroup.getDiagnosisExternal4CodeVersion(),
-            claimGroup.getDiagnosisExternal5Code(), claimGroup.getDiagnosisExternal5CodeVersion(),
-            claimGroup.getDiagnosisExternal6Code(), claimGroup.getDiagnosisExternal6CodeVersion(),
-            claimGroup.getDiagnosisExternal7Code(), claimGroup.getDiagnosisExternal7CodeVersion(),
-            claimGroup.getDiagnosisExternal8Code(), claimGroup.getDiagnosisExternal8CodeVersion(),
-            claimGroup.getDiagnosisExternal9Code(), claimGroup.getDiagnosisExternal9CodeVersion(),
-            claimGroup.getDiagnosisExternal10Code(), claimGroup.getDiagnosisExternal10CodeVersion(),
-            claimGroup.getDiagnosisExternal11Code(), claimGroup.getDiagnosisExternal11CodeVersion(),
-            claimGroup.getDiagnosisExternal12Code(),
-                claimGroup.getDiagnosisExternal12CodeVersion()))
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
+    TransformerUtils.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
+        .stream()
+        .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     if (claimGroup.getClaimLUPACode().isPresent()) {
       TransformerUtils.addInformationWithCode(

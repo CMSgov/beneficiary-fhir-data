@@ -48,7 +48,6 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -70,14 +69,12 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -2504,85 +2501,152 @@ public final class TransformerUtils {
    * @param substitution The methods to retrive diagnosis information all follow a similar pattern.
    *     This value is used to substitute into that pattern when looking up the specific method to
    *     retrive information with.
-   * @param claim Passed as an Object because there is no top level `Claim` class that claims derive
-   *     from
+   * @param codes The mapping of diagnosis codes by their property name and respective value
+   * @param codeVersions The mapping of diagnosis code versions by their property name and
+   *     respective value
+   * @param presentOnAdms The mapping of diagnosis "PresentOnAdmissionCode" codes by their property
+   *     name and respective value
    * @param ccw CCW Codebook value that represents which "PresentOnAdmissionCode" is being used.
    *     Example: {@link CcwCodebookVariable#CLM_POA_IND_SW5}
    * @param label One or more labels to use when mapping the diagnosis.
    * @return a {@link Diagnosis} or {@link Optional#empty()}
    */
   public static Optional<Diagnosis> extractDiagnosis(
-      String substitution, Object claim, Optional<CcwCodebookInterface> ccw, DiagnosisLabel label) {
-
+      String substitution,
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<Character>> presentOnAdms,
+      Optional<CcwCodebookInterface> ccw,
+      Optional<DiagnosisLabel> label) {
     Optional<String> code =
-        ReflectionUtils.tryMethod(claim, String.format("getDiagnosis%sCode", substitution));
+        codes.getOrDefault(String.format("diagnosis%sCode", substitution), Optional.empty());
     Optional<Character> codeVersion =
-        ReflectionUtils.tryMethod(claim, String.format("getDiagnosis%sCodeVersion", substitution));
+        codeVersions.getOrDefault(
+            String.format("diagnosis%sCodeVersion", substitution), Optional.empty());
     Optional<Character> presentOnAdm =
-        ReflectionUtils.tryMethod(
-            claim, String.format("getDiagnosis%sPresentOnAdmissionCode", substitution));
-
-    return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label);
+        presentOnAdms.isEmpty()
+            ? Optional.empty()
+            : presentOnAdms.getOrDefault(
+                String.format("diagnosis%sPresentOnAdmissionCode", substitution), Optional.empty());
+    if (presentOnAdm.isEmpty() && ccw.isEmpty() && label.isEmpty())
+      return Diagnosis.from(code, codeVersion);
+    if (presentOnAdm.isEmpty() && ccw.isEmpty())
+      return Diagnosis.from(code, codeVersion, label.get());
+    return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label.get());
   }
 
   /**
-   * Extracts nearly all diagnosis types from a Claim. It does this with reflection, so if the
-   * specific claim type doesn't have the given diagnosis it will just be skipped.
+   * Extracts all possible diagnosis types from a Claim.
    *
-   * @param claim the Claim to extract the {@link Diagnosis}es from
-   * @return the {@link Diagnosis} that can be extracted from the specified {@link InpatientClaim}
+   * @param codes The mapping of diagnosis codes by their property name and respective value
+   * @param codeVersions The mapping of diagnosis code versions by their property name and
+   *     respective value
+   * @param presentOnAdms The mapping of diagnosis "PresentOnAdmissionCode" codes by their property
+   *     name and respective value
+   * @return the {@link Diagnosis} that can be extracted from the specified claim properties
    */
-  static List<Diagnosis> extractDiagnoses(Object claim) {
-    List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
+  static List<Diagnosis> extractDiagnoses(
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<Character>> presentOnAdms) {
 
+    List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
     // Handle the "special" diagnosis fields
-    diagnosis.add(extractDiagnosis("Admitting", claim, Optional.empty(), DiagnosisLabel.ADMITTING));
+    diagnosis.add(
+        extractDiagnosis(
+            "Admitting",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            Optional.of(DiagnosisLabel.ADMITTING)));
     diagnosis.add(
         extractDiagnosis(
             "1",
-            claim,
-            Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
-            DiagnosisLabel.PRINCIPAL));
-    diagnosis.add(extractDiagnosis("Principal", claim, Optional.empty(), DiagnosisLabel.PRINCIPAL));
+            codes,
+            codeVersions,
+            presentOnAdms,
+            presentOnAdms.isEmpty()
+                ? Optional.empty()
+                : Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
+            Optional.of(DiagnosisLabel.PRINCIPAL)));
+    diagnosis.add(
+        extractDiagnosis(
+            "Principal",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            Optional.of(DiagnosisLabel.PRINCIPAL)));
 
     // Generically handle the rest (2-25)
     final int FIRST_DIAG = 2;
     final int LAST_DIAG = 25;
-
     IntStream.range(FIRST_DIAG, LAST_DIAG + 1)
         .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  String.valueOf(i),
-                  claim,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
-                  DiagnosisLabel.OTHER);
-            })
+            i ->
+                extractDiagnosis(
+                    String.valueOf(i),
+                    codes,
+                    codeVersions,
+                    presentOnAdms,
+                    presentOnAdms.isEmpty()
+                        ? Optional.empty()
+                        : Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
+                    presentOnAdms.isEmpty() ? Optional.empty() : Optional.of(DiagnosisLabel.OTHER)))
         .forEach(diagnosis::add);
 
     // Handle first external diagnosis
     diagnosis.add(
         extractDiagnosis(
             "External1",
-            claim,
-            Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
-            DiagnosisLabel.FIRSTEXTERNAL));
+            codes,
+            codeVersions,
+            presentOnAdms,
+            presentOnAdms.isEmpty()
+                ? Optional.empty()
+                : Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
+            Optional.of(DiagnosisLabel.FIRSTEXTERNAL)));
     diagnosis.add(
-        extractDiagnosis("ExternalFirst", claim, Optional.empty(), DiagnosisLabel.FIRSTEXTERNAL));
+        extractDiagnosis(
+            "ExternalFirst",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            Optional.of(DiagnosisLabel.FIRSTEXTERNAL)));
 
     // Generically handle the rest (2-12)
     final int FIRST_EX_DIAG = 2;
     final int LAST_EX_DIAG = 12;
-
     IntStream.range(FIRST_EX_DIAG, LAST_EX_DIAG + 1)
         .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  "External" + i,
-                  claim,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)),
-                  DiagnosisLabel.EXTERNAL);
-            })
+            i ->
+                extractDiagnosis(
+                    "External" + i,
+                    codes,
+                    codeVersions,
+                    presentOnAdms,
+                    presentOnAdms.isEmpty()
+                        ? Optional.empty()
+                        : Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)),
+                    Optional.of(DiagnosisLabel.EXTERNAL)))
+        .forEach(diagnosis::add);
+
+    // RSN_VISIT_CD(1-3) => diagnosis.diagnosisCodeableConcept
+    // RSN_VISIT_VRSN_CD(1-3) => diagnosis.diagnosisCodeableConcept
+    final int FIRST_INPATIENT_DIAGNOSIS = 1;
+    final int LAST_INPATIENT_DIAGNOSIS = 3;
+    IntStream.range(FIRST_INPATIENT_DIAGNOSIS, LAST_INPATIENT_DIAGNOSIS + 1)
+        .mapToObj(
+            i ->
+                TransformerUtils.extractDiagnosis(
+                    String.format("Admission%d", i),
+                    codes,
+                    codeVersions,
+                    Map.of(),
+                    Optional.empty(),
+                    Optional.of(DiagnosisLabel.REASONFORVISIT)))
         .forEach(diagnosis::add);
 
     // Some may be empty. Convert from List<Optional<Diagnosis>> to List<Diagnosis>
@@ -2593,608 +2657,56 @@ public final class TransformerUtils {
   }
 
   /**
-   * Extract the Diagnosis values for codes 1-12.
+   * Generically attempts to retrieve a procedure from the current claim.
    *
-   * @param diagnosisPrincipalCode the diagnosis principal code
-   * @param diagnosisPrincipalCodeVersion the diagnosis principal code version
-   * @param diagnosis1Code through diagnosis12Code
-   * @param diagnosis1CodeVersion through diagnosis12CodeVersion
-   * @param diagnosis2Code the diagnosis 2 code
-   * @param diagnosis2CodeVersion the diagnosis 2 code version
-   * @param diagnosis3Code the diagnosis 3 code
-   * @param diagnosis3CodeVersion the diagnosis 3 code version
-   * @param diagnosis4Code the diagnosis 4 code
-   * @param diagnosis4CodeVersion the diagnosis 4 code version
-   * @param diagnosis5Code the diagnosis 5 code
-   * @param diagnosis5CodeVersion the diagnosis 5 code version
-   * @param diagnosis6Code the diagnosis 6 code
-   * @param diagnosis6CodeVersion the diagnosis 6 code version
-   * @param diagnosis7Code the diagnosis 7 code
-   * @param diagnosis7CodeVersion the diagnosis 7 code version
-   * @param diagnosis8Code the diagnosis 8 code
-   * @param diagnosis8CodeVersion the diagnosis 8 code version
-   * @param diagnosis9Code the diagnosis 9 code
-   * @param diagnosis9CodeVersion the diagnosis 9 code version
-   * @param diagnosis10Code the diagnosis 10 code
-   * @param diagnosis10CodeVersion the diagnosis 10 code version
-   * @param diagnosis11Code the diagnosis 11 code
-   * @param diagnosis11CodeVersion the diagnosis 11 code version
-   * @param diagnosis12Code the diagnosis 12 code
-   * @param diagnosis12CodeVersion the diagnosis 12 code version
-   * @return the {@link Diagnosis}es that can be extracted from the specified
+   * @param procedure Procedure accessors all follow the same pattern except for an integer
+   *     difference. This value is used as a substitution when looking up the method name.
+   * @param codes The mapping of procedure codes by their property name and respective value
+   * @param codeVersions The mapping of procedure code versions by their property name and
+   *     respective value
+   * @param dates The mapping of procedure dates by their property name and respective value
+   * @return a {@link CCWProcedure} or {@link Optional#empty()}
    */
-  public static List<Diagnosis> extractDiagnoses1Thru12(
-      Optional<String> diagnosisPrincipalCode,
-      Optional<Character> diagnosisPrincipalCodeVersion,
-      Optional<String> diagnosis1Code,
-      Optional<Character> diagnosis1CodeVersion,
-      Optional<String> diagnosis2Code,
-      Optional<Character> diagnosis2CodeVersion,
-      Optional<String> diagnosis3Code,
-      Optional<Character> diagnosis3CodeVersion,
-      Optional<String> diagnosis4Code,
-      Optional<Character> diagnosis4CodeVersion,
-      Optional<String> diagnosis5Code,
-      Optional<Character> diagnosis5CodeVersion,
-      Optional<String> diagnosis6Code,
-      Optional<Character> diagnosis6CodeVersion,
-      Optional<String> diagnosis7Code,
-      Optional<Character> diagnosis7CodeVersion,
-      Optional<String> diagnosis8Code,
-      Optional<Character> diagnosis8CodeVersion,
-      Optional<String> diagnosis9Code,
-      Optional<Character> diagnosis9CodeVersion,
-      Optional<String> diagnosis10Code,
-      Optional<Character> diagnosis10CodeVersion,
-      Optional<String> diagnosis11Code,
-      Optional<Character> diagnosis11CodeVersion,
-      Optional<String> diagnosis12Code,
-      Optional<Character> diagnosis12CodeVersion) {
-    List<Diagnosis> diagnoses = new LinkedList<>();
-
-    /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring
-     * if-blocks.
-     */
-    Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
-
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisPrincipalCode, diagnosisPrincipalCodeVersion, DiagnosisLabel.PRINCIPAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion, DiagnosisLabel.PRINCIPAL));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis2Code, diagnosis2CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis3Code, diagnosis3CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis4Code, diagnosis4CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis5Code, diagnosis5CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis6Code, diagnosis6CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis7Code, diagnosis7CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis8Code, diagnosis8CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis9Code, diagnosis9CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis10Code, diagnosis10CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis11Code, diagnosis11CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis12Code, diagnosis12CodeVersion));
-
-    return diagnoses;
+  public static Optional<CCWProcedure> extractCCWProcedure(
+      int procedure,
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<LocalDate>> dates) {
+    Optional<String> code =
+        codes.getOrDefault(String.format("procedure%dCode", procedure), Optional.empty());
+    Optional<Character> codeVersion =
+        codeVersions.getOrDefault(
+            String.format("procedure%dCodeVersion", procedure), Optional.empty());
+    Optional<LocalDate> date =
+        dates.getOrDefault(String.format("procedure%dDate", procedure), Optional.empty());
+    return CCWProcedure.from(code, codeVersion, date);
   }
 
   /**
-   * Extract the Diagnosis values for codes 1-12.
+   * Generically attempts to retrieve the procedures from the current claim.
    *
-   * @param diagnosisAdmittingCode the diagnosis admitting code
-   * @param diagnosisAdmittingCodeVersion the diagnosis admitting code version
-   * @param diagnosisPrincipalCode the diagnosis principal code
-   * @param diagnosisPrincipalCodeVersion the diagnosis principal code version
-   * @param diagnosis1Code through diagnosis12Code
-   * @param diagnosis1CodeVersion through diagnosis12CodeVersion
-   * @param diagnosis2Code the diagnosis 2 code
-   * @param diagnosis2CodeVersion the diagnosis 2 code version
-   * @param diagnosis3Code the diagnosis 3 code
-   * @param diagnosis3CodeVersion the diagnosis 3 code version
-   * @param diagnosis4Code the diagnosis 4 code
-   * @param diagnosis4CodeVersion the diagnosis 4 code version
-   * @param diagnosis5Code the diagnosis 5 code
-   * @param diagnosis5CodeVersion the diagnosis 5 code version
-   * @param diagnosis6Code the diagnosis 6 code
-   * @param diagnosis6CodeVersion the diagnosis 6 code version
-   * @param diagnosis7Code the diagnosis 7 code
-   * @param diagnosis7CodeVersion the diagnosis 7 code version
-   * @param diagnosis8Code the diagnosis 8 code
-   * @param diagnosis8CodeVersion the diagnosis 8 code version
-   * @param diagnosis9Code the diagnosis 9 code
-   * @param diagnosis9CodeVersion the diagnosis 9 code version
-   * @param diagnosis10Code the diagnosis 10 code
-   * @param diagnosis10CodeVersion the diagnosis 10 code version
-   * @param diagnosis11Code the diagnosis 11 code
-   * @param diagnosis11CodeVersion the diagnosis 11 code version
-   * @param diagnosis12Code the diagnosis 12 code
-   * @param diagnosis12CodeVersion the diagnosis 12 code version
-   * @return the {@link Diagnosis}es that can be extracted from the specified
-   */
-  public static List<Diagnosis> extractDiagnoses1Thru12(
-      Optional<String> diagnosisAdmittingCode,
-      Optional<Character> diagnosisAdmittingCodeVersion,
-      Optional<String> diagnosisPrincipalCode,
-      Optional<Character> diagnosisPrincipalCodeVersion,
-      Optional<String> diagnosis1Code,
-      Optional<Character> diagnosis1CodeVersion,
-      Optional<String> diagnosis2Code,
-      Optional<Character> diagnosis2CodeVersion,
-      Optional<String> diagnosis3Code,
-      Optional<Character> diagnosis3CodeVersion,
-      Optional<String> diagnosis4Code,
-      Optional<Character> diagnosis4CodeVersion,
-      Optional<String> diagnosis5Code,
-      Optional<Character> diagnosis5CodeVersion,
-      Optional<String> diagnosis6Code,
-      Optional<Character> diagnosis6CodeVersion,
-      Optional<String> diagnosis7Code,
-      Optional<Character> diagnosis7CodeVersion,
-      Optional<String> diagnosis8Code,
-      Optional<Character> diagnosis8CodeVersion,
-      Optional<String> diagnosis9Code,
-      Optional<Character> diagnosis9CodeVersion,
-      Optional<String> diagnosis10Code,
-      Optional<Character> diagnosis10CodeVersion,
-      Optional<String> diagnosis11Code,
-      Optional<Character> diagnosis11CodeVersion,
-      Optional<String> diagnosis12Code,
-      Optional<Character> diagnosis12CodeVersion) {
-    List<Diagnosis> diagnoses = new LinkedList<>();
-
-    /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring
-     * if-blocks.
-     */
-    Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisAdmittingCode, diagnosisAdmittingCodeVersion, DiagnosisLabel.ADMITTING));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisPrincipalCode, diagnosisPrincipalCodeVersion, DiagnosisLabel.PRINCIPAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion, DiagnosisLabel.PRINCIPAL));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis2Code, diagnosis2CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis3Code, diagnosis3CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis4Code, diagnosis4CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis5Code, diagnosis5CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis6Code, diagnosis6CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis7Code, diagnosis7CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis8Code, diagnosis8CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis9Code, diagnosis9CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis10Code, diagnosis10CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis11Code, diagnosis11CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis12Code, diagnosis12CodeVersion));
-
-    return diagnoses;
-  }
-
-  /**
-   * Extract the Diagnosis values for codes 13-25.
-   *
-   * @param diagnosis13Code through diagnosis25Code
-   * @param diagnosis13CodeVersion through diagnosis25CodeVersion
-   * @param diagnosis14Code the diagnosis 14 code
-   * @param diagnosis14CodeVersion the diagnosis 14 code version
-   * @param diagnosis15Code the diagnosis 15 code
-   * @param diagnosis15CodeVersion the diagnosis 15 code version
-   * @param diagnosis16Code the diagnosis 16 code
-   * @param diagnosis16CodeVersion the diagnosis 16 code version
-   * @param diagnosis17Code the diagnosis 17 code
-   * @param diagnosis17CodeVersion the diagnosis 17 code version
-   * @param diagnosis18Code the diagnosis 18 code
-   * @param diagnosis18CodeVersion the diagnosis 18 code version
-   * @param diagnosis19Code the diagnosis 19 code
-   * @param diagnosis19CodeVersion the diagnosis 19 code version
-   * @param diagnosis20Code the diagnosis 20 code
-   * @param diagnosis20CodeVersion the diagnosis 20 code version
-   * @param diagnosis21Code the diagnosis 21 code
-   * @param diagnosis21CodeVersion the diagnosis 21 code version
-   * @param diagnosis22Code the diagnosis 22 code
-   * @param diagnosis22CodeVersion the diagnosis 22 code version
-   * @param diagnosis23Code the diagnosis 23 code
-   * @param diagnosis23CodeVersion the diagnosis 23 code version
-   * @param diagnosis24Code the diagnosis 24 code
-   * @param diagnosis24CodeVersion the diagnosis 24 code version
-   * @param diagnosis25Code the diagnosis 25 code
-   * @param diagnosis25CodeVersion the diagnosis 25 code version
-   * @return the {@link Diagnosis}es that can be extracted from the specified
-   */
-  public static List<Diagnosis> extractDiagnoses13Thru25(
-      Optional<String> diagnosis13Code,
-      Optional<Character> diagnosis13CodeVersion,
-      Optional<String> diagnosis14Code,
-      Optional<Character> diagnosis14CodeVersion,
-      Optional<String> diagnosis15Code,
-      Optional<Character> diagnosis15CodeVersion,
-      Optional<String> diagnosis16Code,
-      Optional<Character> diagnosis16CodeVersion,
-      Optional<String> diagnosis17Code,
-      Optional<Character> diagnosis17CodeVersion,
-      Optional<String> diagnosis18Code,
-      Optional<Character> diagnosis18CodeVersion,
-      Optional<String> diagnosis19Code,
-      Optional<Character> diagnosis19CodeVersion,
-      Optional<String> diagnosis20Code,
-      Optional<Character> diagnosis20CodeVersion,
-      Optional<String> diagnosis21Code,
-      Optional<Character> diagnosis21CodeVersion,
-      Optional<String> diagnosis22Code,
-      Optional<Character> diagnosis22CodeVersion,
-      Optional<String> diagnosis23Code,
-      Optional<Character> diagnosis23CodeVersion,
-      Optional<String> diagnosis24Code,
-      Optional<Character> diagnosis24CodeVersion,
-      Optional<String> diagnosis25Code,
-      Optional<Character> diagnosis25CodeVersion) {
-    List<Diagnosis> diagnoses = new LinkedList<>();
-
-    /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring
-     * if-blocks.
-     */
-    Consumer<Optional<Diagnosis>> diagnosisAdder =
-        d -> {
-          if (d.isPresent()) diagnoses.add(d.get());
-        };
-
-    diagnosisAdder.accept(Diagnosis.from(diagnosis13Code, diagnosis13CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis14Code, diagnosis14CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis15Code, diagnosis15CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis16Code, diagnosis16CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis17Code, diagnosis17CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis18Code, diagnosis18CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis19Code, diagnosis19CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis20Code, diagnosis20CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis21Code, diagnosis21CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis22Code, diagnosis22CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis23Code, diagnosis23CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis24Code, diagnosis24CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis25Code, diagnosis25CodeVersion));
-
-    return diagnoses;
-  }
-
-  /**
-   * Extract the External Diagnosis values for codes 1-12.
-   *
-   * @param diagnosisExternalFirstCode the diagnosis external first code
-   * @param diagnosisExternalFirstCodeVersion the diagnosis external first code version
-   * @param diagnosisExternal1Code through diagnosisExternal12Code
-   * @param diagnosisExternal1CodeVersion through diagnosisExternal12CodeVersion
-   * @param diagnosisExternal2Code the diagnosis external 2 code
-   * @param diagnosisExternal2CodeVersion the diagnosis external 2 code version
-   * @param diagnosisExternal3Code the diagnosis external 3 code
-   * @param diagnosisExternal3CodeVersion the diagnosis external 3 code version
-   * @param diagnosisExternal4Code the diagnosis external 4 code
-   * @param diagnosisExternal4CodeVersion the diagnosis external 4 code version
-   * @param diagnosisExternal5Code the diagnosis external 5 code
-   * @param diagnosisExternal5CodeVersion the diagnosis external 5 code version
-   * @param diagnosisExternal6Code the diagnosis external 6 code
-   * @param diagnosisExternal6CodeVersion the diagnosis external 6 code version
-   * @param diagnosisExternal7Code the diagnosis external 7 code
-   * @param diagnosisExternal7CodeVersion the diagnosis external 7 code version
-   * @param diagnosisExternal8Code the diagnosis external 8 code
-   * @param diagnosisExternal8CodeVersion the diagnosis external 8 code version
-   * @param diagnosisExternal9Code the diagnosis external 9 code
-   * @param diagnosisExternal9CodeVersion the diagnosis external 9 code version
-   * @param diagnosisExternal10Code the diagnosis external 10 code
-   * @param diagnosisExternal10CodeVersion the diagnosis external 10 code version
-   * @param diagnosisExternal11Code the diagnosis external 11 code
-   * @param diagnosisExternal11CodeVersion the diagnosis external 11 code version
-   * @param diagnosisExternal12Code the diagnosis external 12 code
-   * @param diagnosisExternal12CodeVersion the diagnosis external 12 code version
-   * @return the {@link Diagnosis}es that can be extracted from the specified
-   */
-  public static List<Diagnosis> extractExternalDiagnoses1Thru12(
-      Optional<String> diagnosisExternalFirstCode,
-      Optional<Character> diagnosisExternalFirstCodeVersion,
-      Optional<String> diagnosisExternal1Code,
-      Optional<Character> diagnosisExternal1CodeVersion,
-      Optional<String> diagnosisExternal2Code,
-      Optional<Character> diagnosisExternal2CodeVersion,
-      Optional<String> diagnosisExternal3Code,
-      Optional<Character> diagnosisExternal3CodeVersion,
-      Optional<String> diagnosisExternal4Code,
-      Optional<Character> diagnosisExternal4CodeVersion,
-      Optional<String> diagnosisExternal5Code,
-      Optional<Character> diagnosisExternal5CodeVersion,
-      Optional<String> diagnosisExternal6Code,
-      Optional<Character> diagnosisExternal6CodeVersion,
-      Optional<String> diagnosisExternal7Code,
-      Optional<Character> diagnosisExternal7CodeVersion,
-      Optional<String> diagnosisExternal8Code,
-      Optional<Character> diagnosisExternal8CodeVersion,
-      Optional<String> diagnosisExternal9Code,
-      Optional<Character> diagnosisExternal9CodeVersion,
-      Optional<String> diagnosisExternal10Code,
-      Optional<Character> diagnosisExternal10CodeVersion,
-      Optional<String> diagnosisExternal11Code,
-      Optional<Character> diagnosisExternal11CodeVersion,
-      Optional<String> diagnosisExternal12Code,
-      Optional<Character> diagnosisExternal12CodeVersion) {
-    List<Diagnosis> diagnoses = new LinkedList<>();
-
-    /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring
-     * if-blocks.
-     */
-    Consumer<Optional<Diagnosis>> diagnosisAdder =
-        d -> {
-          if (d.isPresent()) diagnoses.add(d.get());
-        };
-
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternalFirstCode,
-            diagnosisExternalFirstCodeVersion,
-            DiagnosisLabel.FIRSTEXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal1Code, diagnosisExternal1CodeVersion, DiagnosisLabel.FIRSTEXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal2Code, diagnosisExternal2CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal3Code, diagnosisExternal3CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal4Code, diagnosisExternal4CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal5Code, diagnosisExternal5CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal6Code, diagnosisExternal6CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal7Code, diagnosisExternal7CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal8Code, diagnosisExternal8CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal9Code, diagnosisExternal9CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal10Code, diagnosisExternal10CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal11Code, diagnosisExternal11CodeVersion, DiagnosisLabel.EXTERNAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisExternal12Code, diagnosisExternal12CodeVersion, DiagnosisLabel.EXTERNAL));
-
-    return diagnoses;
-  }
-
-  /**
-   * Extract the Procedure values for codes 1-25.
-   *
-   * @param procedure1Code through procedure25Code,
-   * @param procedure1CodeVersion through procedure25CodeVersion
-   * @param procedure1Date through procedure25Date
-   * @param procedure2Code the procedure 2 code
-   * @param procedure2CodeVersion the procedure 2 code version
-   * @param procedure2Date the procedure 2 date
-   * @param procedure3Code the procedure 3 code
-   * @param procedure3CodeVersion the procedure 3 code version
-   * @param procedure3Date the procedure 3 date
-   * @param procedure4Code the procedure 4 code
-   * @param procedure4CodeVersion the procedure 4 code version
-   * @param procedure4Date the procedure 4 date
-   * @param procedure5Code the procedure 5 code
-   * @param procedure5CodeVersion the procedure 5 code version
-   * @param procedure5Date the procedure 5 date
-   * @param procedure6Code the procedure 6 code
-   * @param procedure6CodeVersion the procedure 6 code version
-   * @param procedure6Date the procedure 6 date
-   * @param procedure7Code the procedure 7 code
-   * @param procedure7CodeVersion the procedure 7 code version
-   * @param procedure7Date the procedure 7 date
-   * @param procedure8Code the procedure 8 code
-   * @param procedure8CodeVersion the procedure 8 code version
-   * @param procedure8Date the procedure 8 date
-   * @param procedure9Code the procedure 9 code
-   * @param procedure9CodeVersion the procedure 9 code version
-   * @param procedure9Date the procedure 9 date
-   * @param procedure10Code the procedure 10 code
-   * @param procedure10CodeVersion the procedure 10 code version
-   * @param procedure10Date the procedure 10 date
-   * @param procedure11Code the procedure 11 code
-   * @param procedure11CodeVersion the procedure 11 code version
-   * @param procedure11Date the procedure 11 date
-   * @param procedure12Code the procedure 12 code
-   * @param procedure12CodeVersion the procedure 12 code version
-   * @param procedure12Date the procedure 12 date
-   * @param procedure13Code the procedure 13 code
-   * @param procedure13CodeVersion the procedure 13 code version
-   * @param procedure13Date the procedure 13 date
-   * @param procedure14Code the procedure 14 code
-   * @param procedure14CodeVersion the procedure 14 code version
-   * @param procedure14Date the procedure 14 date
-   * @param procedure15Code the procedure 15 code
-   * @param procedure15CodeVersion the procedure 15 code version
-   * @param procedure15Date the procedure 15 date
-   * @param procedure16Code the procedure 16 code
-   * @param procedure16CodeVersion the procedure 16 code version
-   * @param procedure16Date the procedure 16 date
-   * @param procedure17Code the procedure 17 code
-   * @param procedure17CodeVersion the procedure 17 code version
-   * @param procedure17Date the procedure 17 date
-   * @param procedure18Code the procedure 18 code
-   * @param procedure18CodeVersion the procedure 18 code version
-   * @param procedure18Date the procedure 18 date
-   * @param procedure19Code the procedure 19 code
-   * @param procedure19CodeVersion the procedure 19 code version
-   * @param procedure19Date the procedure 19 date
-   * @param procedure20Code the procedure 20 code
-   * @param procedure20CodeVersion the procedure 20 code version
-   * @param procedure20Date the procedure 20 date
-   * @param procedure21Code the procedure 21 code
-   * @param procedure21CodeVersion the procedure 21 code version
-   * @param procedure21Date the procedure 21 date
-   * @param procedure22Code the procedure 22 code
-   * @param procedure22CodeVersion the procedure 22 code version
-   * @param procedure22Date the procedure 22 date
-   * @param procedure23Code the procedure 23 code
-   * @param procedure23CodeVersion the procedure 23 code version
-   * @param procedure23Date the procedure 23 date
-   * @param procedure24Code the procedure 24 code
-   * @param procedure24CodeVersion the procedure 24 code version
-   * @param procedure24Date the procedure 24 date
-   * @param procedure25Code the procedure 25 code
-   * @param procedure25CodeVersion the procedure 25 code version
-   * @param procedure25Date the procedure 25 date
-   * @return the {@link CCWProcedure}es that can be extracted from the specified claim types
+   * @param codes The mapping of procedure codes by their property name and respective value
+   * @param codeVersions The mapping of procedure code versions by their property name and
+   *     respective value
+   * @param dates The mapping of procedure dates by their property name and respective value
+   * @return a list of {@link CCWProcedure}
    */
   public static List<CCWProcedure> extractCCWProcedures(
-      Optional<String> procedure1Code,
-      Optional<Character> procedure1CodeVersion,
-      Optional<LocalDate> procedure1Date,
-      Optional<String> procedure2Code,
-      Optional<Character> procedure2CodeVersion,
-      Optional<LocalDate> procedure2Date,
-      Optional<String> procedure3Code,
-      Optional<Character> procedure3CodeVersion,
-      Optional<LocalDate> procedure3Date,
-      Optional<String> procedure4Code,
-      Optional<Character> procedure4CodeVersion,
-      Optional<LocalDate> procedure4Date,
-      Optional<String> procedure5Code,
-      Optional<Character> procedure5CodeVersion,
-      Optional<LocalDate> procedure5Date,
-      Optional<String> procedure6Code,
-      Optional<Character> procedure6CodeVersion,
-      Optional<LocalDate> procedure6Date,
-      Optional<String> procedure7Code,
-      Optional<Character> procedure7CodeVersion,
-      Optional<LocalDate> procedure7Date,
-      Optional<String> procedure8Code,
-      Optional<Character> procedure8CodeVersion,
-      Optional<LocalDate> procedure8Date,
-      Optional<String> procedure9Code,
-      Optional<Character> procedure9CodeVersion,
-      Optional<LocalDate> procedure9Date,
-      Optional<String> procedure10Code,
-      Optional<Character> procedure10CodeVersion,
-      Optional<LocalDate> procedure10Date,
-      Optional<String> procedure11Code,
-      Optional<Character> procedure11CodeVersion,
-      Optional<LocalDate> procedure11Date,
-      Optional<String> procedure12Code,
-      Optional<Character> procedure12CodeVersion,
-      Optional<LocalDate> procedure12Date,
-      Optional<String> procedure13Code,
-      Optional<Character> procedure13CodeVersion,
-      Optional<LocalDate> procedure13Date,
-      Optional<String> procedure14Code,
-      Optional<Character> procedure14CodeVersion,
-      Optional<LocalDate> procedure14Date,
-      Optional<String> procedure15Code,
-      Optional<Character> procedure15CodeVersion,
-      Optional<LocalDate> procedure15Date,
-      Optional<String> procedure16Code,
-      Optional<Character> procedure16CodeVersion,
-      Optional<LocalDate> procedure16Date,
-      Optional<String> procedure17Code,
-      Optional<Character> procedure17CodeVersion,
-      Optional<LocalDate> procedure17Date,
-      Optional<String> procedure18Code,
-      Optional<Character> procedure18CodeVersion,
-      Optional<LocalDate> procedure18Date,
-      Optional<String> procedure19Code,
-      Optional<Character> procedure19CodeVersion,
-      Optional<LocalDate> procedure19Date,
-      Optional<String> procedure20Code,
-      Optional<Character> procedure20CodeVersion,
-      Optional<LocalDate> procedure20Date,
-      Optional<String> procedure21Code,
-      Optional<Character> procedure21CodeVersion,
-      Optional<LocalDate> procedure21Date,
-      Optional<String> procedure22Code,
-      Optional<Character> procedure22CodeVersion,
-      Optional<LocalDate> procedure22Date,
-      Optional<String> procedure23Code,
-      Optional<Character> procedure23CodeVersion,
-      Optional<LocalDate> procedure23Date,
-      Optional<String> procedure24Code,
-      Optional<Character> procedure24CodeVersion,
-      Optional<LocalDate> procedure24Date,
-      Optional<String> procedure25Code,
-      Optional<Character> procedure25CodeVersion,
-      Optional<LocalDate> procedure25Date) {
-
-    List<CCWProcedure> ccwProcedures = new LinkedList<>();
-
-    /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring
-     * if-blocks.
-     */
-    Consumer<Optional<CCWProcedure>> ccwProcedureAdder =
-        p -> {
-          if (p.isPresent()) ccwProcedures.add(p.get());
-        };
-
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure1Code, procedure1CodeVersion, procedure1Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure2Code, procedure2CodeVersion, procedure2Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure3Code, procedure3CodeVersion, procedure3Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure4Code, procedure4CodeVersion, procedure4Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure5Code, procedure5CodeVersion, procedure5Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure6Code, procedure6CodeVersion, procedure6Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure7Code, procedure7CodeVersion, procedure7Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure8Code, procedure8CodeVersion, procedure8Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure9Code, procedure9CodeVersion, procedure9Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure10Code, procedure10CodeVersion, procedure10Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure11Code, procedure11CodeVersion, procedure11Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure12Code, procedure12CodeVersion, procedure12Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure13Code, procedure13CodeVersion, procedure13Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure14Code, procedure14CodeVersion, procedure14Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure15Code, procedure15CodeVersion, procedure15Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure16Code, procedure16CodeVersion, procedure16Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure17Code, procedure17CodeVersion, procedure17Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure18Code, procedure18CodeVersion, procedure18Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure19Code, procedure19CodeVersion, procedure19Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure20Code, procedure20CodeVersion, procedure20Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure21Code, procedure21CodeVersion, procedure21Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure22Code, procedure22CodeVersion, procedure22Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure23Code, procedure23CodeVersion, procedure23Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure24Code, procedure24CodeVersion, procedure24Date));
-    ccwProcedureAdder.accept(
-        CCWProcedure.from(procedure25Code, procedure25CodeVersion, procedure25Date));
-
-    return ccwProcedures;
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<LocalDate>> dates) {
+    // Handle Procedures
+    // ICD_PRCDR_CD(1-25) => ExplanationOfBenefit.procedure.procedureCodableConcept
+    // ICD_PRCDR_VRSN_CD(1-25) =>
+    // ExplanationOfBenefit.procedure.procedureCodableConcept
+    // PRCDR_DT(1-25) => ExplanationOfBenefit.procedure.date
+    final int FIRST_PROCEDURE = 1;
+    final int LAST_PROCEDURE = 25;
+    return IntStream.range(FIRST_PROCEDURE, LAST_PROCEDURE + 1)
+        .mapToObj(i -> TransformerUtils.extractCCWProcedure(i, codes, codeVersions, dates))
+        .filter(p -> p.isPresent())
+        .map(p -> p.get())
+        .toList();
   }
 
   /**
@@ -3748,30 +3260,6 @@ public final class TransformerUtils {
       // Remove _count parameter from the current request details
       requestDetails.setParameters(params);
     }
-  }
-
-  /**
-   * Adds the principal diagnosis labels.
-   *
-   * @param diagnoses the diagnoses to add to
-   * @return the list of updated diagnosis
-   */
-  public static Consumer<Optional<Diagnosis>> addPrincipalDiagnosis(List<Diagnosis> diagnoses) {
-    return diagnosisToAdd -> {
-      if (diagnosisToAdd.isPresent()) {
-        Optional<Diagnosis> matchingDiagnosis =
-            diagnoses.stream()
-                .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
-                .findFirst();
-        if (matchingDiagnosis.isPresent()) {
-          // append labels
-          matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
-          diagnoses.add(matchingDiagnosis.get());
-        } else {
-          diagnoses.add(diagnosisToAdd.get());
-        }
-      }
-    };
   }
 
   /**

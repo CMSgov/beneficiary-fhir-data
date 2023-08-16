@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
@@ -19,6 +18,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
@@ -87,15 +87,15 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_NONCLINICIAN_PROFILE_URL);
 
     // Common group level fields between all claim types
-    // Claim Type + Claim ID    => ExplanationOfBenefit.id
-    // CLM_ID                   => ExplanationOfBenefit.identifier
-    // CLM_GRP_ID               => ExplanationOfBenefit.identifier
-    // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage
-    // BENE_ID                  => ExplanationOfBenefit.patient (reference)
-    // FINAL_ACTION             => ExplanationOfBenefit.status
-    // CLM_FROM_DT              => ExplanationOfBenefit.billablePeriod.start
-    // CLM_THRU_DT              => ExplanationOfBenefit.billablePeriod.end
-    // CLM_PMT_AMT              => ExplanationOfBenefit.payment.amount
+    // Claim Type + Claim ID => ExplanationOfBenefit.id
+    // CLM_ID => ExplanationOfBenefit.identifier
+    // CLM_GRP_ID => ExplanationOfBenefit.identifier
+    // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage
+    // BENE_ID => ExplanationOfBenefit.patient (reference)
+    // FINAL_ACTION => ExplanationOfBenefit.status
+    // CLM_FROM_DT => ExplanationOfBenefit.billablePeriod.start
+    // CLM_THRU_DT => ExplanationOfBenefit.billablePeriod.end
+    // CLM_PMT_AMT => ExplanationOfBenefit.payment.amount
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
         eob,
         claimGroup.getClaimId(),
@@ -117,9 +117,9 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             Optional.of(claimGroup.getWeeklyProcessDate())));
 
     // map eob type codes into FHIR
-    // NCH_CLM_TYPE_CD            => ExplanationOfBenefit.type.coding
-    // EOB Type                   => ExplanationOfBenefit.type.coding
-    // Claim Type                 => ExplanationOfBenefit.type.coding
+    // NCH_CLM_TYPE_CD => ExplanationOfBenefit.type.coding
+    // EOB Type => ExplanationOfBenefit.type.coding
+    // Claim Type => ExplanationOfBenefit.type.coding
     // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
@@ -135,20 +135,20 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getLastUpdated());
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
-    // ORG_NPI_NUM              => ExplanationOfBenefit.provider
-    // ORG NPI NUM Display      => ExplanationOfBenefit.organization.display
-    // CLM_FAC_TYPE_CD          => ExplanationOfBenefit.facility.extension
-    // CLM_FREQ_CD              => ExplanationOfBenefit.supportingInfo
-    // CLM_MDCR_NON_PMT_RSN_CD  => ExplanationOfBenefit.extension
-    // PTNT_DSCHRG_STUS_CD      => ExplanationOfBenefit.supportingInfo
+    // ORG_NPI_NUM => ExplanationOfBenefit.provider
+    // ORG NPI NUM Display => ExplanationOfBenefit.organization.display
+    // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
+    // CLM_FREQ_CD => ExplanationOfBenefit.supportingInfo
+    // CLM_MDCR_NON_PMT_RSN_CD => ExplanationOfBenefit.extension
+    // PTNT_DSCHRG_STUS_CD => ExplanationOfBenefit.supportingInfo
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
-    // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
-    // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
+    // NCH_PRMRY_PYR_CD => ExplanationOfBenefit.supportingInfo
+    // CLM_TOT_CHRG_AMT => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
-    // FI_DOC_CLM_CNTL_NUM      => ExplanationOfBenefit.extension
-    // FI_CLM_PROC_DT           => ExplanationOfBenefit.extension
+    // FI_DOC_CLM_CNTL_NUM => ExplanationOfBenefit.extension
+    // FI_CLM_PROC_DT => ExplanationOfBenefit.extension
     // C4BBInstutionalClaimSubtypes.Inpatient for HHA Claims
-    // CLAIM_QUERY_CODE         => ExplanationOfBenefit.billablePeriod.extension
+    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -176,21 +176,22 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getProspectivePaymentCode());
 
     // Handle Diagnosis
-    // PRNCPAL_DGNS_CD          => diagnosis.diagnosisCodeableConcept
-    // PRNCPAL_DGNS_VRSN_CD     => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD(1-25)        => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_VRSN_CD(1-25)   => diagnosis.diagnosisCodeableConcept
-    // FST_DGNS_E_CD            => diagnosis.diagnosisCodeableConcept
-    // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
+    // PRNCPAL_DGNS_CD => diagnosis.diagnosisCodeableConcept
+    // PRNCPAL_DGNS_VRSN_CD => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_CD(1-25) => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_VRSN_CD(1-25) => diagnosis.diagnosisCodeableConcept
+    // FST_DGNS_E_CD => diagnosis.diagnosisCodeableConcept
+    // FST_DGNS_E_VRSN_CD => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_E_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
-      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.HHA);
-    }
+    DiagnosisUtilV2.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
+        .stream()
+        .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.HHA));
 
     // Map care team
-    // AT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider
-    // AT_PHYSN_UPIN    => ExplanationOfBenefit.careTeam.provider
+    // AT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
+    // AT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
@@ -242,9 +243,9 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
 
-      // HCPCS_CD           => ExplanationOfBenefit.item.productOrService
-      // HCPCS_1ST_MDFR_CD  => ExplanationOfBenefit.item.modifier
-      // HCPCS_2ND_MDFR_CD  => ExplanationOfBenefit.item.modifier
+      // HCPCS_CD => ExplanationOfBenefit.item.productOrService
+      // HCPCS_1ST_MDFR_CD => ExplanationOfBenefit.item.modifier
+      // HCPCS_2ND_MDFR_CD => ExplanationOfBenefit.item.modifier
       TransformerUtilsV2.mapHcpcs(
           eob,
           item,
@@ -258,13 +259,13 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           TransformerUtilsV2.createAdjudicationDenialReasonSlice(
               eob, CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD, line.getRevCntr1stAnsiCd()));
 
-      // REV_CNTR                   => ExplanationOfBenefit.item.revenue
-      // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
-      // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
-      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.extension.valueQuantity
+      // REV_CNTR => ExplanationOfBenefit.item.revenue
+      // REV_CNTR_RATE_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_TOT_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NCVRD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
+      // REV_CNTR_NDC_QTY_QLFR_CD => ExplanationOfBenefit.modifier
+      // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.extension.valueQuantity
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
           eob,
@@ -277,8 +278,8 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           line.getUnitCount());
 
       // Common item level fields between Outpatient, HHA and Hospice
-      // REV_CNTR_DT              => ExplanationOfBenefit.item.servicedDate
-      // REV_CNTR_PMT_AMT_AMT     => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_DT => ExplanationOfBenefit.item.servicedDate
+      // REV_CNTR_PMT_AMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.mapEobCommonItemRevenueOutHHAHospice(
           item, line.getRevenueCenterDate(), line.getPaymentAmount());
 

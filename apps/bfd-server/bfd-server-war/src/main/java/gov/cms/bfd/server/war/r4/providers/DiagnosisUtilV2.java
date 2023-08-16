@@ -6,7 +6,6 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.IcdCode;
-import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInpatientInstitutionalDiagnosisType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimOutpatientInstitutionalDiagnosisType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianDiagnosisType;
@@ -179,86 +178,141 @@ public class DiagnosisUtilV2 {
    * @param substitution The methods to retrive diagnosis information all follow a similar pattern.
    *     This value is used to substitute into that pattern when looking up the specific method to
    *     retrive information with.
-   * @param claim Passed as an Object because there is no top level `Claim` class that claims derive
-   *     from
+   * @param codes The mapping of diagnosis codes by their property name and respective value
+   * @param codeVersions The mapping of diagnosis code versions by their property name and
+   *     respective value
+   * @param presentOnAdms The mapping of diagnosis "PresentOnAdmissionCode" codes by their property
+   *     name and respective value
    * @param ccw CCW Codebook value that represents which "PresentOnAdmissionCode" is being used.
    *     Example: {@link CcwCodebookVariable#CLM_POA_IND_SW5}
    * @param label One or more labels to use when mapping the diagnosis.
    * @return a {@link Diagnosis} or {@link Optional#empty()}
    */
   public static Optional<Diagnosis> extractDiagnosis(
-      String substitution, Object claim, Optional<CcwCodebookInterface> ccw, DiagnosisLabel label) {
-
+      String substitution,
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<Character>> presentOnAdms,
+      Optional<CcwCodebookInterface> ccw,
+      DiagnosisLabel label) {
     Optional<String> code =
-        ReflectionUtils.tryMethod(claim, String.format("getDiagnosis%sCode", substitution));
+        codes.getOrDefault(String.format("diagnosis%sCode", substitution), Optional.empty());
     Optional<Character> codeVersion =
-        ReflectionUtils.tryMethod(claim, String.format("getDiagnosis%sCodeVersion", substitution));
+        codeVersions.getOrDefault(
+            String.format("diagnosis%sCodeVersion", substitution), Optional.empty());
     Optional<Character> presentOnAdm =
-        ReflectionUtils.tryMethod(
-            claim, String.format("getDiagnosis%sPresentOnAdmissionCode", substitution));
-
+        presentOnAdms.getOrDefault(
+            String.format("diagnosis%sPresentOnAdmissionCode", substitution), Optional.empty());
     return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label);
   }
 
   /**
-   * Extracts nearly all diagnosis types from a Claim. It does this with reflection, so if the
-   * specific claim type doesn't have the given diagnosis it will just be skipped.
+   * Extracts nearly all diagnosis types from a Claim. If the specific claim type doesn't have the
+   * given diagnosis it will just be skipped.
    *
-   * @param claim the Claim to extract the {@link Diagnosis}es from
+   * @param codes The mapping of diagnosis codes by their property name and respective value
+   * @param codeVersions The mapping of diagnosis code versions by their property name and
+   *     respective value
+   * @param presentOnAdms The mapping of diagnosis "PresentOnAdmissionCode" codes by their property
+   *     name and respective value
    * @return the {@link Diagnosis} that can be extracted from the specified {@link
    *     gov.cms.bfd.model.rif.InpatientClaim}
    */
-  static List<Diagnosis> extractDiagnoses(Object claim) {
+  static List<Diagnosis> extractDiagnoses(
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<Character>> presentOnAdms) {
     List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
 
     // Handle the "special" diagnosis fields
-    diagnosis.add(extractDiagnosis("Admitting", claim, Optional.empty(), DiagnosisLabel.ADMITTING));
+    diagnosis.add(
+        extractDiagnosis(
+            "Admitting",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            DiagnosisLabel.ADMITTING));
     diagnosis.add(
         extractDiagnosis(
             "1",
-            claim,
+            codes,
+            codeVersions,
+            presentOnAdms,
             Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
             DiagnosisLabel.PRINCIPAL));
-    diagnosis.add(extractDiagnosis("Principal", claim, Optional.empty(), DiagnosisLabel.PRINCIPAL));
+    diagnosis.add(
+        extractDiagnosis(
+            "Principal",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            DiagnosisLabel.PRINCIPAL));
 
     // Generically handle the rest (2-25)
     final int FIRST_DIAG = 2;
     final int LAST_DIAG = 25;
-
     IntStream.range(FIRST_DIAG, LAST_DIAG + 1)
         .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  String.valueOf(i),
-                  claim,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
-                  DiagnosisLabel.OTHER);
-            })
+            i ->
+                extractDiagnosis(
+                    String.valueOf(i),
+                    codes,
+                    codeVersions,
+                    presentOnAdms,
+                    Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)),
+                    DiagnosisLabel.OTHER))
         .forEach(diagnosis::add);
 
     // Handle first external diagnosis
     diagnosis.add(
         extractDiagnosis(
             "External1",
-            claim,
+            codes,
+            codeVersions,
+            presentOnAdms,
             Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
             DiagnosisLabel.FIRSTEXTERNAL));
     diagnosis.add(
-        extractDiagnosis("ExternalFirst", claim, Optional.empty(), DiagnosisLabel.FIRSTEXTERNAL));
+        extractDiagnosis(
+            "ExternalFirst",
+            codes,
+            codeVersions,
+            presentOnAdms,
+            Optional.empty(),
+            DiagnosisLabel.FIRSTEXTERNAL));
 
     // Generically handle the rest (2-12)
     final int FIRST_EX_DIAG = 2;
     final int LAST_EX_DIAG = 12;
-
     IntStream.range(FIRST_EX_DIAG, LAST_EX_DIAG + 1)
         .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  "External" + String.valueOf(i),
-                  claim,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)),
-                  DiagnosisLabel.EXTERNAL);
-            })
+            i ->
+                extractDiagnosis(
+                    "External" + String.valueOf(i),
+                    codes,
+                    codeVersions,
+                    presentOnAdms,
+                    Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)),
+                    DiagnosisLabel.EXTERNAL))
+        .forEach(diagnosis::add);
+
+    // Handle Inpatient Diagnosis.
+    // RSN_VISIT_CD(1-3)        => diagnosis.diagnosisCodeableConcept
+    // RSN_VISIT_VRSN_CD(1-3)   => diagnosis.diagnosisCodeableConcept
+    final int FIRST_INPATIENT_DIAGNOSIS = 1;
+    final int LAST_INPATIENT_DIAGNOSIS = 3;
+    IntStream.range(FIRST_INPATIENT_DIAGNOSIS, LAST_INPATIENT_DIAGNOSIS + 1)
+        .mapToObj(
+            i ->
+                extractDiagnosis(
+                    String.format("Admission%d", i),
+                    codes,
+                    codeVersions,
+                    Map.of(),
+                    Optional.empty(),
+                    DiagnosisLabel.REASONFORVISIT))
         .forEach(diagnosis::add);
 
     // Some may be empty.  Convert from List<Optional<Diagnosis>> to List<Diagnosis>

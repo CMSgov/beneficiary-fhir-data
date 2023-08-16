@@ -13,8 +13,6 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
@@ -23,8 +21,8 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.springframework.stereotype.Component;
@@ -247,47 +245,19 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     // FST_DGNS_E_VRSN_CD => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
-      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.OUTPATIENT);
-    }
-
-    // Handle Inpatient Diagnosis. Only three, so just brute force it
-    // RSN_VISIT_CD1 => diagnosis.diagnosisCodeableConcept
-    // RSN_VISIT_VRSN_CD1 => diagnosis.diagnosisCodeableConcept
-    DiagnosisUtilV2.addDiagnosisCode(
-        eob,
-        DiagnosisUtilV2.extractDiagnosis(
-            "Admission1", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
-        ClaimType.OUTPATIENT);
-
-    // RSN_VISIT_CD2 => diagnosis.diagnosisCodeableConcept
-    // RSN_VISIT_VRSN_CD2 => diagnosis.diagnosisCodeableConcept
-    DiagnosisUtilV2.addDiagnosisCode(
-        eob,
-        DiagnosisUtilV2.extractDiagnosis(
-            "Admission2", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
-        ClaimType.OUTPATIENT);
-
-    // RSN_VISIT_CD3 => diagnosis.diagnosisCodeableConcept
-    // RSN_VISIT_VRSN_CD3 => diagnosis.diagnosisCodeableConcept
-    DiagnosisUtilV2.addDiagnosisCode(
-        eob,
-        DiagnosisUtilV2.extractDiagnosis(
-            "Admission3", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
-        ClaimType.OUTPATIENT);
+    DiagnosisUtilV2.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
+        .stream()
+        .forEach(
+            diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.OUTPATIENT));
 
     // Handle Procedures
-    // ICD_PRCDR_CD(1-25) => ExplanationOfBenefit.procedure.procedureCodableConcept
-    // ICD_PRCDR_VRSN_CD(1-25) =>
-    // ExplanationOfBenefit.procedure.procedureCodableConcept
-    // PRCDR_DT(1-25) => ExplanationOfBenefit.procedure.date
-    final int FIRST_PROCEDURE = 1;
-    final int LAST_PROCEDURE = 25;
-
-    IntStream.range(FIRST_PROCEDURE, LAST_PROCEDURE + 1)
-        .mapToObj(i -> TransformerUtilsV2.extractCCWProcedure(i, claimGroup))
-        .filter(p -> p.isPresent())
-        .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p.get()));
+    TransformerUtilsV2.extractCCWProcedures(
+            claimGroup.getProcedureCodes(),
+            claimGroup.getProcedureCodeVersions(),
+            claimGroup.getProcedureDates())
+        .stream()
+        .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     // ClaimLine => ExplanationOfBenefit.item
     for (OutpatientClaimLine line : claimGroup.getLines()) {

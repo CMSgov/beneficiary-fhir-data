@@ -10,12 +10,12 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -129,35 +129,10 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
         claimGroup.getClaimDispositionCode(),
         claimGroup.getClaimCarrierControlNumber());
 
-    for (Diagnosis diagnosis :
-        TransformerUtils.extractDiagnoses1Thru12(
-            claimGroup.getDiagnosisPrincipalCode(),
-            claimGroup.getDiagnosisPrincipalCodeVersion(),
-            claimGroup.getDiagnosis1Code(),
-            claimGroup.getDiagnosis1CodeVersion(),
-            claimGroup.getDiagnosis2Code(),
-            claimGroup.getDiagnosis2CodeVersion(),
-            claimGroup.getDiagnosis3Code(),
-            claimGroup.getDiagnosis3CodeVersion(),
-            claimGroup.getDiagnosis4Code(),
-            claimGroup.getDiagnosis4CodeVersion(),
-            claimGroup.getDiagnosis5Code(),
-            claimGroup.getDiagnosis5CodeVersion(),
-            claimGroup.getDiagnosis6Code(),
-            claimGroup.getDiagnosis6CodeVersion(),
-            claimGroup.getDiagnosis7Code(),
-            claimGroup.getDiagnosis7CodeVersion(),
-            claimGroup.getDiagnosis8Code(),
-            claimGroup.getDiagnosis8CodeVersion(),
-            claimGroup.getDiagnosis9Code(),
-            claimGroup.getDiagnosis9CodeVersion(),
-            claimGroup.getDiagnosis10Code(),
-            claimGroup.getDiagnosis10CodeVersion(),
-            claimGroup.getDiagnosis11Code(),
-            claimGroup.getDiagnosis11CodeVersion(),
-            claimGroup.getDiagnosis12Code(),
-            claimGroup.getDiagnosis12CodeVersion()))
-      TransformerUtils.addDiagnosisCode(eob, diagnosis);
+    TransformerUtils.extractDiagnoses(
+            claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
+        .stream()
+        .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     for (DMEClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();

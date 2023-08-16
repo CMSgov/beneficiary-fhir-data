@@ -47,7 +47,6 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RaceCategory;
-import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
@@ -85,6 +84,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
@@ -3663,20 +3663,52 @@ public final class TransformerUtilsV2 {
    * Generically attempts to retrieve a procedure from the current claim.
    *
    * @param procedure Procedure accessors all follow the same pattern except for an integer
-   *     difference. This value is used as a subtitution when looking up the method name.
-   * @param claim Passed as an Object because there is no top level `Claim` class that claims derive
-   *     from
+   *     difference. This value is used as a substitution when looking up the method name.
+   * @param codes The mapping of procedure codes by their property name and respective value
+   * @param codeVersions The mapping of procedure code versions by their property name and
+   *     respective value
+   * @param dates The mapping of procedure dates by their property name and respective value
    * @return a {@link CCWProcedure} or {@link Optional#empty()}
    */
-  public static Optional<CCWProcedure> extractCCWProcedure(int procedure, Object claim) {
+  public static Optional<CCWProcedure> extractCCWProcedure(
+      int procedure,
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<LocalDate>> dates) {
     Optional<String> code =
-        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dCode", procedure));
+        codes.getOrDefault(String.format("procedure%dCode", procedure), Optional.empty());
     Optional<Character> codeVersion =
-        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dCodeVersion", procedure));
+        codeVersions.getOrDefault(
+            String.format("procedure%dCodeVersion", procedure), Optional.empty());
     Optional<LocalDate> date =
-        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dDate", procedure));
-
+        dates.getOrDefault(String.format("procedure%dDate", procedure), Optional.empty());
     return CCWProcedure.from(code, codeVersion, date);
+  }
+
+  /**
+   * Generically attempts to retrieve the procedures from the current claim.
+   *
+   * @param codes The mapping of procedure codes by their property name and respective value
+   * @param codeVersions The mapping of procedure code versions by their property name and
+   *     respective value
+   * @param dates The mapping of procedure dates by their property name and respective value
+   * @return a list of {@link CCWProcedure}
+   */
+  public static List<CCWProcedure> extractCCWProcedures(
+      Map<String, Optional<String>> codes,
+      Map<String, Optional<Character>> codeVersions,
+      Map<String, Optional<LocalDate>> dates) {
+    // Handle Procedures
+    // ICD_PRCDR_CD(1-25)        => ExplanationOfBenefit.procedure.procedureCodableConcept
+    // ICD_PRCDR_VRSN_CD(1-25)   => ExplanationOfBenefit.procedure.procedureCodableConcept
+    // PRCDR_DT(1-25)            => ExplanationOfBenefit.procedure.date
+    final int FIRST_PROCEDURE = 1;
+    final int LAST_PROCEDURE = 25;
+    return IntStream.range(FIRST_PROCEDURE, LAST_PROCEDURE + 1)
+        .mapToObj(i -> TransformerUtilsV2.extractCCWProcedure(i, codes, codeVersions, dates))
+        .filter(p -> p.isPresent())
+        .map(p -> p.get())
+        .toList();
   }
 
   /**

@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -69,27 +70,27 @@ public final class RifFilesProcessorTest {
     assertEquals("123", beneRow.getCountyCode());
     assertEquals("12345", beneRow.getPostalCode());
     assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.getBirthDate());
-    assertEquals(('1'), beneRow.getSex());
-    assertEquals(Character.valueOf('1'), beneRow.getRace().get());
-    assertEquals(Character.valueOf('1'), beneRow.getEntitlementCodeOriginal().get());
-    assertEquals(Character.valueOf('1'), beneRow.getEntitlementCodeCurrent().get());
-    assertEquals(Character.valueOf('N'), beneRow.getEndStageRenalDiseaseCode().get());
+    assertEquals('1', beneRow.getSex());
+    assertEquals('1', beneRow.getRace().get());
+    assertEquals('1', beneRow.getEntitlementCodeOriginal().get());
+    assertEquals('1', beneRow.getEntitlementCodeCurrent().get());
+    assertEquals('N', beneRow.getEndStageRenalDiseaseCode().get());
     assertEquals(new String("20"), beneRow.getMedicareEnrollmentStatusCode().get());
-    assertEquals(Character.valueOf('0'), beneRow.getPartBTerminationCode().get());
-    assertEquals(Character.valueOf('0'), beneRow.getPartBTerminationCode().get());
+    assertEquals('0', beneRow.getPartBTerminationCode().get());
+    assertEquals('0', beneRow.getPartBTerminationCode().get());
     assertEquals("543217066U", beneRow.getHicnUnhashed().orElse(null));
     assertEquals("Doe", beneRow.getNameSurname());
     assertEquals("John", beneRow.getNameGiven());
-    assertEquals(Character.valueOf('A'), beneRow.getNameMiddleInitial().get());
+    assertEquals('A', beneRow.getNameMiddleInitial().get());
 
     assertEquals("3456789", beneRow.getMedicareBeneficiaryId().get());
     assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.getBeneficiaryDateOfDeath().get());
     assertEquals(
         LocalDate.of(1963, Month.OCTOBER, 3), beneRow.getMedicareCoverageStartDate().get());
-    assertEquals(Character.valueOf('1'), beneRow.getHmoIndicatorAprInd().get());
+    assertEquals('1', beneRow.getHmoIndicatorAprInd().get());
     assertEquals(new BigDecimal(5), beneRow.getPartDMonthsCount().get());
     assertEquals("00", beneRow.getPartDLowIncomeCostShareGroupFebCode().get());
-    assertEquals(Character.valueOf('N'), beneRow.getPartDRetireeDrugSubsidyDecInd().get());
+    assertEquals('N', beneRow.getPartDRetireeDrugSubsidyDecInd().get());
     assertEquals("204 SOUTH ST", beneRow.getDerivedMailingAddress1().get());
     assertEquals("7560 123TH ST", beneRow.getDerivedMailingAddress2().get());
     assertEquals("SURREY", beneRow.getDerivedMailingAddress3().get());
@@ -161,7 +162,7 @@ public final class RifFilesProcessorTest {
     assertEquals(RecordAction.INSERT, rifRecordEvent0.getRecordAction());
     assertEquals(567834L, beneficiaryHistory0.getBeneficiaryId());
     assertEquals(LocalDate.of(1979, Month.MARCH, 17), beneficiaryHistory0.getBirthDate());
-    assertEquals(('2'), beneficiaryHistory0.getSex());
+    assertEquals('2', beneficiaryHistory0.getSex());
     assertEquals("543217066Z", beneficiaryHistory0.getHicn());
     assertEquals(Optional.of("3456689"), beneficiaryHistory0.getMedicareBeneficiaryId());
     assertEquals(
@@ -183,7 +184,7 @@ public final class RifFilesProcessorTest {
       assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
       assertEquals(567834L, beneficiaryHistory.getBeneficiaryId());
       assertEquals(LocalDate.of(1980, Month.MARCH, 17), beneficiaryHistory.getBirthDate());
-      assertEquals(('1'), beneficiaryHistory.getSex());
+      assertEquals('1', beneficiaryHistory.getSex());
       assertEquals("543217066T", beneficiaryHistory.getHicn());
       assertEquals(Optional.of("3456789"), beneficiaryHistory.getMedicareBeneficiaryId());
       assertEquals(
@@ -236,12 +237,12 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal(60), pdeRow.getQuantityDispensed());
     assertEquals(new BigDecimal(30), pdeRow.getDaysSupply());
     assertEquals(new BigDecimal(3), pdeRow.getFillNumber());
-    assertEquals(Character.valueOf('P'), pdeRow.getDispensingStatusCode().get());
+    assertEquals('P', pdeRow.getDispensingStatusCode().get());
     assertEquals('C', pdeRow.getDrugCoverageStatusCode());
-    assertEquals(Character.valueOf('A'), pdeRow.getAdjustmentDeletionCode().get());
-    assertEquals(Character.valueOf('X'), pdeRow.getNonstandardFormatCode().get());
-    assertEquals(Character.valueOf('M'), pdeRow.getPricingExceptionCode().get());
-    assertEquals(Character.valueOf('C'), pdeRow.getCatastrophicCoverageCode().get());
+    assertEquals('A', pdeRow.getAdjustmentDeletionCode().get());
+    assertEquals('X', pdeRow.getNonstandardFormatCode().get());
+    assertEquals('M', pdeRow.getPricingExceptionCode().get());
+    assertEquals('C', pdeRow.getCatastrophicCoverageCode().get());
     assertEquals(new BigDecimal("995.34"), pdeRow.getGrossCostBelowOutOfPocketThreshold());
     assertEquals(new BigDecimal("15.25"), pdeRow.getGrossCostAboveOutOfPocketThreshold());
     assertEquals(new BigDecimal("235.85"), pdeRow.getPatientPaidAmount());
@@ -251,9 +252,9 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("126.99"), pdeRow.getPartDPlanCoveredPaidAmount());
     assertEquals(new BigDecimal("17.98"), pdeRow.getPartDPlanNonCoveredPaidAmount());
     assertEquals(new BigDecimal("550.00"), pdeRow.getTotalPrescriptionCost());
-    assertEquals(Character.valueOf('3'), pdeRow.getPrescriptionOriginationCode().get());
+    assertEquals('3', pdeRow.getPrescriptionOriginationCode().get());
     assertEquals(new BigDecimal("317.22"), pdeRow.getGapDiscountAmount());
-    assertEquals(Character.valueOf('G'), pdeRow.getBrandGenericCode().get());
+    assertEquals('G', pdeRow.getBrandGenericCode().get());
     assertEquals("01", pdeRow.getPharmacyTypeCode());
     assertEquals("02", pdeRow.getPatientResidenceCode());
     assertEquals("08", pdeRow.getSubmissionClarificationCode().get());
@@ -301,29 +302,61 @@ public final class RifFilesProcessorTest {
     assertEquals(BigDecimal.ZERO, claimGroup.getPrimaryPayerPaidAmount());
     assertEquals("1234534", claimGroup.getReferringPhysicianUpin().get());
     assertEquals("8765676", claimGroup.getReferringPhysicianNpi().get());
-    assertEquals(Character.valueOf('A'), claimGroup.getProviderAssignmentIndicator().get());
+    assertEquals('A', claimGroup.getProviderAssignmentIndicator().get());
     assertEquals(new BigDecimal("123.45"), claimGroup.getProviderPaymentAmount());
     assertEquals(new BigDecimal("888.00"), claimGroup.getBeneficiaryPaymentAmount());
     assertEquals(new BigDecimal("245.04"), claimGroup.getSubmittedChargeAmount());
     assertEquals(new BigDecimal("166.23"), claimGroup.getAllowedChargeAmount());
     assertEquals(new BigDecimal("777.00"), claimGroup.getBeneficiaryPartBDeductAmount());
-    assertEquals(Character.valueOf('5'), claimGroup.getHcpcsYearCode().get());
+    assertEquals('5', claimGroup.getHcpcsYearCode().get());
     assertEquals("K25852", claimGroup.getReferringProviderIdNumber());
     assertEquals("A02", claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals('0', claimGroup.getDiagnosisPrincipalCodeVersion().get());
     assertEquals("A02", claimGroup.getDiagnosis1Code().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get());
     assertEquals("A06", claimGroup.getDiagnosis2Code().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosis2CodeVersion().get());
+    assertEquals('0', claimGroup.getDiagnosis2CodeVersion().get());
     assertEquals("B04", claimGroup.getDiagnosis3Code().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosis3CodeVersion().get());
+    assertEquals('0', claimGroup.getDiagnosis3CodeVersion().get());
     assertEquals("B05", claimGroup.getDiagnosis4Code().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosis4CodeVersion().get());
+    assertEquals('0', claimGroup.getDiagnosis4CodeVersion().get());
     assertFalse(claimGroup.getDiagnosis5Code().isPresent());
     assertFalse(claimGroup.getDiagnosis5CodeVersion().isPresent());
     assertEquals(1, claimGroup.getLines().size());
     assertEquals("0", claimGroup.getClinicalTrialNumber().get());
     assertEquals("74655592568216", claimGroup.getClaimCarrierControlNumber().get());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+
+    // Test that there aren't any additional codes not included in the group
+    assertThrows(
+        NoSuchMethodException.class, () -> CarrierClaim.class.getMethod("getDiagnosis13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> CarrierClaim.class.getMethod("getDiagnosis13CodeVersion"));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
 
     // Verify one of the claim lines.
     CarrierClaimLine claimLine = claimGroup.getLines().get(0);
@@ -337,7 +370,7 @@ public final class RifFilesProcessorTest {
     assertEquals("IL", claimLine.getProviderStateCode().get());
     assertEquals("555558202", claimLine.getProviderZipCode().get());
     assertEquals("41", claimLine.getProviderSpecialityCode().get());
-    assertEquals(Character.valueOf('1'), claimLine.getProviderParticipatingIndCode().get());
+    assertEquals('1', claimLine.getProviderParticipatingIndCode().get());
     assertEquals('0', claimLine.getReducedPaymentPhysicianAsstCode());
     assertEquals(new BigDecimal("1.0"), claimLine.getServiceCount());
     assertEquals('1', claimLine.getCmsServiceTypeCode());
@@ -359,12 +392,12 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("75"), claimLine.getSubmittedChargeAmount());
     assertEquals(new BigDecimal("47.84"), claimLine.getAllowedChargeAmount());
     assertEquals("A", claimLine.getProcessingIndicatorCode().get());
-    assertEquals(Character.valueOf('0'), claimLine.getPaymentCode().get());
-    assertEquals(Character.valueOf('0'), claimLine.getServiceDeductibleCode().get());
+    assertEquals('0', claimLine.getPaymentCode().get());
+    assertEquals('0', claimLine.getServiceDeductibleCode().get());
     assertEquals(new BigDecimal("1"), claimLine.getMtusCount());
-    assertEquals(Character.valueOf('3'), claimLine.getMtusCode().get());
+    assertEquals('3', claimLine.getMtusCode().get());
     assertEquals("A52", claimLine.getDiagnosisCode().get());
-    assertEquals(Character.valueOf('0'), claimLine.getDiagnosisCodeVersion().get());
+    assertEquals('0', claimLine.getDiagnosisCodeVersion().get());
     assertFalse(claimLine.getHpsaScarcityCode().isPresent());
     assertFalse(claimLine.getRxNumber().isPresent());
     assertEquals(new BigDecimal("42.0"), claimLine.getHctHgbTestResult());
@@ -422,7 +455,7 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("84999.37"), claimGroup.getTotalChargeAmount());
     assertEquals(LocalDate.of(2016, 1, 15), claimGroup.getClaimAdmissionDate().get());
     assertEquals('1', claimGroup.getAdmissionTypeCd());
-    assertEquals(Character.valueOf('4'), claimGroup.getSourceAdmissionCd().get());
+    assertEquals('4', claimGroup.getSourceAdmissionCd().get());
     assertEquals(new BigDecimal("10.00"), claimGroup.getPassThruPerDiemAmount());
     assertEquals(new BigDecimal("112.00"), claimGroup.getDeductibleAmount());
     assertEquals(new BigDecimal("5.00"), claimGroup.getPartACoinsuranceLiabilityAmount());
@@ -445,17 +478,17 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("23.99"), claimGroup.getDrgOutlierApprovedPaymentAmount().get());
 
     assertEquals("A37", claimGroup.getDiagnosisAdmittingCode().get());
-    assertEquals('0', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
+    assertEquals('0', claimGroup.getDiagnosisAdmittingCodeVersion().get());
 
     assertEquals("A40", claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals('0', claimGroup.getDiagnosisPrincipalCodeVersion().get());
 
     assertEquals("A40", claimGroup.getDiagnosis1Code().get());
-    assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get().charValue());
-    assertEquals(Character.valueOf('Y'), claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
+    assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals('Y', claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
 
     assertEquals("BQ0HZZZ", claimGroup.getProcedure1Code().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getProcedure1CodeVersion().get());
+    assertEquals('0', claimGroup.getProcedure1CodeVersion().get());
     assertEquals(LocalDate.of(2016, 1, 16), claimGroup.getProcedure1Date().get());
     assertEquals(new BigDecimal("120.56"), claimGroup.getClaimUncompensatedCareAmount().get());
     assertEquals("28486613848", claimGroup.getFiDocumentClaimControlNumber().get());
@@ -467,6 +500,92 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("84888.88"), claimLine.getTotalChargeAmount());
     assertEquals(new BigDecimal("3699.00"), claimLine.getNonCoveredChargeAmount());
     assertEquals("345345345", claimLine.getRevenueCenterRenderingPhysicianNPI().get());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var presentOnAdmissionCodes = claimGroup.getDiagnosisPresentOnAdmissionCodes();
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+    final var procedureCodes = claimGroup.getProcedureCodes();
+    final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
+    final var procedureDates = claimGroup.getProcedureDates();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertThrows(
+        NoSuchMethodException.class, () -> InpatientClaim.class.getMethod("getDiagnosis26Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+    assertEquals(37, presentOnAdmissionCodes.size());
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosis26PresentOnAdmissionCode"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13PresentOnAdmissionCode"));
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmittingCode").get(),
+        claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
+        claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        presentOnAdmissionCodes.get("diagnosis1PresentOnAdmissionCode").get(),
+        claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
+    assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
   }
 
   /**
@@ -522,7 +641,7 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("84999.37"), claimGroup.getTotalChargeAmount());
     assertEquals(LocalDate.of(2016, 1, 15), claimGroup.getClaimAdmissionDate().get());
     assertEquals('1', claimGroup.getAdmissionTypeCd());
-    assertEquals(Character.valueOf('4'), claimGroup.getSourceAdmissionCd().get());
+    assertEquals('4', claimGroup.getSourceAdmissionCd().get());
     assertEquals(new BigDecimal("10.00"), claimGroup.getPassThruPerDiemAmount());
     assertEquals(new BigDecimal("112.00"), claimGroup.getDeductibleAmount());
     assertEquals(new BigDecimal("5.00"), claimGroup.getPartACoinsuranceLiabilityAmount());
@@ -545,17 +664,101 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("23.99"), claimGroup.getDrgOutlierApprovedPaymentAmount().get());
 
     assertEquals("A37", claimGroup.getDiagnosisAdmittingCode().get());
-    assertEquals('0', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
-
+    assertEquals('0', claimGroup.getDiagnosisAdmittingCodeVersion().get());
     assertEquals("A40", claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosisPrincipalCodeVersion().get());
-
+    assertEquals('0', claimGroup.getDiagnosisPrincipalCodeVersion().get());
     assertEquals("A40", claimGroup.getDiagnosis1Code().get());
-    assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get().charValue());
-    assertEquals(Character.valueOf('Y'), claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
+    assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals('Y', claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var presentOnAdmissionCodes = claimGroup.getDiagnosisPresentOnAdmissionCodes();
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+    final var procedureCodes = claimGroup.getProcedureCodes();
+    final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
+    final var procedureDates = claimGroup.getProcedureDates();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertThrows(
+        NoSuchMethodException.class, () -> InpatientClaim.class.getMethod("getDiagnosis26Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+    assertEquals(37, presentOnAdmissionCodes.size());
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosis26PresentOnAdmissionCode"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> InpatientClaim.class.getMethod("getDiagnosisExternal13PresentOnAdmissionCode"));
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            InpatientClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmittingCode").get(),
+        claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
+        claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        presentOnAdmissionCodes.get("diagnosis1PresentOnAdmissionCode").get(),
+        claimGroup.getDiagnosis1PresentOnAdmissionCode().get());
+    assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
 
     assertEquals("BQ0HZZZ", claimGroup.getProcedure1Code().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getProcedure1CodeVersion().get());
+    assertEquals('0', claimGroup.getProcedure1CodeVersion().get());
     assertEquals(LocalDate.of(2016, 1, 16), claimGroup.getProcedure1Date().get());
     assertEquals(new BigDecimal("120.56"), claimGroup.getClaimUncompensatedCareAmount().get());
     assertEquals("28486613848", claimGroup.getFiDocumentClaimControlNumber().get());
@@ -617,15 +820,102 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("6.00"), claimGroup.getBloodDeductibleLiabilityAmount());
     assertEquals(new BigDecimal("66.89"), claimGroup.getProfessionalComponentCharge());
     assertEquals("A40", claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals('0', claimGroup.getDiagnosisPrincipalCodeVersion().get());
     assertEquals("A40", claimGroup.getDiagnosis1Code().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get());
     assertEquals(new BigDecimal("112.00"), claimGroup.getDeductibleAmount());
     assertEquals(new BigDecimal("175.73"), claimGroup.getCoinsuranceAmount());
     assertEquals(new BigDecimal("693.92"), claimGroup.getProviderPaymentAmount());
     assertEquals(new BigDecimal("44.00"), claimGroup.getBeneficiaryPaymentAmount());
     assertEquals("32490593716374487", claimGroup.getFiDocumentClaimControlNumber().get());
     assertEquals("373273882012", claimGroup.getFiOriginalClaimControlNumber().get());
+    assertEquals("A06", claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals('0', claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals("A06", claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals('0', claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+    final var procedureCodes = claimGroup.getProcedureCodes();
+    final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
+    final var procedureDates = claimGroup.getProcedureDates();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        42 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
+
+    // Test that there aren't any additional codes not included in the group
+    assertThrows(
+        NoSuchMethodException.class, () -> OutpatientClaim.class.getMethod("getDiagnosis26Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> OutpatientClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> OutpatientClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> OutpatientClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            OutpatientClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            OutpatientClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            OutpatientClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmission1Code").get(),
+        claimGroup.getDiagnosisAdmission1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmission1CodeVersion").get(),
+        claimGroup.getDiagnosisAdmission1CodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+    assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
 
     assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -690,7 +980,7 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("5555.03"), claimGroup.getTotalChargeAmount());
     assertEquals(LocalDate.of(2013, 11, 5), claimGroup.getClaimAdmissionDate().get());
     assertEquals('3', claimGroup.getAdmissionTypeCd());
-    assertEquals('4', claimGroup.getSourceAdmissionCd().get().charValue());
+    assertEquals('4', claimGroup.getSourceAdmissionCd().get());
     assertEquals(new BigDecimal("112.00"), claimGroup.getDeductibleAmount());
     assertEquals(new BigDecimal("5.00"), claimGroup.getPartACoinsuranceLiabilityAmount());
     assertEquals(new BigDecimal("6.00"), claimGroup.getBloodDeductibleLiabilityAmount());
@@ -715,15 +1005,95 @@ public final class RifFilesProcessorTest {
     assertFalse(claimGroup.getCoveredCareThroughDate().isPresent());
     assertEquals(LocalDate.of(2002, 1, 31), claimGroup.getMedicareBenefitsExhaustedDate().get());
     assertEquals(LocalDate.of(2013, 12, 18), claimGroup.getBeneficiaryDischargeDate().get());
-
     assertEquals("6202", claimGroup.getDiagnosisAdmittingCode().get());
-    assertEquals('9', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
+    assertEquals('9', claimGroup.getDiagnosisAdmittingCodeVersion().get());
     assertEquals("E9281", claimGroup.getDiagnosisExternal1Code().get());
-    assertEquals('9', claimGroup.getDiagnosisExternal1CodeVersion().get().charValue());
+    assertEquals('9', claimGroup.getDiagnosisExternal1CodeVersion().get());
     assertEquals("23443453453", claimGroup.getFiDocumentClaimControlNumber().get());
     assertEquals("34534535535", claimGroup.getFiOriginalClaimControlNumber().get());
     assertEquals("645", claimGroup.getDiagnosisRelatedGroupCd().get());
     assertEquals(1, claimGroup.getLines().size());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+    final var procedureCodes = claimGroup.getProcedureCodes();
+    final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
+    final var procedureDates = claimGroup.getProcedureDates();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
+
+    // Test that there aren't any additional codes not included in the group
+    assertThrows(NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosis26Code"));
+    assertThrows(
+        NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> SNFClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmittingCode").get(),
+        claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
+        claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+    assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
+
     // Verify one of the claim lines.
     SNFClaimLine claimLine = claimGroup.getLines().get(0);
     assertEquals("MMM", claimLine.getHcpcsCode().get());
@@ -785,7 +1155,7 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("5555.03"), claimGroup.getTotalChargeAmount());
     assertEquals(LocalDate.of(2013, 11, 5), claimGroup.getClaimAdmissionDate().get());
     assertEquals('3', claimGroup.getAdmissionTypeCd());
-    assertEquals('4', claimGroup.getSourceAdmissionCd().get().charValue());
+    assertEquals('4', claimGroup.getSourceAdmissionCd().get());
     assertEquals(new BigDecimal("112.00"), claimGroup.getDeductibleAmount());
     assertEquals(new BigDecimal("5.00"), claimGroup.getPartACoinsuranceLiabilityAmount());
     assertEquals(new BigDecimal("6.00"), claimGroup.getBloodDeductibleLiabilityAmount());
@@ -810,16 +1180,99 @@ public final class RifFilesProcessorTest {
     assertFalse(claimGroup.getCoveredCareThroughDate().isPresent());
     assertEquals(LocalDate.of(2002, 1, 31), claimGroup.getMedicareBenefitsExhaustedDate().get());
     assertEquals(LocalDate.of(2013, 12, 18), claimGroup.getBeneficiaryDischargeDate().get());
-
-    assertEquals("6202", claimGroup.getDiagnosisAdmittingCode().get());
-    assertEquals('9', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
-    assertEquals("E9281", claimGroup.getDiagnosisExternal1Code().get());
-    assertEquals('9', claimGroup.getDiagnosisExternal1CodeVersion().get().charValue());
     assertEquals("23443453453", claimGroup.getFiDocumentClaimControlNumber().get());
     assertEquals("34534535535", claimGroup.getFiOriginalClaimControlNumber().get());
+    assertEquals("3736", claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals('9', claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals("6202", claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals('9', claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals("E9281", claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals('9', claimGroup.getDiagnosisExternal1CodeVersion().get());
+
     // Testing for a four digit code for DiagnosisRelatedGroupCd.
     assertEquals("6455", claimGroup.getDiagnosisRelatedGroupCd().get());
     assertEquals(1, claimGroup.getLines().size());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+    final var procedureCodes = claimGroup.getProcedureCodes();
+    final var procedureCodeVersions = claimGroup.getProcedureCodeVersions();
+    final var procedureDates = claimGroup.getProcedureDates();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        40 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    assertTrue(
+        25 == procedureCodes.size()
+            && procedureCodes.size() == procedureCodeVersions.size()
+            && procedureCodeVersions.size() == procedureDates.size());
+
+    // Test that there aren't any additional codes not included in the group
+    assertThrows(NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosis26Code"));
+    assertThrows(
+        NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class, () -> SNFClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> SNFClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dCode", procedureCodes.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dCodeVersion", procedureCodeVersions.size() + 1)));
+    assertThrows(
+        NoSuchMethodException.class,
+        () ->
+            SNFClaim.class.getMethod(
+                String.format("getProcedure%dDates", procedureDates.size() + 1)));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisAdmittingCode").get(),
+        claimGroup.getDiagnosisAdmittingCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisAdmittingCodeVersion").get(),
+        claimGroup.getDiagnosisAdmittingCodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+    assertEquals(procedureCodes.get("procedure1Code").get(), claimGroup.getProcedure1Code().get());
+    assertEquals(
+        procedureCodeVersions.get("procedure1CodeVersion").get(),
+        claimGroup.getProcedure1CodeVersion().get());
+    assertEquals(procedureDates.get("procedure1Date").get(), claimGroup.getProcedure1Date().get());
+
     // Verify one of the claim lines.
     SNFClaimLine claimLine = claimGroup.getLines().get(0);
     assertEquals("MMM", claimLine.getHcpcsCode().get());
@@ -871,15 +1324,66 @@ public final class RifFilesProcessorTest {
     assertEquals("8888888888", claimGroup.getAttendingPhysicianNpi().get());
     assertEquals("30", claimGroup.getPatientDischargeStatusCode());
     assertEquals(new BigDecimal("199.99"), claimGroup.getTotalChargeAmount());
-    assertEquals(Character.valueOf('C'), claimGroup.getPatientStatusCd().get());
+    assertEquals('C', claimGroup.getPatientStatusCd().get());
     assertEquals(BigDecimal.valueOf(30L), claimGroup.getUtilizationDayCount());
     assertEquals(LocalDate.of(2015, 6, 29), claimGroup.getBeneficiaryDischargeDate().get());
-    assertEquals("72761", claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals('9', claimGroup.getDiagnosisPrincipalCodeVersion().get().charValue());
     assertEquals(LocalDate.of(2014, 7, 06), claimGroup.getClaimHospiceStartDate().get());
     assertEquals("38875439343923937", claimGroup.getFiOriginalClaimControlNumber().get());
     assertEquals("2718813985998", claimGroup.getFiDocumentClaimControlNumber().get());
     assertEquals('3', claimGroup.getClaimQueryCode().get());
+    assertEquals("72761", claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals('9', claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals("B01", claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals('0', claimGroup.getDiagnosisExternal1CodeVersion().get());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+    // Test that there aren't any additional codes not included in the group
+    assertThrows(
+        NoSuchMethodException.class, () -> HospiceClaim.class.getMethod("getDiagnosis26Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> HospiceClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> HospiceClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> HospiceClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
 
     assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -936,16 +1440,66 @@ public final class RifFilesProcessorTest {
     assertEquals("2222222222", claimGroup.getAttendingPhysicianNpi().get());
     assertEquals("30", claimGroup.getPatientDischargeStatusCode());
     assertEquals(new BigDecimal("199.99"), claimGroup.getTotalChargeAmount());
-    assertEquals("53081", claimGroup.getDiagnosisPrincipalCode().get());
-    assertEquals(Character.valueOf('9'), claimGroup.getDiagnosisPrincipalCodeVersion().get());
-    assertEquals('L', claimGroup.getClaimLUPACode().get().charValue());
-    assertEquals('1', claimGroup.getClaimReferralCode().get().charValue());
+    assertEquals('L', claimGroup.getClaimLUPACode().get());
+    assertEquals('1', claimGroup.getClaimReferralCode().get());
     assertEquals(BigDecimal.valueOf(3L), claimGroup.getTotalVisitCount());
     assertEquals(LocalDate.of(2015, 6, 23), claimGroup.getCareStartDate().get());
     // assertEquals("308683096577486", claimGroup.getFiDocumentClaimControlNumber().get());
     // assertEquals("10493204767560565", claimGroup.getFiOriginalClaimControlNumber().get());
     assertEquals('3', claimGroup.getClaimQueryCode().get());
     assertEquals(1, claimGroup.getLines().size());
+    assertEquals("53081", claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals('9', claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals("B05", claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals('0', claimGroup.getDiagnosisExternal1CodeVersion().get());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        39 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+
+    // Test that there aren't any additional codes not included in the group
+    assertThrows(NoSuchMethodException.class, () -> HHAClaim.class.getMethod("getDiagnosis26Code"));
+    assertThrows(
+        NoSuchMethodException.class, () -> HHAClaim.class.getMethod("getDiagnosis26CodeVersion"));
+    assertThrows(
+        NoSuchMethodException.class, () -> HHAClaim.class.getMethod("getDiagnosisExternal13Code"));
+    assertThrows(
+        NoSuchMethodException.class,
+        () -> HHAClaim.class.getMethod("getDiagnosisExternal13CodeVersion"));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternal1Code").get(),
+        claimGroup.getDiagnosisExternal1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternal1CodeVersion").get(),
+        claimGroup.getDiagnosisExternal1CodeVersion().get());
+    assertEquals(
+        diagnosisCodes.get("diagnosisExternalFirstCode").get(),
+        claimGroup.getDiagnosisExternalFirstCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisExternalFirstCodeVersion").get(),
+        claimGroup.getDiagnosisExternalFirstCodeVersion().get());
+
     // Verify one of the claim lines.
     HHAClaimLine claimLine = claimGroup.getLines().get(0);
     assertEquals(1, claimLine.getLineNumber());
@@ -1002,21 +1556,52 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("1752.75"), claimGroup.getSubmittedChargeAmount());
     assertEquals(new BigDecimal("754.79"), claimGroup.getAllowedChargeAmount());
     assertEquals(new BigDecimal("777.00"), claimGroup.getBeneficiaryPartBDeductAmount());
-    assertEquals(Character.valueOf('3'), claimGroup.getHcpcsYearCode().get());
-    assertEquals("B04", claimGroup.getDiagnosis1Code().get());
-    assertEquals(Character.valueOf('0'), claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals('3', claimGroup.getHcpcsYearCode().get());
     assertEquals("1306849450", claimGroup.getReferringPhysicianNpi().get());
     assertEquals("0", claimGroup.getClinicalTrialNumber().get());
     assertEquals(1, claimGroup.getLines().size());
     assertEquals("74655592568216", claimGroup.getClaimCarrierControlNumber().get());
+    assertEquals("B04", claimGroup.getDiagnosis1Code().get());
+    assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get());
+    assertEquals("B04", claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals('0', claimGroup.getDiagnosisPrincipalCodeVersion().get());
+
+    // Test that grouped properties exist with the expected number of properties per group
+    final var diagnosisCodes = claimGroup.getDiagnosisCodes();
+    final var diagnosisCodeVersions = claimGroup.getDiagnosisCodeVersions();
+
+    /*
+    If the size of the group hasn't changed, then we should accurately predict that calling the next sequential property
+    of that group will throw an exception.
+    If it doesn't, then 1) We need to update the sizing below; or 2) We need to confirm that the new property has the
+    `groupName` attribute in the yaml file and update the test.
+    */
+    assertTrue(
+        13 == diagnosisCodes.size() && diagnosisCodes.size() == diagnosisCodeVersions.size());
+
+    // Test that there aren't any additional codes not included in the group
+    assertThrows(NoSuchMethodException.class, () -> DMEClaim.class.getMethod("getDiagnosis13Code"));
+    assertThrows(
+        NoSuchMethodException.class, () -> DMEClaim.class.getMethod("getDiagnosis13CodeVersion"));
+
+    // Test that grouped diagnoses properties are populated correctly
+    assertEquals(
+        diagnosisCodes.get("diagnosisPrincipalCode").get(),
+        claimGroup.getDiagnosisPrincipalCode().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosisPrincipalCodeVersion").get(),
+        claimGroup.getDiagnosisPrincipalCodeVersion().get());
+    assertEquals(diagnosisCodes.get("diagnosis1Code").get(), claimGroup.getDiagnosis1Code().get());
+    assertEquals(
+        diagnosisCodeVersions.get("diagnosis1CodeVersion").get(),
+        claimGroup.getDiagnosis1CodeVersion().get());
 
     // Verify one of the claim lines.
     DMEClaimLine claimLine = claimGroup.getLines().get(0);
-
     assertEquals(1, claimLine.getLineNumber());
     assertEquals("9994931888", claimLine.getProviderTaxNumber());
     assertEquals("A5", claimLine.getProviderSpecialityCode().get());
-    assertEquals(Character.valueOf('1'), claimLine.getProviderParticipatingIndCode().get());
+    assertEquals('1', claimLine.getProviderParticipatingIndCode().get());
     assertEquals(new BigDecimal("60"), claimLine.getServiceCount());
     assertEquals('P', claimLine.getCmsServiceTypeCode());
     assertEquals("12", claimLine.getPlaceOfServiceCode());
@@ -1038,16 +1623,16 @@ public final class RifFilesProcessorTest {
     assertEquals(new BigDecimal("130.45"), claimLine.getSubmittedChargeAmount());
     assertEquals(new BigDecimal("129.45"), claimLine.getAllowedChargeAmount());
     assertEquals("A", claimLine.getProcessingIndicatorCode().get());
-    assertEquals('0', claimLine.getPaymentCode().get().charValue());
-    assertEquals(Character.valueOf('0'), claimLine.getServiceDeductibleCode().get());
+    assertEquals('0', claimLine.getPaymentCode().get());
+    assertEquals('0', claimLine.getServiceDeductibleCode().get());
     assertEquals(new BigDecimal("82.29"), claimLine.getPurchasePriceAmount());
     assertEquals("1244444444", claimLine.getProviderNPI().get());
     assertEquals("AL", claimLine.getPricingStateCode().get());
     assertEquals("MO", claimLine.getProviderStateCode());
-    assertEquals(Character.valueOf('3'), claimLine.getSupplierTypeCode().get());
+    assertEquals('3', claimLine.getSupplierTypeCode().get());
     assertEquals(new BigDecimal("0.00"), claimLine.getScreenSavingsAmount().get());
     assertEquals(new BigDecimal("60.234"), claimLine.getMtusCount());
-    assertEquals(Character.valueOf('3'), claimLine.getMtusCode().get());
+    assertEquals('3', claimLine.getMtusCode().get());
     assertEquals(new BigDecimal("44.4"), claimLine.getHctHgbTestResult());
     assertEquals("R2", claimLine.getHctHgbTestTypeCode().get());
     assertEquals("000000000", claimLine.getNationalDrugCode().get());
