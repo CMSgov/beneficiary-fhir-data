@@ -18,11 +18,10 @@ DB_USERNAME="${DB_USERNAME:-{{ data_server_db_username }}}"
 DB_PASSWORD="${DB_PASSWORD:-{{ data_server_db_password }}}"
 DB_CONNECTIONS_MAX="${DB_CONNECTIONS_MAX:-'{{ data_server_db_connections_max }}'}"
 
-# If DB_PASSWORD is not set, use IAM for db auth (overwrites DB_USERNAME with instance profile role name)
-if [ -z "$DB_PASSWORD" ]; then
-  # extract the database host from the jdbc url
-  trimmed_url="jdbc:postgresql://"
-  export DB_HOST="${DB_HOST:-"${trimmed_url%%[:/]*}"}" # extract everything up to the first colon or slash
+# If DB_USERNAME and DB_PASSWORD is set to "iam", we are using iam for authentication
+if [[ "$DB_USERNAME" == "iam" && "$DB_PASSWORD" == "iam" ]]; then
+  # Get the hostname from the DB_URL.
+  DB_HOST=$(echo "$DB_URL" | sed -n 's/.*\/\/\(.*\):.*/\1/p')
 
   # Get the instance profile role from the metadata service. This is the database username.
   log "Retrieving RDS IAM authentication token for $DB_HOST"
