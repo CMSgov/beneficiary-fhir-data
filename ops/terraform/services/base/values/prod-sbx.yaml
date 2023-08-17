@@ -105,8 +105,8 @@
   "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc"
   ]
 /bfd/${env}/server/nonsensitive/asg_min_instance_count: 3
-/bfd/${env}/server/nonsensitive/asg_max_instance_count: 24
-/bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: 12
+/bfd/${env}/server/nonsensitive/asg_max_instance_count: 12
+/bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: 9
 /bfd/${env}/server/nonsensitive/asg_desired_instance_count: 3
 # Analysis into the time required for the BFD Server to startup showed that, on average, the Server
 # starts within 30 seconds. However, we want to account for outliers and the longest time it took to
