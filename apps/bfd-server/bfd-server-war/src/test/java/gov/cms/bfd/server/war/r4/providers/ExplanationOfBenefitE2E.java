@@ -23,6 +23,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
@@ -70,7 +71,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
     List<Object> loadedRecords = loadData();
     CarrierClaim claim = getCarrierClaim(loadedRecords);
     String claimId = String.valueOf(claim.getClaimId());
-    String eobId = TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, claim.getClaimId());
+    String eobId = TransformerUtilsV2.buildEobId(ClaimType.CARRIER, claim.getClaimId());
 
     given()
         .spec(requestAuth)
