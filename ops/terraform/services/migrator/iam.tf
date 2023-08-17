@@ -89,7 +89,7 @@ resource "aws_iam_role" "this" {
               "Effect": "Allow",
               "Principal": {
                   "Service": "ec2.amazonaws.com"
-              }
+              },
               "Sid": ""
           },
           {

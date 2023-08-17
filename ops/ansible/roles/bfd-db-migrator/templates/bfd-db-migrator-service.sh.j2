@@ -7,7 +7,7 @@ log() {
   echo "$(date -u '+%Y-%m-%d %H:%M:%S') $1" >> "$startup_log"
 }
 
-DATABASE_URL="${DATABASE_URL:-{{ db_migrator_db_url }}}"
+DATABASE_URL="${DATABASE_URL:-"{{ db_migrator_db_url }}"}"
 DATABASE_USERNAME="${DATABASE_USERNAME:-{{ db_migrator_db_username }}}"
 DATABASE_PASSWORD="${DATABASE_PASSWORD:-{{ db_migrator_db_password }}}"
 
@@ -26,6 +26,7 @@ if [[ "$DATABASE_USERNAME" == "iam" && "$DATABASE_PASSWORD" == "iam" ]]; then
   for i in {1..3}; do
     if DATABASE_PASSWORD="$(aws rds generate-db-auth-token --hostname "$DATABASE_HOST" --port 5432 --username="$DATABASE_USERNAME")"; then
       log "OK"
+      break
     else
       log "Failed to obtain token for $DATABASE_HOST retrying... (attempt $i/3)"
       sleep 1
