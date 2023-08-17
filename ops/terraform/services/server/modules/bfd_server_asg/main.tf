@@ -237,19 +237,19 @@ resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
 
   step_adjustment {
     metric_interval_upper_bound = "-5e+08"
-    scaling_adjustment          = -9
+    scaling_adjustment          = -(length(var.env_config.azs) * 3)
   }
 
   step_adjustment {
     metric_interval_lower_bound = "-5e+08"
     metric_interval_upper_bound = "-3e+08"
-    scaling_adjustment          = -6
+    scaling_adjustment          = -(length(var.env_config.azs) * 2)
   }
 
   step_adjustment {
     metric_interval_lower_bound = "-3e+08"
     metric_interval_upper_bound = "0"
-    scaling_adjustment          = -3
+    scaling_adjustment          = -length(var.env_config.azs)
   }
 }
 
@@ -310,19 +310,19 @@ resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
 
   step_adjustment {
     metric_interval_lower_bound = "5e+08"
-    scaling_adjustment          = 9
+    scaling_adjustment          = length(var.env_config.azs) * 3
   }
 
   step_adjustment {
     metric_interval_lower_bound = "2e+08"
     metric_interval_upper_bound = "5e+08"
-    scaling_adjustment          = 6
+    scaling_adjustment          = length(var.env_config.azs) * 2
   }
 
   step_adjustment {
     metric_interval_lower_bound = "0"
     metric_interval_upper_bound = "2e+08"
-    scaling_adjustment          = 3
+    scaling_adjustment          = length(var.env_config.azs)
   }
 }
 ## Autoscaling Notifications
