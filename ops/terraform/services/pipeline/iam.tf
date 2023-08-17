@@ -289,7 +289,7 @@ data "aws_iam_policy_document" "rds" {
     effect  = "Allow"
     actions = ["rds-db:connect"]
     resources = [
-      "arn:aws:rds-db:us-east-1:${local.account_id}:dbuser:${data.aws_rds_cluster.this.cluster_resource_id}/${aws_iam_role.this.name}"
+      "arn:aws:rds-db:us-east-1:${local.account_id}:dbuser:${data.aws_rds_cluster.rds.cluster_resource_id}/${aws_iam_role.this.name}"
     ]
   }
 }
