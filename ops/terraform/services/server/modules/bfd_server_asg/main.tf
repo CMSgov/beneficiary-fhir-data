@@ -180,89 +180,151 @@ resource "aws_autoscaling_group" "main" {
 
 ## Autoscaling Policies and Cloudwatch Alarms
 #
-resource "aws_autoscaling_policy" "high-cpu" {
-  name                      = "bfd-${local.env}-${var.role}-high-cpu-policy"
+
+resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
+  alarm_name          = "bfd-${var.role}-${local.env}-networkin-low"
+  comparison_operator = "LessThanThreshold"
+  datapoints_to_alarm = 5
+  evaluation_periods  = 5
+  threshold           = 600000000
+  treat_missing_data  = "ignore"
+  alarm_actions       = [aws_autoscaling_policy.filtered_networkin_low_scaling.arn]
+
+  metric_query {
+    id          = "m1"
+    return_data = false
+
+    metric {
+      dimensions = {
+        AutoScalingGroupName = aws_autoscaling_group.main.name
+      }
+      metric_name = "NetworkIn"
+      namespace   = "AWS/EC2"
+      period      = 60
+      stat        = "Average"
+    }
+  }
+
+  metric_query {
+    id          = "m2"
+    return_data = false
+
+    metric {
+      dimensions = {
+        AutoScalingGroupName = aws_autoscaling_group.main.name
+      }
+      metric_name = "NetworkOut"
+      namespace   = "AWS/EC2"
+      period      = 60
+      stat        = "Average"
+    }
+  }
+
+  metric_query {
+    expression  = "IF(m2/m1 > 0.01, m1, 0)"
+    id          = "e1"
+    label       = "FilteredNetworkIn"
+    return_data = true
+  }
+}
+
+resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
+  name                    = "bfd-${var.role}-${local.env}-networkin-low-scalein"
+  autoscaling_group_name  = aws_autoscaling_group.main.name
+  adjustment_type         = "ChangeInCapacity"
+  metric_aggregation_type = "Average"
+  policy_type             = "StepScaling"
+
+  step_adjustment {
+    metric_interval_upper_bound = "-5e+08"
+    scaling_adjustment          = -9
+  }
+
+  step_adjustment {
+    metric_interval_lower_bound = "-5e+08"
+    metric_interval_upper_bound = "-3e+08"
+    scaling_adjustment          = -6
+  }
+
+  step_adjustment {
+    metric_interval_lower_bound = "-3e+08"
+    metric_interval_upper_bound = "0"
+    scaling_adjustment          = -3
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
+  alarm_name          = "bfd-${var.role}-${local.env}-networkin-high"
+  comparison_operator = "GreaterThanThreshold"
+  datapoints_to_alarm = 1
+  evaluation_periods  = 1
+  threshold           = 100000000
+  treat_missing_data  = "ignore"
+  alarm_actions       = [aws_autoscaling_policy.filtered_networkin_high_scaling.arn]
+
+  metric_query {
+    id          = "m1"
+    return_data = false
+
+    metric {
+      dimensions = {
+        AutoScalingGroupName = aws_autoscaling_group.main.name
+      }
+      metric_name = "NetworkIn"
+      namespace   = "AWS/EC2"
+      period      = 60
+      stat        = "Average"
+    }
+  }
+
+  metric_query {
+    id          = "m2"
+    return_data = false
+
+    metric {
+      dimensions = {
+        AutoScalingGroupName = aws_autoscaling_group.main.name
+      }
+      metric_name = "NetworkOut"
+      namespace   = "AWS/EC2"
+      period      = 60
+      stat        = "Average"
+    }
+  }
+
+  metric_query {
+    expression  = "IF(m2/m1 > 0.01, m1, 0)"
+    id          = "e1"
+    label       = "FilteredNetworkIn"
+    return_data = true
+  }
+}
+
+resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
+  name                      = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
   autoscaling_group_name    = aws_autoscaling_group.main.name
-  adjustment_type           = "ChangeInCapacity"
-  policy_type               = "StepScaling"
   estimated_instance_warmup = var.asg_config.instance_warmup
+  adjustment_type           = "ChangeInCapacity"
   metric_aggregation_type   = "Average"
+  policy_type               = "StepScaling"
 
   step_adjustment {
-    scaling_adjustment          = 1
-    metric_interval_lower_bound = 0.0
-    metric_interval_upper_bound = 15.0
+    metric_interval_lower_bound = "5e+08"
+    scaling_adjustment          = 9
   }
 
   step_adjustment {
-    scaling_adjustment          = 2
-    metric_interval_lower_bound = 15.0
-    metric_interval_upper_bound = 35.0
+    metric_interval_lower_bound = "2e+08"
+    metric_interval_upper_bound = "5e+08"
+    scaling_adjustment          = 6
   }
 
   step_adjustment {
+    metric_interval_lower_bound = "0"
+    metric_interval_upper_bound = "2e+08"
     scaling_adjustment          = 3
-    metric_interval_lower_bound = 35.0
   }
 }
-
-resource "aws_cloudwatch_metric_alarm" "high-cpu" {
-  alarm_name          = "bfd-${local.env}-${var.role}-high-cpu"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = 2
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = 60
-  statistic           = "Average"
-  threshold           = 35
-
-  dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.main.name
-  }
-
-  alarm_description = "CPU usage for ${aws_autoscaling_group.main.name} ASG"
-  alarm_actions     = [aws_autoscaling_policy.high-cpu.arn]
-}
-
-resource "aws_autoscaling_policy" "low-cpu" {
-  name                      = "bfd-${local.env}-${var.role}-low-cpu-policy"
-  autoscaling_group_name    = aws_autoscaling_group.main.name
-  adjustment_type           = "ChangeInCapacity"
-  policy_type               = "StepScaling"
-  estimated_instance_warmup = var.asg_config.instance_warmup
-  metric_aggregation_type   = "Average"
-
-  step_adjustment {
-    scaling_adjustment          = -1
-    metric_interval_lower_bound = -10.0
-    metric_interval_upper_bound = 0.0
-  }
-
-  step_adjustment {
-    scaling_adjustment          = -2
-    metric_interval_upper_bound = -10.0
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "low-cpu" {
-  alarm_name          = "bfd-${local.env}-${var.role}-low-cpu"
-  comparison_operator = "LessThanOrEqualToThreshold"
-  evaluation_periods  = 2
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = 120
-  statistic           = "Average"
-  threshold           = 20
-
-  dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.main.name
-  }
-
-  alarm_description = "CPU usage for ${aws_autoscaling_group.main.name} ASG"
-  alarm_actions     = [aws_autoscaling_policy.low-cpu.arn]
-}
-
-
 ## Autoscaling Notifications
 #
 resource "aws_autoscaling_notification" "asg_notifications" {
