@@ -32,7 +32,7 @@ CLUSTER="$(aws rds describe-db-clusters \
     --query 'DBClusters[].{DBClusterIdentifier:DBClusterIdentifier,Endpoint:Endpoint,ReaderEndpoint:ReaderEndpoint,Members:DBClusterMembers}[0]' \
     --db-cluster-identifier "$CLUSTER_IDENTIFIER")"
 
-CUSTOM_ENDPOINT="$(aws rds describe-db-cluster-endpoints --db-cluster-identifier "$CLUSTER_IDENTIFIER" | jq -r --arg endpoint "$ENDPOINT_IDENTIFIER" '.[][] | select(.DBClusterEndpointIdentifier == $endpoint).Endpoint')"
+CUSTOM_ENDPOINT="$(aws rds describe-db-proxy-endpoints --db-proxy-name bfd-2826-prod | jq -r '.DBProxyEndpoints[1] | select(.DBProxyEndpointName == "bfd-2826-prod-read-only").Endpoint')"
 
 WRITER_NODE="$(jq -r '.Members[] | select(.IsClusterWriter == true) | .DBInstanceIdentifier' <<<"$CLUSTER")"
 

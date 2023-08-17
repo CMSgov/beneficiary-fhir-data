@@ -69,16 +69,6 @@ public final class DatabaseUtils {
 
     poolingDataSource.setMaximumPoolSize(connectionsMax);
 
-    /*
-     * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
-     * strongly worded letter instructing it to avoid sequential scans whenever
-     * possible.
-     */
-    if (poolingDataSource.getJdbcUrl() != null
-        && poolingDataSource.getJdbcUrl().contains("postgre"))
-      poolingDataSource.setConnectionInitSql(
-          "set application_name = 'bfd-server'");
-
     poolingDataSource.setRegisterMbeans(true);
     poolingDataSource.setMetricRegistry(metricRegistry);
 
