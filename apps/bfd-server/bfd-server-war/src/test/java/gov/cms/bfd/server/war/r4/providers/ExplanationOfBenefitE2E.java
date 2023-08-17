@@ -39,10 +39,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /** Endpoint end-to-end test for the V2 explanation of benefits endpoint. */
@@ -217,7 +217,6 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
    * bundle, but instead just a total for the number of entries that match the search criteria. This
    * functionality does no work currently (see https://github.com/jamesagnew/hapi-fhir/issues/1074)
    * and so for now paging with _count=0 should behave as though paging was not requested.
-   *
    */
   @Test
   public void testEobByPatientIdWithPageSizeZeroReturnsNoPaging() {
@@ -397,10 +396,12 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
         .get(requestString);
   }
 
-  /** Verify that EOB by patient id throws a 400 error when the paging start (startIndex) is set
-   * higher than the maximum number of results. */
+  /**
+   * Verify that EOB by patient id throws a 400 error when the paging start (startIndex) is set
+   * higher than the maximum number of results.
+   */
   @Test
-  @Ignore("Broken; needs looking into/fixing")
+  @Disabled("Broken; needs looking into/fixing")
   public void testEobByPatientIdWithPagingStartBeyondMaxExpect400() {
     String patientId = getPatientId(loadData());
     String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&_count=2&startIndex=12";
@@ -416,7 +417,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   }
 
   /**
-   * Test that searching by patient id with samhsa filtering = true does filter the samhsa data from the response.
+   * Test that searching by patient id with samhsa filtering = true does filter the samhsa data from
+   * the response.
    */
   @Test
   public void testEobByPatientIdWithExcludeSamhsaTrueExpectFiltering() {
@@ -442,7 +444,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is set to false.
+   * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is set
+   * to false.
    */
   @Test
   public void testEobByPatientIdWithExcludeSamhsaFalseExpectNoFiltering() {
@@ -466,7 +469,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   }
 
   /**
-   * Ensure nothing unusual happens when we excludeSAMHSA = false and the result has non-samhsa data.
+   * Ensure nothing unusual happens when we excludeSAMHSA = false and the result has non-samhsa
+   * data.
    */
   @Test
   public void testEobByPatientIdForNonSamhsaEobsWithExcludeSamhsaTrueExpectNoError() {
@@ -657,7 +661,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
    * <p>FIXME: Count doesnt seem to work with the query string as-is; may be a bug?
    */
   @Test
-  @Ignore("Broken, needs investigation/fixing")
+  @Disabled("Broken, needs investigation/fixing")
   public void searchEobByPatientIdWithLastUpdatedAndPagination() {
 
     String patientId = getPatientId(loadData());
@@ -781,8 +785,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider} search by patient id returns
-   * the expected data when filtering by service date.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider} search by patient id returns the
+   * expected data when filtering by service date.
    */
   @Test
   public void searchEobByPatientIdWithServiceDate() {
