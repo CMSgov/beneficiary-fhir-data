@@ -1,14 +1,13 @@
 package gov.cms.bfd.migrator.app;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
-import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
@@ -38,21 +37,13 @@ public class SqsDao {
    * Sends a message to an SQS queue.
    *
    * @param queueUrl identifies the queue to post the message to
-   * @param messageGroupId identifies a specific sequence of messages within a FIFO queue
-   * @param messageId identifies a specific message within a sequence
    * @param messageBody text of the message to send
    * @throws QueueDoesNotExistException if queue does not exist
    * @throws SqsException if the operation cannot be completed
    */
-  public void sendMessage(
-      String queueUrl, String messageGroupId, String messageId, String messageBody) {
+  public void sendMessage(String queueUrl, String messageBody) {
     final var request =
-        SendMessageRequest.builder()
-            .queueUrl(queueUrl)
-            .messageGroupId(messageGroupId)
-            .messageDeduplicationId(messageId)
-            .messageBody(messageBody)
-            .build();
+        SendMessageRequest.builder().queueUrl(queueUrl).messageBody(messageBody).build();
     sqsClient.sendMessage(request);
   }
 
@@ -64,12 +55,8 @@ public class SqsDao {
    * @return URL of created queue
    * @throws SqsException if the operation cannot be completed
    */
-  public String createFifoQueue(String queueName) {
-    final var createQueueRequest =
-        CreateQueueRequest.builder()
-            .attributes(Map.of(QueueAttributeName.FIFO_QUEUE, "true"))
-            .queueName(queueName)
-            .build();
+  public String createQueue(String queueName) {
+    final var createQueueRequest = CreateQueueRequest.builder().queueName(queueName).build();
     final var response = sqsClient.createQueue(createQueueRequest);
     return response.queueUrl();
   }
@@ -88,5 +75,21 @@ public class SqsDao {
         ReceiveMessageRequest.builder().queueUrl(queueUrl).maxNumberOfMessages(1).build();
     List<Message> messages = sqsClient.receiveMessage(request).messages();
     return messages.isEmpty() ? Optional.empty() : Optional.of(messages.get(0).body());
+  }
+
+  /**
+   * Read all currently available messages and pass them to the provided function.
+   *
+   * @param queueUrl identifies the queue to read from
+   * @param consumer a function to receive each message
+   * @throws QueueDoesNotExistException if queue does not exist
+   * @throws SqsException if the operation cannot be completed
+   */
+  public void processAllMessages(String queueUrl, Consumer<String> consumer) {
+    for (Optional<String> message = nextMessage(queueUrl);
+        message.isPresent();
+        message = nextMessage(queueUrl)) {
+      consumer.accept(message.get());
+    }
   }
 }

@@ -105,6 +105,7 @@
         <jackson-datatype-jdk8.version>2.15.2</jackson-datatype-jdk8.version>
         <jackson-dataformat-yaml.version>2.15.2</jackson-dataformat-yaml.version>
         <jackson-datatype-jsr310.version>2.15.2</jackson-datatype-jsr310.version>
+        <jackson-annotations.version>2.15.2</jackson-annotations.version>
         <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
         <snakeyaml.version>2.0</snakeyaml.version>
 
@@ -183,7 +184,12 @@
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
         <its.db.username/>
         <its.db.password/>
+        <!-- Docker image used with testcontainers to provide a working database for testing. -->
+        <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed when changing this property. -->
         <its.testcontainer.db.image>postgres:14.7-alpine</its.testcontainer.db.image>
+        <!-- Docker image used with testcontainers to simulate AWS services for testing. -->
+        <!-- This has a default value in gov.cms.bfd.AbstractLocalStackTest that must also be changed when changing this property. -->
+        <its.testcontainer.aws.image>localstack/localstack:2.2.0</its.testcontainer.aws.image>
 
         <!-- Whether the partially adjudicated claims endpoints should be enabled -->
         <local.pac.enabled>true</local.pac.enabled>
@@ -249,6 +255,12 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson-datatype-jsr310.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used to annotate classes for JSON deserialization. -->
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson-annotations.version}</version>
             </dependency>
             <dependency>
                 <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
@@ -777,6 +789,7 @@
                             <its.db.username>${its.db.username}</its.db.username>
                             <its.db.password>${its.db.password}</its.db.password>
                             <its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
+                            <its.testcontainer.aws.image>${its.testcontainer.aws.image}</its.testcontainer.aws.image>
                         </systemPropertyVariables>
                         <includes>
                             <include>**/*IT.java</include>

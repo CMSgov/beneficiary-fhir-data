@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 /** Provides utilities for managing the database in integration tests. */
 public final class DatabaseTestUtils {
@@ -57,6 +58,8 @@ public final class DatabaseTestUtils {
   /** The default database type to use for the integration tests when nothing is provided. */
   public static final String DEFAULT_IT_DATABASE = "jdbc:bfd-test:tc";
 
+  /** The system property defined in pom.xml containing the image to use for test database. */
+  public static final String TEST_CONTAINER_DATABASE_IMAGE_PROPERTY = "its.testcontainer.db.image";
   /** The default test container image to use when nothing is provided. */
   public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "postgres:14.7-alpine";
 
@@ -381,14 +384,16 @@ public final class DatabaseTestUtils {
       String username, String password) {
 
     String testContainerDatabaseImage =
-        System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
+        System.getProperty(
+            TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
     LOGGER.debug("Starting container, using image {}", testContainerDatabaseImage);
     container =
         new PostgreSQLContainer(testContainerDatabaseImage)
             .withDatabaseName("fhirdb")
             .withUsername(username)
             .withPassword(password)
-            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"));
+            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"))
+            .waitingFor(Wait.forListeningPort());
 
     container.start();
 

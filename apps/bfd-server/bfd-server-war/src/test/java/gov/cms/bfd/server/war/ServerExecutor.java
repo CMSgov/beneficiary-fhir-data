@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war;
 
 import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_IMAGE_DEFAULT;
+import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_IMAGE_PROPERTY;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -141,7 +142,8 @@ public class ServerExecutor {
       String gcLog = workDirectory + "/gc.log";
       String maxHeapArg = System.getProperty("its.bfdServer.jvmargs", "-Xmx4g");
       String containerImageType =
-          System.getProperty("its.testcontainer.db.image", TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
+          System.getProperty(
+              TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
       // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
       String v2Enabled = "true";
       String pacEnabled = "true";
@@ -166,7 +168,8 @@ public class ServerExecutor {
       args.add(String.format("-DbfdServer.db.password=%s", dbPassword));
       args.add(String.format("-DbfdServer.include.fake.drug.code=%s", includeFakeDrugCode));
       args.add(String.format("-DbfdServer.include.fake.org.name=%s", includeFakeOrgName));
-      args.add(String.format("-Dits.testcontainer.db.image=%s", containerImageType));
+      args.add(
+          String.format("-D%s=%s", TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, containerImageType));
       return args.toArray(new String[0]);
     } catch (IOException e) {
       throw new RuntimeException(e);
