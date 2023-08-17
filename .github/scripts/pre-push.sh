@@ -23,10 +23,10 @@ checkJavaFormat() {
     set +e
 
     echo 'Relevant app-directory changes detected. Running fmt plugin check.'
-    if mvn -f apps/ com.spotify.fmt:fmt-maven-plugin:check >/dev/null 2>&1; then
+    if mvn -f apps/ com.spotify.fmt:fmt-maven-plugin:check --threads 1C >/dev/null 2>&1; then
       echo 'Verified Java source code format: a-okay.'
     else
-      echo "Inconsistencies discovered in formatting check. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
+      echo "Inconsistencies discovered in formatting check. Run 'mvn com.spotify.fmt:fmt-maven-plugin:check --threads 1C' for details or 'mvn com.spotify.fmt:fmt-maven-plugin:format' to automatically apply the required formatting."
       return 1
     fi
   fi
