@@ -6,9 +6,15 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -18,15 +24,21 @@ import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import io.restassured.response.Response;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -192,14 +204,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
             .get(requestString);
 
     // Get the 'self' link
-    List<Map<String, ?>> links = response.jsonPath().getList("link");
-    String selfLink =
-        links.stream()
-            .filter(m -> m.get("relation").equals("self"))
-            .findFirst()
-            .orElseThrow()
-            .get("url")
-            .toString();
+    String selfLink = getPaginationLink(response, "self");
 
     // Add a start index to the self link to get a subset of the results
     String indexedSelfLink = selfLink + "&startIndex=4";
@@ -323,14 +328,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
 
     // The first line gets the array of json objects inside the "link" path, then we find the one
     // that matches 'next' and get its url
-    List<Map<String, ?>> links = response.jsonPath().getList("link");
-    String nextLink =
-        links.stream()
-            .filter(m -> m.get("relation").equals("next"))
-            .findFirst()
-            .orElseThrow()
-            .get("url")
-            .toString();
+    String nextLink = getPaginationLink(response, "next");
 
     // Page 2/4
 
@@ -353,14 +351,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
 
     // page 3/4
 
-    links = response.jsonPath().getList("link");
-    nextLink =
-        links.stream()
-            .filter(m -> m.get("relation").equals("next"))
-            .findFirst()
-            .orElseThrow()
-            .get("url")
-            .toString();
+    nextLink = getPaginationLink(response, "next");
 
     response =
         given()
@@ -378,14 +369,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
 
     // page 4/4
 
-    links = response.jsonPath().getList("link");
-    nextLink =
-        links.stream()
-            .filter(m -> m.get("relation").equals("next"))
-            .findFirst()
-            .orElseThrow()
-            .get("url")
-            .toString();
+    nextLink = getPaginationLink(response, "next");
 
     given()
         .spec(requestAuth)
@@ -554,7 +538,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
         // item
         .body(
             "entry.find { it.resource.id.contains('carrier') }.resource.item[0].extension.valueCoding.code.flatten()",
-            equalTo(carrierClaim.getLines().get(0).getProviderTaxNumber()))
+            hasItem(carrierClaim.getLines().get(0).getProviderTaxNumber()))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -587,22 +571,305 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
             .get(requestString);
 
     // Check no tax numbers on any of the claims
-    // RestAssured also supports taking the response and doing gpath filters on it, instead of in the chain
+    // RestAssured also supports taking the response and doing gpath filters on it, instead of in
+    // the chain
     // Helpful if you're doing something slightly more complex
-    // We flatten here because there are multiple lists in the chain, so we end up with arrays of arrays otherwise
+    // We flatten here because there are multiple lists in the chain, so we end up with arrays of
+    // arrays otherwise
     List<String> extensionUrls = response.path("entry.resource.item.extension.url.flatten()");
     for (String url : extensionUrls) {
       assertNotEquals("https://bluebutton.cms.gov/resources/variables/tax_num", url);
     }
   }
 
-  // TODO: patientId+claim type, lastUpdated, lastUpdated+pagination,
-  // TODO: lastUpdated+pagination+type, null lastUpdated, serviceDate
+  /**
+   * Validates that passing patient id and claim type returns only the requested claim type in the
+   * response.
+   */
+  @Test
+  public void testEobByPatientIdAndClaimTypeExpectOneResult() {
 
-  
+    String patientId = getPatientId(loadData());
+    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&type=PDE";
 
+    given()
+        .spec(requestAuth)
+        .expect()
+        // our top level is still a bundle
+        .body("resourceType", equalTo("Bundle"))
+        // we should have 1 claim type entry
+        .body("entry.size()", equalTo(1))
+        .body("total", equalTo(1))
+        // the claim type of the entry should be ExplanationOfBenefit
+        .body("entry.resource.resourceType", everyItem(equalTo("ExplanationOfBenefit")))
+        // Check our response has the single claim type (PDE as requested)
+        .body("entry.resource.id", hasItem(containsString("pde")))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Tests EOB search by patient id with various lastUpdated values returns the expected number of
+   * results for that query.
+   */
+  @Test
+  public void testEobByPatientIdWithLastUpdated() {
+
+    String patientId = getPatientId(loadData());
+    String baseRequestString = EOB_ENDPOINT + "?patient=" + patientId;
+
+    // Build up a list of lastUpdatedURLs that return all claim types
+    String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
+    String earlyDateTime = "2019-10-01T00:00:00+00:00";
+    List<String> allUrls =
+        Arrays.asList(
+            "&_lastUpdated=gt" + earlyDateTime,
+            "&_lastUpdated=ge" + earlyDateTime,
+            "&_lastUpdated=le" + nowDateTime,
+            "&_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
+            "&_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
+
+    // Test that for each of the above lastUpdated values, we get 8 results back
+    for (String lastUpdatedValue : allUrls) {
+
+      given()
+          .spec(requestAuth)
+          .expect()
+          .body("entry.size()", equalTo(8))
+          .body("total", equalTo(8))
+          .statusCode(200)
+          .when()
+          .get(baseRequestString + lastUpdatedValue);
+    }
+
+    // Should return 0 results when adjusting lastUpdated for a date that excludes all entries
+    List<String> emptyUrls =
+        Arrays.asList("&_lastUpdated=lt" + earlyDateTime, "&_lastUpdated=le" + earlyDateTime);
+
+    for (String lastUpdatedValue : emptyUrls) {
+      given()
+          .spec(requestAuth)
+          .expect()
+          // Should have no entries in the path
+          .body("$", not(hasKey("entry")))
+          // Total in response should be set to 0
+          .body("total", equalTo(0))
+          .statusCode(200)
+          .when()
+          .get(baseRequestString + lastUpdatedValue);
+    }
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
+   * lastUpdated parameter after yesterday and pagination links work and contain lastUpdated.
+   *
+   * <p>FIXME: Count doesnt seem to work with the query string as-is; may be a bug?
+   */
+  @Test
+  public void searchEobByPatientIdWithLastUpdatedAndPagination() {
+
+    String patientId = getPatientId(loadData());
+    int expectedCount = 5;
+    String yesterday =
+        new DateTimeDt(Date.from(Instant.now().minus(1, ChronoUnit.DAYS))).getValueAsString();
+    String now = new DateTimeDt(new Date()).getValueAsString();
+    String requestString =
+        String.format(
+            EOB_ENDPOINT + "?patient=%s&_lastUpdated=ge%s&_lastUpdated=le%s&_count=%s",
+            patientId,
+            yesterday,
+            now,
+            expectedCount);
+
+    // Search with lastUpdated range between yesterday and now, expect 5 results (due to count)
+    Response response =
+        given()
+            .spec(requestAuth)
+            .expect()
+            .body("entry.size()", equalTo(expectedCount))
+            .body("total", equalTo(expectedCount))
+            .statusCode(200)
+            .when()
+            .get(requestString);
+
+    // Check links have lastUpdated
+    String selfLink = getPaginationLink(response, "self");
+    assertTrue(selfLink.contains("_lastUpdated"));
+
+    String nextLink = getPaginationLink(response, "next");
+    assertTrue(nextLink.contains("_lastUpdated"));
+
+    String lastLink = getPaginationLink(response, "last");
+    assertTrue(lastLink.contains("_lastUpdated"));
+
+    String firstLink = getPaginationLink(response, "first");
+    assertTrue(firstLink.contains("_lastUpdated"));
+
+    // Ensure using the next link works appropriately and returns the last 3 results
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("entry.size()", equalTo(3))
+        .body("total", equalTo(3))
+        .statusCode(200)
+        .when()
+        .get(nextLink);
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider} falls back to using the correct
+   * dates for querying the database when lastUpdated is not set / null.
+   */
+  @Test
+  public void searchEobByPatientIdWhenNullLastUpdatedExpectFallback() {
+
+    List<Object> loadedRecords = loadData();
+    String patientId = getPatientId(loadedRecords);
+    Long claimId = getCarrierClaim(loadedRecords).getClaimId();
+    String requestString = EOB_ENDPOINT + "?patient=" + patientId;
+    // Do some annoying date formatting since the json response and constant have different
+    // precisions/formats
+    String expectedFallbackDate =
+        new DateTimeDt(Date.from(TransformerConstants.FALLBACK_LAST_UPDATED))
+            .setPrecision(TemporalPrecisionEnum.MILLI)
+            .getValueAsString();
+
+    // Clear lastupdated in the database
+    ServerTestUtils.get()
+        .doTransaction(
+            (em) -> {
+              em.createQuery("update CarrierClaim set lastUpdated=null where claimId=:claimId")
+                  .setParameter("claimId", claimId)
+                  .executeUpdate();
+            });
+
+    // Make a call to get the data and ensure lastUpdated matches the fallback value
+    given()
+        .spec(requestAuth)
+        .expect()
+        // Expect all the claims to return
+        .body("total", equalTo(8))
+        .rootPath("entry.find { it.resource.id.contains('carrier') }")
+        .body("resource.meta.lastUpdated", equalTo(expectedFallbackDate))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+
+    // Make a call with lastUpdated to make sure the fallback is used for lastUpdated queries
+    // Set the lastUpdated to pull anything before the current date
+    String now = new DateTimeDt(new Date()).getValueAsString();
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        // Expect all the claims to return
+        .body("total", equalTo(8))
+        // Check the lastUpdated is set to the fallback
+        .rootPath("entry.find { it.resource.id.contains('carrier') }")
+        .body("resource.meta.lastUpdated", equalTo(expectedFallbackDate))
+        .statusCode(200)
+        .when()
+        .get(requestString + "&_lastUpdated=le" + now);
+
+    // Set the lastUpdated to pull anything after the current date and ensure no results
+    // This checks the default isnt returned when it shouldnt be
+    given()
+        .spec(requestAuth)
+        .expect()
+        // Expect all the claims to return
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString + "&_lastUpdated=ge" + now);
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider} works when filtering by service
+   * date.
+   */
+  @Test
+  public void searchEobByPatientIdWithServiceDate() {
+
+    String patientId = getPatientId(loadData());
+    String requestString = EOB_ENDPOINT + "?patient=" + patientId;
+
+    // For SampleA data, we have the following service dates
+    // HHA 23-JUN-2015
+    // Hospice 30-JAN-2014
+    // Inpatient 27-JAN-2016
+    // Outpatient 24-JAN-2011
+    // SNF 18-DEC-2013
+    // Carrier 27-OCT-1999
+    // DME 03-FEB-2014
+    // PDE 12-MAY-2015
+
+    // TestName:serviceDate:ExpectedCount
+    List<Triple<String, String, Integer>> testCases =
+        ImmutableList.of(
+            ImmutableTriple.of("No service date filter", "", 8),
+            ImmutableTriple.of(
+                "Contains all", "service-date=ge1999-10-27&service-date=le2016-01-27", 8),
+            ImmutableTriple.of("Contains none - upper bound", "service-date=gt2016-01-27", 0),
+            ImmutableTriple.of("Contains none - lower bound", "service-date=lt1999-10-27", 0),
+            ImmutableTriple.of(
+                "Exclusive check - no earliest/latest",
+                "service-date=gt1999-10-27&service-date=lt2016-01-27",
+                6),
+            ImmutableTriple.of(
+                "Year end 2015 inclusive check (using last day of 2015)",
+                "service-date=le2015-12-31",
+                7),
+            ImmutableTriple.of(
+                "Year end 2014 exclusive check (using first day of 2015)",
+                "service-date=lt2015-01-01",
+                5));
+
+    // Test each case
+    for (Triple testData : testCases) {
+
+      String url = requestString + "&" + testData.getMiddle();
+      Response response =
+          given()
+              .spec(requestAuth)
+              .expect()
+              .statusCode(200)
+              .body("resourceType", equalTo("Bundle"))
+              .when()
+              .get(url);
+
+      // To preserve the test case message, we'll set this up using assertEquals
+      Integer total = response.path("total");
+      assertEquals(
+          String.valueOf(total.intValue()),
+          testData.getRight().toString(),
+          testData.getLeft().toString());
+    }
+  }
 
   // Helper methods; could easily be in a utils class, if desired
+
+  /**
+   * Gets the pagination link by name from the response. Throws an exception if the given link name
+   * does not exist in the response.
+   *
+   * <p>Should be one of: next, previous, self, last, first
+   *
+   * @param response the response
+   * @param paginationLinkName the pagination link name
+   * @return the pagination link
+   */
+  public String getPaginationLink(Response response, String paginationLinkName) {
+
+    List<Map<String, ?>> links = response.jsonPath().getList("link");
+    return links.stream()
+        .filter(m -> m.get("relation").equals(paginationLinkName))
+        .findFirst()
+        .orElseThrow()
+        .get("url")
+        .toString();
+  }
 
   /**
    * Gets a carrier claim for basic test information.
