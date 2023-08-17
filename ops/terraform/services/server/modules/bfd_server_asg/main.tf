@@ -186,7 +186,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
   comparison_operator = "LessThanThreshold"
   datapoints_to_alarm = 5
   evaluation_periods  = 5
-  threshold           = 600000000
+  threshold           = 400000000
   treat_missing_data  = "ignore"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_low_scaling.arn]
 
@@ -236,18 +236,18 @@ resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
   policy_type             = "StepScaling"
 
   step_adjustment {
-    metric_interval_upper_bound = "-5e+08"
+    metric_interval_upper_bound = "-3e+08"
     scaling_adjustment          = -(length(var.env_config.azs) * 3)
   }
 
   step_adjustment {
-    metric_interval_lower_bound = "-5e+08"
-    metric_interval_upper_bound = "-3e+08"
+    metric_interval_lower_bound = "-3e+08"
+    metric_interval_upper_bound = "-2e+08"
     scaling_adjustment          = -(length(var.env_config.azs) * 2)
   }
 
   step_adjustment {
-    metric_interval_lower_bound = "-3e+08"
+    metric_interval_lower_bound = "-2e+08"
     metric_interval_upper_bound = "0"
     scaling_adjustment          = -length(var.env_config.azs)
   }
@@ -309,19 +309,19 @@ resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
   policy_type               = "StepScaling"
 
   step_adjustment {
-    metric_interval_lower_bound = "5e+08"
+    metric_interval_lower_bound = "3e+08"
     scaling_adjustment          = length(var.env_config.azs) * 3
   }
 
   step_adjustment {
-    metric_interval_lower_bound = "2e+08"
-    metric_interval_upper_bound = "5e+08"
+    metric_interval_lower_bound = "1e+08"
+    metric_interval_upper_bound = "3e+08"
     scaling_adjustment          = length(var.env_config.azs) * 2
   }
 
   step_adjustment {
     metric_interval_lower_bound = "0"
-    metric_interval_upper_bound = "2e+08"
+    metric_interval_upper_bound = "1e+08"
     scaling_adjustment          = length(var.env_config.azs)
   }
 }
