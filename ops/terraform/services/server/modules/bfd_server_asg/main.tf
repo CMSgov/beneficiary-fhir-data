@@ -2,7 +2,7 @@ locals {
   env = terraform.workspace
 
   # When the CustomEndpoint is empty, fall back to the ReaderEndpoint
-  rds_reader_endpoint = data.external.rds.result["CustomEndpoint"] == "" ? data.external.rds.result["ReaderEndpoint"] : data.external.rds.result["CustomEndpoint"]
+  rds_reader_endpoint = data.aws_ssm_parameter.dburi.value
 
   additional_tags = { Layer = var.layer, role = var.role }
 }
@@ -115,6 +115,10 @@ resource "aws_launch_template" "main" {
   }
 }
 
+data "aws_ssm_parameter" "dburi" {
+  name      = "/bfd/2826-prod/sensitive/dburi"
+  with_decryption = true
+}
 
 ## Autoscaling group
 #
