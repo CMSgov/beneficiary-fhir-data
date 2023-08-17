@@ -789,6 +789,7 @@
                             <its.db.username>${its.db.username}</its.db.username>
                             <its.db.password>${its.db.password}</its.db.password>
                             <its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
+                            <its.testcontainer.aws.image>${its.testcontainer.aws.image}</its.testcontainer.aws.image>
                         </systemPropertyVariables>
                         <includes>
                             <include>**/*IT.java</include>
