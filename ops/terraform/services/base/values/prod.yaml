@@ -96,7 +96,11 @@
 /bfd/${env}/server/nonsensitive/asg_max_instance_count: 24
 /bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: 12
 /bfd/${env}/server/nonsensitive/asg_desired_instance_count: 6
-/bfd/${env}/server/nonsensitive/asg_instance_warmup_time: 430
+# Analysis into the time required for the BFD Server to startup showed that, on average, the Server
+# starts within 30 seconds. However, we want to account for outliers and the longest time it took to
+# start during the period analyzed was 77 seconds. So, 90 provides a decent buffer for the worst
+# cases
+/bfd/${env}/server/nonsensitive/asg_instance_warmup_time: 90
 /bfd/${env}/server/nonsensitive/launch_template_instance_type: c6i.4xlarge
 /bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: 250
 # Indicates the amount of time between batched error alerts posted to Slack when 500s occur in BFD
