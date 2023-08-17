@@ -18,18 +18,23 @@ DB_USERNAME="${DB_USERNAME:-{{ data_server_db_username }}}"
 DB_PASSWORD="${DB_PASSWORD:-{{ data_server_db_password }}}"
 DB_CONNECTIONS_MAX="${DB_CONNECTIONS_MAX:-'{{ data_server_db_connections_max }}'}"
 
-# If DB_USERNAME and DB_PASSWORD is set to "iam", we are using iam for authentication
+# If DB_USERNAME and DB_PASSWORD is set to "iam", we are using iam for authentication. The username and password will be
+# replaced with the actual values from the metadata service and the generate-db-auth-token command.
 if [[ "$DB_USERNAME" == "iam" && "$DB_PASSWORD" == "iam" ]]; then
+  log "Using IAM authentication for database connection"
+
   # Get the hostname from the DB_URL.
   DB_HOST=$(echo "$DB_URL" | sed -n 's/.*\/\/\(.*\):.*/\1/p')
 
   # Get the instance profile role from the metadata service. This is the database username.
-  log "Retrieving RDS IAM authentication token for $DB_HOST"
+  log "Retrieving authentication token for $DB_HOST"
   IMDSv2_TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: $metadata_token_ttl_seconds")
   DB_USERNAME=$(curl -s -S -H "X-aws-ec2-metadata-token: $IMDSv2_TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/)
   for i in {1..3}; do
-    if ! DB_PASSWORD="$(aws rds generate-db-auth-token --hostname "$DB_HOST" --port 5432 --username="$DB_USERNAME")"; then
-      log "Failed to obtain rds auth token for $DB_HOST retrying... (attempt $i/3)"
+    if DB_PASSWORD="$(aws rds generate-db-auth-token --hostname "$DB_HOST" --port 5432 --username="$DB_USERNAME")"; then
+      log "OK"
+    else
+      log "Failed to obtain token for $DB_HOST retrying... (attempt $i/3)"
       sleep 1
     fi
   done

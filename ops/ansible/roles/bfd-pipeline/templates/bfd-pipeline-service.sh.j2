@@ -1,38 +1,49 @@
 #!/bin/bash
 metadata_token_ttl_seconds=300
 
+startup_log={{ db_migrator_dir }}/startup.log
+touch $startup_log
+log() {
+  echo "$(date -u '+%Y-%m-%d %H:%M:%S') $1" >> "$startup_log"
+}
+
 export CCW_RIF_JOB_ENABLED='{{ data_pipeline_ccw_rif_job_enabled }}'
 export S3_BUCKET_NAME='{{ data_pipeline_s3_bucket }}'
 export HICN_HASH_ITERATIONS='{{ data_pipeline_hicn_hash_iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
 export HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
 
-DB_URL="${DB_URL:-{{ data_pipeline_db_url }}}"
-DB_USERNAME="${DB_USERNAME:-{{ data_pipeline_db_username }}}"
-DB_PASSWORD="${DB_PASSWORD:-{{ data_pipeline_db_password }}}"
+DATABASE_URL="${DATABASE_URL:-{{ data_pipeline_db_url }}}"
+DATABASE_USERNAME="${DATABASE_USERNAME:-{{ data_pipeline_db_username }}}"
+DATABASE_PASSWORD="${DATABASE_PASSWORD:-{{ data_pipeline_db_password }}}"
 
-# If DB_USERNAME and DB_PASSWORD is set to "iam", we are using iam for authentication
-if [[ "$DB_USERNAME" == "iam" && "$DB_PASSWORD" == "iam" ]]; then
-  # Get the hostname from the DB_URL.
-  DB_HOST=$(echo "$DB_URL" | sed -n 's/.*\/\/\(.*\):.*/\1/p')
+# If DATABASE_USERNAME and DATABASE_PASSWORD is set to "iam", we are using iam for authentication. The username and password will be
+# replaced with the actual values from the metadata service and the generate-db-auth-token command.
+if [[ "$DATABASE_USERNAME" == "iam" && "$DATABASE_PASSWORD" == "iam" ]]; then
+  log "IAM authentication enabled for database connection"
+
+  # Get the hostname from the DATABASE_URL.
+  DATABASE_HOST=$(echo "$DATABASE_URL" | sed -n 's/.*\/\/\(.*\):.*/\1/p')
 
   # Get the instance profile role from the metadata service. This is the database username.
-  log "Retrieving RDS IAM authentication token for $DB_HOST"
+  log "Retrieving auth token for $DATABASE_HOST"
   IMDSv2_TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: $metadata_token_ttl_seconds")
-  DB_USERNAME=$(curl -s -S -H "X-aws-ec2-metadata-token: $IMDSv2_TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/)
+  DATABASE_USERNAME=$(curl -s -S -H "X-aws-ec2-metadata-token: $IMDSv2_TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/)
   for i in {1..3}; do
-    if ! DB_PASSWORD="$(aws rds generate-db-auth-token --hostname "$DB_HOST" --port 5432 --username="$DB_USERNAME")"; then
-      log "Failed to obtain rds auth token for $DB_HOST retrying... (attempt $i/3)"
+    if DATABASE_PASSWORD="$(aws rds generate-db-auth-token --hostname "$DATABASE_HOST" --port 5432 --username="$DATABASE_USERNAME")"; then
+      log "OK"
+    else
+      log "Failed to token for $DATABASE_HOST retrying... (attempt $i/3)"
       sleep 1
     fi
   done
-  if [[ -z "$DB_PASSWORD" ]]; then
-    log "Failed to obtain rds auth token for $DB_HOST after 3 attempts, exiting..."
+  if [[ -z "$DATABASE_PASSWORD" ]]; then
+    log "Failed to obtain token for $DATABASE_HOST after 3 attempts, exiting..."
     exit 1
   fi
 fi
-export DB_URL
-export DB_USERNAME
-export DB_PASSWORD
+export DATABASE_URL
+export DATABASE_USERNAME
+export DATABASE_PASSWORD
 
 # NOTE: RIF Loader Threads are generally some multiple of available cpus/core, e.g. `$((3 * $(nproc)))`
 export LOADER_THREADS='{{ ansible_processor_vcpus * (rif_thread_multiple | int) }}'

@@ -90,6 +90,15 @@ resource "aws_iam_role" "this" {
               "Principal": {
                   "Service": "ec2.amazonaws.com"
               }
+              "Sid": ""
+          },
+          {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                  "Service": "ssm.amazonaws.com"
+               },
+               "Sid": ""
           }
       ]
   }
@@ -99,6 +108,7 @@ resource "aws_iam_role" "this" {
     data.aws_iam_policy.cloudwatch_agent_xray_policy.arn,
     aws_iam_policy.sqs.arn,
     aws_iam_policy.ssm.arn,
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
   ]
 }
 

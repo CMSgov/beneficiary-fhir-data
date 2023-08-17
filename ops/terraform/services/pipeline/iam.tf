@@ -207,6 +207,14 @@ resource "aws_iam_role" "this" {
         "Service": "ec2.amazonaws.com"
       },
       "Sid": ""
+    },
+    {
+      "Action": "sts:AssumeRole",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ssm.amazonaws.com"
+      },
+      "Sid": ""
     }
   ],
   "Version": "2012-10-17"
@@ -220,6 +228,7 @@ EOF
     "arn:aws:iam::aws:policy/AmazonElasticFileSystemReadOnlyAccess",
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
     "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess",
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
   ]
   max_session_duration = 3600
   name                 = "bfd-${local.env}-bfd_${local.service}-role"
@@ -272,4 +281,26 @@ resource "aws_iam_policy" "etl_s3_rda_paths_rw" {
         }
       ]
   })
+}
+
+data "aws_iam_policy_document" "rds" {
+  statement {
+    sid     = "AllowRdsIamAuth"
+    effect  = "Allow"
+    actions = ["rds-db:connect"]
+    resources = [
+      "arn:aws:rds-db:us-east-1:${local.account_id}:dbuser:${data.aws_rds_cluster.this.cluster_resource_id}/${aws_iam_role.this.name}"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "rds" {
+  name        = "bfd-${local.env}-${local.service}-rds-auth"
+  description = "IAM policy to allow instances to generate RDS auth tokens"
+  policy      = data.aws_iam_policy_document.rds.json
+}
+
+resource "aws_iam_role_policy_attachment" "rds-policy-attach" {
+  role       = aws_iam_role.this.id
+  policy_arn = aws_iam_policy.rds.arn
 }
