@@ -31,13 +31,10 @@ class SqsProgressReporterTest {
     doReturn(5046L).when(reporter).getPid();
     reporter.reportMigratorProgress(appProgress);
     reporter.reportMigratorProgress(migratorProgress);
-    verify(sqsDao)
-        .sendMessage(queueUrl, messageGroupId, "1", "{\"appStage\":\"Started\",\"pid\":5046}");
+    verify(sqsDao).sendMessage(queueUrl, "{\"appStage\":\"Started\",\"messageId\":1,\"pid\":5046}");
     verify(sqsDao)
         .sendMessage(
             queueUrl,
-            messageGroupId,
-            "2",
-            "{\"appStage\":\"Migrating\",\"migrationStage\":{\"migrationFile\":\"detail\",\"stage\":\"Completed\",\"version\":\"1\"},\"pid\":5046}");
+            "{\"appStage\":\"Migrating\",\"messageId\":2,\"migrationStage\":{\"stage\":\"Completed\",\"migrationFile\":\"detail\",\"version\":\"1\"},\"pid\":5046}");
   }
 }

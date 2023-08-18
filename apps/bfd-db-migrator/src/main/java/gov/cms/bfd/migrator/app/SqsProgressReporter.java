@@ -1,6 +1,8 @@
 package gov.cms.bfd.migrator.app;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -11,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -30,7 +33,7 @@ public class SqsProgressReporter {
    * make it more compact. Sorting properties alphabetically can make tests more stable and make it
    * easier to find particular fields in test samples.
    */
-  private final ObjectMapper objectMapper =
+  private static final ObjectMapper objectMapper =
       JsonMapper.builder()
           .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
           .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -86,10 +89,13 @@ public class SqsProgressReporter {
   public void reportMigratorProgress(MigratorProgress progress) {
     final long pid = getPid();
     final var message =
-        new SqsProgressMessage(pid, progress.getStage(), progress.getMigrationProgress());
-    final var messageId = String.valueOf(nextMessageId.getAndIncrement());
+        new SqsProgressMessage(
+            pid,
+            nextMessageId.getAndIncrement(),
+            progress.getStage(),
+            progress.getMigrationProgress());
     final var messageText = convertMessageToJson(message);
-    sqsDao.sendMessage(queueUrl, messageGroupId, messageId, messageText);
+    sqsDao.sendMessage(queueUrl, messageText);
   }
 
   /**
@@ -108,9 +114,23 @@ public class SqsProgressReporter {
    * @param message object to convert into JSON
    * @return converted JSON string
    */
-  private String convertMessageToJson(SqsProgressMessage message) {
+  static String convertMessageToJson(SqsProgressMessage message) {
     try {
       return objectMapper.writeValueAsString(message);
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
+  }
+
+  /**
+   * Does the conversion and wraps any checked exception in an unchecked one.
+   *
+   * @param jsonMessage JSON string representation of a {@link SqsProgressMessage}
+   * @return converted {@link SqsProgressMessage}
+   */
+  static SqsProgressMessage convertJsonToMessage(String jsonMessage) {
+    try {
+      return objectMapper.readValue(jsonMessage, SqsProgressMessage.class);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
@@ -119,13 +139,42 @@ public class SqsProgressReporter {
   /** Java object from which the JSON message is constructed. */
   @Data
   public static class SqsProgressMessage {
+    /** Used to sort messages in original send order when testing. */
+    static final Comparator<SqsProgressMessage> SORT_BY_IDS =
+        Comparator.comparingLong(SqsProgressMessage::getPid)
+            .thenComparingLong(SqsProgressMessage::getMessageId);
+
     /** Our process id. */
     private final long pid;
+
+    /** Unique id for this message (relative to pid). Can be used for sorting messages. */
+    private final long messageId;
 
     /** Stage of app processing. */
     private final MigratorProgress.Stage appStage;
 
     /** Migration stage if appropriate. */
     @Nullable private final DatabaseMigrationProgress migrationStage;
+
+    /**
+     * Initializes an instance. Has approperiate Jackson annotations to allow deserialization of
+     * JSON into an instance.
+     *
+     * @param pid the {@link #pid}
+     * @param messageId the {@link #messageId}
+     * @param appStage the {@link #appStage}
+     * @param migrationStage the {@link #migrationStage}
+     */
+    @JsonCreator
+    public SqsProgressMessage(
+        @JsonProperty("pid") long pid,
+        @JsonProperty("messageId") long messageId,
+        @JsonProperty("appStage") MigratorProgress.Stage appStage,
+        @JsonProperty("migrationStage") @Nullable DatabaseMigrationProgress migrationStage) {
+      this.pid = pid;
+      this.messageId = messageId;
+      this.appStage = appStage;
+      this.migrationStage = migrationStage;
+    }
   }
 }

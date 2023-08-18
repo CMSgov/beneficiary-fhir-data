@@ -1,5 +1,7 @@
 package gov.cms.bfd.sharedutils.database;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,8 +50,10 @@ public class DatabaseMigrationProgress {
    * @param stage value for {@link #stage}
    * @param migrationInfo used to extract values for {@link #version} and {@link #migrationFile}
    */
+  @JsonCreator
   public DatabaseMigrationProgress(
-      DatabaseMigrationProgress.Stage stage, @Nullable MigrationInfo migrationInfo) {
+      @JsonProperty("stage") DatabaseMigrationProgress.Stage stage,
+      @JsonProperty("migrationInfo") @Nullable MigrationInfo migrationInfo) {
     this.stage = stage;
     version =
         (migrationInfo == null || migrationInfo.getVersion() == null)

@@ -61,6 +61,12 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 		</dependency>
+        <!-- Required for JSON annotations on migrator status message objects. -->
+        <dependency>
+            <!-- Used to annotate classes for JSON deserialization. -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
 
         <!-- Testing -->
         <dependency>
