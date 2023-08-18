@@ -235,20 +235,29 @@ resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
   metric_aggregation_type = "Average"
   policy_type             = "StepScaling"
 
+  # All metric interval bounds are calculated by _adding_ the value of the bound to the threshold
+  # of the alarm that this scaling policy operates on. For example, if the alarm threshold is 400MB
+  # and the upper bound and lower bounds for a step adjustment are -300MB and -200MB, the step
+  # adjustment executes if the metric is greater than 100MB and less than 200MB
   step_adjustment {
-    metric_interval_upper_bound = "-3e+08"
+    # Large values are always represented in scientific notation by the AWS API, which causes
+    # perpetual diffs when applying this module if the value in Terraform is not also in
+    # scientific notation. We use format()'s %e format specifier to specify scientific notation
+    # and the .0 precision modifier to ensure that Terraform's formatter does not pad the decimal
+    # part with 0s
+    metric_interval_upper_bound = format("%.0e", -300 * 1000000) # 300 megabytes
     scaling_adjustment          = -(length(var.env_config.azs) * 3)
   }
 
   step_adjustment {
-    metric_interval_lower_bound = "-3e+08"
-    metric_interval_upper_bound = "-2e+08"
+    metric_interval_lower_bound = format("%.0e", -300 * 1000000) # 300 megabytes
+    metric_interval_upper_bound = format("%.0e", -200 * 1000000) # 200 megabytes
     scaling_adjustment          = -(length(var.env_config.azs) * 2)
   }
 
   step_adjustment {
-    metric_interval_lower_bound = "-2e+08"
-    metric_interval_upper_bound = "0"
+    metric_interval_lower_bound = format("%.0e", -200 * 1000000) # 200 megabytes
+    metric_interval_upper_bound = 0                              # 0 megabytes
     scaling_adjustment          = -length(var.env_config.azs)
   }
 }
@@ -308,23 +317,28 @@ resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
   metric_aggregation_type   = "Average"
   policy_type               = "StepScaling"
 
+  # All metric interval bounds are calculated by _adding_ the value of the bound to the threshold
+  # of the alarm that this scaling policy operates on. For example, if the alarm threshold is 100MB
+  # and the upper bound and lower bounds for a step adjustment are 300MB and 100MB, the step
+  # adjustment executes if the metric is greater than 200MB and less than 400MB
   step_adjustment {
-    metric_interval_lower_bound = "3e+08"
+    metric_interval_lower_bound = format("%.0e", 300 * 1000000) # 300 megabytes
     scaling_adjustment          = length(var.env_config.azs) * 3
   }
 
   step_adjustment {
-    metric_interval_lower_bound = "1e+08"
-    metric_interval_upper_bound = "3e+08"
+    metric_interval_lower_bound = format("%.0e", 100 * 1000000) # 100 megabytes
+    metric_interval_upper_bound = format("%.0e", 300 * 1000000) # 300 megabytes
     scaling_adjustment          = length(var.env_config.azs) * 2
   }
 
   step_adjustment {
-    metric_interval_lower_bound = "0"
-    metric_interval_upper_bound = "1e+08"
+    metric_interval_lower_bound = 0                             # 0 megabytes
+    metric_interval_upper_bound = format("%.0e", 100 * 1000000) # 100 megabytes
     scaling_adjustment          = length(var.env_config.azs)
   }
 }
+
 ## Autoscaling Notifications
 #
 resource "aws_autoscaling_notification" "asg_notifications" {
