@@ -21,7 +21,8 @@
         "CLM_DISP_CD"
     ],
     "cclfMapping": [
-        "CCLF5.CLM_DISP_CD"
+        "CCLF5.CLM_DISP_CD",
+        "CCLF6.CLM_DISP_CD"
     ],
     "fhirMapping": [
         {
