@@ -186,7 +186,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
   comparison_operator = "LessThanThreshold"
   datapoints_to_alarm = 5
   evaluation_periods  = 5
-  threshold           = 400000000
+  threshold           = 400 * 1000000 # 400 megabytes
   treat_missing_data  = "ignore"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_low_scaling.arn]
 
@@ -267,7 +267,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   comparison_operator = "GreaterThanThreshold"
   datapoints_to_alarm = 1
   evaluation_periods  = 1
-  threshold           = 100000000
+  threshold           = 100 * 1000000 # 100 megabytes
   treat_missing_data  = "ignore"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_high_scaling.arn]
 
