@@ -1,5 +1,7 @@
 package gov.cms.bfd.sharedutils.database;
 
+import java.util.Optional;
+
 /** The user-configurable options that specify how to access the application's database. */
 public final class DatabaseOptions {
 
@@ -62,6 +64,41 @@ public final class DatabaseOptions {
    */
   public int getMaxPoolSize() {
     return maxPoolSize;
+  }
+
+  public Optional<String> getDatabaseHost() {
+    return getHostPortFromUrl()
+        .map(
+            hostAndPort -> {
+              int separatorOffset = hostAndPort.indexOf(':');
+              return separatorOffset < 0 ? hostAndPort : hostAndPort.substring(0, separatorOffset);
+            });
+  }
+
+  public Optional<Integer> getDatabasePort() {
+    return getHostPortFromUrl()
+        .flatMap(
+            hostAndPort -> {
+              int separatorOffset = hostAndPort.indexOf(':');
+              return separatorOffset > 0
+                  ? Optional.of(Integer.parseInt(hostAndPort.substring(separatorOffset + 1)))
+                  : Optional.empty();
+            });
+  }
+
+  private Optional<String> getHostPortFromUrl() {
+    int hostStartOffset = databaseUrl.indexOf("//");
+    if (hostStartOffset < 0) {
+      return Optional.empty();
+    }
+    hostStartOffset += 2;
+
+    int hostEndOffset = databaseUrl.indexOf("/", hostStartOffset);
+    if (hostEndOffset < 0) {
+      return Optional.empty();
+    }
+
+    return Optional.of(databaseUrl.substring(hostStartOffset, hostEndOffset));
   }
 
   /** {@inheritDoc} */

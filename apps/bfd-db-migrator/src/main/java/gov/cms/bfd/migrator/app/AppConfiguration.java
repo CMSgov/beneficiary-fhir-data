@@ -64,7 +64,7 @@ public class AppConfiguration extends BaseAppConfiguration {
       String flywayScriptLocationOverride,
       @Nullable SqsClient sqsClient,
       String sqsQueueName) {
-    super(metricOptions, databaseOptions);
+    super(metricOptions, databaseOptions, null);
     this.flywayScriptLocationOverride = flywayScriptLocationOverride;
     this.sqsClient = sqsClient;
     this.sqsQueueName = sqsQueueName;

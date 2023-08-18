@@ -1,9 +1,19 @@
 package gov.cms.bfd.sharedutils.config;
 
+import com.google.common.base.Strings;
+import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsClientConfig;
+import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import javax.annotation.Nullable;
+import lombok.Getter;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * Models the common configuration options for BFD applications, should be extended by a specific
@@ -71,39 +81,46 @@ public abstract class BaseAppConfiguration {
    */
   public static final String ENV_VAR_FLYWAY_SCRIPT_LOCATION = "FLYWAY_SCRIPT_LOCATION";
 
+  /** Name of setting containing alternative endpoint URL for RDS service. */
+  public static final String ENV_VAR_KEY_RDS_ENDPOINT = "RDS_ENDPOINT";
+  /** Name of setting containing region name for RDS service queue. */
+  public static final String ENV_VAR_KEY_RDS_REGION = "RDS_REGION";
+  /** Name of setting containing access key for RDS service. */
+  public static final String ENV_VAR_KEY_RDS_ACCESS_KEY = "RDS_ACCESS_KEY";
+  /** Name of setting containing secret key for RDS service. */
+  public static final String ENV_VAR_KEY_RDS_SECRET_KEY = "RDS_SECRET_KEY";
+  /** Name of setting containing username used to obtain an access token for RDS. */
+  public static final String ENV_VAR_KEY_RDS_USERNAME = "RDS_USERNAME";
+
   /** Object for capturing the metrics data. */
-  private final MetricOptions metricOptions;
+  @Getter private final MetricOptions metricOptions;
   /** Holds the configured options for the database connection. */
-  private final DatabaseOptions databaseOptions;
+  @Getter private final DatabaseOptions databaseOptions;
+
+  @Nullable private final RdsClientConfig rdsClientConfig;
 
   /**
-   * Constructs a new {@link BaseAppConfiguration} instance.
+   * Initializes an instance.
    *
    * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()} flyway looks for
    *     migration scripts
    */
-  protected BaseAppConfiguration(MetricOptions metricOptions, DatabaseOptions databaseOptions) {
+  protected BaseAppConfiguration(
+      MetricOptions metricOptions,
+      DatabaseOptions databaseOptions,
+      @Nullable RdsClientConfig rdsClientConfig) {
     this.metricOptions = metricOptions;
     this.databaseOptions = databaseOptions;
+    this.rdsClientConfig = rdsClientConfig;
   }
 
-  /**
-   * Gets the {@link #metricOptions}.
-   *
-   * @return the {@link MetricOptions} that the application will use
-   */
-  public MetricOptions getMetricOptions() {
-    return metricOptions;
-  }
-
-  /**
-   * Gets the {@link #databaseOptions}.
-   *
-   * @return the {@link DatabaseOptions} that the application will use
-   */
-  public DatabaseOptions getDatabaseOptions() {
-    return databaseOptions;
+  public DataSourceFactory createDataSourceFactory() {
+    if (rdsClientConfig == null) {
+      return new HikariDataSourceFactory(databaseOptions, HikariDataSource::new);
+    } else {
+      return new RdsDataSourceFactory(rdsClientConfig, databaseOptions);
+    }
   }
 
   @Override
@@ -160,5 +177,36 @@ public abstract class BaseAppConfiguration {
 
     return new DatabaseOptions(
         databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.orElse(1));
+  }
+
+  /**
+   * Loads {@link RdsClientConfig} for use in configuring RDS clients. Other than {@link
+   * #ENV_VAR_KEY_RDS_USERNAME} these settings are generally only changed from defaults during
+   * localstack based tests.
+   *
+   * @param config used to load configuration values
+   * @return the aws client settings
+   */
+  @Nullable
+  protected static RdsClientConfig loadRdsClientConfig(ConfigLoader config) {
+    RdsClientConfig rdsConfig = null;
+    final String rdsUsername = config.stringValue(ENV_VAR_KEY_RDS_USERNAME, null);
+    if (!Strings.isNullOrEmpty(rdsUsername)) {
+      rdsConfig =
+          RdsClientConfig.rdsBuilder()
+              .region(
+                  config
+                      .parsedOption(ENV_VAR_KEY_RDS_REGION, Region.class, Region::of)
+                      .orElse(null))
+              .endpointOverride(
+                  config
+                      .parsedOption(ENV_VAR_KEY_RDS_ENDPOINT, URI.class, URI::create)
+                      .orElse(null))
+              .accessKey(config.stringValue(ENV_VAR_KEY_RDS_ACCESS_KEY, null))
+              .secretKey(config.stringValue(ENV_VAR_KEY_RDS_SECRET_KEY, null))
+              .username(rdsUsername)
+              .build();
+    }
+    return rdsConfig;
   }
 }
