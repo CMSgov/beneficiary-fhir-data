@@ -2,8 +2,9 @@
 # planned changes in Q4 2022. This only applies to the prod environment.
 # TODO: The following resources should be removed ca Q1 2023
 resource "aws_s3_bucket" "ccw-verification" {
-  count  = local.is_prod ? 1 : 0
-  bucket = "bfd-prod-ccw-verification"
+  count         = local.is_prod ? 1 : 0
+  bucket        = "bfd-prod-ccw-verification"
+  force_destroy = local.is_ephemeral_env
   # similar tags to the sole production etl user
   tags = {
     Layer   = local.layer,

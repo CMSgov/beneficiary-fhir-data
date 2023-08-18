@@ -2,11 +2,14 @@
 # Stateful resources for an environment and associated KMS needed by both stateful and stateless resources
 
 locals {
-  account_id                       = data.aws_caller_identity.current.account_id
-  azs                              = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env                              = var.env
-  env_config                       = { env = local.env, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
-  is_prod                          = substr(var.env, 0, 4) == "prod"
+  account_id       = data.aws_caller_identity.current.account_id
+  azs              = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  established_envs = ["test", "prod-sbx", "prod"]
+  env              = var.env
+  env_config       = { env = local.env, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
+  is_prod          = substr(var.env, 0, 4) == "prod"
+  is_ephemeral_env = !(contains(local.established_envs, var.env))
+
   victor_ops_url                   = var.victor_ops_url
   enable_victor_ops                = local.is_prod # only wake people up for prod alarms
   cloudwatch_sns_topic_policy_spec = <<-EOF
@@ -58,11 +61,13 @@ EOF
 data "aws_caller_identity" "current" {}
 
 data "aws_s3_bucket" "logs" {
-  bucket = "bfd-${local.env}-logs-${local.account_id}"
+  bucket        = "bfd-${local.env}-logs-${local.account_id}"
+  force_destroy = local.is_ephemeral_env
 }
 
 data "aws_s3_bucket" "etl" {
-  bucket = "bfd-${local.env}-etl-${local.account_id}"
+  bucket        = "bfd-${local.env}-etl-${local.account_id}"
+  force_destroy = local.is_ephemeral_env
 }
 
 # vpc

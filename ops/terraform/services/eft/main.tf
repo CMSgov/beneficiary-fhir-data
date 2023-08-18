@@ -75,8 +75,9 @@ locals {
 }
 
 resource "aws_s3_bucket" "this" {
-  bucket = local.full_name
-  tags   = { Name = local.full_name }
+  bucket        = local.full_name
+  force_destroy = local.is_ephemeral_env
+  tags          = { Name = local.full_name }
 }
 
 resource "aws_s3_bucket_versioning" "this" {

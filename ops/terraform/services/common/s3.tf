@@ -1,6 +1,7 @@
 resource "aws_s3_bucket" "this" {
   bucket        = local.is_ephemeral_env ? null : local.admin_bucket
   bucket_prefix = local.is_ephemeral_env ? "bfd-${local.env}-${local.legacy_service}" : null
+  force_destroy = local.is_ephemeral_env
 
   tags = {
     Layer = local.layer,
@@ -52,7 +53,8 @@ resource "aws_s3_bucket_acl" "this" {
 }
 
 resource "aws_s3_bucket" "logging" {
-  bucket = local.logging_bucket
+  bucket        = local.logging_bucket
+  force_destroy = local.is_ephemeral_env
   tags = {
     Layer = local.layer
     role  = "logs"

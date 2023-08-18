@@ -2,11 +2,13 @@
 # Build the stateless resources for an environment (ASG, security groups, etc)
 
 locals {
-  azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config      = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
-  port            = 7443
-  cw_period       = 60 # Seconds
-  cw_eval_periods = 3
+  azs              = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  established_envs = ["test", "prod-sbx", "prod"]
+  env_config       = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
+  is_ephemeral_env = !(contains(local.established_envs, var.env_config.env))
+  port             = 7443
+  cw_period        = 60 # Seconds
+  cw_eval_periods  = 3
 
   # add new peerings here
   vpc_peerings_by_env = {
@@ -63,11 +65,13 @@ data "aws_route53_zone" "local_zone" {
 
 # s3 buckets
 data "aws_s3_bucket" "admin" {
-  bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
+  bucket        = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
+  force_destroy = local.is_ephemeral_env
 }
 
 data "aws_s3_bucket" "logs" {
-  bucket = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
+  bucket        = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
+  force_destroy = local.is_ephemeral_env
 }
 
 # cloudwatch topics
@@ -253,13 +257,13 @@ module "bfd_server_metrics" {
 }
 
 module "bfd_server_slo_alarms" {
-  source                   = "../resources/bfd_server_slo_alarms"
-  env                      = var.env_config.env
+  source = "../resources/bfd_server_slo_alarms"
+  env    = var.env_config.env
 }
 
 module "bfd_server_log_alarms" {
-  source                 = "../resources/bfd_server_log_alarms"
-  env                    = var.env_config.env
+  source = "../resources/bfd_server_log_alarms"
+  env    = var.env_config.env
 }
 
 ## This is where cloudwatch dashboards are managed. 
