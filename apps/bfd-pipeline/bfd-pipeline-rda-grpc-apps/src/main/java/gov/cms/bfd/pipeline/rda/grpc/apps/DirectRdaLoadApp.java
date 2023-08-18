@@ -14,15 +14,21 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsClientConfig;
+import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * Simple application that invokes an RDA API server and writes FISS claims to a database using
@@ -64,8 +70,13 @@ public class DirectRdaLoadApp {
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(options);
     final DatabaseOptions databaseConfig =
         readDatabaseOptions(options, jobConfig.getJobConfig().getWriteThreads());
+    final RdsClientConfig rdsClientConfig = readRdsClientConfig(options);
+    final DataSourceFactory dataSourceFactory =
+        rdsClientConfig != null
+            ? new RdsDataSourceFactory(rdsClientConfig, databaseConfig)
+            : new HikariDataSourceFactory(databaseConfig);
     HikariDataSource pooledDataSource =
-        PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+        PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);
     System.out.printf("thread count is %d%n", jobConfig.getJobConfig().getWriteThreads());
     System.out.printf("database pool size %d%n", pooledDataSource.getMaximumPoolSize());
     try (PipelineApplicationState appState =
@@ -157,5 +168,19 @@ public class DirectRdaLoadApp {
             .build();
     return new RdaLoadOptions(
         jobConfig.build(), grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
+  }
+
+  @Nullable
+  private static RdsClientConfig readRdsClientConfig(ConfigLoader options) {
+    RdsClientConfig rdsConfig = null;
+    final String username = options.stringValue("rds.username", null);
+    if (!Strings.isNullOrEmpty(username)) {
+      rdsConfig =
+          RdsClientConfig.rdsBuilder()
+              .region(options.parsedOption("rds.region", Region.class, Region::of).orElse(null))
+              .username(username)
+              .build();
+    }
+    return rdsConfig;
   }
 }

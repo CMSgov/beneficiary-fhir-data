@@ -9,6 +9,10 @@ public class HikariDataSourceFactory implements DataSourceFactory {
   private final DatabaseOptions dbOptions;
   private final Supplier<HikariDataSource> createDataSource;
 
+  public HikariDataSourceFactory(DatabaseOptions dbOptions) {
+    this(dbOptions, HikariDataSource::new);
+  }
+
   @Override
   public HikariDataSource createDataSource() {
     HikariDataSource pooledDataSource = createDataSource.get();

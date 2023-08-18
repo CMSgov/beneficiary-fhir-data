@@ -16,8 +16,12 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsClientConfig;
+import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
@@ -92,8 +96,13 @@ public class LoadRdaJsonApp {
               port -> {
                 final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
                 final DatabaseOptions databaseConfig = config.createDatabaseOptions();
+                final RdsClientConfig rdsClientConfig = config.createRdsClientConfig().orElse(null);
+                final DataSourceFactory dataSourceFactory =
+                    rdsClientConfig != null
+                        ? new RdsDataSourceFactory(rdsClientConfig, databaseConfig)
+                        : new HikariDataSourceFactory(databaseConfig);
                 final HikariDataSource pooledDataSource =
-                    PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+                    PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);
                 if (config.runSchemaMigration) {
                   LOGGER.info("running database migration");
                   DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
@@ -184,6 +193,10 @@ public class LoadRdaJsonApp {
     private final Optional<String> s3Bucket;
     /** Optional directory name within our S3 bucket. */
     private final Optional<String> s3Directory;
+    /** Optional RDS username for RDS authentication. */
+    private final Optional<String> rdsUsername;
+    /** Optional region for RDS authentication. */
+    private final Optional<Region> rdsRegion;
 
     /**
      * Constructor to load the Configuration options for the private fields above.
@@ -212,6 +225,8 @@ public class LoadRdaJsonApp {
       s3Region = options.parsedOption("s3.region", Region.class, Region::of);
       s3Bucket = options.stringOption("s3.bucket");
       s3Directory = options.stringOption("s3.directory");
+      rdsUsername = options.stringOption("rds.username");
+      rdsRegion = options.parsedOption("rds.region", Region.class, Region::of);
     }
 
     /**
@@ -290,6 +305,18 @@ public class LoadRdaJsonApp {
       return List.of(
           jobConfig.createFissClaimsLoadJob(appState, mbiCache),
           jobConfig.createMcsClaimsLoadJob(appState, mbiCache));
+    }
+
+    private Optional<RdsClientConfig> createRdsClientConfig() {
+      RdsClientConfig rdsConfig = null;
+      if (rdsUsername.isPresent()) {
+        rdsConfig =
+            RdsClientConfig.rdsBuilder()
+                .region(rdsRegion.orElse(null))
+                .username(rdsUsername.get())
+                .build();
+      }
+      return Optional.ofNullable(rdsConfig);
     }
   }
 }

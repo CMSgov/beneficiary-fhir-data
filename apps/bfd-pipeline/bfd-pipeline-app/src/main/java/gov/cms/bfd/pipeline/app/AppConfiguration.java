@@ -26,6 +26,7 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.RdsClientConfig;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import java.net.URI;
 import java.time.Duration;
@@ -420,8 +421,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
       @Nullable CcwRifLoadOptions ccwRifLoadOptions,
-      @Nullable RdaLoadOptions rdaLoadOptions) {
-    super(metricOptions, databaseOptions);
+      @Nullable RdaLoadOptions rdaLoadOptions,
+      @Nullable RdsClientConfig rdsClientConfig) {
+    super(metricOptions, databaseOptions, rdsClientConfig);
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
   }
@@ -519,7 +521,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
     CcwRifLoadOptions ccwRifLoadOptions = loadCcwRifLoadOptions(config, loadOptions);
 
     RdaLoadOptions rdaLoadOptions = loadRdaLoadOptions(config, loadOptions.getIdHasherConfig());
-    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+    RdsClientConfig rdsClientConfig = BaseAppConfiguration.loadRdsClientConfig(config);
+    return new AppConfiguration(
+        metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions, rdsClientConfig);
   }
 
   /**

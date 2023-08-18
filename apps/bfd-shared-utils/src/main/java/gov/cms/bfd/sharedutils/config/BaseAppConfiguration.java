@@ -1,7 +1,6 @@
 package gov.cms.bfd.sharedutils.config;
 
 import com.google.common.base.Strings;
-import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
@@ -117,7 +116,7 @@ public abstract class BaseAppConfiguration {
 
   public DataSourceFactory createDataSourceFactory() {
     if (rdsClientConfig == null) {
-      return new HikariDataSourceFactory(databaseOptions, HikariDataSource::new);
+      return new HikariDataSourceFactory(databaseOptions);
     } else {
       return new RdsDataSourceFactory(rdsClientConfig, databaseOptions);
     }
