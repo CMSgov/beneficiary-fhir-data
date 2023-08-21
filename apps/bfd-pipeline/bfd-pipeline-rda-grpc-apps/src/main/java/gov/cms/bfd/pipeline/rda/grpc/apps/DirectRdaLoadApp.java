@@ -13,11 +13,11 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsClientConfig;
 import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
@@ -70,10 +70,10 @@ public class DirectRdaLoadApp {
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(options);
     final DatabaseOptions databaseConfig =
         readDatabaseOptions(options, jobConfig.getJobConfig().getWriteThreads());
-    final RdsClientConfig rdsClientConfig = readRdsClientConfig(options);
+    final AwsClientConfig awsClientConfig = readAwsClientConfig(options);
     final DataSourceFactory dataSourceFactory =
-        rdsClientConfig != null
-            ? new RdsDataSourceFactory(rdsClientConfig, databaseConfig)
+        awsClientConfig != null
+            ? new RdsDataSourceFactory(awsClientConfig, databaseConfig)
             : new HikariDataSourceFactory(databaseConfig);
     HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);
@@ -129,6 +129,10 @@ public class DirectRdaLoadApp {
    */
   private static DatabaseOptions readDatabaseOptions(ConfigLoader options, int threadCount) {
     return DatabaseOptions.builder()
+        .authenticationType(
+            options
+                .enumOption("database.authMode", DatabaseOptions.AuthenticationType.class)
+                .orElse(DatabaseOptions.AuthenticationType.JDBC))
         .databaseUrl(options.stringValue("database.url"))
         .databaseUsername(options.stringValue("database.user"))
         .databasePassword(options.stringValue("database.password"))
@@ -172,16 +176,11 @@ public class DirectRdaLoadApp {
   }
 
   @Nullable
-  private static RdsClientConfig readRdsClientConfig(ConfigLoader options) {
-    RdsClientConfig rdsConfig = null;
-    final String username = options.stringValue("rds.username", null);
-    if (!Strings.isNullOrEmpty(username)) {
-      rdsConfig =
-          RdsClientConfig.rdsBuilder()
-              .region(options.parsedOption("rds.region", Region.class, Region::of).orElse(null))
-              .username(username)
-              .build();
-    }
+  private static AwsClientConfig readAwsClientConfig(ConfigLoader options) {
+    AwsClientConfig rdsConfig = null;
+    AwsClientConfig.awsBuilder()
+        .region(options.parsedOption("aws.region", Region.class, Region::of).orElse(null))
+        .build();
     return rdsConfig;
   }
 }

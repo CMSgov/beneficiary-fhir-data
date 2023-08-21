@@ -1,16 +1,14 @@
 package gov.cms.bfd.sharedutils.config;
 
-import com.google.common.base.Strings;
+import com.google.common.base.Preconditions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsClientConfig;
 import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import software.amazon.awssdk.regions.Region;
 
@@ -86,23 +84,21 @@ public abstract class BaseAppConfiguration {
    */
   public static final String ENV_VAR_FLYWAY_SCRIPT_LOCATION = "FLYWAY_SCRIPT_LOCATION";
 
-  /** Name of setting containing alternative endpoint URL for RDS service. */
-  public static final String ENV_VAR_KEY_RDS_ENDPOINT = "RDS_ENDPOINT";
-  /** Name of setting containing region name for RDS service queue. */
-  public static final String ENV_VAR_KEY_RDS_REGION = "RDS_REGION";
-  /** Name of setting containing access key for RDS service. */
-  public static final String ENV_VAR_KEY_RDS_ACCESS_KEY = "RDS_ACCESS_KEY";
-  /** Name of setting containing secret key for RDS service. */
-  public static final String ENV_VAR_KEY_RDS_SECRET_KEY = "RDS_SECRET_KEY";
-  /** Name of setting containing username used to obtain an access token for RDS. */
-  public static final String ENV_VAR_KEY_RDS_USERNAME = "RDS_USERNAME";
+  /** Name of setting containing alternative endpoint URL for AWS services. */
+  public static final String ENV_VAR_KEY_AWS_ENDPOINT = "AWS_ENDPOINT";
+  /** Name of setting containing region name for AWS services. */
+  public static final String ENV_VAR_KEY_AWS_REGION = "AWS_REGION";
+  /** Name of setting containing access key for AWS services. */
+  public static final String ENV_VAR_KEY_AWS_ACCESS_KEY = "AWS_ACCESS_KEY";
+  /** Name of setting containing secret key for AWS services. */
+  public static final String ENV_VAR_KEY_AWS_SECRET_KEY = "AWS_SECRET_KEY";
 
   /** Object for capturing the metrics data. */
   @Getter private final MetricOptions metricOptions;
   /** Holds the configured options for the database connection. */
   @Getter private final DatabaseOptions databaseOptions;
-
-  @Nullable private final RdsClientConfig rdsClientConfig;
+  /** Common configuration settings for all AWS clients. * */
+  @Getter private final AwsClientConfig awsClientConfig;
 
   /**
    * Initializes an instance.
@@ -110,21 +106,27 @@ public abstract class BaseAppConfiguration {
    * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()} flyway looks for
    *     migration scripts
+   * @param awsClientConfig common configuration settings for all AWS clients
    */
   protected BaseAppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
-      @Nullable RdsClientConfig rdsClientConfig) {
-    this.metricOptions = metricOptions;
-    this.databaseOptions = databaseOptions;
-    this.rdsClientConfig = rdsClientConfig;
+      AwsClientConfig awsClientConfig) {
+    this.metricOptions = Preconditions.checkNotNull(metricOptions);
+    this.databaseOptions = Preconditions.checkNotNull(databaseOptions);
+    this.awsClientConfig = Preconditions.checkNotNull(awsClientConfig);
   }
 
+  /**
+   * Creates appropriate {@link DataSourceFactory} based on on our {@link DatabaseOptions}.
+   *
+   * @return factory for creating data sources
+   */
   public DataSourceFactory createDataSourceFactory() {
-    if (rdsClientConfig == null) {
-      return new HikariDataSourceFactory(databaseOptions);
+    if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
+      return new RdsDataSourceFactory(awsClientConfig, databaseOptions);
     } else {
-      return new RdsDataSourceFactory(rdsClientConfig, databaseOptions);
+      return new HikariDataSourceFactory(databaseOptions);
     }
   }
 
@@ -135,6 +137,8 @@ public abstract class BaseAppConfiguration {
     builder.append(databaseOptions);
     builder.append(", metricsOptions=");
     builder.append(metricOptions);
+    builder.append(", awsClientConfig=");
+    builder.append(awsClientConfig);
     return builder.toString();
   }
 
@@ -194,33 +198,19 @@ public abstract class BaseAppConfiguration {
   }
 
   /**
-   * Loads {@link RdsClientConfig} for use in configuring RDS clients. Other than {@link
-   * #ENV_VAR_KEY_RDS_USERNAME} these settings are generally only changed from defaults during
-   * localstack based tests.
+   * Loads {@link AwsClientConfig} for use in configuring AWS clients. These settings are generally
+   * only changed from defaults during localstack based tests.
    *
    * @param config used to load configuration values
    * @return the aws client settings
    */
-  @Nullable
-  protected static RdsClientConfig loadRdsClientConfig(ConfigLoader config) {
-    RdsClientConfig rdsConfig = null;
-    final String rdsUsername = config.stringValue(ENV_VAR_KEY_RDS_USERNAME, null);
-    if (!Strings.isNullOrEmpty(rdsUsername)) {
-      rdsConfig =
-          RdsClientConfig.rdsBuilder()
-              .region(
-                  config
-                      .parsedOption(ENV_VAR_KEY_RDS_REGION, Region.class, Region::of)
-                      .orElse(null))
-              .endpointOverride(
-                  config
-                      .parsedOption(ENV_VAR_KEY_RDS_ENDPOINT, URI.class, URI::create)
-                      .orElse(null))
-              .accessKey(config.stringValue(ENV_VAR_KEY_RDS_ACCESS_KEY, null))
-              .secretKey(config.stringValue(ENV_VAR_KEY_RDS_SECRET_KEY, null))
-              .username(rdsUsername)
-              .build();
-    }
-    return rdsConfig;
+  protected static AwsClientConfig loadAwsClientConfig(ConfigLoader config) {
+    return AwsClientConfig.awsBuilder()
+        .region(config.parsedOption(ENV_VAR_KEY_AWS_REGION, Region.class, Region::of).orElse(null))
+        .endpointOverride(
+            config.parsedOption(ENV_VAR_KEY_AWS_ENDPOINT, URI.class, URI::create).orElse(null))
+        .accessKey(config.stringValue(ENV_VAR_KEY_AWS_ACCESS_KEY, null))
+        .secretKey(config.stringValue(ENV_VAR_KEY_AWS_SECRET_KEY, null))
+        .build();
   }
 }

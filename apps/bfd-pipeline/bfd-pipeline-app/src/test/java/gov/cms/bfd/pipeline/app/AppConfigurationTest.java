@@ -82,9 +82,9 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "some_password");
     envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
     envVars.put(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URI, "http://localhost:999999");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY, "unreal-access-key");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY, "unreal-secret-key");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, "unreal-access-key");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, "unreal-secret-key");
     final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
     AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
 
@@ -139,9 +139,9 @@ public class AppConfigurationTest {
         "" + testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().isIdempotencyRequired());
     assertEquals(
         S3ClientConfig.s3Builder()
-            .endpointOverride(URI.create(envVars.get(AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URI)))
-            .accessKey(envVars.get(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY))
-            .secretKey(envVars.get(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY))
+            .endpointOverride(URI.create(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT)))
+            .accessKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY))
+            .secretKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY))
             .build(),
         testAppConfig.getCcwRifLoadOptions().get().getExtractionOptions().getS3ClientConfig());
   }
@@ -386,9 +386,9 @@ public class AppConfigurationTest {
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS, "17");
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET, "my-bucket");
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY, "/my-directory");
-    settingsMap.put(AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URI, "http://localhost:999999");
-    settingsMap.put(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY, "unreal-access-key");
-    settingsMap.put(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY, "unreal-secret-key");
+    settingsMap.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
+    settingsMap.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, "unreal-access-key");
+    settingsMap.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, "unreal-secret-key");
     expectedS3ClientConfig =
         S3ClientConfig.s3Builder()
             .endpointOverride(URI.create("http://localhost:999999"))

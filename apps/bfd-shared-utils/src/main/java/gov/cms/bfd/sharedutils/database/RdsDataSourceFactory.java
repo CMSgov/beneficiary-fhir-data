@@ -41,7 +41,7 @@ public class RdsDataSourceFactory implements DataSourceFactory {
     rdsClient = createRdsClient(rdsClientConfig);
   }
 
-  public RdsDataSourceFactory(RdsClientConfig rdsClientConfig, DatabaseOptions databaseOptions) {
+  public RdsDataSourceFactory(AwsClientConfig rdsClientConfig, DatabaseOptions databaseOptions) {
     this(Clock.systemUTC(), rdsClientConfig, databaseOptions);
   }
 
@@ -62,9 +62,9 @@ public class RdsDataSourceFactory implements DataSourceFactory {
     return rdsClient.utilities().generateAuthenticationToken(tokenRequest);
   }
 
-  static RdsClient createRdsClient(AwsClientConfig rdsClientConfig) {
+  static RdsClient createRdsClient(AwsClientConfig awsClientConfig) {
     RdsClientBuilder builder = RdsClient.builder();
-    rdsClientConfig.configureAwsService(builder);
+    awsClientConfig.configureAwsService(builder);
     builder.credentialsProvider(ProfileCredentialsProvider.create());
     return builder.build();
   }

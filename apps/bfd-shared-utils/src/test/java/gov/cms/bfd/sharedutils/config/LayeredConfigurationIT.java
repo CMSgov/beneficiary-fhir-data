@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -29,7 +28,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     final var ssmCommonPath = ssmBasePath + "common/";
     final var ssmSpecificPath = ssmBasePath + "specific/";
     final var ssmRegion = localstack.getRegion();
-    final var ssmEndpoint = localstack.getEndpointOverride(LocalStackContainer.Service.SSM);
+    final var ssmEndpoint = localstack.getEndpoint();
     final var ssmAccessKey = localstack.getAccessKey();
     final var ssmSecretKey = localstack.getSecretKey();
     final var baseName = LayeredConfigurationIT.class.getSimpleName();
