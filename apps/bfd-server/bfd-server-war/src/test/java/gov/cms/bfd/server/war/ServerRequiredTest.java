@@ -5,9 +5,14 @@ import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_PASSWORD;
 import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_USERNAME;
 import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_PASSWORD;
 import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_USERNAME;
+import static io.restassured.RestAssured.certificate;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.DatabaseTestUtils;
+import io.restassured.authentication.AuthenticationScheme;
+import io.restassured.authentication.CertificateAuthSettings;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
 import javax.sql.DataSource;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -28,6 +33,12 @@ public class ServerRequiredTest {
 
   /** The database url used to set up the tests. */
   private static final String dbUrl = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
+
+  /** The base url to use when hitting the container server endpoint. */
+  protected static String baseServerUrl;
+
+  /** The request spec with the auth certificate to use when connecting to the test server. */
+  protected static RequestSpecification requestAuth;
 
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
@@ -59,9 +70,33 @@ public class ServerRequiredTest {
 
       boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
       assertTrue(startedServer, "Could not startup server for tests.");
+      baseServerUrl = "https://localhost:" + ServerExecutor.testServerPort;
+      setRequestAuth();
       // Setup a shutdown hook to shut down the server when we are finished with all tests
       Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
     }
+  }
+
+  /** Sets the request auth (security certs) used in calls to the local server. */
+  private static void setRequestAuth() {
+    // Get the certs for the test
+    String trustStorePath = "src/test/resources/certs/test-truststore.jks";
+    String keyStorePath = "src/test/resources/certs/test-keystore.p12";
+    String testPassword = "changeit";
+    String keystoreType = "pkcs12";
+    // Set up the cert for the calls
+    AuthenticationScheme testCertificate =
+        certificate(
+            trustStorePath,
+            testPassword,
+            keyStorePath,
+            testPassword,
+            CertificateAuthSettings.certAuthSettings()
+                .keyStoreType(keystoreType)
+                .trustStoreType(keystoreType)
+                .allowAllHostnames());
+    requestAuth =
+        new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
   }
 
   /**

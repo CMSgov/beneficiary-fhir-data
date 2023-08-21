@@ -219,6 +219,13 @@
         </dependency>
 
         <dependency>
+            <!-- Used for endpoint testing automation -->
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <!-- The test framework used for unit and integration tests. -->
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
