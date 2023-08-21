@@ -1091,14 +1091,13 @@ public final class TransformerUtils {
    */
   static Extension createExtensionCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
-    if (!code.isPresent()) throw new IllegalArgumentException();
+    if (code.isEmpty()) throw new IllegalArgumentException();
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
 
     String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
-    Extension extension = new Extension(extensionUrl, coding);
 
-    return extension;
+    return new Extension(extensionUrl, coding);
   }
 
   /**
@@ -2888,7 +2887,8 @@ public final class TransformerUtils {
 
   /**
    * Checks to see if there is a extension that already exists in the careteamcomponent so a
-   * duplicate entry for extension is not added.
+   * duplicate entry for extension is not added. This is meant for non-optional fields only, please
+   * use the method
    *
    * @param careTeamComponent care team component
    * @param referenceUrl the {@link String} is the reference url to compare
@@ -2912,6 +2912,47 @@ public final class TransformerUtils {
         }
 
         if (coding != null && coding.getCode().equals(codeValue)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Checks to see if the supplied code exists, and there is a extension that already exists in the careTeam
+   * component.
+   *
+   * @param careTeamComponent care team component
+   * @param referenceUrl the {@link String} is the reference url to compare
+   * @param codeValue the {@link String} is the code value to compare
+   * @return if the code field is present and has a matching extension added already
+   */
+  public static boolean codePresentAndCareTeamHasMatchingExtension(
+          CareTeamComponent careTeamComponent, String referenceUrl, Optional<?> codeValue) {
+
+    if (codeValue.isEmpty()) {
+      return false;
+    }
+
+    // Code is handled as string in our extensions, so convert it to a string for comparisons
+    String codeValueAsString = String.valueOf(codeValue.get());
+
+    if (!Strings.isNullOrEmpty(referenceUrl)
+            && !Strings.isNullOrEmpty(codeValueAsString)
+            && careTeamComponent.getExtension().size() > 0) {
+
+      List<Extension> extensions = careTeamComponent.getExtensionsByUrl(referenceUrl);
+
+      for (Extension ext : extensions) {
+        Coding coding = null;
+
+        if (ext.getValue() instanceof Coding) {
+          coding = (Coding) ext.getValue();
+        }
+
+        if (coding != null && coding.getCode().equals(codeValueAsString)) {
           return true;
         }
       }

@@ -188,10 +188,10 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
 
         performingHasMatchingExtension =
             claimLine.getProviderParticipatingIndCode().isPresent()
-                && TransformerUtils.careTeamHasMatchingExtension(
+                && TransformerUtils.codePresentAndCareTeamHasMatchingExtension(
                     performingCareTeamMember,
                     TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(claimLine.getProviderParticipatingIndCode().get()));
+                    claimLine.getProviderParticipatingIndCode());
 
         if (!performingHasMatchingExtension) {
           performingCareTeamMember.addExtension(
