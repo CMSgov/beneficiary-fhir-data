@@ -2921,8 +2921,8 @@ public final class TransformerUtils {
   }
 
   /**
-   * Checks to see if the supplied code exists, and there is a extension that already exists in the careTeam
-   * component.
+   * Checks to see if the supplied code exists, and there is a extension that already exists in the
+   * careTeam component.
    *
    * @param careTeamComponent care team component
    * @param referenceUrl the {@link String} is the reference url to compare
@@ -2930,7 +2930,7 @@ public final class TransformerUtils {
    * @return if the code field is present and has a matching extension added already
    */
   public static boolean codePresentAndCareTeamHasMatchingExtension(
-          CareTeamComponent careTeamComponent, String referenceUrl, Optional<?> codeValue) {
+      CareTeamComponent careTeamComponent, String referenceUrl, Optional<?> codeValue) {
 
     if (codeValue.isEmpty()) {
       return false;
@@ -2940,8 +2940,8 @@ public final class TransformerUtils {
     String codeValueAsString = String.valueOf(codeValue.get());
 
     if (!Strings.isNullOrEmpty(referenceUrl)
-            && !Strings.isNullOrEmpty(codeValueAsString)
-            && careTeamComponent.getExtension().size() > 0) {
+        && !Strings.isNullOrEmpty(codeValueAsString)
+        && careTeamComponent.getExtension().size() > 0) {
 
       List<Extension> extensions = careTeamComponent.getExtensionsByUrl(referenceUrl);
 
