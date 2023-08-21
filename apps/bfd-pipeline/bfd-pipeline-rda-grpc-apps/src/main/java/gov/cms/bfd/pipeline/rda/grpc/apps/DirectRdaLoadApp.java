@@ -131,11 +131,11 @@ public class DirectRdaLoadApp {
     return DatabaseOptions.builder()
         .authenticationType(
             options
-                .enumOption("database.authMode", DatabaseOptions.AuthenticationType.class)
+                .enumOption("database.authType", DatabaseOptions.AuthenticationType.class)
                 .orElse(DatabaseOptions.AuthenticationType.JDBC))
         .databaseUrl(options.stringValue("database.url"))
         .databaseUsername(options.stringValue("database.user"))
-        .databasePassword(options.stringValue("database.password"))
+        .databasePassword(options.stringValue("database.password", ""))
         .maxPoolSize(options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)))
         .build();
   }

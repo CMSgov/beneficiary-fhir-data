@@ -12,11 +12,11 @@ import lombok.Getter;
 public final class DatabaseOptions {
   /** Regex that matches proper JDBC URLs and extracts groups containing their host and port. */
   private static final Pattern URL_PATTERN =
-      Pattern.compile("^jdbc:[a-z]+://([^:/]+)(:[0-9]+)?/", Pattern.CASE_INSENSITIVE);
+      Pattern.compile("^jdbc:[a-z]+://([^:/]+)(:([0-9]+))?/", Pattern.CASE_INSENSITIVE);
   /** Group number for host matched by {@link #URL_PATTERN}. */
   private static final int URL_HOST_GROUP = 1;
   /** Group number for port matched by {@link #URL_PATTERN}. */
-  private static final int URL_PORT_GROUP = 2;
+  private static final int URL_PORT_GROUP = 3;
 
   public enum AuthenticationType {
     /** Authenticate using plain JDBC authentication with a provided password. * */
