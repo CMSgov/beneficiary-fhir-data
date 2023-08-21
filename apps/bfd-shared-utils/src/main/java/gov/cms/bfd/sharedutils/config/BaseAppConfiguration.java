@@ -22,6 +22,12 @@ public abstract class BaseAppConfiguration {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
+   * #getDatabaseOptions()} {@link DatabaseOptions#authenticationType} value.
+   */
+  public static final String ENV_VAR_KEY_DATABASE_AUTH_TYPE = "DATABASE_AUTH_TYPE";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
    * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUrl()} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_URL = "DATABASE_URL";
@@ -168,14 +174,23 @@ public abstract class BaseAppConfiguration {
    * @return the database options
    */
   protected static DatabaseOptions loadDatabaseOptions(ConfigLoader config) {
+    DatabaseOptions.AuthenticationType databaseAuthType =
+        config
+            .enumOption(ENV_VAR_KEY_DATABASE_AUTH_TYPE, DatabaseOptions.AuthenticationType.class)
+            .orElse(DatabaseOptions.AuthenticationType.JDBC);
     String databaseUrl = config.stringValue(ENV_VAR_KEY_DATABASE_URL);
     String databaseUsername = config.stringValue(ENV_VAR_KEY_DATABASE_USERNAME);
     String databasePassword = config.stringValue(ENV_VAR_KEY_DATABASE_PASSWORD);
     Optional<Integer> databaseMaxPoolSize =
         config.positiveIntOption(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
 
-    return new DatabaseOptions(
-        databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.orElse(1));
+    return DatabaseOptions.builder()
+        .authenticationType(databaseAuthType)
+        .databaseUrl(databaseUrl)
+        .databaseUsername(databaseUsername)
+        .databasePassword(databasePassword)
+        .maxPoolSize(databaseMaxPoolSize.orElse(1))
+        .build();
   }
 
   /**

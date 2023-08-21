@@ -1,7 +1,9 @@
 package gov.cms.bfd.sharedutils.database;
 
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import java.time.Clock;
+import javax.annotation.concurrent.GuardedBy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,20 +12,31 @@ import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.RdsClientBuilder;
 import software.amazon.awssdk.services.rds.model.GenerateAuthenticationTokenRequest;
 
-import javax.annotation.concurrent.GuardedBy;
-
 @AllArgsConstructor
 public class RdsDataSourceFactory implements DataSourceFactory {
   private static final long TokenTTLMillis = 5_000;
   private final Clock clock;
-  private final RdsClientConfig rdsClientConfig;
+  private final String databaseUser;
+  private final String databaseHost;
+  private final int databasePort;
   private final HikariDataSourceFactory realDataSourceFactory;
   private final RdsClient rdsClient;
 
   public RdsDataSourceFactory(
-      Clock clock, RdsClientConfig rdsClientConfig, DatabaseOptions databaseOptions) {
+      Clock clock, AwsClientConfig rdsClientConfig, DatabaseOptions databaseOptions) {
     this.clock = clock;
-    this.rdsClientConfig = rdsClientConfig;
+    if (databaseOptions.getAuthenticationType() != DatabaseOptions.AuthenticationType.RDS) {
+      throw reportInvalidDatabaseOptions();
+    }
+    databaseUser = databaseOptions.getDatabaseUsername();
+    databaseHost =
+        databaseOptions
+            .getDatabaseHost()
+            .orElseThrow(RdsDataSourceFactory::reportInvalidDatabaseOptions);
+    databasePort =
+        databaseOptions
+            .getDatabasePort()
+            .orElseThrow(RdsDataSourceFactory::reportInvalidDatabaseOptions);
     realDataSourceFactory = new HikariDataSourceFactory(databaseOptions, RdsHikariDataSource::new);
     rdsClient = createRdsClient(rdsClientConfig);
   }
@@ -41,19 +54,24 @@ public class RdsDataSourceFactory implements DataSourceFactory {
     var tokenRequest =
         GenerateAuthenticationTokenRequest.builder()
             .credentialsProvider(ProfileCredentialsProvider.create())
-            .username(rdsClientConfig.getUsername())
-            .port(rdsClientConfig.getDbPort())
-            .hostname(rdsClientConfig.getDbInstanceId())
+            .username(databaseUser)
+            .hostname(databaseHost)
+            .port(databasePort)
             .build();
 
     return rdsClient.utilities().generateAuthenticationToken(tokenRequest);
   }
 
-  static RdsClient createRdsClient(RdsClientConfig rdsClientConfig) {
+  static RdsClient createRdsClient(AwsClientConfig rdsClientConfig) {
     RdsClientBuilder builder = RdsClient.builder();
-    rdsClientConfig.configureRdsService(builder);
+    rdsClientConfig.configureAwsService(builder);
     builder.credentialsProvider(ProfileCredentialsProvider.create());
     return builder.build();
+  }
+
+  static IllegalArgumentException reportInvalidDatabaseOptions() {
+    return new IllegalArgumentException(
+        "RDS Authentication must be enabled and a valid JDBC URL must include host and port");
   }
 
   @NoArgsConstructor

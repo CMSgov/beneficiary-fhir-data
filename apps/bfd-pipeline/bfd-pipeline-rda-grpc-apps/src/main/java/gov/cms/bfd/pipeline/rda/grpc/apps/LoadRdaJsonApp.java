@@ -245,7 +245,12 @@ public class LoadRdaJsonApp {
      * @return the database options to be used
      */
     private DatabaseOptions createDatabaseOptions() {
-      return new DatabaseOptions(dbUrl, dbUser, dbPassword, 10);
+      return DatabaseOptions.builder()
+          .databaseUrl(dbUrl)
+          .databaseUsername(dbUser)
+          .databasePassword(dbPassword)
+          .maxPoolSize(10)
+          .build();
     }
 
     /**

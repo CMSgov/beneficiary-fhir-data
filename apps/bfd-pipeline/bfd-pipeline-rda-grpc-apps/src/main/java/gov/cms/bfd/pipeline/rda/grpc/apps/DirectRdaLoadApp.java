@@ -128,11 +128,12 @@ public class DirectRdaLoadApp {
    * @return the database options
    */
   private static DatabaseOptions readDatabaseOptions(ConfigLoader options, int threadCount) {
-    return new DatabaseOptions(
-        options.stringValue("database.url", null),
-        options.stringValue("database.user", null),
-        options.stringValue("database.password", null),
-        options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)));
+    return DatabaseOptions.builder()
+        .databaseUrl(options.stringValue("database.url"))
+        .databaseUsername(options.stringValue("database.user"))
+        .databasePassword(options.stringValue("database.password"))
+        .maxPoolSize(options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)))
+        .build();
   }
 
   /**

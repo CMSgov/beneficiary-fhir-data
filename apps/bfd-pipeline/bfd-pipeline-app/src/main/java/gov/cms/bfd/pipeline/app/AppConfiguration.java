@@ -589,9 +589,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
       databaseMaxPoolSize = Optional.of(loaderThreads * 2);
     }
 
-    return new DatabaseOptions(
-        databaseOptions.getDatabaseUrl(), databaseOptions.getDatabaseUsername(),
-        databaseOptions.getDatabasePassword(), databaseMaxPoolSize.orElse(1));
+    return databaseOptions.toBuilder().maxPoolSize(databaseMaxPoolSize.orElse(1)).build();
   }
 
   /**

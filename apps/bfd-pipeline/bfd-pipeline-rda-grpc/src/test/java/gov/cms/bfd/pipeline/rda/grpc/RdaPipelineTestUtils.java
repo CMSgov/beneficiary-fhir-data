@@ -93,7 +93,13 @@ public class RdaPipelineTestUtils {
     // the HSQLDB database will be destroyed when this connection is closed
     try (Connection dbLifetimeConnection =
         DriverManager.getConnection(dbUrl + ";shutdown=true", "", "")) {
-      final DatabaseOptions dbOptions = new DatabaseOptions(dbUrl, "", "", 10);
+      final DatabaseOptions dbOptions =
+          DatabaseOptions.builder()
+              .databaseUrl(dbUrl)
+              .databaseUsername("")
+              .databasePassword("")
+              .maxPoolSize(10)
+              .build();
       final MetricRegistry appMetrics = new MetricRegistry();
       final DataSourceFactory dataSourceFactory = new HikariDataSourceFactory(dbOptions);
       final HikariDataSource dataSource =
