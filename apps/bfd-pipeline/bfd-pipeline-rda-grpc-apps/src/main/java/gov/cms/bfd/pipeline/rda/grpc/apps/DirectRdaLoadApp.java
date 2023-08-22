@@ -147,7 +147,7 @@ public class DirectRdaLoadApp {
    * Reads and sets the rda options to load from a config file.
    *
    * @param options the config options to use
-   * @return the rda confic load options
+   * @return the rda load options
    */
   private static RdaLoadOptions readRdaLoadOptionsFromProperties(ConfigLoader options) {
     final IdHasher.Config idHasherConfig =
@@ -178,6 +178,12 @@ public class DirectRdaLoadApp {
         jobConfig.build(), grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
   }
 
+  /**
+   * Reads aws client settings from the configuration.
+   *
+   * @param options the config options to use
+   * @return the aws config settings
+   */
   @Nullable
   private static AwsClientConfig readAwsClientConfig(ConfigLoader options) {
     AwsClientConfig rdsConfig = null;

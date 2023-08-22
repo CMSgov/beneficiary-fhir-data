@@ -100,9 +100,9 @@ public class LoadRdaJsonApp {
                 final DataSourceFactory dataSourceFactory =
                     databaseConfig.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS
                         ? RdsDataSourceFactory.builder()
-                                  .awsClientConfig(awsClientConfig)
-                                  .databaseOptions(databaseConfig)
-                                  .build()
+                            .awsClientConfig(awsClientConfig)
+                            .databaseOptions(databaseConfig)
+                            .build()
                         : new HikariDataSourceFactory(databaseConfig);
                 final HikariDataSource pooledDataSource =
                     PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);

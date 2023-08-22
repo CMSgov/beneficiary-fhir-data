@@ -125,9 +125,9 @@ public abstract class BaseAppConfiguration {
   public DataSourceFactory createDataSourceFactory() {
     if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
       return RdsDataSourceFactory.builder()
-                .awsClientConfig(awsClientConfig)
-                .databaseOptions(databaseOptions)
-                .build();
+          .awsClientConfig(awsClientConfig)
+          .databaseOptions(databaseOptions)
+          .build();
     } else {
       return new HikariDataSourceFactory(databaseOptions);
     }
