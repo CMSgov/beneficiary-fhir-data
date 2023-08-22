@@ -32,8 +32,8 @@ resource "aws_elb" "main" {
   }
 
   health_check {
-    healthy_threshold   = 5 # Match HealthApt
-    unhealthy_threshold = 2 # Match HealthApt
+    healthy_threshold   = 3 # Most servers are init'd within 30 seconds, so this should give enough time
+    unhealthy_threshold = 4
     target              = "TCP:${var.egress.port}"
     interval            = 10 # (seconds) Match HealthApt
     timeout             = 5  # (seconds) Match HealthApt
