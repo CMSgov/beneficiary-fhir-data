@@ -73,7 +73,10 @@ public class DirectRdaLoadApp {
     final AwsClientConfig awsClientConfig = readAwsClientConfig(options);
     final DataSourceFactory dataSourceFactory =
         awsClientConfig != null
-            ? new RdsDataSourceFactory(awsClientConfig, databaseConfig)
+            ? RdsDataSourceFactory.builder()
+                .awsClientConfig(awsClientConfig)
+                .databaseOptions(databaseConfig)
+                .build()
             : new HikariDataSourceFactory(databaseConfig);
     HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);
