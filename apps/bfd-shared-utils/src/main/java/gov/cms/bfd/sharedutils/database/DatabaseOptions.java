@@ -54,7 +54,7 @@ public final class DatabaseOptions {
       int maxPoolSize) {
     Preconditions.checkArgument(
         !Strings.isNullOrEmpty(databaseUrl), "databaseUrl must be non-empty");
-    Preconditions.checkNotNull(databaseUsername, "databaseUsername must be null");
+    Preconditions.checkNotNull(databaseUsername, "databaseUsername must not be null");
     Preconditions.checkArgument(
         authenticationType == AuthenticationType.RDS || databasePassword != null);
     this.authenticationType =

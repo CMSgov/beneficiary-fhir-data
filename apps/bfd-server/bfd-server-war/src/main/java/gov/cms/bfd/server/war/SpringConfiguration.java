@@ -6,6 +6,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
+import com.google.common.base.Strings;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
@@ -22,9 +23,14 @@ import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -56,12 +62,15 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import software.amazon.awssdk.regions.Region;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
 public class SpringConfiguration {
+  /** The authentication type that BFD will use for all database connections. */
+  public static final String PROP_DB_AUTH_TYPE = "bfdServer.db.authType";
   /** The database url that BFD will use for all database calls. */
   public static final String PROP_DB_URL = "bfdServer.db.url";
   /** The database username. */
@@ -86,6 +95,9 @@ public class SpringConfiguration {
    * integration testing.
    */
   public static final String PROP_INCLUDE_FAKE_ORG_NAME = "bfdServer.include.fake.org.name";
+  /** Name of AWS region for any AWS services. */
+  public static final String PROP_AWS_REGION = "bfdServer.aws.region";
+
   /** The database transaction timeout value (seconds). */
   public static final int TRANSACTION_TIMEOUT = 30;
 
@@ -137,33 +149,69 @@ public class SpringConfiguration {
   }
 
   /**
-   * Sets up the application's database connection.
+   * Creates an {@link AwsClientConfig} used for all AWS services.
    *
+   * @param awsRegionName optional region name
+   * @return the config
+   */
+  @Bean
+  public AwsClientConfig awsClientConfig(
+      @Value("${" + PROP_AWS_REGION + ":}") String awsRegionName) {
+    Region region = Strings.isNullOrEmpty(awsRegionName) ? null : Region.of(awsRegionName);
+    return AwsClientConfig.awsBuilder().region(region).build();
+  }
+
+  /**
+   * Creates a factory to create {@link DataSource}s.
+   *
+   * @param authTypeName whether to use RDS or JDBC authentication
    * @param url the JDBC URL of the database for the application
    * @param username the database username to use
    * @param password the database password to use
    * @param connectionsMaxText the maximum number of database connections to use
+   * @param awsClientConfig common AWS settings
+   * @return the factory
+   */
+  @Bean
+  public DataSourceFactory dataSourceFactory(
+      @Value("${" + PROP_DB_AUTH_TYPE + ":JDBC}") String authTypeName,
+      @Value("${" + PROP_DB_URL + "}") String url,
+      @Value("${" + PROP_DB_USERNAME + "}") String username,
+      @Value("${" + PROP_DB_PASSWORD + ":}") String password,
+      @Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText,
+      AwsClientConfig awsClientConfig) {
+    final var authType = DatabaseOptions.AuthenticationType.valueOf(authTypeName);
+    final int maxPoolSize = DatabaseUtils.computeMaximumPoolSize(connectionsMaxText);
+    final var databaseOptions =
+        DatabaseOptions.builder()
+            .authenticationType(authType)
+            .databaseUrl(url)
+            .databaseUsername(username)
+            .databasePassword(password)
+            .maxPoolSize(maxPoolSize)
+            .build();
+    if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
+      return new RdsDataSourceFactory(awsClientConfig, databaseOptions);
+    } else {
+      return new HikariDataSourceFactory(databaseOptions);
+    }
+  }
+
+  /**
+   * Creates the application's database connection pool using a factory.
+   *
+   * @param dataSourceFactory factory used to create {@link DataSource}s
    * @param metricRegistry the {@link MetricRegistry} for the application
    * @return the {@link DataSource} that provides the application's database connection
    */
   @Bean(destroyMethod = "close")
-  public DataSource dataSource(
-      @Value("${" + PROP_DB_URL + "}") String url,
-      @Value("${" + PROP_DB_USERNAME + "}") String username,
-      @Value("${" + PROP_DB_PASSWORD + "}") String password,
-      @Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText,
-      MetricRegistry metricRegistry) {
-    DataSource poolingDataSource;
+  public DataSource dataSource(DataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
 
-    HikariDataSource newDataSource = new HikariDataSource();
-    newDataSource.setJdbcUrl(url);
-    if (username != null && !username.isEmpty()) newDataSource.setUsername(username);
-    if (password != null && !password.isEmpty()) newDataSource.setPassword(password);
-    DatabaseUtils.configureDataSource(newDataSource, connectionsMaxText, metricRegistry);
-    poolingDataSource = newDataSource;
+    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
+    DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);
 
     // Wrap the pooled DataSource in a proxy that records performance data.
-    return ProxyDataSourceBuilder.create(poolingDataSource)
+    return ProxyDataSourceBuilder.create(pooledDataSource)
         .name("BFD-Data")
         .listener(new QueryLoggingListener())
         .proxyResultSet()
