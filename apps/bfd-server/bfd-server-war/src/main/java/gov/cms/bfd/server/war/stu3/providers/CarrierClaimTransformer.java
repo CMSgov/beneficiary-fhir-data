@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
@@ -171,53 +172,30 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
             TransformerUtils.createCodeableConcept(
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
-        boolean performingHasMatchingExtension =
-            TransformerUtils.careTeamHasMatchingExtension(
-                performingCareTeamMember,
-                TransformerUtils.getReferenceUrl(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD),
-                String.valueOf(claimLine.getProviderTypeCode()));
+        // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
+        TransformerUtils.addCareTeamExtension(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, claimLine.getProviderTypeCode(), performingCareTeamMember,
+                                              eob);
 
-        if (!performingHasMatchingExtension) {
-          // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-          performingCareTeamMember.addExtension(
-              TransformerUtils.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD,
-                  claimLine.getProviderTypeCode()));
-        }
-
-        performingHasMatchingExtension =
-            claimLine.getProviderParticipatingIndCode().isPresent()
-                && TransformerUtils.codePresentAndCareTeamHasMatchingExtension(
-                    performingCareTeamMember,
-                    TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    claimLine.getProviderParticipatingIndCode());
-
-        if (!performingHasMatchingExtension) {
-          performingCareTeamMember.addExtension(
-              TransformerUtils.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.PRTCPTNG_IND_CD,
-                  claimLine.getProviderParticipatingIndCode()));
-        }
+        // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+        TransformerUtils.addCareTeamExtension(CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode(), performingCareTeamMember,
+                                              eob);
 
         // addExtensionReference
-        if (claimLine.getOrganizationNpi().isPresent()) {
-          performingHasMatchingExtension =
-              TransformerUtils.careTeamHasMatchingExtension(
-                  performingCareTeamMember,
-                  TransformerConstants.CODING_NPI_US,
-                  claimLine.getOrganizationNpi().get());
+        boolean createNpiUsExtension = claimLine.getOrganizationNpi().isPresent() &&
+                !Strings.isNullOrEmpty(claimLine.getOrganizationNpi().get()) &&
+                !TransformerUtils.careTeamHasMatchingExtension(performingCareTeamMember,
+                                                               TransformerConstants.CODING_NPI_US,
+                                                               claimLine.getOrganizationNpi().get());
 
-          if (!performingHasMatchingExtension) {
+          if (createNpiUsExtension) {
             TransformerUtils.addExtensionCoding(
                 performingCareTeamMember,
                 TransformerConstants.CODING_NPI_US,
                 TransformerConstants.CODING_NPI_US,
                 npiOrgLookup.retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
-                "" + claimLine.getOrganizationNpi().get());
+                claimLine.getOrganizationNpi().get());
           }
-        }
+
       }
 
       /*

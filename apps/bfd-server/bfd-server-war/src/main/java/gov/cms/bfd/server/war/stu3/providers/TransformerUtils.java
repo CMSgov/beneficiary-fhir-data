@@ -49,6 +49,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
@@ -215,7 +216,7 @@ public final class TransformerUtils {
    * @return a new {@link Money} instance, with the specified {@link Money#getValue()}
    */
   static Money createMoney(Optional<? extends Number> amountValue) {
-    if (!amountValue.isPresent()) throw new IllegalArgumentException();
+    if (amountValue.isEmpty()) throw new IllegalArgumentException();
 
     Money money = new Money();
     money.setSystem(TransformerConstants.CODING_MONEY);
@@ -928,7 +929,7 @@ public final class TransformerUtils {
    */
   static Extension createExtensionIdentifier(
       CcwCodebookInterface ccwVariable, Optional<String> identifierValue) {
-    if (!identifierValue.isPresent()) throw new IllegalArgumentException();
+    if (identifierValue.isEmpty()) throw new IllegalArgumentException();
 
     Identifier identifier = createIdentifier(ccwVariable, identifierValue.get());
 
@@ -997,7 +998,7 @@ public final class TransformerUtils {
       CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
-    if (!dateYear.isPresent()) {
+    if (dateYear.isEmpty()) {
       throw new NoSuchElementException();
     }
     try {
@@ -2887,8 +2888,8 @@ public final class TransformerUtils {
 
   /**
    * Checks to see if there is a extension that already exists in the careteamcomponent so a
-   * duplicate entry for extension is not added. This is meant for non-optional fields only, please
-   * use the method
+   * duplicate entry for extension is not added. This is meant for non-Optional fields only, please
+   * use the method codePresentAndCareTeamHasMatchingExtension for Optionals.
    *
    * @param careTeamComponent care team component
    * @param referenceUrl the {@link String} is the reference url to compare
@@ -2921,44 +2922,76 @@ public final class TransformerUtils {
   }
 
   /**
-   * Checks to see if the supplied code exists, and there is a extension that already exists in the
-   * careTeam component.
+   * Adds a care team extension to the supplied careTeamComponent if there is not already
+   * an extension for the supplied extensionValue and extensionValue is not empty.
    *
-   * @param careTeamComponent care team component
-   * @param referenceUrl the {@link String} is the reference url to compare
-   * @param codeValue the {@link String} is the code value to compare
-   * @return if the code field is present and has a matching extension added already
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
    */
-  public static boolean codePresentAndCareTeamHasMatchingExtension(
-      CareTeamComponent careTeamComponent, String referenceUrl, Optional<?> codeValue) {
+  public static void addCareTeamExtension(CcwCodebookVariable codebookVariable, Optional extensionValue,
+                                          CareTeamComponent careTeamComponent,
+                                          ExplanationOfBenefit eob) {
 
-    if (codeValue.isEmpty()) {
-      return false;
+    // If our extension value is an empty optional or empty/null string, nothing to add
+    if (extensionValue.isEmpty() || Strings.isNullOrEmpty(String.valueOf(extensionValue.get()))) {
+      return;
     }
 
-    // Code is handled as string in our extensions, so convert it to a string for comparisons
-    String codeValueAsString = String.valueOf(codeValue.get());
+    String valueAsString = String.valueOf(extensionValue.get());
 
-    if (!Strings.isNullOrEmpty(referenceUrl)
-        && !Strings.isNullOrEmpty(codeValueAsString)
-        && careTeamComponent.getExtension().size() > 0) {
+    addCareTeamExtension(codebookVariable, valueAsString, careTeamComponent, eob);
+  }
 
-      List<Extension> extensions = careTeamComponent.getExtensionsByUrl(referenceUrl);
-
-      for (Extension ext : extensions) {
-        Coding coding = null;
-
-        if (ext.getValue() instanceof Coding) {
-          coding = (Coding) ext.getValue();
-        }
-
-        if (coding != null && coding.getCode().equals(codeValueAsString)) {
-          return true;
-        }
-      }
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already
+   * an extension for the supplied extensionValue and extensionValue is not empty.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  public static void addCareTeamExtension(CcwCodebookVariable codebookVariable, char extensionValue,
+                                          CareTeamComponent careTeamComponent,
+                                          ExplanationOfBenefit eob) {
+    // If our extension value is empty/null, nothing to add
+    if (Strings.isNullOrEmpty(String.valueOf(extensionValue))) {
+      return;
     }
 
-    return false;
+    String valueAsString = String.valueOf(extensionValue);
+
+    addCareTeamExtension(codebookVariable, valueAsString, careTeamComponent, eob);
+  }
+
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already
+   * an extension for the supplied extensionValue.
+   *
+   * <p>This method is kept private to dissuade the unpacking of
+   * optionals at the caller level; use the methods above for optional/char values so that we can do
+   * validation within the util method and keep it out of the calling code. If we have mandatory string
+   * values, this can be opened up, but should be noted the values should be passed in as-is from the
+   * line, not transformed prior to the call.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  private static void addCareTeamExtension(CcwCodebookVariable codebookVariable, String extensionValue,
+                                           CareTeamComponent careTeamComponent,
+                                           ExplanationOfBenefit eob) {
+    String referenceUrl = getReferenceUrl(codebookVariable);
+    boolean hasExtension = careTeamHasMatchingExtension(careTeamComponent, referenceUrl, extensionValue);
+
+    // If the extension doesnt exist, add it
+    if (!hasExtension) {
+      careTeamComponent.addExtension(
+              createExtensionCoding(eob, codebookVariable, extensionValue));
+    }
   }
 
   /**

@@ -181,21 +181,7 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        boolean createCareTeamExtensionForIndCode =
-            claimLine.getProviderParticipatingIndCode().isPresent()
-                && !TransformerUtils.careTeamHasMatchingExtension(
-                    performingCareTeamMember,
-                    TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(claimLine.getProviderParticipatingIndCode().get()));
-
-        // If we're missing the care team extension and this code exists, make one
-        if (createCareTeamExtensionForIndCode) {
-          performingCareTeamMember.addExtension(
-              TransformerUtils.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.PRTCPTNG_IND_CD,
-                  claimLine.getProviderParticipatingIndCode()));
-        }
+        TransformerUtils.addCareTeamExtension(CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode(), performingCareTeamMember, eob);
       }
 
       TransformerUtils.mapHcpcs(

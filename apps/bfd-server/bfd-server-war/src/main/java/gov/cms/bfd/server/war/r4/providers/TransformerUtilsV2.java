@@ -60,6 +60,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2.CurrencyIdentifier;
+import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -676,6 +677,79 @@ public final class TransformerUtilsV2 {
     Extension extension = new Extension(extensionUrl, coding);
 
     return extension;
+  }
+
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already
+   * an extension for the supplied extensionValue and extensionValue is not empty.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  public static void addCareTeamExtension(CcwCodebookVariable codebookVariable, Optional extensionValue,
+                                          ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+                                          ExplanationOfBenefit eob) {
+
+    // If our extension value is an empty optional or empty/null string, nothing to add
+    if (extensionValue.isEmpty() || Strings.isNullOrEmpty(String.valueOf(extensionValue.get()))) {
+      return;
+    }
+
+    String valueAsString = String.valueOf(extensionValue.get());
+
+    addCareTeamExtension(codebookVariable, valueAsString, careTeamComponent, eob);
+  }
+
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already
+   * an extension for the supplied extensionValue and extensionValue is not empty.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  public static void addCareTeamExtension(CcwCodebookVariable codebookVariable, char extensionValue,
+                                          ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+                                          ExplanationOfBenefit eob) {
+    // If our extension value is empty/null, nothing to add
+    if (Strings.isNullOrEmpty(String.valueOf(extensionValue))) {
+      return;
+    }
+
+    String valueAsString = String.valueOf(extensionValue);
+
+    addCareTeamExtension(codebookVariable, valueAsString, careTeamComponent, eob);
+  }
+
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already
+   * an extension for the supplied extensionValue.
+   *
+   * <p>This method is kept private to dissuade the unpacking of
+   * optionals at the caller level; use the methods above for optional/char values so that we can do
+   * validation within the util method and keep it out of the calling code. If we have mandatory string
+   * values, this can be opened up, but should be noted the values should be passed in as-is from the
+   * line, not transformed prior to the call.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  private static void addCareTeamExtension(CcwCodebookVariable codebookVariable, String extensionValue,
+                                          ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+                                          ExplanationOfBenefit eob) {
+    String referenceUrl = getReferenceUrl(codebookVariable);
+    boolean hasExtension = careTeamHasMatchingExtension(careTeamComponent, referenceUrl, extensionValue);
+
+    // If the extension doesnt exist, add it
+    if (!hasExtension) {
+      careTeamComponent.addExtension(
+              createExtensionCoding(eob, codebookVariable, extensionValue));
+    }
   }
 
   /**

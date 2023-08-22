@@ -154,8 +154,7 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
           claimGroup.getProfessionalComponentCharge());
     }
 
-    // TODO If actually nullable, should be Optional.
-    if (claimGroup.getClaimTotalPPSCapitalAmount() != null) {
+    if (claimGroup.getClaimTotalPPSCapitalAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob,
           CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
