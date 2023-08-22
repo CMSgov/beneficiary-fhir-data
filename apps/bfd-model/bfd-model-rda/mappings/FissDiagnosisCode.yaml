@@ -1,7 +1,7 @@
 mappings:
 - id: FissDiagnosisCode
   messageClassName: gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode
-  entityClassName: gov.cms.bfd.model.rda.RdaFissDiagnosisCode
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode
   table:
     name: fiss_diagnosis_codes
     schema: rda
