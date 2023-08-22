@@ -27,7 +27,10 @@
         "CLM_LINE_NUM"
     ],
     "cclfMapping": [
-        "CCLF2.CLM_LINE_NUM"
+        "CCLF2.CLM_LINE_NUM",
+        "CCLF5.CLM_LINE_NUM",
+        "CCLF6.CLM_LINE_NUM",
+        "CCLFB.CLM_LINE_NUM"
     ],
     "fhirMapping": [
         {

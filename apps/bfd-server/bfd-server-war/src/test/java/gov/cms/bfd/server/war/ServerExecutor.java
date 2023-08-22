@@ -38,6 +38,9 @@ public class ServerExecutor {
   /** Keeps track of the server's STDOUT capture hook, to aid in debugging. */
   private static ProcessOutputConsumer appRunConsumer;
 
+  /** Keeps track of the server port we're running the server on. */
+  public static String testServerPort;
+
   /**
    * Starts the BFD server for tests. If already running, does nothing.
    *
@@ -114,6 +117,7 @@ public class ServerExecutor {
       assertTrue(
           appRunConsumer.getStdoutContents().contains(successMessage),
           "Did not find the server start message in STDOUT: " + appRunConsumer.getStdoutContents());
+      testServerPort = serverPort;
     }
     // do nothing if we've already got a server started
 
@@ -189,6 +193,7 @@ public class ServerExecutor {
   public static void stopServer() {
     if (serverProcess != null && serverProcess.isAlive()) {
       serverProcess.destroy();
+      testServerPort = null;
       LOGGER.info("Destroyed server process.");
       // If one wishes to see what the server did, this will log the server process STDOut
       LOGGER.debug("Server STDOUT: {}", appRunConsumer.getStdoutContents());

@@ -117,6 +117,7 @@
         <logback.json.classic.version>0.1.5</logback.json.classic.version>
         <mockito.version>5.4.0</mockito.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
+        <rest-assured.version>5.3.1</rest-assured.version>
         <assertj.version>3.24.2</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
         <postgresql.version>42.6.0</postgresql.version>
@@ -174,7 +175,7 @@
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
 
         <!-- Dependencies required for connecting to a gRPC API -->
-        <grpc_java.version>1.56.1</grpc_java.version>
+        <grpc_java.version>1.57.2</grpc_java.version>
         <protoc.version>3.21.12</protoc.version>
         <protobuf.version>3.23.4</protobuf.version>
 
@@ -571,6 +572,14 @@
             </dependency>
 
             <dependency>
+                <!-- Used for endpoint testing automation -->
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${rest-assured.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <!-- The test framework used for unit and integration tests. -->
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-engine</artifactId>
@@ -608,7 +617,6 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
-
             <dependency>
                 <groupId>com.newrelic.telemetry</groupId>
                 <artifactId>dropwizard-metrics-newrelic</artifactId>

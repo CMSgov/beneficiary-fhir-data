@@ -21,7 +21,8 @@
         "LINE_BENE_PRMRY_PYR_CD"
     ],
     "cclfMapping": [
-        "CCLF5.CLM_LINE_PRMRY_PYR_CD"
+        "CCLF5.CLM_LINE_PRMRY_PYR_CD",
+        "CCLF6.CLM_LINE_PRMRY_PYR_CD"
     ],
     "fhirMapping": [
         {
