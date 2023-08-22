@@ -1,5 +1,6 @@
 package gov.cms.bfd.sharedutils.database;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import java.time.Clock;
@@ -7,7 +8,9 @@ import java.time.Duration;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.RdsClientBuilder;
@@ -23,11 +26,14 @@ public class RdsDataSourceFactory extends HikariDataSourceFactory {
    * trigger hundreds of token requests at the same time. According to the AWS documentation a token
    * is valid for 15 minutes but we can fetch a new one more frequently just to be safe.
    */
-  private static final long DEFAULT_TOKEN_TTL_MILLIS = Duration.ofMinutes(5).toMillis();
+  static final long DEFAULT_TOKEN_TTL_MILLIS = Duration.ofMinutes(5).toMillis();
 
+  /** Configuration settings for {@link RdsClient}. */
   private final AwsClientConfig awsClientConfig;
 
   /** Used to configure {@link RdsHikariDataSource} instances. */
+  @Getter(AccessLevel.PACKAGE)
+  @VisibleForTesting
   private final RdsHikariDataSource.Config dataSourceConfig;
 
   /**
@@ -36,8 +42,8 @@ public class RdsDataSourceFactory extends HikariDataSourceFactory {
    *
    * @param clock optional, used to get current time
    * @param tokenTtlMillis optional, minimum millis between token requests
-   * @param awsClientConfig optional, used to create an {@link RdsClient} if needed
-   * @param databaseOptions used to configure a {@link HikariDataSource}
+   * @param awsClientConfig used to config {@link RdsClient} instances
+   * @param databaseOptions used to configure {@link RdsHikariDataSource} instances
    */
   @Builder
   private RdsDataSourceFactory(
@@ -73,24 +79,36 @@ public class RdsDataSourceFactory extends HikariDataSourceFactory {
    */
   @Override
   public HikariDataSource createDataSource() {
+    RdsClientBuilder rdsClientBuilder = createRdsClientBuilder();
+    awsClientConfig.configureAwsService(rdsClientBuilder);
+    rdsClientBuilder.credentialsProvider(DefaultCredentialsProvider.create());
+    var rdsClient = rdsClientBuilder.build();
+
     // the dataSource will take care of closing this when its close method is called
-    RdsClient rdsClient = createRdsClient(awsClientConfig);
-    HikariDataSource dataSource = new RdsHikariDataSource(dataSourceConfig, rdsClient);
+    RdsHikariDataSource dataSource = createRdsHikariDataSource(rdsClient);
     configureDataSource(dataSource);
     return dataSource;
   }
 
   /**
-   * Creates a {@link RdsClient} configured with the provided {@link AwsClientConfig}.
+   * Creates a {@link RdsClientBuilder}.
    *
-   * @param awsClientConfig used to configure the client
-   * @return the client
+   * @return the builder
    */
-  private static RdsClient createRdsClient(AwsClientConfig awsClientConfig) {
-    RdsClientBuilder builder = RdsClient.builder();
-    awsClientConfig.configureAwsService(builder);
-    builder.credentialsProvider(DefaultCredentialsProvider.create());
-    return builder.build();
+  @VisibleForTesting
+  RdsClientBuilder createRdsClientBuilder() {
+    return RdsClient.builder();
+  }
+
+  /**
+   * Creates a {@link RdsHikariDataSource} using the provided {@link RdsClient}.
+   *
+   * @param rdsClient used to call RDS API
+   * @return the data source
+   */
+  @VisibleForTesting
+  RdsHikariDataSource createRdsHikariDataSource(RdsClient rdsClient) {
+    return new RdsHikariDataSource(dataSourceConfig, rdsClient);
   }
 
   /**

@@ -1,8 +1,10 @@
 package gov.cms.bfd.sharedutils.database;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
 import java.time.Clock;
 import javax.annotation.concurrent.GuardedBy;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -31,7 +33,8 @@ public class RdsHikariDataSource extends HikariDataSource {
 
   /** Time in millis at which we consider our token to have expired. */
   @GuardedBy("tokenLock")
-  @Getter
+  @Getter(AccessLevel.PACKAGE)
+  @VisibleForTesting
   private long expires;
 
   /** Most recently generated token. */
@@ -47,7 +50,7 @@ public class RdsHikariDataSource extends HikariDataSource {
   @Override
   public String getPassword() {
     synchronized (tokenLock) {
-      long now = config.clock.millis();
+      long now = config.currentTimeMillis();
       if (token == null || now > expires) {
         final var tokenRequest = config.createTokenRequest();
         token = rdsClient.utilities().generateAuthenticationToken(tokenRequest);
