@@ -6,9 +6,9 @@ locals {
 
   additional_tags = { Layer = var.layer, role = var.role }
   scaleout_asg_capacities = [
-    { type = "low", capacity = length(var.env_config.azs) * 2 },
-    { type = "mid", capacity = length(var.env_config.azs) * 3 },
-    { type = "upper", capacity = length(var.env_config.azs) * 4 }
+    { type = "low", capacity = length(var.env_config.azs) * 2, metric_lower_bound = 0, metric_upper_bound = 1 },
+    { type = "mid", capacity = length(var.env_config.azs) * 3, metric_lower_bound = 1, metric_upper_bound = 2 },
+    { type = "upper", capacity = length(var.env_config.azs) * 4, metric_lower_bound = 2, metric_upper_bound = null }
   ]
 }
 
@@ -358,21 +358,13 @@ resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
   metric_aggregation_type   = "Average"
   policy_type               = "StepScaling"
 
-  # All metric interval bounds are calculated by _adding_ the value of the bound to the threshold
-  # of the alarm that this scaling policy operates on.
-  step_adjustment {
-    metric_interval_lower_bound = "0"
-    metric_interval_upper_bound = "1"
-    scaling_adjustment          = local.scaleout_asg_capacities[0].capacity
-  }
-  step_adjustment {
-    metric_interval_lower_bound = "1"
-    metric_interval_upper_bound = "2"
-    scaling_adjustment          = local.scaleout_asg_capacities[1].capacity
-  }
-  step_adjustment {
-    metric_interval_lower_bound = "2"
-    scaling_adjustment          = local.scaleout_asg_capacities[2].capacity
+  dynamic "step_adjustment" {
+     for_each = local.scaleout_asg_capacities
+     content {
+       metric_interval_lower_bound = step_adjustment.value.metric_lower_bound
+       metric_interval_upper_bound = step_adjustment.value.metric_upper_bound
+       scaling_adjustment          = step_adjustment.value.capacity
+     }
   }
 }
 
