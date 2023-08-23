@@ -53,7 +53,7 @@ resource "aws_s3_bucket_acl" "this" {
 }
 
 resource "aws_s3_bucket" "logging" {
-  bucket        = local.logging_bucket
+  bucket = local.logging_bucket
   tags = {
     Layer = local.layer
     role  = "logs"

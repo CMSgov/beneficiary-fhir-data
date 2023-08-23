@@ -1,5 +1,6 @@
 resource "aws_iam_user" "this" {
   count         = local.create_etl_user ? 1 : 0
+  force_destroy = false
   name          = "bfd-${local.env}-${local.legacy_service}"
   path          = "/"
   tags = {

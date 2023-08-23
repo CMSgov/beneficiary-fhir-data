@@ -2,9 +2,7 @@
 #
 
 locals {
-  established_envs = ["test", "prod-sbx", "prod"]
   is_prod          = substr(var.env_config.env, 0, 4) == "prod"
-  is_ephemeral_env = !(contains(local.established_envs, var.env_config.env))
   tags = {
     Layer = "data"
     role  = var.pii_bucket_config.name
@@ -38,10 +36,9 @@ resource "aws_kms_alias" "pii_bucket_key_alias" {
 }
 
 resource "aws_s3_bucket" "pii_bucket" {
-  bucket        = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-${data.aws_caller_identity.current.account_id}"
-  force_destroy = local.is_ephemeral_env
-  acl           = "private"
-  tags          = local.tags
+  bucket = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-${data.aws_caller_identity.current.account_id}"
+  acl    = "private"
+  tags   = local.tags
 
   server_side_encryption_configuration {
     rule {
