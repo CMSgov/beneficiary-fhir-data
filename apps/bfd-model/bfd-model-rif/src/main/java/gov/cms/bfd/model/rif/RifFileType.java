@@ -1,5 +1,15 @@
 package gov.cms.bfd.model.rif;
 
+import gov.cms.bfd.model.rif.entities.BeneficiaryColumn;
+import gov.cms.bfd.model.rif.entities.BeneficiaryHistoryColumn;
+import gov.cms.bfd.model.rif.entities.CarrierClaimColumn;
+import gov.cms.bfd.model.rif.entities.DMEClaimColumn;
+import gov.cms.bfd.model.rif.entities.HHAClaimColumn;
+import gov.cms.bfd.model.rif.entities.HospiceClaimColumn;
+import gov.cms.bfd.model.rif.entities.InpatientClaimColumn;
+import gov.cms.bfd.model.rif.entities.OutpatientClaimColumn;
+import gov.cms.bfd.model.rif.entities.PartDEventColumn;
+import gov.cms.bfd.model.rif.entities.SNFClaimColumn;
 import java.util.Arrays;
 
 /** Enumerates the various types of RIF files. */
@@ -59,14 +69,14 @@ public enum RifFileType {
 
   /**
    * The <code>Column</code> enum constant for this {@link RifFileType}, e.g. {@link
-   * gov.cms.bfd.model.rif.BeneficiaryColumn}.
+   * gov.cms.bfd.model.rif.entities.BeneficiaryColumn}.
    */
   private final Class<Enum<?>> columnEnum;
   /** All the columns/entries from this {@link RifFileType}'s columns enum. */
   private final Enum<?>[] columns;
   /**
    * The <code>Column</code> enum constant for this {@link RifFileType} ID/grouping column, e.g.
-   * {@link gov.cms.bfd.model.rif.BeneficiaryColumn#BENE_ID}
+   * {@link gov.cms.bfd.model.rif.entities.BeneficiaryColumn#BENE_ID}
    */
   private final Enum<?> idColumn;
 
@@ -89,7 +99,7 @@ public enum RifFileType {
    * Gets the {@link #columnEnum}.
    *
    * @return the <code>Column</code> enum constant for this {@link RifFileType}, e.g. {@link
-   *     gov.cms.bfd.model.rif.BeneficiaryColumn}
+   *     gov.cms.bfd.model.rif.entities.BeneficiaryColumn}
    */
   public Class<Enum<?>> getColumnEnum() {
     return columnEnum;
@@ -108,8 +118,8 @@ public enum RifFileType {
    * Gets the {@link #idColumn}.
    *
    * @return the <code>Column</code> enum constant for this {@link RifFileType} ID/grouping column,
-   *     e.g. {@link gov.cms.bfd.model.rif.BeneficiaryColumn#BENE_ID}, or <code>null</code> if the
-   *     {@link RifFileType} doesn't have an ID/grouping column
+   *     e.g. {@link gov.cms.bfd.model.rif.entities.BeneficiaryColumn#BENE_ID}, or <code>null</code>
+   *     if the {@link RifFileType} doesn't have an ID/grouping column
    */
   public Enum<?> getIdColumn() {
     return idColumn;

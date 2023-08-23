@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.HHAClaim
+- entityClassName: gov.cms.bfd.model.rif.entities.HHAClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: HHAClaim
@@ -639,7 +639,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: HHAClaimColumn
-    packageName: gov.cms.bfd.model.rif
+    packageName: gov.cms.bfd.model.rif.entities
     values:
     - BENE_ID
     - CLM_ID
@@ -1026,4 +1026,4 @@ mappings:
   - from: lines
     to: lines
     transformer: Array
-  transformerClassName: gov.cms.bfd.model.rif.HHAClaimParser
+  transformerClassName: gov.cms.bfd.model.rif.entities.HHAClaimParser
