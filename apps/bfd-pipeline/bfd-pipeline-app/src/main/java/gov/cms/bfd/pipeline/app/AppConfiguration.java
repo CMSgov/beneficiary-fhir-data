@@ -464,6 +464,17 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
+   * Build a {@link ConfigLoader} for use in tests that just uses default values and those returned
+   * by the provided function.
+   *
+   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @return appropriately configured {@link ConfigLoader}
+   */
+  static ConfigLoader createConfigLoaderForTesting(Function<String, String> getenv) {
+    return ConfigLoader.builder().addSingle(DEFAULT_CONFIG_VALUES::get).addSingle(getenv).build();
+  }
+
+  /**
    * Load configuration variables using the provided {@link ConfigLoader} instance and build an
    * {@link AppConfiguration} instance from them.
    *
