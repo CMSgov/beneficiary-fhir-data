@@ -1,5 +1,10 @@
 package gov.cms.bfd.sharedutils.config;
 
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -18,30 +23,6 @@ public final class LayeredConfiguration {
 
   /** Prevents instance creation. */
   private LayeredConfiguration() {}
-
-  /**
-   * The name of the environment variable that should be used to provide the region used for looking
-   * up configuration variables in AWS SSM parameter store.
-   */
-  public static final String ENV_VAR_KEY_AWS_REGION = "AWS_REGION";
-
-  /**
-   * The name of the environment variable that should be used to provide an override endpoint used
-   * for looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
-   */
-  public static final String ENV_VAR_KEY_AWS_ENDPOINT = "AWS_ENDPOINT";
-
-  /**
-   * The name of the environment variable that should be used to provide an access key used for
-   * looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
-   */
-  public static final String ENV_VAR_KEY_AWS_ACCESS_KEY = "AWS_ACCESS_KEY";
-
-  /**
-   * The name of the environment variable that should be used to provide a secret key used for
-   * looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
-   */
-  public static final String ENV_VAR_KEY_AWS_SECRET_KEY = "AWS_SECRET_KEY";
 
   /**
    * The name of the environment variable that should be used to provide a path for looking up

@@ -52,13 +52,13 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
         ImmutableMap.<String, String>builder().put(nameA, "a-system-property").build();
     final var envVars =
         ImmutableMap.<String, String>builder()
-            .put(LayeredConfiguration.ENV_VAR_KEY_AWS_REGION, ssmRegion)
+            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION, ssmRegion)
             .put(
                 LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH,
                 ssmCommonPath + "," + ssmSpecificPath)
-            .put(LayeredConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, ssmEndpoint.toString())
-            .put(LayeredConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, ssmAccessKey)
-            .put(LayeredConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, ssmSecretKey)
+            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, ssmEndpoint.toString())
+            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, ssmAccessKey)
+            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, ssmSecretKey)
             .put(LayeredConfiguration.ENV_VAR_KEY_PROPERTIES_FILE, propertiesFile.getAbsolutePath())
             .put(nameA, "a-env-var")
             .put(nameB, "b-env-var")

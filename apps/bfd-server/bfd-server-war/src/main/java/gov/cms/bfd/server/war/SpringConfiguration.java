@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war;
 
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
+
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
@@ -95,8 +97,6 @@ public class SpringConfiguration {
    * integration testing.
    */
   public static final String PROP_INCLUDE_FAKE_ORG_NAME = "bfdServer.include.fake.org.name";
-  /** Name of AWS region for any AWS services. */
-  public static final String PROP_AWS_REGION = "bfdServer.aws.region";
 
   /** The database transaction timeout value (seconds). */
   public static final int TRANSACTION_TIMEOUT = 30;
@@ -156,7 +156,7 @@ public class SpringConfiguration {
    */
   @Bean
   public AwsClientConfig awsClientConfig(
-      @Value("${" + PROP_AWS_REGION + ":}") String awsRegionName) {
+      @Value("${" + ENV_VAR_KEY_AWS_REGION + ":}") String awsRegionName) {
     Region region = Strings.isNullOrEmpty(awsRegionName) ? null : Region.of(awsRegionName);
     return AwsClientConfig.awsBuilder().region(region).build();
   }
