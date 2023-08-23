@@ -3,9 +3,9 @@
 
 locals {
   is_prod = substr(var.env_config.env, 0, 4) == "prod"
-  tags = {
+  tags    = {
     Layer = "data"
-    role  = var.pii_bucket_config.name
+    role = var.pii_bucket_config.name
   }
 }
 
