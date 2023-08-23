@@ -161,8 +161,8 @@ resource "aws_iam_role_policy_attachment" "kms_mgmt" {
 # Allow instances to generate RDS auth tokens
 data "aws_iam_policy_document" "rds" {
   statement {
-    sid    = "AllowRdsIamAuth"
-    effect = "Allow"
+    sid     = "AllowRdsIamAuth"
+    effect  = "Allow"
     actions = ["rds-db:connect"]
     resources = [
       "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${var.rds_cluster_resource_id}/${aws_iam_role.instance.name}"
