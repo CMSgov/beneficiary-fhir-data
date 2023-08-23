@@ -54,7 +54,6 @@ resource "aws_s3_bucket_acl" "this" {
 
 resource "aws_s3_bucket" "logging" {
   bucket        = local.logging_bucket
-  force_destroy = local.is_ephemeral_env
   tags = {
     Layer = local.layer
     role  = "logs"

@@ -3,9 +3,7 @@
 
 locals {
   azs              = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  established_envs = ["test", "prod-sbx", "prod"]
   env_config       = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
-  is_ephemeral_env = !(contains(local.established_envs, var.env_config.env))
   port             = 7443
   cw_period        = 60 # Seconds
   cw_eval_periods  = 3
@@ -66,12 +64,10 @@ data "aws_route53_zone" "local_zone" {
 # s3 buckets
 data "aws_s3_bucket" "admin" {
   bucket        = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
-  force_destroy = local.is_ephemeral_env
 }
 
 data "aws_s3_bucket" "logs" {
   bucket        = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
-  force_destroy = local.is_ephemeral_env
 }
 
 # cloudwatch topics
