@@ -173,29 +173,36 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
         // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-        TransformerUtils.addCareTeamExtension(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, claimLine.getProviderTypeCode(), performingCareTeamMember,
-                                              eob);
+        TransformerUtils.addCareTeamExtension(
+            CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD,
+            claimLine.getProviderTypeCode(),
+            performingCareTeamMember,
+            eob);
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        TransformerUtils.addCareTeamExtension(CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode(), performingCareTeamMember,
-                                              eob);
+        TransformerUtils.addCareTeamExtension(
+            CcwCodebookVariable.PRTCPTNG_IND_CD,
+            claimLine.getProviderParticipatingIndCode(),
+            performingCareTeamMember,
+            eob);
 
         // addExtensionReference
-        boolean createNpiUsExtension = claimLine.getOrganizationNpi().isPresent() &&
-                !Strings.isNullOrEmpty(claimLine.getOrganizationNpi().get()) &&
-                !TransformerUtils.careTeamHasMatchingExtension(performingCareTeamMember,
-                                                               TransformerConstants.CODING_NPI_US,
-                                                               claimLine.getOrganizationNpi().get());
+        boolean createNpiUsExtension =
+            claimLine.getOrganizationNpi().isPresent()
+                && !Strings.isNullOrEmpty(claimLine.getOrganizationNpi().get())
+                && !TransformerUtils.careTeamHasMatchingExtension(
+                    performingCareTeamMember,
+                    TransformerConstants.CODING_NPI_US,
+                    claimLine.getOrganizationNpi().get());
 
-          if (createNpiUsExtension) {
-            TransformerUtils.addExtensionCoding(
-                performingCareTeamMember,
-                TransformerConstants.CODING_NPI_US,
-                TransformerConstants.CODING_NPI_US,
-                npiOrgLookup.retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
-                claimLine.getOrganizationNpi().get());
-          }
-
+        if (createNpiUsExtension) {
+          TransformerUtils.addExtensionCoding(
+              performingCareTeamMember,
+              TransformerConstants.CODING_NPI_US,
+              TransformerConstants.CODING_NPI_US,
+              npiOrgLookup.retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
+              claimLine.getOrganizationNpi().get());
+        }
       }
 
       /*

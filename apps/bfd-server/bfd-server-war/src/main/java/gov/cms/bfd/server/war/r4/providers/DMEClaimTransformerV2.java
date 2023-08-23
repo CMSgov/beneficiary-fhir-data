@@ -238,10 +238,16 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         performing.get().setResponsible(true);
 
         // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-        careTeam.setQualification(TransformerUtilsV2.createCodeableConcept(eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+        careTeam.setQualification(
+            TransformerUtilsV2.createCodeableConcept(
+                eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        TransformerUtilsV2.addCareTeamExtension(CcwCodebookVariable.PRTCPTNG_IND_CD, line.getProviderParticipatingIndCode(), careTeam, eob);
+        TransformerUtilsV2.addCareTeamExtension(
+            CcwCodebookVariable.PRTCPTNG_IND_CD,
+            line.getProviderParticipatingIndCode(),
+            careTeam,
+            eob);
       }
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension

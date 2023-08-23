@@ -181,7 +181,11 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
                 eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        TransformerUtils.addCareTeamExtension(CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode(), performingCareTeamMember, eob);
+        TransformerUtils.addCareTeamExtension(
+            CcwCodebookVariable.PRTCPTNG_IND_CD,
+            claimLine.getProviderParticipatingIndCode(),
+            performingCareTeamMember,
+            eob);
       }
 
       TransformerUtils.mapHcpcs(

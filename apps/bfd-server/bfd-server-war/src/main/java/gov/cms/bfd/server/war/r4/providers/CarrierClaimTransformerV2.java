@@ -252,16 +252,20 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         // Update the responsible flag
         careTeam.setResponsible(true);
         // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-        careTeam
-            .setQualification(
-                TransformerUtilsV2.createCodeableConcept(
-                    eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+        careTeam.setQualification(
+            TransformerUtilsV2.createCodeableConcept(
+                eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
         // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-        TransformerUtilsV2.addCareTeamExtension(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode(), careTeam, eob);
+        TransformerUtilsV2.addCareTeamExtension(
+            CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode(), careTeam, eob);
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        TransformerUtilsV2.addCareTeamExtension(CcwCodebookVariable.PRTCPTNG_IND_CD, line.getProviderParticipatingIndCode(), careTeam, eob);
+        TransformerUtilsV2.addCareTeamExtension(
+            CcwCodebookVariable.PRTCPTNG_IND_CD,
+            line.getProviderParticipatingIndCode(),
+            careTeam,
+            eob);
       }
 
       if (line.getOrganizationNpi().isPresent()) {
