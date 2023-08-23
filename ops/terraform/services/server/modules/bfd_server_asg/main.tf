@@ -269,7 +269,7 @@ resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
 
 resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   alarm_name          = "bfd-${var.role}-${local.env}-networkin-high"
-  comparison_operator = "GreaterThanThreshold"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
   datapoints_to_alarm = 1
   evaluation_periods  = 1
   threshold           = 1
@@ -336,7 +336,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
     content {
       id          = "e${metric_query.key}"
       label       = "Set to ${metric_query.value.capacity} capacity units"
-      expression  = metric_query.value.type == "low" ? "IF(networkin > 1 * ${var.scaling_networkin_interval_mb} && networkin <= 2 * ${var.scaling_networkin_interval_mb} && m3 <= ${metric_query.value.capacity}, 1)" :  metric_query.value.type == "mid" ? "IF(networkin > 2 * ${var.scaling_networkin_interval_mb} && networkin <= 4 * ${var.scaling_networkin_interval_mb} && m3 <= ${metric_query.value.capacity}, 2)" : "IF(networkin > 4 * ${var.scaling_networkin_interval_mb} && m3 < ${metric_query.value.capacity}, 3)"
+      expression  = metric_query.value.type == "low" ? "IF(networkin > ${var.scaling_networkin_interval_mb} && networkin <= 2 * ${var.scaling_networkin_interval_mb} && m3 <= ${metric_query.value.capacity}, 1)" :  metric_query.value.type == "mid" ? "IF(networkin > 2 * ${var.scaling_networkin_interval_mb} && networkin <= 4 * ${var.scaling_networkin_interval_mb} && m3 <= ${metric_query.value.capacity}, 2)" : "IF(networkin > 4 * ${var.scaling_networkin_interval_mb} && m3 < ${metric_query.value.capacity}, 3)"
       return_data = false
     }
   }
