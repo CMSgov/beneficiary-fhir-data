@@ -186,10 +186,8 @@ public class DirectRdaLoadApp {
    */
   @Nullable
   private static AwsClientConfig readAwsClientConfig(ConfigLoader options) {
-    AwsClientConfig rdsConfig = null;
-    AwsClientConfig.awsBuilder()
+    return AwsClientConfig.awsBuilder()
         .region(options.parsedOption("aws.region", Region.class, Region::of).orElse(null))
         .build();
-    return rdsConfig;
   }
 }
