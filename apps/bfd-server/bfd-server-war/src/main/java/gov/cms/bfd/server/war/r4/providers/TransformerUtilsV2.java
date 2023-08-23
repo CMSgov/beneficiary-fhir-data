@@ -831,7 +831,7 @@ public final class TransformerUtilsV2 {
    */
   static CodeableConcept createCodeableConcept(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
-    if (!code.isPresent()) {
+    if (code.isEmpty()) {
       throw new IllegalArgumentException();
     }
 
@@ -841,6 +841,36 @@ public final class TransformerUtilsV2 {
     concept.addCoding(coding);
 
     return concept;
+  }
+
+  /**
+   * Adds a qualification {@link CodeableConcept} to the given careTeam component, if the input code
+   * optional is not empty. If the code is empty, returns with no effect. Can safely be called to
+   * add qualification only if the value is present.
+   *
+   * @param careTeam the care team to add the
+   * @param rootResource the root resource to use for the coding
+   * @param ccwVariable the ccw variable to use for the coding
+   * @param code an optional to create the {@link CodeableConcept} from; if empty, method returns
+   *     with no action taken
+   */
+  static void addCareTeamQualification(
+      CareTeamComponent careTeam,
+      IAnyResource rootResource,
+      CcwCodebookInterface ccwVariable,
+      Optional code) {
+    // While the original code was written in such a way that implies this optional wont be empty,
+    // its still an optional, so dont bother adding anything if it happens to be empty
+    if (code.isEmpty()) {
+      return;
+    }
+
+    Coding coding = createCoding(rootResource, ccwVariable, code.get());
+
+    CodeableConcept concept = new CodeableConcept();
+    concept.addCoding(coding);
+
+    careTeam.setQualification(concept);
   }
 
   /**
