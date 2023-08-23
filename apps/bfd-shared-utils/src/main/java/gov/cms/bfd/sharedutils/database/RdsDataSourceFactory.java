@@ -29,7 +29,7 @@ public class RdsDataSourceFactory extends HikariDataSourceFactory {
   static final long DEFAULT_TOKEN_TTL_MILLIS = Duration.ofMinutes(5).toMillis();
 
   /** Configuration settings for {@link RdsClient}. */
-  private final AwsClientConfig awsClientConfig;
+  @Getter private final AwsClientConfig awsClientConfig;
 
   /** Used to configure {@link RdsHikariDataSource} instances. */
   @Getter(AccessLevel.PACKAGE)

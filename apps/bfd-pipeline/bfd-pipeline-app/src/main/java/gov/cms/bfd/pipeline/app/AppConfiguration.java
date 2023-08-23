@@ -559,7 +559,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    *     pool size
    * @return the database options
    */
-  private static DatabaseOptions loadDatabaseOptions(ConfigLoader config, int loaderThreads) {
+  static DatabaseOptions loadDatabaseOptions(ConfigLoader config, int loaderThreads) {
     DatabaseOptions databaseOptions = loadDatabaseOptions(config);
 
     Optional<Integer> databaseMaxPoolSize = config.intOption(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);

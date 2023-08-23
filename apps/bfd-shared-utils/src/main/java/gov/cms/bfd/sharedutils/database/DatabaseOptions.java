@@ -6,9 +6,11 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /** The user-configurable options that specify how to access the application's database. */
+@EqualsAndHashCode
 public final class DatabaseOptions {
   /** Regex that matches proper JDBC URLs and extracts groups containing their host and port. */
   private static final Pattern URL_PATTERN =

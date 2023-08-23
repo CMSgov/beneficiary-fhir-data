@@ -22,6 +22,7 @@ import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_WRIT
 import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_VERSION;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadBeneficiaryPerformanceSettings;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadClaimPerformanceSettings;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,8 +45,12 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import io.micrometer.core.instrument.config.validate.ValidationException;
 import java.net.URI;
@@ -54,9 +59,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.regions.Region;
 
 /** Unit tests for {@link AppConfiguration}. */
 public class AppConfigurationTest {
@@ -117,6 +124,10 @@ public class AppConfigurationTest {
             .getLoadOptions()
             .getIdHasherConfig()
             .getHashPepper());
+
+    assertEquals(
+        DatabaseOptions.AuthenticationType.JDBC,
+        testAppConfig.getDatabaseOptions().getAuthenticationType());
     assertEquals(
         envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL),
         testAppConfig.getDatabaseOptions().getDatabaseUrl());
@@ -126,6 +137,9 @@ public class AppConfigurationTest {
     assertEquals(
         envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD),
         testAppConfig.getDatabaseOptions().getDatabasePassword());
+    assertThat(testAppConfig.createDataSourceFactory())
+        .isExactlyInstanceOf(HikariDataSourceFactory.class);
+
     assertEquals(
         Integer.parseInt(envVars.get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
         testAppConfig
@@ -144,6 +158,56 @@ public class AppConfigurationTest {
             .secretKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY))
             .build(),
         testAppConfig.getCcwRifLoadOptions().get().getExtractionOptions().getS3ClientConfig());
+  }
+
+  /** Verify that RDS authentication settings are loaded as expected. */
+  @Test
+  void testRdsDatabaseAuthenticationSettings() {
+    final var envVars = new HashMap<String, String>();
+    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_AUTH_TYPE, "RDS");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, "jdbc:postgres://host:1234/fhirdb");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, "some_user");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "not-used");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "14");
+    addRequiredSettingsForTest(envVars);
+
+    final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
+    AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
+
+    assertEquals(
+        DatabaseOptions.builder()
+            .authenticationType(DatabaseOptions.AuthenticationType.RDS)
+            .databaseUrl(envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL))
+            .databaseUsername(envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME))
+            .databasePassword(envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD))
+            .maxPoolSize(14)
+            .build(),
+        testAppConfig.getDatabaseOptions());
+    assertThat(testAppConfig.createDataSourceFactory())
+        .isExactlyInstanceOf(RdsDataSourceFactory.class);
+  }
+
+  /** Verify that AWS settings are loaded as expected. */
+  @Test
+  void testAwsSettings() {
+    final var envVars = new HashMap<String, String>();
+    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_REGION, "us-west-1");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, "unreal-access-key");
+    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, "unreal-secret-key");
+    addRequiredSettingsForTest(envVars);
+
+    final var configLoader = AppConfiguration.createConfigLoader(envVars::get);
+    AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
+
+    assertEquals(
+        AwsClientConfig.awsBuilder()
+            .endpointOverride(URI.create(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT)))
+            .accessKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY))
+            .secretKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY))
+            .region(Region.US_WEST_1)
+            .build(),
+        testAppConfig.getAwsClientConfig());
   }
 
   /**
@@ -407,5 +471,27 @@ public class AppConfigurationTest {
     verify(configBuilder).s3Directory("/my-directory");
     verify(configBuilder).build();
     verifyNoMoreInteractions(configBuilder);
+  }
+
+  /**
+   * Adds the settings that must be defined in order for {@link
+   * AppConfiguration#loadConfig(ConfigLoader)} to succeed.
+   *
+   * @param envVars map to add the settings to
+   */
+  private void addRequiredSettingsForTest(Map<String, String> envVars) {
+    envVars.putIfAbsent(
+        AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
+        String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
+    envVars.putIfAbsent(
+        AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
+        Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
+    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
+    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
+    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_BUCKET, "foo");
+    envVars.putIfAbsent(
+        AppConfiguration.ENV_VAR_KEY_DATABASE_URL, "jdbc:postgres://host:1234/fhirdb");
+    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, "some_user");
+    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "not-used");
   }
 }
