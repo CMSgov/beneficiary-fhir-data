@@ -253,13 +253,13 @@ module "bfd_server_metrics" {
 }
 
 module "bfd_server_slo_alarms" {
-  source = "../resources/bfd_server_slo_alarms"
-  env    = var.env_config.env
+  source                   = "../resources/bfd_server_slo_alarms"
+  env                      = var.env_config.env
 }
 
 module "bfd_server_log_alarms" {
-  source = "../resources/bfd_server_log_alarms"
-  env    = var.env_config.env
+  source                 = "../resources/bfd_server_log_alarms"
+  env                    = var.env_config.env
 }
 
 ## This is where cloudwatch dashboards are managed. 

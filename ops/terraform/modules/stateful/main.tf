@@ -7,7 +7,6 @@ locals {
   env                              = var.env
   env_config                       = { env = local.env, vpc_id = data.aws_vpc.main.id, zone_id = module.local_zone.zone_id }
   is_prod                          = substr(var.env, 0, 4) == "prod"
-
   victor_ops_url                   = var.victor_ops_url
   enable_victor_ops                = local.is_prod # only wake people up for prod alarms
   cloudwatch_sns_topic_policy_spec = <<-EOF
