@@ -267,32 +267,6 @@ resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
   }
 }
 
-resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
-  name                      = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
-  autoscaling_group_name    = aws_autoscaling_group.main.name
-  estimated_instance_warmup = var.asg_config.instance_warmup
-  adjustment_type           = "ExactCapacity"
-  metric_aggregation_type   = "Average"
-  policy_type               = "StepScaling"
-
-  # All metric interval bounds are calculated by _adding_ the value of the bound to the threshold
-  # of the alarm that this scaling policy operates on.
-  step_adjustment {
-    metric_interval_lower_bound = "0"
-    metric_interval_upper_bound = "1"
-    scaling_adjustment          = local.scaleout_asg_capacities[0].capacity
-  }
-  step_adjustment {
-    metric_interval_lower_bound = "1"
-    metric_interval_upper_bound = "2"
-    scaling_adjustment          = local.scaleout_asg_capacities[1].capacity
-  }
-  step_adjustment {
-    metric_interval_lower_bound = "2"
-    scaling_adjustment          = local.scaleout_asg_capacities[2].capacity
-  }
-}
-
 resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   alarm_name          = "bfd-${var.role}-${local.env}-networkin-high"
   comparison_operator = "GreaterThanThreshold"
@@ -373,6 +347,32 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
     label       = "ScalingCapacityScalar"
     period      = 0
     return_data = true
+  }
+}
+
+resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
+  name                      = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
+  autoscaling_group_name    = aws_autoscaling_group.main.name
+  estimated_instance_warmup = var.asg_config.instance_warmup
+  adjustment_type           = "ExactCapacity"
+  metric_aggregation_type   = "Average"
+  policy_type               = "StepScaling"
+
+  # All metric interval bounds are calculated by _adding_ the value of the bound to the threshold
+  # of the alarm that this scaling policy operates on.
+  step_adjustment {
+    metric_interval_lower_bound = "0"
+    metric_interval_upper_bound = "1"
+    scaling_adjustment          = local.scaleout_asg_capacities[0].capacity
+  }
+  step_adjustment {
+    metric_interval_lower_bound = "1"
+    metric_interval_upper_bound = "2"
+    scaling_adjustment          = local.scaleout_asg_capacities[1].capacity
+  }
+  step_adjustment {
+    metric_interval_lower_bound = "2"
+    scaling_adjustment          = local.scaleout_asg_capacities[2].capacity
   }
 }
 
