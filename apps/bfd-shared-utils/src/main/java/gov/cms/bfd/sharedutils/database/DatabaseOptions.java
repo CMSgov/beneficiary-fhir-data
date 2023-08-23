@@ -18,6 +18,7 @@ public final class DatabaseOptions {
   /** Group number for port matched by {@link #URL_PATTERN}. */
   private static final int URL_PORT_GROUP = 3;
 
+  /** Used to define how to authenticate with the database. */
   public enum AuthenticationType {
     /** Authenticate using plain JDBC authentication with a provided password. * */
     JDBC,
@@ -86,7 +87,8 @@ public final class DatabaseOptions {
   /**
    * Parses {@link #databaseUrl} to obtain a match group.
    *
-   * @return matched value from the URL (if any)
+   * @param groupNumber number of the match group to return
+   * @return matched group value from the URL (if any)
    */
   private Optional<String> parseUrl(int groupNumber) {
     final Matcher matcher = URL_PATTERN.matcher(databaseUrl);

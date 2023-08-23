@@ -20,61 +20,61 @@ public abstract class BaseAppConfiguration {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#authenticationType} value.
+   * #databaseOptions} {@link DatabaseOptions#authenticationType} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_AUTH_TYPE = "DATABASE_AUTH_TYPE";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUrl()} value.
+   * #databaseOptions} {@link DatabaseOptions#databaseUrl} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_URL = "DATABASE_URL";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUsername()} value.
+   * #databaseOptions} {@link DatabaseOptions#databaseUsername} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_USERNAME = "DATABASE_USERNAME";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabasePassword()} value.
+   * #databaseOptions} {@link DatabaseOptions#databasePassword} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_PASSWORD = "DATABASE_PASSWORD";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getDatabaseOptions()} {@link DatabaseOptions#getMaxPoolSize()} value.
+   * #databaseOptions} {@link DatabaseOptions#maxPoolSize} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE = "DATABASE_MAX_POOL_SIZE";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricKey()} value.
+   * The name of the environment variable that should be used to provide the {@link #metricOptions}
+   * {@link MetricOptions#getNewRelicMetricKey()} value.
    */
   public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "NEW_RELIC_METRIC_KEY";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicAppName()} value.
+   * The name of the environment variable that should be used to provide the {@link #metricOptions}
+   * {@link MetricOptions#getNewRelicAppName()} value.
    */
   public static final String ENV_VAR_NEW_RELIC_APP_NAME = "NEW_RELIC_APP_NAME";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricHost()} value.
+   * The name of the environment variable that should be used to provide the {@link #metricOptions}
+   * {@link MetricOptions#getNewRelicMetricHost()} value.
    */
   public static final String ENV_VAR_NEW_RELIC_METRIC_HOST = "NEW_RELIC_METRIC_HOST";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricPath()} value.
+   * The name of the environment variable that should be used to provide the {@link #metricOptions}
+   * {@link MetricOptions#getNewRelicMetricPath()} value.
    */
   public static final String ENV_VAR_NEW_RELIC_METRIC_PATH = "NEW_RELIC_METRIC_PATH";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricPeriod()} value.
+   * The name of the environment variable that should be used to provide the {@link #metricOptions}
+   * {@link MetricOptions#getNewRelicMetricPeriod()} value.
    */
   public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "NEW_RELIC_METRIC_PERIOD";
 
@@ -103,9 +103,9 @@ public abstract class BaseAppConfiguration {
   /**
    * Initializes an instance.
    *
-   * @param metricOptions the value to use for {@link #getMetricOptions()}
-   * @param databaseOptions the value to use for {@link #getDatabaseOptions()} flyway looks for
-   *     migration scripts
+   * @param metricOptions the value to use for {@link #metricOptions}
+   * @param databaseOptions the value to use for {@link #databaseOptions} flyway looks for migration
+   *     scripts
    * @param awsClientConfig common configuration settings for all AWS clients
    */
   protected BaseAppConfiguration(
