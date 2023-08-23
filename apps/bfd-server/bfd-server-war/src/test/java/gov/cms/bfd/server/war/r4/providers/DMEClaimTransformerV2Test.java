@@ -11,7 +11,7 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;

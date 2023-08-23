@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.rif;
 
+import gov.cms.bfd.model.rif.entities.Beneficiary;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;

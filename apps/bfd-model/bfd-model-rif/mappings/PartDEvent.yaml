@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.PartDEvent
+- entityClassName: gov.cms.bfd.model.rif.entities.PartDEvent
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: PartDEvent
@@ -225,7 +225,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: PartDEventColumn
-    packageName: gov.cms.bfd.model.rif
+    packageName: gov.cms.bfd.model.rif.entities
     values:
     - PDE_ID
     - CLM_GRP_ID
@@ -399,4 +399,4 @@ mappings:
     to: patientResidenceCode
   - from: SUBMSN_CLR_CD
     to: submissionClarificationCode
-  transformerClassName: gov.cms.bfd.model.rif.PartDEventParser
+  transformerClassName: gov.cms.bfd.model.rif.entities.PartDEventParser

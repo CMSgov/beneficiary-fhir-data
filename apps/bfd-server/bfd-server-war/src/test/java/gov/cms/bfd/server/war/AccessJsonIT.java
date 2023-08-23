@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.TransformerConstants;

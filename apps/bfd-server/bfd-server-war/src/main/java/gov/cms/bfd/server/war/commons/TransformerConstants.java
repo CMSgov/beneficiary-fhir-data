@@ -2,8 +2,8 @@ package gov.cms.bfd.server.war.commons;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.Variable;
-import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.CarrierClaimColumn;
+import gov.cms.bfd.model.rif.entities.Beneficiary;
+import gov.cms.bfd.model.rif.entities.CarrierClaimColumn;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import java.time.Instant;
 import org.hl7.fhir.dstu3.model.Coding;

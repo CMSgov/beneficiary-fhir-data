@@ -9,7 +9,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;

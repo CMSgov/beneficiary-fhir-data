@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;

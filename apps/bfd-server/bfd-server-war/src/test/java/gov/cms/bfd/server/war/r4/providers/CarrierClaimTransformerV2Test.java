@@ -12,7 +12,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
-import gov.cms.bfd.model.rif.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
