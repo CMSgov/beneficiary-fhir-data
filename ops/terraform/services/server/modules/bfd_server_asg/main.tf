@@ -5,6 +5,11 @@ locals {
   rds_reader_endpoint = data.external.rds.result["CustomEndpoint"] == "" ? data.external.rds.result["ReaderEndpoint"] : data.external.rds.result["CustomEndpoint"]
 
   additional_tags = { Layer = var.layer, role = var.role }
+  scaleout_asg_capacities = [
+    { type = "low", capacity = length(var.env_config.azs) * 2 },
+    { type = "mid", capacity = length(var.env_config.azs) * 3 },
+    { type = "upper", capacity = length(var.env_config.azs) * 4 }
+  ]
 }
 
 ## Security groups
@@ -262,17 +267,44 @@ resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
   }
 }
 
+resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
+  name                      = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
+  autoscaling_group_name    = aws_autoscaling_group.main.name
+  estimated_instance_warmup = var.asg_config.instance_warmup
+  adjustment_type           = "ExactCapacity"
+  metric_aggregation_type   = "Average"
+  policy_type               = "StepScaling"
+
+  # All metric interval bounds are calculated by _adding_ the value of the bound to the threshold
+  # of the alarm that this scaling policy operates on.
+  step_adjustment {
+    metric_interval_lower_bound = "0"
+    metric_interval_upper_bound = "1"
+    scaling_adjustment          = local.scaleout_asg_capacities[0].capacity
+  }
+  step_adjustment {
+    metric_interval_lower_bound = "1"
+    metric_interval_upper_bound = "2"
+    scaling_adjustment          = local.scaleout_asg_capacities[1].capacity
+  }
+  step_adjustment {
+    metric_interval_lower_bound = "2"
+    scaling_adjustment          = local.scaleout_asg_capacities[2].capacity
+  }
+}
+
 resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   alarm_name          = "bfd-${var.role}-${local.env}-networkin-high"
   comparison_operator = "GreaterThanThreshold"
   datapoints_to_alarm = 1
   evaluation_periods  = 1
-  threshold           = 100 * 1000000 # 100 megabytes
+  threshold           = 1
   treat_missing_data  = "ignore"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_high_scaling.arn]
 
   metric_query {
     id          = "m1"
+    period      = 0
     return_data = false
 
     metric {
@@ -285,9 +317,9 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
       stat        = "Average"
     }
   }
-
   metric_query {
     id          = "m2"
+    period      = 0
     return_data = false
 
     metric {
@@ -302,177 +334,49 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   }
 
   metric_query {
+    id          = "m3"
+    period      = 0
+    return_data = false
+
+    metric {
+      dimensions = {
+        AutoScalingGroupName = aws_autoscaling_group.main.name
+      }
+      metric_name = "GroupDesiredCapacity"
+      namespace   = "AWS/AutoScaling"
+      period      = 60
+      stat        = "Average"
+    }
+  }
+
+  metric_query {
     expression  = "IF(m2/m1 > 0.01, m1, 0)"
-    id          = "e1"
+    id          = "networkin"
     label       = "FilteredNetworkIn"
+    period      = 0
+    return_data = false
+  }
+
+  dynamic "metric_query" {
+    for_each = local.scaleout_asg_capacities
+    content {
+      id          = "e${metric_query.key}"
+      label       = "Set to ${metric_query.value.capacity} capacity units"
+      expression  = metric_query.value.type == "low" ? "IF(networkin > 1 * ${var.scaling_networkin_interval_mb} && networkin <= 2 * ${var.scaling_networkin_interval_mb} && m3 <= ${metric_query.value.capacity}, 1)" :  metric_query.value.type == "mid" ? "IF(networkin > 2 * ${var.scaling_networkin_interval_mb} && networkin <= 4 * ${var.scaling_networkin_interval_mb} && m3 <= ${metric_query.value.capacity}, 2)" : "IF(networkin > 4 * ${var.scaling_networkin_interval_mb} && m3 < ${metric_query.value.capacity}, 3)"
+      return_data = false
+    }
+  }
+
+  metric_query {
+    expression  = "MAX([e0, e1, e2])"
+    id          = "e5"
+    label       = "ScalingCapacityScalar"
+    period      = 0
     return_data = true
   }
 }
 
-resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
-  name                      = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
-  autoscaling_group_name    = aws_autoscaling_group.main.name
-  estimated_instance_warmup = var.asg_config.instance_warmup
-  adjustment_type           = "ChangeInCapacity"
-  metric_aggregation_type   = "Average"
-  policy_type               = "StepScaling"
-
-  # All metric interval bounds are calculated by _adding_ the value of the bound to the threshold
-  # of the alarm that this scaling policy operates on. For example, if the alarm threshold is 100MB
-  # and the upper bound and lower bounds for a step adjustment are 300MB and 100MB, the step
-  # adjustment executes if the metric is greater than 200MB and less than 400MB
-  step_adjustment {
-    metric_interval_lower_bound = format("%.0e", 300 * 1000000) # 300 megabytes
-    scaling_adjustment          = length(var.env_config.azs) * 3
-  }
-
-  step_adjustment {
-    metric_interval_lower_bound = format("%.0e", 100 * 1000000) # 100 megabytes
-    metric_interval_upper_bound = format("%.0e", 300 * 1000000) # 300 megabytes
-    scaling_adjustment          = length(var.env_config.azs) * 2
-  }
-
-  step_adjustment {
-    metric_interval_lower_bound = 0                             # 0 megabytes
-    metric_interval_upper_bound = format("%.0e", 100 * 1000000) # 100 megabytes
-    scaling_adjustment          = length(var.env_config.azs)
-  }
-}
-
-resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
-    adjustment_type           = "ExactCapacity"
-    arn                       = "arn:aws:autoscaling:us-east-1:577373831711:scalingPolicy:f78d9336-e263-441f-8e8f-af0dca80abe3:autoScalingGroupName/bfd-2806-test-fhir-1:policyName/bfd-fhir-2806-test-networkin-high-scaleout"
-    autoscaling_group_name    = "bfd-2806-test-fhir-1"
-    cooldown                  = 0
-    enabled                   = true
-    estimated_instance_warmup = 90
-    id                        = "bfd-fhir-2806-test-networkin-high-scaleout"
-    metric_aggregation_type   = "Average"
-    min_adjustment_magnitude  = 0
-    name                      = "bfd-fhir-2806-test-networkin-high-scaleout"
-    policy_type               = "StepScaling"
-    scaling_adjustment        = 0
-
-    step_adjustment {
-        metric_interval_lower_bound = "0"
-        metric_interval_upper_bound = "1"
-        scaling_adjustment          = 6
-    }
-    step_adjustment {
-        metric_interval_lower_bound = "1"
-        metric_interval_upper_bound = "2"
-        scaling_adjustment          = 9
-    }
-    step_adjustment {
-        metric_interval_lower_bound = "2"
-        scaling_adjustment          = 12
-    }
-}
-
-resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
-    actions_enabled           = true
-    alarm_actions             = [
-        "arn:aws:autoscaling:us-east-1:577373831711:scalingPolicy:f78d9336-e263-441f-8e8f-af0dca80abe3:autoScalingGroupName/bfd-2806-test-fhir-1:policyName/bfd-fhir-2806-test-networkin-high-scaleout",
-    ]
-    alarm_name                = "bfd-2806-test-2856-scaleout-testing"
-    arn                       = "arn:aws:cloudwatch:us-east-1:577373831711:alarm:bfd-2806-test-2856-scaleout-testing"
-    comparison_operator       = "GreaterThanThreshold"
-    datapoints_to_alarm       = 1
-    dimensions                = {}
-    evaluation_periods        = 1
-    id                        = "bfd-2806-test-2856-scaleout-testing"
-    insufficient_data_actions = []
-    ok_actions                = []
-    period                    = 0
-    tags                      = {}
-    tags_all                  = {}
-    threshold                 = 1
-    treat_missing_data        = "missing"
-
-    metric_query {
-        id          = "m1"
-        period      = 0
-        return_data = false
-
-        metric {
-            dimensions  = {
-                "AutoScalingGroupName" = "bfd-2806-test-fhir-1"
-            }
-            metric_name = "NetworkIn"
-            namespace   = "AWS/EC2"
-            period      = 60
-            stat        = "Average"
-        }
-    }
-    metric_query {
-        id          = "m2"
-        period      = 0
-        return_data = false
-
-        metric {
-            dimensions  = {
-                "AutoScalingGroupName" = "bfd-2806-test-fhir-1"
-            }
-            metric_name = "NetworkOut"
-            namespace   = "AWS/EC2"
-            period      = 60
-            stat        = "Average"
-        }
-    }
-    metric_query {
-        id          = "m3"
-        period      = 0
-        return_data = false
-
-        metric {
-            dimensions  = {
-                "AutoScalingGroupName" = "bfd-2806-test-fhir-1"
-            }
-            metric_name = "GroupDesiredCapacity"
-            namespace   = "AWS/AutoScaling"
-            period      = 60
-            stat        = "Average"
-        }
-    }
-    metric_query {
-        expression  = "IF(e1 > 100000000 && e1 <= 200000000 && m3 <= 6, 1)"
-        id          = "e2"
-        label       = "Expression2"
-        period      = 0
-        return_data = false
-    }
-    metric_query {
-        expression  = "IF(e1 > 200000000 && e1 <= 400000000 && m3 <= 9, 2)"
-        id          = "e3"
-        label       = "Expression3"
-        period      = 0
-        return_data = false
-    }
-    metric_query {
-        expression  = "IF(e1 > 400000000 && m3 < 12, 3)"
-        id          = "e4"
-        label       = "Expression4"
-        period      = 0
-        return_data = false
-    }
-    metric_query {
-        expression  = "IF(m2/m1 > 0.01, m1, 0)"
-        id          = "e1"
-        label       = "FilteredNetworkIn"
-        period      = 0
-        return_data = false
-    }
-    metric_query {
-        expression  = "MAX([e2, e3, e4])"
-        id          = "e5"
-        label       = "ScalingCapacityScalar"
-        period      = 0
-        return_data = true
-    }
-}
-
 ## Autoscaling Notifications
-#
 resource "aws_autoscaling_notification" "asg_notifications" {
   count = var.asg_config.sns_topic_arn != "" ? 1 : 0
 
