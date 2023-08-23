@@ -169,7 +169,6 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, "some_user");
     envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "not-used");
     envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "14");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
     addRequiredSettingsForTest(envVars);
 
     final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars::get);
@@ -494,5 +493,8 @@ public class AppConfigurationTest {
         AppConfiguration.ENV_VAR_KEY_DATABASE_URL, "jdbc:postgres://host:1234/fhirdb");
     envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, "some_user");
     envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "not-used");
+
+    // if this one is absent the tests will do AWS credential checks!
+    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
   }
 }
