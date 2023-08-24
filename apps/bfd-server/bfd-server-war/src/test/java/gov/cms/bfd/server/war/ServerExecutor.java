@@ -1,23 +1,23 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_IMAGE_DEFAULT;
-import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_IMAGE_PROPERTY;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import gov.cms.bfd.ProcessOutputConsumer;
+import gov.cms.bfd.server.launcher.AppConfiguration;
+import gov.cms.bfd.server.launcher.DataServerLauncherApp;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.shaded.org.awaitility.core.ConditionTimeoutException;
 
@@ -29,17 +29,10 @@ public class ServerExecutor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerExecutor.class);
 
-  /**
-   * The BFD server process handle which the server runs within. We keep it around for cleanup when
-   * the tests are done.
-   */
-  private static Process serverProcess;
-
-  /** Keeps track of the server's STDOUT capture hook, to aid in debugging. */
-  private static ProcessOutputConsumer appRunConsumer;
+  private static DataServerLauncherApp.ServerStuff serverStuff;
 
   /** Keeps track of the server port we're running the server on. */
-  public static String testServerPort;
+  private static String testServerPort;
 
   /**
    * Starts the BFD server for tests. If already running, does nothing.
@@ -50,19 +43,19 @@ public class ServerExecutor {
    * @return {@code true} if the server is running, if {@code false} the server failed to start up
    * @throws IOException if there is an issue setting up the server relating to accessing files
    */
-  public static boolean startServer(String dbUrl, String dbUsername, String dbPassword)
+  public static synchronized boolean startServer(String dbUrl, String dbUsername, String dbPassword)
       throws IOException {
-    if (serverProcess == null) {
+    if (serverStuff == null) {
       LOGGER.info("Starting IT server with DB: {}", dbUrl);
 
+      // Configure Java Util Logging (JUL) to route over SLF4J, instead.
+      SLF4JBridgeHandler.removeHandlersForRootLogger(); // (since SLF4J 1.6.5)
+      SLF4JBridgeHandler.install();
+
       // Set up the paths we require for the server war dependencies
-      String javaHome = System.getProperty("java.home", "");
       String targetPath = "target";
       String workDirectory = "target/server-work";
-      String warArtifactLocation =
-          findFirstPathMatchWithFilenameEnd(targetPath, ".war", 1).toString();
-      String serverLauncher =
-          findFirstPathMatchWithFilenameEnd(workDirectory, ".jar", 2).toString();
+      String warArtifactLocation = "target/test-war-directory";
       String serverPortsFile = workDirectory + "/server-ports.properties";
       // These two files are copied into server-work during build time by maven for convenience
       // from:
@@ -72,7 +65,7 @@ public class ServerExecutor {
 
       // Validate the paths and properties needed to run the server war exist
       if (!validateRequiredServerSetup(
-          javaHome, warArtifactLocation, serverLauncher, serverPortsFile, keyStore, trustStore)) {
+          warArtifactLocation, serverPortsFile, keyStore, trustStore)) {
         return false;
       }
 
@@ -80,47 +73,48 @@ public class ServerExecutor {
       String serverPort = portFileContents.substring(portFileContents.indexOf('=') + 1);
       LOGGER.info("Configured server to run on HTTPS port {}.", serverPort);
 
-      ProcessBuilder appRunBuilder =
-          new ProcessBuilder(
-              createCommandForServerLauncherApp(workDirectory, dbUrl, dbUsername, dbPassword));
-      appRunBuilder.environment().put("BFD_PORT", serverPort);
-      appRunBuilder.environment().put("BFD_KEYSTORE", keyStore);
-      appRunBuilder.environment().put("BFD_TRUSTSTORE", trustStore);
-      appRunBuilder.environment().put("BFD_WAR", warArtifactLocation);
-      appRunBuilder.environment().put("BFD_JAVA_HOME", javaHome);
-      serverProcess = appRunBuilder.start();
+      final var appSettings = new HashMap<String, String>();
+      addServerSettings(appSettings, workDirectory, dbUrl, dbUsername, dbPassword);
+      final var configLoader = ConfigLoader.builder().addSingle(appSettings::get).build();
+      appSettings.put("BFD_PORT", serverPort);
+      appSettings.put("BFD_KEYSTORE", keyStore);
+      appSettings.put("BFD_TRUSTSTORE", trustStore);
+      appSettings.put("BFD_WAR", warArtifactLocation);
+      AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
+      serverStuff = DataServerLauncherApp.createServer(appConfig);
+      serverStuff
+          .getWebapp()
+          .setAttribute(
+              "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern", ".*/classes/.*");
 
-      appRunConsumer = new ProcessOutputConsumer(serverProcess);
-      Thread appRunConsumerThread = new Thread(appRunConsumer);
-      appRunConsumerThread.start();
+      // install our config so it will be used directly by the application
+      serverStuff
+          .getWebapp()
+          .setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, configLoader);
 
-      // Await start/finish of application startup by grepping the stdOut for keywords
-      String failureMessage = "Failed startup of context";
-      String successMessage = "Started Jetty.";
+      try {
+        serverStuff.getServer().start();
+      } catch (Exception ex) {
+        throw new RuntimeException("Caught exception when starting server.", ex);
+      }
+
       try {
         Awaitility.await()
             .atMost(2, TimeUnit.MINUTES)
             .until(
-                () ->
-                    appRunConsumer.getStdoutContents().contains(successMessage)
-                        || appRunConsumer.getStdoutContents().contains(failureMessage));
+                () -> {
+                  try (Socket ignored = new Socket("localhost", Integer.parseInt(serverPort))) {
+                    return true;
+                  } catch (Exception e) {
+                    return false;
+                  }
+                });
       } catch (ConditionTimeoutException e) {
-        throw new RuntimeException(
-            "Error: Server failed to start within 120 seconds. STDOUT:\n"
-                + appRunConsumer.getStdoutContents(),
-            e);
+        throw new RuntimeException("Error: Server failed to start within 120 seconds.", e);
       }
-      // Fail fast if we didn't start the server correctly
-      assertFalse(
-          appRunConsumer.getStdoutContents().contains(failureMessage),
-          "Server failed to start due to an error. STDOUT: " + appRunConsumer.getStdoutContents());
-      assertTrue(
-          appRunConsumer.getStdoutContents().contains(successMessage),
-          "Did not find the server start message in STDOUT: " + appRunConsumer.getStdoutContents());
       testServerPort = serverPort;
     }
     // do nothing if we've already got a server started
-
     return true;
   }
 
@@ -131,53 +125,37 @@ public class ServerExecutor {
    * @param dbUrl the db url
    * @param dbUsername the db username
    * @param dbPassword the db password
-   * @return the command array for the server app
    */
-  private static String[] createCommandForServerLauncherApp(
-      String workDirectory, String dbUrl, String dbUsername, String dbPassword) {
-    try {
-      Path assemblyDirectory =
-          Files.list(Paths.get(workDirectory))
-              .filter(f -> f.getFileName().toString().startsWith("bfd-server-launcher-"))
-              .findFirst()
-              .orElse(Path.of(""));
-      Path scriptPath = findFirstPathMatchWithFilenameEnd(assemblyDirectory.toString(), ".sh", 1);
+  private static void addServerSettings(
+      Map<String, String> appSettings,
+      String workDirectory,
+      String dbUrl,
+      String dbUsername,
+      String dbPassword) {
+    // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
+    String v2Enabled = "true";
+    String pacEnabled = "true";
+    String pacOldMbiHashEnabled = "true";
+    String pacClaimSourceTypes = "fiss,mcs";
+    String includeFakeDrugCode = "true";
+    String includeFakeOrgName = "true";
+    Random rand = new Random();
+    // Copied this from the startup script, but may not be needed
+    //      String bfdServerId = String.valueOf(rand.nextInt(10240));
 
-      String gcLog = workDirectory + "/gc.log";
-      String maxHeapArg = System.getProperty("its.bfdServer.jvmargs", "-Xmx4g");
-      String containerImageType =
-          System.getProperty(
-              TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
-      // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
-      String v2Enabled = "true";
-      String pacEnabled = "true";
-      String pacOldMbiHashEnabled = "true";
-      String pacClaimSourceTypes = "fiss,mcs";
-      String includeFakeDrugCode = "true";
-      String includeFakeOrgName = "true";
-      Random rand = new Random();
-      // Copied this from the startup script, but may not be needed
-      String bfdServerId = String.valueOf(rand.nextInt(10240));
+    //      args.add(String.format("-Dbfd-server-%s", bfdServerId));
+    appSettings.put("bfdServer.pac.enabled", pacEnabled);
+    appSettings.put("bfdServer.pac.oldMbiHash.enabled", pacOldMbiHashEnabled);
+    appSettings.put("bfdServer.pac.claimSourceTypes", pacClaimSourceTypes);
+    appSettings.put("bfdServer.db.url", dbUrl);
+    appSettings.put("bfdServer.db.username", dbUsername);
+    appSettings.put("bfdServer.db.password", dbPassword);
+    appSettings.put("bfdServer.include.fake.drug.code", includeFakeDrugCode);
+    appSettings.put("bfdServer.include.fake.org.name", includeFakeOrgName);
+  }
 
-      List<String> args = new ArrayList<>();
-      args.add(scriptPath.toAbsolutePath().toString());
-      args.add(maxHeapArg);
-      args.add(String.format("-Xlog:gc*:%s:time,level,tags", gcLog));
-      args.add(String.format("-Dbfd-server-%s", bfdServerId));
-      args.add(String.format("-DbfdServer.pac.enabled=%s", pacEnabled));
-      args.add(String.format("-DbfdServer.pac.oldMbiHash.enabled=%s", pacOldMbiHashEnabled));
-      args.add(String.format("-DbfdServer.pac.claimSourceTypes=%s", pacClaimSourceTypes));
-      args.add(String.format("-DbfdServer.db.url=%s", dbUrl));
-      args.add(String.format("-DbfdServer.db.username=%s", dbUsername));
-      args.add(String.format("-DbfdServer.db.password=%s", dbPassword));
-      args.add(String.format("-DbfdServer.include.fake.drug.code=%s", includeFakeDrugCode));
-      args.add(String.format("-DbfdServer.include.fake.org.name=%s", includeFakeOrgName));
-      args.add(
-          String.format("-D%s=%s", TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, containerImageType));
-      return args.toArray(new String[0]);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public static synchronized String getServerPort() {
+    return testServerPort;
   }
 
   /**
@@ -185,18 +163,23 @@ public class ServerExecutor {
    *
    * @return true if the server is running
    */
-  public static boolean isRunning() {
-    return serverProcess != null && serverProcess.isAlive();
+  public static synchronized boolean isRunning() {
+    return serverStuff != null && serverStuff.getServer().isRunning();
   }
 
   /** Stops the server process. */
-  public static void stopServer() {
-    if (serverProcess != null && serverProcess.isAlive()) {
-      serverProcess.destroy();
+  public static synchronized void stopServer() {
+    if (isRunning()) {
+      try {
+        serverStuff.getServer().stop();
+        serverStuff.getServer().join();
+      } catch (Exception ex) {
+        LOGGER.error("Caught exception while stopping server: message={}", ex.getMessage(), ex);
+        throw new RuntimeException(ex);
+      }
+      serverStuff = null;
       testServerPort = null;
-      LOGGER.info("Destroyed server process.");
-      // If one wishes to see what the server did, this will log the server process STDOut
-      LOGGER.debug("Server STDOUT: {}", appRunConsumer.getStdoutContents());
+      LOGGER.info("Stopped server.");
     } else {
       LOGGER.warn("Tried to destroy server process but was not running.");
     }
@@ -238,18 +221,14 @@ public class ServerExecutor {
   /**
    * Validate required server setup variables and paths exist.
    *
-   * @param javaHome the java home to use for the server launch
    * @param warArtifactLocation the war artifact location
-   * @param serverLauncherLocation the server launcher location
    * @param serverPortsFileLocation the server ports file location
    * @param keyStoreLocation the key store location
    * @param trustStoreLocation the trust store location
    * @return false if required paths or properties dont exist
    */
   private static boolean validateRequiredServerSetup(
-      String javaHome,
       String warArtifactLocation,
-      String serverLauncherLocation,
       String serverPortsFileLocation,
       String keyStoreLocation,
       String trustStoreLocation) {
@@ -257,28 +236,20 @@ public class ServerExecutor {
     // Check required paths exist
     boolean targetIsDir = Files.isDirectory(Paths.get("target"));
     boolean serverWorkExists = Files.exists(Paths.get("target", "server-work"));
-    boolean launcherDirExists = Files.exists(Paths.get(serverLauncherLocation));
     boolean serverPortFileExists = Files.exists(Paths.get(serverPortsFileLocation));
     boolean keyStoreExists = Files.exists(Paths.get(keyStoreLocation));
     boolean trustStoreExists = Files.exists(Paths.get(trustStoreLocation));
     if (!targetIsDir
         || !serverWorkExists
-        || !launcherDirExists
         || !serverPortFileExists
         || !keyStoreExists
         || !trustStoreExists) {
       LOGGER.error("Could not setup server; could not find required path.");
       LOGGER.error("   found target: {}", targetIsDir);
       LOGGER.error("   found target/server-work: {}", serverWorkExists);
-      LOGGER.error("   found launcher directory: {}", launcherDirExists);
       LOGGER.error("   found server port file: {}", serverPortFileExists);
       LOGGER.error("   found keystore: {}", keyStoreExists);
       LOGGER.error("   found trust store: {}", trustStoreExists);
-      return false;
-    }
-
-    if (!Files.exists(Paths.get(javaHome + "/bin/java"))) {
-      LOGGER.error("Test setup could not find java at: {}/bin/java", javaHome);
       return false;
     }
 
@@ -288,17 +259,5 @@ public class ServerExecutor {
     }
 
     return true;
-  }
-
-  /**
-   * Gets the standard out for the running server, useful for debugging.
-   *
-   * @return the standard out for the E2E server
-   */
-  public static String getServerStdOut() {
-    if (appRunConsumer != null) {
-      return appRunConsumer.getStdoutContents();
-    }
-    return "<Server not running>";
   }
 }

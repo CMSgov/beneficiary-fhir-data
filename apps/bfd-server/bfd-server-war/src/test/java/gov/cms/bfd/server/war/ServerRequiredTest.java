@@ -42,7 +42,7 @@ public class ServerRequiredTest {
 
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
-  protected static void setup() throws IOException {
+  protected static synchronized void setup() throws IOException {
     if (!ServerExecutor.isRunning()) {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(dbUrl),
@@ -70,7 +70,7 @@ public class ServerRequiredTest {
 
       boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
       assertTrue(startedServer, "Could not startup server for tests.");
-      baseServerUrl = "https://localhost:" + ServerExecutor.testServerPort;
+      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
       setRequestAuth();
       // Setup a shutdown hook to shut down the server when we are finished with all tests
       Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
@@ -104,7 +104,7 @@ public class ServerRequiredTest {
    * tests currently manage their own data cleanup).
    */
   @AfterEach
-  public void cleanDatabaseServerAfterEachTestCase() {
+  public synchronized void cleanDatabaseServerAfterEachTestCase() {
     if (dataSource != null && ServerTestUtils.isValidServerDatabase(dbUrl)) {
       ServerTestUtils.get().truncateNonRdaTablesInDataSource(dataSource);
     }
