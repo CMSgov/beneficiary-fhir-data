@@ -45,17 +45,13 @@ public final class DatabaseUtils {
   }
 
   /**
-   * Configures a data source.
+   * Computes an appropriate maximum number of connections to use by parsing the provided string.
+   * Falls back to a computed value if the string cannot be parsed or is non-positive.
    *
-   * @param poolingDataSource the {@link HikariDataSource} to be configured, which must already have
-   *     its basic connection properties (URL, username, password) configured
    * @param connectionsMaxText the maximum number of database connections to use
-   * @param metricRegistry the {@link MetricRegistry} for the application
+   * @return computed maximum number of database connections to use
    */
-  public static void configureDataSource(
-      HikariDataSource poolingDataSource,
-      String connectionsMaxText,
-      MetricRegistry metricRegistry) {
+  public static int computeMaximumPoolSize(String connectionsMaxText) {
     int connectionsMax;
     try {
       connectionsMax = Integer.parseInt(connectionsMaxText);
@@ -66,9 +62,18 @@ public final class DatabaseUtils {
       // Assign a reasonable default value, if none was specified.
       connectionsMax = Runtime.getRuntime().availableProcessors() * 5;
     }
+    return connectionsMax;
+  }
 
-    poolingDataSource.setMaximumPoolSize(connectionsMax);
-
+  /**
+   * Configures a data source.
+   *
+   * @param poolingDataSource the {@link HikariDataSource} to be configured, which must already have
+   *     its basic connection properties (URL, username, password) configured
+   * @param metricRegistry the {@link MetricRegistry} for the application
+   */
+  public static void configureDataSource(
+      HikariDataSource poolingDataSource, MetricRegistry metricRegistry) {
     /*
      * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
      * strongly worded letter instructing it to avoid sequential scans whenever

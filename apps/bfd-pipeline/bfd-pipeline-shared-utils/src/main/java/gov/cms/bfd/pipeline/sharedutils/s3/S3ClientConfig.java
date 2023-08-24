@@ -20,13 +20,16 @@ import software.amazon.awssdk.services.s3.S3CrtAsyncClientBuilder;
  * clients.
  */
 @Getter
-@EqualsAndHashCode(callSuper = true)
-public class S3ClientConfig extends AwsClientConfig {
+@EqualsAndHashCode
+public class S3ClientConfig {
   /**
    * Passed to {@link S3CrtAsyncClientBuilder#minimumPartSizeInBytes} to cause large files to be
    * downloaded in parts of 200 mb. Default value used when no alternative value has been provided.
    */
   static final long DEFAULT_MINIMUM_PART_SIZE_FOR_DOWNLOAD = 8 * 1024L * 1024L;
+
+  /** Common configuration used by all AWS clients. */
+  private final AwsClientConfig awsClientConfig;
 
   /**
    * Passed to {@link S3CrtAsyncClientBuilder#minimumPartSizeInBytes} to cause large files to be
@@ -35,8 +38,11 @@ public class S3ClientConfig extends AwsClientConfig {
   private final long minimumPartSizeForDownload;
 
   /**
-   * Initializes an instance. Any variable can be null. Region defaults to {@link #REGION_DEFAULT}.
+   * Initializes an instance. Any variable can be null. If {@code awsClientConfig} is non null it is
+   * used, otherwise an {@link AwsClientConfig} is constructed using the other AWS configuration
+   * settings.
    *
+   * @param awsClientConfig specific {@link AwsClientConfig} to use instead of buildng one
    * @param region an AWS {@link Region}
    * @param endpointOverride alternative URI for accessing AWS services (used with localstack)
    * @param accessKey optional access key
@@ -45,12 +51,22 @@ public class S3ClientConfig extends AwsClientConfig {
    */
   @Builder(builderClassName = "S3Builder", builderMethodName = "s3Builder")
   private S3ClientConfig(
+      @Nullable AwsClientConfig awsClientConfig,
       @Nullable Region region,
       @Nullable URI endpointOverride,
       @Nullable String accessKey,
       @Nullable String secretKey,
       @Nullable Long minimumPartSizeForDownload) {
-    super(region, endpointOverride, accessKey, secretKey);
+    if (awsClientConfig == null) {
+      awsClientConfig =
+          AwsClientConfig.awsBuilder()
+              .region(region)
+              .endpointOverride(endpointOverride)
+              .accessKey(accessKey)
+              .secretKey(secretKey)
+              .build();
+    }
+    this.awsClientConfig = awsClientConfig;
     this.minimumPartSizeForDownload =
         minimumPartSizeForDownload != null
             ? minimumPartSizeForDownload
@@ -64,12 +80,13 @@ public class S3ClientConfig extends AwsClientConfig {
    */
   @CanIgnoreReturnValue
   public void configureS3ServiceForAsyncS3(S3CrtAsyncClientBuilder builder) {
-    region.ifPresent(builder::region);
-    endpointOverride.ifPresent(builder::endpointOverride);
-    if (accessKey.isPresent() && secretKey.isPresent()) {
+    awsClientConfig.getRegion().ifPresent(builder::region);
+    awsClientConfig.getEndpointOverride().ifPresent(builder::endpointOverride);
+    if (awsClientConfig.getAccessKey().isPresent() && awsClientConfig.getSecretKey().isPresent()) {
       builder.credentialsProvider(
           StaticCredentialsProvider.create(
-              AwsBasicCredentials.create(accessKey.get(), secretKey.get())));
+              AwsBasicCredentials.create(
+                  awsClientConfig.getAccessKey().get(), awsClientConfig.getSecretKey().get())));
     }
     builder.minimumPartSizeInBytes(minimumPartSizeForDownload);
   }
@@ -85,14 +102,8 @@ public class S3ClientConfig extends AwsClientConfig {
   @Override
   public String toString() {
     return "S3ClientConfig{"
-        + "region="
-        + region
-        + ", endpointOverride="
-        + endpointOverride
-        + ", accessKeyLength="
-        + accessKey.map(String::length)
-        + ", secretKeyLength="
-        + secretKey.map(String::length)
+        + "awsClientConfig="
+        + awsClientConfig
         + ", minimumPartSizeForDownload="
         + minimumPartSizeForDownload
         + '}';
