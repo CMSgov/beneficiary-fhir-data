@@ -6,9 +6,9 @@ locals {
 
   additional_tags = { Layer = var.layer, role = var.role }
   scaleout_asg_capacities = [
-    { type = "low", capacity = length(var.env_config.azs) * 2, metric_lower_bound = 0, metric_upper_bound = 1 },
-    { type = "mid", capacity = length(var.env_config.azs) * 3, metric_lower_bound = 1, metric_upper_bound = 2 },
-    { type = "upper", capacity = length(var.env_config.azs) * 4, metric_lower_bound = 2, metric_upper_bound = null }
+    { capacity = length(var.env_config.azs) * 2, metric_lower_bound = 1 * var.scaling_networkin_interval_mb, metric_upper_bound = 2 * var.scaling_networkin_interval_mb },
+    { capacity = length(var.env_config.azs) * 3, metric_lower_bound = 2 * var.scaling_networkin_interval_mb, metric_upper_bound = 4 * var.scaling_networkin_interval_mb },
+    { capacity = length(var.env_config.azs) * 4, metric_lower_bound = 4 * var.scaling_networkin_interval_mb, metric_upper_bound = null }
   ]
 }
 
@@ -336,14 +336,18 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
     content {
       id          = "e${metric_query.key}"
       label       = "Set to ${metric_query.value.capacity} capacity units"
-      expression  = metric_query.value.type == "low" ? "IF(networkin > ${var.scaling_networkin_interval_mb} && networkin <= 2 * ${var.scaling_networkin_interval_mb} && m3 <= ${metric_query.value.capacity}, 1)" :  metric_query.value.type == "mid" ? "IF(networkin > 2 * ${var.scaling_networkin_interval_mb} && networkin <= 4 * ${var.scaling_networkin_interval_mb} && m3 <= ${metric_query.value.capacity}, 2)" : "IF(networkin > 4 * ${var.scaling_networkin_interval_mb} && m3 < ${metric_query.value.capacity}, 3)"
+      expression = "IF(${join(" && ", compact([
+        "networkin > ${metric_query.value.metric_lower_bound}",
+        metric_query.value.metric_upper_bound != null ? "networkin <= ${metric_query.value.metric_upper_bound}" : null,
+        "m3 < ${metric_query.value.capacity}"
+      ]))}, ${metric_query.key + 1})"
       return_data = false
     }
   }
 
   metric_query {
-    expression  = "MAX([e0, e1, e2])"
-    id          = "e5"
+    expression  = "MAX([${join(",", [for i in range(length(local.scaleout_asg_capacities)) : "e${i}"])}])"
+    id          = "e${length(local.scaleout_asg_capacities)}"
     label       = "ScalingCapacityScalar"
     period      = 0
     return_data = true
@@ -361,8 +365,8 @@ resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
   dynamic "step_adjustment" {
      for_each = local.scaleout_asg_capacities
      content {
-       metric_interval_lower_bound = step_adjustment.value.metric_lower_bound
-       metric_interval_upper_bound = step_adjustment.value.metric_upper_bound
+       metric_interval_lower_bound = step_adjustment.key + 1
+       metric_interval_upper_bound = step_adjustment.key + 2
        scaling_adjustment          = step_adjustment.value.capacity
      }
   }
