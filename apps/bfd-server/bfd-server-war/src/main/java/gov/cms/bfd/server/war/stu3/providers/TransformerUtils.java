@@ -3000,6 +3000,36 @@ public final class TransformerUtils {
   }
 
   /**
+   * Adds a qualification {@link org.hl7.fhir.r4.model.CodeableConcept} to the given careTeam
+   * component, if the input code optional is not empty. If the code is empty, returns with no
+   * effect. Can safely be called to add qualification only if the value is present.
+   *
+   * @param careTeam the care team to add the
+   * @param rootResource the root resource to use for the coding
+   * @param ccwVariable the ccw variable to use for the coding
+   * @param code an optional to create the {@link org.hl7.fhir.r4.model.CodeableConcept} from; if
+   *     empty, method returns with no action taken
+   */
+  static void addCareTeamQualification(
+      CareTeamComponent careTeam,
+      IAnyResource rootResource,
+      CcwCodebookInterface ccwVariable,
+      Optional code) {
+    // While the original code was written in such a way that implies this optional wont be empty,
+    // its still an optional, so dont bother adding anything if it happens to be empty
+    if (code.isEmpty()) {
+      return;
+    }
+
+    Coding coding = createCoding(rootResource, ccwVariable, code.get());
+
+    CodeableConcept concept = new CodeableConcept();
+    concept.addCoding(coding);
+
+    careTeam.setQualification(concept);
+  }
+
+  /**
    * Reads ALL the NPI codes and display values from the NPI_Coded_Display_Values_Tab.txt file.
    * Refer to the README file in the src/main/resources directory.
    *

@@ -176,9 +176,11 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
          * extension. TODO: suggest that the spec allows more than one
          * `qualification` entry.
          */
-        performingCareTeamMember.setQualification(
-            TransformerUtils.createCodeableConcept(
-                eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
+        TransformerUtils.addCareTeamQualification(
+            performingCareTeamMember,
+            eob,
+            CcwCodebookVariable.PRVDR_SPCLTY,
+            claimLine.getProviderSpecialityCode());
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
         TransformerUtils.addCareTeamExtension(
