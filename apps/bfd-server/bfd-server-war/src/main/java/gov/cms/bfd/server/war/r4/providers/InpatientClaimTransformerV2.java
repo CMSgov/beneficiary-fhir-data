@@ -195,8 +195,10 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     // CLM_TOT_PPS_CPTL_AMT => ExplanationOfBenefit.benefitBalance.financial
     if (claimGroup.getClaimTotalPPSCapitalAmount().isPresent()) {
-      TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(eob, CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
-                                                              claimGroup.getClaimTotalPPSCapitalAmount());
+      TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
+          eob,
+          CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
+          claimGroup.getClaimTotalPPSCapitalAmount());
     }
 
     /*
