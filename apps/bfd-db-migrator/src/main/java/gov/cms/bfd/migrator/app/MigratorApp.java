@@ -13,7 +13,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
-import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -101,13 +101,14 @@ public final class MigratorApp {
     final MigratorProgressTracker progressTracker = createProgressTracker(appConfig);
     progressTracker.appStarted();
 
+    final DataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
     final MetricRegistry appMetrics = setupMetrics(appConfig);
     createOrUpdateSchema(
-        appConfig.getDatabaseOptions(),
+        dataSourceFactory,
         appConfig.getFlywayScriptLocationOverride(),
         progressTracker,
         appMetrics);
-    validateSchema(appConfig.getDatabaseOptions(), progressTracker, appMetrics);
+    validateSchema(dataSourceFactory, progressTracker, appMetrics);
 
     LOGGER.info("Migration and validation passed, shutting down");
     progressTracker.appFinished();
@@ -116,18 +117,19 @@ public final class MigratorApp {
   /**
    * Uses {@link HibernateValidator} to validate the database matches our entities.
    *
-   * @param databaseOptions used to connect to database
+   * @param dataSourceFactory used to connect to database
    * @param progressTracker used to record app progress
    * @param appMetrics used to track app metrics
    * @throws FatalErrorException to report an error that should terminate the application
    */
   private void validateSchema(
-      DatabaseOptions databaseOptions,
+      DataSourceFactory dataSourceFactory,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
       throws FatalErrorException {
     // Hibernate suggests not reusing data sources for validations
-    try (HikariDataSource pooledDataSource = createPooledDataSource(databaseOptions, appMetrics)) {
+    try (HikariDataSource pooledDataSource =
+        createPooledDataSource(dataSourceFactory, appMetrics)) {
       boolean validationSuccess;
       // Run hibernate validation after the migrations have succeeded
       HibernateValidator validator =
@@ -144,7 +146,7 @@ public final class MigratorApp {
   /**
    * Uses {@link DatabaseSchemaManager} to create and apply migrations to the database as necessary.
    *
-   * @param databaseOptions used to connect to database
+   * @param dataSourceFactory used to connect to database
    * @param flywayScriptLocationOverride the flyway script location override, can be null if no
    *     override
    * @param progressTracker used to record app progress
@@ -152,13 +154,14 @@ public final class MigratorApp {
    * @throws FatalErrorException to report an error that should terminate the application
    */
   private void createOrUpdateSchema(
-      DatabaseOptions databaseOptions,
+      DataSourceFactory dataSourceFactory,
       String flywayScriptLocationOverride,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
       throws FatalErrorException {
     // Hibernate suggests not reusing data sources for validations
-    try (HikariDataSource pooledDataSource = createPooledDataSource(databaseOptions, appMetrics)) {
+    try (HikariDataSource pooledDataSource =
+        createPooledDataSource(dataSourceFactory, appMetrics)) {
       progressTracker.appConnected();
 
       // run migration
@@ -260,21 +263,17 @@ public final class MigratorApp {
    *
    * <p>TODO: BFD-1558 Move to shared location for pipeline + this app
    *
-   * @param dbOptions the {@link DatabaseOptions} to use for the application's DB
+   * @param dataSourceFactory the {@link DataSourceFactory} to use to create a {@link
+   *     HikariDataSource}
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
   private HikariDataSource createPooledDataSource(
-      DatabaseOptions dbOptions, MetricRegistry metrics) {
-    HikariDataSource pooledDataSource = new HikariDataSource();
-
-    pooledDataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
-    pooledDataSource.setUsername(dbOptions.getDatabaseUsername());
-    pooledDataSource.setPassword(dbOptions.getDatabasePassword());
-    pooledDataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
-    pooledDataSource.setRegisterMbeans(true);
+      DataSourceFactory dataSourceFactory, MetricRegistry metrics) {
+    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
+    // we know that flyway requires at least two connections so override the value if it's 1
+    pooledDataSource.setMaximumPoolSize(Math.max(2, pooledDataSource.getMaximumPoolSize()));
     pooledDataSource.setMetricRegistry(metrics);
-
     return pooledDataSource;
   }
 

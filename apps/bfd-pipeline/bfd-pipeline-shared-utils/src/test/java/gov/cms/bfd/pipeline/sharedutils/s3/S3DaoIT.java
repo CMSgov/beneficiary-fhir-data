@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -63,8 +62,7 @@ class S3DaoIT extends AbstractLocalStackTest {
         new AwsS3ClientFactory(
                 S3ClientConfig.s3Builder()
                     .region(Region.of(localstack.getRegion()))
-                    .endpointOverride(
-                        localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+                    .endpointOverride(localstack.getEndpoint())
                     .accessKey(localstack.getAccessKey())
                     .secretKey(localstack.getSecretKey())
                     .minimumPartSizeForDownload((long) MIN_PART_SIZE_FOR_TESTING)

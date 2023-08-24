@@ -29,6 +29,7 @@ import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import io.micrometer.cloudwatch2.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -179,8 +180,9 @@ public final class PipelineApplication {
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
     // Create a pooled data source for use by any registered jobs.
+    final DataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
     final HikariDataSource pooledDataSource =
-        PipelineApplicationState.createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
+        PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics);
 
     HikariProxyConnection dbConn = null;
     try {
