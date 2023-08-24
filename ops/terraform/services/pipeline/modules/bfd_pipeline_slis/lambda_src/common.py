@@ -1,0 +1,43 @@
+import os
+from dataclasses import dataclass
+from enum import Enum
+
+METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
+
+
+@dataclass
+class PipelineMetricMetadata:
+    """Encapsulates metadata about a given pipeline metric"""
+
+    metric_name: str
+    """The name of the metric in CloudWatch Metrics, excluding namespace"""
+    unit: str
+    """The unit of the metric. Must conform to the list of supported CloudWatch Metrics"""
+
+
+class PipelineMetric(PipelineMetricMetadata, Enum):
+    """Enumeration of pipeline metrics that can be stored in CloudWatch Metrics"""
+
+    TIME_DATA_AVAILABLE = PipelineMetricMetadata("time/data-available", "Seconds")
+    TIME_DATA_FIRST_AVAILABLE = PipelineMetricMetadata("time/data-first-available", "Seconds")
+    TIME_DATA_LOADED = PipelineMetricMetadata("time/data-loaded", "Seconds")
+    TIME_DATA_FULLY_LOADED = PipelineMetricMetadata("time/data-fully-loaded", "Seconds")
+    TIME_DELTA_DATA_LOAD_TIME = PipelineMetricMetadata("time-delta/data-load-time", "Seconds")
+    TIME_DELTA_FULL_DATA_LOAD_TIME = PipelineMetricMetadata(
+        "time-delta/data-full-load-time", "Seconds"
+    )
+
+    def __init__(self, data: PipelineMetricMetadata):
+        for key in data.__annotations__.keys():
+            value = getattr(data, key)
+            setattr(self, key, value)
+
+    def full_name(self) -> str:
+        """Returns the fully qualified name of the metric, which includes the metric namespace and
+        metric name
+
+        Returns:
+            str: The "full name" of the metric
+        """
+        metric_metadata: PipelineMetricMetadata = self.value
+        return f"{METRICS_NAMESPACE}/{metric_metadata.metric_name}"

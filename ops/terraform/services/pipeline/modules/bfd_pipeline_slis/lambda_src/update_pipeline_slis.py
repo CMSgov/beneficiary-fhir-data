@@ -2,7 +2,6 @@ import calendar
 import json
 import os
 import re
-from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Type
@@ -13,6 +12,7 @@ from botocore import exceptions as botocore_exceptions
 from botocore.config import Config
 
 from backoff_retry import backoff_retry
+from common import METRICS_NAMESPACE, PipelineMetric
 from cw_metrics import (
     MetricDataQuery,
     gen_all_dimensioned_metrics,
@@ -22,7 +22,6 @@ from cw_metrics import (
 from sqs import check_sentinel_queue, post_sentinel_message
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
-METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
 SENTINEL_QUEUE_NAME = os.environ.get("SENTINEL_QUEUE_NAME", "")
 BOTO_CONFIG = Config(
@@ -68,44 +67,6 @@ class RifFileType(str, Enum):
     SNF = "snf"
 
 
-@dataclass
-class PipelineMetricMetadata:
-    """Encapsulates metadata about a given pipeline metric"""
-
-    metric_name: str
-    """The name of the metric in CloudWatch Metrics, excluding namespace"""
-    unit: str
-    """The unit of the metric. Must conform to the list of supported CloudWatch Metrics"""
-
-
-class PipelineMetric(PipelineMetricMetadata, Enum):
-    """Enumeration of pipeline metrics that can be stored in CloudWatch Metrics"""
-
-    TIME_DATA_AVAILABLE = PipelineMetricMetadata("time/data-available", "Seconds")
-    TIME_DATA_FIRST_AVAILABLE = PipelineMetricMetadata("time/data-first-available", "Seconds")
-    TIME_DATA_LOADED = PipelineMetricMetadata("time/data-loaded", "Seconds")
-    TIME_DATA_FULLY_LOADED = PipelineMetricMetadata("time/data-fully-loaded", "Seconds")
-    TIME_DELTA_DATA_LOAD_TIME = PipelineMetricMetadata("time-delta/data-load-time", "Seconds")
-    TIME_DELTA_FULL_DATA_LOAD_TIME = PipelineMetricMetadata(
-        "time-delta/data-full-load-time", "Seconds"
-    )
-
-    def __init__(self, data: PipelineMetricMetadata):
-        for key in data.__annotations__.keys():
-            value = getattr(data, key)
-            setattr(self, key, value)
-
-    def full_name(self) -> str:
-        """Returns the fully qualified name of the metric, which includes the metric namespace and
-        metric name
-
-        Returns:
-            str: The "full name" of the metric
-        """
-        metric_metadata: PipelineMetricMetadata = self.value
-        return f"{METRICS_NAMESPACE}/{metric_metadata.metric_name}"
-
-
 def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
     done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group_timestamp}/"
     # Returns the file names of all text files within the "done" folder for the current bucket
@@ -141,9 +102,9 @@ def handler(event: Any, context: Any):
         return
 
     try:
-        cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)
-        s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
-        sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)
+        cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
+        s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
+        sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)  # type: ignore
         sentinel_queue = sqs_resource.get_queue_by_name(QueueName=SENTINEL_QUEUE_NAME)
         etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
     except Exception as exc:
