@@ -858,7 +858,7 @@ public final class TransformerUtilsV2 {
       CareTeamComponent careTeam,
       IAnyResource rootResource,
       CcwCodebookInterface ccwVariable,
-      Optional code) {
+      Optional<?> code) {
     // While the original code was written in such a way that implies this optional wont be empty,
     // its still an optional, so dont bother adding anything if it happens to be empty
     if (code.isEmpty()) {
