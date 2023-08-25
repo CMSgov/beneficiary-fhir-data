@@ -14,6 +14,7 @@ import io.restassured.authentication.CertificateAuthSettings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.sql.DataSource;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -30,7 +31,7 @@ import org.postgresql.ds.PGSimpleDataSource;
 public class ServerRequiredTest {
 
   /** The database url used to set up the tests. */
-  private static final String dbUrl = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
+  private static final String DB_URL = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
 
   /** The database connection to use for the test. */
   @GuardedBy("class synchronized")
@@ -49,7 +50,7 @@ public class ServerRequiredTest {
   protected static synchronized void setup() throws IOException {
     if (!ServerExecutor.isRunning()) {
       assertTrue(
-          ServerTestUtils.isValidServerDatabase(dbUrl),
+          ServerTestUtils.isValidServerDatabase(DB_URL),
           "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise) OR an in-memory hsql db.");
       // Initialize/get the database/datasource, so we can just pass a connection string to the
       // server
@@ -58,11 +59,11 @@ public class ServerRequiredTest {
       String dbUsername;
       String dbPassword;
       // Grab the previously set-up local database url to pass to the test server
-      if (dataSource instanceof PGSimpleDataSource && dbUrl.endsWith("tc")) {
+      if (dataSource instanceof PGSimpleDataSource && DB_URL.endsWith("tc")) {
         resolvedDbUrl = ((PGSimpleDataSource) dataSource).getUrl();
         dbUsername = TEST_CONTAINER_DATABASE_USERNAME;
         dbPassword = TEST_CONTAINER_DATABASE_PASSWORD;
-      } else if (dataSource instanceof JDBCDataSource && dbUrl.contains("hsql")) {
+      } else if (dataSource instanceof JDBCDataSource && DB_URL.contains("hsql")) {
         resolvedDbUrl = ((JDBCDataSource) dataSource).getUrl();
         dbUsername = HSQL_SERVER_USERNAME;
         dbPassword = HSQL_SERVER_PASSWORD;
@@ -109,16 +110,19 @@ public class ServerRequiredTest {
    */
   @AfterEach
   public void cleanDatabaseServerAfterEachTestCase() {
-    cleanDatabaseServerAfterEachTestCaseImpl();
+    final DataSource dataSource = getDataSource();
+    if (dataSource != null && ServerTestUtils.isValidServerDatabase(DB_URL)) {
+      ServerTestUtils.get().truncateNonRdaTablesInDataSource(dataSource);
+    }
   }
 
   /**
-   * Cleans the database by truncating all non-RDA data. (RDA is skipped since RDA tests currently
-   * manage their own data cleanup). Implemented as a static method to simplify synchronization.
+   * Gets the current {@link DataSource} (if any).
+   *
+   * @return the data source or null if there is none
    */
-  private static synchronized void cleanDatabaseServerAfterEachTestCaseImpl() {
-    if (dataSource != null && ServerTestUtils.isValidServerDatabase(dbUrl)) {
-      ServerTestUtils.get().truncateNonRdaTablesInDataSource(dataSource);
-    }
+  @Nullable
+  private static synchronized DataSource getDataSource() {
+    return dataSource;
   }
 }
