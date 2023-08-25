@@ -352,25 +352,6 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <!-- When its 'attach-artifact' goal is run, this plugin will attach
-                        the server management scripts that should be used to run this project's WAR.
-                        This ensures that it is included in install, deploy, etc. operations. -->
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${build.helper.maven.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <!-- Use the dependency plugin to copy the test dependency artifacts,
-                        for use in ITs. -->
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven.dependency.plugin.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -425,6 +406,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build.helper.maven.plugin.version}</version>
                 <executions>
                     <execution>
                         <!-- Reserve random available ports for the server to use. -->
