@@ -2931,7 +2931,7 @@ public final class TransformerUtils {
    */
   public static void addCareTeamExtension(
       CcwCodebookVariable codebookVariable,
-      Optional extensionValue,
+      Optional<?> extensionValue,
       CareTeamComponent careTeamComponent,
       ExplanationOfBenefit eob) {
 

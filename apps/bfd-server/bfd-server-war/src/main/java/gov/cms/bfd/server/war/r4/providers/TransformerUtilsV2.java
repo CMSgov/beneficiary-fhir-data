@@ -689,7 +689,7 @@ public final class TransformerUtilsV2 {
    */
   public static void addCareTeamExtension(
       CcwCodebookVariable codebookVariable,
-      Optional extensionValue,
+      Optional<?> extensionValue,
       ExplanationOfBenefit.CareTeamComponent careTeamComponent,
       ExplanationOfBenefit eob) {
 
