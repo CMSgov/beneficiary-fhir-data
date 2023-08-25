@@ -273,7 +273,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   datapoints_to_alarm = 1
   evaluation_periods  = 1
   threshold           = 1
-  treat_missing_data  = "ignore"
+  treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_high_scaling.arn]
 
   metric_query {
