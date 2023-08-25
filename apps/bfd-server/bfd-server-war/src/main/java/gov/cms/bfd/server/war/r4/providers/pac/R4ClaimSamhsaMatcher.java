@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
-import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.r4.ClaimAdapter;
 import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;

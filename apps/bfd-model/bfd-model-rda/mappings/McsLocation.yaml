@@ -1,7 +1,7 @@
 mappings:
 - id: McsLocation
   messageClassName: gov.cms.mpsm.rda.v1.mcs.McsLocation
-  entityClassName: gov.cms.bfd.model.rda.RdaMcsLocation
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaMcsLocation
   table:
     name: mcs_locations
     schema: rda

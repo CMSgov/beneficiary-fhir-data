@@ -1010,6 +1010,7 @@
                     <!-- Exclude javadocs on certain generated files, reduces build warnings -->
                     <excludePackageNames>gov.cms.mpsm.rda.*</excludePackageNames>
                     <excludePackageNames>gov.cms.bfd.model.rif.entities.*</excludePackageNames>
+                    <excludePackageNames>gov.cms.bfd.model.rda.entities.*</excludePackageNames>
                     <quiet>true</quiet>
                     <!-- This notimestamp option does not make our *-javadoc.jar files completely
                         reproducible, but the option is recommended by Maven for a reproducible

@@ -1,7 +1,7 @@
 mappings:
 - id: McsDiagnosisCode
   messageClassName: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode
-  entityClassName: gov.cms.bfd.model.rda.RdaMcsDiagnosisCode
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode
   table:
     name: mcs_diagnosis_codes
     schema: rda
