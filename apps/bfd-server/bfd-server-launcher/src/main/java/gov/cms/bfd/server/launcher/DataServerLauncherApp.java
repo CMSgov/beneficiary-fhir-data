@@ -83,14 +83,25 @@ public final class DataServerLauncherApp {
    */
   static final int EXIT_CODE_MONITOR_ERROR = 2;
 
+  /** Holds important information about the running jetty server and its web application. */
   @Getter
   @AllArgsConstructor
-  public static class ServerStuff {
+  public static class ServerInfo {
+    /** The server object can be used to start and stop the server. */
     private Server server;
+
+    /** The app context can be used to set attributes for use by the application. */
     private WebAppContext webapp;
   }
 
-  public static ServerStuff createServer(AppConfiguration appConfig) {
+  /**
+   * Creates a new {@link Server} and {@link WebAppContext} and returns them. Does not actually
+   * start the server.
+   *
+   * @param appConfig used to configure the server
+   * @return an object containing the values
+   */
+  public static ServerInfo createServer(AppConfiguration appConfig) {
     Server server = new Server(appConfig.getPort());
 
     // Modify the default HTTP config.
@@ -218,7 +229,7 @@ public final class DataServerLauncherApp {
     // Wire up the WebAppContext to Jetty.
     HandlerCollection handlers = new HandlerCollection(webapp);
     server.setHandler(handlers);
-    return new ServerStuff(server, webapp);
+    return new ServerInfo(server, webapp);
   }
 
   /**
@@ -259,18 +270,18 @@ public final class DataServerLauncherApp {
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
     // Create the Jetty Server instance that will do most of our work.
-    ServerStuff stuff = createServer(appConfig);
+    ServerInfo serverInfo = createServer(appConfig);
 
     // Configure shutdown handlers before starting everything up.
-    stuff.server.setStopTimeout(Duration.ofSeconds(30).toMillis());
-    stuff.server.setStopAtShutdown(true);
+    serverInfo.server.setStopTimeout(Duration.ofSeconds(30).toMillis());
+    serverInfo.server.setStopAtShutdown(true);
     registerShutdownHook(appMetrics);
 
     // Start up Jetty.
     try {
       LOGGER.info("Starting Jetty...");
-      stuff.server.start();
-      URI serverURI = stuff.server.getURI();
+      serverInfo.server.start();
+      URI serverURI = serverInfo.server.getURI();
       LOGGER.info(
           "{} Server available at: '{}'",
           LOG_MESSAGE_STARTED_JETTY,
@@ -290,7 +301,7 @@ public final class DataServerLauncherApp {
      * configured above will fire.
      */
     try {
-      stuff.server.join();
+      serverInfo.server.join();
     } catch (InterruptedException e) {
       // Don't do anything here; this is expected behavior when the app is stopped.
     }

@@ -9,15 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.shaded.org.awaitility.core.ConditionTimeoutException;
 
@@ -26,12 +23,22 @@ import org.testcontainers.shaded.org.awaitility.core.ConditionTimeoutException;
  * integration tests).
  */
 public class ServerExecutor {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerExecutor.class);
 
-  private static DataServerLauncherApp.ServerStuff serverStuff;
+  /**
+   * Name of directory under target that contains our web application. The directory must have been
+   * already created for us by maven. It must not contain any jar or class files as those would be
+   * loaded by a different class loader and make debugging difficult as well as making it difficult
+   * to re-use the {@link ConfigLoader} containing the app configuration.
+   */
+  public static final String TEST_WEBAPP_DIRECTORY = "test-webapp-directory";
+
+  /** Holds information about the running server. */
+  @GuardedBy("class synchronized")
+  private static DataServerLauncherApp.ServerInfo serverInfo;
 
   /** Keeps track of the server port we're running the server on. */
+  @GuardedBy("class synchronized")
   private static String testServerPort;
 
   /**
@@ -45,105 +52,101 @@ public class ServerExecutor {
    */
   public static synchronized boolean startServer(String dbUrl, String dbUsername, String dbPassword)
       throws IOException {
-    if (serverStuff == null) {
-      LOGGER.info("Starting IT server with DB: {}", dbUrl);
-
-      // Configure Java Util Logging (JUL) to route over SLF4J, instead.
-      SLF4JBridgeHandler.removeHandlersForRootLogger(); // (since SLF4J 1.6.5)
-      SLF4JBridgeHandler.install();
-
-      // Set up the paths we require for the server war dependencies
-      String targetPath = "target";
-      String workDirectory = "target/server-work";
-      String warArtifactLocation = "target/test-war-directory";
-      String serverPortsFile = workDirectory + "/server-ports.properties";
-      // These two files are copied into server-work during build time by maven for convenience
-      // from:
-      // bfd-server/dev/ssl-stores
-      String keyStore = workDirectory + "/server-keystore.pfx";
-      String trustStore = workDirectory + "/server-truststore.pfx";
-
-      // Validate the paths and properties needed to run the server war exist
-      if (!validateRequiredServerSetup(
-          warArtifactLocation, serverPortsFile, keyStore, trustStore)) {
-        return false;
-      }
-
-      String portFileContents = Files.readString(Path.of(serverPortsFile)).trim();
-      String serverPort = portFileContents.substring(portFileContents.indexOf('=') + 1);
-      LOGGER.info("Configured server to run on HTTPS port {}.", serverPort);
-
-      final var appSettings = new HashMap<String, String>();
-      addServerSettings(appSettings, workDirectory, dbUrl, dbUsername, dbPassword);
-      final var configLoader = ConfigLoader.builder().addSingle(appSettings::get).build();
-      appSettings.put("BFD_PORT", serverPort);
-      appSettings.put("BFD_KEYSTORE", keyStore);
-      appSettings.put("BFD_TRUSTSTORE", trustStore);
-      appSettings.put("BFD_WAR", warArtifactLocation);
-      AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
-      serverStuff = DataServerLauncherApp.createServer(appConfig);
-      serverStuff
-          .getWebapp()
-          .setAttribute(
-              "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern", ".*/classes/.*");
-
-      // install our config so it will be used directly by the application
-      serverStuff
-          .getWebapp()
-          .setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, configLoader);
-
-      try {
-        serverStuff.getServer().start();
-      } catch (Exception ex) {
-        throw new RuntimeException("Caught exception when starting server.", ex);
-      }
-
-      try {
-        Awaitility.await()
-            .atMost(2, TimeUnit.MINUTES)
-            .until(
-                () -> {
-                  try (Socket ignored = new Socket("localhost", Integer.parseInt(serverPort))) {
-                    return true;
-                  } catch (Exception e) {
-                    return false;
-                  }
-                });
-      } catch (ConditionTimeoutException e) {
-        throw new RuntimeException("Error: Server failed to start within 120 seconds.", e);
-      }
-      testServerPort = serverPort;
+    if (serverInfo != null) {
+      // Nothing to do since its already running.
+      return true;
     }
-    // do nothing if we've already got a server started
+
+    LOGGER.info("Starting IT server with DB: {}", dbUrl);
+
+    // Set up the paths we require for the server war dependencies
+    String targetPath = "target";
+    String workDirectory = targetPath + "/server-work";
+    String warArtifactLocation = targetPath + "/" + TEST_WEBAPP_DIRECTORY;
+    String serverPortsFile = workDirectory + "/server-ports.properties";
+    // These two files are copied into server-work during build time by maven for convenience
+    // from: bfd-server/dev/ssl-stores
+    String keyStore = workDirectory + "/server-keystore.pfx";
+    String trustStore = workDirectory + "/server-truststore.pfx";
+
+    // Validate the paths and properties needed to run the server war exist
+    if (!validateRequiredServerSetup(
+        targetPath, workDirectory, warArtifactLocation, serverPortsFile, keyStore, trustStore)) {
+      return false;
+    }
+
+    String portFileContents = Files.readString(Path.of(serverPortsFile)).trim();
+    String serverPort = portFileContents.substring(portFileContents.indexOf('=') + 1);
+    LOGGER.info("Configured server to run on HTTPS port {}.", serverPort);
+
+    final var appSettings = new HashMap<String, String>();
+    addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
+    final var configLoader = ConfigLoader.builder().addSingle(appSettings::get).build();
+    appSettings.put("BFD_PORT", serverPort);
+    appSettings.put("BFD_KEYSTORE", keyStore);
+    appSettings.put("BFD_TRUSTSTORE", trustStore);
+    appSettings.put("BFD_WAR", warArtifactLocation);
+    AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
+    serverInfo = DataServerLauncherApp.createServer(appConfig);
+
+    // Tells jetty to scan the classes in our normal classpath instead of
+    // scanning jars and class files within the webapp directory.  This is
+    // necessary to allow spring to find our configuration class.
+    serverInfo
+        .getWebapp()
+        .setAttribute(
+            "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern", ".*/classes/.*");
+
+    // Installs our configuration as an attribute in the ServletContext so that
+    // ServerInitializer can reuse it.  This prevents it trying to configure the
+    // application using environment variables and system properties.
+    serverInfo
+        .getWebapp()
+        .setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, configLoader);
+
+    // OK - fire it up.  This is asynchronous so it returns immediately.
+    try {
+      serverInfo.getServer().start();
+    } catch (Exception ex) {
+      throw new RuntimeException("Caught exception when starting server.", ex);
+    }
+
+    // Wait for the server to begin listening on its port.
+    try {
+      Awaitility.await()
+          .atMost(2, TimeUnit.MINUTES)
+          .until(
+              () -> {
+                try (Socket ignored = new Socket("localhost", Integer.parseInt(serverPort))) {
+                  return true;
+                } catch (Exception e) {
+                  return false;
+                }
+              });
+    } catch (ConditionTimeoutException e) {
+      throw new RuntimeException("Error: Server failed to start within 120 seconds.", e);
+    }
+    testServerPort = serverPort;
     return true;
   }
 
   /**
-   * Create a command for the server launcher script to be run with.
+   * Add the necessary BFD settings to the {@link Map} used by our {@link ConfigLoader}.
    *
-   * @param workDirectory the server-work directory
+   * @param appSettings map to receive the settings
    * @param dbUrl the db url
    * @param dbUsername the db username
    * @param dbPassword the db password
    */
   private static void addServerSettings(
-      Map<String, String> appSettings,
-      String workDirectory,
-      String dbUrl,
-      String dbUsername,
-      String dbPassword) {
+      Map<String, String> appSettings, String dbUrl, String dbUsername, String dbPassword) {
     // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
-    String v2Enabled = "true";
     String pacEnabled = "true";
     String pacOldMbiHashEnabled = "true";
     String pacClaimSourceTypes = "fiss,mcs";
     String includeFakeDrugCode = "true";
     String includeFakeOrgName = "true";
-    Random rand = new Random();
-    // Copied this from the startup script, but may not be needed
-    //      String bfdServerId = String.valueOf(rand.nextInt(10240));
 
-    //      args.add(String.format("-Dbfd-server-%s", bfdServerId));
     appSettings.put("bfdServer.pac.enabled", pacEnabled);
     appSettings.put("bfdServer.pac.oldMbiHash.enabled", pacOldMbiHashEnabled);
     appSettings.put("bfdServer.pac.claimSourceTypes", pacClaimSourceTypes);
@@ -154,6 +157,12 @@ public class ServerExecutor {
     appSettings.put("bfdServer.include.fake.org.name", includeFakeOrgName);
   }
 
+  /**
+   * Gets the port our server is listening to (if any).
+   *
+   * @return the port as a string
+   */
+  @Nullable
   public static synchronized String getServerPort() {
     return testServerPort;
   }
@@ -164,20 +173,20 @@ public class ServerExecutor {
    * @return true if the server is running
    */
   public static synchronized boolean isRunning() {
-    return serverStuff != null && serverStuff.getServer().isRunning();
+    return serverInfo != null && serverInfo.getServer().isRunning();
   }
 
   /** Stops the server process. */
   public static synchronized void stopServer() {
     if (isRunning()) {
       try {
-        serverStuff.getServer().stop();
-        serverStuff.getServer().join();
+        serverInfo.getServer().stop();
+        serverInfo.getServer().join();
       } catch (Exception ex) {
         LOGGER.error("Caught exception while stopping server: message={}", ex.getMessage(), ex);
         throw new RuntimeException(ex);
       }
-      serverStuff = null;
+      serverInfo = null;
       testServerPort = null;
       LOGGER.info("Stopped server.");
     } else {
@@ -186,41 +195,10 @@ public class ServerExecutor {
   }
 
   /**
-   * Find the first file's Path within the starting directory, traversing X depth into the
-   * directory, which ends with the given value.
-   *
-   * @param startingDirectory the starting directory to search in
-   * @param filenameEndsWith the filename ending to seearch for; includes extension
-   * @param depth the depth (number of directories down) to search
-   * @return the path of the found file
-   * @throws IOException if the filename ending matched no files within the path and depth provided
-   */
-  private static Path findFirstPathMatchWithFilenameEnd(
-      String startingDirectory, String filenameEndsWith, int depth) throws IOException {
-
-    List<Path> findPaths;
-    try (Stream<Path> pathStream =
-        Files.find(
-            Paths.get(startingDirectory),
-            depth,
-            (p, basicFileAttributes) -> p.getFileName().toString().endsWith(filenameEndsWith))) {
-      findPaths = pathStream.collect(Collectors.toList());
-    }
-
-    if (findPaths.stream().findFirst().isPresent()) {
-      return findPaths.stream().findFirst().get();
-    } else {
-      throw new IOException(
-          "Unable to find path ending with '"
-              + filenameEndsWith
-              + "' within : "
-              + startingDirectory);
-    }
-  }
-
-  /**
    * Validate required server setup variables and paths exist.
    *
+   * @param targetPath the target directory location
+   * @param serverWorkPath the server-work directory location
    * @param warArtifactLocation the war artifact location
    * @param serverPortsFileLocation the server ports file location
    * @param keyStoreLocation the key store location
@@ -228,14 +206,16 @@ public class ServerExecutor {
    * @return false if required paths or properties dont exist
    */
   private static boolean validateRequiredServerSetup(
+      String targetPath,
+      String serverWorkPath,
       String warArtifactLocation,
       String serverPortsFileLocation,
       String keyStoreLocation,
       String trustStoreLocation) {
 
     // Check required paths exist
-    boolean targetIsDir = Files.isDirectory(Paths.get("target"));
-    boolean serverWorkExists = Files.exists(Paths.get("target", "server-work"));
+    boolean targetIsDir = Files.isDirectory(Paths.get(targetPath));
+    boolean serverWorkExists = Files.exists(Paths.get(serverWorkPath));
     boolean serverPortFileExists = Files.exists(Paths.get(serverPortsFileLocation));
     boolean keyStoreExists = Files.exists(Paths.get(keyStoreLocation));
     boolean trustStoreExists = Files.exists(Paths.get(trustStoreLocation));

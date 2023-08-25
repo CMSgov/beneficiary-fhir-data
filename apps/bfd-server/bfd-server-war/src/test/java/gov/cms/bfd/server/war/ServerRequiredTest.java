@@ -14,6 +14,7 @@ import io.restassured.authentication.CertificateAuthSettings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
+import javax.annotation.concurrent.GuardedBy;
 import javax.sql.DataSource;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.jupiter.api.AfterEach;
@@ -28,16 +29,19 @@ import org.postgresql.ds.PGSimpleDataSource;
  */
 public class ServerRequiredTest {
 
-  /** The database connection to use for the test. */
-  private static DataSource dataSource;
-
   /** The database url used to set up the tests. */
   private static final String dbUrl = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
 
+  /** The database connection to use for the test. */
+  @GuardedBy("class synchronized")
+  private static DataSource dataSource;
+
   /** The base url to use when hitting the container server endpoint. */
+  @GuardedBy("class synchronized")
   protected static String baseServerUrl;
 
   /** The request spec with the auth certificate to use when connecting to the test server. */
+  @GuardedBy("class synchronized")
   protected static RequestSpecification requestAuth;
 
   /** Sets up the test server (and required datasource) if the server is not already running. */
@@ -104,7 +108,15 @@ public class ServerRequiredTest {
    * tests currently manage their own data cleanup).
    */
   @AfterEach
-  public synchronized void cleanDatabaseServerAfterEachTestCase() {
+  public void cleanDatabaseServerAfterEachTestCase() {
+    cleanDatabaseServerAfterEachTestCaseImpl();
+  }
+
+  /**
+   * Cleans the database by truncating all non-RDA data. (RDA is skipped since RDA tests currently
+   * manage their own data cleanup). Implemented as a static method to simplify synchronization.
+   */
+  private static synchronized void cleanDatabaseServerAfterEachTestCaseImpl() {
     if (dataSource != null && ServerTestUtils.isValidServerDatabase(dbUrl)) {
       ServerTestUtils.get().truncateNonRdaTablesInDataSource(dataSource);
     }

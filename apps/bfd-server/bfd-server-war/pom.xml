@@ -382,14 +382,10 @@
                     <configuration>
                       <tasks>
                           <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war"
-                                 dest="${project.build.directory}/test-war-directory">
+                                 dest="${project.build.directory}/test-webapp-directory">
                               <patternset>
-                                  <exclude name="**/lib/*.jar"/>
-                                  <exclude name="**/classes/**.class"/>
-<!--                                  <exclude name="**/lib/bfd-*.jar"/>-->
-<!--                                  <exclude name="**/lib/bfd-model-rda*.jar"/>-->
-<!--                                  <exclude name="**/lib/bfd-model-rif*.jar"/>-->
-<!--                                  <exclude name="**/classes/**"/>-->
+                                  <exclude name="**/lib/*"/>
+                                  <exclude name="**/classes/**"/>
                               </patternset>
                           </unzip>
                       </tasks>
