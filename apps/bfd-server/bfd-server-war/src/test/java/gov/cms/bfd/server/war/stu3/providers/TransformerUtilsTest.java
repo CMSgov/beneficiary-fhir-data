@@ -23,6 +23,7 @@ import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -36,6 +37,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -248,6 +250,124 @@ public final class TransformerUtilsTest {
         TransformerUtils.careTeamHasMatchingExtension(careTeamComponent, referenceUrl, codeValue);
 
     assertFalse(returnResult);
+  }
+
+  /**
+   * Tests that addCareTeamQualification does not add a qualification if the input Optional is
+   * empty.
+   */
+  @Test
+  public void addCareTeamQualificationWhenEmptyCodeExpectNoQualificationCodeAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    Optional<String> value = Optional.empty();
+
+    TransformerUtils.addCareTeamQualification(careTeam, eob, codebookVariable, value);
+
+    // ensure careteam qualification isnt populated
+    // (hasQualification does some checks on coding and text existing)
+    assertFalse(careTeam.hasQualification());
+  }
+
+  /**
+   * Tests that addCareTeamQualification adds a qualification if the input Optional is not empty.
+   */
+  @Test
+  public void addCareTeamQualificationWhenNotEmptyCodeExpectQualificationAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    String expectedValue = "ABC-TESTID";
+    Optional<String> value = Optional.of(expectedValue);
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtils.addCareTeamQualification(careTeam, eob, codebookVariable, value);
+
+    // careTeam object should have the qualification added with expected values
+    assertTrue(careTeam.hasQualification());
+    assertTrue(careTeam.getQualification().hasCoding());
+    assertEquals(expectedUrl, careTeam.getQualification().getCoding().get(0).getSystem());
+    assertEquals(expectedValue, careTeam.getQualification().getCoding().get(0).getCode());
+  }
+
+  /**
+   * Tests that addCareTeamExtension correctly adds an extension when the value Optional and its
+   * string value is not empty.
+   */
+  @Test
+  public void addCareTeamExtensionWhenNotEmptyOptionalExpectExtensionAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    String expectedValue = "DDD-TESTID";
+    Optional<String> value = Optional.of(expectedValue);
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtils.addCareTeamExtension(codebookVariable, value, careTeam, eob);
+
+    assertTrue(careTeam.hasExtension(expectedUrl));
+    Extension extension = careTeam.getExtensionByUrl(expectedUrl);
+    String extensionValue = ((Coding) extension.getValue()).getCode();
+    assertEquals(expectedValue, extensionValue);
+  }
+
+  /**
+   * Tests that addCareTeamExtension correctly adds an extension when the value is required and a
+   * char.
+   */
+  @Test
+  public void addCareTeamExtensionWhenRequiredCharExpectExtensionAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    char expectedValue = 'V';
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtils.addCareTeamExtension(codebookVariable, expectedValue, careTeam, eob);
+
+    assertTrue(careTeam.hasExtension(expectedUrl));
+    Extension extension = careTeam.getExtensionByUrl(expectedUrl);
+    String extensionValue = ((Coding) extension.getValue()).getCode();
+    assertEquals(String.valueOf(expectedValue), extensionValue);
+  }
+
+  /**
+   * Tests that addCareTeamExtension does not add an extension when the value Optional string value
+   * is empty.
+   */
+  @Test
+  public void addCareTeamExtensionWhenOptionalEmptyStringExpectNoExtensionAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    String expectedValue = "";
+    Optional<String> value = Optional.of(expectedValue);
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtils.addCareTeamExtension(codebookVariable, value, careTeam, eob);
+
+    assertFalse(careTeam.hasExtension(expectedUrl));
+  }
+
+  /** Tests that addCareTeamExtension does not add an extension when the value Optional is empty. */
+  @Test
+  public void addCareTeamExtensionWhenEmptyOptionalExpectNoExtensionAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    Optional<String> value = Optional.empty();
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtils.addCareTeamExtension(codebookVariable, value, careTeam, eob);
+
+    assertFalse(careTeam.hasExtension(expectedUrl));
   }
 
   /**
