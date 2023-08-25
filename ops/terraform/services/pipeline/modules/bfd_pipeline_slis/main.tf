@@ -55,10 +55,10 @@ resource "aws_lambda_function" "this" {
   # duplicate submissions
   reserved_concurrent_executions = 1
 
-  filename         = data.archive_file.lambda_src.output_path
-  source_code_hash = data.archive_file.lambda_src.output_base64sha256
+  filename         = data.archive_file.lambda_src[local.update_slis_lambda_name].output_path
+  source_code_hash = data.archive_file.lambda_src[local.update_slis_lambda_name].output_base64sha256
   architectures    = ["x86_64"]
-  handler          = "update_pipeline_slis.handler"
+  handler          = "${local.update_slis_lambda_name}.handler"
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
@@ -115,8 +115,8 @@ resource "aws_lambda_function" "repeater" {
 
   kms_key_arn = local.kms_key_arn
 
-  filename         = data.archive_file.lambda_src.output_path
-  source_code_hash = data.archive_file.lambda_src.output_base64sha256
+  filename         = data.archive_file.lambda_src[local.repeater_lambda_name].output_path
+  source_code_hash = data.archive_file.lambda_src[local.repeater_lambda_name].output_base64sha256
   architectures    = ["x86_64"]
   handler          = "${local.repeater_lambda_name}.handler"
   memory_size      = 128
