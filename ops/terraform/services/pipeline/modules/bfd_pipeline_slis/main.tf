@@ -6,12 +6,19 @@ locals {
   kms_key_arn = var.aws_kms_key_arn
   kms_key_id  = var.aws_kms_key_id
 
-  update_slis_lambda_name      = "update-pipeline-slis"
-  update_slis_lambda_full_name = "${local.resource_prefix}-${local.update_slis_lambda_name}"
-  update_slis_lambda_src       = replace(local.update_slis_lambda_name, "-", "_")
-  repeater_lambda_name         = "pipeline-metrics-repeater"
-  repeater_lambda_full_name    = "${local.resource_prefix}-${local.repeater_lambda_name}"
-  repeater_lambda_src          = replace(local.repeater_lambda_name, "-", "_")
+  lambda_update_slis = "update_slis"
+  lambda_repeater    = "repeater"
+  lambdas = {
+    for label, name in {
+      "${local.lambda_update_slis}" = "update-pipeline-slis",
+      "${local.lambda_repeater}"    = "pipeline-metrics-repeater"
+    } :
+    label => {
+      name      = name
+      full_name = "${local.resource_prefix}-${name}"
+      src       = replace(name, "-", "_")
+    }
+  }
 
   repeater_invoke_rate = "15 minutes"
 
@@ -19,7 +26,7 @@ locals {
 }
 
 resource "aws_lambda_permission" "this" {
-  statement_id   = "${local.update_slis_lambda_full_name}-allow-sns"
+  statement_id   = "${local.lambdas[local.lambda_update_slis].full_name}-allow-sns"
   action         = "lambda:InvokeFunction"
   function_name  = aws_lambda_function.this.function_name
   principal      = "sns.amazonaws.com"
@@ -34,7 +41,7 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  function_name = local.update_slis_lambda_full_name
+  function_name = local.lambdas[local.lambda_update_slis].full_name
 
   description = join("", [
     "Puts new CloudWatch Metric Data related to BFD Pipline SLIs whenever a new file is uploaded ",
@@ -43,7 +50,7 @@ resource "aws_lambda_function" "this" {
   ])
 
   tags = {
-    Name = local.update_slis_lambda_full_name
+    Name = local.lambdas[local.lambda_update_slis].full_name
   }
 
   kms_key_arn = local.kms_key_arn
@@ -55,10 +62,10 @@ resource "aws_lambda_function" "this" {
   # duplicate submissions
   reserved_concurrent_executions = 1
 
-  filename         = data.archive_file.lambda_src[local.update_slis_lambda_name].output_path
-  source_code_hash = data.archive_file.lambda_src[local.update_slis_lambda_name].output_base64sha256
+  filename         = data.archive_file.lambda_src[local.lambda_update_slis].output_path
+  source_code_hash = data.archive_file.lambda_src[local.lambda_update_slis].output_base64sha256
   architectures    = ["x86_64"]
-  handler          = "${local.update_slis_lambda_name}.handler"
+  handler          = "${local.lambdas[local.lambda_update_slis].src}.handler"
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
@@ -71,21 +78,21 @@ resource "aws_lambda_function" "this" {
     }
   }
 
-  role = aws_iam_role.this.arn
+  role = aws_iam_role.lambda[local.lambda_update_slis].arn
 }
 
 resource "aws_sqs_queue" "this" {
-  name                       = local.update_slis_lambda_full_name
+  name                       = local.lambdas[local.lambda_update_slis].full_name
   visibility_timeout_seconds = 0
   kms_master_key_id          = local.kms_key_id
 }
 
 resource "aws_scheduler_schedule_group" "repeater" {
-  name = "${local.repeater_lambda_full_name}-lambda-schedules"
+  name = "${local.lambdas[local.lambda_repeater].full_name}-lambda-schedules"
 }
 
 resource "aws_scheduler_schedule" "repeater" {
-  name       = "${local.repeater_lambda_full_name}-every-${replace(local.repeater_invoke_rate, " ", "-")}"
+  name       = "${local.lambdas[local.lambda_repeater].full_name}-every-${replace(local.repeater_invoke_rate, " ", "-")}"
   group_name = aws_scheduler_schedule_group.repeater.name
 
   flexible_time_window {
@@ -101,7 +108,7 @@ resource "aws_scheduler_schedule" "repeater" {
 }
 
 resource "aws_lambda_function" "repeater" {
-  function_name = local.repeater_lambda_full_name
+  function_name = local.lambdas[local.lambda_repeater].full_name
 
   description = join("", [
     "Invoked by rate schedules in the ${aws_scheduler_schedule_group.repeater.name} schedule ",
@@ -110,15 +117,15 @@ resource "aws_lambda_function" "repeater" {
   ])
 
   tags = {
-    Name = local.repeater_lambda_full_name
+    Name = local.lambdas[local.lambda_repeater].full_name
   }
 
   kms_key_arn = local.kms_key_arn
 
-  filename         = data.archive_file.lambda_src[local.repeater_lambda_name].output_path
-  source_code_hash = data.archive_file.lambda_src[local.repeater_lambda_name].output_base64sha256
+  filename         = data.archive_file.lambda_src[local.lambda_repeater].output_path
+  source_code_hash = data.archive_file.lambda_src[local.lambda_repeater].output_base64sha256
   architectures    = ["x86_64"]
-  handler          = "${local.repeater_lambda_name}.handler"
+  handler          = "${local.lambdas[local.lambda_repeater].src}.handler"
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
@@ -129,5 +136,5 @@ resource "aws_lambda_function" "repeater" {
     }
   }
 
-  role = aws_iam_role.this.arn
+  role = aws_iam_role.lambda[local.lambda_repeater].arn
 }

@@ -9,14 +9,14 @@ data "aws_sns_topic" "this" {
 }
 
 data "archive_file" "lambda_src" {
-  for_each = toset([local.repeater_lambda_name, local.update_slis_lambda_name])
+  for_each = local.lambdas
 
   type        = "zip"
-  output_path = "${path.module}/lambda_src/${each.value}.zip"
+  output_path = "${path.module}/lambda_src/${each.value.src}.zip"
 
   source {
-    content  = file("${path.module}/lambda_src/${each.value}.py")
-    filename = "${each.value}.py"
+    content  = file("${path.module}/lambda_src/${each.value.src}.py")
+    filename = "${each.value.src}.py"
   }
 
   source {
