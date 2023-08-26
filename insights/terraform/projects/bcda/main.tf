@@ -11,7 +11,7 @@ locals {
 }
 
 data "aws_caller_identity" "current" {}
-
+data "aws_region" "current" {}
 
 ## Bucket for the project's data
 
@@ -66,51 +66,59 @@ module "glue_jobs" {
 }
 
 module "insights_data_table_dev" {
-  source      = "../../modules/table"
-  database    = module.database.name
-  table       = "dev_insights"
-  description = "dev insights data"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
-  tags        = local.tags
-  partitions  = local.partitions
-  columns     = local.columns
+  source             = "../../modules/table"
+  owner              = "bcda"
+  database           = module.database.name
+  table              = "dev_insights"
+  description        = "dev insights data"
+  bucket             = module.bucket.id
+  bucket_cmk         = module.bucket.bucket_cmk
+  tags               = local.tags
+  partitions         = local.partitions
+  columns            = local.columns
+  storage_compressed = false
 }
 
 module "insights_data_table_test" {
-  source      = "../../modules/table"
-  database    = module.database.name
-  table       = "test_insights"
-  description = "test insights data"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
-  tags        = local.tags
-  partitions  = local.partitions
-  columns     = local.columns
+  source             = "../../modules/table"
+  owner              = "bcda"
+  database           = module.database.name
+  table              = "test_insights"
+  description        = "test insights data"
+  bucket             = module.bucket.id
+  bucket_cmk         = module.bucket.bucket_cmk
+  tags               = local.tags
+  partitions         = local.partitions
+  columns            = local.columns
+  storage_compressed = false
 }
 
 module "insights_data_table_opensbx" {
-  source      = "../../modules/table"
-  database    = module.database.name
-  table       = "opensbx_insights"
-  description = "opensbx insights data"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
-  tags        = local.tags
-  partitions  = local.partitions
-  columns     = local.columns
+  source             = "../../modules/table"
+  owner              = "bcda"
+  database           = module.database.name
+  table              = "opensbx_insights"
+  description        = "opensbx insights data"
+  bucket             = module.bucket.id
+  bucket_cmk         = module.bucket.bucket_cmk
+  tags               = local.tags
+  partitions         = local.partitions
+  columns            = local.columns
+  storage_compressed = false
 }
 
 module "insights_data_table_prod" {
-  source      = "../../modules/table"
-  database    = module.database.name
-  table       = "prod_insights"
-  description = "prod insights data"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
-  tags        = local.tags
-  partitions  = local.partitions
-  columns     = local.columns
+  source             = "../../modules/table"
+  owner              = "bcda"
+  database           = module.database.name
+  table              = "prod_insights"
+  description        = "prod insights data"
+  bucket             = module.bucket.id
+  bucket_cmk         = module.bucket.bucket_cmk
+  tags               = local.tags
+  partitions         = local.partitions
+  columns            = local.columns
+  storage_compressed = false
 }
 
 # lambda to reload partitions

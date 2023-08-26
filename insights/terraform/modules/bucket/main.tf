@@ -44,7 +44,7 @@ resource "aws_s3_bucket_object" "top" {
   key           = "${each.value}/"
 }
 
-# Every bucket has its own CMK which allows cross-acount 
+# Every bucket has its own CMK which allows cross-acount
 resource "aws_kms_key" "main" {
   description   = "CMK for the ${local.full_name} bucket"
   tags          = var.tags

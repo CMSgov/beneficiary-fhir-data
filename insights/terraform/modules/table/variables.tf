@@ -1,3 +1,8 @@
+variable "owner" {
+  description = "Owner of the table (bfd, bcda, etc.)"
+  type        = string
+}
+
 variable "table" {
   description = "Name of the table"
   type        = string
@@ -67,4 +72,10 @@ variable "serde_parameters" {
   description = "parameters for serde (optional)"
   type        = map
   default     = {}
+}
+
+variable "storage_compressed" {
+  description = "whether or not the data is compressed (defaults to true)"
+  type        = bool
+  default     = true
 }

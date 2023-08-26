@@ -2,17 +2,21 @@
 
 ## Contibuting
 
-Before pushing changes to this project's terraform code, we ask that you please run the following commands from the
-`$repo/insights/terraform/projects/bcda` directory:
+Before pushing changes to this project's terraform code, we ask that you please run the following commands from this
+project's base directory:
 
 * `terraform fmt`
 * `terraform-docs markdown table .`
 
 The first command will format the code according to the terraform style guide. The second command will update the table
-in this README with the latest inputs and outputs. Please commit these changes along with your code changes.
+in this README with the latest terraform inputs and outputs. Please commit these along with your code changes.
 
 If you do not have `terraform-docs` installed, you can install it with `brew install terraform-docs` on MacOS, or by
-following the instructions [here](https://github.com/terraform-docs/terraform-docs/).
+following the instructions [here](https://github.com/terraform-docs/terraform-docs/) for your system.
+
+| Key | Description | Data Source |
+|-----|-------------|-------------|
+| `/bcda/insights/$env/cross_account_role_arn` | BCDA Cross Account Role ARN | `data.aws_ssm_parameter.bcda_cross_account_role_arn` |
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
@@ -24,8 +28,7 @@ following the instructions [here](https://github.com/terraform-docs/terraform-do
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 0.13.4 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 2.57 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.30 |
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.
@@ -82,5 +85,6 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_iam_policy.s3_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy_document.bcda_load_partitions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_kms_alias.moderate_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_alias) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_s3_bucket.moderate_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket) | data source |
 <!-- END_TF_DOCS -->
