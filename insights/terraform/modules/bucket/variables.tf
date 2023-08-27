@@ -12,6 +12,7 @@ variable "sensitivity" {
 variable "tags" {
   description = "tags"
   type        = map(string)
+  default     = {}
 }
 
 variable "full_groups" {
