@@ -2,10 +2,8 @@
 #
 
 locals {
-  established_envs = ["test", "prod-sbx", "prod"]
-  tags             = merge({ Layer = "data", role = var.role }, var.env_config.tags)
-  is_prod          = substr(var.env_config.env, 0, 4) == "prod"
-  is_ephemeral_env = !(contains(local.established_envs, var.env_config.env))
+  tags    = merge({ Layer = "data", role = var.role }, var.env_config.tags)
+  is_prod = substr(var.env_config.env, 0, 4) == "prod"
 }
 
 data "aws_caller_identity" "current" {}
@@ -17,10 +15,9 @@ data "aws_caller_identity" "current" {}
 #   - deletition protection in prod environments
 #   - postfix with the account id to prevent global name conflicts
 resource "aws_s3_bucket" "main" {
-  bucket        = "bfd-${var.env_config.env}-${var.role}-${data.aws_caller_identity.current.account_id}"
-  force_destroy = local.is_ephemeral_env
-  acl           = var.acl
-  tags          = local.tags
+  bucket = "bfd-${var.env_config.env}-${var.role}-${data.aws_caller_identity.current.account_id}"
+  acl    = var.acl
+  tags   = local.tags
 
   # always apply encryption, Customer CMK or AWS AES256
   server_side_encryption_configuration {
