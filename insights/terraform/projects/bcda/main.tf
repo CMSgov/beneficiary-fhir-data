@@ -11,10 +11,13 @@ locals {
     { name = "json_result", type = "string", comment = "" },
   ]
 
+  # List of arns for cross account access to the bucket. This value is populated from the SSM parameter store and is
+  # encrypted with this project's CMK. It is currently managed manually, but will be managed by Terraform in the future.
+  cross_account_arns = tolist(split(",", data.aws_ssm_parameter.cross_account_arns.value))
+
   # The following tags get applied to all resources in this project. They are used to enforce ABAC policies, so modify
   # with caution. To append custom tags to specific resource, simply add them to the resource's tags map, not here.
   default_tags = {
-    Environment = "prod"
     Terraform   = true
     business    = "oeda"
     application = "bfd"
@@ -26,6 +29,12 @@ locals {
 
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
+
+# As of 08/2023 this parameter is currently managed manually. It was populated from a now deprecated tfvars file.
+data "aws_ssm_parameter" "cross_account_arns" {
+  name = "/bcda/global/sensitive/insights/bucket/cross_account_arns"
+  with_decryption = true
+}
 
 data "aws_s3_bucket" "moderate_bucket" {
   bucket = "bfd-insights-moderate-${data.aws_caller_identity.current.account_id}"
@@ -39,7 +48,7 @@ module "bucket" {
   source         = "../../modules/bucket"
   name           = local.project
   sensitivity    = "moderate"
-  cross_accounts = var.bcda_cross_accounts
+  cross_accounts = local.cross_account_arns
 }
 
 ## Athena workgroup

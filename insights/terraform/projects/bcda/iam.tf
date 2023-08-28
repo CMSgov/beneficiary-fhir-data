@@ -122,6 +122,15 @@ resource "aws_iam_policy" "terraform" {
           "dynamodb:DeleteItem"
         ],
         Resource = "arn:aws:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/bfd-tf-table"
+      },{
+        Sid = "AllowReadingSensitiveParameters",
+        Effect = "Allow",
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath"
+        ],
+        Resource = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/bcda/global/sensitive/insights/*"
       }
     ]
   })
