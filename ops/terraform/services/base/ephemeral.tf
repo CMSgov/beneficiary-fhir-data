@@ -18,7 +18,6 @@ locals {
   migrator_seed_paths = local.is_ephemeral_env ? {
     "/bfd/${local.env}/migrator/sensitive/db_migrator_db_username" = "/bfd/${local.seed_env}/migrator/sensitive/db_migrator_db_username"
     "/bfd/${local.env}/migrator/sensitive/db_migrator_db_password" = "/bfd/${local.seed_env}/migrator/sensitive/db_migrator_db_password"
-    "/bfd/${local.env}/migrator/nonsensitive/sqs_queue_name"       = "/bfd/${local.seed_env}/migrator/nonsensitive/sqs_queue_name"
   } : {}
 
   # Targeted PIPELINE hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
