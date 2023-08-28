@@ -17,8 +17,9 @@ locals {
     Environment = "prod"
     Terraform   = true
     business    = "oeda"
-    project     = "bfd"
-    subproject  = "insights"
+    application = "bfd"
+    project     = "insights"
+    subproject  = "bcda"
     owner       = "bcda"
   }
 }
@@ -47,7 +48,6 @@ module "workgroup" {
   bucket     = module.bucket.id
   bucket_cmk = module.bucket.bucket_cmk
   name       = local.database
-  tags       = {}
 }
 
 ## Glue Catalog Database for the project
