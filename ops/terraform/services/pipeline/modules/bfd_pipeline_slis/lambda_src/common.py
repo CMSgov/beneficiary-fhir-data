@@ -14,6 +14,9 @@ class PipelineMetricMetadata:
     unit: str
     """The unit of the metric. Must conform to the list of supported CloudWatch Metrics"""
 
+    def __hash__(self) -> int:
+        return hash(self.metric_name)
+
 
 class PipelineMetric(PipelineMetricMetadata, Enum):
     """Enumeration of pipeline metrics that can be stored in CloudWatch Metrics"""
@@ -26,11 +29,20 @@ class PipelineMetric(PipelineMetricMetadata, Enum):
     TIME_DELTA_FULL_DATA_LOAD_TIME = PipelineMetricMetadata(
         "time-delta/data-full-load-time", "Seconds"
     )
+    TIME_DATA_FIRST_AVAILABLE_REPEATING = PipelineMetricMetadata(
+        "time/data-first-available-repeating", "Seconds"
+    )
+    TIME_DATA_FULLY_LOADED_REPEATING = PipelineMetricMetadata(
+        "time/data-fully-loaded-repeating", "Seconds"
+    )
 
     def __init__(self, data: PipelineMetricMetadata):
         for key in data.__annotations__.keys():
             value = getattr(data, key)
             setattr(self, key, value)
+
+    def __hash__(self) -> int:
+        return hash(self.value)
 
     def full_name(self) -> str:
         """Returns the fully qualified name of the metric, which includes the metric namespace and
