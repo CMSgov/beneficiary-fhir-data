@@ -102,31 +102,34 @@ def monitorMigrator(Map args = [:]) {
         )
 
         // 1. "handle" (capture status, print, delete) each message
-        // 2. if the message body contains a non "0/0" (running) value, return it
+        // 2. if the message body contains a non-running value, return it
+        lastVersion = null
         for (msg in messages) {
-            migratorStatus = msg.body.status
-            schemaVersion = msg.body.schema_version
-            println "Migrator schema version is at ${schemaVersion}"
-            printMigratorMessage(msg)
+            body = msg.body
+            printMigratorMessage(body)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-            if (migratorStatus != '0/0') {
-                def resultsList = [migratorStatus, schemaVersion]
-                return resultsList
+            if (body.appStage == "Finished") {
+                return [body.appStage, lastVersion]
             }
+            lastVersion = body?.migrationStage?.version != null ? body.migrationStage.version : lastVersion
         }
         sleep(heartbeatInterval)
     }
 }
 
 // print formatted migrator messages
-void printMigratorMessage(message) {
-    body = message.body
+void printMigratorMessage(body) {
     println "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-
-    if (body.stop_time == "n/a") {
-        println "Migrator ${body.pid} started at ${body.start_time} is running"
+    migratorStatus = body.appStage
+    migrationStage = body?.migrationStage
+    if (migrationStage != null) {
+        if (migrationStage?.migrationFile != null) {
+            println "${migratorStatus} (${migrationStage.stage}): ${migrationStage.migrationFile} (schema version ${migrationStage.version} ..."
+        } else {
+            println "${migratorStatus} (${migrationStage.stage}) ..."
+        }
     } else {
-        println "Migrator ${body.pid} started at ${body.start_time} is no longer running: '${body.code}' '${body.status}' as of ${body.stop_time}"
+        println "${migratorStatus}"
     }
 }
 
