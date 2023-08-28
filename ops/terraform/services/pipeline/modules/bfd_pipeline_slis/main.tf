@@ -122,8 +122,8 @@ resource "aws_lambda_function" "repeater" {
 
   description = join("", [
     "Invoked by rate schedules in the ${aws_scheduler_schedule_group.repeater.name} schedule ",
-    "group. When invoked, this Lambda re-submits the latest values of several CCW Pipeline ",
-    "metrics to corresponding \"-repeating\" CloudWatch Metrics used by the CCW Pipeline SLO Alarms"
+    "group. When invoked, this Lambda re-submits the latest values of select CCW Pipeline ",
+    "metrics to corresponding \"-repeating\" metrics for SLO Alarms"
   ])
 
   tags = {
