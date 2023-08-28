@@ -3,6 +3,7 @@
 export DATABASE_PASSWORD='{{ db_migrator_db_password }}'
 export DATABASE_URL='{{ db_migrator_db_url }}'
 export DATABASE_USERNAME='{{ db_migrator_db_username }}'
+export DB_MIGRATOR_SQS_QUEUE='{{ sqs_queue_name }}'
 
 {#
 # The expression {{ '#' if foo|default('', true)|length < 1 }} prepends exports with '#' to prevent
