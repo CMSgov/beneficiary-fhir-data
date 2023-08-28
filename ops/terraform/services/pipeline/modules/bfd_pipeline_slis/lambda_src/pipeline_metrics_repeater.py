@@ -22,10 +22,10 @@ BOTO_CONFIG = Config(
     },
 )
 
-REPEATING_METRICS = [
-    PipelineMetric.TIME_DATA_FIRST_AVAILABLE,
-    PipelineMetric.TIME_DATA_FULLY_LOADED,
-]
+SOURCE_TO_REPEATING_METRICS = {
+    PipelineMetric.TIME_DATA_FIRST_AVAILABLE: PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING,
+    PipelineMetric.TIME_DATA_FULLY_LOADED: PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING,
+}
 
 logging.basicConfig(level=logging.INFO, force=True)
 logger = logging.getLogger()
@@ -59,7 +59,8 @@ def handler(event: Any, context: Any):
     ]
 
     logger.info(
-        "Getting latest values for metrics %s...", [x.full_name() for x in REPEATING_METRICS]
+        "Getting latest values for metrics %s...",
+        [x.full_name() for x in SOURCE_TO_REPEATING_METRICS],
     )
     try:
         result = backoff_retry(
@@ -69,7 +70,7 @@ def handler(event: Any, context: Any):
                     MetricDataQuery(
                         metric_namespace=METRICS_NAMESPACE, metric_name=pipeline_metric.metric_name
                     )
-                    for pipeline_metric in REPEATING_METRICS
+                    for pipeline_metric in SOURCE_TO_REPEATING_METRICS
                 ],
                 statistic="Maximum",
             ),
@@ -84,14 +85,17 @@ def handler(event: Any, context: Any):
     logger.info(
         "Retrieved metric data %s for metrics %s",
         str(result),
-        [x.full_name() for x in REPEATING_METRICS],
+        [x.full_name() for x in SOURCE_TO_REPEATING_METRICS],
     )
 
     if any(not x.values or not x.timestamps for x in result):
         logger.error("Empty metric data returned from metric data result: %s", str(result))
         return
 
-    logger.info("Determining latest values for %s...", [x.full_name() for x in REPEATING_METRICS])
+    logger.info(
+        "Determining latest values for %s...",
+        [x.full_name() for x in SOURCE_TO_REPEATING_METRICS],
+    )
     latest_values = [
         MetricLatestValue(
             pipeline_metric=pipeline_metric,
@@ -111,8 +115,8 @@ def handler(event: Any, context: Any):
 
     logger.info(
         "Submitting latest values for metrics %s to corresponding CloudWatch Metric(s): %s",
-        [x.full_name() for x in REPEATING_METRICS],
-        [f"{m.pipeline_metric.full_name()}-repeating" for m in latest_values],
+        [x.full_name() for x in SOURCE_TO_REPEATING_METRICS],
+        [SOURCE_TO_REPEATING_METRICS[m.pipeline_metric].full_name() for m in latest_values],
     )
     try:
         backoff_retry(
@@ -121,9 +125,9 @@ def handler(event: Any, context: Any):
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=[
                     MetricData(
-                        metric_name=f"{v.pipeline_metric.metric_name}-repeating",
+                        metric_name=SOURCE_TO_REPEATING_METRICS[v.pipeline_metric].metric_name,
                         value=v.latest_value,
-                        unit=v.pipeline_metric.unit,
+                        unit=SOURCE_TO_REPEATING_METRICS[v.pipeline_metric].unit,
                         timestamp=datetime.utcnow(),
                     )
                     for v in latest_values
@@ -138,5 +142,5 @@ def handler(event: Any, context: Any):
         return
     logger.info(
         "Latest values for metrics %s submitted successfully",
-        [x.full_name() for x in REPEATING_METRICS],
+        [x.full_name() for x in SOURCE_TO_REPEATING_METRICS.values()],
     )
