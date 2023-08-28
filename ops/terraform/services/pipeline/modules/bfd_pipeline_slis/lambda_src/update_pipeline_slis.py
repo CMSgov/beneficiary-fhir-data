@@ -14,6 +14,7 @@ from botocore.config import Config
 from backoff_retry import backoff_retry
 from common import METRICS_NAMESPACE, PipelineMetric
 from cw_metrics import (
+    MetricData,
     MetricDataQuery,
     gen_all_dimensioned_metrics,
     get_metric_data,
@@ -279,15 +280,18 @@ def handler(event: Any, context: Any):
                     f"No sentinel message was received from queue {SENTINEL_QUEUE_NAME} for current"
                     f" group {group_timestamp}, this indicates that the incoming file is the start"
                     f" of a new data load for group {group_timestamp}. Putting data to metric"
-                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
-                    f" {utc_timestamp}"
+                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" and corresponding'
+                    f' metric "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()}"'
+                    f" with value {utc_timestamp}"
                 )
 
                 try:
                     print(
                         "Putting time metric data to"
-                        f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" with value'
-                        f" {utc_timestamp}..."
+                        f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" and'
+                        " corresponding"
+                        f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()}" with'
+                        f" value {utc_timestamp}..."
                     )
                     backoff_retry(
                         func=lambda: put_metric_data(
@@ -299,13 +303,22 @@ def handler(event: Any, context: Any):
                                 timestamp=event_timestamp,
                                 value=utc_timestamp,
                                 unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
-                            ),
+                            )
+                            + [
+                                MetricData(
+                                    metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
+                                    value=utc_timestamp,
+                                    unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
+                                    timestamp=event_timestamp,
+                                )
+                            ],
                         ),
                         ignored_exceptions=common_unrecoverable_exceptions,
                     )
                     print(
                         "Metrics put to"
-                        f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()} successfully"
+                        f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()} and"
+                        f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()} successfully"
                     )
                 except Exception as exc:
                     print(
@@ -492,8 +505,9 @@ def handler(event: Any, context: Any):
                 print(
                     f"All files have been loaded for group {group_timestamp}. This indicates that"
                     " the data load has been completed for this group. Putting data to metric"
-                    f' "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}" with value'
-                    f" {utc_timestamp}"
+                    f' "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}" and corresponding'
+                    f' metric "{PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name()}" with'
+                    f" value {utc_timestamp}"
                 )
                 backoff_retry(
                     func=lambda: put_metric_data(
@@ -505,13 +519,21 @@ def handler(event: Any, context: Any):
                             timestamp=event_timestamp,
                             value=utc_timestamp,
                             unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                        ),
+                        )
+                        + [
+                            MetricData(
+                                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
+                                value=utc_timestamp,
+                                unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
+                                timestamp=event_timestamp,
+                            )
+                        ],
                     ),
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
                 print(
-                    f'Data put to "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}"'
-                    " successfully"
+                    f'Data put to "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}" and'
+                    f' "{PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name()}" successfully'
                 )
             except Exception as exc:
                 print(
