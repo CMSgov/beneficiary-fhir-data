@@ -88,6 +88,13 @@ def handler(event: Any, context: Any):
         [x.full_name() for x in SOURCE_TO_REPEATING_METRICS],
     )
 
+    if not result:
+        logger.error(
+            "No data was returned for %s metrics, extiting",
+            [x.full_name() for x in SOURCE_TO_REPEATING_METRICS],
+        )
+        return
+
     if any(not x.values or not x.timestamps for x in result):
         logger.error("Empty metric data returned from metric data result: %s", str(result))
         return
