@@ -8,12 +8,12 @@ rm -f *.pfx
 # verify base64 encoded #PKCS#12 file
 #
 function verify_encoded_p12 {
-    rm -f foo.12
+    rm -f foo.p12
     cat "$1" |base64 --decode > foo.p12
     echo " "
     echo "verifying $1 keystore file..."
     openssl pkcs12 -in foo.p12 -password pass:changeit -nodes | openssl x509 -noout -enddate
-    rm -f foo.12
+    rm -f foo.p12
     echo "-------------------------------"
     echo " "
 }
@@ -21,6 +21,7 @@ function verify_encoded_p12 {
 # Generate a keystore and a public key pem file
 #
 function gen_keystore {
+    echo "begin processing of $3 environment...."
     rm -f "$3-bluebutton-appserver-keystore.jks"
     rm -f "$3-bluebutton-appserver-public-cert.pem"
 
