@@ -14,7 +14,7 @@ locals {
   )
   nonsensitive_service_config = {
     for key, value in local.nonsensitive_service_map
-    : split("/", key)[5] => value
+    : element(split("/", key), length(split("/", key)) - 1) => value
   }
   repeater_invoke_rate = local.nonsensitive_service_config["slis_repeater_lambda_invoke_rate"]
 
