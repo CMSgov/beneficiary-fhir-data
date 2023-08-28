@@ -114,7 +114,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
     return_data = false
 
     metric {
-      metric_name = "time/data-fully-loaded"
+      metric_name = "time/data-fully-loaded-repeating"
       namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
@@ -126,7 +126,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
     return_data = false
 
     metric {
-      metric_name = "time/data-first-available"
+      metric_name = "time/data-first-available-repeating"
       namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
@@ -193,7 +193,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_data_load_ingestion_time" {
     return_data = false
 
     metric {
-      metric_name = "time/data-first-available"
+      metric_name = "time/data-first-available-repeating"
       namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
@@ -205,7 +205,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_data_load_ingestion_time" {
     return_data = false
 
     metric {
-      metric_name = "time/data-fully-loaded"
+      metric_name = "time/data-fully-loaded-repeating"
       namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
