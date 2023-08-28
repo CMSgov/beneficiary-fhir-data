@@ -1,7 +1,7 @@
 mappings:
 - id: FissProcCode
   messageClassName: gov.cms.mpsm.rda.v1.fiss.FissProcedureCode
-  entityClassName: gov.cms.bfd.model.rda.RdaFissProcCode
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaFissProcCode
   table:
     name: fiss_proc_codes
     schema: rda

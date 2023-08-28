@@ -1,7 +1,7 @@
 mappings:
 - id: FissPayer
   messageClassName: gov.cms.mpsm.rda.v1.fiss.FissPayer
-  entityClassName: gov.cms.bfd.model.rda.RdaFissPayer
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaFissPayer
   table:
     name: fiss_payers
     schema: rda

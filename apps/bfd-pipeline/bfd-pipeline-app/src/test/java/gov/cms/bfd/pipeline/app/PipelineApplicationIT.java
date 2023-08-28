@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.app;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
@@ -606,11 +605,9 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
         AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
         String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
 
-    environment.put(
-        AppConfiguration.ENV_VAR_KEY_S3_ENDPOINT_URI,
-        localstack.getEndpointOverride(S3).toString());
-    environment.put(AppConfiguration.ENV_VAR_KEY_S3_ACCESS_KEY, localstack.getAccessKey());
-    environment.put(AppConfiguration.ENV_VAR_KEY_S3_SECRET_KEY, localstack.getSecretKey());
+    environment.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString());
+    environment.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey());
+    environment.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey());
 
     /*
      * Note: Not explicitly providing AWS credentials here, as the child

@@ -176,25 +176,18 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
          * extension. TODO: suggest that the spec allows more than one
          * `qualification` entry.
          */
-        performingCareTeamMember.setQualification(
-            TransformerUtils.createCodeableConcept(
-                eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
+        TransformerUtils.addCareTeamQualification(
+            performingCareTeamMember,
+            eob,
+            CcwCodebookVariable.PRVDR_SPCLTY,
+            claimLine.getProviderSpecialityCode());
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        boolean performingHasMatchingExtension =
-            claimLine.getProviderParticipatingIndCode().isPresent()
-                && TransformerUtils.careTeamHasMatchingExtension(
-                    performingCareTeamMember,
-                    TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(claimLine.getProviderParticipatingIndCode()));
-
-        if (!performingHasMatchingExtension) {
-          performingCareTeamMember.addExtension(
-              TransformerUtils.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.PRTCPTNG_IND_CD,
-                  claimLine.getProviderParticipatingIndCode()));
-        }
+        TransformerUtils.addCareTeamExtension(
+            CcwCodebookVariable.PRTCPTNG_IND_CD,
+            claimLine.getProviderParticipatingIndCode(),
+            performingCareTeamMember,
+            eob);
       }
 
       TransformerUtils.mapHcpcs(

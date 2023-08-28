@@ -22,7 +22,7 @@ public class AwsS3ClientFactory implements S3ClientFactory {
   public S3Client createS3Client() {
     final S3ClientBuilder builder = S3Client.builder();
     builder.defaultsMode(DefaultsMode.STANDARD);
-    s3ClientConfig.configureAwsService(builder);
+    s3ClientConfig.getAwsClientConfig().configureAwsService(builder);
     return builder.build();
   }
 

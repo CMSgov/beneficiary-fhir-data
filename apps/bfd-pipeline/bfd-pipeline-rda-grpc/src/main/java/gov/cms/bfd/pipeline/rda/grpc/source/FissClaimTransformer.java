@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import gov.cms.bfd.model.rda.Mbi;
-import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.FissClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;

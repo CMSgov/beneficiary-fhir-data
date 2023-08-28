@@ -679,6 +679,85 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already an
+   * extension for the supplied extensionValue and extensionValue is not empty.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  public static void addCareTeamExtension(
+      CcwCodebookVariable codebookVariable,
+      Optional<?> extensionValue,
+      ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+      ExplanationOfBenefit eob) {
+
+    // If our extension value is an empty optional or empty/null string, nothing to add
+    if (extensionValue.isEmpty() || Strings.isNullOrEmpty(String.valueOf(extensionValue.get()))) {
+      return;
+    }
+
+    String valueAsString = String.valueOf(extensionValue.get());
+
+    addCareTeamExtension(codebookVariable, valueAsString, careTeamComponent, eob);
+  }
+
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already an
+   * extension for the supplied extensionValue and extensionValue is not empty.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  public static void addCareTeamExtension(
+      CcwCodebookVariable codebookVariable,
+      char extensionValue,
+      ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+      ExplanationOfBenefit eob) {
+    // If our extension value is empty/null, nothing to add
+    if (Strings.isNullOrEmpty(String.valueOf(extensionValue))) {
+      return;
+    }
+
+    String valueAsString = String.valueOf(extensionValue);
+
+    addCareTeamExtension(codebookVariable, valueAsString, careTeamComponent, eob);
+  }
+
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already an
+   * extension for the supplied extensionValue.
+   *
+   * <p>This method is kept private to dissuade the unpacking of optionals at the caller level; use
+   * the methods above for optional/char values so that we can do validation within the util method
+   * and keep it out of the calling code. If we have mandatory string values, this can be opened up,
+   * but should be noted the values should be passed in as-is from the line, not transformed prior
+   * to the call.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  private static void addCareTeamExtension(
+      CcwCodebookVariable codebookVariable,
+      String extensionValue,
+      ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+      ExplanationOfBenefit eob) {
+    String referenceUrl = getReferenceUrl(codebookVariable);
+    boolean hasExtension =
+        careTeamHasMatchingExtension(careTeamComponent, referenceUrl, extensionValue);
+
+    // If the extension doesnt exist, add it
+    if (!hasExtension) {
+      careTeamComponent.addExtension(createExtensionCoding(eob, codebookVariable, extensionValue));
+    }
+  }
+
+  /**
    * Creates an extension coding for the specified ccw variable, year-month, and code.
    *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
@@ -752,7 +831,7 @@ public final class TransformerUtilsV2 {
    */
   static CodeableConcept createCodeableConcept(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
-    if (!code.isPresent()) {
+    if (code.isEmpty()) {
       throw new IllegalArgumentException();
     }
 
@@ -762,6 +841,36 @@ public final class TransformerUtilsV2 {
     concept.addCoding(coding);
 
     return concept;
+  }
+
+  /**
+   * Adds a qualification {@link CodeableConcept} to the given careTeam component, if the input code
+   * optional is not empty. If the code is empty, returns with no effect. Can safely be called to
+   * add qualification only if the value is present.
+   *
+   * @param careTeam the care team to add the
+   * @param rootResource the root resource to use for the coding
+   * @param ccwVariable the ccw variable to use for the coding
+   * @param code an optional to create the {@link CodeableConcept} from; if empty, method returns
+   *     with no action taken
+   */
+  static void addCareTeamQualification(
+      CareTeamComponent careTeam,
+      IAnyResource rootResource,
+      CcwCodebookInterface ccwVariable,
+      Optional<?> code) {
+    // While the original code was written in such a way that implies this optional wont be empty,
+    // its still an optional, so dont bother adding anything if it happens to be empty
+    if (code.isEmpty()) {
+      return;
+    }
+
+    Coding coding = createCoding(rootResource, ccwVariable, code.get());
+
+    CodeableConcept concept = new CodeableConcept();
+    concept.addCoding(coding);
+
+    careTeam.setQualification(concept);
   }
 
   /**

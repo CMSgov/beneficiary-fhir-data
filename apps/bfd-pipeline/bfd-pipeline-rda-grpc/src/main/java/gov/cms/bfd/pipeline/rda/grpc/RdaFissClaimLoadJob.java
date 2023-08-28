@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import gov.cms.bfd.model.rda.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import io.micrometer.core.instrument.MeterRegistry;
