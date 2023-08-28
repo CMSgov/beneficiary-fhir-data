@@ -113,7 +113,7 @@ resource "aws_scheduler_schedule" "repeater" {
 
   target {
     arn      = aws_lambda_function.repeater.arn
-    role_arn = aws_iam_policy.invoke_repeater.arn
+    role_arn = aws_iam_role.scheduler_assume_role.arn
   }
 }
 
