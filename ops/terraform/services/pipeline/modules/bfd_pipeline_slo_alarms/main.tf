@@ -16,13 +16,9 @@ locals {
   # alarm.
   topic_names_by_env = {
     prod = {
-      # alert      = local.victor_ops_sns
-      # warning    = local.bfd_warnings_slack_sns
-      # alert_ok   = local.default_alert_ok_sns
-      # TODO: Until Pipeline SLO alarms have been verified, prod alarms will be routed to the #bfd-test channel
-      alert      = local.bfd_test_slack_sns
-      warning    = local.bfd_test_slack_sns
-      alert_ok   = null
+      alert      = local.victor_ops_sns
+      warning    = local.bfd_warnings_slack_sns
+      alert_ok   = local.default_alert_ok_sns
       warning_ok = null
     }
     prod-sbx = {
