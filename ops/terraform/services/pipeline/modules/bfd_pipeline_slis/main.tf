@@ -1,17 +1,29 @@
 locals {
   env             = terraform.workspace
+  service         = "pipeline"
+  variant         = "ccw"
   region          = data.aws_region.current.name
   resource_prefix = "bfd-${local.env}"
 
   kms_key_arn = var.aws_kms_key_arn
   kms_key_id  = var.aws_kms_key_id
 
-  lambda_update_slis = "update_slis"
+  nonsensitive_service_map = zipmap(
+    data.aws_ssm_parameters_by_path.nonsensitive_service.names,
+    nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_service.values)
+  )
+  nonsensitive_service_config = {
+    for key, value in local.nonsensitive_service_map
+    : split("/", key)[5] => value
+  }
+  repeater_invoke_rate = local.nonsensitive_service_config["slis_repeater_lambda_invoke_rate"]
+
+  lambda_update_slis = "update_slis" # resources related to this lambda are also named "this" in some cases
   lambda_repeater    = "repeater"
   lambdas = {
     for label, name in {
-      "${local.lambda_update_slis}" = "update-pipeline-slis",
-      "${local.lambda_repeater}"    = "pipeline-metrics-repeater"
+      "${local.lambda_update_slis}" = "update-${local.service}-slis",
+      "${local.lambda_repeater}"    = "${local.service}-metrics-repeater"
     } :
     label => {
       name      = name
@@ -20,9 +32,7 @@ locals {
     }
   }
 
-  repeater_invoke_rate = "15 minutes"
-
-  metrics_namespace = "${local.resource_prefix}/bfd-pipeline"
+  metrics_namespace = "${local.resource_prefix}/bfd-${local.service}"
 }
 
 resource "aws_lambda_permission" "this" {

@@ -1,5 +1,9 @@
 data "aws_region" "current" {}
 
+data "aws_ssm_parameters_by_path" "nonsensitive_service" {
+  path = "/bfd/${local.env}/${local.service}/${local.variant}/nonsensitive"
+}
+
 data "aws_s3_bucket" "etl" {
   bucket = var.etl_bucket_id
 }
