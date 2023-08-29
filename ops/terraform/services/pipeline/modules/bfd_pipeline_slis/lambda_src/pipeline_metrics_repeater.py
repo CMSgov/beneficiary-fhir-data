@@ -90,7 +90,7 @@ def handler(event: Any, context: Any):
 
     if not result:
         logger.error(
-            "No data was returned for %s metrics, extiting",
+            "No data was returned for %s metrics, exiting",
             [x.full_name() for x in SOURCE_TO_REPEATING_METRICS],
         )
         return
