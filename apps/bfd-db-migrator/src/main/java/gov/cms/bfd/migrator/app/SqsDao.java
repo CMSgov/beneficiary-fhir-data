@@ -1,5 +1,8 @@
 package gov.cms.bfd.migrator.app;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +14,6 @@ import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SqsException;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 /** Data access object that encapsulate interactions with SQS. */
 @AllArgsConstructor

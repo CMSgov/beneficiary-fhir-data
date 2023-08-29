@@ -7,14 +7,13 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import java.util.Map;
+import java.util.function.Function;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sqs.SqsClient;
-
-import javax.annotation.Nullable;
-import java.util.Map;
-import java.util.function.Function;
 
 /** Models the configuration options for the application. */
 public class AppConfiguration extends BaseAppConfiguration {
