@@ -1,11 +1,7 @@
 #!/bin/bash
 set -e
-echo "cleaning up .b64, *.pfx, *.pem files before starting run..."
-rm -f *.b64
-rm -f *.pem
-rm -f *.pfx
 
-# verify base64 encoded #PKCS#12 file
+# verify base64 encoded PKCS#12 file
 #
 function verify_encoded_p12 {
     rm -f foo.p12
@@ -23,6 +19,8 @@ function verify_encoded_p12 {
 function gen_keystore {
     echo "begin processing of $3 environment...."
     rm -f "$3-bluebutton-appserver-keystore.jks"
+    rm -f "$3-bluebutton-appserver-keystore.pfx"
+    rm -f "$3-bluebutton-appserver-keystore.pfx.b64"
     rm -f "$3-bluebutton-appserver-public-cert.pem"
 
     echo "Generating $3 keystore..."
