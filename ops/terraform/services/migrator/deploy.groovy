@@ -105,6 +105,7 @@ def monitorMigrator(Map args = [:]) {
         // 2. if the message body contains a non-running value, return it
         lastVersion = null
         for (msg in messages) {
+            println "${msg}"
             body = msg.body
             printMigratorMessage(body)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
@@ -119,6 +120,8 @@ def monitorMigrator(Map args = [:]) {
 
 // print formatted migrator messages
 void printMigratorMessage(body) {
+    println "${body}"
+
     println "Timestamp: ${java.time.LocalDateTime.now().toString()}"
     migratorStatus = body.appStage
     migrationStage = body?.migrationStage
