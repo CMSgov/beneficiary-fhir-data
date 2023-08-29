@@ -7,16 +7,21 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.sqs.SqsClient;
+
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Function;
-import javax.annotation.Nullable;
-import lombok.Getter;
-import software.amazon.awssdk.services.sqs.SqsClient;
 
 /** Models the configuration options for the application. */
 public class AppConfiguration extends BaseAppConfiguration {
   /** Name of setting containing name of SQS queue to which progress messages can be sent. */
   public static final String ENV_VAR_KEY_SQS_QUEUE_NAME = "DB_MIGRATOR_SQS_QUEUE";
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AppConfiguration.class);
 
   /**
    * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway
@@ -95,6 +100,7 @@ public class AppConfiguration extends BaseAppConfiguration {
     final AwsClientConfig awsClientConfig = loadAwsClientConfig(configLoader);
     final String sqsQueueName = configLoader.stringValue(ENV_VAR_KEY_SQS_QUEUE_NAME, "");
     final SqsClient sqsClient = sqsQueueName.isEmpty() ? null : createSqsClient(awsClientConfig);
+    LOGGER.info("sqsQueneName.isEmpty() = " + sqsQueueName.isEmpty());
 
     return new AppConfiguration(
         metricOptions,

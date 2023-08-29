@@ -1,9 +1,8 @@
 package gov.cms.bfd.migrator.app;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
@@ -13,9 +12,15 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SqsException;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+
 /** Data access object that encapsulate interactions with SQS. */
 @AllArgsConstructor
 public class SqsDao {
+  private static final Logger LOGGER = LoggerFactory.getLogger(SqsDao.class);
+
   /** Used to communicate with SQS. */
   private final SqsClient sqsClient;
 
@@ -44,6 +49,7 @@ public class SqsDao {
   public void sendMessage(String queueUrl, String messageBody) {
     final var request =
         SendMessageRequest.builder().queueUrl(queueUrl).messageBody(messageBody).build();
+    LOGGER.info("SENDING SQS MESSAGE: " + request.messageBody().toString());
     sqsClient.sendMessage(request);
   }
 
