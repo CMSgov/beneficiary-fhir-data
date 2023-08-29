@@ -13,7 +13,11 @@ export DATABASE_USERNAME='{{ db_migrator_db_username }}'
 # DATABASE_MAX_POOL_SIZE defaults to 1 in the bfd-db-migrator application
 {{ '#' if db_migrator_db_max_pool_size|default('', true)|length < 1 }}export DATABASE_MAX_POOL_SIZE='{{ db_migrator_db_max_pool_size|default('', true) }}'
 
-{{ '#' if not migrator_monitor_enabled|default('', true) }}export DB_MIGRATOR_SQS_QUEUE='{{ sqs_queue_name|default('', true) }}'
+{{ '#' if not migrator_monitor_enabled|default('', true) and sqs_queue_name is defined else '' }}export DB_MIGRATOR_SQS_QUEUE='{{ sqs_queue_name|default('', true) }}'
+
+{%- if db_migrator_new_relic_metric_key is defined %}
+export NEW_RELIC_METRIC_KEY='{{ db_migrator_new_relic_metric_key }}'
+{%- en
 
 {%- if db_migrator_new_relic_metric_key is defined %}
 export NEW_RELIC_METRIC_KEY='{{ db_migrator_new_relic_metric_key }}'
