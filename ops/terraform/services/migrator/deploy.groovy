@@ -1,5 +1,19 @@
 #!/usr/bin/env groovy
 
+// copied from gov.cms.bfd.migrator.app.MigratorProgress
+enum MigratorStage {
+    /** App has started but hasn't done anything yet. */
+    Started,
+    /** App has successfully connected to the database. */
+    Connected,
+    /** App has completed a migration step. */
+    Migrating,
+    /** App has finished processing with no errors. */
+    Finished,
+    /** App has terminated processing due to some error. */
+    Failed
+}
+
 // entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
 // attempts to deploy and monitor and return `true` when the migrator signals a zero exit status
 boolean deployMigrator(Map args = [:]) {
@@ -53,7 +67,7 @@ boolean deployMigrator(Map args = [:]) {
     awsAuth.assumeRole()
 
     // set return value for final disposition
-    if (finalMigratorStatus[0] == '0') {
+    if (finalMigratorStatus[0] == MigratorStage.Finished.name()) {
         migratorDeployedSuccessfully = true
         awsSsm.putParameter(
             parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
@@ -109,7 +123,7 @@ def monitorMigrator(Map args = [:]) {
             body = msg.body
             printMigratorMessage(body)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-            if (body.appStage == "Finished") {
+            if (body.appStage == MigratorStage.Finished.name()) {
                 return [body.appStage, lastVersion]
             }
             lastVersion = body?.migrationStage?.version != null ? body.migrationStage.version : lastVersion
