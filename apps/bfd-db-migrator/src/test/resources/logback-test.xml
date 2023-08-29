@@ -3,7 +3,9 @@
 	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
 
 	<!-- This appender will be sent all of the app's logging statements. -->
-	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>./target/migratorOutput.log</file>
+		<immediateFlush>true</immediateFlush>
 		<encoder>
 			<pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
@@ -12,6 +14,6 @@
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->
 	<root level="info">
-		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
 	</root>
 </configuration>

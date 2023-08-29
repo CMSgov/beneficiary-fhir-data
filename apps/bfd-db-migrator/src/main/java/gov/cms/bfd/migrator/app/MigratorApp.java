@@ -5,6 +5,7 @@ import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
+import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
@@ -12,10 +13,13 @@ import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import lombok.Getter;
@@ -63,16 +67,28 @@ public final class MigratorApp {
 
   /**
    * This method is called when the application is launched from the command line. Creates a new
-   * instance and calls its {@link MigratorApp#run} method. Terminates with an appropriate error
-   * code.
+   * instance and calls its {@link MigratorApp#performMigrations} method. Terminates with an
+   * appropriate error code.
    *
    * @param args generally, should be empty. Application <strong>will</strong> accept configuration
    *     via layered configuration sources.
    */
   public static void main(String[] args) {
+    int exitCode = new MigratorApp().performMigrationsAndHandleExceptions();
+    System.exit(exitCode);
+  }
+
+  /**
+   * Wrapper around {@link #performMigrations()} that catches any thrown exceptions and returns an
+   * appropriate exit code for use by the {@link #main(String[])} method.
+   *
+   * @return exit code for {@link System#exit}
+   */
+  @VisibleForTesting
+  int performMigrationsAndHandleExceptions() {
     try {
-      new MigratorApp().run();
-      System.exit(EXIT_CODE_SUCCESS);
+      performMigrations();
+      return EXIT_CODE_SUCCESS;
     } catch (FatalErrorException ex) {
       if (ex.getCause() != null) {
         LOGGER.error(
@@ -82,10 +98,10 @@ public final class MigratorApp {
       } else {
         LOGGER.error("{}, shutting down", ex.getMessage());
       }
-      System.exit(ex.getExitCode());
+      return ex.getExitCode();
     } catch (RuntimeException ex) {
       LOGGER.error("app terminating due to unhandled exception: message={}", ex.getMessage(), ex);
-      System.exit(EXIT_CODE_FAILED_UNHANDLED_EXCEPTION);
+      return EXIT_CODE_FAILED_UNHANDLED_EXCEPTION;
     }
   }
 
@@ -94,7 +110,7 @@ public final class MigratorApp {
    *
    * @throws FatalErrorException to report an error that should terminate the application
    */
-  private void run() throws FatalErrorException {
+  private void performMigrations() throws FatalErrorException {
     LOGGER.info("Successfully started");
     final AppConfiguration appConfig = loadAppConfiguration();
 
@@ -177,15 +193,26 @@ public final class MigratorApp {
   }
 
   /**
+   * Creates a {@link ConfigLoader} that can be used to populate an {@link AppConfiguration}.
+   * Intended as an insertion point for a mock during testing.
+   *
+   * @return the config loader
+   */
+  @VisibleForTesting
+  ConfigLoader createConfigLoader() {
+    return LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
+  }
+
+  /**
    * Loads and returns the app configuration.
    *
    * @return the configuration
    * @throws FatalErrorException to report an error that should terminate the application
    */
   private AppConfiguration loadAppConfiguration() throws FatalErrorException {
-
     try {
-      AppConfiguration appConfig = AppConfiguration.loadConfig(System::getenv);
+      ConfigLoader configLoader = createConfigLoader();
+      AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
       return appConfig;
     } catch (ConfigException | AppConfigurationException e) {
