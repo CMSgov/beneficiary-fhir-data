@@ -1,17 +1,9 @@
 #!/usr/bin/env groovy
 
-// copied from gov.cms.bfd.migrator.app.MigratorProgress
+// partially copied from gov.cms.bfd.migrator.app.MigratorProgress
 enum MigratorStage {
-    /** App has started but hasn't done anything yet. */
-    Started,
-    /** App has successfully connected to the database. */
-    Connected,
-    /** App has completed a migration step. */
-    Migrating,
     /** App has finished processing with no errors. */
-    Finished,
-    /** App has terminated processing due to some error. */
-    Failed
+    Finished
 }
 
 // entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
@@ -95,7 +87,6 @@ boolean deployMigrator(Map args = [:]) {
     return migratorDeployedSuccessfully
 }
 
-
 // polls the given AWS SQS Queue `sqsQueueName` for migrator messages for
 // 20s at the `heartbeatInterval`
 def monitorMigrator(Map args = [:]) {
@@ -117,16 +108,15 @@ def monitorMigrator(Map args = [:]) {
 
         // 1. "handle" (capture status, print, delete) each message
         // 2. if the message body contains a non-running value, return it
-        lastVersion = null
+        latestSchemaVersion = null
         for (msg in messages) {
-            println "${msg}"
             body = msg.body
             printMigratorMessage(body)
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
             if (body.appStage == MigratorStage.Finished.name()) {
-                return [body.appStage, lastVersion]
+                return [body.appStage, latestSchemaVersion]
             }
-            lastVersion = body?.migrationStage?.version != null ? body.migrationStage.version : lastVersion
+            latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
         }
         sleep(heartbeatInterval)
     }
@@ -134,19 +124,19 @@ def monitorMigrator(Map args = [:]) {
 
 // print formatted migrator messages
 void printMigratorMessage(body) {
-    println "${body}"
-
-    println "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+    migratorStartTimestamp = java.time.LocalDateTime.now().toString()
+    println "[Timestamp]: Migrator started - ${migratorStartTimestamp}"
     migratorStatus = body.appStage
     migrationStage = body?.migrationStage
     if (migrationStage != null) {
         if (migrationStage?.migrationFile != null) {
-            println "${migratorStatus} (${migrationStage.stage}): ${migrationStage.migrationFile} (schema version ${migrationStage.version} ..."
+            statusStage = "${migratorStatus} (${migrationStage.stage})"
+            println "${statusStage}: ${migrationStage.migrationFile} (schema version ${migrationStage.version} ..."
         } else {
-            println "${migratorStatus} (${migrationStage.stage}) ..."
+            println "${statusStage} ..."
         }
     } else {
-        println "${migratorStatus}"
+        println "[Timestamp]: Migrator started at ${migratorStartTimestamp} is no longer running with a final status of '${migratorStatus}' at ${java.time.LocalDateTime.now().toString()}"
     }
 }
 
