@@ -12,7 +12,7 @@ String getFormattedMonitorMsg(String msg) {
 boolean deployMigrator(Map args = [:]) {
     amiId = args.amiId
     bfdEnv = args.bfdEnv
-    heartbeatInterval = args.heartbeatInterval ?: 10
+    heartbeatInterval = args.heartbeatInterval ?: 30
     awsRegion = args.awsRegion ?: 'us-east-1'
     forceDeployment = args.forceDeployment ?: false
 
