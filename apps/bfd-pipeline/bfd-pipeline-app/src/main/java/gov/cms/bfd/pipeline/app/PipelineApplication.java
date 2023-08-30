@@ -156,8 +156,8 @@ public final class PipelineApplication {
 
     LOGGER.info("Application starting up!");
 
-    AppConfiguration appConfig = null;
-    ConfigLoader configLoader = null;
+    final AppConfiguration appConfig;
+    final ConfigLoader configLoader;
     try {
       // add any additional sources of configuration variables then load the app config
       configLoader = createConfigLoader();
@@ -169,8 +169,6 @@ public final class PipelineApplication {
       throw new FatalAppException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
     }
 
-    assert appConfig != null;
-    assert configLoader != null;
     final MetricOptions metricOptions = appConfig.getMetricOptions();
     final var appMeters = new CompositeMeterRegistry();
     final var appMetrics = new MetricRegistry();
@@ -181,62 +179,8 @@ public final class PipelineApplication {
     final DataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
     try (HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics)) {
-
       logDatabaseDetails(pooledDataSource);
-
-      /*
-       * Create all jobs and run their smoke tests.
-       */
-      final var jobs = createAllJobs(appConfig, appMeters, appMetrics, pooledDataSource);
-      if (anySmokeTestFailed(jobs)) {
-        LOGGER.info("Pipeline terminating due to smoke test failure.");
-        pooledDataSource.close();
-        System.exit(EXIT_CODE_SMOKE_TEST_FAILURE);
-      }
-
-      final var pipelineManager = new PipelineManager(Thread::sleep, Clock.systemUTC(), jobs);
-      registerShutdownHook(appMetrics, pipelineManager);
-
-      pipelineManager.start();
-      LOGGER.info("Job processing started.");
-
-      pipelineManager.awaitCompletion();
-
-      if (s3TaskManager != null) {
-        // ensures all background operations have been completed
-        s3TaskManager.shutdownSafely();
-        s3TaskManager = null;
-      }
-
-      if (pipelineManager.getError() != null) {
-        throw new FatalAppException(
-            "Pipeline job threw exception", pipelineManager.getError(), EXIT_CODE_JOB_FAILED);
-      }
-    }
-  }
-
-  /**
-   * Extracts database details from the pool and writes them to the log file.
-   *
-   * @param pooledDataSource our connection pool
-   * @throws SQLException if database details cannot be obtained
-   */
-  private void logDatabaseDetails(HikariDataSource pooledDataSource) throws SQLException {
-    try (HikariProxyConnection dbConn = (HikariProxyConnection) pooledDataSource.getConnection()) {
-      DatabaseMetaData dbmeta = dbConn.getMetaData();
-      String dbName = dbmeta.getDatabaseProductName();
-      LOGGER.info(
-          "Database: {}, Driver version: major: {}, minor: {}; JDBC version, major: {}, minor: {}",
-          dbName,
-          dbmeta.getDriverMajorVersion(),
-          dbmeta.getDriverMinorVersion(),
-          dbmeta.getJDBCMajorVersion(),
-          dbmeta.getJDBCMinorVersion());
-
-      if (dbName.equals("PostgreSQL")) {
-        BaseConnection pSqlConnection = dbConn.unwrap(BaseConnection.class);
-        LOGGER.info("pgjdbc, logServerDetail: {}", pSqlConnection.getLogServerErrorDetail());
-      }
+      createJobsAndRunPipeline(appConfig, appMeters, appMetrics, pooledDataSource);
     }
   }
 
@@ -315,6 +259,76 @@ public final class PipelineApplication {
     new JvmMemoryMetrics().bindTo(appMeters);
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
+  }
+
+  /**
+   * Extracts database details from the pool and writes them to the log file.
+   *
+   * @param pooledDataSource our connection pool
+   * @throws SQLException if database details cannot be obtained
+   */
+  private void logDatabaseDetails(HikariDataSource pooledDataSource) throws SQLException {
+    try (HikariProxyConnection dbConn = (HikariProxyConnection) pooledDataSource.getConnection()) {
+      DatabaseMetaData dbmeta = dbConn.getMetaData();
+      String dbName = dbmeta.getDatabaseProductName();
+      LOGGER.info(
+          "Database: {}, Driver version: major: {}, minor: {}; JDBC version, major: {}, minor: {}",
+          dbName,
+          dbmeta.getDriverMajorVersion(),
+          dbmeta.getDriverMinorVersion(),
+          dbmeta.getJDBCMajorVersion(),
+          dbmeta.getJDBCMinorVersion());
+
+      if (dbName.equals("PostgreSQL")) {
+        BaseConnection pSqlConnection = dbConn.unwrap(BaseConnection.class);
+        LOGGER.info("pgjdbc, logServerDetail: {}", pSqlConnection.getLogServerErrorDetail());
+      }
+    }
+  }
+
+  /**
+   * Creates all of the configured jobs and runs them using a {@link PipelineManager}.
+   *
+   * @param appConfig our {@link AppConfiguration} for configuring jobs
+   * @param appMeters the app meters
+   * @param appMetrics the {@link MetricRegistry} to receive metrics
+   * @param pooledDataSource our connection pool
+   * @throws FatalAppException if app shutdown required
+   */
+  private void createJobsAndRunPipeline(
+      AppConfiguration appConfig,
+      CompositeMeterRegistry appMeters,
+      MetricRegistry appMetrics,
+      HikariDataSource pooledDataSource)
+      throws FatalAppException {
+    /*
+     * Create all jobs and run their smoke tests.
+     */
+    final var jobs = createAllJobs(appConfig, appMeters, appMetrics, pooledDataSource);
+    if (anySmokeTestFailed(jobs)) {
+      LOGGER.info("Pipeline terminating due to smoke test failure.");
+      pooledDataSource.close();
+      System.exit(EXIT_CODE_SMOKE_TEST_FAILURE);
+    }
+
+    final var pipelineManager = new PipelineManager(Thread::sleep, Clock.systemUTC(), jobs);
+    registerShutdownHook(appMetrics, pipelineManager);
+
+    pipelineManager.start();
+    LOGGER.info("Job processing started.");
+
+    pipelineManager.awaitCompletion();
+
+    if (s3TaskManager != null) {
+      // ensures all background operations have been completed
+      s3TaskManager.shutdownSafely();
+      s3TaskManager = null;
+    }
+
+    if (pipelineManager.getError() != null) {
+      throw new FatalAppException(
+          "Pipeline job threw exception", pipelineManager.getError(), EXIT_CODE_JOB_FAILED);
+    }
   }
 
   /**
