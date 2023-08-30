@@ -36,7 +36,6 @@ locals {
   )
 }
 
-
 # Role BCDA Insights engineers will assume to manage their resources
 # TODO: Consider modifying the trust policy to allow for cross-account assumption instead of requiring IAM users in our
 # account.
@@ -138,4 +137,25 @@ resource "aws_iam_policy" "terraform" {
 resource "aws_iam_role_policy_attachment" "terraform" {
   role       = aws_iam_role.dev.name
   policy_arn = aws_iam_policy.terraform.arn
+}
+
+# Group specifying which users may assume the developer role
+resource "aws_iam_group" "dev" {
+  name = "bfd-insights-bcda-developers"
+}
+
+resource "aws_iam_group_policy" "this" {
+  name  = "bfd-insights-bcda-developers-assume-role"
+  group = aws_iam_group.dev.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action   = "sts:AssumeRole",
+        Resource = aws_iam_role.dev.arn,
+        Effect   = "Allow"
+      }
+    ]
+  })
 }
