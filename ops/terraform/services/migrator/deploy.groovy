@@ -1,9 +1,10 @@
 #!/usr/bin/env groovy
 
-// partially copied from gov.cms.bfd.migrator.app.MigratorProgress
-enum MigratorStage {
-    /** App has finished processing with no errors. */
-    Finished
+/** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
+STATUS_FINISHED = "Finished"
+
+String getFormattedMonitorMsg(String msg) {
+    return "[Migrator monitor]: ${msg}"
 }
 
 // entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
@@ -59,7 +60,7 @@ boolean deployMigrator(Map args = [:]) {
     awsAuth.assumeRole()
 
     // set return value for final disposition
-    if (finalMigratorStatus[0] == MigratorStage.Finished.name()) {
+    if (finalMigratorStatus[0] == STATUS_FINISHED) {
         migratorDeployedSuccessfully = true
         awsSsm.putParameter(
             parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
@@ -90,12 +91,15 @@ boolean deployMigrator(Map args = [:]) {
 // polls the given AWS SQS Queue `sqsQueueName` for migrator messages for
 // 20s at the `heartbeatInterval`
 def monitorMigrator(Map args = [:]) {
+    migratorStartTimestamp = java.time.LocalDateTime.now().toString()
+    println getFormattedMonitorMsg("Migrator started - ${migratorStartTimestamp}")
+
     sqsQueueName = args.sqsQueueName
     awsRegion = args.awsRegion
     heartbeatInterval = args.heartbeatInterval
     maxMessages = args.maxMessages
-
     sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
+    latestSchemaVersion = null
     while (true) {
         awsAuth.assumeRole()
         messages = awsSqs.receiveMessages(
@@ -108,36 +112,35 @@ def monitorMigrator(Map args = [:]) {
 
         // 1. "handle" (capture status, print, delete) each message
         // 2. if the message body contains a non-running value, return it
-        latestSchemaVersion = null
         for (msg in messages) {
             body = msg.body
-            printMigratorMessage(body)
+            println getFormattedMonitorMsg(getMigratorStatus(body))
+
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-            if (body.appStage == MigratorStage.Finished.name()) {
+
+            latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
+            if (body.appStage == STATUS_FINISHED) {
                 return [body.appStage, latestSchemaVersion]
             }
-            latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
         }
         sleep(heartbeatInterval)
     }
+    println getFormattedMonitorMsg("Migrator started at ${migratorStartTimestamp} is no longer running with a final status of '${migratorStatus}' at ${java.time.LocalDateTime.now().toString()}")
 }
 
-// print formatted migrator messages
-void printMigratorMessage(body) {
-    migratorStartTimestamp = java.time.LocalDateTime.now().toString()
-    println "[Timestamp]: Migrator started - ${migratorStartTimestamp}"
+// return migrator messages
+String getMigratorStatus(Map body = [:]) {
     migratorStatus = body.appStage
     migrationStage = body?.migrationStage
     if (migrationStage != null) {
+        statusStage = "${migratorStatus} (${migrationStage.stage})"
         if (migrationStage?.migrationFile != null) {
-            statusStage = "${migratorStatus} (${migrationStage.stage})"
-            println "${statusStage}: ${migrationStage.migrationFile} (schema version ${migrationStage.version} ..."
+            return "${statusStage}: ${migrationStage.migrationFile} (schema version ${migrationStage.version}) ..."
         } else {
-            println "${statusStage} ..."
+            return statusStage
         }
-    } else {
-        println "[Timestamp]: Migrator started at ${migratorStartTimestamp} is no longer running with a final status of '${migratorStatus}' at ${java.time.LocalDateTime.now().toString()}"
     }
+    return "${migratorStatus} ..."
 }
 
 // checks for indications of a running migrator deployment by looking for unconsumed SQS messages
