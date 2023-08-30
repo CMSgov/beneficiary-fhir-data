@@ -2,8 +2,7 @@
 	<!-- Required to ensure that JUL respects log level changes. -->
 	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
 
-	<!-- This appender will be sent all of the app's logging statements. -->
-	<!-- This appender will be sent all of the app's logging statements. -->
+	<!-- This appender will be sent all of the app's logging statements. -->S3Dao
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
 		<file>./target/pipelineOutput.log</file>
 		<immediateFlush>true</immediateFlush>
