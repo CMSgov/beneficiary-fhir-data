@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
+import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Arrays;
@@ -239,7 +241,7 @@ public class RequestHeaders {
     else {
       // Return values split on a comma with any whitespace, valid, distict, and sort
       return Arrays.asList(
-              headerValues.trim().replaceAll("^\\[|\\]$", "").toLowerCase().split("\\s*,\\s*"))
+              splitOnCommas(headerValues.trim().replaceAll("^\\[|\\]$", "").toLowerCase()))
           .stream()
           .peek(
               c -> {
