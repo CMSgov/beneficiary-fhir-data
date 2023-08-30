@@ -7,8 +7,8 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.InpatientClaimLine;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -194,8 +194,12 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         Optional.ofNullable(claimGroup.getProfessionalComponentCharge()));
 
     // CLM_TOT_PPS_CPTL_AMT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
-        eob, CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT, claimGroup.getClaimTotalPPSCapitalAmount());
+    if (claimGroup.getClaimTotalPPSCapitalAmount().isPresent()) {
+      TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
+          eob,
+          CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
+          claimGroup.getClaimTotalPPSCapitalAmount());
+    }
 
     /*
      * add field values to the benefit balances that are common between the

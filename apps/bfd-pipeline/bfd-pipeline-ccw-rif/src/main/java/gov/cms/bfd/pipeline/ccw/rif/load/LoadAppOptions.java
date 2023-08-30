@@ -1,8 +1,8 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
-import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import lombok.Data;
 import lombok.Getter;

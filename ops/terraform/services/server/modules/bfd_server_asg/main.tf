@@ -5,6 +5,11 @@ locals {
   rds_reader_endpoint = data.external.rds.result["CustomEndpoint"] == "" ? data.external.rds.result["ReaderEndpoint"] : data.external.rds.result["CustomEndpoint"]
 
   additional_tags = { Layer = var.layer, role = var.role }
+  scaleout_asg_capacities = [
+    { capacity = length(var.env_config.azs) * 2, metric_lower_bound = 1 * var.scaling_networkin_interval_mb, metric_upper_bound = 2 * var.scaling_networkin_interval_mb },
+    { capacity = length(var.env_config.azs) * 3, metric_lower_bound = 2 * var.scaling_networkin_interval_mb, metric_upper_bound = 4 * var.scaling_networkin_interval_mb },
+    { capacity = length(var.env_config.azs) * 4, metric_lower_bound = 4 * var.scaling_networkin_interval_mb, metric_upper_bound = null }
+  ]
 }
 
 ## Security groups
@@ -130,7 +135,7 @@ resource "aws_autoscaling_group" "main" {
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
-  health_check_grace_period = var.asg_config.instance_warmup * 2
+  health_check_grace_period = 600 # Temporary, will be lowered when/if lifecycle hooks are implemented
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
   load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
@@ -184,8 +189,8 @@ resource "aws_autoscaling_group" "main" {
 resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
   alarm_name          = "bfd-${var.role}-${local.env}-networkin-low"
   comparison_operator = "LessThanThreshold"
-  datapoints_to_alarm = 5
-  evaluation_periods  = 5
+  datapoints_to_alarm = 10
+  evaluation_periods  = 10
   threshold           = 400 * 1000000 # 400 megabytes
   treat_missing_data  = "ignore"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_low_scaling.arn]
@@ -231,7 +236,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
 resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
   name                    = "bfd-${var.role}-${local.env}-networkin-low-scalein"
   autoscaling_group_name  = aws_autoscaling_group.main.name
-  adjustment_type         = "ChangeInCapacity"
+  adjustment_type         = "ExactCapacity"
   metric_aggregation_type = "Average"
   policy_type             = "StepScaling"
 
@@ -246,33 +251,34 @@ resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
     # and the .0 precision modifier to ensure that Terraform's formatter does not pad the decimal
     # part with 0s
     metric_interval_upper_bound = format("%.0e", -300 * 1000000) # 300 megabytes
-    scaling_adjustment          = -(length(var.env_config.azs) * 3)
+    scaling_adjustment          = length(var.env_config.azs)
   }
 
   step_adjustment {
     metric_interval_lower_bound = format("%.0e", -300 * 1000000) # 300 megabytes
     metric_interval_upper_bound = format("%.0e", -200 * 1000000) # 200 megabytes
-    scaling_adjustment          = -(length(var.env_config.azs) * 2)
+    scaling_adjustment          = length(var.env_config.azs) * 2
   }
 
   step_adjustment {
     metric_interval_lower_bound = format("%.0e", -200 * 1000000) # 200 megabytes
     metric_interval_upper_bound = 0                              # 0 megabytes
-    scaling_adjustment          = -length(var.env_config.azs)
+    scaling_adjustment          = length(var.env_config.azs) * 3
   }
 }
 
 resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   alarm_name          = "bfd-${var.role}-${local.env}-networkin-high"
-  comparison_operator = "GreaterThanThreshold"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
   datapoints_to_alarm = 1
   evaluation_periods  = 1
-  threshold           = 100 * 1000000 # 100 megabytes
-  treat_missing_data  = "ignore"
+  threshold           = 1
+  treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_high_scaling.arn]
 
   metric_query {
     id          = "m1"
+    period      = 0
     return_data = false
 
     metric {
@@ -285,9 +291,9 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
       stat        = "Average"
     }
   }
-
   metric_query {
     id          = "m2"
+    period      = 0
     return_data = false
 
     metric {
@@ -302,9 +308,48 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   }
 
   metric_query {
+    id          = "m3"
+    period      = 0
+    return_data = false
+
+    metric {
+      dimensions = {
+        AutoScalingGroupName = aws_autoscaling_group.main.name
+      }
+      metric_name = "GroupDesiredCapacity"
+      namespace   = "AWS/AutoScaling"
+      period      = 60
+      stat        = "Average"
+    }
+  }
+
+  metric_query {
     expression  = "IF(m2/m1 > 0.01, m1, 0)"
-    id          = "e1"
+    id          = "networkin"
     label       = "FilteredNetworkIn"
+    period      = 0
+    return_data = false
+  }
+
+  dynamic "metric_query" {
+    for_each = local.scaleout_asg_capacities
+    content {
+      id    = "e${metric_query.key}"
+      label = "Set to ${metric_query.value.capacity} capacity units"
+      expression = "IF(${join(" && ", compact([
+        "networkin > ${metric_query.value.metric_lower_bound}",
+        metric_query.value.metric_upper_bound != null ? "networkin <= ${metric_query.value.metric_upper_bound}" : null,
+        "m3 < ${metric_query.value.capacity}"
+      ]))}, ${metric_query.key + 1})"
+      return_data = false
+    }
+  }
+
+  metric_query {
+    expression  = "MAX([${join(",", [for i in range(length(local.scaleout_asg_capacities)) : "e${i}"])}])"
+    id          = "e${length(local.scaleout_asg_capacities)}"
+    label       = "ScalingCapacityScalar"
+    period      = 0
     return_data = true
   }
 }
@@ -313,34 +358,21 @@ resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
   name                      = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
   autoscaling_group_name    = aws_autoscaling_group.main.name
   estimated_instance_warmup = var.asg_config.instance_warmup
-  adjustment_type           = "ChangeInCapacity"
+  adjustment_type           = "ExactCapacity"
   metric_aggregation_type   = "Average"
   policy_type               = "StepScaling"
 
-  # All metric interval bounds are calculated by _adding_ the value of the bound to the threshold
-  # of the alarm that this scaling policy operates on. For example, if the alarm threshold is 100MB
-  # and the upper bound and lower bounds for a step adjustment are 300MB and 100MB, the step
-  # adjustment executes if the metric is greater than 200MB and less than 400MB
-  step_adjustment {
-    metric_interval_lower_bound = format("%.0e", 300 * 1000000) # 300 megabytes
-    scaling_adjustment          = length(var.env_config.azs) * 3
-  }
-
-  step_adjustment {
-    metric_interval_lower_bound = format("%.0e", 100 * 1000000) # 100 megabytes
-    metric_interval_upper_bound = format("%.0e", 300 * 1000000) # 300 megabytes
-    scaling_adjustment          = length(var.env_config.azs) * 2
-  }
-
-  step_adjustment {
-    metric_interval_lower_bound = 0                             # 0 megabytes
-    metric_interval_upper_bound = format("%.0e", 100 * 1000000) # 100 megabytes
-    scaling_adjustment          = length(var.env_config.azs)
+  dynamic "step_adjustment" {
+    for_each = local.scaleout_asg_capacities
+    content {
+      metric_interval_lower_bound = step_adjustment.key
+      metric_interval_upper_bound = step_adjustment.key + 1 != length(local.scaleout_asg_capacities) ? step_adjustment.key + 1 : null
+      scaling_adjustment          = step_adjustment.value.capacity
+    }
   }
 }
 
 ## Autoscaling Notifications
-#
 resource "aws_autoscaling_notification" "asg_notifications" {
   count = var.asg_config.sns_topic_arn != "" ? 1 : 0
 

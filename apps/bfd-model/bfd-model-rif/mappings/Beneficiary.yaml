@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.Beneficiary
+- entityClassName: gov.cms.bfd.model.rif.entities.Beneficiary
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: Beneficiary
@@ -919,7 +919,7 @@ mappings:
     - cascadeTypes:
       - ALL
       collectionType: List
-      entityClass: gov.cms.bfd.model.rif.BeneficiaryMonthly
+      entityClass: gov.cms.bfd.model.rif.entities.BeneficiaryMonthly
       fetchType: LAZY
       fieldName: beneficiaryMonthlys
       joinType: OneToMany
@@ -939,7 +939,7 @@ mappings:
     - cascadeTypes:
       - ALL
       collectionType: Set
-      entityClass: gov.cms.bfd.model.rif.BeneficiaryHistory
+      entityClass: gov.cms.bfd.model.rif.entities.BeneficiaryHistory
       fetchType: LAZY
       fieldName: beneficiaryHistories
       joinType: OneToMany
@@ -952,7 +952,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: BeneficiaryColumn
-    packageName: gov.cms.bfd.model.rif
+    packageName: gov.cms.bfd.model.rif.entities
     values:
     - BENE_ID
     - STATE_CODE
@@ -1602,4 +1602,4 @@ mappings:
     to: partDCoverageStartDate
   - from: PTD_CVRG_END_DT
     to: partDCoverageEndDate
-  transformerClassName: gov.cms.bfd.model.rif.BeneficiaryParser
+  transformerClassName: gov.cms.bfd.model.rif.entities.BeneficiaryParser

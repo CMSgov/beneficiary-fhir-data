@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.InpatientClaim
+- entityClassName: gov.cms.bfd.model.rif.entities.InpatientClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: InpatientClaim
@@ -1498,7 +1498,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: InpatientClaimColumn
-    packageName: gov.cms.bfd.model.rif
+    packageName: gov.cms.bfd.model.rif.entities
     values:
     - BENE_ID
     - CLM_ID
@@ -2365,4 +2365,4 @@ mappings:
   - from: lines
     to: lines
     transformer: Array
-  transformerClassName: gov.cms.bfd.model.rif.InpatientClaimParser
+  transformerClassName: gov.cms.bfd.model.rif.entities.InpatientClaimParser

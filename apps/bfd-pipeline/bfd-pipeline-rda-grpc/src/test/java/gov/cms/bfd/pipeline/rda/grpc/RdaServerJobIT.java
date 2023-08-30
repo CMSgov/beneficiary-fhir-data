@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
-import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaS3JsonMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;

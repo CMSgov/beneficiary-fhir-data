@@ -1,8 +1,10 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -11,15 +13,17 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.DMEClaim;
-import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -81,6 +85,42 @@ public final class DMEClaimTransformerTest {
 
     ExplanationOfBenefit eob = dmeClaimTransformer.transform(claim, true);
     assertMatches(claim, eob, true);
+  }
+
+  /**
+   * Tests that the transformer sets the expected values for the care team member extensions and
+   * does not error when only the required care team values exist.
+   */
+  @Test
+  public void testCareTeamExtensionsWhenOptionalValuesAbsent() {
+
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    DMEClaim loadedClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(DMEClaim.class::cast)
+            .findFirst()
+            .get();
+    loadedClaim.setLastUpdated(Instant.now());
+
+    // Set the optional care team fields to empty
+    for (DMEClaimLine line : loadedClaim.getLines()) {
+      line.setProviderParticipatingIndCode(Optional.empty());
+      line.setProviderSpecialityCode(Optional.empty());
+    }
+
+    ExplanationOfBenefit genEob = dmeClaimTransformer.transform(loadedClaim, false);
+
+    // Ensure the extension for PRTCPTNG_IND_CD wasnt added
+    // Also the qualification coding should be empty if specialty code is not set
+    String prtIndCdUrl =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD);
+    for (ExplanationOfBenefit.CareTeamComponent careTeam : genEob.getCareTeam()) {
+      assertFalse(careTeam.getExtension().stream().anyMatch(i -> i.getUrl().equals(prtIndCdUrl)));
+      assertTrue(careTeam.getQualification().getCoding().isEmpty());
+    }
   }
 
   /**

@@ -1,10 +1,10 @@
 package gov.cms.bfd.migrator.app;
 
-import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_ACCESS_KEY;
-import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_ENDPOINT;
 import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_QUEUE_NAME;
-import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_REGION;
-import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_SECRET_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,7 +36,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 
 /** Tests the migrator app under various conditions to ensure it works correctly. */
 public final class MigratorAppIT extends AbstractLocalStackTest {
@@ -385,12 +384,10 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
 
     // add SQS related configuration settings
     environment.put(ENV_VAR_KEY_SQS_QUEUE_NAME, SQS_QUEUE_NAME);
-    environment.put(
-        ENV_VAR_KEY_SQS_ENDPOINT,
-        localstack.getEndpointOverride(LocalStackContainer.Service.SQS).toString());
-    environment.put(ENV_VAR_KEY_SQS_REGION, localstack.getRegion());
-    environment.put(ENV_VAR_KEY_SQS_ACCESS_KEY, localstack.getAccessKey());
-    environment.put(ENV_VAR_KEY_SQS_SECRET_KEY, localstack.getSecretKey());
+    environment.put(ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString());
+    environment.put(ENV_VAR_KEY_AWS_REGION, localstack.getRegion());
+    environment.put(ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey());
+    environment.put(ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey());
 
     Path testFilePath =
         Path.of(".", "src", "test", "resources", "db", "migration-test", "error-scenarios");

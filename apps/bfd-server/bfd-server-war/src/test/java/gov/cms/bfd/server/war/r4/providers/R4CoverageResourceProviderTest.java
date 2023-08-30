@@ -20,7 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;

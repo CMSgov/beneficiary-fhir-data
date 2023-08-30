@@ -2,9 +2,9 @@ package gov.cms.bfd.model.rif.samples;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.model.rif.BeneficiaryColumn;
-import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.model.rif.entities.BeneficiaryColumn;
+import gov.cms.bfd.model.rif.entities.CarrierClaimColumn;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;

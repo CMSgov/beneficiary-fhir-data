@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.HHAClaimLine
+- entityClassName: gov.cms.bfd.model.rif.entities.HHAClaimLine
   id: HHAClaimLine
   messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
@@ -104,7 +104,7 @@ mappings:
     compositeKeyClassName: LineId
     equalsNeeded: false
     joins:
-    - entityClass: gov.cms.bfd.model.rif.HHAClaim
+    - entityClass: gov.cms.bfd.model.rif.entities.HHAClaim
       fetchType: EAGER
       fieldName: parentClaim
       foreignKey: hha_claim_lines_clm_id_to_hha_claims

@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
-import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.List;
 import java.util.Optional;

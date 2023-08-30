@@ -4,7 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.server.war.commons.CoverageClass;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;

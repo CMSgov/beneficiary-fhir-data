@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.HospiceClaimLine
+- entityClassName: gov.cms.bfd.model.rif.entities.HospiceClaimLine
   id: HospiceClaimLine
   messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
@@ -97,7 +97,7 @@ mappings:
     compositeKeyClassName: LineId
     equalsNeeded: false
     joins:
-    - entityClass: gov.cms.bfd.model.rif.HospiceClaim
+    - entityClass: gov.cms.bfd.model.rif.entities.HospiceClaim
       fetchType: EAGER
       fieldName: parentClaim
       foreignKey: hospice_claim_lines_clm_id_to_hospice_claims

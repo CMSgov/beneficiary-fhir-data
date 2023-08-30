@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,9 +12,12 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
@@ -23,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -200,10 +205,71 @@ public final class DMEClaimTransformerV2Test {
     // First member
     CareTeamComponent member1 = TransformerTestUtilsV2.findCareTeamBySequence(1, eob.getCareTeam());
     assertEquals("1306849450", member1.getProvider().getIdentifier().getValue());
+    assertEquals(
+        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        member1.getRole().getCoding().get(0).getSystem());
+    assertEquals("referring", member1.getRole().getCoding().get(0).getCode());
 
     // Second member
     CareTeamComponent member2 = TransformerTestUtilsV2.findCareTeamBySequence(2, eob.getCareTeam());
     assertEquals("1244444444", member2.getProvider().getIdentifier().getValue());
+    assertEquals(
+        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        member2.getRole().getCoding().get(0).getSystem());
+    assertEquals("performing", member2.getRole().getCoding().get(0).getCode());
+    // Check PRTCPTNG_IND_CD extension
+    assertEquals(
+        "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        member2.getExtension().get(0).getUrl());
+    assertEquals(
+        "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        member2.getExtension().get(0).getUrl());
+    assertEquals("1", ((Coding) member2.getExtension().get(0).getValue()).getCode());
+    assertEquals("Participating", ((Coding) member2.getExtension().get(0).getValue()).getDisplay());
+    // Check Qualification
+    assertEquals(
+        "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+        member2.getQualification().getCoding().get(0).getSystem());
+    assertEquals("Pharmacy (DMERC)", member2.getQualification().getCoding().get(0).getDisplay());
+    assertEquals("A5", member2.getQualification().getCoding().get(0).getCode());
+
+    assertEquals(2, eob.getCareTeam().size());
+  }
+
+  /**
+   * Tests that the transformer sets the expected values for the care team member extensions and
+   * does not error when only the required care team values exist.
+   */
+  @Test
+  public void testCareTeamExtensionsWhenOptionalValuesAbsent() {
+
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    DMEClaim loadedClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(DMEClaim.class::cast)
+            .findFirst()
+            .get();
+    loadedClaim.setLastUpdated(Instant.now());
+
+    // Set the optional care team fields to empty
+    for (DMEClaimLine line : loadedClaim.getLines()) {
+      line.setProviderParticipatingIndCode(Optional.empty());
+      line.setProviderSpecialityCode(Optional.empty());
+    }
+
+    ExplanationOfBenefit genEob = dmeClaimTransformer.transform(loadedClaim, false);
+
+    // Ensure the extension for PRTCPTNG_IND_CD wasnt added
+    // Also the qualification coding should be empty if specialty code is not set
+    String prtIndCdUrl =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD);
+    for (CareTeamComponent careTeam : genEob.getCareTeam()) {
+      assertFalse(careTeam.getExtension().stream().anyMatch(i -> i.getUrl().equals(prtIndCdUrl)));
+      assertTrue(careTeam.getQualification().getCoding().isEmpty());
+    }
   }
 
   /** Tests that the transformer sets the expected number of supporting info entries. */

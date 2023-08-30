@@ -7,8 +7,8 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.DMEClaim;
-import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
@@ -234,32 +234,19 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
       // Update the responsible flag
       if (performing.isPresent()) {
+        CareTeamComponent careTeam = performing.get();
         performing.get().setResponsible(true);
 
         // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-        performing
-            .get()
-            .setQualification(
-                TransformerUtilsV2.createCodeableConcept(
-                    eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+        TransformerUtilsV2.addCareTeamQualification(
+            careTeam, eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode());
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        boolean performingHasMatchingExtension =
-            line.getProviderParticipatingIndCode().isPresent()
-                && TransformerUtilsV2.careTeamHasMatchingExtension(
-                    performing.get(),
-                    TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(line.getProviderParticipatingIndCode().get()));
-
-        if (!performingHasMatchingExtension) {
-          performing
-              .get()
-              .addExtension(
-                  TransformerUtilsV2.createExtensionCoding(
-                      eob,
-                      CcwCodebookVariable.PRTCPTNG_IND_CD,
-                      line.getProviderParticipatingIndCode()));
-        }
+        TransformerUtilsV2.addCareTeamExtension(
+            CcwCodebookVariable.PRTCPTNG_IND_CD,
+            line.getProviderParticipatingIndCode(),
+            careTeam,
+            eob);
       }
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension

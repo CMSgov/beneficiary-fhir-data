@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.DMEClaim
+- entityClassName: gov.cms.bfd.model.rif.entities.DMEClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: DMEClaim
@@ -305,7 +305,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: DMEClaimColumn
-    packageName: gov.cms.bfd.model.rif
+    packageName: gov.cms.bfd.model.rif.entities
     values:
     - BENE_ID
     - CLM_ID
@@ -541,4 +541,4 @@ mappings:
   - from: lines
     to: lines
     transformer: Array
-  transformerClassName: gov.cms.bfd.model.rif.DMEClaimParser
+  transformerClassName: gov.cms.bfd.model.rif.entities.DMEClaimParser
