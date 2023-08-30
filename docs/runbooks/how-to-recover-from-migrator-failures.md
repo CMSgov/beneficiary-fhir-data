@@ -133,7 +133,7 @@ Common causes might include:
         - /beneficiary-fhir-data/ops/ansible/playbooks-ccs/common_vars.json
         - /beneficiary-fhir-data/ops/ansible/playbooks-ccs/extra_vars.json
         - /beneficiary-fhir-data/ops/ansible/playbooks-ccs/pipeline_vars.json
-    - Inspect output of `sudo systemctl status bfd-db-migrator` and `sudo systemctl migrator-monitor` for errors
+    - Inspect output of `sudo systemctl status bfd-db-migrator` for errors
 5. Make adjustments as necessary:
     - AWS IAM Policies attached to `bfd-<env>-migrator`
     - Likely Ansible Configuration Files:

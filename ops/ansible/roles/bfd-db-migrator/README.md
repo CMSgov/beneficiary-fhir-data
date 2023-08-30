@@ -26,7 +26,7 @@ This role is highly configurable, though it tries to provide reasonable defaults
 | env                                 | deployment env, e.g. `prod`, `prod-sbx`, `test` **required by migrator-monitor**<sup>\*</sup> | test                 | no<sup>\*</sup> |
 | db_migrator_dir                     | primary, on-host directory for migrator-related resources                                     | /opt/bfd-db-migrator | no              |
 | db_migrator_tmp_dir                 | defines the `-Djava.io.tmpdir` for the migrator's jvm                                         | /tmp                 | no              |
-| db_migrator_user                    | user to be created to run migrator and migrator-monitor service                               | bb-migrator          | no              |
+| db_migrator_user                    | user to be created to run migrator service                               | bb-migrator          | no              |
 | migrator_monitor_enabled            | migrator-monitor enabled for sqs message passing, **requires `env`**                          | false                | no              |
 | migrator_monitor_heartbeat_interval | sleep interval between monitor heartbeats                                                     | 300                  | no              |
 
