@@ -202,6 +202,12 @@ public final class PipelineApplication {
 
       pipelineManager.awaitCompletion();
 
+      if (s3TaskManager != null) {
+        // ensures all background operations have been completed
+        s3TaskManager.shutdownSafely();
+        s3TaskManager = null;
+      }
+
       if (pipelineManager.getError() != null) {
         throw new FatalAppException(
             "Pipeline job threw exception", pipelineManager.getError(), EXIT_CODE_JOB_FAILED);
@@ -561,6 +567,7 @@ public final class PipelineApplication {
                   LOGGER.info("Job processing stopped.");
 
                   if (s3TaskManager != null) {
+                    // ensures all background operations have been completed
                     s3TaskManager.shutdownSafely();
                   }
 
