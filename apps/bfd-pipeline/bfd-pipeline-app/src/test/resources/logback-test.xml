@@ -3,7 +3,10 @@
 	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
 
 	<!-- This appender will be sent all of the app's logging statements. -->
-	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+	<!-- This appender will be sent all of the app's logging statements. -->
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>./target/pipelineOutput.log</file>
+		<immediateFlush>true</immediateFlush>
 		<encoder>
 			<pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
@@ -15,8 +18,8 @@
 	<logger name="gov.cms.bfd.pipeline.app.PipelineJobRunner" level="trace" />
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
-		send all events to 'STDOUT'. -->
+		send all events to 'FILE'. -->
 	<root level="info">
-		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
 	</root>
 </configuration>

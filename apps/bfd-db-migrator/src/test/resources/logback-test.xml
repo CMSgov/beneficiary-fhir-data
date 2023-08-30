@@ -12,7 +12,7 @@
 	</appender>
 	<logger name="org.hibernate.validator" level="debug" />
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
-		send all events to 'STDOUT'. -->
+		send all events to 'FILE'. -->
 	<root level="info">
 		<appender-ref ref="FILE" />
 	</root>

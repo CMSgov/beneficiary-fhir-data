@@ -55,7 +55,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               options,
               s3TaskManager,
               listener,
-              false);
+              false,
+              Optional.empty());
       ccwJob.call();
 
       // Verify that no data sets were generated.
@@ -162,7 +163,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               options,
               s3TaskManager,
               listener,
-              false);
+              false,
+              Optional.empty());
       // Process both sets
       ccwJob.call();
       ccwJob.call();
@@ -316,7 +318,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               options,
               s3TaskManager,
               listener,
-              false);
+              false,
+              Optional.empty());
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -403,7 +406,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               options,
               s3TaskManager,
               listener,
-              false);
+              false,
+              Optional.empty());
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -483,7 +487,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               options,
               s3TaskManager,
               listener,
-              false);
+              false,
+              Optional.empty());
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -558,7 +563,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               options,
               s3TaskManager,
               listener,
-              false);
+              false,
+              Optional.empty());
 
       ccwJob.call();
       // Verify what was handed off to the DataSetMonitorListener.

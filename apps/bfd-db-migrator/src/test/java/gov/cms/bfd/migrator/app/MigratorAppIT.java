@@ -378,8 +378,8 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   }
 
   /**
-   * Truncates the log file before the start of a new test. Doing so ensures each test will only
-   * find its own output rather than output from prior tests.
+   * Truncates the log file before the start of a new test. Doing so ensures no test will see
+   * messages from prior tests.
    */
   static void truncateLogFile() {
     try (var output = new PrintStream(new FileOutputStream(LOG_FILE, false))) {

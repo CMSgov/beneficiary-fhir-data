@@ -18,11 +18,11 @@ import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
+import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +89,7 @@ public final class MigratorApp {
     try {
       performMigrations();
       return EXIT_CODE_SUCCESS;
-    } catch (FatalErrorException ex) {
+    } catch (FatalAppException ex) {
       if (ex.getCause() != null) {
         LOGGER.error(
             "app terminating due to exception: message={}",
@@ -108,9 +108,9 @@ public final class MigratorApp {
   /**
    * Main application logic. Performs the schema creation, migration and validation.
    *
-   * @throws FatalErrorException to report an error that should terminate the application
+   * @throws FatalAppException to report an error that should terminate the application
    */
-  private void performMigrations() throws FatalErrorException {
+  private void performMigrations() throws FatalAppException {
     LOGGER.info("Successfully started");
     final AppConfiguration appConfig = loadAppConfiguration();
 
@@ -136,13 +136,13 @@ public final class MigratorApp {
    * @param dataSourceFactory used to connect to database
    * @param progressTracker used to record app progress
    * @param appMetrics used to track app metrics
-   * @throws FatalErrorException to report an error that should terminate the application
+   * @throws FatalAppException to report an error that should terminate the application
    */
   private void validateSchema(
       DataSourceFactory dataSourceFactory,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
-      throws FatalErrorException {
+      throws FatalAppException {
     // Hibernate suggests not reusing data sources for validations
     try (HikariDataSource pooledDataSource =
         createPooledDataSource(dataSourceFactory, appMetrics)) {
@@ -154,7 +154,7 @@ public final class MigratorApp {
 
       if (!validationSuccess) {
         progressTracker.appFailed();
-        throw new FatalErrorException("Validation failed", EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
+        throw new FatalAppException("Validation failed", EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
       }
     }
   }
@@ -167,14 +167,14 @@ public final class MigratorApp {
    *     override
    * @param progressTracker used to record app progress
    * @param appMetrics used to track app metrics
-   * @throws FatalErrorException to report an error that should terminate the application
+   * @throws FatalAppException to report an error that should terminate the application
    */
   private void createOrUpdateSchema(
       DataSourceFactory dataSourceFactory,
       String flywayScriptLocationOverride,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
-      throws FatalErrorException {
+      throws FatalAppException {
     // Hibernate suggests not reusing data sources for validations
     try (HikariDataSource pooledDataSource =
         createPooledDataSource(dataSourceFactory, appMetrics)) {
@@ -187,7 +187,7 @@ public final class MigratorApp {
 
       if (!migrationSuccess) {
         progressTracker.appFailed();
-        throw new FatalErrorException("Migration failed", EXIT_CODE_FAILED_MIGRATION);
+        throw new FatalAppException("Migration failed", EXIT_CODE_FAILED_MIGRATION);
       }
     }
   }
@@ -207,16 +207,16 @@ public final class MigratorApp {
    * Loads and returns the app configuration.
    *
    * @return the configuration
-   * @throws FatalErrorException to report an error that should terminate the application
+   * @throws FatalAppException to report an error that should terminate the application
    */
-  private AppConfiguration loadAppConfiguration() throws FatalErrorException {
+  private AppConfiguration loadAppConfiguration() throws FatalAppException {
     try {
       ConfigLoader configLoader = createConfigLoader();
       AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
       return appConfig;
     } catch (ConfigException | AppConfigurationException e) {
-      throw new FatalErrorException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
+      throw new FatalAppException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
     }
   }
 
@@ -302,34 +302,5 @@ public final class MigratorApp {
     pooledDataSource.setMaximumPoolSize(Math.max(2, pooledDataSource.getMaximumPoolSize()));
     pooledDataSource.setMetricRegistry(metrics);
     return pooledDataSource;
-  }
-
-  /** Thrown to inform {@link #main} that app should be shut down with a specific exit code. */
-  private static class FatalErrorException extends Exception {
-    /** Code to pass to {@link System#exit}. */
-    @Getter private final int exitCode;
-
-    /**
-     * Initializes an instance.
-     *
-     * @param message Error message to log on exit.
-     * @param exitCode Exit code for the application.
-     */
-    public FatalErrorException(String message, int exitCode) {
-      super(message);
-      this.exitCode = exitCode;
-    }
-
-    /**
-     * Initializes an instance.
-     *
-     * @param message Error message to log on exit.
-     * @param cause Exception that triggered the shutdown.
-     * @param exitCode Exit code for the application.
-     */
-    public FatalErrorException(String message, Throwable cause, int exitCode) {
-      super(message, cause);
-      this.exitCode = exitCode;
-    }
   }
 }

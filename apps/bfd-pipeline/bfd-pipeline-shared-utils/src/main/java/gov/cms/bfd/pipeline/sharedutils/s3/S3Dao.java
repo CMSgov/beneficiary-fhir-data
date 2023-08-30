@@ -168,6 +168,11 @@ public class S3Dao implements AutoCloseable {
             .metadata(metaData)
             .build();
     PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, requestBody);
+    HeadObjectRequest headObjectRequest =
+        HeadObjectRequest.builder().bucket(s3Bucket).key(s3Key).build();
+    try (S3Waiter waiter = s3Client.waiter()) {
+      waiter.waitUntilObjectExists(headObjectRequest);
+    }
     return new S3ObjectSummary(s3Key, objectSize, putObjectResponse);
   }
 
