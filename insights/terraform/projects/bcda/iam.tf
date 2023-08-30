@@ -50,6 +50,11 @@ resource "aws_iam_role" "dev" {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         }
         Action = "sts:AssumeRole"
+        Condition = {
+          StringEquals = {
+            "sts:RoleSessionName" = "$${aws:username}"
+          }
+        }
       }
     ]
   })
