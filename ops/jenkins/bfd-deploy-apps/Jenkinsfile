@@ -341,7 +341,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                     } finally {
-                        //sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        sendNotifications(trimmedEnv, currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                     }
                 }
             }
