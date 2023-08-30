@@ -92,7 +92,7 @@ boolean deployMigrator(Map args = [:]) {
 // 20s at the `heartbeatInterval`
 def monitorMigrator(Map args = [:]) {
     migratorStartTimestamp = java.time.LocalDateTime.now().toString()
-    println getFormattedMonitorMsg("Migrator started - ${migratorStartTimestamp}")
+    println getFormattedMonitorMsg("Initialize monitor - ${migratorStartTimestamp}")
 
     sqsQueueName = args.sqsQueueName
     awsRegion = args.awsRegion
@@ -140,7 +140,7 @@ String getMigratorStatus(Map body = [:]) {
             return statusStage
         }
     }
-    return "${migratorStatus} ..."
+    return "${migratorStatus}"
 }
 
 // checks for indications of a running migrator deployment by looking for unconsumed SQS messages
