@@ -1,14 +1,13 @@
 package gov.cms.bfd.server.war.commons;
 
-import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A per-request instance that holds all resource (FHIR) request headers, such as:
@@ -240,9 +239,8 @@ public class RequestHeaders {
         || headerValues.trim().replaceAll("^\\[|\\]$", "").isEmpty()) return Arrays.asList("");
     else {
       // Return values split on a comma with any whitespace, valid, distict, and sort
-      return Arrays.asList(
-              splitOnCommas(headerValues.trim().replaceAll("^\\[|\\]$", "").toLowerCase()))
-          .stream()
+      return Arrays.stream(
+              StringUtils.split(headerValues.trim().replaceAll("^\\[|\\]$", "").toLowerCase(), ","))
           .peek(
               c -> {
                 if (!CommonHeaders.VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
@@ -256,7 +254,7 @@ public class RequestHeaders {
               })
           .distinct()
           .sorted()
-          .collect(Collectors.toList());
+          .collect(ImmutableList.toImmutableList());
     }
   }
 }

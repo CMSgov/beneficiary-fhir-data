@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -19,6 +18,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -1032,7 +1032,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (Strings.isNullOrEmpty(headerValues)) return Arrays.asList("");
     else
       // Return values split on a comma with any whitespace, valid, distict, and sort
-      return Arrays.asList(splitOnCommas(headerValues.toLowerCase())).stream()
+      return Arrays.stream(StringUtils.split(headerValues.toLowerCase(), ","))
           .peek(
               c -> {
                 if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
@@ -1041,7 +1041,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
               })
           .distinct()
           .sorted()
-          .collect(Collectors.toList());
+          .collect(ImmutableList.toImmutableList());
   }
 
   /**
