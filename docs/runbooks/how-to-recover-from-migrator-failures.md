@@ -140,8 +140,6 @@ Common causes might include:
         - /beneficiary-fhir-data/ops/ansible/playbooks-ccs/launch_bfd-db-migrator.yml
         - /beneficiary-fhir-data/ops/ansible/roles/bfd-db-migrator/templates/bfd-db-migrator.service.j2
         - /beneficiary-fhir-data/ops/ansible/roles/bfd-db-migrator/templates/bfd-db-migrator-service.sh.j2
-        - /beneficiary-fhir-data/ops/ansible/roles/bfd-db-migrator/templates/migrator-monitor.service.j2
-        - /beneficiary-fhir-data/ops/ansible/roles/bfd-db-migrator/templates/migrator-monitor.sh.j2
 6. Record all adjustments in a new branch and seek PR feedback from BFD engineers as necessary.
 7. Re-deploy with latest changes from Jenkins
 

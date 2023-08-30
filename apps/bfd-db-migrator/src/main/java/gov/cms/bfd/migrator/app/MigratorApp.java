@@ -128,14 +128,14 @@ public final class MigratorApp {
       MetricRegistry appMetrics)
       throws FatalErrorException {
     // Hibernate suggests not reusing data sources for validations
+    boolean validationSuccess = false;
     try (HikariDataSource pooledDataSource =
         createPooledDataSource(dataSourceFactory, appMetrics)) {
-      boolean validationSuccess;
       // Run hibernate validation after the migrations have succeeded
       HibernateValidator validator =
           new HibernateValidator(pooledDataSource, hibernateValidationModelPackages);
       validationSuccess = validator.runHibernateValidation();
-
+    } finally {
       if (!validationSuccess) {
         progressTracker.appFailed();
         throw new FatalErrorException("Validation failed", EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
@@ -160,15 +160,17 @@ public final class MigratorApp {
       MetricRegistry appMetrics)
       throws FatalErrorException {
     // Hibernate suggests not reusing data sources for validations
+    boolean migrationSuccess = false;
     try (HikariDataSource pooledDataSource =
         createPooledDataSource(dataSourceFactory, appMetrics)) {
       progressTracker.appConnected();
 
       // run migration
-      boolean migrationSuccess =
+      migrationSuccess =
           DatabaseSchemaManager.createOrUpdateSchema(
               pooledDataSource, flywayScriptLocationOverride, progressTracker::migrating);
 
+    } finally {
       if (!migrationSuccess) {
         progressTracker.appFailed();
         throw new FatalErrorException("Migration failed", EXIT_CODE_FAILED_MIGRATION);
