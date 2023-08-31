@@ -32,7 +32,7 @@ class SqsDaoIT extends AbstractLocalStackTest {
   /** Test creating a queue. */
   @Test
   void createQueue() {
-    String queueName = "my-created-queue";
+    String queueName = "my-created-queue.fifo";
     String createdQueueUri = dao.createQueue(queueName);
     String lookupQueueUri = dao.lookupQueueUrl(queueName);
     assertEquals(createdQueueUri, lookupQueueUri);

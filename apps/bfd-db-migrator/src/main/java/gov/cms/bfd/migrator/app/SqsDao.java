@@ -1,17 +1,21 @@
 package gov.cms.bfd.migrator.app;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SqsException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /** Data access object that encapsulate interactions with SQS. */
 @AllArgsConstructor
@@ -61,7 +65,10 @@ public class SqsDao {
    * @throws SqsException if the operation cannot be completed
    */
   public String createQueue(String queueName) {
-    final var createQueueRequest = CreateQueueRequest.builder().queueName(queueName).build();
+    Map<QueueAttributeName, String> attributes = new HashMap<>();
+    attributes.put(QueueAttributeName.FIFO_QUEUE, Boolean.TRUE.toString());
+    final var createQueueRequest =
+        CreateQueueRequest.builder().queueName(queueName).attributes(attributes).build();
     final var response = sqsClient.createQueue(createQueueRequest);
     return response.queueUrl();
   }
