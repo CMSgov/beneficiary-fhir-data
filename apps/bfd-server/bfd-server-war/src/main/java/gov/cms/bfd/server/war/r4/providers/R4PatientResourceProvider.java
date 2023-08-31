@@ -981,7 +981,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       return Arrays.asList("");
     } else
       // Return values split on a comma with any whitespace, valid, distict, and sort
-      return Arrays.stream(StringUtils.split(headerValues.toLowerCase(), ","))
+      return Arrays.asList(StringUtils.split(headerValues.toLowerCase(), ",")).stream()
           .peek(
               c -> {
                 if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))

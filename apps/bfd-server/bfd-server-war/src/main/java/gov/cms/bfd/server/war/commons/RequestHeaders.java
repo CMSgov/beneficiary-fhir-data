@@ -239,8 +239,9 @@ public class RequestHeaders {
         || headerValues.trim().replaceAll("^\\[|\\]$", "").isEmpty()) return Arrays.asList("");
     else {
       // Return values split on a comma with any whitespace, valid, distict, and sort
-      return Arrays.stream(
+      return Arrays.asList(
               StringUtils.split(headerValues.trim().replaceAll("^\\[|\\]$", "").toLowerCase(), ","))
+          .stream()
           .peek(
               c -> {
                 if (!CommonHeaders.VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
