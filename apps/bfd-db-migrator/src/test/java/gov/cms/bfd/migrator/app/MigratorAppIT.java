@@ -1,6 +1,10 @@
 package gov.cms.bfd.migrator.app;
 
 import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_QUEUE_NAME;
+import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_BAD_CONFIG;
+import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_HIBERNATE_VALIDATION;
+import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_MIGRATION;
+import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_SUCCESS;
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
@@ -149,7 +153,8 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
       final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
-      assertEquals(0, exitCode, "Did not get expected exit code, \nOUTPUT:\n" + logOutput);
+      assertEquals(
+          EXIT_CODE_SUCCESS, exitCode, "Did not get expected exit code, \nOUTPUT:\n" + logOutput);
 
       // Test the migrations occurred by checking the log output
       boolean hasExpectedMigrationLine =
@@ -202,7 +207,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
 
       // Verify results
       assertEquals(
-          3,
+          EXIT_CODE_FAILED_HIBERNATE_VALIDATION,
           exitCode,
           "Did not get expected error code for validation failure., \nOUTPUT:\n" + logOutput);
     } catch (Exception e) {
@@ -226,7 +231,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
       final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
-      assertEquals(1, exitCode);
+      assertEquals(EXIT_CODE_BAD_CONFIG, exitCode);
     } catch (Exception e) {
       final String logOutput = LOG_FILE.readFileAsString();
       fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
@@ -255,7 +260,10 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
       assertFalse(
           logOutput.contains("Skipping filesystem location"), "Could not find path to test files");
 
-      assertEquals(2, exitCode, "Exited with the wrong exit code. OUTPUT:\n" + logOutput);
+      assertEquals(
+          EXIT_CODE_FAILED_MIGRATION,
+          exitCode,
+          "Exited with the wrong exit code. OUTPUT:\n" + logOutput);
 
       // Test flyway threw an exception by checking the log output
       boolean hasExceptionLogLine = logOutput.contains("FlywayMigrateException");
@@ -292,7 +300,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
       assertFalse(
           logOutput.contains("Skipping filesystem location"), "Could not find path to test files");
 
-      assertEquals(2, exitCode);
+      assertEquals(EXIT_CODE_FAILED_MIGRATION, exitCode);
 
       // Test flyway threw an exception by checking the log output
       assertTrue(
