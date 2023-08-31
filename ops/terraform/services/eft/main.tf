@@ -49,14 +49,23 @@ locals {
   eft_r53_hosted_zone   = local.sensitive_service_config["r53_hosted_zone"]
   eft_user_sftp_pub_key = local.sensitive_service_config["sftp_eft_user_public_key"]
   eft_user_username     = local.sensitive_service_config["sftp_eft_user_username"]
-  eft_bucket_partners   = jsondecode(local.sensitive_service_config["partners_with_bucket_access_json"])
-  eft_bucket_partners_iam = {
-    for partner in local.eft_bucket_partners :
+  eft_partners          = jsondecode(local.sensitive_service_config["partners_list_json"])
+  eft_partners_config = {
+    for partner in local.eft_partners :
     partner => {
-      bucket_iam_assumer_arn = local.sensitive_service_config["partner_iam_assumer_arn_${partner}"]
-      bucket_home_path       = trim(local.sensitive_service_config["partner_bucket_home_path_${partner}"], "/")
+      bucket_iam_assumer_arn             = local.sensitive_service_config["partner_bucket_iam_assumer_arn_${partner}"]
+      bucket_home_path                   = trim(local.sensitive_service_config["partner_bucket_home_path_${partner}"], "/")
+      bucket_notifs_subscriber_principal = lookup(local.sensitive_service_config, "partner_bucket_notifications_subscriber_principal_arn_${partner}", null)
+      bucket_notifs_subscriber_arn       = lookup(local.sensitive_service_config, "partner_bucket_notifications_subscriber_arn_${partner}", null)
+      bucket_notifs_subscriber_protocol  = lookup(local.sensitive_service_config, "partner_bucket_notifications_subscriber_protocol_${partner}", null)
     }
   }
+  eft_partners_with_s3_notifs = [
+    for partner, config in local.eft_partners_config : partner
+    if config.bucket_notifs_subscriber_principal != null &&
+    config.bucket_notifs_subscriber_arn != null &&
+    config.bucket_notifs_subscriber_protocol != null
+  ]
 
   # Data source lookups
 
@@ -83,6 +92,68 @@ locals {
 
 resource "aws_s3_bucket" "this" {
   bucket = local.full_name
+}
+
+resource "aws_s3_bucket_notification" "bucket_notifications" {
+  bucket = aws_s3_bucket.this.id
+
+  dynamic "topic" {
+    for_each = toset(local.eft_partners_with_s3_notifs)
+
+    content {
+      events        = ["s3:ObjectCreated:*"]
+      filter_prefix = "${local.eft_user_username}/${local.eft_partners_config[topic.key].bucket_home_path}/"
+      id            = "${local.full_name}-s3-event-notifications-${topic.key}"
+      topic_arn     = aws_sns_topic.bucket_notifications[topic.key].arn
+    }
+  }
+}
+
+resource "aws_sns_topic" "bucket_notifications" {
+  for_each = toset(local.eft_partners_with_s3_notifs)
+
+  name              = "${local.full_name}-s3-event-notifications-${each.key}"
+  kms_master_key_id = local.kms_key_id
+}
+
+resource "aws_sns_topic_policy" "bucket_notifications" {
+  for_each = toset(local.eft_partners_with_s3_notifs)
+
+  arn = aws_sns_topic.bucket_notifications[each.key].arn
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid       = "Allow_Publish_from_S3"
+          Effect    = "Allow"
+          Principal = { Service = "s3.amazonaws.com" }
+          Action    = "SNS:Publish"
+          Resource  = aws_sns_topic.bucket_notifications[each.key].arn
+          Condition = {
+            ArnLike = {
+              "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
+            }
+          }
+        },
+        {
+          Sid       = "Allow_Subscribe_from_${each.key}"
+          Effect    = "Allow"
+          Principal = { AWS = local.eft_partners_config[each.key].bucket_notifs_subscriber_principal }
+          Action    = ["SNS:Subscribe", "SNS:Receive"]
+          Resource  = aws_sns_topic.bucket_notifications[each.key].arn
+          Condition = {
+            StringEquals = {
+              "sns:Protocol" = local.eft_partners_config[each.key].bucket_notifs_subscriber_protocol
+            }
+            "ForAllValues:StringEquals" = {
+              "sns:Endpoint" = [local.eft_partners_config[each.key].bucket_notifs_subscriber_arn]
+            }
+          }
+        }
+      ]
+    }
+  )
 }
 
 resource "aws_s3_bucket_versioning" "this" {
