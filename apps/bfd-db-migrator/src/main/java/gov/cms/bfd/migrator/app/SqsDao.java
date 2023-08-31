@@ -66,6 +66,7 @@ public class SqsDao {
   public String createQueue(String queueName) {
     Map<QueueAttributeName, String> attributes = new HashMap<>();
     attributes.put(QueueAttributeName.FIFO_QUEUE, Boolean.TRUE.toString());
+    attributes.put(QueueAttributeName.CONTENT_BASED_DEDUPLICATION, Boolean.TRUE.toString());
     final var createQueueRequest =
         CreateQueueRequest.builder().queueName(queueName).attributes(attributes).build();
     final var response = sqsClient.createQueue(createQueueRequest);
