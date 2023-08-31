@@ -15,12 +15,13 @@ import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * The main application/entry point for the Database Migration system. See {@link
@@ -128,14 +129,14 @@ public final class MigratorApp {
       MetricRegistry appMetrics)
       throws FatalErrorException {
     // Hibernate suggests not reusing data sources for validations
-    boolean validationSuccess = false;
     try (HikariDataSource pooledDataSource =
         createPooledDataSource(dataSourceFactory, appMetrics)) {
+      boolean validationSuccess;
       // Run hibernate validation after the migrations have succeeded
       HibernateValidator validator =
           new HibernateValidator(pooledDataSource, hibernateValidationModelPackages);
       validationSuccess = validator.runHibernateValidation();
-    } finally {
+
       if (!validationSuccess) {
         progressTracker.appFailed();
         throw new FatalErrorException("Validation failed", EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
@@ -160,17 +161,15 @@ public final class MigratorApp {
       MetricRegistry appMetrics)
       throws FatalErrorException {
     // Hibernate suggests not reusing data sources for validations
-    boolean migrationSuccess = false;
     try (HikariDataSource pooledDataSource =
         createPooledDataSource(dataSourceFactory, appMetrics)) {
       progressTracker.appConnected();
 
       // run migration
-      migrationSuccess =
+      boolean migrationSuccess =
           DatabaseSchemaManager.createOrUpdateSchema(
               pooledDataSource, flywayScriptLocationOverride, progressTracker::migrating);
 
-    } finally {
       if (!migrationSuccess) {
         progressTracker.appFailed();
         throw new FatalErrorException("Migration failed", EXIT_CODE_FAILED_MIGRATION);
@@ -209,8 +208,12 @@ public final class MigratorApp {
       progressConsumer = progress -> LOGGER.info("progress: {}", progress);
     } else {
       final var sqsDao = new SqsDao(sqsClient);
-      final var queueUrl = sqsDao.lookupQueueUrl(appConfig.getSqsQueueName());
-      final var sqsProgressReporter = new SqsProgressReporter(sqsDao, queueUrl);
+      final var queueName = appConfig.getSqsQueueName();
+      final var queueUrl = sqsDao.lookupQueueUrl(queueName);
+      // Presently there is no need for a dynamically generated message group id when sending and receiving messages,
+      // however any static value is required at a bare-minimum for FIFO sqs queues
+      final var messageGroupId = queueName;
+      final var sqsProgressReporter = new SqsProgressReporter(sqsDao, queueUrl, messageGroupId);
       progressConsumer = sqsProgressReporter::reportMigratorProgress;
     }
     return new MigratorProgressTracker(progressConsumer);

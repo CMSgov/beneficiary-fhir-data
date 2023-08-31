@@ -154,11 +154,12 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
         sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
         println "Queue ${sqsQueueName} exists. Checking for messages in ${sqsQueueUrl} ..."
         migratorMessages = awsSqs.receiveMessages(
-                sqsQueueUrl: sqsQueueUrl,
-                awsRegion: awsRegion,
-                maxMessages: 10,
-                visibilityTimeoutSeconds: 0,
-                waitTimeSeconds: 0)
+            sqsQueueUrl: sqsQueueUrl,
+            awsRegion: awsRegion,
+            maxMessages: 10,
+            visibilityTimeoutSeconds: 0,
+            waitTimeSeconds: 0
+        )
         if (migratorMessages?.isEmpty()) {
             println "Queue ${sqsQueueName} is empty. Migrator deployment can proceed!"
             return true

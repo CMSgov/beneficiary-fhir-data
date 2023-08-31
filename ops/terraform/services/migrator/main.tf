@@ -52,9 +52,10 @@ locals {
 }
 
 resource "aws_sqs_queue" "this" {
-  name              = local.queue_name
-  kms_master_key_id = local.kms_key_id
-  fifo_queue        = true
+  name                        = local.queue_name
+  kms_master_key_id           = local.kms_key_id
+  fifo_queue                  = true
+  content_based_deduplication = true
 }
 
 resource "aws_instance" "this" {
