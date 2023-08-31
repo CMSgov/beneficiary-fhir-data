@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -1031,7 +1032,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (Strings.isNullOrEmpty(headerValues)) return Arrays.asList("");
     else
       // Return values split on a comma with any whitespace, valid, distict, and sort
-      return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream()
+      return Arrays.asList(splitOnCommas(headerValues.toLowerCase())).stream()
           .peek(
               c -> {
                 if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
