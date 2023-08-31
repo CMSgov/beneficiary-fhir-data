@@ -16,13 +16,9 @@ locals {
   # alarm.
   topic_names_by_env = {
     prod = {
-      # alert      = local.victor_ops_sns
-      # warning    = local.bfd_warnings_slack_sns
-      # alert_ok   = local.default_alert_ok_sns
-      # TODO: Until Pipeline SLO alarms have been verified, prod alarms will be routed to the #bfd-test channel
-      alert      = local.bfd_test_slack_sns
-      warning    = local.bfd_test_slack_sns
-      alert_ok   = null
+      alert      = local.victor_ops_sns
+      warning    = local.bfd_warnings_slack_sns
+      alert_ok   = local.default_alert_ok_sns
       warning_ok = null
     }
     prod-sbx = {
@@ -114,7 +110,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
     return_data = false
 
     metric {
-      metric_name = "time/data-fully-loaded"
+      metric_name = "time/data-fully-loaded-repeating"
       namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
@@ -126,7 +122,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
     return_data = false
 
     metric {
-      metric_name = "time/data-first-available"
+      metric_name = "time/data-first-available-repeating"
       namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
@@ -193,7 +189,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_data_load_ingestion_time" {
     return_data = false
 
     metric {
-      metric_name = "time/data-first-available"
+      metric_name = "time/data-first-available-repeating"
       namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
@@ -205,7 +201,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_data_load_ingestion_time" {
     return_data = false
 
     metric {
-      metric_name = "time/data-fully-loaded"
+      metric_name = "time/data-fully-loaded-repeating"
       namespace   = local.metric_namespace
       period      = 60
       stat        = "Maximum"
