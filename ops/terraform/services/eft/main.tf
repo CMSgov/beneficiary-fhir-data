@@ -95,6 +95,8 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_s3_bucket_notification" "bucket_notifications" {
+  count = length(local.eft_partners_with_s3_notifs) > 0 ? 1 : 0
+
   bucket = aws_s3_bucket.this.id
 
   dynamic "topic" {
