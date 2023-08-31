@@ -5,4 +5,4 @@ db_migrator_user: bb-migrator
 db_migrator_tmp_dir: /tmp
 migrator_monitor_enabled: true
 migrator_monitor_heartbeat_interval_seconds: 300
-sqs_queue_name: bfd-test-migrator
+sqs_queue_name: bfd-test-migrator.fifo

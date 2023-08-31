@@ -54,6 +54,7 @@ locals {
 resource "aws_sqs_queue" "this" {
   name              = local.queue_name
   kms_master_key_id = local.kms_key_id
+  fifo_queue        = true
 }
 
 resource "aws_instance" "this" {

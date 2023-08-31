@@ -51,7 +51,7 @@ Causes might include:
         If the following returns nothing, there are no messages available:
 
         ```sh
-        queue_name=bfd-test-migrator # CHANGE AS NECESSARY
+        queue_name=bfd-test-migrator.fifo # CHANGE AS NECESSARY
         url="$(aws sqs get-queue-url --queue-name "$queue_name" --region us-east-1 --output text)"
         aws sqs receive-message --region us-east-1 --queue-url "$url" 
         ```

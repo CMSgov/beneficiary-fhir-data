@@ -42,7 +42,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
 
   /** Name of SQS queue created in localstack to receive progress messages via SQS. */
-  private static final String SQS_QUEUE_NAME = "migrator-progress";
+  private static final String SQS_QUEUE_NAME = "migrator-progress.fifo";
 
   /** Used to communicate with the localstack SQS service. */
   private SqsDao sqsDao;

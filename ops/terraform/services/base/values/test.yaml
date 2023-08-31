@@ -22,7 +22,7 @@
 # MIGRATOR CONFIGURATION
 /bfd/test/migrator/nonsensitive/instance_type: m6i.large
 /bfd/test/migrator/nonsensitive/volume_size: 100
-/bfd/test/migrator/nonsensitive/sqs_queue_name: bfd-test-migrator
+/bfd/test/migrator/nonsensitive/sqs_queue_name: bfd-test-migrator.fifo
 /bfd/test/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
 /bfd/test/migrator/nonsensitive/db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
 
