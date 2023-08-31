@@ -1,6 +1,13 @@
 package gov.cms.bfd.migrator.app;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import gov.cms.bfd.AbstractLocalStackTest;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
@@ -9,14 +16,6 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
-
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.stream.IntStream;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Integration tests for {@link SqsDao}. */
 class SqsDaoIT extends AbstractLocalStackTest {

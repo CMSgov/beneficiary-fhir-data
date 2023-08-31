@@ -12,15 +12,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.services.sqs.model.SqsException;
-
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.services.sqs.model.SqsException;
 
 /**
  * Uses an {@link SqsDao} to post JSON messages to an SQS queue for each {@link MigratorProgress}.
