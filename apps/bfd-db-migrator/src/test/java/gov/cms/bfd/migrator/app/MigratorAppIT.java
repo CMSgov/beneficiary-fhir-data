@@ -1,32 +1,10 @@
 package gov.cms.bfd.migrator.app;
 
-import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_QUEUE_NAME;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.migrator.app.SqsProgressReporter.SqsProgressMessage;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-import javax.sql.DataSource;
 import lombok.Getter;
 import org.awaitility.Awaitility;
 import org.awaitility.Durations;
@@ -36,6 +14,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+
+import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_QUEUE_NAME;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests the migrator app under various conditions to ensure it works correctly. */
 public final class MigratorAppIT extends AbstractLocalStackTest {
@@ -409,11 +410,10 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
    */
   private List<SqsProgressMessage> readProgressMessagesFromSQSQueue() {
     final var queueUrl = sqsDao.lookupQueueUrl(SQS_QUEUE_NAME);
-    var messages = new ArrayList<SqsProgressMessage>();
+    var messages = new LinkedList<SqsProgressMessage>();
     sqsDao.processAllMessages(
         queueUrl,
         messageJson -> messages.add(SqsProgressReporter.convertJsonToMessage(messageJson)));
-    messages.sort(SqsProgressMessage.SORT_BY_IDS);
     return messages;
   }
 
