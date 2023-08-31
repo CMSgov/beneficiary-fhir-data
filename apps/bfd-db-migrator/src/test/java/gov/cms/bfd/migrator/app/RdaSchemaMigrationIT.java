@@ -1,6 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
-import static gov.cms.bfd.migrator.app.MigratorAppIT.readLogOutput;
+import static gov.cms.bfd.migrator.app.MigratorAppIT.LOG_FILE;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,7 +44,9 @@ import javax.sql.DataSource;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hibernate.tool.schema.Action;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests to ensure basic functioning of the RDA API related JPA entity classes. */
@@ -60,6 +62,23 @@ public class RdaSchemaMigrationIT {
   private static EntityManager entityManager;
 
   /**
+   * Locks and truncates the log file so that each test case can read only its own messages from the
+   * file when making assertions about log output.
+   *
+   * @throws Exception unable to lock or truncate the file
+   */
+  @BeforeEach
+  public void lockLogFile() throws Exception {
+    LOG_FILE.beginTest(true, 300);
+  }
+
+  /** Unlocks the log file. */
+  @AfterEach
+  public void releaseLogFile() {
+    LOG_FILE.endTest();
+  }
+
+  /**
    * Running the migrator once cuts the test time down significantly; however
    * the @BeforeAll/@AfterAll annotation requires static methods, thus the static entityManager and
    * datasource as well.
@@ -73,7 +92,7 @@ public class RdaSchemaMigrationIT {
     // Await start/finish of application
     try {
       final int exitCode = app.performMigrationsAndHandleExceptions();
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
       assertEquals(0, exitCode, "Migration failed during test setup. \nOUTPUT:\n" + logOutput);
 
       final Map<String, Object> hibernateProperties =
@@ -89,7 +108,7 @@ public class RdaSchemaMigrationIT {
           Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties);
       entityManager = entityManagerFactory.createEntityManager();
     } catch (ConditionTimeoutException e) {
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
       fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }

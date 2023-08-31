@@ -13,19 +13,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
+import gov.cms.bfd.FileBasedAssertionHelper;
 import gov.cms.bfd.migrator.app.SqsProgressReporter.SqsProgressMessage;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -35,6 +34,7 @@ import javax.sql.DataSource;
 import lombok.Getter;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -51,7 +51,15 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
    * Name of log file that will contain log output from the migrator. This has to match the value in
    * our {@code logback-test.xml} file.
    */
-  private static final String LOG_FILE = "target/migratorOutput.log";
+  private static final String LOG_FILE_PATH = "target/migratorOutput.log";
+
+  /**
+   * Controls access to the log file so that multiple tests do not try to write to it at the same
+   * time. Package accessible so it can be used by other tests as well.
+   */
+  @VisibleForTesting
+  static final FileBasedAssertionHelper LOG_FILE =
+      new FileBasedAssertionHelper(Path.of(LOG_FILE_PATH));
 
   /** Used to communicate with the localstack SQS service. */
   private SqsDao sqsDao;
@@ -81,14 +89,27 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     }
   }
 
-  /**
-   * Cleans up the database before each test. Also truncates the log file so that each test case can
-   * read only its own messages from the file when making assertions about log output.
-   */
+  /** Cleans up the database before each test. */
   @BeforeEach
   public void setup() {
     DatabaseTestUtils.get().dropSchemaForDataSource();
-    truncateLogFile();
+  }
+
+  /**
+   * Locks and truncates the log file so that each test case can read only its own messages from the
+   * file when making assertions about log output.
+   *
+   * @throws Exception unable to lock or truncate the file
+   */
+  @BeforeEach
+  public void lockLogFile() throws Exception {
+    LOG_FILE.beginTest(true, 300);
+  }
+
+  /** Unlocks the log file. */
+  @AfterEach
+  public void releaseLogFile() {
+    LOG_FILE.endTest();
   }
 
   /** Cleans up the schema after the test. */
@@ -125,7 +146,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     try {
       // Run the app and collect its output.
       final int exitCode = app.performMigrationsAndHandleExceptions();
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
       assertEquals(0, exitCode, "Did not get expected exit code, \nOUTPUT:\n" + logOutput);
@@ -158,7 +179,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
           .matches(m -> m.getAppStage() == MigratorProgress.Stage.Finished);
 
     } catch (ConditionTimeoutException e) {
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
       fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
@@ -177,7 +198,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     try {
       // Run the app and collect its output.
       final int exitCode = app.performMigrationsAndHandleExceptions();
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
       assertEquals(
@@ -185,7 +206,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
           exitCode,
           "Did not get expected error code for validation failure., \nOUTPUT:\n" + logOutput);
     } catch (Exception e) {
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
       fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
@@ -202,12 +223,12 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     try {
       // Run the app and collect its output.
       final int exitCode = app.performMigrationsAndHandleExceptions();
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
       assertEquals(1, exitCode);
     } catch (Exception e) {
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
       fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
@@ -226,7 +247,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     try {
       // Run the app and collect its output.
       final int exitCode = app.performMigrationsAndHandleExceptions();
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
 
@@ -242,7 +263,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
           hasExceptionLogLine,
           "Did not have expected log line for migration exception; OUTPUT:\n" + logOutput);
     } catch (Exception e) {
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
       fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
@@ -261,7 +282,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     try {
       // Run the app and collect its output.
       final int exitCode = app.performMigrationsAndHandleExceptions();
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       LOGGER.info(logOutput);
 
@@ -281,7 +302,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
           logOutput.contains("Found more than one migration with version"),
           "Did find duplicate version error OUTPUT:\n" + logOutput);
     } catch (Exception e) {
-      final String logOutput = readLogOutput();
+      final String logOutput = LOG_FILE.readFileAsString();
       fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
@@ -375,30 +396,5 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
         messageJson -> messages.add(SqsProgressReporter.convertJsonToMessage(messageJson)));
     messages.sort(SqsProgressMessage.SORT_BY_IDS);
     return messages;
-  }
-
-  /**
-   * Truncates the log file before the start of a new test. Doing so ensures no test will see
-   * messages from prior tests.
-   */
-  static void truncateLogFile() {
-    try (var output = new PrintStream(new FileOutputStream(LOG_FILE, false))) {
-      output.println("Starting new test at " + new Date());
-    } catch (IOException e) {
-      throw new RuntimeException("unable to truncate log file", e);
-    }
-  }
-
-  /**
-   * Reads the log file generated by the most recent test run.
-   *
-   * @return the entire file as a string
-   */
-  static String readLogOutput() {
-    try {
-      return Files.readString(Path.of(LOG_FILE));
-    } catch (IOException ex) {
-      return String.format("unable to read log file: %s", ex.getMessage());
-    }
   }
 }

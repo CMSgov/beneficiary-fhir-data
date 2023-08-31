@@ -9,6 +9,7 @@ import static org.mockito.Mockito.spy;
 
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
+import gov.cms.bfd.FileBasedAssertionHelper;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
@@ -24,19 +25,15 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.utils.StringUtils;
@@ -54,12 +51,30 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
    * Name of log file that will contain log output from the app. This has to match the value in our
    * {@code logback-test.xml} file.
    */
-  private static final String LOG_FILE = "target/pipelineOutput.log";
+  private static final String LOG_FILE_PATH = "target/pipelineOutput.log";
 
-  /** Truncates the log file before each test. */
+  /**
+   * Controls access to the log file so that multiple tests do not try to write to it at the same
+   * time.
+   */
+  private static final FileBasedAssertionHelper LOG_FILE =
+      new FileBasedAssertionHelper(Path.of(LOG_FILE_PATH));
+
+  /**
+   * Locks and truncates the log file so that each test case can read only its own messages from the
+   * file when making assertions about log output.
+   *
+   * @throws Exception unable to lock or truncate the file
+   */
   @BeforeEach
-  public void setup() {
-    truncateLogFile();
+  public void lockLogFile() throws Exception {
+    LOG_FILE.beginTest(true, 300);
+  }
+
+  /** Unlocks the log file. */
+  @AfterEach
+  public void releaseLogFile() {
+    LOG_FILE.endTest();
   }
 
   /**
@@ -91,7 +106,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
 
     // Run the app and collect its output.
     final int exitCode = app.runPipelineAndHandleExceptions();
-    final List<String> logLines = readLogLines();
+    final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
     // Verify the results match expectations
     assertEquals(PipelineApplication.EXIT_CODE_JOB_FAILED, exitCode);
@@ -115,7 +130,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
 
       // Run the app and collect its output.
       final int exitCode = app.runPipelineAndHandleExceptions();
-      final List<String> logLines = readLogLines();
+      final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
       // Verify the results match expectations
       assertEquals(PipelineApplication.EXIT_CODE_SUCCESS, exitCode);
@@ -171,7 +186,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
 
       // Run the app and collect its output.
       final int exitCode = app.runPipelineAndHandleExceptions();
-      final List<String> logLines = readLogLines();
+      final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
       // Verify the results match expectations
       assertEquals(PipelineApplication.EXIT_CODE_SUCCESS, exitCode);
@@ -206,7 +221,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
 
               // Run the app and collect its output.
               final int exitCode = app.runPipelineAndHandleExceptions();
-              final List<String> logLines = readLogLines();
+              final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
               // Verify the results match expectations
               assertEquals(PipelineApplication.EXIT_CODE_SUCCESS, exitCode);
@@ -251,7 +266,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
 
               // Run the app and collect its output.
               final int exitCode = app.runPipelineAndHandleExceptions();
-              final List<String> logLines = readLogLines();
+              final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
               // Verify the results match expectations
               assertEquals(PipelineApplication.EXIT_CODE_SUCCESS, exitCode);
@@ -443,30 +458,5 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     // we don't actually want to register a shutdown hook
     doNothing().when(app).registerShutdownHook(any(), any());
     return app;
-  }
-
-  /**
-   * Truncates the log file before the start of a new test. Doing so ensures no test will see
-   * messages from prior tests.
-   */
-  static void truncateLogFile() {
-    try (var output = new PrintStream(new FileOutputStream(LOG_FILE, false))) {
-      output.println("Starting new test at " + new Date());
-    } catch (IOException e) {
-      throw new RuntimeException("unable to truncate log file", e);
-    }
-  }
-
-  /**
-   * Reads the log file generated by the most recent test run.
-   *
-   * @return list containing every line from the file
-   */
-  static List<String> readLogLines() {
-    try {
-      return Files.readAllLines(Path.of(LOG_FILE));
-    } catch (IOException ex) {
-      return List.of();
-    }
   }
 }
