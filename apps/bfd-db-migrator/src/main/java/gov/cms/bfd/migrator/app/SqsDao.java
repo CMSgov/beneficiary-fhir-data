@@ -38,12 +38,17 @@ public class SqsDao {
    *
    * @param queueUrl identifies the queue to post the message to
    * @param messageBody text of the message to send
+   * @param messageGroupId the message group id
    * @throws QueueDoesNotExistException if queue does not exist
    * @throws SqsException if the operation cannot be completed
    */
-  public void sendMessage(String queueUrl, String messageBody) {
+  public void sendMessage(String queueUrl, String messageBody, String messageGroupId) {
     final var request =
-        SendMessageRequest.builder().queueUrl(queueUrl).messageBody(messageBody).build();
+        SendMessageRequest.builder()
+            .queueUrl(queueUrl)
+            .messageBody(messageBody)
+            .messageGroupId(messageGroupId)
+            .build();
     sqsClient.sendMessage(request);
   }
 

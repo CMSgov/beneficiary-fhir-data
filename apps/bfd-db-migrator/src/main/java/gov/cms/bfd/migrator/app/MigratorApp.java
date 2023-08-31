@@ -15,13 +15,12 @@ import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main application/entry point for the Database Migration system. See {@link
@@ -210,7 +209,8 @@ public final class MigratorApp {
       final var sqsDao = new SqsDao(sqsClient);
       final var queueName = appConfig.getSqsQueueName();
       final var queueUrl = sqsDao.lookupQueueUrl(queueName);
-      // Presently there is no need for a dynamically generated message group id when sending and receiving messages,
+      // Presently there is no need for a dynamically generated message group id when sending and
+      // receiving messages,
       // however any static value is required at a bare-minimum for FIFO sqs queues
       final var messageGroupId = queueName;
       final var sqsProgressReporter = new SqsProgressReporter(sqsDao, queueUrl, messageGroupId);

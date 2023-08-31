@@ -1,12 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import gov.cms.bfd.AbstractLocalStackTest;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
@@ -15,6 +9,14 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
+
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.stream.IntStream;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Integration tests for {@link SqsDao}. */
 class SqsDaoIT extends AbstractLocalStackTest {
@@ -40,18 +42,22 @@ class SqsDaoIT extends AbstractLocalStackTest {
   /** Test sending and receiving. */
   @Test
   void sendAndReceiveMessages() {
-    String queueName = "my-test-queue";
+    String queueName = "my-test-queue.fifo";
     String queueUri = dao.createQueue(queueName);
-    String message1 = "this is a first message";
-    String message2 = "this is a second message";
-    dao.sendMessage(queueUri, message1);
-    dao.sendMessage(queueUri, message2);
+    String messageGroupId = queueName;
 
-    // SQS does not guarantee messages will be received in order so we just collect all
-    // of them and compare to all that we sent.
-    Set<String> receivedMessages = new HashSet<>();
+    Queue<String> sentMessages = new LinkedList<String>();
+    IntStream.range(0, 10)
+        .forEach(
+            i -> {
+              final var message = String.format("this is message %d", i);
+              sentMessages.offer(message);
+              dao.sendMessage(queueUri, message, messageGroupId);
+            });
+
+    Queue<String> receivedMessages = new LinkedList<>();
     dao.processAllMessages(queueUri, receivedMessages::add);
-    assertEquals(Set.of(message1, message2), receivedMessages);
+    assertEquals(sentMessages, receivedMessages);
     assertEquals(Optional.empty(), dao.nextMessage(queueUri));
   }
 
@@ -60,7 +66,8 @@ class SqsDaoIT extends AbstractLocalStackTest {
   void variousNonExistentQueueScenarios() {
     assertThatThrownBy(() -> dao.lookupQueueUrl("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);
-    assertThatThrownBy(() -> dao.sendMessage("no-such-queue-exists", "not gonna make it there"))
+    assertThatThrownBy(
+            () -> dao.sendMessage("no-such-queue-exists", "not gonna make it there", "message-id"))
         .isInstanceOf(QueueDoesNotExistException.class);
     assertThatThrownBy(() -> dao.nextMessage("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);
