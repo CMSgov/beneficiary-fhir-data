@@ -20,7 +20,7 @@ boolean deployMigrator(Map args = [:]) {
     awsAuth.assumeRole()
 
     // set sqsQueueName
-    sqsQueueName = "bfd-${bfdEnv}-migrator"
+    sqsQueueName = "bfd-${bfdEnv}-migrator.fifo"
 
     // prechecks
     if (isMigratorDeploymentRequired(bfdEnv, awsRegion) || forceDeployment) {
