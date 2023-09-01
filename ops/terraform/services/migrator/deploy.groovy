@@ -157,7 +157,7 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
         migratorMessages = awsSqs.receiveMessages(
             sqsQueueUrl: sqsQueueUrl,
             awsRegion: awsRegion,
-            maxMessages: 10,
+            maxMessages: 1,
             visibilityTimeoutSeconds: 0,
             waitTimeSeconds: 0
         )
