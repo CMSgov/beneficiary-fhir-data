@@ -55,7 +55,7 @@ boolean deployMigrator(Map args = [:]) {
         sqsQueueName: sqsQueueName,
         awsRegion: awsRegion,
         heartbeatInterval: heartbeatInterval,
-        maxMessages: 10
+        maxMessages: 1
     )
 
     // re-authenticate
@@ -102,27 +102,30 @@ def monitorMigrator(Map args = [:]) {
     maxMessages = args.maxMessages
     sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
     latestSchemaVersion = null
-    while (true) {
+    while(true) {
         awsAuth.assumeRole()
-        messages = awsSqs.receiveMessages(
-            sqsQueueUrl: sqsQueueUrl,
-            awsRegion: awsRegion,
-            visibilityTimeoutSeconds: 30,
-            waitTimeSeconds: 20,
-            maxMessages: maxMessages
-        )
+        messages = [];
+        do {
+            messages = awsSqs.receiveMessages(
+                sqsQueueUrl: sqsQueueUrl,
+                awsRegion: awsRegion,
+                visibilityTimeoutSeconds: 30,
+                waitTimeSeconds: 20,
+                maxMessages: maxMessages
+            )
 
-        // 1. "handle" (capture status, print, delete) each message
-        // 2. if the message body contains a non-running value, return it
-        for (msg in messages) {
-            body = msg.body
-            println getFormattedMonitorMsg(getMigratorStatus(body))
-            awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-            latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
-            if (body.appStage == STATUS_FINISHED) {
-                return [body.appStage, latestSchemaVersion]
+            // 1. "handle" (capture status, print, delete) each message
+            // 2. if the message body contains a non-running value, return it
+            for (msg in messages) {
+                body = msg.body
+                println getFormattedMonitorMsg(getMigratorStatus(body))
+                awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
+                latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
+                if (body.appStage == STATUS_FINISHED) {
+                    return [body.appStage, latestSchemaVersion]
+                }
             }
-        }
+        } while (messages.size() > 0);
         sleep(heartbeatInterval)
     }
     println getFormattedMonitorMsg("Migrator started at ${migratorStartTimestamp} is no longer running with a final status of '${migratorStatus}' at ${java.time.LocalDateTime.now().toString()}")
