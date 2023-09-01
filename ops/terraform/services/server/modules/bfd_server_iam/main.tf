@@ -1,5 +1,7 @@
 locals {
-  env = terraform.workspace
+  region     = data.aws_region.current.name
+  account_id = data.aws_caller_identity.current.account_id
+  env        = terraform.workspace
 }
 
 resource "aws_iam_instance_profile" "instance" {
@@ -143,4 +145,32 @@ POLICY
 resource "aws_iam_role_policy_attachment" "kms_mgmt" {
   role       = aws_iam_role.instance.id
   policy_arn = aws_iam_policy.kms_mgmt.arn
+}
+
+
+# allow Server instances to complete lifecycle actions on their ASG
+resource "aws_iam_policy" "asg" {
+  description = join("", [
+    "Policy granting BFD Server in ${local.env} environment access to complete Lifecycle Actions on "
+  ])
+  name = "bfd-${local.env}-${var.service}-asg"
+  path = "/"
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect   = "Allow"
+          Action   = "autoscaling:CompleteLifecycleAction"
+          Resource = ["arn:aws:autoscaling:${local.region}:${local.account_id}:autoScalingGroup:*:autoScalingGroupName/bfd-${local.env}-${var.legacy_service}*"]
+        }
+      ]
+    }
+  )
+}
+
+# attach policy allowing BFD Server to complete lifecycle actions on its ASG
+resource "aws_iam_role_policy_attachment" "asg" {
+  role       = aws_iam_role.instance.id
+  policy_arn = aws_iam_policy.asg.arn
 }
