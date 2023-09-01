@@ -125,7 +125,7 @@ def monitorMigrator(Map args = [:]) {
                     return [body.appStage, latestSchemaVersion]
                 }
             }
-            hasMessages = messages.length > 0
+            hasMessages = messages.size() > 0
         }
         sleep(heartbeatInterval)
     }
