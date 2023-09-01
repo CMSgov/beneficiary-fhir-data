@@ -118,9 +118,7 @@ def monitorMigrator(Map args = [:]) {
         for (msg in messages) {
             body = msg.body
             println getFormattedMonitorMsg(getMigratorStatus(body))
-
             awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-
             latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
             if (body.appStage == STATUS_FINISHED) {
                 return [body.appStage, latestSchemaVersion]

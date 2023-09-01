@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -142,11 +143,14 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
       // verify that progress messages were passed to SQS
       final var progressMessages = readProgressMessagesFromSQSQueue();
       assertThat(progressMessages)
+          .isSortedAccordingTo(Comparator.comparing(SqsProgressMessage::getMessageId));
+      assertThat(progressMessages)
           .first()
           .matches(m -> m.getAppStage() == MigratorProgress.Stage.Started);
-      assertThat(progressMessages)
-          .anyMatch(m -> m.getAppStage() == MigratorProgress.Stage.Connected)
-          .anyMatch(m -> m.getAppStage() == MigratorProgress.Stage.Migrating);
+      assertThat(progressMessages.get(1))
+          .matches(m -> m.getAppStage() == MigratorProgress.Stage.Connected);
+      assertThat(progressMessages.subList(2, progressMessages.size() - 1))
+          .allMatch(m -> m.getAppStage() == MigratorProgress.Stage.Migrating);
       assertThat(progressMessages)
           .last()
           .matches(m -> m.getAppStage() == MigratorProgress.Stage.Finished);
