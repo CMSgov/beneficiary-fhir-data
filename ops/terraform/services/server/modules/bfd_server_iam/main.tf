@@ -151,7 +151,8 @@ resource "aws_iam_role_policy_attachment" "kms_mgmt" {
 # allow Server instances to complete lifecycle actions on their ASG
 resource "aws_iam_policy" "asg" {
   description = join("", [
-    "Policy granting BFD Server in ${local.env} environment access to complete Lifecycle Actions on "
+    "Policy granting BFD Server in ${local.env} environment access to complete Lifecycle Actions ",
+    "on the ${local.env} AutoScaling Group"
   ])
   name = "bfd-${local.env}-${var.service}-asg"
   path = "/"
