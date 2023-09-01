@@ -104,8 +104,8 @@ def monitorMigrator(Map args = [:]) {
     latestSchemaVersion = null
     while(true) {
         awsAuth.assumeRole()
-        messages = [];
-        do {
+        hasMessages = true;
+        while(hasMessages) {
             messages = awsSqs.receiveMessages(
                 sqsQueueUrl: sqsQueueUrl,
                 awsRegion: awsRegion,
@@ -125,7 +125,8 @@ def monitorMigrator(Map args = [:]) {
                     return [body.appStage, latestSchemaVersion]
                 }
             }
-        } while (messages.size() > 0);
+            hasMessages = messages.length > 0
+        }
         sleep(heartbeatInterval)
     }
     println getFormattedMonitorMsg("Migrator started at ${migratorStartTimestamp} is no longer running with a final status of '${migratorStatus}' at ${java.time.LocalDateTime.now().toString()}")
