@@ -19,7 +19,6 @@ boolean deployMigrator(Map args = [:]) {
     // authenticate
     awsAuth.assumeRole()
 
-    // set sqsQueueName
     sqsQueueName = awsSsm.getParameter(
         parameterName: "/bfd/${bfdEnv}/migrator/nonsensitive/sqs_queue_name",
         awsRegion: awsRegion

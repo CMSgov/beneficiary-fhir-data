@@ -77,7 +77,7 @@ public class SqsDao {
 
   /**
    * Try to pull a message from the queue and return it. If none exists returns an empty optional,
-   * otherwise returns the message's body. Deletes the message after consumption.
+   * otherwise returns the message's body.
    *
    * @param queueUrl identifies the queue to read from
    * @return empty if no message, otherwise the {@link SqsMessage} message
