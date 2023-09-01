@@ -65,6 +65,9 @@ export NEW_RELIC_METRIC_PERIOD='{{ data_server_new_relic_metric_period }}'
 STARTUP_TESTING_REQ_TIMEOUT='15'
 STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='1'
 STARTUP_TESTING_BENE_ID='-88888888888888'
+# Lifecycle hook name, used to signal to the ASG that this instance has warmed-up and is ready for
+# traffic
+LAUNCH_LIFECYCLE_HOOK="{{ launch_lifecycle_hook }}"
 
 ##
 # Prints out the specified message.
@@ -125,6 +128,33 @@ service_startup_check() {
       # Effectively allow traffic from external sources to reach service port
       sudo iptables -D INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
       log "Server started properly"
+
+      instance_id="$(
+        TOKEN="$(
+          curl -X PUT "http://169.254.169.254/latest/api/token" \
+            -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" \
+            --max-time 1 2>/dev/null
+        )" && curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id
+      )"
+      if [[ -n "$instance_id" ]]; then
+        # Capturing the ASG name from Terraform -> User Data Init -> Ansible is not possible, as the
+        # ASG name (as of writing) is based upon the Launch Template name and latest version. Trying
+        # to pass this data within the launch template's Terraform resource definition would result
+        # in a circular reference. Instead, we rely on AWS's default tagging behavior to get the
+        # ASG's name
+        asg_name="$(
+          aws ec2 describe-tags \
+            --filters "Name=resource-id,Values=$instance_id" "Name=key,Values=aws:autoscaling:groupName" |
+            jq -r '.Tags | .[] | .Value'
+        )"
+        if [[ -n "$asg_name" ]]; then
+          log "Completing Lifecycle Action for Hook $LAUNCH_LIFECYCLE_HOOK..."
+          aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE \
+            --instance-id $instance_id --lifecycle-hook-name $LAUNCH_LIFECYCLE_HOOK \
+            --auto-scaling-group-name $asg_name 1> /dev/null 2> /dev/null &&
+            log "Lifecycle Action completed with result CONTINUE for hook $LAUNCH_LIFECYCLE_HOOK"
+        fi
+      fi
       return 0
     else
       log "Server failed to start properly, retrying..."
