@@ -134,17 +134,12 @@ service_startup_check() {
       if [[ -z "$LAUNCH_LIFECYCLE_HOOK" ]]; then
         return 0
       fi
-      
+
       log "Launch Lifecycle Hook $LAUNCH_LIFECYCLE_HOOK is enabled"
-      instance_id="$(
-        TOKEN="$(
-          curl -X PUT "http://169.254.169.254/latest/api/token" \
-            -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" \
-            --max-time 1 2>/dev/null
-        )" && curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id
-      )"
-      if [[ -z "$instance_id" ]]; then
-        log "Instance ID not found from IMDS; is BFD Server running on an EC2 Instance?"
+      instance_id="$(ec2-metadata --instance-id | sed 's/instance-id: \(.*\)$/\1/')"
+      region="$(ec2-metadata --availability-zone | sed 's/placement: \(.*\).$/\1/')"
+      if [[ -z "$instance_id" || -z "$region" ]]; then
+        log "Instance ID or region not found from IMDS; is BFD Server running on an EC2 Instance?"
         return 0
       fi
 
@@ -155,7 +150,8 @@ service_startup_check() {
       # name
       asg_name="$(
         aws ec2 describe-tags \
-          --filters "Name=resource-id,Values=$instance_id" "Name=key,Values=aws:autoscaling:groupName" |
+          --filters "Name=resource-id,Values=$instance_id" "Name=key,Values=aws:autoscaling:groupName" \
+          --region "$region" |
           jq -r '.Tags | .[] | .Value'
       )"
       if [[ -z "$asg_name" ]]; then
@@ -165,10 +161,14 @@ service_startup_check() {
 
       log "ASG Name: $asg_name; Instance ID: $instance_id"
       log "Completing Lifecycle Action for Hook $LAUNCH_LIFECYCLE_HOOK..."
-      aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE \
-        --instance-id $instance_id --lifecycle-hook-name $LAUNCH_LIFECYCLE_HOOK \
-        --auto-scaling-group-name $asg_name 1> /dev/null 2> /dev/null &&
-        log "Lifecycle Action completed with result CONTINUE for hook $LAUNCH_LIFECYCLE_HOOK"
+      aws autoscaling complete-lifecycle-action \
+        --lifecycle-action-result CONTINUE \
+        --instance-id "$instance_id" \
+        --lifecycle-hook-name "$LAUNCH_LIFECYCLE_HOOK" \
+        --auto-scaling-group-name "$asg_name" \
+        --region "$region" 1>/dev/null 2>/dev/null &&
+        log "Lifecycle Action completed with result CONTINUE for hook $LAUNCH_LIFECYCLE_HOOK" ||
+        log "Failed to complete Lifecycle Action for hook $LAUNCH_LIFECYCLE_HOOK"
       return 0
     else
       log "Server failed to start properly, retrying..."
