@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,7 +53,6 @@ public class SqsDao {
             .queueUrl(queueUrl)
             .messageBody(messageBody)
             .messageGroupId(messageGroupId)
-            .messageDeduplicationId(UUID.randomUUID().toString())
             .build();
     sqsClient.sendMessage(request);
   }
