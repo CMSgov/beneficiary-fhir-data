@@ -1,11 +1,5 @@
 package gov.cms.bfd.migrator.app;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -18,6 +12,13 @@ import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SqsException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 /** Data access object that encapsulate interactions with SQS. */
 @AllArgsConstructor
@@ -56,13 +57,7 @@ public class SqsDao {
             .messageGroupId(messageGroupId)
             .messageDeduplicationId(UUID.randomUUID().toString())
             .build();
-    sqsClient.sendMessage(
-        SendMessageRequest.builder()
-            .queueUrl(queueUrl)
-            .messageBody(messageBody)
-            .messageGroupId(messageGroupId)
-            .messageDeduplicationId(UUID.randomUUID().toString())
-            .build());
+    sqsClient.sendMessage(request);
   }
 
   /**
