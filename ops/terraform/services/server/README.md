@@ -39,6 +39,7 @@ https://terraform-docs.io/user-guide/configuration/
 | <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Server override ami-id. Defaults to latest server/fhir AMI from `master`. | `string` | `null` | no |
 | <a name="input_force_create_server_dashboards"></a> [force\_create\_server\_dashboards](#input\_force\_create\_server\_dashboards) | Forces the creation of bfd\_server\_dashboards for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_disk_alarms"></a> [force\_create\_server\_disk\_alarms](#input\_force\_create\_server\_disk\_alarms) | Forces the creation of bfd\_server\_disk\_alarms for ephemeral environments | `bool` | `false` | no |
+| <a name="input_force_create_server_error_alerts"></a> [force\_create\_server\_error\_alerts](#input\_force\_create\_server\_error\_alerts) | Forces the creation of bfd\_server\_error\_alerts for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_lb_alarms"></a> [force\_create\_server\_lb\_alarms](#input\_force\_create\_server\_lb\_alarms) | Forces the creation of bfd\_server\_lb\_alarms for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_log_alarms"></a> [force\_create\_server\_log\_alarms](#input\_force\_create\_server\_log\_alarms) | Forces the creation of bfd\_server\_log\_alarms for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_metrics"></a> [force\_create\_server\_metrics](#input\_force\_create\_server\_metrics) | Forces the creation of bfd\_server\_metrics for ephemeral environments | `bool` | `false` | no |
@@ -61,6 +62,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_ec2_managed_prefix_list.jenkins](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_managed_prefix_list) | data source |
 | [aws_ec2_managed_prefix_list.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_managed_prefix_list) | data source |
 | [aws_iam_policy.ansible_vault_pw_ro_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
+| [aws_rds_cluster.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [aws_s3_bucket.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket) | data source |
 | [aws_security_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.remote](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |

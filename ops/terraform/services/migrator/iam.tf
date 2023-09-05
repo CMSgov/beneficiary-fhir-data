@@ -89,7 +89,16 @@ resource "aws_iam_role" "this" {
               "Effect": "Allow",
               "Principal": {
                   "Service": "ec2.amazonaws.com"
-              }
+              },
+              "Sid": ""
+          },
+          {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                  "Service": "ssm.amazonaws.com"
+               },
+               "Sid": ""
           }
       ]
   }
@@ -99,10 +108,33 @@ resource "aws_iam_role" "this" {
     data.aws_iam_policy.cloudwatch_agent_xray_policy.arn,
     aws_iam_policy.sqs.arn,
     aws_iam_policy.ssm.arn,
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
   ]
 }
 
 resource "aws_iam_instance_profile" "this" {
   name = "bfd-${local.env}-${local.service}"
   role = aws_iam_role.this.name
+}
+
+data "aws_iam_policy_document" "rds" {
+  statement {
+    sid     = "AllowRdsIamAuth"
+    effect  = "Allow"
+    actions = ["rds-db:connect"]
+    resources = [
+      "arn:aws:rds-db:us-east-1:${local.account_id}:dbuser:${data.aws_rds_cluster.this.cluster_resource_id}/${aws_iam_role.this.name}"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "rds" {
+  name        = "bfd-${local.env}-${local.service}-rds-auth"
+  description = "IAM policy to allow instances to generate RDS auth tokens"
+  policy      = data.aws_iam_policy_document.rds.json
+}
+
+resource "aws_iam_role_policy_attachment" "rds-policy-attach" {
+  role       = aws_iam_role.this.id
+  policy_arn = aws_iam_policy.rds.arn
 }

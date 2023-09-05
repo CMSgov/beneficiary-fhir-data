@@ -78,9 +78,10 @@ locals {
 module "fhir_iam" {
   source = "./modules/bfd_server_iam"
 
-  kms_key_alias  = local.kms_key_alias
-  service        = local.service
-  legacy_service = local.legacy_service
+  kms_key_alias           = local.kms_key_alias
+  service                 = local.service
+  legacy_service          = local.legacy_service
+  rds_cluster_resource_id = data.aws_rds_cluster.aurora_cluster.cluster_resource_id
 }
 
 resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
@@ -203,7 +204,7 @@ module "bfd_server_log_alarms" {
   source = "./modules/bfd_server_log_alarms"
 }
 
-## This is where cloudwatch dashboards are managed. 
+## This is where cloudwatch dashboards are managed.
 #
 module "bfd_dashboards" {
   count = local.create_server_dashboards ? 1 : 0

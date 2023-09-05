@@ -98,3 +98,7 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 data "aws_ssm_parameters_by_path" "nonsensitive" {
   path = "/bfd/${local.env}/${local.service}/nonsensitive"
 }
+
+data "aws_rds_cluster" "this" {
+  cluster_identifier = local.rds_cluster_identifier
+}

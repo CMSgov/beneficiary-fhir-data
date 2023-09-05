@@ -53,6 +53,11 @@ data "aws_s3_bucket" "logs" {
   bucket = "bfd-${local.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
 
+# aurora cluster
+data "aws_rds_cluster" "aurora_cluster" {
+  cluster_identifier = "bfd-${local.env}-aurora-cluster"
+}
+
 # aurora security group
 data "aws_security_group" "aurora_cluster" {
   vpc_id = data.aws_vpc.main.id
