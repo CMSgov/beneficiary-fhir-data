@@ -10,6 +10,8 @@ locals {
     { capacity = length(var.env_config.azs) * 3, metric_lower_bound = 2 * var.scaling_networkin_interval_mb, metric_upper_bound = 4 * var.scaling_networkin_interval_mb },
     { capacity = length(var.env_config.azs) * 4, metric_lower_bound = 4 * var.scaling_networkin_interval_mb, metric_upper_bound = null }
   ]
+
+  on_launch_lifecycle_hook_name = "bfd-${local.env}-${var.role}-on-launch"
 }
 
 ## Security groups
@@ -103,10 +105,11 @@ resource "aws_launch_template" "main" {
   }
 
   user_data = base64encode(templatefile("${path.module}/templates/${var.launch_config.user_data_tpl}", {
-    env                = local.env
-    port               = var.lb_config.port
-    accountId          = var.launch_config.account_id
-    data_server_db_url = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${var.jdbc_suffix}"
+    env                   = local.env
+    port                  = var.lb_config.port
+    accountId             = var.launch_config.account_id
+    data_server_db_url    = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${var.jdbc_suffix}"
+    launch_lifecycle_hook = local.on_launch_lifecycle_hook_name
   }))
 
   tag_specifications {
@@ -143,6 +146,13 @@ resource "aws_autoscaling_group" "main" {
   launch_template {
     name    = aws_launch_template.main.name
     version = aws_launch_template.main.latest_version
+  }
+
+  initial_lifecycle_hook {
+    name                 = local.on_launch_lifecycle_hook_name
+    default_result       = "ABANDON"
+    heartbeat_timeout    = var.asg_config.instance_warmup * 3
+    lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
   }
 
   enabled_metrics = [
