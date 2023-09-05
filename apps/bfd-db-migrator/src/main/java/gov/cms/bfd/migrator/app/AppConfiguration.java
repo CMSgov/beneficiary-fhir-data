@@ -4,11 +4,8 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import java.util.Map;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -78,14 +75,12 @@ public class AppConfiguration extends BaseAppConfiguration {
    * Read configuration variables from a layered {@link ConfigLoader} and build an {@link
    * AppConfiguration} instance from them.
    *
-   * @param getenv function used to access environment variables (provided explicitly for testing)
-   * @return instance representing the configuration provided to this application via the
-   *     environment variables
+   * @param configLoader used to access settings (provided explicitly for testing)
+   * @return instance representing the configuration provided to this application via the {@link
+   *     ConfigLoader}
    * @throws ConfigException if the configuration passed to the application is invalid
    */
-  public static AppConfiguration loadConfig(Function<String, String> getenv) {
-    final var configLoader = LayeredConfiguration.createConfigLoader(Map.of(), getenv);
-
+  public static AppConfiguration loadConfig(ConfigLoader configLoader) {
     MetricOptions metricOptions = loadMetricOptions(configLoader);
     DatabaseOptions databaseOptions = loadDatabaseOptions(configLoader);
 

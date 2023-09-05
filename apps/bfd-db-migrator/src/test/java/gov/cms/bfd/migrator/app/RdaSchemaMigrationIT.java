@@ -1,13 +1,16 @@
 package gov.cms.bfd.migrator.app;
 
+import static gov.cms.bfd.migrator.app.MigratorAppIT.LOG_FILE;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
-import gov.cms.bfd.ProcessOutputConsumer;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
@@ -19,11 +22,8 @@ import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
-import java.io.IOException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,11 +41,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
-import org.awaitility.Awaitility;
-import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hibernate.tool.schema.Action;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -62,50 +62,55 @@ public class RdaSchemaMigrationIT {
   private static EntityManager entityManager;
 
   /**
+   * Locks and truncates the log file so that each test case can read only its own messages from the
+   * file when making assertions about log output.
+   *
+   * @throws Exception unable to lock or truncate the file
+   */
+  @BeforeEach
+  public void lockLogFile() throws Exception {
+    LOG_FILE.beginTest(true, 300);
+  }
+
+  /** Unlocks the log file. */
+  @AfterEach
+  public void releaseLogFile() {
+    LOG_FILE.endTest();
+  }
+
+  /**
    * Running the migrator once cuts the test time down significantly; however
    * the @BeforeAll/@AfterAll annotation requires static methods, thus the static entityManager and
    * datasource as well.
-   *
-   * @throws IOException the io exception
    */
-  @BeforeEach
-  public void setUp() throws IOException {
-
-    ProcessBuilder appRunBuilder = createAppProcessBuilder();
-    appRunBuilder.redirectErrorStream(true);
-    Process appProcess = appRunBuilder.start();
-
-    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
-    Thread appRunConsumerThread = new Thread(appRunConsumer);
-    appRunConsumerThread.start();
+  @BeforeAll
+  public static void setUp() {
+    MigratorApp app = spy(new MigratorApp());
+    ConfigLoader configLoader = createConfigLoader();
+    doReturn(configLoader).when(app).createConfigLoader();
 
     // Await start/finish of application
     try {
-      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      final int exitCode = app.performMigrationsAndHandleExceptions();
+      final String logOutput = LOG_FILE.readFileAsString();
+      assertEquals(0, exitCode, "Migration failed during test setup. \nOUTPUT:\n" + logOutput);
+
+      final Map<String, Object> hibernateProperties =
+          ImmutableMap.of(
+              org.hibernate.cfg.AvailableSettings.DATASOURCE,
+              dataSource,
+              org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO,
+              Action.VALIDATE,
+              org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE,
+              10);
+
+      EntityManagerFactory entityManagerFactory =
+          Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties);
+      entityManager = entityManagerFactory.createEntityManager();
     } catch (ConditionTimeoutException e) {
-      throw new RuntimeException(
-          "Migration application failed to start within timeout, STDOUT:\n"
-              + appRunConsumer.getStdoutContents(),
-          e);
+      final String logOutput = LOG_FILE.readFileAsString();
+      fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
-
-    assertEquals(
-        0,
-        appProcess.exitValue(),
-        "Migration failed during test setup. \nSTDOUT:\n" + appRunConsumer.getStdoutContents());
-
-    final Map<String, Object> hibernateProperties =
-        ImmutableMap.of(
-            org.hibernate.cfg.AvailableSettings.DATASOURCE,
-            dataSource,
-            org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO,
-            Action.VALIDATE,
-            org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE,
-            10);
-
-    EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties);
-    entityManager = entityManagerFactory.createEntityManager();
   }
 
   /** Cleans up the resources after all tests have run. */
@@ -120,49 +125,23 @@ public class RdaSchemaMigrationIT {
   }
 
   /**
-   * Creates a ProcessBuilder for the migrator tests to be run with.
+   * Creates a {@link ConfigLoader} for the migrator tests to be run with.
    *
-   * @return ProcessBuilder ready with common values set
+   * @return config with common values set
    */
-  private static ProcessBuilder createAppProcessBuilder() {
-    String[] command = createCommandForMigratorApp();
-    ProcessBuilder appRunBuilder = new ProcessBuilder(command);
-    appRunBuilder.redirectErrorStream(true);
-
+  private static ConfigLoader createConfigLoader() {
     dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
-    appRunBuilder
-        .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
+    ImmutableMap.Builder<String, String> environment = ImmutableMap.builder();
+    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
+    environment.put(
+        AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
+    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
 
-    return appRunBuilder;
-  }
-
-  /**
-   * Create command for the migrator script to be run.
-   *
-   * @return the command array for the migrator app
-   */
-  private static String[] createCommandForMigratorApp() {
-    try {
-      Path assemblyDirectory =
-          Files.list(Paths.get(".", "target", "db-migrator"))
-              .filter(f -> f.getFileName().toString().startsWith("bfd-db-migrator-"))
-              .findFirst()
-              .orElse(Path.of(""));
-      Path pipelineAppScript = assemblyDirectory.resolve("bfd-db-migrator.sh");
-      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return ConfigLoader.builder().addSingle(environment.build()::get).build();
   }
 
   /**
