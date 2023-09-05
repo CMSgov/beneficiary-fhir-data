@@ -39,9 +39,7 @@ This includes information about [making requests to bfd](https://github.com/CMSg
 
 The [BFD Wiki](https://github.com/CMSgov/beneficiary-fhir-data/wiki) contains useful
 resources like the [development environment setup guide](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Local-Environment-Setup-for-BFD-Development),
-[style guide](https://github.com/CMSgov/beneficiary-fhir-data/wiki/BFD-Code-Style-Guide), and more.
-
-Also for maintainers, the full set of runbooks for various scenarios can be found in [runbooks](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/docs/runbooks).
+[style guide](https://github.com/CMSgov/beneficiary-fhir-data/wiki/BFD-Code-Style-Guide), [runbooks](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Runbooks) for various scenarios, and more.
 
 ## Security
 
