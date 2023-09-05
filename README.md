@@ -25,13 +25,12 @@ The high-level purpose and location of each piece of the project is listed below
 * [insights](insights) - contains documentation and resources for maintaining BFD Insights, a platform using AWS Cloudwatch to provide analytics and metrics for BFD applications
 * [ops](ops) - contains the scripts and resources required for packaging and deploying BFD applications
 * [rfcs](docs/rfcs) - holds the archived and active RFC (Request for Comment) documents for BFD
-* [runbooks](docs/runbooks) - contains maintenance documents for executing and troubleshooting various BFD scenarios 
 
 ## Documentation
 
 ### Users
 
-Many useful guides and documentation items can be found on the [BFD Wiki](https://github.com/CMSgov/beneficiary-fhir-data/wiki), hosted in this repo.
+Many useful guides, documentation items, and runbooks can be found on the [BFD Wiki](https://github.com/CMSgov/beneficiary-fhir-data/wiki), hosted in this repo.
 
 This includes information about [making requests to bfd](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Making-Requests-to-BFD), 
 [synthetic data](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Synthetic-Data-Guide), and more.
