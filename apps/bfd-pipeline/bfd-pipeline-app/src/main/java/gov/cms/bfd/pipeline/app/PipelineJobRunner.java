@@ -37,18 +37,23 @@ public class PipelineJobRunner implements Runnable {
   @Override
   public void run() {
     try {
-      final Long repeatMillis =
-          job.getSchedule()
-              .map(s -> Duration.of(s.getRepeatDelay(), s.getRepeatDelayUnit()))
-              .map(Duration::toMillis)
-              .orElse(0L);
-      while (tracker.jobsCanRun()) {
-        runJob();
-        if (repeatMillis <= 0 || !tracker.jobsCanRun()) {
-          break;
+      // This try-with-resources guarantees job's close method is called.
+      // Nested within the outer try because we don't want stoppingNormally to be
+      // called if closing the job throws an exception.
+      try (job) {
+        final Long repeatMillis =
+            job.getSchedule()
+                .map(s -> Duration.of(s.getRepeatDelay(), s.getRepeatDelayUnit()))
+                .map(Duration::toMillis)
+                .orElse(0L);
+        while (tracker.jobsCanRun()) {
+          runJob();
+          if (repeatMillis <= 0 || !tracker.jobsCanRun()) {
+            break;
+          }
+          tracker.sleeping(job);
+          sleeper.accept(repeatMillis);
         }
-        tracker.sleeping(job);
-        sleeper.accept(repeatMillis);
       }
       tracker.stoppingNormally(job);
     } catch (InterruptedException ex) {
