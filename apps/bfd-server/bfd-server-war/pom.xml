@@ -24,8 +24,8 @@
         </dependency>
         <dependency>
             <!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
         </dependency>
         <dependency>
             <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP

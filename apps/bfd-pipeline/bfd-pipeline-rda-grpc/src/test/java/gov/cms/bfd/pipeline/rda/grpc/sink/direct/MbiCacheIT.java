@@ -12,8 +12,8 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import jakarta.persistence.PersistenceException;
 import java.time.Clock;
-import javax.persistence.PersistenceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

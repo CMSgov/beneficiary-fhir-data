@@ -24,13 +24,6 @@
     </properties>
 
     <dependencies>
-        <!-- Hibernate / JPA -->
-        <dependency>
-            <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
-                Hibernate is used for that in the BFD projects.) -->
-            <artifactId>hibernate-jpa-2.1-api</artifactId>
-            <groupId>org.hibernate.javax.persistence</groupId>
-        </dependency>
         <!-- Compile Time -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -53,17 +46,16 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
         <!-- Testing -->
         <dependency>
             <!-- Used to run our unit and integration tests. -->
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- In-memory database that can be used for testing. -->

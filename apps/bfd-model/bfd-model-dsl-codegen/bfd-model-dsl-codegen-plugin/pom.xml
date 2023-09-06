@@ -63,15 +63,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Hibernate / JPA -->
-            <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
-                Hibernate is used for that in the BFD projects.) -->
-            <artifactId>hibernate-jpa-2.1-api</artifactId>
-            <groupId>org.hibernate.javax.persistence</groupId>
         </dependency>
         <dependency>
             <!-- Makes programmatically generating Java sources much simpler. -->
@@ -116,7 +109,6 @@
     </dependencies>
 
     <build>
-
         <pluginManagement>
             <plugins>
                 <plugin>

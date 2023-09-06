@@ -9,6 +9,8 @@ import gov.cms.model.dsl.codegen.plugin.model.validation.JavaNameType;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaType;
 import gov.cms.model.dsl.codegen.plugin.model.validation.MappingExists;
 import gov.cms.model.dsl.codegen.plugin.model.validation.ValidationUtil;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -17,8 +19,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -89,14 +89,14 @@ public class JoinBean implements ModelBean {
   @NotNull @Builder.Default private List<CascadeType> cascadeTypes = new ArrayList<>();
 
   /**
-   * Optionally specifies an order by expression to add using an {@link javax.persistence.OrderBy}
+   * Optionally specifies an order by expression to add using an {@link jakarta.persistence.OrderBy}
    * annotation.
    */
   private String orderBy;
 
   /**
    * Optionally specifies a foreign key constraint to reference in the {@link
-   * javax.persistence.JoinColumn} annotation.
+   * jakarta.persistence.JoinColumn} annotation.
    */
   private String foreignKey;
 
@@ -167,9 +167,10 @@ public class JoinBean implements ModelBean {
   }
 
   /**
-   * Determine if there is a value defined for the {@link javax.persistence.ForeignKey} annotation.
+   * Determine if there is a value defined for the {@link jakarta.persistence.ForeignKey}
+   * annotation.
    *
-   * @return true if there is a value defined for the {@link javax.persistence.ForeignKey}
+   * @return true if there is a value defined for the {@link jakarta.persistence.ForeignKey}
    *     annotation.
    */
   public boolean hasForeignKey() {
@@ -197,11 +198,11 @@ public class JoinBean implements ModelBean {
   @AllArgsConstructor
   public enum JoinType {
     /** OneToMany. */
-    OneToMany(ClassName.get(javax.persistence.OneToMany.class), true),
+    OneToMany(ClassName.get(jakarta.persistence.OneToMany.class), true),
     /** ManyToOne. */
-    ManyToOne(ClassName.get(javax.persistence.ManyToOne.class), false),
+    ManyToOne(ClassName.get(jakarta.persistence.ManyToOne.class), false),
     /** OneToOne. */
-    OneToOne(ClassName.get(javax.persistence.OneToOne.class), false);
+    OneToOne(ClassName.get(jakarta.persistence.OneToOne.class), false);
 
     /** The annotation class to use when adding the join annotation to the entity. */
     @Getter private final ClassName annotationClass;

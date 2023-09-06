@@ -6,7 +6,7 @@ import java.util.Map;
 import org.hibernate.boot.Metadata;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.PostgreSQL95Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
@@ -21,7 +21,7 @@ public final class HibernateSchemaPrinter {
    * @param args (unused)
    */
   public static void main(String[] args) {
-    printHibernateSchemaToStdout("gov.cms.bfd", PostgreSQL95Dialect.class);
+    printHibernateSchemaToStdout("gov.cms.bfd", PostgreSQLDialect.class);
   }
 
   /**
@@ -29,7 +29,7 @@ public final class HibernateSchemaPrinter {
    *
    * @param persistenceUnitName the name of the JPA persistence unit to generate the schema for
    * @param dialectType the Hibernate {@link Dialect} type to generate the schema for, e.g. {@link
-   *     PostgreSQL95Dialect}
+   *     PostgreSQLDialect}
    */
   public static void printHibernateSchemaToStdout(
       String persistenceUnitName, Class<? extends Dialect> dialectType) {

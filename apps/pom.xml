@@ -83,10 +83,7 @@
         <spring-data-jpa.version>2.7.14</spring-data-jpa.version>
         <spring-framework.version>5.3.23</spring-framework.version>
 
-        <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
-        but not all (in particular, entity-manager does not have a 6.0 version available yet).
-        Staying on latest 5.x version until all components have 6.0 versions available. -->
-        <hibernate.version>5.6.15.Final</hibernate.version>
+        <hibernate.version>6.2.8.Final</hibernate.version>
         <junit.version>5.10.0</junit.version>
         <javadoc.version>3.5.0</javadoc.version>
         <testcontainers.version>1.18.3</testcontainers.version>
@@ -170,8 +167,6 @@
         <javax.activation.version>1.1.1</javax.activation.version>
         <commons-cli.version>1.5.0</commons-cli.version>
 
-        <hibernate.jpa.2.1.api.version>1.0.2.Final</hibernate.jpa.2.1.api.version>
-        <jpa.version>1.0.2.Final</jpa.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
 
         <!-- Dependencies required for connecting to a gRPC API -->
@@ -442,24 +437,9 @@
             </dependency>
 
             <dependency>
-                <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
-                    Hibernate is used for that in our projects.) -->
-                <artifactId>hibernate-jpa-2.1-api</artifactId>
-                <groupId>org.hibernate.javax.persistence</groupId>
-                <version>${hibernate.jpa.2.1.api.version}</version>
-            </dependency>
-
-            <dependency>
-                <!-- Hibernate's JPA implementation is used to manage most database usage
-                    in our applications. -->
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
-            <dependency>
                 <!-- This is included as a transitive dependency of org.hibernate:hibernate-entitymanager,
                     but may occassionally be needed separately. -->
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
@@ -467,8 +447,14 @@
                 <!-- The Hibernate JPA Model Generator, which will produce MetaModel
                     classes for JPA entities. This happens happens automagically via javac's
                     annotation processor. -->
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-jpamodelgen</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <!-- The Hibernate Annotation Processor to generate JPA 2 static metamodel classes. -->
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-ant</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
 
@@ -752,7 +738,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.11.0</version>
                     <configuration>
                         <!-- Set the Java source version used by the compiler. -->
                         <source>${javaSourceVersion}</source>

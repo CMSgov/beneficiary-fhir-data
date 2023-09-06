@@ -54,16 +54,10 @@
             <artifactId>poi</artifactId>
         </dependency>
         <dependency>
-            <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
-                Hibernate is used for that in the BFD projects.) -->
-            <artifactId>hibernate-jpa-2.1-api</artifactId>
-            <groupId>org.hibernate.javax.persistence</groupId>
-        </dependency>
-        <dependency>
             <!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
                 for JPA entities. This happens happens automagically via javac's annotation
                 processor. -->
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jpamodelgen</artifactId>
             <exclusions>
                 <exclusion>
@@ -71,14 +65,39 @@
                     <artifactId>jboss-logging</artifactId>
                 </exclusion>
             </exclusions>
-
+            <scope>provided</scope>
+        </dependency>
+        <!-- JAXB API only - required by hibernate-jpamodelgen -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>3.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- JAXB RI, Jakarta XML Binding - required by hibernate-jpamodelgen -->
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>3.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- The Hibernate Annotation Processor to generate JPA 2 static metamodel classes. -->
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-ant</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.logging</groupId>
+                    <artifactId>jboss-logging</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's
                 only brought into this project for the extra ORM mapping annotations that
                 it provides (hence all of the exclusions). -->
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <exclusions>
                 <exclusion>
