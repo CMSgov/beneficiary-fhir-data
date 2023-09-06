@@ -87,7 +87,7 @@ Prior to delving into proposed strategies or solutions, it is best to provide so
   - PACA lookups, which should only support hashed MBI values
 ### BFD Hash Algorithm
 [BFD Hash Algorithm]: #bfd_hash_algorithm
-In broad terms, BFD uses a cryptographically sound, one-way hashing algorithm, that leverages additional best practices to produce an obfuscated base-64 encoded character string. The entire hash-generation process is shared amongst all BFD peering partners, allowing each PP to dynamically generate an obfuscated patient identifier suitable for use as a patient identifier to perform a patient lookup. For example, a PP could take an MBI value, hash that, and then request information on that patient using the hashed MBI. Because BFD defines, and subsequently shares all aspects of the hashing algorithm, this could be deemed a security issue if the algorithm is leaked.
+In broad terms, BFD uses a cryptographically sound, one-way hashing algorithm, that leverages additional best practices to produce an obfuscated base-64 encoded character string. The entire hash-generation process is shared amongst all BFD peering partners, allowing each PP to dynamically generate an obfuscated patient identifier suitable for a patient lookup. For example, a PP could take an MBI value, hash that, and then request information on that patient using the hashed MBI. Because BFD defines, and subsequently shares all aspects of the hashing algorithm, this could be deemed a security issue if the algorithm is leaked.
 ### Much Ado About Nothing?
 [Much Ado About Nothing]: #much-ado-about-nothing
 Is the leakage of BFD's hashing algorithm, really a security concern? Depends. Let's explore that by assuming that the algorithm is leaked into the wild:
