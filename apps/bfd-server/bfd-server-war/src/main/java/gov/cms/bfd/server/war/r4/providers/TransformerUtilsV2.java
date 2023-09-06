@@ -1766,6 +1766,8 @@ public final class TransformerUtilsV2 {
        */
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
+      // Throw a 400 if startIndex >= results, since we cant sublist with these values
+      validateStartIndexSize(paging.getStartIndex(), resources.size());
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
       // Add number of paginated resources to MDC logs
@@ -1797,6 +1799,24 @@ public final class TransformerUtilsV2 {
                 : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
     return bundle;
+  }
+
+  /**
+   * Validate the start index size is less than the total number of resources. If startIndex is
+   * greater than or equal to the number of resources, throws an InvalidRequestException which will
+   * bubble up and create a 400 error at the REST level via HAPI-FHIR.
+   *
+   * @param startIndex the start index from the paging
+   * @param numResources the number of resources in the response
+   */
+  public static void validateStartIndexSize(int startIndex, int numResources) {
+    // Throw a 400 if startIndex >= results, since we cant sublist with these values
+    if (startIndex >= numResources) {
+      throw new InvalidRequestException(
+          String.format(
+              "Value for startIndex (%d) must be less than than result size (%d)",
+              startIndex, numResources));
+    }
   }
 
   /**
