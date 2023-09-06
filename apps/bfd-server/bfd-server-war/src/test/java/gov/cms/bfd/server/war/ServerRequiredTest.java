@@ -14,6 +14,8 @@ import io.restassured.authentication.CertificateAuthSettings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import javax.sql.DataSource;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.jupiter.api.AfterEach;
@@ -28,24 +30,27 @@ import org.postgresql.ds.PGSimpleDataSource;
  */
 public class ServerRequiredTest {
 
+  /** The database url used to set up the tests. */
+  private static final String DB_URL = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
+
   /** The database connection to use for the test. */
+  @GuardedBy("class synchronized")
   private static DataSource dataSource;
 
-  /** The database url used to set up the tests. */
-  private static final String dbUrl = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
-
   /** The base url to use when hitting the container server endpoint. */
+  @GuardedBy("class synchronized")
   protected static String baseServerUrl;
 
   /** The request spec with the auth certificate to use when connecting to the test server. */
+  @GuardedBy("class synchronized")
   protected static RequestSpecification requestAuth;
 
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
-  protected static void setup() throws IOException {
+  protected static synchronized void setup() throws IOException {
     if (!ServerExecutor.isRunning()) {
       assertTrue(
-          ServerTestUtils.isValidServerDatabase(dbUrl),
+          ServerTestUtils.isValidServerDatabase(DB_URL),
           "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise) OR an in-memory hsql db.");
       // Initialize/get the database/datasource, so we can just pass a connection string to the
       // server
@@ -54,11 +59,11 @@ public class ServerRequiredTest {
       String dbUsername;
       String dbPassword;
       // Grab the previously set-up local database url to pass to the test server
-      if (dataSource instanceof PGSimpleDataSource && dbUrl.endsWith("tc")) {
+      if (dataSource instanceof PGSimpleDataSource && DB_URL.endsWith("tc")) {
         resolvedDbUrl = ((PGSimpleDataSource) dataSource).getUrl();
         dbUsername = TEST_CONTAINER_DATABASE_USERNAME;
         dbPassword = TEST_CONTAINER_DATABASE_PASSWORD;
-      } else if (dataSource instanceof JDBCDataSource && dbUrl.contains("hsql")) {
+      } else if (dataSource instanceof JDBCDataSource && DB_URL.contains("hsql")) {
         resolvedDbUrl = ((JDBCDataSource) dataSource).getUrl();
         dbUsername = HSQL_SERVER_USERNAME;
         dbPassword = HSQL_SERVER_PASSWORD;
@@ -70,7 +75,7 @@ public class ServerRequiredTest {
 
       boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
       assertTrue(startedServer, "Could not startup server for tests.");
-      baseServerUrl = "https://localhost:" + ServerExecutor.testServerPort;
+      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
       setRequestAuth();
       // Setup a shutdown hook to shut down the server when we are finished with all tests
       Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
@@ -105,8 +110,19 @@ public class ServerRequiredTest {
    */
   @AfterEach
   public void cleanDatabaseServerAfterEachTestCase() {
-    if (dataSource != null && ServerTestUtils.isValidServerDatabase(dbUrl)) {
+    final DataSource dataSource = getDataSource();
+    if (dataSource != null && ServerTestUtils.isValidServerDatabase(DB_URL)) {
       ServerTestUtils.get().truncateNonRdaTablesInDataSource(dataSource);
     }
+  }
+
+  /**
+   * Gets the current {@link DataSource} (if any).
+   *
+   * @return the data source or null if there is none
+   */
+  @Nullable
+  private static synchronized DataSource getDataSource() {
+    return dataSource;
   }
 }

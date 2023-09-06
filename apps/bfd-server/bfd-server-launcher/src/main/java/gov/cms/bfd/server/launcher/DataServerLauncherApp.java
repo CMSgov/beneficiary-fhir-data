@@ -10,9 +10,12 @@ import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.security.ConstraintMapping;
@@ -80,48 +83,26 @@ public final class DataServerLauncherApp {
    */
   static final int EXIT_CODE_MONITOR_ERROR = 2;
 
-  /** The Jetty Server instance that will do most of our work. * */
-  private static Server server;
+  /** Holds important information about the running jetty server and its web application. */
+  @Getter
+  @AllArgsConstructor
+  public static class ServerInfo {
+    /** The server object can be used to start and stop the server. */
+    private Server server;
+
+    /** The app context can be used to set attributes for use by the application. */
+    private WebAppContext webapp;
+  }
 
   /**
-   * This method is the one that will get called when users launch the application from the command
-   * line.
+   * Creates a new {@link Server} and {@link WebAppContext} and returns them. Does not actually
+   * start the server.
    *
-   * @param args (should be empty, as this application accepts configuration via environment
-   *     variables)
+   * @param appConfig used to configure the server
+   * @return an object containing the values
    */
-  public static void main(String[] args) {
-    LOGGER.info("Launcher starting up!");
-
-    // Configure Java Util Logging (JUL) to route over SLF4J, instead.
-    SLF4JBridgeHandler.removeHandlersForRootLogger(); // (since SLF4J 1.6.5)
-    SLF4JBridgeHandler.install();
-
-    // Ensure that unhandled exceptions are... well, handled. Kinda'.
-    configureUnexpectedExceptionHandlers();
-
-    // Parse the app config.
-    AppConfiguration appConfig = null;
-    try {
-      ConfigLoader config = LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
-      appConfig = AppConfiguration.loadConfig(config);
-      LOGGER.info("Launcher configured: '{}'", appConfig);
-    } catch (ConfigException | AppConfigurationException e) {
-      System.err.println(e.getMessage());
-      LOGGER.warn("Invalid app configuration.", e);
-      System.exit(EXIT_CODE_BAD_CONFIG);
-    }
-
-    // Wire up metrics reporting.
-    MetricRegistry appMetrics = new MetricRegistry();
-    appMetrics.registerAll(new MemoryUsageGaugeSet());
-    appMetrics.registerAll(new GarbageCollectorMetricSet());
-    Slf4jReporter appMetricsReporter =
-        Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
-    appMetricsReporter.start(1, TimeUnit.HOURS);
-
-    // Create the Jetty Server instance that will do most of our work.
-    server = new Server(appConfig.getPort());
+  public static ServerInfo createServer(AppConfiguration appConfig) {
+    Server server = new Server(appConfig.getPort());
 
     // Modify the default HTTP config.
     HttpConfiguration httpConfig = new HttpConfiguration();
@@ -248,20 +229,63 @@ public final class DataServerLauncherApp {
     // Wire up the WebAppContext to Jetty.
     HandlerCollection handlers = new HandlerCollection(webapp);
     server.setHandler(handlers);
+    return new ServerInfo(server, webapp);
+  }
+
+  /**
+   * This method is the one that will get called when users launch the application from the command
+   * line.
+   *
+   * @param args (should be empty, as this application accepts configuration via environment
+   *     variables)
+   */
+  public static void main(String[] args) {
+    LOGGER.info("Launcher starting up!");
+
+    // Configure Java Util Logging (JUL) to route over SLF4J, instead.
+    SLF4JBridgeHandler.removeHandlersForRootLogger(); // (since SLF4J 1.6.5)
+    SLF4JBridgeHandler.install();
+
+    // Ensure that unhandled exceptions are... well, handled. Kinda'.
+    configureUnexpectedExceptionHandlers();
+
+    // Parse the app config.
+    AppConfiguration appConfig = null;
+    try {
+      ConfigLoader config = LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
+      appConfig = AppConfiguration.loadConfig(config);
+      LOGGER.info("Launcher configured: '{}'", appConfig);
+    } catch (ConfigException | AppConfigurationException e) {
+      System.err.println(e.getMessage());
+      LOGGER.warn("Invalid app configuration.", e);
+      System.exit(EXIT_CODE_BAD_CONFIG);
+    }
+
+    // Wire up metrics reporting.
+    MetricRegistry appMetrics = new MetricRegistry();
+    appMetrics.registerAll(new MemoryUsageGaugeSet());
+    appMetrics.registerAll(new GarbageCollectorMetricSet());
+    Slf4jReporter appMetricsReporter =
+        Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
+    appMetricsReporter.start(1, TimeUnit.HOURS);
+
+    // Create the Jetty Server instance that will do most of our work.
+    ServerInfo serverInfo = createServer(appConfig);
 
     // Configure shutdown handlers before starting everything up.
-    server.setStopTimeout(Duration.ofSeconds(30).toMillis());
-    server.setStopAtShutdown(true);
+    serverInfo.server.setStopTimeout(Duration.ofSeconds(30).toMillis());
+    serverInfo.server.setStopAtShutdown(true);
     registerShutdownHook(appMetrics);
 
     // Start up Jetty.
     try {
       LOGGER.info("Starting Jetty...");
-      server.start();
+      serverInfo.server.start();
+      URI serverURI = serverInfo.server.getURI();
       LOGGER.info(
           "{} Server available at: '{}'",
           LOG_MESSAGE_STARTED_JETTY,
-          String.format("https://%s:%d/", server.getURI().getHost(), server.getURI().getPort()));
+          String.format("https://%s:%d/", serverURI.getHost(), serverURI.getPort()));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -277,7 +301,7 @@ public final class DataServerLauncherApp {
      * configured above will fire.
      */
     try {
-      server.join();
+      serverInfo.server.join();
     } catch (InterruptedException e) {
       // Don't do anything here; this is expected behavior when the app is stopped.
     }
@@ -344,24 +368,20 @@ public final class DataServerLauncherApp {
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    LOGGER.info("Application is shutting down. Housekeeping...");
+                () -> {
+                  LOGGER.info("Application is shutting down. Housekeeping...");
 
-                    // Ensure that the final metrics get logged.
-                    Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build().report();
+                  // Ensure that the final metrics get logged.
+                  Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build().report();
 
-                    LOGGER.info(LOG_MESSAGE_SHUTDOWN_HOOK_COMPLETE);
+                  LOGGER.info(LOG_MESSAGE_SHUTDOWN_HOOK_COMPLETE);
 
-                    /*
-                     * We have to do this ourselves (rather than use Logback's DelayingShutdownHook)
-                     * to ensure that the logger isn't closed before the above logging.
-                     */
-                    LoggerContext logbackContext =
-                        (LoggerContext) LoggerFactory.getILoggerFactory();
-                    logbackContext.stop();
-                  }
+                  /*
+                   * We have to do this ourselves (rather than use Logback's DelayingShutdownHook)
+                   * to ensure that the logger isn't closed before the above logging.
+                   */
+                  LoggerContext logbackContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+                  logbackContext.stop();
                 }));
   }
 
@@ -373,24 +393,16 @@ public final class DataServerLauncherApp {
   private static void configureUnexpectedExceptionHandlers() {
     Thread.currentThread()
         .setUncaughtExceptionHandler(
-            new UncaughtExceptionHandler() {
-              @Override
-              public void uncaughtException(Thread t, Throwable e) {
-                LOGGER.error("Uncaught exception on launch thread. Stopping.", e);
-              }
-            });
+            (t, e) -> LOGGER.error("Uncaught exception on launch thread. Stopping.", e));
     Thread.setDefaultUncaughtExceptionHandler(
-        new UncaughtExceptionHandler() {
-          @Override
-          public void uncaughtException(Thread t, Throwable e) {
-            /*
-             * Just a note on something that I found a bit surprising: this won't be triggered for
-             * errors that occur on a ScheduledExecutorService's threads, as the
-             * ScheduledExecutorService swallows those exceptions.
-             */
+        (t, e) -> {
+          /*
+           * Just a note on something that I found a bit surprising: this won't be triggered for
+           * errors that occur on a ScheduledExecutorService's threads, as the
+           * ScheduledExecutorService swallows those exceptions.
+           */
 
-            LOGGER.error("Uncaught exception on non-main thread. Stopping.", e);
-          }
+          LOGGER.error("Uncaught exception on non-main thread. Stopping.", e);
         });
   }
 }

@@ -145,10 +145,10 @@ public final class AppConfiguration {
    * @throws ConfigException if the configuration passed to the application are incomplete or
    *     incorrect.
    */
-  static AppConfiguration loadConfig(ConfigLoader config) {
+  public static AppConfiguration loadConfig(ConfigLoader config) {
     Optional<String> host = config.stringOption(ENV_VAR_KEY_HOST);
     int port = config.positiveIntValueZeroOK(ENV_VAR_KEY_PORT);
-    Path war = config.readableFile(ENV_VAR_KEY_WAR).toPath();
+    Path war = Path.of(config.stringValue(ENV_VAR_KEY_WAR));
     Path keystore = config.readableFile(ENV_VAR_KEY_KEYSTORE).toPath();
     Path truststore = config.readableFile(ENV_VAR_KEY_TRUSTSTORE).toPath();
     return new AppConfiguration(host, port, keystore, truststore, war);
