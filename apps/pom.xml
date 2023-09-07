@@ -83,7 +83,8 @@
         <spring-data-jpa.version>2.7.14</spring-data-jpa.version>
         <spring-framework.version>5.3.23</spring-framework.version>
 
-        <hibernate.version>6.2.8.Final</hibernate.version>
+        <!-- https://stackoverflow.com/questions/76490128/class-org-hibernate-mapping-basicvalue-cannot-be-cast-to-class-org-hibernate-map -->
+        <hibernate.version>6.3.0.Final</hibernate.version>
         <junit.version>5.10.0</junit.version>
         <javadoc.version>3.5.0</javadoc.version>
         <testcontainers.version>1.18.3</testcontainers.version>
@@ -470,16 +471,40 @@
             and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
             Once BFD moves to Jetty 11 (which is dependent on the HAPI dependency becoming compliant with Jakarta EE 9),
             these dependencies below should be updated as well which will necessitate moving all BFD javax imports to the jakarta versions. -->
+            <!-- some things need javax.xml.bind -->
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version> <!-- ${jakarta.xml.bind.api.version} -->
+            </dependency>
+            <!-- runtime for javax -->
+             <dependency>
+               <groupId>com.sun.xml.bind</groupId>
+               <artifactId>jaxb-impl</artifactId>
+               <version>2.3.6</version>
+             </dependency>
+
+            <!-- other things need jakarta.xml.bind -->
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>${jakarta.xml.bind.api.version}</version>
+                <version>4.0.0</version>  <!-- jakarta version -->
             </dependency>
+            <!-- runtime for jakarta -->
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>${org.glassfish.jaxb.runtime.version}</version>
+                <version>4.0.0</version> <!-- ${org.glassfish.jaxb.runtime.version} -->
             </dependency>
+
+            <dependency>
+                <!-- https://mvnrepository.com/artifact/org.antlr/antlr4-runtime -->
+                <!-- required by hibernate 6 -->
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>4.13.1</version>
+            </dependency>
+
             <dependency>
                 <groupId>jakarta.annotation</groupId>
                 <artifactId>jakarta.annotation-api</artifactId>

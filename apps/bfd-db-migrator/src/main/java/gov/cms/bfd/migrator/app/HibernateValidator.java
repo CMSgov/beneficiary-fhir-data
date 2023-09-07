@@ -1,9 +1,12 @@
 package gov.cms.bfd.migrator.app;
 
+import jakarta.persistence.Entity;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import jakarta.persistence.Entity;
+import javax.annotation.Nullable;
 import javax.sql.DataSource;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
@@ -14,7 +17,13 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
-import org.hibernate.tool.hbm2ddl.SchemaValidator;
+import org.hibernate.engine.config.spi.ConfigurationService;
+import org.hibernate.tool.schema.internal.ExceptionHandlerHaltImpl;
+import org.hibernate.tool.schema.spi.ContributableMatcher;
+import org.hibernate.tool.schema.spi.ExecutionOptions;
+import org.hibernate.tool.schema.spi.SchemaManagementTool;
+import org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator;
+import org.hibernate.tool.schema.spi.SchemaValidator;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +43,7 @@ public class HibernateValidator {
   private final DataSource dataSource;
 
   /** Validates the schema. */
-  private SchemaValidator schemaValidator;
+  @Nullable private SchemaValidator schemaValidator;
 
   /** Holds the configuration data for hibernate. */
   private Configuration hibernateConfiguration;
@@ -51,7 +60,6 @@ public class HibernateValidator {
   public HibernateValidator(DataSource dataSource, List<String> modelPackagesToScan) {
     this.dataSource = dataSource;
     this.modelPackagesToScan = modelPackagesToScan;
-    this.schemaValidator = new SchemaValidator();
     this.hibernateConfiguration = new Configuration();
   }
 
@@ -100,7 +108,17 @@ public class HibernateValidator {
       MetadataSources sources = new MetadataSources(registry);
       Metadata metadata = sources.buildMetadata(registry);
       // This will throw an exception if validation fails
-      schemaValidator.validate(metadata);
+      Map<String, Object> config =
+          new HashMap<>(registry.getService(ConfigurationService.class).getSettings());
+      SchemaValidator schemaValidator = this.schemaValidator;
+      if (schemaValidator == null) {
+        schemaValidator =
+            registry.getService(SchemaManagementTool.class).getSchemaValidator(config);
+      }
+      final ExecutionOptions executionOptions =
+          SchemaManagementToolCoordinator.buildExecutionOptions(
+              config, ExceptionHandlerHaltImpl.INSTANCE);
+      schemaValidator.doValidation(metadata, executionOptions, ContributableMatcher.ALL);
     } catch (HibernateException hx) {
       LOGGER.error("Hibernate validation failed due to: ", hx);
       return false;

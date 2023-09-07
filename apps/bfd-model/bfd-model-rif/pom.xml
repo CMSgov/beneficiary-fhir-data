@@ -54,6 +54,11 @@
             <artifactId>poi</artifactId>
         </dependency>
         <dependency>
+            <!-- required by hibernate 6 -->
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
+        <dependency>
             <!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
                 for JPA entities. This happens happens automagically via javac's annotation
                 processor. -->
@@ -71,15 +76,11 @@
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>3.0.0</version>
-            <scope>provided</scope>
         </dependency>
         <!-- JAXB RI, Jakarta XML Binding - required by hibernate-jpamodelgen -->
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>3.0.0</version>
-            <scope>provided</scope>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
         </dependency>
         <dependency>
             <!-- The Hibernate Annotation Processor to generate JPA 2 static metamodel classes. -->
@@ -127,10 +128,6 @@
                 <exclusion>
                     <groupId>org.jboss.logging</groupId>
                     <artifactId>jboss-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>antlr</groupId>
-                    <artifactId>antlr</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
