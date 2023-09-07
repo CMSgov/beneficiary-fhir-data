@@ -315,7 +315,6 @@ The code generation plugin has a goal for each type of code to be generated.
 
 - The `entities` goal generates Hibernate database entity classes with all appropriate annotations, getters, setters, equals/hashCode, and entity relationship mappings.
 - The `transformers` goal generates data transformation/validation classes to copy data from RDA API protbuf messages into database entity classes.
-- The `csv-writers` goal generates RIF CsvWriter classes for each parent entity.
 - The `sql` goal generates sample SQL DDL for each table that can be used as the basis for creating Flyway migration files.
 - The `random-data` goal generates random data generation classes to create randomized data of appropriate size and type for each object/field in the RDA API messages. (Not in POC)
 - The `synthea-bridge` goal generates data transformation classes to copy data from Synthea RIF data files into protobuf messages. (Not in POC)
