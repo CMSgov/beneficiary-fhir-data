@@ -95,7 +95,7 @@ boolean deployMigrator(Map args = [:]) {
 def monitorMigrator(Map args = [:]) {
     migratorStartTimestamp = java.time.LocalDateTime.now().toString()
     println getFormattedMonitorMsg("Begin Migrator monitoring - ${migratorStartTimestamp}")
-    printlin getFormattedMonitorMsg("NOTE - Messages may appear out of order. Refer to the messageId for the true " +
+    println getFormattedMonitorMsg("NOTE - Messages may appear out of order. Refer to the messageId for the true " +
         "order when debugging.")
 
     sqsQueueName = args.sqsQueueName
