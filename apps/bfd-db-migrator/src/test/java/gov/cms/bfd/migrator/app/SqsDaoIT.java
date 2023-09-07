@@ -4,9 +4,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import gov.cms.bfd.AbstractLocalStackTest;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
@@ -31,7 +31,7 @@ class SqsDaoIT extends AbstractLocalStackTest {
   /** Test creating a queue. */
   @Test
   void createQueue() {
-    String queueName = "my-created-queue.fifo";
+    String queueName = "my-created-queue";
     String createdQueueUri = dao.createQueue(queueName);
     String lookupQueueUri = dao.lookupQueueUrl(queueName);
     assertEquals(createdQueueUri, lookupQueueUri);
@@ -40,16 +40,18 @@ class SqsDaoIT extends AbstractLocalStackTest {
   /** Test sending and receiving. */
   @Test
   void sendAndReceiveMessages() {
-    String queueName = "my-test-queue.fifo";
+    String queueName = "my-test-queue";
     String queueUri = dao.createQueue(queueName);
-    String messageGroupId = queueName;
     String message1 = "this is a first message";
     String message2 = "this is a second message";
-    dao.sendMessage(queueUri, message1, messageGroupId);
-    dao.sendMessage(queueUri, message2, messageGroupId);
-    List<String> receivedMessages = new LinkedList<>();
+    dao.sendMessage(queueUri, message1);
+    dao.sendMessage(queueUri, message2);
+
+    // SQS does not guarantee messages will be received in order so we just collect all
+    // of them and compare to all that we sent.
+    Set<String> receivedMessages = new HashSet<>();
     dao.processAllMessages(queueUri, receivedMessages::add);
-    assertEquals(List.of(message1, message2), receivedMessages);
+    assertEquals(Set.of(message1, message2), receivedMessages);
     assertEquals(Optional.empty(), dao.nextMessage(queueUri));
   }
 
@@ -58,8 +60,7 @@ class SqsDaoIT extends AbstractLocalStackTest {
   void variousNonExistentQueueScenarios() {
     assertThatThrownBy(() -> dao.lookupQueueUrl("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);
-    assertThatThrownBy(
-            () -> dao.sendMessage("no-such-queue-exists", "not gonna make it there", "message-id"))
+    assertThatThrownBy(() -> dao.sendMessage("no-such-queue-exists", "not gonna make it there"))
         .isInstanceOf(QueueDoesNotExistException.class);
     assertThatThrownBy(() -> dao.nextMessage("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);

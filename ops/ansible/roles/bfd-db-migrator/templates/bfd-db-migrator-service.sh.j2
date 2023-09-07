@@ -17,10 +17,6 @@ export DATABASE_USERNAME='{{ db_migrator_db_username }}'
 export NEW_RELIC_METRIC_KEY='{{ db_migrator_new_relic_metric_key }}'
 {%- endif %}
 
-{%- if db_migrator_new_relic_metric_key is defined %}
-export NEW_RELIC_METRIC_KEY='{{ db_migrator_new_relic_metric_key }}'
-{%- endif %}
-
 {%- if db_migrator_new_relic_metric_host is defined %}
 export NEW_RELIC_METRIC_HOST='{{ db_migrator_new_relic_metric_host }}'
 {%- endif %}

@@ -28,9 +28,8 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -50,7 +49,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorAppIT.class);
 
   /** Name of SQS queue created in localstack to receive progress messages via SQS. */
-  private static final String SQS_QUEUE_NAME = "migrator-progress.fifo";
+  private static final String SQS_QUEUE_NAME = "migrator-progress";
 
   /**
    * Name of log file that will contain log output from the migrator. This has to match the value in
@@ -175,14 +174,11 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
       // verify that progress messages were passed to SQS
       final var progressMessages = readProgressMessagesFromSQSQueue();
       assertThat(progressMessages)
-          .isSortedAccordingTo(Comparator.comparing(SqsProgressMessage::getMessageId));
-      assertThat(progressMessages)
           .first()
           .matches(m -> m.getAppStage() == MigratorProgress.Stage.Started);
-      assertThat(progressMessages.get(1))
-          .matches(m -> m.getAppStage() == MigratorProgress.Stage.Connected);
-      assertThat(progressMessages.subList(2, progressMessages.size() - 1))
-          .allMatch(m -> m.getAppStage() == MigratorProgress.Stage.Migrating);
+      assertThat(progressMessages)
+          .anyMatch(m -> m.getAppStage() == MigratorProgress.Stage.Connected)
+          .anyMatch(m -> m.getAppStage() == MigratorProgress.Stage.Migrating);
       assertThat(progressMessages)
           .last()
           .matches(m -> m.getAppStage() == MigratorProgress.Stage.Finished);
@@ -402,10 +398,11 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
    */
   private List<SqsProgressMessage> readProgressMessagesFromSQSQueue() {
     final var queueUrl = sqsDao.lookupQueueUrl(SQS_QUEUE_NAME);
-    var messages = new LinkedList<SqsProgressMessage>();
+    var messages = new ArrayList<SqsProgressMessage>();
     sqsDao.processAllMessages(
         queueUrl,
         messageJson -> messages.add(SqsProgressReporter.convertJsonToMessage(messageJson)));
+    messages.sort(SqsProgressMessage.SORT_BY_IDS);
     return messages;
   }
 }

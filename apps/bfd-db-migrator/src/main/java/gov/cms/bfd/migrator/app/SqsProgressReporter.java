@@ -14,6 +14,7 @@ import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -54,6 +55,16 @@ public class SqsProgressReporter {
   private final AtomicInteger nextMessageId;
 
   /**
+   * Initialize a new instance using UUID for {@link #messageGroupId}.
+   *
+   * @param sqsDao used to communicate with SQS
+   * @param queueUrl identifies the queue to which progress updates are sent
+   */
+  public SqsProgressReporter(SqsDao sqsDao, String queueUrl) {
+    this(sqsDao, queueUrl, UUID.randomUUID().toString());
+  }
+
+  /**
    * Initialize a new instance.
    *
    * @param sqsDao used to communicate with SQS
@@ -84,7 +95,7 @@ public class SqsProgressReporter {
             progress.getStage(),
             progress.getMigrationProgress());
     final var messageText = convertMessageToJson(message);
-    sqsDao.sendMessage(queueUrl, messageText, messageGroupId);
+    sqsDao.sendMessage(queueUrl, messageText);
   }
 
   /**

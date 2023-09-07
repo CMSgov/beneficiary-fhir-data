@@ -22,7 +22,7 @@
 # MIGRATOR CONFIGURATION
 /bfd/prod-sbx/migrator/nonsensitive/instance_type: m6i.large
 /bfd/prod-sbx/migrator/nonsensitive/volume_size: 100
-/bfd/prod-sbx/migrator/nonsensitive/sqs_queue_name: bfd-prod-sbx-migrator.fifo
+/bfd/prod-sbx/migrator/nonsensitive/sqs_queue_name: bfd-prod-sbx-migrator
 /bfd/prod-sbx/migrator/nonsensitive/db_migrator_dir: /opt/bfd-db-migrator
 /bfd/prod-sbx/migrator/nonsensitive/db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
 

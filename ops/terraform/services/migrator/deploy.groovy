@@ -55,7 +55,7 @@ boolean deployMigrator(Map args = [:]) {
         sqsQueueName: sqsQueueName,
         awsRegion: awsRegion,
         heartbeatInterval: heartbeatInterval,
-        maxMessages: 1
+        maxMessages: 10
     )
 
     // re-authenticate
@@ -94,7 +94,9 @@ boolean deployMigrator(Map args = [:]) {
 // 20s at the `heartbeatInterval`
 def monitorMigrator(Map args = [:]) {
     migratorStartTimestamp = java.time.LocalDateTime.now().toString()
-    println getFormattedMonitorMsg("Initialize monitor - ${migratorStartTimestamp}")
+    println getFormattedMonitorMsg("Begin Migrator monitoring - ${migratorStartTimestamp}")
+    printlin getFormattedMonitorMsg("NOTE - Messages may appear out of order. Refer to the messageId for the true " +
+        "order when debugging.")
 
     sqsQueueName = args.sqsQueueName
     awsRegion = args.awsRegion
@@ -116,7 +118,7 @@ def monitorMigrator(Map args = [:]) {
 
             // 1. "handle" (capture status, print, delete) each message
             // 2. if the message body contains a non-running value, return it
-            for (msg in messages) {
+            for (msg in messages.sort{ msg.messageId }) {
                 body = msg.body
                 println getFormattedMonitorMsg(getMigratorStatus(body))
                 awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
@@ -132,19 +134,20 @@ def monitorMigrator(Map args = [:]) {
     println getFormattedMonitorMsg("Migrator started at ${migratorStartTimestamp} is no longer running with a final status of '${migratorStatus}' at ${java.time.LocalDateTime.now().toString()}")
 }
 
-// return migrator messages
+// return migrator status as a formatted string
 String getMigratorStatus(Map body = [:]) {
     migratorStatus = body.appStage
     migrationStage = body?.migrationStage
+    msgIdPrefix = "[${body.messageId}]"
     if (migrationStage != null) {
         statusStage = "${migratorStatus} (${migrationStage.stage})"
         if (migrationStage?.migrationFile != null) {
-            return "${statusStage}: ${migrationStage.migrationFile} (schema version ${migrationStage.version}) ..."
+            return "${msgIdPrefix} ${statusStage}: ${migrationStage.migrationFile} (schema version ${migrationStage.version}) ..."
         } else {
-            return statusStage
+            return "${msgIdPrefix} ${statusStage}"
         }
     }
-    return "${migratorStatus}"
+    return "${msgIdPrefix} ${migratorStatus}"
 }
 
 // checks for indications of a running migrator deployment by looking for unconsumed SQS messages
@@ -157,7 +160,7 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
         migratorMessages = awsSqs.receiveMessages(
             sqsQueueUrl: sqsQueueUrl,
             awsRegion: awsRegion,
-            maxMessages: 1,
+            maxMessages: 10,
             visibilityTimeoutSeconds: 0,
             waitTimeSeconds: 0
         )

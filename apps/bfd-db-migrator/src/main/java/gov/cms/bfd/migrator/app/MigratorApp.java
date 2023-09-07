@@ -236,10 +236,6 @@ public final class MigratorApp {
       final var sqsDao = new SqsDao(sqsClient);
       final var queueName = appConfig.getSqsQueueName();
       final var queueUrl = sqsDao.lookupQueueUrl(queueName);
-      // Presently there is no need for a dynamically generated message group id when sending and
-      // receiving messages, however any static value is required at a bare-minimum for FIFO sqs
-      // queues
-      final var messageGroupId = queueName;
       final var sqsProgressReporter = new SqsProgressReporter(sqsDao, queueUrl, messageGroupId);
       progressConsumer = sqsProgressReporter::reportMigratorProgress;
     }
