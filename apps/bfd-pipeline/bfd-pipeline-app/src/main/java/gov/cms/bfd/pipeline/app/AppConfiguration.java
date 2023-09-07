@@ -91,6 +91,14 @@ public final class AppConfiguration extends BaseAppConfiguration {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getRunInterval()} value. This variable's
+   * value should be the frequency at which this job runs in seconds.
+   */
+  public static final String ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS =
+      "CCW_RIF_JOB_INTERVAL_SECONDS";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
    * #getCcwRifLoadOptions()} {@link LoadAppOptions.PerformanceSettings#getLoaderThreads()} value.
    *
    * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
@@ -385,6 +393,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES, "true")
           .put(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "25")
           .put(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "2")
+          .put(ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS, "30")
           .put(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, "300")
           .put(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "1")
           .put(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS, "1")
@@ -638,9 +647,13 @@ public final class AppConfiguration extends BaseAppConfiguration {
     if (s3ClientConfig.getAwsClientConfig().isCredentialCheckUseful()) {
       LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
     }
-    ExtractionOptions extractionOptions =
+    final ExtractionOptions extractionOptions =
         new ExtractionOptions(s3BucketName, allowedRifFileType, Optional.empty(), s3ClientConfig);
-    return new CcwRifLoadOptions(extractionOptions, loadOptions);
+    final Optional<Duration> runInterval =
+        config
+            .positiveIntOptionZeroOK(ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS)
+            .map(Duration::ofSeconds);
+    return new CcwRifLoadOptions(extractionOptions, loadOptions, runInterval);
   }
 
   /**

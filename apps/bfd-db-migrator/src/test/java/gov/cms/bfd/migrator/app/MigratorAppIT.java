@@ -1,6 +1,10 @@
 package gov.cms.bfd.migrator.app;
 
 import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_QUEUE_NAME;
+import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_BAD_CONFIG;
+import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_HIBERNATE_VALIDATION;
+import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_MIGRATION;
+import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_SUCCESS;
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
@@ -9,30 +13,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
-import gov.cms.bfd.ProcessOutputConsumer;
+import gov.cms.bfd.FileBasedAssertionHelper;
 import gov.cms.bfd.migrator.app.SqsProgressReporter.SqsProgressMessage;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import javax.sql.DataSource;
 import lombok.Getter;
-import org.awaitility.Awaitility;
-import org.awaitility.Durations;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -40,10 +47,24 @@ import org.slf4j.LoggerFactory;
 
 /** Tests the migrator app under various conditions to ensure it works correctly. */
 public final class MigratorAppIT extends AbstractLocalStackTest {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MigratorApp.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MigratorAppIT.class);
 
   /** Name of SQS queue created in localstack to receive progress messages via SQS. */
   private static final String SQS_QUEUE_NAME = "migrator-progress.fifo";
+
+  /**
+   * Name of log file that will contain log output from the migrator. This has to match the value in
+   * our {@code logback-test.xml} file.
+   */
+  private static final String LOG_FILE_PATH = "target/migratorOutput.log";
+
+  /**
+   * Controls access to the log file so that multiple tests do not try to write to it at the same
+   * time. Package accessible so it can be used by other tests as well.
+   */
+  @VisibleForTesting
+  static final FileBasedAssertionHelper LOG_FILE =
+      new FileBasedAssertionHelper(Path.of(LOG_FILE_PATH));
 
   /** Used to communicate with the localstack SQS service. */
   private SqsDao sqsDao;
@@ -79,6 +100,23 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     DatabaseTestUtils.get().dropSchemaForDataSource();
   }
 
+  /**
+   * Locks and truncates the log file so that each test case can read only its own messages from the
+   * file when making assertions about log output.
+   *
+   * @throws Exception unable to lock or truncate the file
+   */
+  @BeforeEach
+  public void lockLogFile() throws Exception {
+    LOG_FILE.beginTest(true, 300);
+  }
+
+  /** Unlocks the log file. */
+  @AfterEach
+  public void releaseLogFile() {
+    LOG_FILE.endTest();
+  }
+
   /** Cleans up the schema after the test. */
   @AfterAll
   public static void teardown() {
@@ -101,43 +139,37 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   void testMigrationRunWhenNoErrorsAndAllFilesRunExpectExitCodeZeroAndSchemaMigrationsRun()
       throws IOException {
     // Setup
-    ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.REAL);
-    appRunBuilder.redirectErrorStream(true);
-    Process appProcess = appRunBuilder.start();
-
-    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
-    Thread appRunConsumerThread = new Thread(appRunConsumer);
-    appRunConsumerThread.start();
+    MigratorApp app = spy(new MigratorApp());
+    ConfigLoader configLoader = createConfigLoader(TestDirectory.REAL);
+    doReturn(configLoader).when(app).createConfigLoader();
 
     int numMigrations = getNumMigrationScripts();
     /* Normally the version would be the same as the number of files, but
     migration #12 is missing for some reason in the real scripts, so the version will be files +1 */
     int expectedVersion = numMigrations + 1;
 
-    // Await start/finish of application
     try {
-      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      // Run the app and collect its output.
+      final int exitCode = app.performMigrationsAndHandleExceptions();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
       assertEquals(
-          0,
-          appProcess.exitValue(),
-          "Did not get expected exit code, \nSTDOUT:\n" + appRunConsumer.getStdoutContents());
+          EXIT_CODE_SUCCESS, exitCode, "Did not get expected exit code, \nOUTPUT:\n" + logOutput);
 
       // Test the migrations occurred by checking the log output
       boolean hasExpectedMigrationLine =
-          hasLogLine(
-              appRunConsumer,
+          logOutput.contains(
               String.format("Successfully applied %s migrations to schema", numMigrations));
 
       assertTrue(
           hasExpectedMigrationLine,
           "Did not find log entry for completing expected number of migrations ("
               + numMigrations
-              + ") \nSTDOUT:\n"
-              + appRunConsumer.getStdoutContents());
+              + ") \nOUTPUT:\n"
+              + logOutput);
       assertTrue(
-          hasLogLine(appRunConsumer, String.format("now at version v%s", expectedVersion)),
+          logOutput.contains(String.format("now at version v%s", expectedVersion)),
           "Did not find log entry for expected final version (v" + expectedVersion + ")");
 
       // verify that progress messages were passed to SQS
@@ -156,172 +188,134 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
           .matches(m -> m.getAppStage() == MigratorProgress.Stage.Finished);
 
     } catch (ConditionTimeoutException e) {
-      throw new RuntimeException(
-          "Migration application failed to start within timeout, STDOUT:\n"
-              + appRunConsumer.getStdoutContents(),
-          e);
+      final String logOutput = LOG_FILE.readFileAsString();
+      fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
 
   /**
    * Test when the migration app runs and the schema is not in the state the models imply, the exit
    * code is 3 (hibernate validation failure).
-   *
-   * @throws IOException if there is an issue starting the app
    */
   @Test
-  void testMigrationRunWhenSchemaDoesntMatchTablesExpectValidationError() throws IOException {
+  void testMigrationRunWhenSchemaDoesntMatchTablesExpectValidationError() {
     // Setup
-    ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.VALIDATION_FAILURE);
-    appRunBuilder.redirectErrorStream(true);
-    Process appProcess = appRunBuilder.start();
+    MigratorApp app = spy(new MigratorApp());
+    ConfigLoader configLoader = createConfigLoader(TestDirectory.VALIDATION_FAILURE);
+    doReturn(configLoader).when(app).createConfigLoader();
 
-    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
-    Thread appRunConsumerThread = new Thread(appRunConsumer);
-    appRunConsumerThread.start();
-
-    // Await start/finish of application
     try {
-      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      // Run the app and collect its output.
+      final int exitCode = app.performMigrationsAndHandleExceptions();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
       assertEquals(
-          3,
-          appProcess.exitValue(),
-          "Did not get expected error code for validation failure., \nSTDOUT:\n"
-              + appRunConsumer.getStdoutContents());
-    } catch (ConditionTimeoutException e) {
-      throw new RuntimeException(
-          "Migration application failed to start within timeout, STDOUT:\n"
-              + appRunConsumer.getStdoutContents(),
-          e);
+          EXIT_CODE_FAILED_HIBERNATE_VALIDATION,
+          exitCode,
+          "Did not get expected error code for validation failure., \nOUTPUT:\n" + logOutput);
+    } catch (Exception e) {
+      final String logOutput = LOG_FILE.readFileAsString();
+      fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
 
-  /**
-   * Test when the migration app runs and there is a configuration error, the exit code is 1.
-   *
-   * @throws IOException if there is an issue starting the app
-   */
+  /** Test when the migration app runs and there is a configuration error, the exit code is 1. */
   @Test
-  void testMigrationRunWhenConfigErrorExpectExitCodeOne() throws IOException {
+  void testMigrationRunWhenConfigErrorExpectExitCodeOne() {
     // Setup
-    // Run the process without configuring the app
-    ProcessBuilder appRunBuilder = new ProcessBuilder(createCommandForMigratorApp());
-    appRunBuilder.redirectErrorStream(true);
-    Process appProcess = appRunBuilder.start();
+    // Sets up the app with an empty configuration.
+    MigratorApp app = spy(new MigratorApp());
+    ConfigLoader configLoader = ConfigLoader.builder().build();
+    doReturn(configLoader).when(app).createConfigLoader();
 
-    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
-    Thread appRunConsumerThread = new Thread(appRunConsumer);
-    appRunConsumerThread.start();
-
-    // Await start/finish of application
     try {
-      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      // Run the app and collect its output.
+      final int exitCode = app.performMigrationsAndHandleExceptions();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
-      assertEquals(1, appProcess.exitValue());
-    } catch (ConditionTimeoutException e) {
-      throw new RuntimeException(
-          "Migration application failed to start within timeout, STDOUT:\n"
-              + appRunConsumer.getStdoutContents(),
-          e);
+      assertEquals(EXIT_CODE_BAD_CONFIG, exitCode);
+    } catch (Exception e) {
+      final String logOutput = LOG_FILE.readFileAsString();
+      fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
 
   /**
    * Test when the migration app runs and there are errors with the sql in a script, the exit code
    * is 2.
-   *
-   * @throws IOException if there is an issue starting the app
    */
   @Test
-  void testMigrationRunWhenSchemaFileErrorExpectFailedExitCodeAndMigrationsNotRun()
-      throws IOException {
+  void testMigrationRunWhenSchemaFileErrorExpectFailedExitCodeAndMigrationsNotRun() {
     // Setup
-    ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.BAD_SQL);
-    appRunBuilder.redirectErrorStream(true);
-    Process appProcess = appRunBuilder.start();
+    MigratorApp app = spy(new MigratorApp());
+    ConfigLoader configLoader = createConfigLoader(TestDirectory.BAD_SQL);
+    doReturn(configLoader).when(app).createConfigLoader();
 
-    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
-    Thread appRunConsumerThread = new Thread(appRunConsumer);
-    appRunConsumerThread.start();
-
-    // Await start/finish of application
     try {
-      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      // Run the app and collect its output.
+      final int exitCode = app.performMigrationsAndHandleExceptions();
+      final String logOutput = LOG_FILE.readFileAsString();
 
       // Verify results
 
       // Ensure the script directory was found (which would cause a false positive failure)
       assertFalse(
-          hasLogLine(appRunConsumer, "Skipping filesystem location"),
-          "Could not find path to test files");
+          logOutput.contains("Skipping filesystem location"), "Could not find path to test files");
 
       assertEquals(
-          2,
-          appProcess.exitValue(),
-          "Exited with the wrong exit code. STDOUT:\n" + appRunConsumer.getStdoutContents());
+          EXIT_CODE_FAILED_MIGRATION,
+          exitCode,
+          "Exited with the wrong exit code. OUTPUT:\n" + logOutput);
 
       // Test flyway threw an exception by checking the log output
-      boolean hasExceptionLogLine = hasLogLine(appRunConsumer, "FlywayMigrateException");
+      boolean hasExceptionLogLine = logOutput.contains("FlywayMigrateException");
       assertTrue(
           hasExceptionLogLine,
-          "Did not have expected log line for migration exception; STDOUT:\n"
-              + appRunConsumer.getStdoutContents());
-    } catch (ConditionTimeoutException e) {
-      throw new RuntimeException(
-          "Migration application failed to start within timeout, STDOUT:\n"
-              + appRunConsumer.getStdoutContents(),
-          e);
+          "Did not have expected log line for migration exception; OUTPUT:\n" + logOutput);
+    } catch (Exception e) {
+      final String logOutput = LOG_FILE.readFileAsString();
+      fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
 
   /**
    * Test when the migration app runs and there are two of the same file with the same version, the
    * exit code is 2.
-   *
-   * @throws IOException if there is an issue starting the app
    */
   @Test
-  void testMigrationRunWhenSchemaFileDuplicateVersionExpectFailedExitCodeAndMigrationsNotRun()
-      throws IOException {
+  void testMigrationRunWhenSchemaFileDuplicateVersionExpectFailedExitCodeAndMigrationsNotRun() {
     // Setup
-    ProcessBuilder appRunBuilder = createAppProcessBuilder(TestDirectory.DUPLICATE_VERSION);
-    appRunBuilder.redirectErrorStream(true);
-    Process appProcess = appRunBuilder.start();
+    MigratorApp app = spy(new MigratorApp());
+    ConfigLoader configLoader = createConfigLoader(TestDirectory.DUPLICATE_VERSION);
+    doReturn(configLoader).when(app).createConfigLoader();
 
-    ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
-    Thread appRunConsumerThread = new Thread(appRunConsumer);
-    appRunConsumerThread.start();
-
-    // Await start/finish of application
     try {
-      Awaitility.await().atMost(Durations.ONE_MINUTE).until(() -> !appProcess.isAlive());
+      // Run the app and collect its output.
+      final int exitCode = app.performMigrationsAndHandleExceptions();
+      final String logOutput = LOG_FILE.readFileAsString();
 
-      LOGGER.info(appRunConsumer.getStdoutContents());
+      LOGGER.info(logOutput);
 
       // Verify results
 
       // Ensure the script directory was found (which would cause a false positive failure)
       assertFalse(
-          hasLogLine(appRunConsumer, "Skipping filesystem location"),
-          "Could not find path to test files");
+          logOutput.contains("Skipping filesystem location"), "Could not find path to test files");
 
-      assertEquals(2, appProcess.exitValue());
+      assertEquals(EXIT_CODE_FAILED_MIGRATION, exitCode);
 
       // Test flyway threw an exception by checking the log output
       assertTrue(
-          hasLogLine(appRunConsumer, "FlywayException"),
-          "Did not find expected flyway exception STDOUT:\n" + appRunConsumer.getStdoutContents());
+          logOutput.contains("FlywayException"),
+          "Did not find expected flyway exception OUTPUT:\n" + logOutput);
       assertTrue(
-          hasLogLine(appRunConsumer, "Found more than one migration with version"),
-          "Did find duplicate version error STDOUT:\n" + appRunConsumer.getStdoutContents());
-    } catch (ConditionTimeoutException e) {
-      throw new RuntimeException(
-          "Migration application failed to start within timeout, STDOUT:\n"
-              + appRunConsumer.getStdoutContents(),
-          e);
+          logOutput.contains("Found more than one migration with version"),
+          "Did find duplicate version error OUTPUT:\n" + logOutput);
+    } catch (Exception e) {
+      final String logOutput = LOG_FILE.readFileAsString();
+      fail("Migration application threw exception, OUTPUT:\n" + logOutput, e);
     }
   }
 
@@ -332,8 +326,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
    * @return the number migration scripts
    * @throws IOException pass through
    */
-  public int getNumMigrationScripts() throws IOException {
-
+  private int getNumMigrationScripts() throws IOException {
     int MAX_SEARCH_DEPTH = 5;
     Path jarFilePath =
         Files.find(
@@ -363,22 +356,18 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   }
 
   /**
-   * Creates a ProcessBuilder for the migrator tests to be run with.
+   * Creates the {@link ConfigLoader} used to configure the app for a test.
    *
    * @param testDirectory the directory the flyway scripts to run for this test are located
-   * @return ProcessBuilder ready with common values set
+   * @return config with common values set
    */
-  private ProcessBuilder createAppProcessBuilder(TestDirectory testDirectory) {
-    String[] command = createCommandForMigratorApp();
-    ProcessBuilder appRunBuilder = new ProcessBuilder(command);
-    appRunBuilder.redirectErrorStream(true);
-
-    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
+  private ConfigLoader createConfigLoader(TestDirectory testDirectory) {
     // Clear the schema before this test
+    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     DatabaseTestUtils.get().dropSchemaForDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
-    Map<String, String> environment = appRunBuilder.environment();
+    ImmutableMap.Builder<String, String> environment = ImmutableMap.builder();
     environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
     environment.put(
         AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
@@ -397,13 +386,13 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
         Path.of(".", "src", "test", "resources", "db", "migration-test", "error-scenarios");
     String testFileDir = testFilePath.toAbsolutePath().toString();
     // If real we'll use the default flyway path, else use the test path
-    if (testDirectory != TestDirectory.REAL) {
+    if (!testDirectory.equals(TestDirectory.REAL)) {
       environment.put(
           AppConfiguration.ENV_VAR_FLYWAY_SCRIPT_LOCATION,
           "filesystem:" + testFileDir + testDirectory.getPath());
     }
 
-    return appRunBuilder;
+    return ConfigLoader.builder().addSingle(environment.build()::get).build();
   }
 
   /**
@@ -418,35 +407,5 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
         queueUrl,
         messageJson -> messages.add(SqsProgressReporter.convertJsonToMessage(messageJson)));
     return messages;
-  }
-
-  /**
-   * Create command for the migrator script to be run.
-   *
-   * @return the command array for the migrator app
-   */
-  private static String[] createCommandForMigratorApp() {
-    try {
-      Path assemblyDirectory =
-          Files.list(Paths.get(".", "target", "db-migrator"))
-              .filter(f -> f.getFileName().toString().startsWith("bfd-db-migrator-"))
-              .findFirst()
-              .orElse(Path.of(""));
-      Path pipelineAppScript = assemblyDirectory.resolve("bfd-db-migrator.sh");
-      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Checks if the app has a line matching the input text (partially or completely).
-   *
-   * @param appRunConsumer the consumer that is ingesting the application output
-   * @param logLine the log line to check for, including fragments
-   * @return {@code true} if the output has the specified log fragment
-   */
-  private static boolean hasLogLine(ProcessOutputConsumer appRunConsumer, String logLine) {
-    return appRunConsumer.matches(line -> line.contains(logLine));
   }
 }

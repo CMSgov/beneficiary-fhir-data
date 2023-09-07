@@ -146,7 +146,8 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               options,
               s3TaskManager,
               listener,
-              false);
+              false,
+              Optional.empty());
       // Process dataset
       ccwJob.call();
 
@@ -279,7 +280,8 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               options,
               s3TaskManager,
               listener,
-              true); // run in idempotent mode
+              true, // run in idempotent mode
+              Optional.empty());
       // Process dataset
       ccwJob.call();
 

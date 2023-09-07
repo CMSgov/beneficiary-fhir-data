@@ -20,6 +20,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,6 +149,8 @@ public final class CcwRifLoadJob implements PipelineJob {
   private final PipelineApplicationState appState;
   /** If the application is in idempotent mode. */
   private final boolean isIdempotentMode;
+  /** Time between runs of the {@link CcwRifLoadJob}. Empty means to run exactly once. */
+  private final Optional<Duration> runInterval;
   /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
@@ -158,28 +161,31 @@ public final class CcwRifLoadJob implements PipelineJob {
    * @param options the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
-   * @param isIdempotentMode the {@link boolean} TRUE if running in idenpotent mode
+   * @param isIdempotentMode the {@link boolean} TRUE if running in idempotent mode
+   * @param runInterval used to construct the job schedule
    */
   public CcwRifLoadJob(
       PipelineApplicationState appState,
       ExtractionOptions options,
       S3TaskManager s3TaskManager,
       DataSetMonitorListener listener,
-      boolean isIdempotentMode) {
+      boolean isIdempotentMode,
+      Optional<Duration> runInterval) {
     this.appState = appState;
     this.appMetrics = appState.getMetrics();
     this.options = options;
     this.s3TaskManager = s3TaskManager;
     this.listener = listener;
     this.isIdempotentMode = isIdempotentMode;
+    this.runInterval = runInterval;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
-    return Optional.of(new PipelineJobSchedule(1, ChronoUnit.SECONDS));
+    return runInterval.map(
+        interval -> new PipelineJobSchedule(interval.toMillis(), ChronoUnit.MILLIS));
   }
 
   /** {@inheritDoc} */
