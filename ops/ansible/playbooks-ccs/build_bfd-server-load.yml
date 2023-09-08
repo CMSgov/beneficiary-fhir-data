@@ -11,6 +11,8 @@
     server_load_dir: /opt/server-load
     # TODO: Remove this when CloudWatch Agent role is properly removed from build tasks
     env: "test"
+    # TODO: Resolve this as feasible
+    python3_version: '3.9.16'
 
   tasks:
     - name: Download BFD Repository
@@ -30,6 +32,21 @@
     - name: Apply latest host security patches
       import_role:
         name: base_patch
+
+    # TODO: Resolve this as feasible
+    - name: Create symbolic links
+      file:
+        src: "{{ item.src }}"
+        path: "{{ item.path }}"
+        state: link
+        force: true
+      loop:
+        - src: /usr/local/bin/python3.{{ python3_version.split('.')[1] }}
+          path: /usr/bin/python3
+        - src: /usr/local/bin/pip3.{{ python3_version.split('.')[1] }}
+          path: /usr/bin/pip3
+      tags:
+        - pre-ami
 
     - name: Apply server-load Role
       import_role:
