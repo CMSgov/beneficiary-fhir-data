@@ -1,8 +1,7 @@
 - name: Configure server-load Controller
   hosts: localhost
-  # TODO: Resolve this as feasible
   vars:
-    ansible_ssh_pipelining: false
+    # TODO: Resolve this as feasible
     python3_version: '3.9.16'
 
   tasks:
