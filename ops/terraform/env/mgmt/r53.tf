@@ -1,13 +1,13 @@
 locals {
   hosted_zones = {
-    for zone in jsondecode(local.sensitive_common_config["r53_hosted_zone_labels_json"]) :
+    for zone in jsondecode(local.sensitive_common_config["r53_hosted_zones_json"]) :
     zone => {
-      domain  = local.sensitive_common_config["r53_hosted_zone_domain_${zone}"]
-      comment = local.sensitive_common_config["r53_hosted_zone_comment_${zone}"]
+      domain  = local.sensitive_common_config["r53_hosted_zone_${zone}_domain"]
+      comment = local.sensitive_common_config["r53_hosted_zone_${zone}_comment"]
       # If a hosted zone does not specify any VPC associations, it is considered a Public zone. If
       # any VPCs are specified, it is considered Private. We handle the case where VPCs are not
       # specified in configuration by returning an empty list.
-      vpc_ids = jsondecode(lookup(local.sensitive_common_config, "r53_hosted_zone_vpcs_json_${zone}", "[]"))
+      vpc_ids = jsondecode(lookup(local.sensitive_common_config, "r53_hosted_zone_${zone}_vpcs_json", "[]"))
     }
   }
   all_r53_vpcs = flatten([for hz_label, hz_config in local.hosted_zones : hz_config.vpc_ids])
@@ -24,6 +24,10 @@ resource "aws_route53_zone" "zones" {
 
   name    = each.value.domain
   comment = each.value.comment
+
+  tags = {
+    "ConfigId" = each.key
+  }
 
   dynamic "vpc" {
     for_each = toset(each.value.vpc_ids)
