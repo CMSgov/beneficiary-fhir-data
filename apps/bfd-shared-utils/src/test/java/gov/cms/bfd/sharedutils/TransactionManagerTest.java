@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.sharedutils;
+package gov.cms.bfd.sharedutils;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

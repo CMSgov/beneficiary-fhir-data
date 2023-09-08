@@ -25,6 +25,7 @@ import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
+import gov.cms.bfd.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
@@ -33,14 +34,13 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceUnit;
+import jakarta.persistence.Persistence;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -52,17 +52,14 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import software.amazon.awssdk.regions.Region;
 
@@ -132,6 +129,11 @@ public class SpringConfiguration {
    * using old MBI hash.
    */
   public static final String PAC_OLD_MBI_HASH_ENABLED = "PacOldMbiHashEnabled";
+
+  /** The persistence unit name for the adjudicated pipeline. */
+  public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+  /** The persistence unit name for the RDA (pre-adjudicated) pipeline. */
+  public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   /**
    * Exposes our {@link ConfigLoader} instance as a singleton to components in the application. If
@@ -208,6 +210,7 @@ public class SpringConfiguration {
    * @return the {@link DataSource} that provides the application's database connection
    */
   @Bean(destroyMethod = "close")
+  @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
   public DataSource dataSource(DataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
 
     HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
@@ -221,36 +224,54 @@ public class SpringConfiguration {
         .build();
   }
 
+  @Bean
+  @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+  public EntityManagerFactory entityManagerFactory(DataSource dataSource) {
+    return createEntityManagerFactory(dataSource, PERSISTENCE_UNIT_NAME);
+  }
+
   /**
    * Creates the transaction manager for the application from a factory.
    *
    * @param entityManagerFactory the {@link EntityManagerFactory} to use
-   * @return the {@link JpaTransactionManager} for the application
+   * @return the {@link TransactionManager} for the application
    */
   @Bean
-  public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-    JpaTransactionManager retVal = new JpaTransactionManager();
-    retVal.setEntityManagerFactory(entityManagerFactory);
-    return retVal;
+  @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+  public TransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+    return new TransactionManager(entityManagerFactory);
   }
 
   /**
-   * Creates the entity manager factory from a datasource.
+   * Creates an entity manager factory.
    *
-   * @param dataSource the {@link DataSource} for the application
-   * @return the {@link LocalContainerEntityManagerFactoryBean}, which ensures that other beans can
-   *     safely request injection of {@link EntityManager} instances
+   * @param pooledDataSource the JDBC {@link DataSource} for the application's database
+   * @param persistenceUnitName the persistence unit name
+   * @return a JPA {@link EntityManagerFactory} for the application's database
    */
-  @Bean
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-    LocalContainerEntityManagerFactoryBean containerEmfBean =
-        new LocalContainerEntityManagerFactoryBean();
-    containerEmfBean.setDataSource(dataSource);
-    containerEmfBean.setPackagesToScan("gov.cms.bfd.model");
-    containerEmfBean.setPersistenceProvider(new HibernatePersistenceProvider());
-    containerEmfBean.setJpaProperties(jpaProperties());
-    containerEmfBean.afterPropertiesSet();
-    return containerEmfBean;
+  private static EntityManagerFactory createEntityManagerFactory(
+      DataSource pooledDataSource, String persistenceUnitName) {
+    /*
+     * The number of JDBC statements that will be queued/batched within a single transaction. Most
+     * recommendations suggest this should be 5-30. Paradoxically, setting it higher seems to
+     * actually slow things down. Presumably, it's delaying work that could be done earlier in a
+     * batch, and that starts to cost more than the extra network roundtrips.
+     */
+    final int jdbcBatchSize = 10;
+
+    Map<String, Object> hibernateProperties = new HashMap<>();
+    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, pooledDataSource);
+    /*
+     * Hibernate validation is done in the validator app, so leave HBM2DDL_AUTO disabled here.
+     * This defaults to NONE, but just explicitly noting this.
+     */
+    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.NONE);
+    hibernateProperties.put(
+        org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
+
+    EntityManagerFactory entityManagerFactory =
+        Persistence.createEntityManagerFactory(persistenceUnitName, jpaProperties());
+    return entityManagerFactory;
   }
 
   /**
@@ -258,7 +279,7 @@ public class SpringConfiguration {
    *
    * @return the jpa properties
    */
-  private Properties jpaProperties() {
+  private static Properties jpaProperties() {
     Properties extraProperties = new Properties();
     /*
      * Hibernate validation is being disabled in the applications so that
@@ -297,18 +318,6 @@ public class SpringConfiguration {
     extraProperties.put("jakarta.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
 
     return extraProperties;
-  }
-
-  /**
-   * Creates a Spring {@link BeanPostProcessor} that enables the use of the JPA {@link
-   * PersistenceUnit} and {@link PersistenceContext} annotations for injection of {@link
-   * EntityManagerFactory} and {@link EntityManager} instances, respectively, into beans.
-   *
-   * @return the post processor
-   */
-  @Bean
-  public PersistenceAnnotationBeanPostProcessor persistenceAnnotationProcessor() {
-    return new PersistenceAnnotationBeanPostProcessor();
   }
 
   /**

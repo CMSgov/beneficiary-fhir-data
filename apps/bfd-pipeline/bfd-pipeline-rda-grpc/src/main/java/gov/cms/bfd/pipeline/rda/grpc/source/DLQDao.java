@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.model.rda.MessageError;
-import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.sharedutils.TransactionManager;
 import java.time.Clock;
 import java.time.temporal.ChronoUnit;
 import java.util.List;

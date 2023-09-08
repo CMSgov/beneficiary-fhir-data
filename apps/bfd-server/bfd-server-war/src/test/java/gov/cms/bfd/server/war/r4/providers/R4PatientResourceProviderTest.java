@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,8 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.sharedutils.TransactionManager;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -115,10 +118,17 @@ public class R4PatientResourceProviderTest {
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
+    TransactionManager transactionManager = mock(TransactionManager.class);
+    doAnswer(
+            args -> {
+              ThrowingFunction functionLogic = args.getArgument(0, ThrowingFunction.class);
+              return functionLogic.apply(entityManager);
+            })
+        .when(transactionManager)
+        .executeFunction(any());
     patientProvider =
         new R4PatientResourceProvider(
-            metricRegistry, loadedFilterManager, beneficiaryTransformerV2);
-    patientProvider.setEntityManager(entityManager);
+            transactionManager, metricRegistry, loadedFilterManager, beneficiaryTransformerV2);
 
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));

@@ -38,9 +38,9 @@ import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.sharedutils.TransactionManager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -64,7 +64,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.jpa.QueryHints;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -102,8 +101,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
       Arrays.asList("true", "false", "mbi");
 
-  /** The Entity manager. */
-  private EntityManager entityManager;
+  /** The transaction manager. */
+  private final TransactionManager transactionManager;
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
   /** The Loaded filter manager. */
@@ -125,22 +124,14 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @param beneficiaryTransformerV2 the beneficiary transformer
    */
   public R4PatientResourceProvider(
+      TransactionManager transactionManager,
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
       BeneficiaryTransformerV2 beneficiaryTransformerV2) {
+    this.transactionManager = transactionManager;
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.beneficiaryTransformerV2 = requireNonNull(beneficiaryTransformerV2);
-  }
-
-  /**
-   * Sets the {@link #entityManager}.
-   *
-   * @param entityManager a JPA {@link EntityManager} connected to the application's database
-   */
-  @PersistenceContext
-  public void setEntityManager(EntityManager entityManager) {
-    this.entityManager = entityManager;
   }
 
   /** {@inheritDoc} */
@@ -187,46 +178,50 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
-    Root<Beneficiary> root = criteria.from(Beneficiary.class);
-    root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
-    root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+    return transactionManager.executeFunction(
+        entityManager -> {
+          CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+          CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
+          Root<Beneficiary> root = criteria.from(Beneficiary.class);
+          root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
+          root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
 
-    criteria.select(root);
-    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
+          criteria.select(root);
+          criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
 
-    Beneficiary beneficiary = null;
-    Long beneByIdQueryNanoSeconds = null;
-    Timer.Context timerBeneQuery =
-        metricRegistry
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id"))
-            .time();
-    try {
-      beneficiary = entityManager.createQuery(criteria).getSingleResult();
+          Beneficiary beneficiary = null;
+          Long beneByIdQueryNanoSeconds = null;
+          Timer.Context timerBeneQuery =
+              metricRegistry
+                  .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id"))
+                  .time();
+          try {
+            beneficiary = entityManager.createQuery(criteria).getSingleResult();
 
-      // Add bene_id to MDC logs
-      LoggingUtils.logBeneIdToMdc(beneId);
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(1);
-    } catch (NoResultException e) {
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(0);
+            // Add bene_id to MDC logs
+            LoggingUtils.logBeneIdToMdc(beneId);
+            // Add number of resources to MDC logs
+            LoggingUtils.logResourceCountToMdc(1);
+          } catch (NoResultException e) {
+            // Add number of resources to MDC logs
+            LoggingUtils.logResourceCountToMdc(0);
 
-      throw new ResourceNotFoundException(patientId);
-    } finally {
-      beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+            throw new ResourceNotFoundException(patientId);
+          } finally {
+            beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
-      TransformerUtilsV2.recordQueryInMdc(
-          String.format(
-              "bene_by_id_include_%s",
-              String.join(
-                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
-          beneByIdQueryNanoSeconds,
-          beneficiary == null ? 0 : 1);
-    }
+            TransformerUtilsV2.recordQueryInMdc(
+                String.format(
+                    "bene_by_id_include_%s",
+                    String.join(
+                        "_",
+                        (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
+                beneByIdQueryNanoSeconds,
+                beneficiary == null ? 0 : 1);
+          }
 
-    return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
+          return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
+        });
   }
 
   /**
@@ -354,29 +349,32 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
               value = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_VALUE)
           String cursor,
       RequestDetails requestDetails) {
+    return transactionManager.executeFunction(
+        entityManager -> {
+          String contractMonth =
+              coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
+          CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
+          String contractMonthValue = partDFieldByMonth(partDContractMonth);
 
-    String contractMonth =
-        coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
-    CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
-    String contractMonthValue = partDFieldByMonth(partDContractMonth);
+          // Figure out which year they're searching for.
+          int year = Year.now().getValue();
+          if (referenceYear != null && !StringUtils.isEmpty(referenceYear.getValueNotNull())) {
+            /*
+             * TODO Once AB2D has switched to always specifying the year, the implicit
+             * `else` on this
+             * needs to become an invalid request.
+             */
+            try {
+              year = Integer.parseInt(referenceYear.getValueNotNull());
+            } catch (NumberFormatException e) {
+              throw new InvalidRequestException("Contract year must be a number.", e);
+            }
+          }
 
-    // Figure out which year they're searching for.
-    int year = Year.now().getValue();
-    if (referenceYear != null && !StringUtils.isEmpty(referenceYear.getValueNotNull())) {
-      /*
-       * TODO Once AB2D has switched to always specifying the year, the implicit
-       * `else` on this
-       * needs to become an invalid request.
-       */
-      try {
-        year = Integer.parseInt(referenceYear.getValueNotNull());
-      } catch (NumberFormatException e) {
-        throw new InvalidRequestException("Contract year must be a number.", e);
-      }
-    }
-
-    YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
-    return searchByCoverageContractAndYearMonth(coverageId, ym.atDay(1), requestDetails);
+          YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
+          return searchByCoverageContractAndYearMonth(
+              entityManager, coverageId, ym.atDay(1), requestDetails);
+        });
   }
 
   /**
@@ -398,37 +396,44 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       String cursor,
       RequestDetails requestDetails) {
     checkCoverageId(coverageId);
-    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
-    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    return transactionManager.executeFunction(
+        entityManager -> {
+          RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
+          PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
 
-    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
-    operation.setOption("by", "coverageContract");
-    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
-    operation.publishOperationName();
+          CanonicalOperation operation =
+              new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
+          operation.setOption("by", "coverageContract");
+          requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
+          operation.publishOperationName();
 
-    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(coverageId, requestHeader, paging);
-    boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
-    if (hasAnotherPage) {
-      matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
-      paging = new PatientLinkBuilder(paging, hasAnotherPage);
-    }
+          List<Beneficiary> matchingBeneficiaries =
+              fetchBeneficiaries(entityManager, coverageId, requestHeader, paging);
+          boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
+          if (hasAnotherPage) {
+            matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
+            paging = new PatientLinkBuilder(paging, hasAnotherPage);
+          }
 
-    List<IBaseResource> patients =
-        matchingBeneficiaries.stream()
-            .map(
-                beneficiary -> {
-                  // Null out the unhashed HICNs
-                  beneficiary.setHicnUnhashed(Optional.empty());
+          List<IBaseResource> patients =
+              matchingBeneficiaries.stream()
+                  .map(
+                      beneficiary -> {
+                        // Null out the unhashed HICNs
+                        beneficiary.setHicnUnhashed(Optional.empty());
 
-                  Patient patient = beneficiaryTransformerV2.transform(beneficiary, requestHeader);
-                  return patient;
-                })
-            .collect(Collectors.toList());
+                        Patient patient =
+                            beneficiaryTransformerV2.transform(beneficiary, requestHeader);
+                        return patient;
+                      })
+                  .collect(Collectors.toList());
 
-    Bundle bundle =
-        TransformerUtilsV2.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
-    TransformerUtilsV2.workAroundHAPIIssue1585(requestDetails);
-    return bundle;
+          Bundle bundle =
+              TransformerUtilsV2.createBundle(
+                  patients, paging, loadedFilterManager.getTransactionTime());
+          TransformerUtilsV2.workAroundHAPIIssue1585(requestDetails);
+          return bundle;
+        });
   }
 
   /**
@@ -497,7 +502,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the beneficiaries
    */
   private List<Beneficiary> fetchBeneficiaries(
-      TokenParam coverageId, RequestHeaders requestHeader, PatientLinkBuilder paging) {
+      EntityManager entityManager,
+      TokenParam coverageId,
+      RequestHeaders requestHeader,
+      PatientLinkBuilder paging) {
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
@@ -515,15 +523,15 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
-          queryBeneficiaryIds(contractMonthField, contractCode, paging)
+          queryBeneficiaryIds(entityManager, contractMonthField, contractCode, paging)
               .setMaxResults(paging.getQueryMaxSize())
               .getResultList();
 
       // Fetch the benes using the ids
-      return queryBeneficiariesByIds(ids).getResultList();
+      return queryBeneficiariesByIds(entityManager, ids).getResultList();
     } else {
       // Fetch benes and their histories in one query
-      return queryBeneficiariesBy(contractMonthField, contractCode, paging)
+      return queryBeneficiariesBy(entityManager, contractMonthField, contractCode, paging)
           .setMaxResults(paging.getQueryMaxSize())
           .getResultList();
     }
@@ -538,7 +546,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the query object
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
-      String field, String value, PatientLinkBuilder paging) {
+      EntityManager entityManager, String field, String value, PatientLinkBuilder paging) {
     String joinsClause = "left join fetch b.skippedRifRecords ";
     boolean passDistinctThrough = false;
 
@@ -595,7 +603,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the query object
    */
   private TypedQuery<String> queryBeneficiaryIds(
-      String field, String value, PatientLinkBuilder paging) {
+      EntityManager entityManager, String field, String value, PatientLinkBuilder paging) {
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
           "select b.beneficiaryId from Beneficiary b "
@@ -626,7 +634,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @param ids to use
    * @return the query object
    */
-  private TypedQuery<Beneficiary> queryBeneficiariesByIds(List<String> ids) {
+  private TypedQuery<Beneficiary> queryBeneficiariesByIds(
+      EntityManager entityManager, List<String> ids) {
     String joinsClause = "left join fetch b.beneficiaryHistories ";
     boolean passDistinctThrough = false;
 
@@ -689,49 +698,56 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
-    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
+    return transactionManager.executeFunction(
+        entityManager -> {
+          RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
-    operation.setOption("by", "identifier");
-    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
-    operation.setOption(
-        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
-    operation.publishOperationName();
+          CanonicalOperation operation =
+              new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
+          operation.setOption("by", "identifier");
+          requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
+          operation.setOption(
+              "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
+          operation.publishOperationName();
 
-    List<IBaseResource> patients;
+          List<IBaseResource> patients;
 
-    try {
-      Patient patient;
-      switch (identifier.getSystem()) {
-        case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
-          patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
-          break;
-        case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
-        case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
-          patient = queryDatabaseByHicnHash(identifier.getValue(), requestHeader);
-          break;
-        default:
-          throw new InvalidRequestException(
-              "Unsupported identifier system: " + identifier.getSystem());
-      }
+          try {
+            Patient patient;
+            switch (identifier.getSystem()) {
+              case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
+                patient =
+                    queryDatabaseByMbiHash(entityManager, identifier.getValue(), requestHeader);
+                break;
+              case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
+              case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
+                patient =
+                    queryDatabaseByHicnHash(entityManager, identifier.getValue(), requestHeader);
+                break;
+              default:
+                throw new InvalidRequestException(
+                    "Unsupported identifier system: " + identifier.getSystem());
+            }
 
-      patients =
-          QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)
-              ? Collections.singletonList(patient)
-              : Collections.emptyList();
-    } catch (NoResultException e) {
-      patients = new LinkedList<>();
-    }
+            patients =
+                QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)
+                    ? Collections.singletonList(patient)
+                    : Collections.emptyList();
+          } catch (NoResultException e) {
+            patients = new LinkedList<>();
+          }
 
-    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
+          OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
 
-    Bundle bundle =
-        TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+          Bundle bundle =
+              TransformerUtilsV2.createBundle(
+                  paging, patients, loadedFilterManager.getTransactionTime());
 
-    // Add bene_id to MDC logs
-    LoggingUtils.logBenesToMdc(bundle);
+          // Add bene_id to MDC logs
+          LoggingUtils.logBenesToMdc(bundle);
 
-    return bundle;
+          return bundle;
+        });
   }
 
   /**
@@ -745,9 +761,15 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByHicnHash(String hicnHash, RequestHeaders requestHeader) {
+  private Patient queryDatabaseByHicnHash(
+      EntityManager entityManager, String hicnHash, RequestHeaders requestHeader) {
     return queryDatabaseByHash(
-        hicnHash, "hicn", Beneficiary_.hicn, BeneficiaryHistory_.hicn, requestHeader);
+        entityManager,
+        hicnHash,
+        "hicn",
+        Beneficiary_.hicn,
+        BeneficiaryHistory_.hicn,
+        requestHeader);
   }
 
   /**
@@ -761,9 +783,15 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByMbiHash(String mbiHash, RequestHeaders requestHeader) {
+  private Patient queryDatabaseByMbiHash(
+      EntityManager entityManager, String mbiHash, RequestHeaders requestHeader) {
     return queryDatabaseByHash(
-        mbiHash, "mbi", Beneficiary_.mbiHash, BeneficiaryHistory_.mbiHash, requestHeader);
+        entityManager,
+        mbiHash,
+        "mbi",
+        Beneficiary_.mbiHash,
+        BeneficiaryHistory_.mbiHash,
+        requestHeader);
   }
 
   /**
@@ -781,6 +809,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Trace
   private Patient queryDatabaseByHash(
+      EntityManager entityManager,
       String hash,
       String hashType,
       SingularAttribute<Beneficiary, String> beneficiaryHashField,
@@ -946,7 +975,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    *     {@link Beneficiary#getHicn()} hash value
    */
   @Trace
-  private Beneficiary selectBeneWithLatestReferenceYear(List<Beneficiary> duplicateBenes) {
+  private Beneficiary selectBeneWithLatestReferenceYear(
+      EntityManager entityManager, List<Beneficiary> duplicateBenes) {
     BigDecimal maxReferenceYear = new BigDecimal(-0001);
     String maxReferenceYearMatchingBeneficiaryId = null;
 
@@ -1039,7 +1069,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the matching {@link Beneficiary}s
    */
   @Trace
-  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<Long> ids) {
+  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(
+      EntityManager entityManager, List<Long> ids) {
 
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -1059,11 +1090,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                     getClass().getSimpleName(), "query", "benes_by_year_month_part_d_contract_id"))
             .time();
     try {
-      matchingBenes =
-          entityManager
-              .createQuery(beneCriteria)
-              .setHint(QueryHints.HINT_PASS_DISTINCT_THROUGH, false)
-              .getResultList();
+      matchingBenes = entityManager.createQuery(beneCriteria).getResultList();
       return matchingBenes;
     } finally {
       beneMatchesTimerQueryNanoSeconds = beneIdTimer.stop();
@@ -1125,7 +1152,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      TokenParam coverageId, LocalDate yearMonth, RequestDetails requestDetails) {
+      EntityManager entityManager,
+      TokenParam coverageId,
+      LocalDate yearMonth,
+      RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
@@ -1137,7 +1167,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     operation.publishOperationName();
 
     List<Beneficiary> matchingBeneficiaries =
-        fetchBeneficiariesByContractAndYearMonth(coverageId, yearMonth, paging);
+        fetchBeneficiariesByContractAndYearMonth(entityManager, coverageId, yearMonth, paging);
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -1170,7 +1200,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Trace
   private List<Beneficiary> fetchBeneficiariesByContractAndYearMonth(
-      TokenParam coverageId, LocalDate yearMonth, PatientLinkBuilder paging) {
+      EntityManager entityManager,
+      TokenParam coverageId,
+      LocalDate yearMonth,
+      PatientLinkBuilder paging) {
     String contractCode = coverageId.getValueNotNull();
 
     /*
@@ -1188,7 +1221,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      */
     if (!paging.isPagingRequested() || paging.isFirstPage()) {
       boolean matchingBeneExists =
-          queryBeneExistsByPartDContractCodeAndYearMonth(yearMonth, contractCode);
+          queryBeneExistsByPartDContractCodeAndYearMonth(entityManager, yearMonth, contractCode);
       if (!matchingBeneExists) {
         return Collections.emptyList();
       }
@@ -1208,13 +1241,14 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     // Fetch the Beneficiary.id values that we will get results for.
     List<Long> ids =
-        queryBeneficiaryIdsByPartDContractCodeAndYearMonth(yearMonth, contractCode, paging);
+        queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
+            entityManager, yearMonth, contractCode, paging);
     if (ids.isEmpty()) {
       return Collections.emptyList();
     }
 
     // Fetch the benes using the ids
-    return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids);
+    return queryBeneficiariesByIdsWithBeneficiaryMonthlys(entityManager, ids);
   }
 
   /**
@@ -1227,7 +1261,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Trace
   private boolean queryBeneExistsByPartDContractCodeAndYearMonth(
-      LocalDate yearMonth, String contractId) {
+      EntityManager entityManager, LocalDate yearMonth, String contractId) {
     // Create the query to run.
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -1286,7 +1320,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Trace
   private List<Long> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
-      LocalDate yearMonth, String contractId, PatientLinkBuilder paging) {
+      EntityManager entityManager,
+      LocalDate yearMonth,
+      String contractId,
+      PatientLinkBuilder paging) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> beneIdCriteria = builder.createQuery(Long.class);

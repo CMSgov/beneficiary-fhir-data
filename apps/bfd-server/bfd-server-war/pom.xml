@@ -23,6 +23,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <!-- Required for integration tests to run correctly. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-server-launcher</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -140,16 +147,14 @@
             <version>1</version>
         </dependency>
         <dependency>
-            <!-- We mostly use Spring to ensure that our JPA EntityManagers are properly
-                managed. -->
+            <!-- We mostly use Spring to provide dependency injection. -->
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
         <dependency>
-            <!-- We're really not using much of the Spring Data JPA framework; we
-                mostly just need its Hibernate JPA glue. -->
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
+            <!-- We mostly use Spring to provide dependency injection. -->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
         </dependency>
 
         <dependency>

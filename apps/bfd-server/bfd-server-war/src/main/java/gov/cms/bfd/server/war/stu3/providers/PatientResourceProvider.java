@@ -63,7 +63,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.jpa.QueryHints;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -683,11 +682,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                     getClass().getSimpleName(), "query", "benes_by_year_month_part_d_contract_id"))
             .time();
     try {
-      matchingBenes =
-          entityManager
-              .createQuery(beneCriteria)
-              .setHint(QueryHints.HINT_PASS_DISTINCT_THROUGH, false)
-              .getResultList();
+      matchingBenes = entityManager.createQuery(beneCriteria).getResultList();
       return matchingBenes;
     } finally {
       beneMatchesTimerQueryNanoSeconds = beneIdTimer.stop();
