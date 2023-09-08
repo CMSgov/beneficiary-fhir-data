@@ -45,6 +45,7 @@ locals {
     local.sensitive_service_config["subnet_to_ip_reservations_nlb_json"]
   )
   host_key              = local.sensitive_service_config["sftp_transfer_server_host_private_key"]
+  eft_r53_hosted_zone   = local.sensitive_service_config["r53_hosted_zone"]
   eft_user_sftp_pub_key = local.sensitive_service_config["sftp_eft_user_public_key"]
   eft_user_username     = local.sensitive_service_config["sftp_eft_user_username"]
   eft_bucket_partners   = jsondecode(local.sensitive_service_config["partners_with_bucket_access_json"])
@@ -180,6 +181,18 @@ resource "aws_lb" "this" {
       subnet_id            = data.aws_subnet.this[subnet_mapping.key].id
       private_ipv4_address = subnet_mapping.value
     }
+  }
+}
+
+resource "aws_route53_record" "nlb_alias" {
+  name    = "${local.env}.${local.service}.${data.aws_route53_zone.this.name}"
+  type    = "A"
+  zone_id = data.aws_route53_zone.this.zone_id
+
+  alias {
+    name                   = aws_lb.this.dns_name
+    zone_id                = aws_lb.this.zone_id
+    evaluate_target_health = true
   }
 }
 
