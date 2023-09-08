@@ -9,6 +9,7 @@ locals {
   default_tags     = module.terraservice.default_tags
   env              = module.terraservice.env
   is_ephemeral_env = module.terraservice.is_ephemeral_env
+  seed_env         = module.terraservice.seed_env
 
   service        = "common"
   legacy_service = "admin"
