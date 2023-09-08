@@ -177,6 +177,14 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         CcwCodebookVariable.IME_OP_CLM_VAL_AMT,
         claimGroup.getIndirectMedicalEducationAmount());
 
+    // CLM_UNCOMPD_CARE_PMT_AMT => ExplanationOfBenefit.extension[N].valueMoney.value
+    if (claimGroup.getClaimUncompensatedCareAmount().isPresent()) {
+      TransformerUtilsV2.addAdjudicationTotal(
+          eob,
+          CcwCodebookVariable.CLM_UNCOMPD_CARE_PMT_AMT,
+          claimGroup.getClaimUncompensatedCareAmount().get());
+    }
+
     // DSH_OP_CLM_VAL_AMT => ExplanationOfBenefit.extension
     TransformerUtilsV2.addAdjudicationTotal(
         eob, CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claimGroup.getDisproportionateShareAmount());
