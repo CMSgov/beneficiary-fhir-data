@@ -118,7 +118,7 @@ def monitorMigrator(Map args = [:]) {
 
             // 1. "handle" (capture status, print, delete) each message
             // 2. if the message body contains a non-running value, return it
-            for (msg in messages.sort{ msg.messageId }) {
+            for (msg in messages) {
                 body = msg.body
                 println getFormattedMonitorMsg(getMigratorStatus(body))
                 awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
