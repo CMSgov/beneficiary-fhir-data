@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -645,7 +646,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Tests that the transformer sets the expected number of extensions for this claim type. */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(9, eob.getExtension().size());
+    assertEquals(10, eob.getExtension().size());
   }
 
   /** Tests that the transformer sets the expected "near line" extensions. */
@@ -1897,6 +1898,28 @@ public final class InpatientClaimTransformerV2Test {
             .setUsed(new UnsignedIntType(0));
 
     assertTrue(compare.equalsDeep(benefit));
+  }
+
+  /** Tests that the transformer sets the expected clm_uncompd_care_pmt_amt. */
+  @Test
+  public void shouldHaveClaimUncompensatedCarePmtAmt() {
+
+    Optional<BigDecimal> expectedValue = claim.getClaimUncompensatedCareAmount();
+    assertTrue(expectedValue.isPresent());
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt",
+            eob.getExtension());
+
+    Extension expectedExtension =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt",
+            new Money()
+                .setValue(expectedValue.get())
+                .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    assertTrue(expectedExtension.equalsDeep(ex));
   }
 
   /**
