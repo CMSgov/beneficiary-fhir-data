@@ -52,7 +52,7 @@ More useful links:
 Given these constraints, it is possible for some use cases to load large volumes of data with Athena (using
 `insert into select`) at a much cheaper AWS cost than with Glue. However, the 30 minute timeout and 100 partition
 maximum may result in spending engineer time (another aspect of cost that should be considered) to break up the job
-manually. For a practical example, see this [Runbook](../../docs/runbooks/how-to-load-cloudwatch-historical-data.md).
+manually. For a practical example, see this [Runbook](https://github.com/CMSgov/beneficiary-fhir-data/wiki/how-to-load-cloudwatch-historical-data#how-to-load-cloudwatch-historical-data).
 
 ### Know your AWS features and their cost implications
 
