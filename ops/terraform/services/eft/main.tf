@@ -5,21 +5,21 @@ module "terraservice" {
   relative_module_root = "ops/terraform/services/eft"
   additional_tags = {
     Layer = local.layer
-    Name  = "bfd-${local.env}-${local.service}"
+    Name  = local.full_name
     role  = local.service
   }
 }
 
 locals {
 
-  default_tags = module.terraservice.default_tags
-  env          = module.terraservice.env
-  seed_env     = module.terraservice.seed_env
+  default_tags     = module.terraservice.default_tags
+  env              = module.terraservice.env
+  seed_env         = module.terraservice.seed_env
   is_ephemeral_env = module.terraservice.is_ephemeral_env
 
 
-  service = "eft"
-  layer   = "data"
+  service   = "eft"
+  layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"
 
   nonsensitive_common_map = zipmap(
@@ -60,8 +60,8 @@ locals {
 
   # Data source lookups
 
-  account_id = data.aws_caller_identity.current.account_id
-  vpc_id     = data.aws_vpc.this.id
+  account_id     = data.aws_caller_identity.current.account_id
+  vpc_id         = data.aws_vpc.this.id
   kms_key_id     = data.aws_kms_key.cmk.arn
   sftp_port      = 22
   logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
@@ -83,7 +83,6 @@ locals {
 
 resource "aws_s3_bucket" "this" {
   bucket = local.full_name
-  tags   = { Name = local.full_name }
 }
 
 resource "aws_s3_bucket_versioning" "this" {

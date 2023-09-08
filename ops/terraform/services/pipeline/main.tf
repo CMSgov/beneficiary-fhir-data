@@ -15,9 +15,9 @@ locals {
   account_id        = data.aws_caller_identity.current.account_id
   layer             = "data"
   create_etl_user   = local.is_prod || var.force_etl_user_creation
-  create_slis       = contains(local.established_envs, local.env) || var.force_sli_creation
-  create_dashboard  = contains(local.established_envs, local.env) || var.force_dashboard_creation
-  create_slo_alarms = (contains(local.established_envs, local.env) || var.force_slo_alarms_creation) && local.create_slis
+  create_slis       = !local.is_ephemeral_env || var.force_sli_creation
+  create_dashboard  = !local.is_ephemeral_env || var.force_dashboard_creation
+  create_slo_alarms = (!local.is_ephemeral_env || var.force_slo_alarms_creation) && local.create_slis
   jdbc_suffix       = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
