@@ -32,7 +32,7 @@ locals {
   }
   # This returns an object with nested keys in the following format: ssm_config.<top-level hierarchy
   # name>.<service name>; for example, to get a parameter named "vpc_name" in BFD's hierarchy in the
-  # "common" service, it would be: local.ssm_config.bfd.vpc_name.
+  # "common" service, it would be: local.ssm_config.bfd.common.vpc_name.
   # FUTURE: Refactor this out into a distinct module much like bfd-terraservice above
   ssm_config = {
     # This would be much easier if Terraform had a reduce() or if merge() was a deep merge instead
