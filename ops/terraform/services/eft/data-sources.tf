@@ -45,3 +45,21 @@ data "aws_network_interface" "vpc_endpoint" {
 data "aws_vpc_endpoint_service" "transfer_server" {
   service_name = "com.amazonaws.us-east-1.transfer.server"
 }
+
+data "aws_ssm_parameter" "zone_name" {
+  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_${local.eft_r53_hosted_zone}_domain"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "zone_is_private" {
+  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_${local.eft_r53_hosted_zone}_is_private"
+  with_decryption = true
+}
+
+data "aws_route53_zone" "this" {
+  name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
+  private_zone = nonsensitive(data.aws_ssm_parameter.zone_is_private.value)
+  tags = {
+    "ConfigId" = local.eft_r53_hosted_zone
+  }
+}

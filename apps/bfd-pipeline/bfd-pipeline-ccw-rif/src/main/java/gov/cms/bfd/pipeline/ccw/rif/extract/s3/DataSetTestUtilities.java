@@ -26,6 +26,20 @@ import javax.xml.bind.Marshaller;
  */
 public class DataSetTestUtilities {
   /**
+   * Computes the key prefix for a given manifest's contents within an S3 bucket.
+   *
+   * @param location the location to find the object, should be {@link
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS}, {@link
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}, or {@link
+   *     CcwRifLoadJob#S3_PREFIX_COMPLETED_DATA_SETS}
+   * @param manifest the {@link DataSetManifest} to push as an object
+   * @return the computed key prefix
+   */
+  public static String keyPrefixForManifest(String location, DataSetManifest manifest) {
+    return String.format("%s/%s", location, manifest.getTimestampText());
+  }
+
+  /**
    * Creates a put request for the specified S3 bucket.
    *
    * @param s3Dao the {@link S3Dao} client to use
@@ -33,9 +47,7 @@ public class DataSetTestUtilities {
    * @param manifest the {@link DataSetManifest} to push as an object
    */
   public static void putObject(S3Dao s3Dao, String bucket, DataSetManifest manifest) {
-    String keyPrefix =
-        String.format(
-            "%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
+    String keyPrefix = keyPrefixForManifest(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, manifest);
     putObject(s3Dao, bucket, keyPrefix, manifest);
   }
 
@@ -51,7 +63,7 @@ public class DataSetTestUtilities {
    */
   public static void putObject(
       S3Dao s3Dao, String bucket, DataSetManifest manifest, String location) {
-    String keyPrefix = String.format("%s/%s", location, manifest.getTimestampText());
+    String keyPrefix = keyPrefixForManifest(location, manifest);
     putObject(s3Dao, bucket, keyPrefix, manifest);
   }
 
