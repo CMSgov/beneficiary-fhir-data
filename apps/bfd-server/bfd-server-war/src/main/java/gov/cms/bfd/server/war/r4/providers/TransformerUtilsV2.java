@@ -1765,9 +1765,9 @@ public final class TransformerUtilsV2 {
        * TODO: Above bug should be fixed as of 1/1/20; re-investigate this
        */
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
-      resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       // Throw a 400 if startIndex >= results, since we cant sublist with these values
       validateStartIndexSize(paging.getStartIndex(), resources.size());
+      resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
       // Add number of paginated resources to MDC logs
