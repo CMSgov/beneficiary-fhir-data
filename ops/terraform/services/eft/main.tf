@@ -110,7 +110,6 @@ locals {
     for subnet in values(data.aws_subnet.this)
     : subnet if contains(local.available_endpoint_azs, subnet.availability_zone)
   ]
-
 }
 
 resource "aws_s3_bucket" "this" {
