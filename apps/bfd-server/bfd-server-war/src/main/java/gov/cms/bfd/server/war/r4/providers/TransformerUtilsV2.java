@@ -1756,6 +1756,7 @@ public final class TransformerUtilsV2 {
   public static Bundle createBundle(
       OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime) {
     Bundle bundle = new Bundle();
+    List<IBaseResource> resourcesSubList = resources;
     if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
@@ -1764,10 +1765,9 @@ public final class TransformerUtilsV2 {
        * TODO: Above bug should be fixed as of 1/1/20; re-investigate this
        */
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
-      List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
+      resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
-
       // Add number of paginated resources to MDC logs
       LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
     } else {
@@ -1784,7 +1784,7 @@ public final class TransformerUtilsV2 {
      * the timestamp.
      */
     Instant maxBundleDate =
-        resources.stream()
+        resourcesSubList.stream()
             .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
             .max(Instant::compareTo)

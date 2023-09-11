@@ -29,6 +29,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import io.restassured.response.Response;
+import java.net.URLDecoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -657,15 +658,13 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
    * lastUpdated parameter after yesterday and pagination links work and contain lastUpdated.
-   *
-   * <p>FIXME: Count doesnt seem to work with the query string as-is; may be a bug?
    */
   @Test
-  @Disabled("Broken, needs investigation/fixing")
   public void searchEobByPatientIdWithLastUpdatedAndPagination() {
 
     String patientId = getPatientId(loadData());
     int expectedCount = 5;
+    int expectedTotal = 8;
     String yesterday =
         new DateTimeDt(Date.from(Instant.now().minus(1, ChronoUnit.DAYS))).getValueAsString();
     String now = new DateTimeDt(new Date()).getValueAsString();
@@ -682,8 +681,10 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
         given()
             .spec(requestAuth)
             .expect()
+            .log()
+            .body()
             .body("entry.size()", equalTo(expectedCount))
-            .body("total", equalTo(expectedCount))
+            .body("total", equalTo(expectedTotal))
             .statusCode(200)
             .when()
             .get(requestString);
@@ -706,10 +707,11 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         .body("entry.size()", equalTo(3))
-        .body("total", equalTo(3))
+        .body("total", equalTo(expectedTotal))
         .statusCode(200)
         .when()
-        .get(nextLink);
+        .get(URLDecoder.decode(nextLink));
+    // FUTURE: Decoder is a workaround, fix in https://jira.cms.gov/browse/BFD-2883
   }
 
   /**
