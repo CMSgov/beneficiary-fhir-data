@@ -18,6 +18,7 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
+import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -46,6 +47,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.postgresql.copy.CopyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -437,6 +440,17 @@ public final class RifLoader {
           loadAction = LoadAction.UPDATED;
           // Skip this record if the year is not 2023 and its an update.
           if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
+            /*
+             * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
+             * it in the DB.
+             */
+            StringBuffer rifData = new StringBuffer();
+            try (CSVPrinter csvPrinter = new CSVPrinter(rifData, RifParsingUtils.CSV_FORMAT)) {
+              for (CSVRecord csvRow : rifRecordEvent.getRawCsvRecords()) {
+                csvPrinter.printRecord(csvRow);
+              }
+            }
+
             // Save the skipped record to the DB.
             SkippedRifRecord skippedRifRecord =
                 new SkippedRifRecord(
@@ -445,7 +459,7 @@ public final class RifLoader {
                     rifRecordEvent.getFileEvent().getFile().getFileType().name(),
                     rifRecordEvent.getRecordAction(),
                     ((Beneficiary) record).getBeneficiaryId(),
-                    "");
+                    rifData.toString());
             entityManager.persist(skippedRifRecord);
             LOGGER.info("Skipped RIF record, due to '{}'.", skippedRifRecord.getSkipReason());
           } else {
