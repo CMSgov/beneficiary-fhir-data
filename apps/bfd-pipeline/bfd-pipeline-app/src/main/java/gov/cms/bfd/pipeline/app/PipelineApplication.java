@@ -93,9 +93,6 @@ public final class PipelineApplication {
    */
   static final int EXIT_CODE_FAILED_UNHANDLED_EXCEPTION = 4;
 
-  /** Keep this around for cleanup in the event of an error with the CCW pipeline. */
-  private static S3TaskManager s3TaskManager;
-
   /**
    * This method is the one that will get called when users launch the application from the command
    * line.
@@ -319,12 +316,6 @@ public final class PipelineApplication {
 
     pipelineManager.awaitCompletion();
 
-    if (s3TaskManager != null) {
-      // ensures all background operations have been completed
-      s3TaskManager.shutdownSafely();
-      s3TaskManager = null;
-    }
-
     if (pipelineManager.getError() != null) {
       throw new FatalAppException(
           "Pipeline job threw exception", pipelineManager.getError(), EXIT_CODE_JOB_FAILED);
@@ -500,9 +491,9 @@ public final class PipelineApplication {
       CcwRifLoadOptions loadOptions, PipelineApplicationState appState) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
-     * load process.
+     * load process.  The task manager will be automatically closed by the job.
      */
-    s3TaskManager =
+    final var s3TaskManager =
         new S3TaskManager(
             appState.getMetrics(),
             loadOptions.getExtractionOptions(),
@@ -579,11 +570,6 @@ public final class PipelineApplication {
                   pipelineManager.stop();
                   pipelineManager.awaitCompletion();
                   LOGGER.info("Job processing stopped.");
-
-                  if (s3TaskManager != null) {
-                    // ensures all background operations have been completed
-                    s3TaskManager.shutdownSafely();
-                  }
 
                   if (pipelineManager.getError() != null) {
                     LOGGER.error(
