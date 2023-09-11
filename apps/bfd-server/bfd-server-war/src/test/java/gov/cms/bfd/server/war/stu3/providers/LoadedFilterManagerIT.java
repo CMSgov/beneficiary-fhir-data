@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import gov.cms.bfd.sharedutils.TransactionManager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,10 +46,9 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
   @Test
   public void emptyFilters() {
     PipelineTestUtils.get()
-        .doTestWithDb(
-            (dataSource, entityManager) -> {
-              final LoadedFilterManager filterManager = new LoadedFilterManager();
-              filterManager.setEntityManager(entityManager);
+        .doTestWithDb2(
+            (dataSource, transactionManager) -> {
+              final LoadedFilterManager filterManager = new LoadedFilterManager(transactionManager);
               filterManager.init();
 
               // After init manager should have an empty filter list but a valid transaction time
@@ -84,10 +84,9 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
   @Test
   public void refreshFilters() {
     PipelineTestUtils.get()
-        .doTestWithDb(
-            (dataSource, entityManager) -> {
-              final LoadedFilterManager filterManager = new LoadedFilterManager();
-              filterManager.setEntityManager(entityManager);
+        .doTestWithDb2(
+            (dataSource, transactionManager) -> {
+              final LoadedFilterManager filterManager = new LoadedFilterManager(transactionManager);
               filterManager.init();
               final Instant initialTransactionTime = filterManager.getTransactionTime();
               assertTrue(initialTransactionTime.isBefore(Instant.now().plusMillis(1)));
@@ -119,10 +118,9 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
   @Test
   public void isResultSetEmpty() {
     PipelineTestUtils.get()
-        .doTestWithDb(
-            (dataSource, entityManager) -> {
-              final LoadedFilterManager filterManager = new LoadedFilterManager();
-              filterManager.setEntityManager(entityManager);
+        .doTestWithDb2(
+            (dataSource, transactionManager) -> {
+              final LoadedFilterManager filterManager = new LoadedFilterManager(transactionManager);
               filterManager.init();
 
               // Establish a before load time
@@ -172,10 +170,9 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
   @Test
   public void testWithMultipleRefreshes() {
     PipelineTestUtils.get()
-        .doTestWithDb(
-            (dataSource, entityManager) -> {
-              final LoadedFilterManager filterManager = new LoadedFilterManager();
-              filterManager.setEntityManager(entityManager);
+        .doTestWithDb2(
+            (dataSource, transactionManager) -> {
+              final LoadedFilterManager filterManager = new LoadedFilterManager(transactionManager);
               filterManager.init();
               loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 

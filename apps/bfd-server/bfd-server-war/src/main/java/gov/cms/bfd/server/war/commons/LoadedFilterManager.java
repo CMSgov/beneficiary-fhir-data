@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.commons;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
+import gov.cms.bfd.sharedutils.TransactionManager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -16,6 +17,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import org.apache.spark.util.sketch.BloomFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +38,7 @@ public class LoadedFilterManager {
   private static final Instant BEFORE_LAST_UPDATED_FEATURE = Instant.parse("2020-01-01T00:00:00Z");
 
   /** The connection to the DB. */
-  private EntityManager entityManager;
+  private final TransactionManager transactionManager;
 
   /** The filter set. */
   private List<LoadedFileFilter> filters;
@@ -47,6 +51,12 @@ public class LoadedFilterManager {
 
   /** The first LoadedBatch.created in the filter set. */
   private Instant firstBatchCreated;
+
+  /** Create a manager for {@link LoadedFileFilter}s. */
+  public LoadedFilterManager(TransactionManager transactionManager) {
+    this.transactionManager = transactionManager;
+    this.filters = new ArrayList<>();
+  }
 
   /**
    * A tuple of values: LoadedFile.loadedFileid, LoadedFile.created, max(LoadedBatch.created). Used
@@ -101,11 +111,6 @@ public class LoadedFilterManager {
     }
   }
 
-  /** Create a manager for {@link LoadedFileFilter}s. */
-  public LoadedFilterManager() {
-    this.filters = new ArrayList<>();
-  }
-
   /**
    * Gets the {@link #filters}.
    *
@@ -151,21 +156,14 @@ public class LoadedFilterManager {
     return firstBatchCreated;
   }
 
-  /**
-   * Set up the JPA entityManager for the database to query.
-   *
-   * @param entityManager to use
-   */
-  @PersistenceContext
-  public void setEntityManager(EntityManager entityManager) {
-    this.entityManager = entityManager;
-  }
-
   /** Called to finish initialization of the manager. */
   @PostConstruct
   public synchronized void init() {
     // The transaction time will either the last LoadedBatch or some earlier time
-    transactionTime = fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+    transactionTime =
+        transactionManager
+            .executeFunction(this::fetchLastLoadedBatchCreated)
+            .orElse(BEFORE_LAST_UPDATED_FEATURE);
   }
 
   /**
@@ -245,39 +243,46 @@ public class LoadedFilterManager {
      * millisecond.
      */
     try {
-      // If new batches are present, then build new filters for the affected files
-      final Instant currentLastBatchCreated =
-          fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+      transactionManager.executeProcedure(
+          entityManager -> {
+            // If new batches are present, then build new filters for the affected files
+            final Instant currentLastBatchCreated =
+                fetchLastLoadedBatchCreated(entityManager).orElse(BEFORE_LAST_UPDATED_FEATURE);
 
-      if (this.lastBatchCreated == null
-          || this.lastBatchCreated.isBefore(currentLastBatchCreated)) {
-        LOGGER.info(
-            "Refreshing LoadedFile filters with new filters from {} to {}",
-            lastBatchCreated,
-            currentLastBatchCreated);
+            if (this.lastBatchCreated == null
+                || this.lastBatchCreated.isBefore(currentLastBatchCreated)) {
+              LOGGER.info(
+                  "Refreshing LoadedFile filters with new filters from {} to {}",
+                  lastBatchCreated,
+                  currentLastBatchCreated);
 
-        List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);
-        List<LoadedFileFilter> newFilters =
-            updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
+              List<LoadedTuple> loadedTuples =
+                  fetchLoadedTuples(entityManager, this.lastBatchCreated);
+              List<LoadedFileFilter> newFilters =
+                  updateFilters(
+                      this.filters,
+                      loadedTuples,
+                      fileId -> fetchLoadedBatches(entityManager, fileId));
 
-        // If batches been trimmed, then remove filters which are no longer present
-        final Instant currentFirstBatchUpdate =
-            fetchFirstLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+              // If batches been trimmed, then remove filters which are no longer present
+              final Instant currentFirstBatchUpdate =
+                  fetchFirstLoadedBatchCreated(entityManager).orElse(BEFORE_LAST_UPDATED_FEATURE);
 
-        if (this.firstBatchCreated == null
-            || this.firstBatchCreated.isBefore(currentFirstBatchUpdate)) {
-          LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
-          List<LoadedFile> loadedFiles = fetchLoadedFiles();
-          newFilters = trimFilters(newFilters, loadedFiles);
-        }
+              if (this.firstBatchCreated == null
+                  || this.firstBatchCreated.isBefore(currentFirstBatchUpdate)) {
+                LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
+                List<LoadedFile> loadedFiles = fetchLoadedFiles(entityManager);
+                newFilters = trimFilters(newFilters, loadedFiles);
+              }
 
-        LOGGER.info(
-            "Updating timestamps. currentFirstBatchUpdate={} currentLastBatchCreated={}",
-            currentFirstBatchUpdate,
-            currentLastBatchCreated);
+              LOGGER.info(
+                  "Updating timestamps. currentFirstBatchUpdate={} currentLastBatchCreated={}",
+                  currentFirstBatchUpdate,
+                  currentLastBatchCreated);
 
-        set(newFilters, currentFirstBatchUpdate, currentLastBatchCreated);
-      }
+              set(newFilters, currentFirstBatchUpdate, currentLastBatchCreated);
+            }
+          });
     } catch (Throwable ex) {
       LOGGER.error("Error found refreshing LoadedFile filters", ex);
     }
@@ -420,7 +425,7 @@ public class LoadedFilterManager {
    *
    * @return the max date
    */
-  private Optional<Instant> fetchLastLoadedBatchCreated() {
+  private Optional<Instant> fetchLastLoadedBatchCreated(EntityManager entityManager) {
     Instant maxCreated =
         entityManager
             .createQuery("select max(b.created) from LoadedBatch b", Instant.class)
@@ -433,7 +438,7 @@ public class LoadedFilterManager {
    *
    * @return the min date
    */
-  private Optional<Instant> fetchFirstLoadedBatchCreated() {
+  private Optional<Instant> fetchFirstLoadedBatchCreated(EntityManager entityManager) {
     Instant minBatchId =
         entityManager
             .createQuery("select min(b.created) from LoadedBatch b", Instant.class)
@@ -447,7 +452,7 @@ public class LoadedFilterManager {
    * @param after limits the query to include batches created after this timestamp
    * @return tuples that meet the after criteria or an empty list
    */
-  private List<LoadedTuple> fetchLoadedTuples(Instant after) {
+  private List<LoadedTuple> fetchLoadedTuples(EntityManager entityManager, Instant after) {
     final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<LoadedTuple> query = cb.createQuery(LoadedTuple.class);
     final Root<LoadedFile> f = query.from(LoadedFile.class);
@@ -472,7 +477,7 @@ public class LoadedFilterManager {
    *
    * @return the LoadedFiles or an empty list
    */
-  private List<LoadedFile> fetchLoadedFiles() {
+  private List<LoadedFile> fetchLoadedFiles(EntityManager entityManager) {
     return entityManager
         .createQuery("select f from LoadedFile f", LoadedFile.class)
         .getResultList();
@@ -484,7 +489,7 @@ public class LoadedFilterManager {
    * @param loadedFileId of the LoadedFile
    * @return a list of LoadedBatches or an empty list
    */
-  private List<LoadedBatch> fetchLoadedBatches(long loadedFileId) {
+  private List<LoadedBatch> fetchLoadedBatches(EntityManager entityManager, long loadedFileId) {
     return entityManager
         .createQuery(
             "select b from LoadedBatch b where b.loadedFileId = :loadedFileId", LoadedBatch.class)

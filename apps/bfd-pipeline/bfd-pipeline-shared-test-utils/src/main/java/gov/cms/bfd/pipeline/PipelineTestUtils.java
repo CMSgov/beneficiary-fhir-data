@@ -30,6 +30,7 @@ import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
@@ -287,6 +288,12 @@ public final class PipelineTestUtils {
         entityManager.close();
       }
     }
+  }
+
+  public void doTestWithDb2(BiConsumer<DataSource, TransactionManager> consumer) {
+    TransactionManager transactionManager =
+        new TransactionManager(pipelineApplicationState.getEntityManagerFactory());
+    consumer.accept(pipelineApplicationState.getPooledDataSource(), transactionManager);
   }
 
   /**

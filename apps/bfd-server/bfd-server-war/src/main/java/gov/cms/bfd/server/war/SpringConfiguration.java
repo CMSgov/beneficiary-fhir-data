@@ -269,8 +269,9 @@ public class SpringConfiguration {
     hibernateProperties.put(
         org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
 
+    addJpaProperties(hibernateProperties);
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory(persistenceUnitName, jpaProperties());
+        Persistence.createEntityManagerFactory(persistenceUnitName, hibernateProperties);
     return entityManagerFactory;
   }
 
@@ -279,15 +280,14 @@ public class SpringConfiguration {
    *
    * @return the jpa properties
    */
-  private static Properties jpaProperties() {
-    Properties extraProperties = new Properties();
+  private static void addJpaProperties(Map<String, Object> hibernateProperties) {
     /*
      * Hibernate validation is being disabled in the applications so that
      * validation failures do not prevent the server from starting.
      * With the implementation of RFC-0011 this validation will be moved
      * to a more appropriate stage of the deployment.
      */
-    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.NONE);
+    hibernateProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.NONE);
 
     /*
      * These configuration settings will set Hibernate to log all SQL
@@ -296,10 +296,10 @@ public class SpringConfiguration {
      * slow things down, so this should generally be disabled in production.
      */
     if (HIBERNATE_DETAILED_LOGGING) {
-      extraProperties.put(AvailableSettings.FORMAT_SQL, "true");
-      extraProperties.put(AvailableSettings.USE_SQL_COMMENTS, "true");
-      extraProperties.put(AvailableSettings.SHOW_SQL, "true");
-      extraProperties.put(AvailableSettings.GENERATE_STATISTICS, "true");
+      hibernateProperties.put(AvailableSettings.FORMAT_SQL, "true");
+      hibernateProperties.put(AvailableSettings.USE_SQL_COMMENTS, "true");
+      hibernateProperties.put(AvailableSettings.SHOW_SQL, "true");
+      hibernateProperties.put(AvailableSettings.GENERATE_STATISTICS, "true");
     }
 
     /*
@@ -315,9 +315,7 @@ public class SpringConfiguration {
     // This limits how long each query will run before being terminated. We've seen
     // long running queries cause the application to respond poorly to other
     // requests.
-    extraProperties.put("jakarta.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
-
-    return extraProperties;
+    hibernateProperties.put("jakarta.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
   }
 
   /**
