@@ -3180,6 +3180,14 @@ public final class TransformerUtils {
        * correctly.
        */
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+      // Throw a 400 if startIndex >= results, since we cant sublist with these values
+      if (paging.getStartIndex() >= resources.size()) {
+        throw new InvalidRequestException(
+            String.format(
+                "Value for startIndex (%s) must be less than than result size (%s)",
+                paging.getStartIndex(), resources.size()));
+      }
+
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
