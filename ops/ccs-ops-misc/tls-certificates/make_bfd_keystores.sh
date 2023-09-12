@@ -74,4 +74,4 @@ gen_keystore "cn=test.bfd.cms.gov" \
 
 # Encrypt
 echo "About to encrypt using ansible vault..."
-#ansible-vault encrypt --ask-vault-pass prod-bluebutton-appserver-keystore.pfx prod-sbx-bluebutton-appserver-keystore.pfx test-bluebutton-appserver-keystore.pfx
+ansible-vault encrypt --ask-vault-pass prod-bluebutton-appserver-keystore.pfx prod-sbx-bluebutton-appserver-keystore.pfx test-bluebutton-appserver-keystore.pfx
