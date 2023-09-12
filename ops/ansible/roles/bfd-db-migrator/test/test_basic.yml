@@ -28,6 +28,7 @@
         db_migrator_dir: /opt/bfd-db-migrator
         migrator_monitor_enabled: false
         migrator_monitor_heartbeat_interval_seconds: 15
+        sqs_queue_name: bfd-test-migrator
 
     - name: Ensure Service Is Running
       service:
