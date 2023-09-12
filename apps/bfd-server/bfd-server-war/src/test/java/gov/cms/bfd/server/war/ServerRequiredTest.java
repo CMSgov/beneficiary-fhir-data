@@ -45,6 +45,9 @@ public class ServerRequiredTest {
   @GuardedBy("class synchronized")
   protected static RequestSpecification requestAuth;
 
+  /** The Server test utils instance, for convenience and brevity. */
+  protected ServerTestUtils testUtils = ServerTestUtils.get();
+
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
   protected static synchronized void setup() throws IOException {

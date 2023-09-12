@@ -69,23 +69,20 @@ The supported goals are:
 | entities     | GenerateEntitiesFromDslMojo     | Generates one JPA entity class per mapping found at `mappingPath`. Classes are written to `entitiesDirectory`.                              |
 | sql          | GenerateSqlFromDslMojo          | Generates a text file containing sample SQL for each mapping found at `mappingPath`. SQL is written to `sqlFile`.                           |
 | transformers | GenerateTransformersFromDslMojo | Generates one transformer class for each mapping that has a defined `transformerClassName`. Classes are written to `transformersDirectory`. |
-| csv-writers  | GenerateCsvWritersFromDslMojo   | Generates one CsvWriter class for each mapping that has a defined `transformerClassName`.  Classes are written to `csvWritersDirectory`.    |
 
 Generally the `entities` and `sql` goals will be used together in a model project to create a jar containing entities.
 The `transformers` goal would be used in whichever maven project should include the classes used to transform incoming
 messages into entity objects. This might be a model project (e.g. `bfd-model-rif`) or a pipeline project
 (e.g. `bfd-pipeline-rda-grpc`).
-The `csv-writers` goal is only intended for use in the `bfd-model-rif` project.
 
 The configuration properties for the plugins are:
 
-| Property              | Goals                                    | Description                                                                            |
-|-----------------------|------------------------------------------|----------------------------------------------------------------------------------------|
-| mappingPath           | entities, sql, transformers, csv-writers | Path to either a single mapping file or a directory containing multiple mapping files. |
-| entitiesDirectory     | entities                                 | Directory to write generated class files to.                                           |
-| sqlFile               | sql                                      | File to write generated SQL code to.                                                   |
-| transformersDirectory | transformers                             | Directory to write generated class files to.                                           |
-| csvWritersDirectory   | csv-writers                              | Directory to write generated class files to.                                           |
+| Property              | Goals                       | Description                                                                            |
+|-----------------------|-----------------------------|----------------------------------------------------------------------------------------|
+| mappingPath           | entities, sql, transformers | Path to either a single mapping file or a directory containing multiple mapping files. |
+| entitiesDirectory     | entities                    | Directory to write generated class files to.                                           |
+| sqlFile               | sql                         | File to write generated SQL code to.                                                   |
+| transformersDirectory | transformers                | Directory to write generated class files to.                                           |
 
 ## DSL Syntax Guide
 

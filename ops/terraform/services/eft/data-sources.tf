@@ -4,13 +4,24 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_key_alias
 }
 
-data "aws_ssm_parameters_by_path" "nonsensitive_common" {
-  path = "/bfd/${local.env}/common/nonsensitive"
+# This is a distinct parameter as we need to retrieve the list of partners first so that we know
+# which SSM hierarchies to get
+data "aws_ssm_parameter" "partners_list_json" {
+  name            = "/bfd/${local.env}/${local.service}/sensitive/partners_list_json"
+  with_decryption = true
 }
 
-data "aws_ssm_parameters_by_path" "sensitive_service" {
-  path            = "/bfd/${local.env}/${local.service}/sensitive"
+data "aws_ssm_parameters_by_path" "sensitive" {
+  for_each = local.ssm_all_paths
+
+  path            = "/${each.value.hierarchy}/${local.env}/${each.value.service}/sensitive"
   with_decryption = true
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive" {
+  for_each = local.ssm_all_paths
+
+  path = "/${each.value.hierarchy}/${local.env}/${each.value.service}/nonsensitive"
 }
 
 data "aws_ec2_managed_prefix_list" "vpn" {

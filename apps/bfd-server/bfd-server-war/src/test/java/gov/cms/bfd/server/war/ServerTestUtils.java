@@ -28,15 +28,19 @@ import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
+import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import io.restassured.response.Response;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -57,6 +61,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -67,6 +72,7 @@ import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Table;
 import javax.sql.DataSource;
@@ -400,6 +406,103 @@ public final class ServerTestUtils {
   }
 
   /**
+   * Loads the sample A test data.
+   *
+   * @return the loaded records
+   */
+  public List<Object> loadSampleAData() {
+    return loadSampleAData(false);
+  }
+
+  /**
+   * Loads the sample A data to use in tests.
+   *
+   * @param addSamhsa if samhsa data should be added to the carrier test data
+   * @return the loaded records
+   */
+  public List<Object> loadSampleAData(boolean addSamhsa) {
+
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    if (addSamhsa) {
+      addSamhsaToLoadedRecords(loadedRecords);
+    }
+
+    return loadedRecords;
+  }
+
+  /**
+   * Load the SAMPLE_A resources and then tweak carrier claim types to have a SAMHSA diagnosis code.
+   *
+   * @param loadedRecords the loaded records
+   */
+  private void addSamhsaToLoadedRecords(List<Object> loadedRecords) {
+    // Load the SAMPLE_A resources normally.
+    EntityManager entityManager = null;
+
+    try {
+      EntityManagerFactory entityManagerFactory =
+          PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+      entityManager = entityManagerFactory.createEntityManager();
+
+      // Tweak the SAMPLE_A claims such that they are SAMHSA-related.
+      adjustCarrierClaimForSamhsaDiagnosis(loadedRecords, entityManager);
+
+    } finally {
+      if (entityManager != null && entityManager.getTransaction().isActive())
+        entityManager.getTransaction().rollback();
+      if (entityManager != null) entityManager.close();
+    }
+  }
+
+  /**
+   * Adjusts the carrier claim to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustCarrierClaimForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    CarrierClaim carrierRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(CarrierClaim.class::cast)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
+    carrierRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(carrierRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Gets the pagination link by name from the response. Throws an exception if the given link name
+   * does not exist in the response.
+   *
+   * <p>Should be one of: next, previous, self, last, first
+   *
+   * @param response the response
+   * @param paginationLinkName the pagination link name
+   * @return the pagination link
+   */
+  public String getPaginationLink(Response response, String paginationLinkName) {
+
+    List<Map<String, ?>> links = response.jsonPath().getList("link");
+    return links.stream()
+        .filter(m -> m.get("relation").equals(paginationLinkName))
+        .findFirst()
+        .orElseThrow()
+        .get("url")
+        .toString();
+  }
+
+  /**
    * Loads a list of sample resources.
    *
    * @param sampleResources the sample RIF resources to load
@@ -434,6 +537,30 @@ public final class ServerTestUtils {
     }
     LOGGER.info("Loaded RIF records: '{}'.", recordsLoaded.size());
     return recordsLoaded;
+  }
+
+  /**
+   * Gets the first beneficiary in the provided data.
+   *
+   * @param loadedRecords the loaded records
+   * @return the first beneficiary
+   */
+  public Beneficiary getFirstBeneficiary(List<Object> loadedRecords) {
+    return loadedRecords.stream()
+        .filter(r -> r instanceof Beneficiary)
+        .map(Beneficiary.class::cast)
+        .findFirst()
+        .get();
+  }
+
+  /**
+   * Gets the patient id.
+   *
+   * @param loadedRecords the loaded records
+   * @return the patient id from the first beneficiary
+   */
+  public String getPatientId(List<Object> loadedRecords) {
+    return TransformerUtilsV2.buildPatientId(getFirstBeneficiary(loadedRecords)).getIdPart();
   }
 
   /**

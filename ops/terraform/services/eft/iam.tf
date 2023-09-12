@@ -101,7 +101,7 @@ resource "aws_iam_policy" "eft_user" {
 }
 
 resource "aws_iam_role" "partner_bucket_role" {
-  for_each = local.eft_bucket_partners_iam
+  for_each = local.eft_partners_config
 
   name = "${local.full_name}-${each.key}-bucket-role"
   description = join("", [
@@ -129,7 +129,7 @@ resource "aws_iam_role" "partner_bucket_role" {
 }
 
 resource "aws_iam_policy" "partner_bucket_access" {
-  for_each = local.eft_bucket_partners_iam
+  for_each = local.eft_partners_config
 
   name = "${local.full_name}-${each.key}-allow-eft-s3-path"
   description = join("", [

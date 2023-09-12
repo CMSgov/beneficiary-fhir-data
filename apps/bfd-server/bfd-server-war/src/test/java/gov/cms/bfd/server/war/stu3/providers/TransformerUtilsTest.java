@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
@@ -529,6 +531,64 @@ public final class TransformerUtilsTest {
     Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
     assertEquals(4, bundle.getTotal());
     assertEquals(2, Integer.parseInt(BfdMDC.get("resources_returned_count")));
+  }
+
+  /**
+   * Verifies that creating a bundle with a start index greater than the resource count throws a
+   * {@link InvalidRequestException}.
+   */
+  @Test
+  public void createBundleWithStartIndexGreaterThanResourceCountExpectException() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
+    pagingParams.put("startIndex", new String[] {"12"});
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<IBaseResource> eobs = new ArrayList<>();
+    // Add three resources
+    eobs.add(new ExplanationOfBenefit());
+    eobs.add(new ExplanationOfBenefit());
+    eobs.add(new ExplanationOfBenefit());
+
+    InvalidRequestException expectedException =
+        assertThrows(
+            InvalidRequestException.class,
+            () -> TransformerUtils.createBundle(paging, eobs, Instant.now()));
+    assertEquals(
+        "Value for startIndex (12) must be less than than result size (3)",
+        expectedException.getMessage());
+  }
+
+  /**
+   * Verifies that creating a bundle with a start index equal to the resource count throws a {@link
+   * InvalidRequestException} (its 0-indexed).
+   */
+  @Test
+  public void createBundleWithStartIndexEqualsResourceCountExpectException() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
+    pagingParams.put("startIndex", new String[] {"3"});
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<IBaseResource> eobs = new ArrayList<>();
+    // Add three resources
+    eobs.add(new ExplanationOfBenefit());
+    eobs.add(new ExplanationOfBenefit());
+    eobs.add(new ExplanationOfBenefit());
+
+    InvalidRequestException expectedException =
+        assertThrows(
+            InvalidRequestException.class,
+            () -> TransformerUtils.createBundle(paging, eobs, Instant.now()));
+    assertEquals(
+        "Value for startIndex (3) must be less than than result size (3)",
+        expectedException.getMessage());
   }
 
   /**
