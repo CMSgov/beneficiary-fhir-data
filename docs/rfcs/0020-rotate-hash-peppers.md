@@ -16,7 +16,7 @@ This RFC is therefore intended to explore solutions that lend themselves to prov
 ## Status
 [Status]: #status
 
-* Status: Propsed <!-- (Proposed/Approved/Rejected/Implemented) -->
+* Status: Proposed <!-- (Proposed/Approved/Rejected/Implemented) -->
 * Implementation JIRA Ticket(s):
     * [BFD-1110](https://jira.cms.gov/browse/BFD-1110)
 
@@ -109,7 +109,7 @@ or
 identifier="https://bluebutton.cms.gov/resources/identifier/mbi-hash|1425547895d49fdf40d4128ec03cfd53c6ca2a67af9f7adcc2845a00cf6a5af5"
 ```
 - need to change components of the (leaked) hashing algorithm; the changes would most likely be constrained to the seed and/or iteration count. The new hash algorithm components would be persisted in the BFD SSM parameter store.
-- peering partners need to be alerted to the issue and pendinghashing  mitigation plan; changing the algorithm will require communicating the new hashing algorithm via an agreed upon secure channel. Since this affects all PPs, some amount of collaboration and synchronization of PPs will need to be implemented.
+- peering partners need to be alerted to the issue and pending hashing mitigation plan; changing the algorithm will require communicating the new hashing algorithm via an agreed upon secure channel. Since this affects all PPs, some amount of collaboration and synchronization of PPs will need to be implemented.
 - need to update all records in the _BENEFICIARIES_ table (67M+ records) with new MBI and HICN hash values using the newly minted hashing algorithm being applied to the bene's plaintext MBI and HICN table columns. The hashing of a field is compute intensive and time consuming; since both hashed columns are also indexed in the table, the database update operation will take some time. There are database optimzation techniques we can employ for this operation (i.e., drop indexes, perform updates, rebuild indexes) but we have no prior work that defines best practices for this type of update.
 - The above database update presents an interesting conumdrum; in theory, BFD should have in its toolchest, a simple program (script) that reads/updates the hashed identifiers in every record in the _BENEFICIARIES_ table; in addition a runbook would exist denoting best practices for an operation of this kind; neither exists.
 - once the 67+ million _BENEFICIARIES_ records have been updated and indexed, BFD could perform a deployment with the new hashing algorithm at the ready and the database fully compliant with the hashing changes.
