@@ -750,8 +750,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
         .body("total", equalTo(expectedTotal))
         .statusCode(200)
         .when()
-        .get(URLDecoder.decode(nextLink));
-    // FUTURE: Decoder is a workaround, fix in https://jira.cms.gov/browse/BFD-2883
+        .get(nextLink);
   }
 
   /**
