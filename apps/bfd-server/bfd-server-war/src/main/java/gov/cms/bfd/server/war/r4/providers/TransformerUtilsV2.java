@@ -1764,10 +1764,13 @@ public final class TransformerUtilsV2 {
        * correctly.
        * TODO: Above bug should be fixed as of 1/1/20; re-investigate this
        */
-      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
-      // Throw a 400 if startIndex >= results, since we cant sublist with these values
-      validateStartIndexSize(paging.getStartIndex(), resources.size());
-      resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
+      // If we have no resources, don't sublist anything since it causes indexing issues
+      if (resources.size() > 0) {
+        int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+        // Throw a 400 if startIndex >= results, since we cant sublist with these values
+        validateStartIndexSize(paging.getStartIndex(), resources.size());
+        resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
+      }
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
       // Add number of paginated resources to MDC logs
