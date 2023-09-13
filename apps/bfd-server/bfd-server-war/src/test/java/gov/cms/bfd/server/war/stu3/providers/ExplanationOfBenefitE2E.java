@@ -696,10 +696,10 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
    * lastUpdated parameter after yesterday and pagination links work and contain lastUpdated.
    *
-   * <p>FIXME: Count doesnt seem to work with the query string as-is; may be a bug?
+   * <p>FIXME: Fix up like v2, should work now
    */
   @Test
-  @Disabled("Broken, needs investigation/fixing")
+  @Disabled("Should be fixed, needs adjustment like v2")
   public void searchEobByPatientIdWithLastUpdatedAndPagination() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -883,6 +883,41 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
           testData.getRight().toString(),
           testData.getLeft().toString());
     }
+  }
+
+  /**
+   * Verify that an empty bundle is returned when pagination is requested but no results are
+   * returned. Normally this would return a 400 since the default startIndex is equal to the number
+   * of results, but we make a special exception for empty returns since there's nothing to paginate
+   * anyway.
+   */
+  @Test
+  public void searchEobByPatientIdWithNoResultsAndPaginationRequestedExpect200() {
+    String patientId = "0";
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=50";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+
+    // check with startIndex as well
+    requestString = eobEndpoint + "?patient=" + patientId + "&startIndex=2";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString);
   }
 
   /**

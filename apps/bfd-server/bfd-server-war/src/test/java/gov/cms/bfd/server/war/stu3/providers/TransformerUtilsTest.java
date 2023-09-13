@@ -534,6 +534,28 @@ public final class TransformerUtilsTest {
   }
 
   /**
+   * Verifies that {@link TransformerUtils#createBundle} returns an empty bundle when no eob items
+   * are present and pagination is requested.
+   */
+  @Test
+  public void createBundleWithNoResultsAndPagingExpectEmptyBundle() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
+    pagingParams.put("startIndex", new String[] {"1"});
+
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
+
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<IBaseResource> eobs = new ArrayList<>();
+
+    Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
+    assertEquals(0, bundle.getTotal());
+  }
+
+  /**
    * Verifies that creating a bundle with a start index greater than the resource count throws a
    * {@link InvalidRequestException}.
    */

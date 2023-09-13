@@ -103,4 +103,38 @@ public class ClaimE2E extends ServerRequiredTest {
         .when()
         .get(requestString);
   }
+
+  /**
+   * Verify that an empty bundle is returned when pagination is requested but no results are
+   * returned. Normally this would return a 400 since the default startIndex is equal to the number
+   * of results, but we make a special exception for empty returns since there's nothing to paginate
+   * anyway.
+   */
+  @Test
+  public void testClaimFindByPatientWithNoResultsAndPaginationRequestedExpect200() {
+    String requestString = claimEndpoint + "?mbi=1111111111111&_count=50";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+
+    // check with startIndex as well
+    requestString = claimEndpoint + "?mbi=1111111111111&startIndex=2";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
 }
