@@ -40,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -531,6 +533,26 @@ public final class TransformerUtilsTest {
     Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
     assertEquals(4, bundle.getTotal());
     assertEquals(2, Integer.parseInt(BfdMDC.get("resources_returned_count")));
+  }
+
+  /** Verifies that {@link TransformerUtilsV2#createBundle} returns an empty bundle when no
+   * eob items are present and pagination is requested. */
+  @Test
+  public void createBundleWithNoResultsAndPagingExpectEmptyBundle() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
+    pagingParams.put("startIndex", new String[] {"1"});
+
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
+
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<IBaseResource> eobs = new ArrayList<>();
+
+    Bundle bundle = TransformerUtils.createBundle(paging, eobs, Instant.now());
+    assertEquals(0, bundle.getTotal());
   }
 
   /**
