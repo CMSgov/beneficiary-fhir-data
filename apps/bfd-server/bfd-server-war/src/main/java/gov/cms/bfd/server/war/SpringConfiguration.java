@@ -145,6 +145,8 @@ public class SpringConfiguration {
    */
   @Bean
   public ConfigLoader configLoader(@Autowired ServletContext servletContext) {
+    // Would need to find appropriate place to make this call.
+    //    initializeStaXPropertiesForFHIRApi();
     return servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME) != null
         ? (ConfigLoader) servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME)
         : createConfigLoader(System::getenv);
@@ -505,6 +507,16 @@ public class SpringConfiguration {
   public static ConfigLoader createConfigLoader(Function<String, String> getenv) {
     return LayeredConfiguration.createConfigLoader(Map.of(), getenv);
   }
+
+  // This code fails to find the default implementations because java 9 module is not exporting
+  // them. Did not resolve this issue prior to wrapping up tech spike.
+  /*
+  private static void initializeStaXPropertiesForFHIRApi() {
+    System.setProperty( javax.xml.stream.    XMLInputFactory.class.getName(), com.sun.xml.internal.stream.XMLInputFactoryImpl.class.getName());
+    System.setProperty(javax.xml.stream.XMLOutputFactory.class.getName(), com.sun.xml.internal.stream.XMLOutputFactoryImpl.class.getName());
+    System.setProperty(javax.xml.stream.XMLEventFactory.class.getName(), com.sun.xml.internal.stream.events.XMLEventFactoryImpl.class.getName());
+  }
+   */
 
   /**
    * This bean provides an {@link ExecutorService} to enable EOB claim transformers to run in
