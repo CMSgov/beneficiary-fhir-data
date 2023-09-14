@@ -1,17 +1,18 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import gov.cms.bfd.sharedutils.TransactionManager;
-import jakarta.persistence.EntityManagerFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.server.war.commons.LoadedFileFilter;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.sharedutils.TransactionManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -26,7 +27,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,7 +152,8 @@ public final class LoadedFilterManagerTest {
     assertEquals(2, aFilters.size());
 
     // Setup the manager and test a few lastUpdated ranges
-    final LoadedFilterManager filterManagerA = new LoadedFilterManager(new TransactionManager(mock(EntityManagerFactory.class)));
+    final LoadedFilterManager filterManagerA =
+        new LoadedFilterManager(new TransactionManager(mock(EntityManagerFactory.class)));
     filterManagerA.set(aFilters, preDates[1], preBatches[2].getCreated());
     final DateRangeParam beforeRange =
         new DateRangeParam(Date.from(preDates[0]), Date.from(preDates[1]));
