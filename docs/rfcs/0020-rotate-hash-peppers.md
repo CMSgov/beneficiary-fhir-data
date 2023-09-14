@@ -50,7 +50,7 @@ This RFC is therefore intended to explore solutions that lend themselves to prov
 [Motivation]: #motivation
 BFD provides a FHIR (STU3, R4) patient search service in which a Peering Partner (PP) can lookup a patient using either a patient's Medicare Beneficiary ID (MBI) or the less used patient Health Insurance Claim Number (HICN).
 
-The current BFD patient search service is implemented as an HTTP GET which requires an identifier, such as a patient's MBI or HICN, to be obfuscated prior to being used within a URL GET parameter. To achieve this, a level of syncrhronicity must be maintained between a PP and BFD; in a nutshell, BFD shares a hashing algorithm, including seed value and iteration count, with PPs such that a PP can create/embed a hashed value in a URL, which can then be used by the BFD service to search for a match in the database. This symmetric key/algorthim sharing, if compromised, creates a potential attack vector for gaining access to a patient's PII/PHI data.
+The current BFD patient search service is implemented as an HTTP GET which requires an identifier, such as a patient's MBI or HICN, to be obfuscated prior to being used within a URL GET parameter. To achieve this, a level of synchronicity must be maintained between a PP and BFD; in a nutshell, BFD shares a hashing algorithm, including seed value and iteration count, with PPs such that a PP can create/embed a hashed value in a URL, which can then be used by the BFD service to search for a match in the database. This symmetric key/algorithm sharing, if compromised, creates a potential attack vector for gaining access to a patient's PII/PHI data.
 
 This RFC then explores ways to preserve the patient search functionality in a manner that minimizes, or completely eliminates BFD services downtime, especially in a leaked key (algorithm) scenario.
 
@@ -92,15 +92,15 @@ In broad terms, BFD uses a cryptographically sound, one-way hashing algorithm, t
 [Much Ado About Nothing]: #much-ado-about-nothing
 Is the leakage of BFD's hashing algorithm, really a security concern? Depends. Let's explore that by assuming that the algorithm is leaked into the wild:
 1. BFD is a closed system, requiring mTLS authentication; essentially BFD has a known set of clients (peering partners) that use an X509 certificate to connect to BFD. BFD server checks that client certificate vs. a known list of certificates that reside in the BFD server _trust store_; so a client must be a known entity just to connect.
-2. While all BFD clients are known, BFD does not support role-based authentication or authorization; this means that all clients have equal access to any beneficiciary info regardless if that client reallly has no business accessing a given beneficiary's data.
+2. While all BFD clients are known, BFD does not support role-based authentication or authorization; this means that all clients have equal access to any beneficiary info regardless if that client really has no business accessing a given beneficiary's data.
 3. Hashed patient identifiers are simply one way to _search for_ patient information; but there are other paths to achieve the same. For example, BFD supports the fetching of BENE_ID values based on a Part D contract identifier; those part D contract IDs are not considered PII/PHI data, so a simple request to fetch all patients for a contract ID, yields a list of identifiers (BENE_ID) that are even more useful than a hashed MBI value. With a BENE_ID in hand, pretty much any and all BFD data for a patient could be harvested.
 4. The BFD hashing algorithm is made up of the base algorithm, a _salt_ value (referred to as _pepper_ in BFD parlance), and an iteration count. A cleartext _key_, in this case a patient identifier (i.e., MBI), is fed into the alg, resulting in a hashed value; so in order to create the hashed identifier, a bad actor would need to know a patient's MBI. So if they already know the MBI value, and all the hashing does is obfuscate that MBI value, then a leaked algorithm, accessing a closed system that is restricted to known peering partners, may not be that big a problem.
 5. Where the hash leak does become relevant, is if an attacker knows a patient MBI and the hashing algorithm; in that case they can generate a hashed MBI and pass that to search services that require a hashed MBI; that is if they can even connect to BFD (see item 2 above). However, even that scenario would fall into the _merely interesting_ scenario; if the attacker has access to log files, they could simply just scrape all log entries that have an MBI hash in the URL, and just replay those URL(s), again assuming they can get access to BFD services.
-6. How about the scenario where the _bad actor_ has access to both BFD log entries and BFD's hashing algorithm; using that knowlege, one could try a _brute force_ attack by controlled generation of an MBI (see https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf for the structure of an MBI) until the generated hash MBI matches one from the log file(s). While mathematically challenging to say the least, it is hypothetically possible.
+6. How about the scenario where the _bad actor_ has access to both BFD log entries and BFD's hashing algorithm; using that knowledge, one could try a _brute force_ attack by controlled generation of an MBI (see https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf for the structure of an MBI) until the generated hash MBI matches one from the log file(s). While mathematically challenging to say the least, it is hypothetically possible.
 ### So We Leaked the Hash Algorithm
 Prior to delving into possible solutions, and more germane to this RFC, some background on how BFD currently might handle a leak of the algorithm that both BFD and peering partners share.
 
-To start with, BFD has never encountered the situation where a leaked component of the hashing alogritm would require immediate mitigation; there have been some muted table-top and/or game-day exercises, but nothing concrete and for real. So what follows is some back-of-the-napkin tasks that would need to be completed in the current environment in such a scenario.
+To start with, BFD has never encountered the situation where a leaked component of the hashing alogrithm would require immediate mitigation; there have been some muted table-top and/or game-day exercises, but nothing concrete and for real. So what follows is some back-of-the-napkin tasks that would need to be completed in the current environment in such a scenario.
 - incident declared denoting hashing algorithm is compromised; depending on the severity of the leak (i.e., how long has it been compromised, etc.) may dictate the severity of the incident.
 - BFD services may not need to be taken offline; the hashing algorithm is used by a couple of BFD services; those service calls takes an MBI or HICN hash parameter; for example (cURL syntax):
 ```
@@ -110,8 +110,8 @@ identifier="https://bluebutton.cms.gov/resources/identifier/mbi-hash|1425547895d
 ```
 - need to change components of the (leaked) hashing algorithm; the changes would most likely be constrained to the seed and/or iteration count. The new hash algorithm components would be persisted in the BFD SSM parameter store.
 - peering partners need to be alerted to the issue and pending hashing mitigation plan; changing the algorithm will require communicating the new hashing algorithm via an agreed upon secure channel. Since this affects all PPs, some amount of collaboration and synchronization of PPs will need to be implemented.
-- need to update all records in the _BENEFICIARIES_ table (67M+ records) with new MBI and HICN hash values using the newly minted hashing algorithm being applied to the bene's plaintext MBI and HICN table columns. The hashing of a field is compute intensive and time consuming; since both hashed columns are also indexed in the table, the database update operation will take some time. There are database optimzation techniques we can employ for this operation (i.e., drop indexes, perform updates, rebuild indexes) but we have no prior work that defines best practices for this type of update.
-- The above database update presents an interesting conumdrum; in theory, BFD should have in its toolchest, a simple program (script) that reads/updates the hashed identifiers in every record in the _BENEFICIARIES_ table; in addition a runbook would exist denoting best practices for an operation of this kind; neither exists.
+- need to update all records in the _BENEFICIARIES_ table (67M+ records) with new MBI and HICN hash values using the newly minted hashing algorithm being applied to the bene's plaintext MBI and HICN table columns. The hashing of a field is compute intensive and time consuming; since both hashed columns are also indexed in the table, the database update operation will take some time. There are database optimization techniques we can employ for this operation (i.e., drop indexes, perform updates, rebuild indexes) but we have no prior work that defines best practices for this type of update.
+- The above database update presents an interesting conundrum; in theory, BFD should have in its toolchest, a simple program (script) that reads/updates the hashed identifiers in every record in the _BENEFICIARIES_ table; in addition a runbook would exist denoting best practices for an operation of this kind; neither exists.
 - once the 67+ million _BENEFICIARIES_ records have been updated and indexed, BFD could perform a deployment with the new hashing algorithm at the ready and the database fully compliant with the hashing changes.
 - Peering Partners would then need to modify how they construct (or cache) their instance of the BFD hashing algorithm. Once deployed, BFD could return servicing requests and it would be up to each PP to implement their necessary changes to comply with the new hashing algorithm.
 - Weekly ETL processing
@@ -156,7 +156,7 @@ CREATE BENEFICIARIES_PREHASH AS
   SELECT * FROM BENEFICIARIES;
 ```
 - create and execute a script (python? SQL?) that would:
-  - sequentialy read/update each record in the new table
+  - sequentially read/update each record in the new table
   - for each record, calculate new hash value for _MBI_HASH_ and _BENE_CRNT_HIC_NUM_ by hashing respective cleartext columns:
      - hash _MBI_NUM_ to create _MBI_HASH_ value
      - hash _HICN_UNHASHED_ to create _BENE_CRNT_HIC_NUM_ 
@@ -186,7 +186,7 @@ ALTER INDEX beneficiaries_mbi_idx
 ALTER INDEX beneficiaries_hicn_idx
   RENAME TO beneficiaries_orig_hicn_idx;
 
-// rename indeces we originally created in the _prehash_ table
+// rename indices we originally created in the _prehash_ table
 ALTER INDEX beneficiaries_prehash_mbi_idx
   RENAME TO beneficiaries_mbi_idx;
 
@@ -198,7 +198,7 @@ ALTER INDEX beneficiaries_prehash_hicn_idx
 - Once db changes are complete, the BFD database is effectively operational but a deployment would still be required to ensure ETL is updated with the new hash algorithm.
 - Peering partners requiring patient search would remain _broken_ until they have synchronized their codebase/processing with the updated hashing algorithm.
 - If the PP is not using the latest hashing algorithm, and BFD has updated its database and algorithm, or vice versa the PP has updated its hashing algorithm but BFD has not yet finished updating the  _BENEFICIARIES_ table, then _patient search_ requests will return an empty result Bundle.
-- Some permutations of the above UPDATE logic/processing steps, for which BFD does have prior work, is to wrap the _BENEFICIARIES_ table in an updateable db VIEW, and then toggle between two _BENEFICIARIES_ tables simply by (re-) pointing the VIEW as needed.
+- Some permutations of the above UPDATE logic/processing steps, for which BFD does have prior work, is to wrap the _BENEFICIARIES_ table in an updatable db VIEW, and then toggle between two _BENEFICIARIES_ tables simply by (re-) pointing the VIEW as needed.
 
 **NOTE** - while this document may reference database tables, columns, indexes, etc. it should be noted that any processing changes that affect a database, needs to occur in three distinct environments: _PROD_, _PROD-SBX_ and _TEST_.
 #### PROS
@@ -306,13 +306,13 @@ Since all BFD services are protected by TLS, changing a service from a GET to a 
 #### PROS
 - **completely removes necessity to have/maintain hash algorithms and hashed data values**; BFD would never have to deal with this issue again.
 - removing requirement for PPs to hash search params simplifies URL construction for their client implementation and provides immediate performance boost due to not having to created hashed lookup value.
-- in checking with PPs, they are unamimous that this would be a good idea IF BFD could support both GET and POST for patient search for some minimal overlap duration, at the end of which, support for GET could be removed. Using raw MBI_NUM allows PPs to streamline their processing and not worry about hashing algorithm.
+- in checking with PPs, they are unanimous that this would be a good idea IF BFD could support both GET and POST for patient search for some minimal overlap duration, at the end of which, support for GET could be removed. Using raw MBI_NUM allows PPs to streamline their processing and not worry about hashing algorithm.
 #### CONS
 - BFD would need to implement some sort of logging interceptor of POST operations if we wanted to maintain current logging visibility for requests. Under the current logging framework, the GET URL is logged which includes the search param; BFD would lose visibility to the MBI or HICN hashed param value that is currently captured in log files. A logging interceptor could mitigate this shortcoming.
 - PPs that currently use service GET URLs will need to modify their client setup code to use HTTP POST; this requires the following changes:
   - change construction of URL from GET to POST.
   - encode former GET params into a POST body.
-- PPs are in favor of POST if some overlap support / break-in period supprting both GET and POST.
+- PPs are in favor of POST if some overlap support / break-in period supporting both GET and POST.
 ### Asymmetric Crypto
 [Asymmetric Crypto]: #asymmetric-crypto
 
@@ -320,7 +320,7 @@ As noted previously, distributing a shared hashing algorithm to peering partners
 
 If BFD wishes to maintain total control over hashing of URL GET parameters, we could adopt asymmetric crypto for creating the hash value(s). Instead of _sharing_ a secret (the algorithm), we use a public-private keypair to dynamically encrypt/decrypt sensitive URL parameters.
 
-BFD creates a public-private keypair; it then distributes the public key to each of its peering partners. Each PP then uses their copy of the public key to encrypt a plaintext MBI or HICN; the encrypted value is then passed to the BFD _patient search_ as a URL GET parameter. The parameter is fully obfuscated so any public access (logging, TCP snooping, etc.) is limited to just that...a URL that has an encrypted content and the only way to discern the view the sensitive parameter is to decryypt it using BFD's private key.
+BFD creates a public-private keypair; it then distributes the public key to each of its peering partners. Each PP then uses their copy of the public key to encrypt a plaintext MBI or HICN; the encrypted value is then passed to the BFD _patient search_ as a URL GET parameter. The parameter is fully obfuscated so any public access (logging, TCP snooping, etc.) is limited to just that...a URL that has an encrypted content and the only way to discern the view the sensitive parameter is to decrypt it using BFD's private key.
 #### PROS
 - can still support HTTP GET URLs; current logging continues as is, logging the URL.
 - extensible choice of algorithms and key sizes make this the safest way to protect data.
