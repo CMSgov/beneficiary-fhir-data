@@ -178,7 +178,7 @@ CREATE INDEX IF NOT EXISTS beneficiaries_prehash_hicn_idx
 alter table BENEFICIARIES rename to BENEFICIARIES_ORIG;
 alter table BENEFICIARIES_PREHASH rename to BENEFICIARIES;
 ```
-  - Perform database indeces rename operations:
+  - Perform database indices rename operations:
 ```
 ALTER INDEX beneficiaries_mbi_idx
   RENAME TO beneficiaries_orig_mbi_idx;
