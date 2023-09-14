@@ -34,7 +34,6 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /** Endpoint end-to-end test for the V1 explanation of benefits endpoint. */
@@ -695,15 +694,13 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
    * lastUpdated parameter after yesterday and pagination links work and contain lastUpdated.
-   *
-   * <p>FIXME: Fix up like v2, should work now
    */
   @Test
-  @Disabled("Should be fixed, needs adjustment like v2")
   public void searchEobByPatientIdWithLastUpdatedAndPagination() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     int expectedCount = 5;
+    int expectedTotal = 8;
     String yesterday =
         new DateTimeDt(Date.from(Instant.now().minus(1, ChronoUnit.DAYS))).getValueAsString();
     String now = new DateTimeDt(new Date()).getValueAsString();
@@ -721,7 +718,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
             .spec(requestAuth)
             .expect()
             .body("entry.size()", equalTo(expectedCount))
-            .body("total", equalTo(expectedCount))
+            .body("total", equalTo(expectedTotal))
             .statusCode(200)
             .when()
             .get(requestString);
@@ -744,7 +741,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         .body("entry.size()", equalTo(3))
-        .body("total", equalTo(3))
+        .body("total", equalTo(expectedTotal))
         .statusCode(200)
         .when()
         .get(URLDecoder.decode(nextLink));

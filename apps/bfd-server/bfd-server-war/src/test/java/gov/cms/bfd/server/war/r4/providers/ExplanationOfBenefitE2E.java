@@ -723,8 +723,6 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
         given()
             .spec(requestAuth)
             .expect()
-            .log()
-            .body()
             .body("entry.size()", equalTo(expectedCount))
             .body("total", equalTo(expectedTotal))
             .statusCode(200)
