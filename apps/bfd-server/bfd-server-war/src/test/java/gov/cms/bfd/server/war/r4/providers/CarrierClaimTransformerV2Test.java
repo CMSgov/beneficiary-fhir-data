@@ -150,6 +150,46 @@ public class CarrierClaimTransformerV2Test {
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
+  /** Tests that the transformer sets the provider (CARR_CLM_BLG_NPI_NUM). */
+  @Test
+  public void shouldSetProvider() {
+    // Make sure the field was in the claim data
+    assertTrue(claim.getCarrierClaimBlgNpiNumber().isPresent());
+
+    // Check the value was mapped correctly
+    assertNotNull(eob.getProvider());
+    assertEquals(
+        claim.getCarrierClaimBlgNpiNumber().get(), eob.getProvider().getIdentifier().getValue());
+    assertEquals(
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM),
+        eob.getProvider().getIdentifier().getSystem());
+  }
+
+  /**
+   * Tests that the transformer sets the provider to the default "UNKNOWN" when CARR_CLM_BLG_NPI_NUM
+   * is not present in the claim.
+   */
+  @Test
+  public void shouldSetProviderDefaultWhenNoClaimBlgNumberPresent() {
+    // Remove CARR_CLM_BLG_NPI_NUM from the claim
+    claim = generateClaim();
+    claim.setCarrierClaimBlgNpiNumber(Optional.empty());
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+
+    // Make sure the field is no longer present
+    assertFalse(claim.getCarrierClaimBlgNpiNumber().isPresent());
+
+    // Check the value was set to UNKNOWN
+    assertNotNull(eob.getProvider());
+    assertEquals("UNKNOWN", eob.getProvider().getIdentifier().getValue());
+    assertEquals(
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM),
+        eob.getProvider().getIdentifier().getSystem());
+  }
+
   /**
    * Tests that the transformer sets the billable period.
    *

@@ -210,15 +210,13 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
     // CARR_CLM_BLG_NPI_NUM => ExplanationOfBenefit.provider.identifier
-    claimGroup
-        .getCarrierClaimBlgNpiNumber()
-        .ifPresent(
-            value ->
-                eob.setProvider(
-                    new Reference()
-                        .setIdentifier(
-                            TransformerUtilsV2.createIdentifier(
-                                CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, value))));
+    // Since provider is a required FHIR field, default to UNKNOWN if not in the data
+    String providerValue = claimGroup.getCarrierClaimBlgNpiNumber().orElse("UNKNOWN");
+    eob.setProvider(
+        new Reference()
+            .setIdentifier(
+                TransformerUtilsV2.createIdentifier(
+                    CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, providerValue)));
 
     // Process line items
     for (CarrierClaimLine line : claimGroup.getLines()) {
