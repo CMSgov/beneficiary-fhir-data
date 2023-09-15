@@ -3213,9 +3213,8 @@ public final class TransformerUtils {
      * manager's version of
      * the timestamp.
      */
-    // FUTURE: Fix this to use sublist similar to V2 to fix bug
     Instant maxBundleDate =
-        resources.stream()
+        resourcesSubList.stream()
             .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
             .max(Instant::compareTo)
