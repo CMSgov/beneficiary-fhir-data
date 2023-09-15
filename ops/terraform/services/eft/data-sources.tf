@@ -49,8 +49,14 @@ data "aws_subnet" "this" {
 }
 
 data "aws_network_interface" "vpc_endpoint" {
-  for_each = toset(aws_vpc_endpoint.this.network_interface_ids)
-  id       = each.key
+  # This is a bit strange looking, but we cannot use network_interface_ids within a for_each as its
+  # value is not determined until _after_ aws_vpc_endpoint.this is applied. Terraform expects the
+  # set it iterates upon is known prior to apply, so instead we iterate on a common, known
+  # constraint which is the subnets that this service exists in
+  count = length(local.available_endpoint_subnets)
+  # network_interface_ids is a set by default, and sets have no index in Terraform, so we need to
+  # convert it to a list. Then, to make it consistent between runs, we sort it
+  id = sort(tolist(aws_vpc_endpoint.this.network_interface_ids))[count.index]
 }
 
 data "aws_vpc_endpoint_service" "transfer_server" {

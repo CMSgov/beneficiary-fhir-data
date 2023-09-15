@@ -307,10 +307,10 @@ resource "aws_lb_target_group" "nlb_to_vpc_endpoint" {
 }
 
 resource "aws_alb_target_group_attachment" "nlb_to_vpc_endpoint" {
-  for_each = toset(values(data.aws_network_interface.vpc_endpoint)[*].private_ip)
+  count = length(local.available_endpoint_subnets)
 
   target_group_arn = aws_lb_target_group.nlb_to_vpc_endpoint.arn
-  target_id        = each.key
+  target_id        = data.aws_network_interface.vpc_endpoint[count.index].private_ip
 }
 
 resource "aws_lb_listener" "nlb_to_vpc_endpoint" {
@@ -344,7 +344,7 @@ resource "aws_security_group" "nlb" {
     from_port   = local.sftp_port
     to_port     = local.sftp_port
     protocol    = "tcp"
-    cidr_blocks = [for ip in values(data.aws_network_interface.vpc_endpoint)[*].private_ip : "${ip}/32"]
+    cidr_blocks = [for ip in data.aws_network_interface.vpc_endpoint[*].private_ip : "${ip}/32"]
   }
 }
 
