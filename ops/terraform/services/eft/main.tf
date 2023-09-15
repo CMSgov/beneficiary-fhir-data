@@ -265,6 +265,10 @@ resource "aws_ec2_subnet_cidr_reservation" "this" {
   cidr_block       = "${each.value}/32"
   reservation_type = "explicit"
   subnet_id        = data.aws_subnet.this[each.key].id
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_lb" "this" {
