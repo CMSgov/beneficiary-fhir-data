@@ -415,7 +415,7 @@ resource "aws_vpc_endpoint" "this" {
 
   private_dns_enabled = false
   security_group_ids  = [aws_security_group.vpc_endpoint.id]
-  service_name        = "com.amazonaws.us-east-1.transfer.server"
+  service_name        = data.aws_vpc_endpoint_service.transfer_server.service_name
   subnet_ids          = local.available_endpoint_subnets[*].id
   vpc_endpoint_type   = "Interface"
   vpc_id              = local.vpc_id
