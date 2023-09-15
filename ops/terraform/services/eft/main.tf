@@ -275,11 +275,11 @@ resource "aws_lb" "this" {
   tags                             = { Name = "${local.full_name}-nlb" }
 
   dynamic "subnet_mapping" {
-    for_each = local.subnet_ip_reservations
+    for_each = local.available_endpoint_subnets
 
     content {
-      subnet_id            = data.aws_subnet.this[subnet_mapping.key].id
-      private_ipv4_address = subnet_mapping.value
+      subnet_id            = subnet_mapping.value.id
+      private_ipv4_address = local.subnet_ip_reservations[subnet_mapping.value.tags["Name"]]
     }
   }
 }
