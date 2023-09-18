@@ -51,6 +51,7 @@
         <module>bfd-pipeline</module>
         <module>bfd-server</module>
         <module>bfd-db-migrator</module>
+        <module>bfd-ops</module>
     </modules>
 
     <properties>
@@ -67,6 +68,8 @@
             they are reproducible bit-by-bit no matter when/where they are generated.
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
         <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
+        <bfd.data.fda.version>1.0-SNAPSHOT</bfd.data.fda.version>
+        <bfd.data.npi.version>1.0-SNAPSHOT</bfd.data.npi.version>
         <maven.jacoco.plugin.version>0.8.10</maven.jacoco.plugin.version>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
@@ -867,12 +870,15 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>3.0.1</version>
                     <configuration>
-                        <!-- Require manual pushes after releases. Makes it easier to clean
-                            things up if releases fail. -->
-                        <pushChanges>false</pushChanges>
+                        <tagNameFormat>v@{project.version}</tagNameFormat>
+                        <!-- Automatically push after release. -->
+                        <pushChanges>true</pushChanges>
                         <localCheckout>true</localCheckout>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <commitByProject>false</commitByProject>
+                        <arguments>--threads 1C -DskipTests=true -DskipITs -Dmaven.build.cache.enabled=false</arguments>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1204,6 +1210,21 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>test-release</id>
+            <properties>
+                <jib.skip>false</jib.skip>
+                <jib.goal>build</jib.goal>
+                <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
+                <maven.build.cache.enabled>false</maven.build.cache.enabled>
+            </properties>
+            <distributionManagement>
+                <repository>
+                    <id>${env.CA_DOMAIN}-${env.CA_REPOSITORY}</id>
+                    <url>${env.CA_REPOSITORY_ENDPOINT}</url>
+                </repository>
+            </distributionManagement>
+        </profile>
         <profile>
             <!-- This profile will only be active for builds inside of Eclipse (managed
                 by m2e). It's primarily used to manage the execution of plugins in that environment. -->
