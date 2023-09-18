@@ -855,6 +855,9 @@
                     <configuration>
                         <!-- Delay deployment of build artifacts until after all modules build successfully. -->
                         <deployAtEnd>true</deployAtEnd>
+                        <!-- We aren't publishing libraries for consumption via maven so we want to limit which projects
+                             are pushed to CodeArtifact.-->
+                        <skip>true</skip>
                     </configuration>
                 </plugin>
                 <plugin>
