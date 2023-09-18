@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -9,6 +10,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -626,6 +628,38 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
     List<String> emptyUrls =
         Arrays.asList("_lastUpdated=lt" + earlyDateTime, "_lastUpdated=le" + earlyDateTime);
     testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} works as expected,
+   * when an invalid year is specified.
+   */
+  @Test
+  public void searchByPartDContractWithInvalidYear() {
+    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
+
+    assertThrows(
+        InvalidRequestException.class,
+        () -> {
+          fhirClient
+              .search()
+              .forResource(Patient.class)
+              .where(
+                  new TokenClientParam("_has:Coverage.extension")
+                      .exactly()
+                      .systemAndIdentifier(
+                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
+                          "S4607"))
+              .where(
+                  new TokenClientParam("_has:Coverage.rfrncyr")
+                      .exactly()
+                      .systemAndIdentifier(
+                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
+                          "ABC"))
+              .returnBundle(Bundle.class)
+              .execute();
+        });
   }
 
   /**
