@@ -26,7 +26,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import io.restassured.response.Response;
-import java.net.URLDecoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;

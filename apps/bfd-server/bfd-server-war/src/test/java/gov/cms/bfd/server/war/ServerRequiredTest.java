@@ -103,8 +103,14 @@ public class ServerRequiredTest {
                 .keyStoreType(keystoreType)
                 .trustStoreType(keystoreType)
                 .allowAllHostnames());
+    /* RestAssured will url encode urls by default, and we use pre-encoded urls during pagination, so turn it off
+     * since it will double-encode the lastUpdated field otherwise. */
     requestAuth =
-        new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
+        new RequestSpecBuilder()
+            .setBaseUri(baseServerUrl)
+            .setAuth(testCertificate)
+            .setUrlEncodingEnabled(false)
+            .build();
   }
 
   /**
