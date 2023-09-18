@@ -143,13 +143,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-             <!-- Required for integration tests to run correctly. -->
-             <groupId>gov.cms.bfd</groupId>
-             <artifactId>bfd-server-launcher-sample</artifactId>
-             <version>${project.version}</version>
-             <type>war</type>
-             <scope>test</scope>
-         </dependency>
+            <!-- Required for integration tests to run correctly. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-server-launcher-sample</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
