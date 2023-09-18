@@ -1220,6 +1220,8 @@
                 <jib.goal>build</jib.goal>
                 <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
                 <maven.build.cache.enabled>false</maven.build.cache.enabled>
+                <!-- Source jars are large and we don't need to publish them. -->
+                <maven.source.skip>true</maven.source.skip>
             </properties>
             <distributionManagement>
                 <repository>
