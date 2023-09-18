@@ -26,6 +26,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -741,9 +742,13 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
     String firstLink = testUtils.getPaginationLink(response, "first");
     assertTrue(firstLink.contains("_lastUpdated"));
 
+    /* RestAssured will url encode urls by default, and we use pre-encoded urls during pagination, so turn it off
+     * since it will double-encode the lastUpdated field otherwise. */
+    RequestSpecification requestAuthNoEncode = given().spec(requestAuth).urlEncodingEnabled(false);
+
     // Ensure using the next link works appropriately and returns the last 3 results
     given()
-        .spec(requestAuth)
+        .spec(requestAuthNoEncode)
         .expect()
         .body("entry.size()", equalTo(3))
         .body("total", equalTo(expectedTotal))
