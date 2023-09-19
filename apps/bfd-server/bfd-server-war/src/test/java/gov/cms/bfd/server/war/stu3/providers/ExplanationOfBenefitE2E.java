@@ -736,13 +736,12 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
     String firstLink = testUtils.getPaginationLink(response, "first");
     assertTrue(firstLink.contains("_lastUpdated"));
 
-    /* RestAssured will url encode urls by default, and we use pre-encoded urls during pagination, so turn it off
-     * since it will double-encode the lastUpdated field otherwise. */
-    RequestSpecification requestAuthNoEncode = given().spec(requestAuth).urlEncodingEnabled(false);
-
     // Ensure using the next link works appropriately and returns the last 3 results
     given()
-        .spec(requestAuthNoEncode)
+        .spec(requestAuth)
+        /* RestAssured will url encode urls by default, and we use pre-encoded urls during pagination, so turn it off
+         * since it will double-encode the lastUpdated field otherwise. */
+        .urlEncodingEnabled(false)
         .expect()
         .body("entry.size()", equalTo(3))
         .body("total", equalTo(expectedTotal))
