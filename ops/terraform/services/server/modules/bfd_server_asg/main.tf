@@ -25,14 +25,19 @@ locals {
       consecutive_periods_to_alarm = 15
     }
   }
+  # begin is inclusive, end is exclusive
   scaling_stages = [
-    # Between 0 MB/min and 100 MB/min we want to be at 3 instances
-    { begin = 0, end = 1 * var.scaling_networkin_interval_mb, desired_capacity = local.scaling_capacity_step * 1 },
-    # Between 100 MB/min and 200 MB/min we want to be at 6 instances
+    # If NetworkIn is less than 1 * var.scaling_networkin_interval_mb MB/min, exclusive, we want to
+    # be at 3 instances
+    { begin = null, end = 1 * var.scaling_networkin_interval_mb, desired_capacity = local.scaling_capacity_step * 1 },
+    # If NetworkIn is greater than or equal to 1 * var.scaling_networkin_interval_mb MB/min, but
+    # less than 2 * var.scaling_networkin_interval_mb MB/min we want to be at 6 instances
     { begin = 1 * var.scaling_networkin_interval_mb, end = 2 * var.scaling_networkin_interval_mb, desired_capacity = local.scaling_capacity_step * 2 },
-    # Between 200 MB/min and 400 MB/min we want to be at 9 instances
+    # If NetworkIn is greater than or equal to 2 * var.scaling_networkin_interval_mb MB/min, but
+    # less than 4 * var.scaling_networkin_interval_mb MB/min we want to be at 9 instances
     { begin = 2 * var.scaling_networkin_interval_mb, end = 4 * var.scaling_networkin_interval_mb, desired_capacity = local.scaling_capacity_step * 3 },
-    # Whenever traffic exceeds 400 MB/min we want to be at 12 instances
+    # Whenever traffic is greater than or equal to 4 * var.scaling_networkin_interval_mb MB/min we
+    # want to be at 12 instances
     { begin = 4 * var.scaling_networkin_interval_mb, end = null, desired_capacity = local.scaling_capacity_step * 4 },
   ]
   scalein_config  = slice(local.scaling_stages, 0, length(local.scaling_stages) - 1)
