@@ -24,7 +24,6 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
