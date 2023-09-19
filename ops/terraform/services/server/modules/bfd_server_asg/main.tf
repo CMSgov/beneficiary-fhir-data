@@ -295,7 +295,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
     id    = "e2"
     label = "Set to ${each.value.desired_capacity} capacity units"
     expression = "IF(${join(" && ", compact([
-      each.value.begin > 0 ? "networkin > ${each.value.begin}" : null,
+      each.value.begin != null ? "networkin > ${each.value.begin}" : null,
       each.value.end != null ? "networkin <= ${each.value.end}" : null,
       "m3 > ${each.value.desired_capacity}"
     ]))}, 1)"
@@ -384,7 +384,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
       id    = "e${metric_query.key}"
       label = "Set to ${metric_query.value.desired_capacity} capacity units"
       expression = "IF(${join(" && ", compact([
-        "networkin > ${metric_query.value.begin}",
+        metric_query.value.begin != null ? "networkin > ${metric_query.value.begin}" : null,
         metric_query.value.end != null ? "networkin <= ${metric_query.value.end}" : null,
         "m3 < ${metric_query.value.desired_capacity}"
       ]))}, ${metric_query.key + 1})"
