@@ -637,7 +637,7 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
   @Test
   public void searchByPartDContractWithInvalidYear() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     assertThrows(
         InvalidRequestException.class,
