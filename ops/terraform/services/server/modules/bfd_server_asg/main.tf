@@ -6,11 +6,33 @@ locals {
 
   additional_tags = { Layer = var.layer, role = var.role }
 
+  # FUTURE: Encode the scaling step, scaling stages, and alarm evaluation periods within config
   scaling_capacity_step = length(var.env_config.azs)
+  scaling_alarms_config = {
+    # Scale-out alarm is configured to ALARM if 1 out of 1 consecutive 1 minute periods report high
+    # network traffic. This is intended to scale the Server aggressively
+    scale_out = {
+      eval_period                  = 1 * 60
+      datapoints_to_alarm          = 1
+      consecutive_periods_to_alarm = 1
+    }
+    # Scale-in alarms are configured to ALARM if 15 out of 15 consecutive 1 minute periods report
+    # low network traffic. This is intended to keep the Server scaled-out as traffic is often bursty
+    # over a given period rather than sustained at a given threshold
+    scale_in = {
+      eval_period                  = 1 * 60
+      datapoints_to_alarm          = 15
+      consecutive_periods_to_alarm = 15
+    }
+  }
   scaling_stages = [
+    # Between 0 MB/min and 100 MB/min we want to be at 3 instances
     { begin = 0, end = 1 * var.scaling_networkin_interval_mb, desired_capacity = local.scaling_capacity_step * 1 },
+    # Between 100 MB/min and 200 MB/min we want to be at 6 instances
     { begin = 1 * var.scaling_networkin_interval_mb, end = 2 * var.scaling_networkin_interval_mb, desired_capacity = local.scaling_capacity_step * 2 },
+    # Between 200 MB/min and 400 MB/min we want to be at 9 instances
     { begin = 2 * var.scaling_networkin_interval_mb, end = 4 * var.scaling_networkin_interval_mb, desired_capacity = local.scaling_capacity_step * 3 },
+    # Whenever traffic exceeds 400 MB/min we want to be at 12 instances
     { begin = 4 * var.scaling_networkin_interval_mb, end = null, desired_capacity = local.scaling_capacity_step * 4 },
   ]
   scalein_config  = slice(local.scaling_stages, 0, length(local.scaling_stages) - 1)
@@ -206,8 +228,8 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
 
   alarm_name          = "bfd-${var.role}-${local.env}-networkin-low-${each.key}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  datapoints_to_alarm = 10
-  evaluation_periods  = 10
+  datapoints_to_alarm = local.scaling_alarms_config.scale_in.datapoints_to_alarm
+  evaluation_periods  = local.scaling_alarms_config.scale_in.consecutive_periods_to_alarm
   threshold           = 1
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_low_scaling[each.key].arn]
@@ -222,7 +244,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
       }
       metric_name = "NetworkIn"
       namespace   = "AWS/EC2"
-      period      = 60
+      period      = local.scaling_alarms_config.scale_in.eval_period
       stat        = "Average"
     }
   }
@@ -237,14 +259,13 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
       }
       metric_name = "NetworkOut"
       namespace   = "AWS/EC2"
-      period      = 60
+      period      = local.scaling_alarms_config.scale_in.eval_period
       stat        = "Average"
     }
   }
 
   metric_query {
     id          = "m3"
-    period      = 0
     return_data = false
 
     metric {
@@ -253,7 +274,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
       }
       metric_name = "GroupDesiredCapacity"
       namespace   = "AWS/AutoScaling"
-      period      = 60
+      period      = local.scaling_alarms_config.scale_in.eval_period
       stat        = "Average"
     }
   }
@@ -295,15 +316,14 @@ resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
 resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
   alarm_name          = "bfd-${var.role}-${local.env}-networkin-high"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  datapoints_to_alarm = 1
-  evaluation_periods  = 1
+  datapoints_to_alarm = local.scaling_alarms_config.scale_out.datapoints_to_alarm
+  evaluation_periods  = local.scaling_alarms_config.scale_out.consecutive_periods_to_alarm
   threshold           = 1
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_autoscaling_policy.filtered_networkin_high_scaling.arn]
 
   metric_query {
     id          = "m1"
-    period      = 0
     return_data = false
 
     metric {
@@ -312,13 +332,12 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
       }
       metric_name = "NetworkIn"
       namespace   = "AWS/EC2"
-      period      = 60
+      period      = local.scaling_alarms_config.scale_out.eval_period
       stat        = "Average"
     }
   }
   metric_query {
     id          = "m2"
-    period      = 0
     return_data = false
 
     metric {
@@ -327,14 +346,13 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
       }
       metric_name = "NetworkOut"
       namespace   = "AWS/EC2"
-      period      = 60
+      period      = local.scaling_alarms_config.scale_out.eval_period
       stat        = "Average"
     }
   }
 
   metric_query {
     id          = "m3"
-    period      = 0
     return_data = false
 
     metric {
@@ -343,7 +361,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
       }
       metric_name = "GroupDesiredCapacity"
       namespace   = "AWS/AutoScaling"
-      period      = 60
+      period      = local.scaling_alarms_config.scale_out.eval_period
       stat        = "Average"
     }
   }
@@ -352,7 +370,6 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
     expression  = "IF(m2/m1 > 0.01, m1, 0)"
     id          = "networkin"
     label       = "FilteredNetworkIn"
-    period      = 0
     return_data = false
   }
 
@@ -374,7 +391,6 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
     expression  = "MAX([${join(",", [for i in range(length(local.scaleout_config)) : "e${i}"])}])"
     id          = "e${length(local.scaleout_config)}"
     label       = "ScalingCapacityScalar"
-    period      = 0
     return_data = true
   }
 }
