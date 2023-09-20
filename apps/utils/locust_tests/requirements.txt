@@ -204,7 +204,7 @@ flask-cors==4.0.0 \
     --hash=sha256:bc3492bfd6368d27cfe79c7821df5a8a319e1a6d5eab277a3794be19bdc51783 \
     --hash=sha256:f268522fcb2f73e2ecdde1ef45e2fd5c71cc48fe03cffb4b441c6d1b40684eb0
     # via locust
-gevent==23.7.0 \
+gevent==23.9.0 \
     --hash=sha256:11b9bb0bce45170ff992760385a86e6955ccb88dba4a82a64d5ce9459290d8d6 \
     --hash=sha256:1234849b0bc4df560924aa92f7c01ca3f310677735fb508a2b0d7a61bb946916 \
     --hash=sha256:34086bcc1252ae41e1cb81cf13c4a7678031595c12f4e9a1c3d0ab433f20826a \
