@@ -16,7 +16,7 @@ This RFC is therefore intended to explore solutions that lend themselves to prov
 ## Status
 [Status]: #status
 
-* Status: Proposed <!-- (Proposed/Approved/Rejected/Implemented) -->
+* Status: Approved <!-- (Proposed/Approved/Rejected/Implemented) -->
 * Implementation JIRA Ticket(s):
     * [BFD-1110](https://jira.cms.gov/browse/BFD-1110)
 
@@ -34,8 +34,8 @@ This RFC is therefore intended to explore solutions that lend themselves to prov
   * [Much Ado About Nothing?](#much-ado-about-nothing)
 * [Exploration of Solutions](#exploration-of-solutions)
   * [Status Quo](#status-quo)
-  * [Hot Stand-by : Option 1](#hot-standby-1)
-  * [Hot Stand-by : Option 2](#hot-standby-2)
+  * [Hot Stand-by Option 1](#hot-standby-1)
+  * [Hot Stand-by Option 2](#hot-standby-2)
   * [HTTP POST](#http-post)
   * [Asymmetric Crypto](#asymmetric-crypto)
 * [Proposed Solution: Detailed Design](#proposed-solution-detailed-design)
@@ -210,8 +210,9 @@ ALTER INDEX beneficiaries_prehash_hicn_idx
 #### CONS
 - while not quite _zero downtime_ this tack is the closest what could be achieved based on current capabilities; does not represent a significant level of effort to implement.
 - will need write script (i.e., python, SQL) that can re-hash records and update db table.
-### Hot Stand-by : Option 1
-[Hot Stand-by - Option 1]: #hot-standby-1
+### Hot Stand-by Option 1
+[Hot Stand-by Option 1]: #hot-standby-1
+
 The premise behind a _hot stand-by_ is to have BFD actively support multiple concurrent hash algorithms and associated _MBI_HASH_ and _BENE_CRNT_HIC_NUM_ values specific to each hash algorithm that was used to generate the hash values.
 
 This set of _shadow_ values for MBI and HICN could be accomplished solely within the _BENEFICIARIES_ data (i.e., maintain two sets of hashed values). Since the bulk of the (performance) cost for a hash value is the hashing operation itself, we could probably not worry about indexing the new fields; they exist as already calculated hash values which will be plugged into the the real hash columns (_MBI_HASH_ and _BENE_CRNT_HIC_NUM_) with a single SQL update script as needed.
@@ -246,8 +247,8 @@ UPDATE BENEFICIARIES SET
 - maintaining data over time (i.e., INSERTs or UPDATEs from weekly ETL) needs to be considered; changes to ETL may be non-trivial.
 - may also require some AWS (SSM) work
 - will need script (i.e., flyway, python, SQL) that can populate new table columns; possibly custom maven build artifact.
-### Hot Stand-by : Option 2
-[Hot Stand-by - Option 2]: #hot-stand-by-2
+### Hot Stand-by Option 2
+[Hot Stand-by Option 2]: #hot-standby-2
 
 Similar to Option 1, but maintain the _shadow_ values for MBI and HICN in a (new) separate table.
 
