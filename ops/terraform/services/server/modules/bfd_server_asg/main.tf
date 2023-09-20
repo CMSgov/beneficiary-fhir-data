@@ -298,7 +298,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
       each.value.begin != null ? "networkin > ${each.value.begin}" : null,
       each.value.end != null ? "networkin <= ${each.value.end}" : null,
       "m3 > ${each.value.desired_capacity}"
-    ]))}, 1)"
+    ]))}, 1, 0)"
     return_data = true
   }
 }
@@ -387,7 +387,7 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
         metric_query.value.begin != null ? "networkin > ${metric_query.value.begin}" : null,
         metric_query.value.end != null ? "networkin <= ${metric_query.value.end}" : null,
         "m3 < ${metric_query.value.desired_capacity}"
-      ]))}, ${metric_query.key + 1})"
+      ]))}, ${metric_query.key + 1}, 0)"
       return_data = false
     }
   }
