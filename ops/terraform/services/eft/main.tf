@@ -265,6 +265,10 @@ resource "aws_ec2_subnet_cidr_reservation" "this" {
   cidr_block       = "${each.value}/32"
   reservation_type = "explicit"
   subnet_id        = data.aws_subnet.this[each.key].id
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_lb" "this" {
@@ -275,11 +279,11 @@ resource "aws_lb" "this" {
   tags                             = { Name = "${local.full_name}-nlb" }
 
   dynamic "subnet_mapping" {
-    for_each = local.subnet_ip_reservations
+    for_each = local.available_endpoint_subnets
 
     content {
-      subnet_id            = data.aws_subnet.this[subnet_mapping.key].id
-      private_ipv4_address = subnet_mapping.value
+      subnet_id            = subnet_mapping.value.id
+      private_ipv4_address = local.subnet_ip_reservations[subnet_mapping.value.tags["Name"]]
     }
   }
 }
@@ -307,10 +311,10 @@ resource "aws_lb_target_group" "nlb_to_vpc_endpoint" {
 }
 
 resource "aws_alb_target_group_attachment" "nlb_to_vpc_endpoint" {
-  for_each = toset(values(data.aws_network_interface.vpc_endpoint)[*].private_ip)
+  count = length(local.available_endpoint_subnets)
 
   target_group_arn = aws_lb_target_group.nlb_to_vpc_endpoint.arn
-  target_id        = each.key
+  target_id        = data.aws_network_interface.vpc_endpoint[count.index].private_ip
 }
 
 resource "aws_lb_listener" "nlb_to_vpc_endpoint" {
@@ -344,7 +348,7 @@ resource "aws_security_group" "nlb" {
     from_port   = local.sftp_port
     to_port     = local.sftp_port
     protocol    = "tcp"
-    cidr_blocks = [for ip in values(data.aws_network_interface.vpc_endpoint)[*].private_ip : "${ip}/32"]
+    cidr_blocks = [for ip in data.aws_network_interface.vpc_endpoint[*].private_ip : "${ip}/32"]
   }
 }
 
@@ -415,7 +419,7 @@ resource "aws_vpc_endpoint" "this" {
 
   private_dns_enabled = false
   security_group_ids  = [aws_security_group.vpc_endpoint.id]
-  service_name        = "com.amazonaws.us-east-1.transfer.server"
+  service_name        = data.aws_vpc_endpoint_service.transfer_server.service_name
   subnet_ids          = local.available_endpoint_subnets[*].id
   vpc_endpoint_type   = "Interface"
   vpc_id              = local.vpc_id

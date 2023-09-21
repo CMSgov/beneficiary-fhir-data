@@ -347,11 +347,23 @@
         <dependency>
             <groupId>gov.cms.bfd.data.fda.utility</groupId>
             <artifactId>bfd-data-fda</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${bfd.data.fda.version}</version>
         </dependency>
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <configuration>
+                        <!-- We do want to publish this project to CodeArtifact. -->
+                        <skip>false</skip>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
