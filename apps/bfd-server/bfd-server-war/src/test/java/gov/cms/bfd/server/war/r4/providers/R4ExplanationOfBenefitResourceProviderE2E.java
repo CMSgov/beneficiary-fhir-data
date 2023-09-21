@@ -1034,6 +1034,7 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     // Verify that tax numbers are present for carrier claims.
     carrierEob = filterToClaimType(searchResults, ClaimType.CARRIER).get(0);
     assertNotNull(carrierClaim.getLines().get(0).getProviderTaxNumber());
+    // Ensure old v1 mapping for tax num using careteam is not present
     assertNull(
         TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
             carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
@@ -1041,10 +1042,10 @@ public final class R4ExplanationOfBenefitResourceProviderE2E extends ServerRequi
     // Verify that tax numbers are present for DME claims.
     dmeEob = filterToClaimType(searchResults, ClaimType.DME).get(0);
     assertNotNull(dmeClaim.getLines().get(0).getProviderTaxNumber());
-    // FIXME: investigate this, careTeam for tax number doesnt seem to be added correctly for DME?
-    /*assertNotNull(
-    TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
-        dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));*/
+    // Ensure old v1 mapping for tax num using careteam is not present
+    assertNull(
+        TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
+            dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));
   }
 
   /**
