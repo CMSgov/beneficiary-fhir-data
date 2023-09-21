@@ -46,9 +46,7 @@
       "playbook_file": "./build_bfd-docker-host.yml",
       "extra_arguments": [
         "-e git_commit={{ user `git_commit` }}",
-        "-e git_branch={{ user `git_branch` }}",
-        "--tags",
-        "pre-ami"
+        "-e git_branch={{ user `git_branch` }}"
       ],
       "ansible_env_vars": [
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
