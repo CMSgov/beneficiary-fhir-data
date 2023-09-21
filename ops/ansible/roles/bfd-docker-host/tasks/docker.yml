@@ -1,19 +1,6 @@
 ---
-- name: Install yum utils
-  vars:
-    ansible_python_interpreter: /usr/bin/python
-  yum:
-    name: yum-utils
-    state: latest
-
-- name: Docker repo
-  ansible.builtin.yum_repository:
-    baseurl: https://download.docker.com/linux/centos/docker-ce.repo
-
 - name: Install Docker
-  package:
-    name: docker-ce
-    state: latest
+  shell: amazon-linux-extras install docker
   become: yes
 
 - name: Start Docker service
