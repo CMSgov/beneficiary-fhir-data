@@ -1,6 +1,27 @@
 ---
-- name: Enable Some packages from amazon-linux-extras packages
-  shell: "amazon-linux-extras install docker -y"
+- name: Install yum utils
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+  yum:
+    name: yum-utils
+    state: latest
+
+- name: Docker repo
+  ansible.builtin.yum_repository:
+    baseurl: https://download.docker.com/linux/rhel/docker-ce.repo
+
+- name: Install Docker
+  package:
+    name: docker-ce
+    state: latest
+  become: yes
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  become: yes
 
 - name: Enable Docker service at startup
   command: /usr/bin/systemctl --system enable docker
