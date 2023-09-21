@@ -148,14 +148,6 @@ packer build -color=false \
 			}
 			return new AmiIds(
 					platinumAmiId: amiIds.platinumAmiId,
-					bfdPipelineAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
-					bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
-					bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
-					bfdServerLoadAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json")),
 					bfdDockerHostAmiId: extractAmiIdFromPackerManifest(readFile(
 							file: "${workspace}/ops/ansible/playbooks-ccs/manifest_docker-host.json")),
 			)
