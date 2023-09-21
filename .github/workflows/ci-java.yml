@@ -17,6 +17,7 @@ env:
   ^ops/ansible/roles/bfd-db-migrator/|\
   ^ops/ansible/roles/bfd-pipeline/|\
   ^ops/ansible/roles/bfd-server/|\
+  ^ops/ansible/roles/bfd-docker-host/|\
   ^.github/workflows/ci-ansible.yml|\
   ^.github/workflows/ci-java.yml\
   )"
@@ -188,6 +189,11 @@ jobs:
   #         if [ "$is_valid" = "false" ] ; then exit 1 ; fi
 
   # ansible system testing
+  ansible-role-bfd-docker-host:
+    uses: ./.github/workflows/ci-ansible.yml
+    with:
+      role: bfd-docker-host
+
   ansible-role-bfd-pipeline:
     needs: mvn-verify
     uses: ./.github/workflows/ci-ansible.yml
@@ -205,9 +211,3 @@ jobs:
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-db-migrator
-
-  ansible-role-bfd-docker-host:
-    needs: mvn-verify
-    uses: ./.github/workflows/ci-ansible.yml
-    with:
-      role: bfd-docker-host
