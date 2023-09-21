@@ -58,7 +58,7 @@
     {
       "only": ["bfd-docker-host"],
       "type": "manifest",
-      "output": "manifest_server-load.json",
+      "output": "manifest_docker-host.json",
       "strip_path": true
     }
   ]
