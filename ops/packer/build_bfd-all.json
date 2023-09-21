@@ -47,8 +47,6 @@
       "extra_arguments": [
         "-e git_commit={{ user `git_commit` }}",
         "-e git_branch={{ user `git_branch` }}",
-        "--extra-vars",
-        "@extra_vars.json",
         "--tags",
         "pre-ami"
       ],
