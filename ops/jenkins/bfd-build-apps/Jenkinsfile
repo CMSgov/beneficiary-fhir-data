@@ -142,7 +142,7 @@ spec:
                 }
             }
         }
-
+/*
         stage('Build Apps') {
             steps {
                 script {
@@ -162,7 +162,7 @@ spec:
                 }
             }
         }
-
+*/
         stage('Build App AMIs') {
             steps {
                 script {
@@ -177,7 +177,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                     } finally {
-                        sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        //sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                     }
                 }
             }

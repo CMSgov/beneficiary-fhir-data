@@ -122,10 +122,10 @@ def findAmis(String branchName = 'master') {
 def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 
 	amis = [
-		'data_server_launcher': "${workspace}/${appBuildResults.dataServerLauncher}",
-		'data_server_war': "${workspace}/${appBuildResults.dataServerWar}",
-		'data_pipeline_zip': "${workspace}/${appBuildResults.dataPipelineZip}",
-		'db_migrator_zip': "${workspace}/${appBuildResults.dbMigratorZip}"
+		'data_server_launcher': "",
+		'data_server_war': "",
+		'data_pipeline_zip': "",
+		'db_migrator_zip': ""
 	]
 
 	dir('ops/ansible/playbooks-ccs'){
