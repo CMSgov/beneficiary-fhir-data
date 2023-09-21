@@ -25,7 +25,7 @@ class AppBuildResults implements Serializable {
  * @return An {@link AppBuildResults} instance containing the paths to the artifacts that were built.
  * @throws Exception An exception will be bubbled up if the Maven build fails.
  */
-def build(boolean verboseMaven) {
+def build(boolean verboseMaven, boolean runTests) {
 	withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
 		// Set the auth token for aws code artifact
 		env.CODEARTIFACT_AUTH_TOKEN = sh(
@@ -85,9 +85,12 @@ EOF
 
 	dir ('apps') {
 		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
-		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true -Dmaven.build.cache.enabled=false clean verify"
+		if (runTests) {
+			sh "mvn clean verify -e install -Dmaven.javadoc.skip=true -Dcheckstyle.skip -Dmaven.build.cache.skipCache=true -Dmaven.jacoco.skip=false"
+		} else {
+			sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true -Dmaven.build.cache.enabled=false clean verify"
+		}
 	}
-
 	return new AppBuildResults(
 		dbMigratorZip: 'apps/bfd-db-migrator/target/bfd-db-migrator-1.0.0-SNAPSHOT.zip',
 		dataPipelineZip: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT.zip',

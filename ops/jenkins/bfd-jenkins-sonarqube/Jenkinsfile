@@ -50,7 +50,7 @@ spec:
                    //Authentication of AWS to run Build.groovy
                    awsAuth.assumeRole()
                    // Perform Build steps
-                   appBuildResults = scriptForApps.build(verboseMaven)
+                   appBuildResults = scriptForApps.build(verboseMaven, true)
                 }
             }
         }
@@ -61,7 +61,10 @@ spec:
                     " -Dsonar.projectKey=${SONAR_PROJECT_KEY}" +
                     " -Dsonar.host.url=${SONAR_HOST_URL}" +
                     " -Dsonar.login=${SONAR_TOKEN}" +
-                    " -Dmaven.build.cache.enabled=false"
+                    " -Dsonar.exclusions='*.java'" +
+                    " -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml" +
+                    " -Dmaven.build.cache.enabled=false" +
+                    " -DskipITs -DskipTests"
                 }
             }
         }
