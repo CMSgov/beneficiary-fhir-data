@@ -1,0 +1,19 @@
+---
+##
+# Builds a 'Docker Host' AMI (updates) and installs docker and any of its dependencies
+# from the base platinum image
+##
+- name: Configure BFD Docker Host
+  hosts: all
+  become: true
+  remote_user: ec2-user
+  gather_facts: no
+
+  tasks:
+    - name: Apply latest host security patches
+      import_role:
+        name: base_patch
+
+    - name: Apply Docker Host Role
+      import_role:
+        name: bfd-docker-host

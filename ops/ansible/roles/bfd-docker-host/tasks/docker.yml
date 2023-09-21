@@ -1,0 +1,10 @@
+# Ansible playbook AWS - install docker (2021)
+---
+- name: Enable Some packages from amazon-linux-extras packages
+  shell: "amazon-linux-extras install docker -y"
+
+- name: Enable Docker service at startup
+  command: /usr/bin/systemctl --system enable docker
+  become: true
+  notify:
+    - Restart Docker

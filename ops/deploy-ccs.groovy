@@ -45,6 +45,11 @@ class AmiIds implements Serializable {
 	 * The ID of the AMI that will run the bfd-server-load service's controller, or <code>null</code> if such an AMI does not yet exist.
 	 */
 	String bfdServerLoadAmiId
+
+	/**
+	 * The ID of the AMI that will run the docker host service, or <code>null</code> if such an AMI does not yet exist.
+	 */
+	String bfdDockerHostAmiId
 }
 
 /**
@@ -94,7 +99,15 @@ def findAmis(String branchName = 'master') {
 			'Name=name,Values=server-load-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		)
+		).trim(),
+		bfdDockerHostAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+			'Name=tag:Branch,Values=${branchName}' \
+			'Name=name,Values=docker-host-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim()
 	)
 }
 
@@ -143,6 +156,8 @@ packer build -color=false \
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
 					bfdServerLoadAmiId: extractAmiIdFromPackerManifest(readFile(
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json")),
+					bfdDockerHostAmiId: extractAmiIdFromPackerManifest(readFile(
+							file: "${workspace}/ops/ansible/playbooks-ccs/manifest_docker-host.json")),
 			)
 		}
 	}

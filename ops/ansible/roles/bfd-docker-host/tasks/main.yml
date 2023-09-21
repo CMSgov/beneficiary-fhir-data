@@ -1,0 +1,3 @@
+---
+- name: Configure Docker Service
+  import_tasks: docker.yml
