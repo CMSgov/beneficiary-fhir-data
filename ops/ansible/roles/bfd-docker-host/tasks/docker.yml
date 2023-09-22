@@ -36,26 +36,10 @@
   shell: "amazon-linux-extras enable docker"
   become: true
 
-- name: clean yum metadata cache
-  command: yum clean metadata
-  args:
-    warn: false
-  become: true
-
-- name: Ensure a list of yum packages are installed
-  yum:
-    name: "{{ packages }}"
-    state: latest
-    update_cache: yes
-  vars:
-    ansible_python_interpreter: /usr/bin/python
-    packages:
-      - docker
-  become: true
-
-- name: Permissions
-  command: usermod -a -G docker ec2-user
+- name: Create Docker Group
+  group:
+    name: docker
+    system: true
   become: true
   notify:
-    - Enable Docker Service
     - Restart Docker Service
