@@ -21,7 +21,7 @@
       - device-mapper-persistent-data
       - lvm2
       - amazon-linux-extras
-      - systemd
+      - initscripts
   become: true
 
 - name: Add extras repository
@@ -29,41 +29,45 @@
   become: true
 
 - name: Enable Some packages from amazon-linux-extras packages
-  shell: "amazon-linux-extras install docker"
-  become: true
+  shell: "amazon-linux-extras enable python3.8 ansible2 docker"
 
-- name: Enable Some packages from amazon-linux-extras packages
-  shell: "amazon-linux-extras enable docker"
-  become: true
+- name: clean yum metadata cache
+  command: yum clean metadata
+  args:
+    warn: false
 
-- name: Enable and Start Docker
-  systemd:
+- name: Ensure a list of yum packages are installed
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+    packages:
+      - python3.8
+      - ansible
+      - docker
+      - systemd
+
+- name: Upgrade pip3
+  shell: "python3.8 -m pip install pip --upgrade"
+
+- name: Ensure Python pip packages are installed
+  command: pip3 install docker
+
+- name: Ensure Python pip packages are installed
+  pip:
+    name: "{{ packages }}"
+    executable: /usr/local/bin/pip3.8
+  vars:
+    packages:
+      - boto
+      - boto3
+      - docker-compose
+
+- name: Enable Docker CE service at startup
+  service:
     name: docker
-    enabled: true
+    enabled: yes
     state: started
-  become: true
-
-- name: Create Docker systemd Config Directory
-  file:
-    path: /etc/systemd/system/docker.service.d
-    state: directory
-    owner: root
-    group: root
-    mode: u=rwx,g=rx,o=rx
-  become: true
-  listen: Enable and Start Docker
-  notify:
-    - Restart Docker
-
-- name: Create Docker Group
-  group:
-    name: docker
-    system: true
-  become: true
-
-- name: Add Docker User to Docker Group
-  user:
-    name: docker
-    group: docker
-    append: true
   become: true
