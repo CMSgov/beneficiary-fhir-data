@@ -443,8 +443,14 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
           .addAnnotation(
               AnnotationSpec.builder(BatchSize.class)
                   .addMember("size", "$L", BATCH_SIZE_FOR_ARRAY_FIELDS)
-                  .build())
-          .addAnnotation(Builder.Default.class);
+                  .build());
+      // We previously skipped adding the @Builder annotation to an entity that
+      // has a 100 or more fields; the check here is to prevent spurious Lombok
+      // warnings that correctly point out that since we are not adding the
+      // @Builder annotation, we should also not add a @Builder.Default annotation.
+      if (mapping.getTable().getColumns().size() < 100) {
+        fieldSpec.addAnnotation(Builder.Default.class);
+      }
     }
     final var accessorSpec =
         AccessorSpec.builder()
