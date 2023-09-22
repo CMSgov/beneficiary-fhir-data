@@ -37,7 +37,7 @@
             ],
             "derived": "Medicare",
             "note": "",
-            "example": "[\\n  \"Medicare\"\\n]"
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/coverage-class\",\\n          \"code\": \"group\",\\n          \"display\": \"Group\"\\n        }\\n      ]\\n    },\\n    \"value\": \"Medicare\"\\n  }\\n]\\n"
         }
     ]
 }

@@ -35,7 +35,7 @@
             "additional": [],
             "derived": "",
             "note": "",
-            "example": "[\\n  \"Doe\"\\n]"
+            "example": "[\\n  {\\n    \"use\": \"usual\",\\n    \"family\": \"Doe\",\\n    \"given\": [\\n      \"John\",\\n      \"A\"\\n    ]\\n  }\\n]\\n"
         }
     ]
 }

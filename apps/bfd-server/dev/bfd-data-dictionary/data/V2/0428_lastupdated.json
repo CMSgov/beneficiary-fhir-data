@@ -29,7 +29,7 @@
             "additional": [],
             "derived": "The value will either be from the Beneficiary or MedicareBeneficiaryIdHistory table, depending upon which one is the latest date.",
             "note": "",
-            "example": "[\\n  \"IGNORED_FIELD\"\\n]"
+            "example": "{\\n    \"lastUpdated\": \"2021-05-15T08:22:38.251+00:00\",\\n    \"profile\": [\\n      \"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage\"\\n    ]\\n  }\\n  "
         }
     ]
 }

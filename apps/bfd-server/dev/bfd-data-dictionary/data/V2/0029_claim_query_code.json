@@ -42,7 +42,7 @@
             ],
             "derived": "",
             "note": "",
-            "example": "[\\n  \"3\"\\n]"
+            "example": "[\\n  {\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/claim_query_cd\",\\n    \"code\": \"3\",\\n    \"display\": \"Final bill\"\\n  }\\n]\\n"
         }
     ]
 }

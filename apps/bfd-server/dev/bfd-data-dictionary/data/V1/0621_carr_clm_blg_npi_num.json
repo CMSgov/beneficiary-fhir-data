@@ -1,6 +1,6 @@
 {
     "id": 621,
-    "name": "Carrier Claim Billing NPI Number (available Q1 2023)",
+    "name": "Carrier Claim Billing NPI Number",
     "description": "The CMS National Provider Identifier (NPI) number assigned to the billing provider",
     "appliesTo": [
         "Carrier"
