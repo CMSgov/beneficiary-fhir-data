@@ -145,6 +145,11 @@ resource "aws_rds_cluster_endpoint" "readers" {
   cluster_identifier          = aws_rds_cluster.aurora_cluster.id
   cluster_endpoint_identifier = "bfd-${local.env}-ro"
   custom_endpoint_type        = "READER"
+
+  # EXCLUDED_MEMBERS assigns ALL but the last reader to the custom endpoint
+  excluded_members = [
+    element(local.reader_nodes, length(local.reader_nodes) - 1).id
+  ]
 }
 
 # This is the reserved synthea reader endpoint in production
