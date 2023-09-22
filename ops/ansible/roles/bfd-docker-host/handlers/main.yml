@@ -1,6 +1,10 @@
 ---
+- name: Enable Docker Service
+  command: /usr/bin/systemctl enable docker
+  become: true
+
 - name: Restart Docker Service
-  systemd:
+  service:
     name: docker
     state: restarted
   become: true

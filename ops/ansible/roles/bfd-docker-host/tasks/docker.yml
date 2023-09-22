@@ -6,6 +6,7 @@
     name: '*'
     state: latest
     update_only: yes
+  become: true
 
 - name: Ensure a list of yum packages are installed
   yum:
@@ -21,17 +22,25 @@
       - lvm2
       - amazon-linux-extras
       - systemd
+  become: true
 
 - name: Add extras repository
   shell: yum-config-manager --enable extras
+  become: true
 
 - name: Enable Some packages from amazon-linux-extras packages
-  shell: "amazon-linux-extras enable python3.8 ansible2 docker"
+  shell: "amazon-linux-extras install docker"
+  become: true
+
+- name: Enable Some packages from amazon-linux-extras packages
+  shell: "amazon-linux-extras enable docker"
+  become: true
 
 - name: clean yum metadata cache
   command: yum clean metadata
   args:
     warn: false
+  become: true
 
 - name: Ensure a list of yum packages are installed
   yum:
@@ -41,20 +50,12 @@
   vars:
     ansible_python_interpreter: /usr/bin/python
     packages:
-      - python3.8
-      - ansible
       - docker
+  become: true
 
-- name: Enable Docker
-  systemd:
-    name: docker
-    enabled: true
+- name: Permissions
+  command: usermod -a -G docker ec2-user
   become: true
   notify:
+    - Enable Docker Service
     - Restart Docker Service
-
-- name: Create Docker Group
-  group:
-    name: docker
-    system: true
-  become: true
