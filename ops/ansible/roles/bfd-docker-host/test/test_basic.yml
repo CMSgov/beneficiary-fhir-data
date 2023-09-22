@@ -12,10 +12,3 @@
       vars:
         env: dev
         git_repo_root: /beneficiary-fhir-data
-
-    - name: Ensure Service Is Running
-      systemd:
-        name: docker
-        state: started
-      changed_when: false
-      become: true

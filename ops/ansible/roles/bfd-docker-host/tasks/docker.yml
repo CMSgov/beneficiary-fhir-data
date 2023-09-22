@@ -36,10 +36,34 @@
   shell: "amazon-linux-extras enable docker"
   become: true
 
+- name: Enable and Start Docker
+  systemd:
+    name: docker
+    enabled: true
+    state: started
+  become: true
+
+- name: Create Docker systemd Config Directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  listen: Enable and Start Docker
+  notify:
+    - Restart Docker
+
 - name: Create Docker Group
   group:
     name: docker
     system: true
   become: true
-  notify:
-    - Restart Docker Service
+
+- name: Add Docker User to Docker Group
+  user:
+    name: docker
+    group: docker
+    append: true
+  become: true
