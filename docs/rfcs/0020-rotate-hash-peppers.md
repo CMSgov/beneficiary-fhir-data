@@ -334,6 +334,8 @@ BFD creates a public-private keypair; it then distributes the public key to each
 [Prior Art]: #prior-art
 While BFD has no prior work replacing HTTP GET with HTTP POST, the FHIR specification is clear on how this could be implemented.
 
+RDA (PACA) implemented a hashed MBI cache table to their database schema which handles current and previous (old) MBI hash value(s) within their patient lookup queries. If a client requesting pre-adjudicated claims data passes in an old hashed value, and that value exists in the cache table, the query lookup succeeds **AND** the patient's current MBI hash value is added to the cache table if it does not already exist there. In the case of a hash algorithm change, no extra work would be necessary to maintain the cache, as it dynamically maintains itself. Should the adoption of HTTP POST be deferred, this cache table strategy could be adopted for adjudicated claims.
+
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
 Introducing FHIR POST services, provides a clear path for future support of sensitive data parameters.
