@@ -1,17 +1,60 @@
 ---
-- name: Install Docker
-  shell: amazon-linux-extras install docker
-  become: yes
+- name: Update all packages
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+  yum:
+    name: '*'
+    state: latest
+    update_only: yes
 
-- name: Start Docker service
-  service:
+- name: Ensure a list of yum packages are installed
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+    packages:
+      - python-pip
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - amazon-linux-extras
+      - systemd
+
+- name: Add extras repository
+  shell: yum-config-manager --enable extras
+
+- name: Enable Some packages from amazon-linux-extras packages
+  shell: "amazon-linux-extras enable python3.8 ansible2 docker"
+
+- name: clean yum metadata cache
+  command: yum clean metadata
+  args:
+    warn: false
+
+- name: Ensure a list of yum packages are installed
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+    packages:
+      - python3.8
+      - ansible
+      - docker
+
+- name: Enable Docker
+  systemd:
     name: docker
-    state: started
-    enabled: yes
-  become: yes
-
-- name: Enable Docker service at startup
-  command: /usr/bin/systemctl --system enable docker
+    enabled: true
   become: true
   notify:
-    - Restart Docker
+    - Restart Docker Service
+
+- name: Create Docker Group
+  group:
+    name: docker
+    system: true
+  become: true

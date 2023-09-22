@@ -17,6 +17,5 @@
       systemd:
         name: docker
         state: started
-        enabled: yes
       changed_when: false
       become: true
