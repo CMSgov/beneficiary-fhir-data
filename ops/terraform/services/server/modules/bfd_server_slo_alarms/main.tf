@@ -614,8 +614,13 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
   metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
 
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
+  # FUTURE: Alarm actions sending notifications to destinations other than #bfd-test have been
+  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated; when this SLO is
+  # updated, re-enable this Alarm's actions
+
+  # alarm_actions = local.alert_arn
+  # ok_actions    = local.alert_ok_arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -638,8 +643,13 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
   metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
 
-  alarm_actions = local.warning_arn
-  ok_actions    = local.warning_ok_arn
+  # FUTURE: Alarm actions sending notifications to destinations other than #bfd-test have been
+  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated; when this SLO is
+  # updated, re-enable this Alarm's actions
+
+  # alarm_actions = local.alert_arn
+  # ok_actions    = local.alert_ok_arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
