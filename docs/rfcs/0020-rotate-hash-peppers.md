@@ -332,9 +332,23 @@ BFD creates a public-private keypair; it then distributes the public key to each
 
 ## Prior Art
 [Prior Art]: #prior-art
-While BFD has no prior work replacing HTTP GET with HTTP POST, the FHIR specification is clear on how this could be implemented.
+##### FHIR Specification for HTTP POST
+While BFD has no prior work replacing HTTP GET with HTTP POST, the FHIR specification is clear on how this would be implemented.
 
-RDA (PACA) implemented a hashed MBI cache table to their database schema which handles current and previous (old) MBI hash value(s) within their patient lookup queries. If a client requesting pre-adjudicated claims data passes in an old hashed value, and that value exists in the cache table, the query lookup succeeds **AND** the patient's current MBI hash value is added to the cache table if it does not already exist there. In the case of a hash algorithm change, no extra work would be necessary to maintain the cache, as it dynamically maintains itself. Should the adoption of HTTP POST be deferred, this cache table strategy could be adopted for adjudicated claims.
+##### RDA MBI Cache Table
+RDA (PACA) has implemented a hashed MBI cache table to their database schema which handles current and previous (old) MBI hash value.
+
+This cache table would need to be updated in a separate process, but does allow for concurrent querying while the update process is running. This is to allow the server to continue serving requests with the old hash value(s) while a background process is updating the new hash values in the table.
+
+For the instance where changing the hashing algorithm would be required, the remediation process would be:
+
+* Stop the pipeline
+* UPDATE rda.mbi_cache SET old_hash=hash
+* Restart the _BFD server_ with **-DPacOldMbiHashEnabled=true**
+* In a background process scan the _MBI_CACHE_ table and set the hash column to the new hash value.
+* Once all updates have been completed restart the pipeline.
+* At a point when all clients have begun using the new hash algorithm, the _BFD Server_ be can restarted with **-DPacOldMbiHashEnabled=false**.
+* Remove support for old hash values; UPDATE _MBI_CACHE_ SET old_hash=null.
 
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
