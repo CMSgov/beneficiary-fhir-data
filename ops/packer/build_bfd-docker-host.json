@@ -32,7 +32,7 @@
   }],
   "provisioners": [{
     "type": "shell",
-    "script": "./scripts/build_bfd-docker-host.sh",
+    "script": "./scripts/build_bfd-docker-host.sh"
   }],
   "post-processors": [{
     "type": "manifest",
