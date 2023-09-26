@@ -166,7 +166,7 @@ packer build -color=false \
 				 "gitCommitId=${gitCommitId}"]) {
 			// build docker-host ami
 			sh '''
-packer build -color=false \
+packer build -debug -color=false \
 -var source_ami="$platinumAmiId" \
 -var subnet_id=subnet-092c2a68bd18b34d1 \
 -var git_branch="$gitBranchName" \
