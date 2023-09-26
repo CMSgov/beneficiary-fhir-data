@@ -2,7 +2,7 @@ locals {
   env = terraform.workspace
 
   # When the CustomEndpoint is empty, fall back to the ReaderEndpoint
-  rds_reader_endpoint = data.external.rds.result["CustomEndpoint"] == "" ? data.external.rds.result["ReaderEndpoint"] : data.external.rds.result["CustomEndpoint"]
+  rds_reader_endpoint = data.external.rds.result["ReaderEndpoint"]
 
   additional_tags = { Layer = var.layer, role = var.role }
 
