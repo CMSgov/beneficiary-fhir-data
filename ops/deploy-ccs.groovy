@@ -45,6 +45,11 @@ class AmiIds implements Serializable {
 	 * The ID of the AMI that will run the bfd-server-load service's controller, or <code>null</code> if such an AMI does not yet exist.
 	 */
 	String bfdServerLoadAmiId
+
+	/**
+	 * The ID of the AMI that will run the docker host service, or <code>null</code> if such an AMI does not yet exist.
+	 */
+	String bfdDockerHostAmiId
 }
 
 /**
@@ -94,7 +99,15 @@ def findAmis(String branchName = 'master') {
 			'Name=name,Values=server-load-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		)
+		).trim(),
+		bfdDockerHostAmiId: sh(
+			returnStdout: true,
+			script: "aws ec2 describe-images --owners self --filters \
+			'Name=tag:Branch,Values=${branchName}' \
+			'Name=name,Values=docker-host-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+		).trim()
 	)
 }
 
@@ -115,6 +128,8 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 		'db_migrator_zip': "${workspace}/${appBuildResults.dbMigratorZip}"
 	]
 
+	amiIdsWrapper = new AmiIds();
+
 	dir('ops/ansible/playbooks-ccs'){
 
 		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
@@ -133,19 +148,39 @@ packer build -color=false \
 ../../packer/build_bfd-all.json
 '''
 			}
-			return new AmiIds(
-					platinumAmiId: amiIds.platinumAmiId,
-					bfdPipelineAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
-					bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
-					bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
-					bfdServerLoadAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json")),
-			)
+			amiIdsWrapper.platinumAmiId = amiIds.platinumAmiId
+			amiIdsWrapper.bfdPipelineAmiId = extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json"))
+			amiIdsWrapper.bfdServerAmiId = extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json"))
+			amiIdsWrapper.bfdMigratorAmiId = extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json"))
+			amiIdsWrapper.bfdServerLoadAmiId = extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json"))
+			amiIdsWrapper.bfdDockerHostAmiId = extractAmiIdFromPackerManifest(readFile(
+							file: "${workspace}/ops/ansible/playbooks-ccs/manifest_docker-host.json"))
 		}
 	}
+
+	dir('ops/packer'){
+		withEnv(["platinumAmiId=${amiIds.platinumAmiId}", "gitBranchName=${gitBranchName}",
+				 "gitCommitId=${gitCommitId}"]) {
+			// build docker-host ami
+			sh '''
+packer build -color=false \
+-var source_ami="$platinumAmiId" \
+-var subnet_id=subnet-092c2a68bd18b34d1 \
+-var git_branch="$gitBranchName" \
+-var git_commit="$gitCommitId" \
+./build_bfd-docker-host.json
+'''
+		}
+
+		amiIdsWrapper.bfdDockerHostAmiId = extractAmiIdFromPackerManifest(readFile(
+			file: "${workspace}/ops/packer/manifest_docker-host.json"))
+	}
+
+	return amiIdsWrapper
 }
 
 /**
@@ -184,11 +219,9 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 }
 
 def extractAmiIdFromPackerManifest(String manifest) {
-	dir('ops/ansible/playbooks-ccs'){
-		def manifestJson = new JsonSlurper().parseText(manifest)
-		// artifactId will be of the form $region:$amiId
-		return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
-	}
+	def manifestJson = new JsonSlurper().parseText(manifest)
+	// artifactId will be of the form $region:$amiId
+	return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
 }
 
 return this
