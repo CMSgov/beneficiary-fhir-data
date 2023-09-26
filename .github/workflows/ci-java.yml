@@ -208,6 +208,7 @@ jobs:
       role: bfd-db-migrator
 
   ansible-role-bfd-docker-host:
+    needs: mvn-verify
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-docker-host
