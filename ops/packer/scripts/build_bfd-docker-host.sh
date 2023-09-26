@@ -2,4 +2,4 @@
 
 set -e
 
-yum update-minimal --security -y && amazon-linux-extras enable docker && amazon-linux-extras install docker
+sudo yum update-minimal --security -y && amazon-linux-extras enable docker && amazon-linux-extras install docker
