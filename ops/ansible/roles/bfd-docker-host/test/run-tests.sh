@@ -18,6 +18,7 @@ REMOVE_CONTAINER=true # exported after getopts below...
 export ROLE=bfd-docker-host
 export CONTAINER_NAME="$ROLE"
 export TEST_PLAY=test_basic.yml
+export ANSIBLE_SPEC="ansible"
 
 # iterate getopts
 while getopts "e:hk" option; do

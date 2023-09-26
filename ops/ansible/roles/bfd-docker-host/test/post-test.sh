@@ -11,6 +11,6 @@ cd "$SCRIPT_DIR"
 
 # Remove the Docker instance used in the tests.
 if "$REMOVE_CONTAINER"; then
-    echo "Removing ${CONTAINER_NAME}, ${CONTAINER_NAME}-db containers..."
-    docker rm --force "$CONTAINER_NAME" "${CONTAINER_NAME}-db"
+    echo "Removing ${CONTAINER_NAME} containers..."
+    docker rm --force "${CONTAINER_NAME}"
 fi
