@@ -13,6 +13,16 @@
         env: dev
         git_repo_root: /beneficiary-fhir-data
 
+    # Getting systemd to run correctly inside Docker is very tricky. Need to
+    # ensure that it doesn't start things it shouldn't, without stripping out so
+    # much as to make it useless.
+    # References:
+    #
+    # * <https://hub.docker.com/_/centos/>: Good start, but badly broken.
+    # * <https://github.com/solita/docker-systemd>: For Ubuntu, but works!
+    # * <https://github.com/moby/moby/issues/28614>: Also some useful info.
+    #
+    # To avoid, we'll use a simple curl command to verify the docker service has started.
     - name: Check if the Docker Service is Running
       shell: curl -s --unix-socket /var/run/docker.sock http/_ping
       register: docker_running
