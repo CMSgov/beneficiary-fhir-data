@@ -33,7 +33,6 @@
   "provisioners": [{
     "type": "shell",
     "script": "./scripts/build_bfd-docker-host.sh",
-    "user": "ec2-user"
   }],
   "post-processors": [{
     "type": "manifest",
