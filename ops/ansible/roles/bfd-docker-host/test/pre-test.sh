@@ -33,8 +33,6 @@ if [ ! -L "roles/${ROLE}" ]; then ln -s "$(cd .. && pwd)" "roles/${ROLE}"; fi
 
 docker network create "$CONTAINER_NAME" || true
 
-docker pull "ghcr.io/cmsgov/bfd-ansible:${BFD_ANSIBLE_IMAGE_ID}"
-
 # Prep the Docker container that will be used (if it's not already running).
 if [ ! "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}' | grep -E "^${CONTAINER_NAME}$")" ]; then
   docker run \
@@ -44,9 +42,9 @@ if [ ! "$(docker ps -f "name=${CONTAINER_NAME}" --format '{{.Names}}' | grep -E 
     --detach \
     --rm \
     --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
+    --volume=/var/run/docker.sock:/var/run/docker.sock \
     --tmpfs /run \
     --tmpfs /run/lock \
     --name "$CONTAINER_NAME" \
-    "ghcr.io/cmsgov/bfd-ansible:${BFD_ANSIBLE_IMAGE_ID}" \
     /usr/sbin/init
 fi
