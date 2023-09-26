@@ -1,8 +1,7 @@
 {
   "variables": {
     "source_ami": "",
-    "subnet_id": "",
-    "vault_password_file": ""
+    "subnet_id": ""
   },
   "builders": [{
     "type": "amazon-ebs",
