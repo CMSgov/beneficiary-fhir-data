@@ -120,15 +120,15 @@ def findAmis(String branchName = 'master') {
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
 def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
+	amiIdsWrapper = new AmiIds();
 
+	/*
 	amis = [
 		'data_server_launcher': "${workspace}/${appBuildResults.dataServerLauncher}",
 		'data_server_war': "${workspace}/${appBuildResults.dataServerWar}",
 		'data_pipeline_zip': "${workspace}/${appBuildResults.dataPipelineZip}",
 		'db_migrator_zip': "${workspace}/${appBuildResults.dbMigratorZip}"
 	]
-
-	amiIdsWrapper = new AmiIds();
 
 	dir('ops/ansible/playbooks-ccs'){
 
@@ -157,10 +157,9 @@ packer build -color=false \
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json"))
 			amiIdsWrapper.bfdServerLoadAmiId = extractAmiIdFromPackerManifest(readFile(
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json"))
-			amiIdsWrapper.bfdDockerHostAmiId = extractAmiIdFromPackerManifest(readFile(
-							file: "${workspace}/ops/ansible/playbooks-ccs/manifest_docker-host.json"))
 		}
 	}
+    */
 
 	dir('ops/packer'){
 		withEnv(["platinumAmiId=${amiIds.platinumAmiId}", "gitBranchName=${gitBranchName}",

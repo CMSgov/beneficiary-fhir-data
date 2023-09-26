@@ -143,6 +143,7 @@ spec:
             }
         }
 
+        /*
         stage('Build Apps') {
             steps {
                 script {
@@ -163,13 +164,15 @@ spec:
             }
         }
 
+         */
+
         stage('Build App AMIs') {
             steps {
                 script {
                     currentStage = env.STAGE_NAME
                     try {
                         awsAuth.assumeRole()
-                        amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+                        amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, null)
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         throw e
@@ -177,7 +180,7 @@ spec:
                         currentBuild.result = 'FAILURE'
                         throw ex
                     } finally {
-                        sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+                        //sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
                     }
                 }
             }
