@@ -44,6 +44,12 @@ while getopts "e:hk" option; do
 done
 shift "$((OPTIND-1))"
 
+# TODO: complete the getopts implementation. See BFD-1628.
+# use the input from option '-i' or default to current commit's short sha
+# use input "$1" or default to current commit's short sha
+export BFD_ANSIBLE_IMAGE_ID="${1:-master}"
+export REMOVE_CONTAINER EXTRA_VARS
+
 # Determine the directory that this script is in.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
