@@ -1,5 +1,8 @@
 import json
+import logging
 import os
+import sys
+from typing import Any, Mapping
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
@@ -11,7 +14,17 @@ ENV = os.environ.get("ENV", "")
 WEBHOOK_SSM_PATH = os.environ.get("WEBHOOK_SSM_PATH", "")
 
 boto_config = Config(region_name=REGION)
-ssm_client = boto3.client("ssm", config=boto_config)
+
+logging.basicConfig(level=logging.INFO, force=True)
+logger = logging.getLogger()
+try:
+    ssm_client = boto3.client("ssm", config=boto_config)  # type: ignore
+except Exception as exc:
+    logger.error(
+        "Unrecoverable exception occurred when attempting to create boto3 clients/resources:",
+        exc_info=True,
+    )
+    sys.exit(0)
 
 
 def slack_escape_str(str_to_escape: str) -> str:
@@ -27,32 +40,32 @@ def slack_escape_str(str_to_escape: str) -> str:
     return str_to_escape.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def handler(event, context):
+def handler(event: Any, context: Any):
     if not ENV:
-        print("ENV was not defined, exiting...")
+        logger.error("ENV was not defined, exiting...")
         return
 
     if not WEBHOOK_SSM_PATH:
-        print("WEBHOOK_SSM_PATH was not defined, exiting...")
+        logger.error("WEBHOOK_SSM_PATH was not defined, exiting...")
         return
 
     # We take only the first record, if it exists
     try:
-        record = event["Records"][0]
+        record: Mapping[Any, Any] = event["Records"][0]
     except IndexError:
-        print("Invalid SNS notification, no records found")
+        logger.error("Invalid SNS notification, no records found; exc:\n", exc_info=True)
         return
 
     try:
-        sns_message = record["Sns"]["Message"]
-    except KeyError as exc:
-        print(f"No message found in SNS notification: {exc}")
+        sns_message: str = record["Sns"]["Message"]
+    except KeyError:
+        logger.error("No message found in SNS notification; exc:\n", exc_info=True)
         return
 
     try:
         alarm_info = json.loads(sns_message)
     except json.JSONDecodeError:
-        print("SNS message body was not valid JSON")
+        logger.error("SNS message body was not valid JSON; exc:\n", exc_info=True)
         return
 
     try:
@@ -63,17 +76,16 @@ def handler(event, context):
         alarm_name = slack_escape_str(alarm_info["AlarmName"])
         alarm_reason = slack_escape_str(alarm_info["NewStateReason"])
         alarm_metric = slack_escape_str(alarm_info["Trigger"]["MetricName"])
-    except KeyError as exc:
-        print(f"Unable to retrieve alarm information from SNS message: {exc}")
+    except KeyError:
+        logger.error("Unable to retrieve alarm information from SNS message; exc:\n", exc_info=True)
         return
 
     try:
-        wehbook_url = ssm_client.get_parameter(
-            Name=WEBHOOK_SSM_PATH,
-            WithDecryption=True,
-        )["Parameter"]["Value"]
-    except KeyError as exc:
-        print(f"SSM parameter {WEBHOOK_SSM_PATH} not found: {exc.reason}")
+        wehbook_url: str = ssm_client.get_parameter(Name=WEBHOOK_SSM_PATH, WithDecryption=True)[
+            "Parameter"
+        ]["Value"]
+    except KeyError:
+        logger.error("SSM parameter %s not found; exc:\n", WEBHOOK_SSM_PATH, exc_info=True)
         return
 
     slack_message = {
@@ -97,12 +109,10 @@ def handler(event, context):
     request = Request(wehbook_url, method="POST")
     request.add_header("Content-Type", "application/json")
     try:
-        with urlopen(
-            request, data=json.dumps(slack_message).encode("utf-8")
-        ) as response:
+        with urlopen(request, data=json.dumps(slack_message).encode("utf-8")) as response:
             if response.status == 200:
-                print(f"Message posted successfully")
+                logger.info("Message posted successfully")
             else:
-                print(f"{response.status} response received from Slack")
-    except URLError as e:
-        print(f"Unable to connect to Slack: {e.reason}")
+                logger.info("%s response received from Slack", response.status)
+    except URLError:
+        logger.error("Unable to connect to Slack; exc:\n", exc_info=True)
