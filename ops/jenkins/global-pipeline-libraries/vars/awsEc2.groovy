@@ -4,12 +4,10 @@
 // Returns the AmiId for the given AMI and (Optional) git branch
 String getAmiId(String gitBranch, String amiName) {
     command = "aws ec2 describe-images --owners self --filters "
-    gitBranch != "" ? command.append("'Name=tag:Branch,Values=${gitBranch}'") : ""
-    command.append(
-        "'Name=name,Values=${amiName}' \
+    command = command + (gitBranch != "" ? "'Name=tag:Branch,Values=${gitBranch}'" : "")
+    command = command + "'Name=name,Values=${amiName}' \
         'Name=state,Values=available' --region us-east-1 --output json | \
         jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-    )
     amiId = sh(returnStdout: true, script: command).trim()
     return amiId
 }
