@@ -10,7 +10,6 @@
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def verboseMaven = params.verbose_mvn_logging
-def skipDockerHostAmi = params.skip_docker_host_ami != null ? params.skip_docker_host_ami : true
 def appBuildResults
 def amiIds
 def gitBranchName
@@ -103,7 +102,7 @@ spec:
             defaultValue: false)
         booleanParam(name: 'skip_docker_host_ami',
             description: 'When true, the docker-host AMI will not be built.',
-            defaultValue: skipDockerHostAmi)
+            defaultValue: true)
     }
 
     stages {
@@ -175,7 +174,7 @@ spec:
                     try {
                         awsAuth.assumeRole()
                         amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, null)
-                        if (!skipDockerHostAmi) {
+                        if (!params.skip_docker_host_ami) {
                             amiIds.bfdDockerHostAmiId = scriptForApps.buildDockerHostAmi(gitBranchName, gitCommitId,
                                 amiIds.platinumAmiId)
                         }
