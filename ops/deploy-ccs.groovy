@@ -95,8 +95,8 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
 
 		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-			packerBuildAmis(platinumAmiId: amiIds.platinumAmiId, gitBranchName: gitBranchName, gitCommitId: gitCommitId,
-					templateFile: "../../packer/build_bfd-all.json", ["vault_password_file": "$vaultPasswordFile"])
+			packerBuildAmis(amiIds.platinumAmiId, gitBranchName, gitCommitId,
+					"../../packer/build_bfd-all.json", ["vault_password_file": "$vaultPasswordFile"] as Map)
 
 			amiIdsWrapper.platinumAmiId = amiIds.platinumAmiId
 			amiIdsWrapper.bfdPipelineAmiId = extractAmiIdFromPackerManifest(readFile(
@@ -130,7 +130,7 @@ def packerBuildAmis(String platinumAmiId, String gitBranchName, String gitCommit
 			 "gitCommitId=${gitCommitId}", "templateFile=${templateFile}"]) {
 		// build ami
 		sh '''
-packer build -debug -color=false \
+packer build -color=false \
 -var source_ami="$platinumAmiId" \
 -var subnet_id=subnet-092c2a68bd18b34d1 \
 -var git_branch="$gitBranchName" \
