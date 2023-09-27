@@ -6,8 +6,11 @@
  * </p>
  */
 
+@Library('bfd@bfd-2886-v2-build-docker-host')
+
 // These variables are accessible throughout this file (except inside methods and classes).
 def verboseMaven = params.verbose_mvn_logging
+def skipDockerHostAmi = params.skip_docker_host_ami != null ? params.skip_docker_host_ami : true
 def appBuildResults
 def amiIds
 def gitBranchName
@@ -96,8 +99,11 @@ spec:
 
     parameters {
         booleanParam(name: 'verbose_mvn_logging',
-        description: 'When true, `mvn` will produce verbose logs.',
-        defaultValue: false)
+            description: 'When true, `mvn` will produce verbose logs.',
+            defaultValue: false)
+        booleanParam(name: 'skip_docker_host_ami',
+            description: 'When true, the docker-host AMI will not be built.',
+            defaultValue: skipDockerHostAmi)
     }
 
     stages {
@@ -120,7 +126,6 @@ spec:
                     awsAuth.assumeRole()
 
                     // Find the most current AMI IDs (if any).
-                    amiIds = null
                     amiIds = scriptForDeploys.findAmis()
                 }
             }
@@ -143,7 +148,6 @@ spec:
             }
         }
 
-        /*
         stage('Build Apps') {
             steps {
                 script {
@@ -164,8 +168,6 @@ spec:
             }
         }
 
-         */
-
         stage('Build App AMIs') {
             steps {
                 script {
@@ -173,6 +175,10 @@ spec:
                     try {
                         awsAuth.assumeRole()
                         amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, null)
+                        if (!skipDockerHostAmi) {
+                            amiIds.bfdDockerHostAmiId = scriptForApps.buildDockerHostAmi(gitBranchName, gitCommitId,
+                                amiIds.platinumAmiId)
+                        }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         throw e

@@ -10,6 +10,8 @@ import groovy.json.JsonSlurper
  * </p>
  */
 
+@Library('bfd@bfd-2886-v2-build-docker-host')
+
 
 /**
  * Models the results of a call to {@link #buildAppAmis}: contains the IDs of the AMIs that were built.
@@ -61,53 +63,12 @@ class AmiIds implements Serializable {
 def findAmis(String branchName = 'master') {
 	// Replace this lookup either with a lookup in SSM or in a build artifact.
 	return new AmiIds(
-		platinumAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk17-platinum-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdPipelineAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=bfd-amzn2-jdk17-etl-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdServerAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=bfd-amzn2-jdk17-fhir-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdMigratorAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=bfd-amzn2-jdk17-db-migrator-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdServerLoadAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=server-load-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdDockerHostAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=docker-host-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim()
+		platinumAmiId: awsEc2.getAmiId("", "bfd-amzn2-jdk17-platinum-??????????????"),
+		bfdPipelineAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-etl-??????????????"),
+		bfdServerAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-fhir-??????????????"),
+		bfdMigratorAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-db-migrator-??????????????"),
+		bfdServerLoadAmiId:awsEc2.getAmiId(branchName, "server-load-??????????????"),
+		bfdDockerHostAmiId: awsEc2.getAmiId(branchName, "docker-host-??????????????")
 	)
 }
 
@@ -122,7 +83,6 @@ def findAmis(String branchName = 'master') {
 def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	amiIdsWrapper = new AmiIds();
 
-	/*
 	amis = [
 		'data_server_launcher': "${workspace}/${appBuildResults.dataServerLauncher}",
 		'data_server_war': "${workspace}/${appBuildResults.dataServerWar}",
@@ -135,19 +95,9 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
 
 		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-			withEnv(["platinumAmiId=${amiIds.platinumAmiId}", "gitBranchName=${gitBranchName}",
-					 "gitCommitId=${gitCommitId}"]) {
-					// build AMIs in parallel
-				sh '''
-packer build -color=false \
--var vault_password_file="$vaultPasswordFile" \
--var source_ami="$platinumAmiId" \
--var subnet_id=subnet-092c2a68bd18b34d1 \
--var git_branch="$gitBranchName" \
--var git_commit="$gitCommitId" \
-../../packer/build_bfd-all.json
-'''
-			}
+			packerBuildAmi(platinumAmiId: platinumAmiId, gitBranchName: gitBranchName, gitCommitId: gitCommitId,
+					templateFile: "../../packer/build_bfd-all.json", ["vault_password_file": "$vaultPasswordFile"])
+
 			amiIdsWrapper.platinumAmiId = amiIds.platinumAmiId
 			amiIdsWrapper.bfdPipelineAmiId = extractAmiIdFromPackerManifest(readFile(
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json"))
@@ -159,27 +109,36 @@ packer build -color=false \
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json"))
 		}
 	}
-    */
 
+	return amiIdsWrapper
+}
+
+def buildDockerHostAmi(String gitBranchName, String gitCommitId, String platinumAmiId) {
 	dir('ops/packer'){
-		withEnv(["platinumAmiId=${amiIds.platinumAmiId}", "gitBranchName=${gitBranchName}",
-				 "gitCommitId=${gitCommitId}"]) {
-			// build docker-host ami
-			sh '''
+		packerBuildAmis(platinumAmiId, gitBranchName, gitCommitId, "./build_bfd-docker-host.json", [] as Map)
+		return extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/packer/manifest_docker-host.json"))
+	}
+}
+
+def packerBuildAmis(String platinumAmiId, String gitBranchName, String gitCommitId, String templateFile,
+   		Map additionalVariables) {
+
+	variableOpts = ""
+	additionalVariables.each { entry -> variableOpts.append("-var $entry.key=$entry.value") }
+
+	withEnv(["platinumAmiId=${platinumAmiId}", "gitBranchName=${gitBranchName}",
+			 "gitCommitId=${gitCommitId}", "templateFile=${templateFile}"]) {
+		// build ami
+		sh '''
 packer build -debug -color=false \
 -var source_ami="$platinumAmiId" \
 -var subnet_id=subnet-092c2a68bd18b34d1 \
 -var git_branch="$gitBranchName" \
 -var git_commit="$gitCommitId" \
-./build_bfd-docker-host.json
+"$variableOpts" \
+"$templateFile"
 '''
-		}
-
-		amiIdsWrapper.bfdDockerHostAmiId = extractAmiIdFromPackerManifest(readFile(
-			file: "${workspace}/ops/packer/manifest_docker-host.json"))
 	}
-
-	return amiIdsWrapper
 }
 
 /**
