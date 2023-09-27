@@ -175,7 +175,7 @@ spec:
                         awsAuth.assumeRole()
                         amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
                         if (!params.skip_docker_host_ami) {
-                            amiIds.bfdDockerHostAmiId = scriptForApps.buildDockerHostAmi(gitBranchName, gitCommitId,
+                            amiIds.bfdDockerHostAmiId = scriptForDeploys.buildDockerHostAmi(gitBranchName, gitCommitId,
                                 amiIds.platinumAmiId)
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
