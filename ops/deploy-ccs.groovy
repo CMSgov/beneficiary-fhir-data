@@ -94,7 +94,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 
 		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
 			packerBuildAmis(amiIds.platinumAmiId, gitBranchName, gitCommitId,
-					"../../packer/build_bfd-all.json", ["vault_password_file": "$vaultPasswordFile"] as Map)
+					"../../packer/build_bfd-all.json")
 
 			amiIdsWrapper.platinumAmiId = amiIds.platinumAmiId
 			amiIdsWrapper.bfdPipelineAmiId = extractAmiIdFromPackerManifest(readFile(
@@ -112,7 +112,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 
 def buildDockerHostAmi(String gitBranchName, String gitCommitId, String platinumAmiId) {
 	dir('ops/packer'){
-		packerBuildAmis(platinumAmiId, gitBranchName, gitCommitId, "./build_bfd-docker-host.json", [] as Map)
+		packerBuildAmis(platinumAmiId, gitBranchName, gitCommitId, "./build_bfd-docker-host.json")
 		return extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/packer/manifest_docker-host.json"))
 	}
 }
