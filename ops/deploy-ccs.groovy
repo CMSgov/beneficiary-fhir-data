@@ -93,8 +93,6 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 	dir('ops/ansible/playbooks-ccs'){
 
 		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
-
-		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
 			packerBuildAmis(amiIds.platinumAmiId, gitBranchName, gitCommitId,
 					"../../packer/build_bfd-all.json", ["vault_password_file": "$vaultPasswordFile"] as Map)
 
@@ -107,7 +105,6 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json"))
 			amiIdsWrapper.bfdServerLoadAmiId = extractAmiIdFromPackerManifest(readFile(
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json"))
-		}
 	}
 
 	return amiIdsWrapper
@@ -120,24 +117,21 @@ def buildDockerHostAmi(String gitBranchName, String gitCommitId, String platinum
 	}
 }
 
-def packerBuildAmis(String platinumAmiId, String gitBranchName, String gitCommitId, String templateFile,
-   		Map additionalVariables) {
-
-	variableOpts = ""
-	additionalVariables.each { entry -> variableOpts = variableOpts + "-var $entry.key=$entry.value " }
-
-	withEnv(["platinumAmiId=${platinumAmiId}", "gitBranchName=${gitBranchName}",
-			 "gitCommitId=${gitCommitId}", "templateFile=${templateFile}"]) {
-		// build ami
-		sh '''
+def packerBuildAmis(String platinumAmiId, String gitBranchName, String gitCommitId, String templateFile) {
+	withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
+		withEnv(["platinumAmiId=${platinumAmiId}", "gitBranchName=${gitBranchName}",
+				 "gitCommitId=${gitCommitId}", "templateFile=${templateFile}"]) {
+			// build AMIs in parallel
+			sh '''
 packer build -color=false \
+-var vault_password_file="$vaultPasswordFile"
 -var source_ami="$platinumAmiId" \
 -var subnet_id=subnet-092c2a68bd18b34d1 \
 -var git_branch="$gitBranchName" \
 -var git_commit="$gitCommitId" \
-"$variableOpts" \
 "$templateFile"
 '''
+		}
 	}
 }
 
