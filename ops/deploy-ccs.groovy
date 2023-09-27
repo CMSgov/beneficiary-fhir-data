@@ -124,7 +124,7 @@ def packerBuildAmis(String platinumAmiId, String gitBranchName, String gitCommit
 			// build AMIs in parallel
 			sh '''
 packer build -color=false \
--var vault_password_file="$vaultPasswordFile"
+-var vault_password_file="$vaultPasswordFile" \
 -var source_ami="$platinumAmiId" \
 -var subnet_id=subnet-092c2a68bd18b34d1 \
 -var git_branch="$gitBranchName" \
