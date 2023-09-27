@@ -75,10 +75,17 @@ def handler(event: Any, context: Any):
 
         alarm_name = slack_escape_str(alarm_info["AlarmName"])
         alarm_reason = slack_escape_str(alarm_info["NewStateReason"])
-        alarm_metric = slack_escape_str(alarm_info["Trigger"]["MetricName"])
     except KeyError:
         logger.error("Unable to retrieve alarm information from SNS message; exc:\n", exc_info=True)
         return
+
+    try:
+        # For computed metric alarms (that is, alarms that alarm on a metric math expression), there
+        # is no corresponding "MetricName" property and so this will fail. If it does, we specify
+        # the metric name as "N/A"
+        alarm_metric = slack_escape_str(alarm_info["Trigger"]["MetricName"])
+    except KeyError:
+        alarm_metric = slack_escape_str("N/A (computed metric)")
 
     try:
         wehbook_url: str = ssm_client.get_parameter(Name=WEBHOOK_SSM_PATH, WithDecryption=True)[
