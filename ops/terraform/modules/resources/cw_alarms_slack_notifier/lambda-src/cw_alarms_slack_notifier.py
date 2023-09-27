@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, force=True)
 logger = logging.getLogger()
 try:
     ssm_client = boto3.client("ssm", config=boto_config)  # type: ignore
-except Exception as exc:
+except Exception:
     logger.error(
         "Unrecoverable exception occurred when attempting to create boto3 clients/resources:",
         exc_info=True,
