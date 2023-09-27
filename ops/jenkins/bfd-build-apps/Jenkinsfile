@@ -173,7 +173,7 @@ spec:
                     currentStage = env.STAGE_NAME
                     try {
                         awsAuth.assumeRole()
-                        amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, null)
+                        amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
                         if (!params.skip_docker_host_ami) {
                             amiIds.bfdDockerHostAmiId = scriptForApps.buildDockerHostAmi(gitBranchName, gitCommitId,
                                 amiIds.platinumAmiId)
