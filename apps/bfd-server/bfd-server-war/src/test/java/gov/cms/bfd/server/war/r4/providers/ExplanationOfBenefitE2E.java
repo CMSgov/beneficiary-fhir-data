@@ -139,7 +139,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   public void testEobByPatientIdWithNegativeCountExpect400() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
-    // Its possible to add these via the API, but
+    // Its possible to add these via the API, but this is easier to liken to actual request strings
     String requestString = eobEndpoint + "?patient=" + patientId + "&_count=-10";
 
     given()
@@ -536,8 +536,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
     // Adjust the sampleA data that was loaded to include some samhsa data
     // We could also just keep a samhsa set, or have the default set have samhsa
     // so that we don't need a separate set or modification
-    List<Object> loadedRecords = testUtils.loadSampleAData(true);
-    String patientId = testUtils.getPatientId(loadedRecords);
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(true));
     String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
 
     given()
