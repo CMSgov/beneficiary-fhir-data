@@ -22,8 +22,40 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > server_vars.json
 
-# build `data_server_ssl_client_certificates` from json values stored in SSM
-jq '{data_server_ssl_client_certificates: .data_server_ssl_client_certificates_json|fromjson}' server_vars.json > client_certificates.json
+# the previous ssm get-paramter will also pick the certs up due to the 'recursive' arg;.
+# we'll process the ".../client_certs/" path separately
+temp_dir=$(mktemp -d)
+temp_fn="${temp_dir}/client_certs.json"
+aws ssm get-parameters-by-path \
+    --path "/bfd/${env}/server/client_certs" \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > "$temp_fn"
+
+# convert flattened JSON into an array of certs
+json_array=()
+# Read the file line by line
+while IFS= read -r line; do
+    # Split the line into tag and value using a delimiter (e.g., ':')
+    IFS=":" read -r tag value <<< "$line";
+    value="${value%,}";
+
+    # Create a JSON object and add it to the array
+    if [ ! -z "$value" ]; then
+		json_object="{\"alias\": $tag, \"certificate\": $value}";
+		json_object="${json_object%,}";
+		json_array+=("$json_object");
+	fi
+done < "$temp_fn"
+
+# Convert the array to a JSON array
+json_output="["
+for json_object in "${json_array[@]}"; do
+    json_output+="$json_object,"
+done
+json_output="${json_output%,}"  # Remove the trailing comma
+json_output+="]"
+echo "$json_output" |jq . > client_certificates.json
+rm -fR "$temp_dir"
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
