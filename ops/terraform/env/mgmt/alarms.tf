@@ -96,6 +96,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_failing_instances" {
   ])
 
   metric_query {
+    period      = 60
     expression  = "SELECT SUM(StatusCheckFailed) FROM \"AWS/EC2\""
     id          = "q1"
     label       = "StatusCheckFailed Sum"
