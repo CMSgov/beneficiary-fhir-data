@@ -615,8 +615,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
   namespace   = local.namespace
 
   # FUTURE: Alarm actions sending notifications to destinations other than #bfd-test have been
-  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated; when this SLO is
-  # updated, re-enable this Alarm's actions
+  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated in BFD-2949
 
   # alarm_actions = local.alert_arn
   # ok_actions    = local.alert_ok_arn
@@ -644,8 +643,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
   namespace   = local.namespace
 
   # FUTURE: Alarm actions sending notifications to destinations other than #bfd-test have been
-  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated; when this SLO is
-  # updated, re-enable this Alarm's actions
+  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated in BFD-2949
 
   # alarm_actions = local.alert_arn
   # ok_actions    = local.alert_ok_arn
