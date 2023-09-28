@@ -6,8 +6,6 @@
  * </p>
  */
 
-@Library('bfd@bfd-2886-v2-build-docker-host')
-
 // These variables are accessible throughout this file (except inside methods and classes).
 def verboseMaven = params.verbose_mvn_logging
 def appBuildResults

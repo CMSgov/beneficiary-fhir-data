@@ -10,9 +10,6 @@ import groovy.json.JsonSlurper
  * </p>
  */
 
-@Library('bfd@bfd-2886-v2-build-docker-host')
-
-
 /**
  * Models the results of a call to {@link #buildAppAmis}: contains the IDs of the AMIs that were built.
  */
@@ -110,6 +107,15 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 	return amiIdsWrapper
 }
 
+/**
+ * Builds the Docker Host AMI.
+ *
+ * @param gitBranchName the name of the Git branch this build is for
+ * @param gitCommitId the hash/ID of the Git commit that this build is for
+ * @param the ID of the base "platinum" AMI to use for new instances/AMIs
+ * @return the AMI id of the Docker Host AMI
+ * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
+ */
 def buildDockerHostAmi(String gitBranchName, String gitCommitId, String platinumAmiId) {
 	dir('ops/packer'){
 		packerBuildAmis(platinumAmiId, gitBranchName, gitCommitId, "./build_bfd-docker-host.json")
@@ -117,6 +123,14 @@ def buildDockerHostAmi(String gitBranchName, String gitCommitId, String platinum
 	}
 }
 
+/**
+ * Uses Packer to build the specified AMI from the given templateFile. Also creates a JSON manifest per AMI.
+ *
+ * @param platinumAmiId the ID of the base "platinum" AMI to use for new instances/AMIs
+ * @param gitBranchName the name of the Git branch this build is for
+ * @param gitCommitId the hash/ID of the Git commit that this build is for
+ * @param templateFile the relative path to the packer template file
+ */
 def packerBuildAmis(String platinumAmiId, String gitBranchName, String gitCommitId, String templateFile) {
 	withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
 		withEnv(["platinumAmiId=${platinumAmiId}", "gitBranchName=${gitBranchName}",
@@ -170,6 +184,12 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 	}
 }
 
+/**
+ * Extracts and returns the AMI id from the contents of a Packer manifest
+ *
+ * @param manifest the text content contained in the Packer manifest file
+ * @return the AMI id from the given manifest content
+ */
 def extractAmiIdFromPackerManifest(String manifest) {
 	def manifestJson = new JsonSlurper().parseText(manifest)
 	// artifactId will be of the form $region:$amiId
