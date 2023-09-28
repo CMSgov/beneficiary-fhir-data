@@ -7,7 +7,7 @@ locals {
       # If a hosted zone does not specify any VPC associations, it is considered a Public zone. If
       # any VPCs are specified, it is considered Private. We handle the case where VPCs are not
       # specified in configuration by returning an empty list.
-      internal_vpc_ids = jsondecode(lookup(local.sensitive_common_config, "r53_hosted_zone_${zone}_vpcs_json", "[]"))
+      internal_vpc_ids = jsondecode(lookup(local.sensitive_common_config, "r53_hosted_zone_${zone}_internal_vpcs_json", "[]"))
       external_vpc_ids = jsondecode(lookup(local.sensitive_common_config, "r53_hosted_zone_${zone}_external_vpcs_json", "[]"))
     }
   }
