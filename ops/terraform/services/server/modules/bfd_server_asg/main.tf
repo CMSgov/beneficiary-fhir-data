@@ -175,6 +175,12 @@ resource "aws_autoscaling_group" "main" {
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
   load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
 
+  # With Lifecycle Hooks, BFD Server instances will not reach the InService state until the BFD
+  # Server application running on the instance is ready to start serving traffic. As a result, it is
+  # unnecessary to have any cooldown or instance warmup period
+  default_cooldown        = 0
+  default_instance_warmup = 0
+
   launch_template {
     name    = aws_launch_template.main.name
     version = aws_launch_template.main.latest_version
