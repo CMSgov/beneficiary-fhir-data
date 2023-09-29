@@ -306,11 +306,12 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
 resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
   for_each = { for v in local.scalein_config : "${v.desired_capacity}-instances" => v }
 
-  name                    = "bfd-${var.role}-${local.env}-networkin-low-scalein-${each.key}"
-  autoscaling_group_name  = aws_autoscaling_group.main.name
-  adjustment_type         = "ExactCapacity"
-  metric_aggregation_type = "Average"
-  policy_type             = "StepScaling"
+  name                      = "bfd-${var.role}-${local.env}-networkin-low-scalein-${each.key}"
+  autoscaling_group_name    = aws_autoscaling_group.main.name
+  estimated_instance_warmup = 0 # explicitly disable warmup as lifecycle hooks handle it more accurately
+  adjustment_type           = "ExactCapacity"
+  metric_aggregation_type   = "Average"
+  policy_type               = "StepScaling"
 
   step_adjustment {
     metric_interval_lower_bound = 0
@@ -401,11 +402,12 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
 }
 
 resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
-  name                    = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
-  autoscaling_group_name  = aws_autoscaling_group.main.name
-  adjustment_type         = "ExactCapacity"
-  metric_aggregation_type = "Average"
-  policy_type             = "StepScaling"
+  name                      = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
+  autoscaling_group_name    = aws_autoscaling_group.main.name
+  estimated_instance_warmup = 0 # explicitly disable warmup as lifecycle hooks handle it more accurately
+  adjustment_type           = "ExactCapacity"
+  metric_aggregation_type   = "Average"
+  policy_type               = "StepScaling"
 
   dynamic "step_adjustment" {
     for_each = local.scaleout_config
