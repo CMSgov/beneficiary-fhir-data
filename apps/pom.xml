@@ -77,6 +77,11 @@
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/coverage-reports/jacoco-ut/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.jacoco.itReportPath>${project.build.directory}/coverage-reports/jacoco-it/jacoco.xml</sonar.coverage.jacoco.itReportPath>
+        <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>
+            **/*.java
+        </sonar.issue.ignore.multicriteria.e1.resourceKey>
         <micrometer.version>1.11.2</micrometer.version>
         <metrics.version>4.2.19</metrics.version>
         <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
