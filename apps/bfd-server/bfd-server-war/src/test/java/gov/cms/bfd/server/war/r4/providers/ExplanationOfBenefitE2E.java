@@ -28,10 +28,7 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
   /** Sets up the test resources. */
   @BeforeEach
   public void setupTest() {
-    // Set this up once, after the server has run
-    if (eobEndpoint == null) {
-      eobEndpoint = baseServerUrl + "/v2/fhir/ExplanationOfBenefit/";
-    }
+    eobEndpoint = baseServerUrl + "/v2/fhir/ExplanationOfBenefit/";
   }
 
   /**
