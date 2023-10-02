@@ -7,18 +7,18 @@ locals {
   }
   namespace = "bfd-${local.env}/bfd-server"
   endpoints = {
-    all                = "*/fhir/*"
-    metadata           = "*/fhir/metadata*"
-    coverage_all       = "*/fhir/Coverage*"
-    patient_all        = "*/fhir/Patient*"
-    eob_all            = "*/fhir/ExplanationOfBenefit*"
-    claim_all          = "*/fhir/Claim"
-    claim_response_all = "*/fhir/ClaimResponse"
+    all                = ["*/fhir/*"]
+    metadata           = ["*/fhir/metadata*"]
+    coverage_all       = ["*/fhir/Coverage*"]
+    patient_all        = ["*/fhir/Patient*"]
+    eob_all            = ["*/fhir/ExplanationOfBenefit*"]
+    claim_all          = ["*/fhir/Claim", "*/fhir/Claim/"]
+    claim_response_all = ["*/fhir/ClaimResponse", "*/fhir/ClaimResponse/"]
   }
 
   endpoint_patterns = {
-    for name, pattern in local.endpoints :
-    replace(name, "_", "-") => "$.mdc.http_access_request_uri = \"${pattern}\""
+    for name, patterns in local.endpoints :
+    replace(name, "_", "-") => "(${join(" || ", [for pattern in patterns : "$.mdc.http_access_request_uri = \"${pattern}\""])})"
   }
 
   client_ssl_pattern = "$.mdc.http_access_request_clientSSL_DN = \"*\""
