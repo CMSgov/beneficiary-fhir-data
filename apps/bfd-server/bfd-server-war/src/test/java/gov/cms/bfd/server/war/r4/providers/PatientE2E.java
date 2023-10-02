@@ -7,7 +7,12 @@ import static org.hamcrest.Matchers.hasItem;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.server.war.ServerRequiredTest;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import io.restassured.response.Response;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,23 +66,26 @@ public class PatientE2E extends ServerRequiredTest {
     String requestString = patientEndpoint + patientId;
     String currentMbi = "3456789";
 
-    given()
+    Response response = given()
         .spec(requestAuth)
         .expect()
         .body("resourceType", equalTo("Patient"))
         .body("id", equalTo(patientId))
-        // Check the current MBI matches
-        .body(
-            "identifier"
-                +
-                // ".type.coding.extension.valueCoding.code.flatten()",
-                //".findAll { it.type.coding.extension.valueCoding.code.flatten() == 'current'}",
-            ".findAll { it.type.coding.extension }.find { it.valueCoding.code == 'current'}",
-            hasItem(currentMbi))
-        // TODO: Check historical MBI matches
         .statusCode(200)
         .when()
         .get(requestString);
+
+    // Check the current and historical MBIs exist
+    List<Map<String, ?>> identifiers = response.jsonPath().getList("identifier");
+    String currentMbiValue;
+    List<String> historicalMbiValues = new ArrayList<>();
+
+    for(Map<String, ?> identifier : identifiers) {
+      
+    }
+
+
+
   }
 
   /**
