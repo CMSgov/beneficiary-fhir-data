@@ -448,6 +448,12 @@ public final class ServerTestUtils {
 
       // Tweak the SAMPLE_A claims such that they are SAMHSA-related.
       adjustCarrierClaimForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustHhaRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustDmeRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustInpatientRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustHospiceRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustOutpatientRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustSnfRecordForSamhsaDiagnosis(loadedRecords, entityManager);
 
     } finally {
       if (entityManager != null && entityManager.getTransaction().isActive())
@@ -478,6 +484,157 @@ public final class ServerTestUtils {
         Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(carrierRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first inpatient record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustInpatientRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    InpatientClaim inpatientRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof InpatientClaim)
+            .map(InpatientClaim.class::cast)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
+    inpatientRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(inpatientRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first outpatient record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustOutpatientRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    OutpatientClaim outpatientRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof OutpatientClaim)
+            .map(OutpatientClaim.class::cast)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    outpatientRifRecord =
+        entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
+    outpatientRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(outpatientRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first HHA record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustHhaRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    HHAClaim hhaRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(HHAClaim.class::cast)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
+    hhaRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(hhaRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first SNF record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustSnfRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    SNFClaim snfRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof SNFClaim)
+            .map(SNFClaim.class::cast)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
+    snfRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(snfRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first Hospice record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustHospiceRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    HospiceClaim hospiceRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof HospiceClaim)
+            .map(HospiceClaim.class::cast)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
+    hospiceRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(hospiceRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first DME record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustDmeRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    DMEClaim dmeRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(DMEClaim.class::cast)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
+    dmeRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(dmeRifRecord);
     entityManager.getTransaction().commit();
   }
 
