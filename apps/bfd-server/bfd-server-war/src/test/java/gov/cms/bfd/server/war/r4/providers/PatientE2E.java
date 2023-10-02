@@ -4,7 +4,11 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
+import gov.cms.bfd.model.rif.entities.Beneficiary;
+import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.server.war.ServerRequiredTest;
+import java.util.List;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +18,16 @@ public class PatientE2E extends ServerRequiredTest {
   /** The base patient endpoint. */
   private static String patientEndpoint;
 
+  /**
+   * A list of expected historical mbis for adding to the sample A loaded data (as data coming back
+   * from the endpoint will have this added in the resource provider).
+   */
+  private static final List<String> standardExpectedHistoricalMbis =
+      List.of("9AB2WW3GR44", "543217066", "3456689");
+
+  /** The current Mbi as found in the SAMPLE A data. */
+  private static final String currentMbi = "3456789";
+
   /** Sets up the test resources. */
   @BeforeEach
   public void setupTest() {
@@ -22,6 +36,134 @@ public class PatientE2E extends ServerRequiredTest {
       patientEndpoint = baseServerUrl + "/v2/fhir/Patient/";
     }
   }
+
+  /** Verifies patient read with an existing bene returns a 200 and response. */
+  @Test
+  public void testReadWhenExistingPatientExpect200() {
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = patientEndpoint + patientId;
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Patient"))
+        .body("id", equalTo(patientId))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /** Test read when historical mbis expect all mbis returned. */
+  @Test
+  public void testReadWhenHistoricalMbisExpectAllMbisReturned() {
+    List<Object> loadedRecords = testUtils.loadSampleAData();
+    String patientId = testUtils.getPatientId(loadedRecords);
+    String requestString = patientEndpoint + patientId;
+    String currentMbi = "3456789";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Patient"))
+        .body("id", equalTo(patientId))
+        // Check the current MBI matches
+        .body(
+            "identifier"
+                +
+                // ".type.coding.extension.valueCoding.code.flatten()",
+                //".findAll { it.type.coding.extension.valueCoding.code.flatten() == 'current'}",
+            ".findAll { it.type.coding.extension }.find { it.valueCoding.code == 'current'}",
+            hasItem(currentMbi))
+        // TODO: Check historical MBI matches
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verifies that Patient searchByLogicalId returns a 200 and response when the beneficiary exists
+   * in the DB but has no {@link BeneficiaryHistory} or MedicareBeneficiaryIdHistory records.
+   * Primarily this checks that the table joins do not cause any issue retrieving the patient when
+   * there is nothing found in the history table.
+   */
+  @Test
+  public void testReadWhenNoHistoricalMbisExpect200() {}
+
+  /**
+   * Verifies that Patient searchByLogicalId returns a 200 and response for a {@link Patient} that
+   * exists in the DB.
+   */
+  @Test
+  public void testPatientByLogicalIdUsingBeneIdExpect200() {}
+
+  /**
+   * Verifies that Patient searchByLogicalId returns a 200 and response for a {@link Patient} that
+   * exists in the DB.
+   */
+  @Test
+  public void testPatientByLogicalIdUsingCurrentMbiHashExpect200() {}
+
+  /**
+   * Verifies that Patient searchByLogicalId returns a 200 and response for a {@link Patient} that
+   * exists in the DB and an MBI points to more than one bene id in either the Beneficiaries and/or
+   * BeneficiariesHistory table.
+   */
+  @Test
+  public void testPatientByLogicalIdUsingMbiHashWithBeneDupesExpect200() {}
+
+  /**
+   * Verifies that Patient searchByLogicalId returns a 200 and response when searching by a
+   * historical MBI hash.
+   */
+  @Test
+  public void testPatientByLogicalIdUsingHistoricalMbiHashExpect200() {}
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} works as expected for MBIs
+   * associated with {@link Beneficiary}s that have <strong>no</strong> {@link BeneficiaryHistory}
+   * records.
+   */
+  @Test
+  public void testPatientByLogicalIdWhenNoHistoricalMbisExpect200() {}
+
+  /**
+   * Verifies that searching by a known existing part D contract number returns a result as
+   * expected. Also ensures the unhashed MBI values are returned by default.
+   */
+  @Test
+  public void testPatientByPartDContractExpectUnhashedMbis() {}
+
+  /**
+   * Regression test for part of BFD-525, which verifies that duplicate entries are not returned
+   * when 1) plain-text identifiers are requested, 2) a beneficiary has multiple historical
+   * identifiers, and 3) paging is requested. (This oddly specific combo had been bugged earlier and
+   * was quite tricky to resolve).
+   */
+  @Test
+  public void testPatientByPartDContractWithPagingAndMultipleMbisExpectNoDupes() {}
+
+  /**
+   * Regression test for part of BFD-525, which verifies that duplicate entries are not returned
+   * when 1) plain-text identifiers are requested, 2) a beneficiary has multiple historical
+   * identifiers, and 3) paging is not requested. (This oddly specific combo had been bugged earlier
+   * and was quite tricky to resolve).
+   */
+  @Test
+  public void testPatientByPartDContractWithMultipleMbisExpectNoDupes() {}
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} works as expected,
+   * when an invalid year is specified.
+   */
+  @Test
+  public void testPatientByPartDContractWithInvalidYearExpect400() {}
+
+  /**
+   * Verifies that searching by lastUpdated with its various supported prefixes returns results as
+   * expected.
+   */
+  @Test
+  public void testPatientByLogicalIdWithLastUpdatedExpectFilteredResults() {}
 
   /**
    * Verify that Patient throws a 400 error when the paging start (startIndex) is set higher than

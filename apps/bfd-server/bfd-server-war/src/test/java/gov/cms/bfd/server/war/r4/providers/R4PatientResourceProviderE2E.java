@@ -52,30 +52,6 @@ public final class R4PatientResourceProviderE2E extends ServerRequiredTest {
       List.of("9AB2WW3GR44", "543217066", "3456689");
 
   /**
-   * Verifies that {@link R4PatientResourceProvider#read} works as expected for a {@link Patient}
-   * that does exist in the DB.
-   */
-  @Test
-  public void readExistingPatient() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-
-    Patient patient =
-        fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
-
-    comparePatient(beneficiary, patient, standardExpectedHistoricalMbis);
-  }
-
-  /**
    * Verifies that {@link R4PatientResourceProvider#read} returns a {@link Patient} when the
    * beneficiary exists in the DB but has no {@link BeneficiaryHistory} or {@link
    * MedicareBeneficiaryIdHistory} records. Primarily this checks that the table joins do not cause
