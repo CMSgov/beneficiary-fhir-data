@@ -3,16 +3,12 @@ package gov.cms.bfd.server.war.r4.providers;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.server.war.ServerRequiredTest;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import io.restassured.response.Response;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,8 +23,7 @@ public class PatientE2E extends ServerRequiredTest {
    * A list of expected historical mbis for adding to the sample A loaded data (as data coming back
    * from the endpoint will have this added in the resource provider).
    */
-  private static final List<String> standardExpectedHistoricalMbis =
-      List.of("9AB2WW3GR44", "543217066", "3456689");
+  private static final List<String> historicalMbis = List.of("9AB2WW3GR44", "543217066", "3456689");
 
   /** The current Mbi as found in the SAMPLE A data. */
   private static final String currentMbi = "3456789";
@@ -53,39 +48,13 @@ public class PatientE2E extends ServerRequiredTest {
         .expect()
         .body("resourceType", equalTo("Patient"))
         .body("id", equalTo(patientId))
+        // Check current MBI is returned
+        .body("identifier.value", hasItem(currentMbi))
+        // Check historical MBIs are returned too
+        .body("identifier.value", hasItems(historicalMbis.toArray()))
         .statusCode(200)
         .when()
         .get(requestString);
-  }
-
-  /** Test read when historical mbis expect all mbis returned. */
-  @Test
-  public void testReadWhenHistoricalMbisExpectAllMbisReturned() {
-    List<Object> loadedRecords = testUtils.loadSampleAData();
-    String patientId = testUtils.getPatientId(loadedRecords);
-    String requestString = patientEndpoint + patientId;
-    String currentMbi = "3456789";
-
-    Response response = given()
-        .spec(requestAuth)
-        .expect()
-        .body("resourceType", equalTo("Patient"))
-        .body("id", equalTo(patientId))
-        .statusCode(200)
-        .when()
-        .get(requestString);
-
-    // Check the current and historical MBIs exist
-    List<Map<String, ?>> identifiers = response.jsonPath().getList("identifier");
-    String currentMbiValue;
-    List<String> historicalMbiValues = new ArrayList<>();
-
-    for(Map<String, ?> identifier : identifiers) {
-      
-    }
-
-
-
   }
 
   /**
@@ -95,7 +64,9 @@ public class PatientE2E extends ServerRequiredTest {
    * there is nothing found in the history table.
    */
   @Test
-  public void testReadWhenNoHistoricalMbisExpect200() {}
+  public void testReadWhenNoHistoricalMbisExpect200() {
+    
+  }
 
   /**
    * Verifies that Patient searchByLogicalId returns a 200 and response for a {@link Patient} that
