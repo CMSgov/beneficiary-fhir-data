@@ -136,33 +136,33 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
   metric_query {
     expression  = "(e1 - (DAY(e1) + 5) * 86400 - (HOUR(e1) + 7) * 3600 - (${local.eastern_seconds_utc_offset} + (MINUTE(e1) * 60)) + 604800)"
     id          = "e4"
-    label       = "currentMonday9AMEastern"
+    label       = "Unix Timestamp of Week's Current Monday 9 AM ET"
     return_data = false
   }
 
   metric_query {
     expression  = "EPOCH(m1)"
     id          = "e1"
-    label       = "Expression1"
+    label       = "Unix Time"
     return_data = false
   }
 
   metric_query {
     expression  = "FILL(m1, REPEAT)"
     id          = "e7"
-    label       = "Expression7"
+    label       = "Filled Fully Loaded"
     return_data = false
   }
 
   metric_query {
     expression  = "FILL(m2, REPEAT)"
     id          = "e9"
-    label       = "Expression9"
+    label       = "Filled Time Available"
     return_data = false
   }
 
   metric_query {
-    expression  = "IF(e9 > e7 && e4 > e9, 1, 0)"
+    expression  = "IF(e9 > e7 && e4 > e9 && e1 > e4, 1, 0)"
     id          = "e3"
     label       = "Has ongoing load exceeded Monday 9 AM EST/EDT?"
     return_data = true
