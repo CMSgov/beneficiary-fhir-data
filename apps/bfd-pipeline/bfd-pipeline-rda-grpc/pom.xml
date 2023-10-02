@@ -60,6 +60,10 @@
             <artifactId>grpc-stub</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-inprocess</artifactId>
+        </dependency>
+        <dependency>
             <!-- provides JsonFormat and JsonParser -->
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
