@@ -18,8 +18,31 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > server_vars.json
 
-# build `data_server_ssl_client_certificates` from json values stored in SSM
-jq '{data_server_ssl_client_certificates: .data_server_ssl_client_certificates_json|fromjson}' server_vars.json > client_certificates.json
+# the previous ssm get-parameter will also pick the certs up due to the 'recursive' arg;.
+# we'll process the ".../client_certs/" path separately and still outpyt the JSON to the
+# client_certificates.json file.
+json_array=()
+for key in \
+$(aws ssm get-parameters-by-path \
+--path "/bfd/${env}/server/nonsensitive/client_certificates" \
+--region=us-east-1 --query 'Parameters[].Name' --output text)
+do \
+cn_val="$(echo "$key" |sed 's/.*\///')":
+val=$(aws ssm get-parameter \
+--name "$key" \
+--region=us-east-1 --query 'Parameter.Value' --output text)
+json_object="{\"alias\": \"$cn_val\", \"certificate\": \"$val\"}";
+json_object="${json_object%,}";
+json_array+=("$json_object");
+done
+json_output="{ \"data_server_ssl_client_certificates\": ["
+for json_object in "${json_array[@]}"; do
+    json_output+="$json_object,"
+done
+json_output="${json_output%,}"  # Remove the trailing comma
+json_output+="]}"
+echo "$json_output" |jq . > client_certificates.json
+
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
