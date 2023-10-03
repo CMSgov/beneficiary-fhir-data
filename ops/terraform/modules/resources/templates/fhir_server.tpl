@@ -38,12 +38,12 @@ json_object="{\"alias\": \"$cn_val\", \"certificate\": \"$val\"}";
 json_object="${json_object%,}";
 json_array+=("$json_object");
 done
-json_output="["
+json_output="{ \"data_server_ssl_client_certificates\": ["
 for json_object in "${json_array[@]}"; do
     json_output+="$json_object,"
 done
 json_output="${json_output%,}"  # Remove the trailing comma
-json_output+="]"
+json_output+="]}"
 echo "$json_output" |jq . > client_certificates.json
 
 aws ssm get-parameters-by-path \
