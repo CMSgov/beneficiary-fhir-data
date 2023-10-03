@@ -210,15 +210,13 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
     // CARR_CLM_BLG_NPI_NUM => ExplanationOfBenefit.provider.identifier
-    claimGroup
-        .getCarrierClaimBlgNpiNumber()
-        .ifPresent(
-            value ->
-                eob.setProvider(
-                    new Reference()
-                        .setIdentifier(
-                            TransformerUtilsV2.createIdentifier(
-                                CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, value))));
+    // Since provider is a required FHIR field, default to UNKNOWN if not in the data
+    String providerValue = claimGroup.getCarrierClaimBlgNpiNumber().orElse("UNKNOWN");
+    eob.setProvider(
+        new Reference()
+            .setIdentifier(
+                TransformerUtilsV2.createIdentifier(
+                    CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM, providerValue)));
 
     // Process line items
     for (CarrierClaimLine line : claimGroup.getLines()) {
@@ -236,7 +234,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
               line.getPerformingPhysicianNpi());
 
       // Fall back to UPIN if NPI not present
-      if (!line.getPerformingPhysicianNpi().isPresent()) {
+      if (line.getPerformingPhysicianNpi().isEmpty()) {
         performing =
             TransformerUtilsV2.addCareTeamMember(
                 eob,
@@ -247,52 +245,24 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
       }
 
       if (performing.isPresent()) {
+        CareTeamComponent careTeam = performing.get();
+
         // Update the responsible flag
-        performing.get().setResponsible(true);
+        careTeam.setResponsible(true);
         // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-        performing
-            .get()
-            .setQualification(
-                TransformerUtilsV2.createCodeableConcept(
-                    eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+        TransformerUtilsV2.addCareTeamQualification(
+            careTeam, eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode());
 
-        boolean performingHasMatchingExtension =
-            TransformerUtilsV2.careTeamHasMatchingExtension(
-                performing.get(),
-                TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD),
-                String.valueOf(line.getProviderTypeCode()));
+        // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
+        TransformerUtilsV2.addCareTeamExtension(
+            CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode(), careTeam, eob);
 
-        if (!performingHasMatchingExtension) {
-          // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-          performing
-              .get()
-              .addExtension(
-                  TransformerUtilsV2.createExtensionCoding(
-                      eob,
-                      CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD,
-                      line.getProviderTypeCode()));
-        }
-
-        performingHasMatchingExtension =
-            line.getProviderParticipatingIndCode().isPresent()
-                && TransformerUtilsV2.careTeamHasMatchingExtension(
-                    performing.get(),
-                    TransformerUtilsV2.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(line.getProviderParticipatingIndCode().get()));
-
-        // TODO - following code is wrong and needs to be fixed; this error may be
-        // for both CARRIER and DME claims, stu3 and r4.
-        // JIRA ticket: https://jira.cms.gov/browse/BFD-2815
-        if (!performingHasMatchingExtension) {
-          // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-          performing
-              .get()
-              .addExtension(
-                  TransformerUtilsV2.createExtensionCoding(
-                      eob,
-                      CcwCodebookVariable.PRTCPTNG_IND_CD,
-                      line.getProviderParticipatingIndCode()));
-        }
+        // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+        TransformerUtilsV2.addCareTeamExtension(
+            CcwCodebookVariable.PRTCPTNG_IND_CD,
+            line.getProviderParticipatingIndCode(),
+            careTeam,
+            eob);
       }
 
       if (line.getOrganizationNpi().isPresent()) {

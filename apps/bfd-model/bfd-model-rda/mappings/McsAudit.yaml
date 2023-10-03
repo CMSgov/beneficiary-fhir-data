@@ -1,7 +1,7 @@
 mappings:
 - id: McsAudit
   messageClassName: gov.cms.mpsm.rda.v1.mcs.McsAudit
-  entityClassName: gov.cms.bfd.model.rda.RdaMcsAudit
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaMcsAudit
   table:
     name: mcs_audits
     schema: rda

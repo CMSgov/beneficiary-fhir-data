@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,10 +13,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -144,6 +148,46 @@ public class CarrierClaimTransformerV2Test {
   public void serializeSampleARecord() throws FHIRException, IOException {
     ExplanationOfBenefit eob = carrierClaimTransformer.transform(generateClaim(), false);
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
+  }
+
+  /** Tests that the transformer sets the provider (CARR_CLM_BLG_NPI_NUM). */
+  @Test
+  public void shouldSetProvider() {
+    // Make sure the field was in the claim data
+    assertTrue(claim.getCarrierClaimBlgNpiNumber().isPresent());
+
+    // Check the value was mapped correctly
+    assertNotNull(eob.getProvider());
+    assertEquals(
+        claim.getCarrierClaimBlgNpiNumber().get(), eob.getProvider().getIdentifier().getValue());
+    assertEquals(
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM),
+        eob.getProvider().getIdentifier().getSystem());
+  }
+
+  /**
+   * Tests that the transformer sets the provider to the default "UNKNOWN" when CARR_CLM_BLG_NPI_NUM
+   * is not present in the claim.
+   */
+  @Test
+  public void shouldSetProviderDefaultWhenNoClaimBlgNumberPresent() {
+    // Remove CARR_CLM_BLG_NPI_NUM from the claim
+    claim = generateClaim();
+    claim.setCarrierClaimBlgNpiNumber(Optional.empty());
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
+
+    // Make sure the field is no longer present
+    assertFalse(claim.getCarrierClaimBlgNpiNumber().isPresent());
+
+    // Check the value was set to UNKNOWN
+    assertNotNull(eob.getProvider());
+    assertEquals("UNKNOWN", eob.getProvider().getIdentifier().getValue());
+    assertEquals(
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CARR_CLM_BLG_NPI_NUM),
+        eob.getProvider().getIdentifier().getSystem());
   }
 
   /**
@@ -698,7 +742,7 @@ public class CarrierClaimTransformerV2Test {
 
     assertTrue(compare2.equalsDeep(member2));
 
-    //     // Third member
+    // Third member
     CareTeamComponent member3 =
         TransformerTestUtilsV2.findCareTeamBySequence(3, genEob.getCareTeam());
     CareTeamComponent compare3 =
@@ -748,6 +792,42 @@ public class CarrierClaimTransformerV2Test {
     assertTrue(compare4.equalsDeep(member4));
 
     assertEquals(4, genEob.getCareTeam().size());
+  }
+
+  /**
+   * Tests that the transformer sets the expected values for the care team member extensions and
+   * does not error when only the required care team values exist.
+   */
+  @Test
+  public void testCareTeamExtensionsWhenOptionalValuesAbsent() {
+
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    CarrierClaim loadedClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(CarrierClaim.class::cast)
+            .findFirst()
+            .get();
+    loadedClaim.setLastUpdated(Instant.now());
+
+    // Set the optional care team fields to empty
+    for (CarrierClaimLine line : loadedClaim.getLines()) {
+      line.setProviderParticipatingIndCode(Optional.empty());
+      line.setProviderSpecialityCode(Optional.empty());
+    }
+
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
+
+    // Ensure the extension for PRTCPTNG_IND_CD wasnt added
+    // Also the qualification coding should be empty if specialty code is not set
+    String prtIndCdUrl =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD);
+    for (CareTeamComponent careTeam : genEob.getCareTeam()) {
+      assertFalse(careTeam.getExtension().stream().anyMatch(i -> i.getUrl().equals(prtIndCdUrl)));
+      assertTrue(careTeam.getQualification().getCoding().isEmpty());
+    }
   }
 
   /**

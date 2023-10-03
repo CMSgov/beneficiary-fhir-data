@@ -13,6 +13,14 @@ locals {
   test_kms_key_id         = data.aws_kms_key.test_cmk.arn
   prod_sbx_kms_key_id     = data.aws_kms_key.prod_sbx_cmk.arn
   prod_kms_key_id         = data.aws_kms_key.prod_cmk.arn
+
+  sensitive_common_config = zipmap(
+    [
+      for name in data.aws_ssm_parameters_by_path.common_sensitive.names :
+      element(split("/", name), length(split("/", name)) - 1)
+    ],
+    nonsensitive(data.aws_ssm_parameters_by_path.common_sensitive.values)
+  )
 }
 
 data "aws_caller_identity" "current" {}
@@ -61,8 +69,6 @@ data "aws_ssm_parameter" "cpm_aws_account_arn" {
   with_decryption = true
 }
 
-module "base_config" {
-  source = "./base_config"
-
-  kms_key_id = data.aws_kms_key.cmk.arn
+data "aws_ssm_parameters_by_path" "common_sensitive" {
+  path = "/bfd/${local.env}/common/sensitive"
 }

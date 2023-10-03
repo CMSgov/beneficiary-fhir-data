@@ -679,6 +679,85 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already an
+   * extension for the supplied extensionValue and extensionValue is not empty.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  public static void addCareTeamExtension(
+      CcwCodebookVariable codebookVariable,
+      Optional<?> extensionValue,
+      ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+      ExplanationOfBenefit eob) {
+
+    // If our extension value is an empty optional or empty/null string, nothing to add
+    if (extensionValue.isEmpty() || Strings.isNullOrEmpty(String.valueOf(extensionValue.get()))) {
+      return;
+    }
+
+    String valueAsString = String.valueOf(extensionValue.get());
+
+    addCareTeamExtension(codebookVariable, valueAsString, careTeamComponent, eob);
+  }
+
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already an
+   * extension for the supplied extensionValue and extensionValue is not empty.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  public static void addCareTeamExtension(
+      CcwCodebookVariable codebookVariable,
+      char extensionValue,
+      ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+      ExplanationOfBenefit eob) {
+    // If our extension value is empty/null, nothing to add
+    if (Strings.isNullOrEmpty(String.valueOf(extensionValue))) {
+      return;
+    }
+
+    String valueAsString = String.valueOf(extensionValue);
+
+    addCareTeamExtension(codebookVariable, valueAsString, careTeamComponent, eob);
+  }
+
+  /**
+   * Adds a care team extension to the supplied careTeamComponent if there is not already an
+   * extension for the supplied extensionValue.
+   *
+   * <p>This method is kept private to dissuade the unpacking of optionals at the caller level; use
+   * the methods above for optional/char values so that we can do validation within the util method
+   * and keep it out of the calling code. If we have mandatory string values, this can be opened up,
+   * but should be noted the values should be passed in as-is from the line, not transformed prior
+   * to the call.
+   *
+   * @param codebookVariable the codebook variable to make the reference url
+   * @param extensionValue the value for the extension, typically sourced from the claimLine
+   * @param careTeamComponent the care team component to look for the extension in
+   * @param eob the eob
+   */
+  private static void addCareTeamExtension(
+      CcwCodebookVariable codebookVariable,
+      String extensionValue,
+      ExplanationOfBenefit.CareTeamComponent careTeamComponent,
+      ExplanationOfBenefit eob) {
+    String referenceUrl = getReferenceUrl(codebookVariable);
+    boolean hasExtension =
+        careTeamHasMatchingExtension(careTeamComponent, referenceUrl, extensionValue);
+
+    // If the extension doesnt exist, add it
+    if (!hasExtension) {
+      careTeamComponent.addExtension(createExtensionCoding(eob, codebookVariable, extensionValue));
+    }
+  }
+
+  /**
    * Creates an extension coding for the specified ccw variable, year-month, and code.
    *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
@@ -752,7 +831,7 @@ public final class TransformerUtilsV2 {
    */
   static CodeableConcept createCodeableConcept(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
-    if (!code.isPresent()) {
+    if (code.isEmpty()) {
       throw new IllegalArgumentException();
     }
 
@@ -762,6 +841,36 @@ public final class TransformerUtilsV2 {
     concept.addCoding(coding);
 
     return concept;
+  }
+
+  /**
+   * Adds a qualification {@link CodeableConcept} to the given careTeam component, if the input code
+   * optional is not empty. If the code is empty, returns with no effect. Can safely be called to
+   * add qualification only if the value is present.
+   *
+   * @param careTeam the care team to add the
+   * @param rootResource the root resource to use for the coding
+   * @param ccwVariable the ccw variable to use for the coding
+   * @param code an optional to create the {@link CodeableConcept} from; if empty, method returns
+   *     with no action taken
+   */
+  static void addCareTeamQualification(
+      CareTeamComponent careTeam,
+      IAnyResource rootResource,
+      CcwCodebookInterface ccwVariable,
+      Optional<?> code) {
+    // While the original code was written in such a way that implies this optional wont be empty,
+    // its still an optional, so dont bother adding anything if it happens to be empty
+    if (code.isEmpty()) {
+      return;
+    }
+
+    Coding coding = createCoding(rootResource, ccwVariable, code.get());
+
+    CodeableConcept concept = new CodeableConcept();
+    concept.addCoding(coding);
+
+    careTeam.setQualification(concept);
   }
 
   /**
@@ -1647,6 +1756,7 @@ public final class TransformerUtilsV2 {
   public static Bundle createBundle(
       OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime) {
     Bundle bundle = new Bundle();
+    List<IBaseResource> resourcesSubList = resources;
     if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
@@ -1654,11 +1764,15 @@ public final class TransformerUtilsV2 {
        * correctly.
        * TODO: Above bug should be fixed as of 1/1/20; re-investigate this
        */
-      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
-      List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
+      // If we have no resources, don't sublist anything since it causes indexing issues
+      if (resources.size() > 0) {
+        int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+        // Throw a 400 if startIndex >= results, since we cant sublist with these values
+        validateStartIndexSize(paging.getStartIndex(), resources.size());
+        resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
+      }
       bundle = TransformerUtilsV2.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
-
       // Add number of paginated resources to MDC logs
       LoggingUtils.logResourceCountToMdc(resourcesSubList.size());
     } else {
@@ -1675,7 +1789,7 @@ public final class TransformerUtilsV2 {
      * the timestamp.
      */
     Instant maxBundleDate =
-        resources.stream()
+        resourcesSubList.stream()
             .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
             .max(Instant::compareTo)
@@ -1688,6 +1802,24 @@ public final class TransformerUtilsV2 {
                 : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
     return bundle;
+  }
+
+  /**
+   * Validate the start index size is less than the total number of resources. If startIndex is
+   * greater than or equal to the number of resources, throws an InvalidRequestException which will
+   * bubble up and create a 400 error at the REST level via HAPI-FHIR.
+   *
+   * @param startIndex the start index from the paging
+   * @param numResources the number of resources in the response
+   */
+  public static void validateStartIndexSize(int startIndex, int numResources) {
+    // Throw a 400 if startIndex >= results, since we cant sublist with these values
+    if (startIndex >= numResources) {
+      throw new InvalidRequestException(
+          String.format(
+              "Value for startIndex (%d) must be less than than result size (%d)",
+              startIndex, numResources));
+    }
   }
 
   /**

@@ -1,7 +1,7 @@
 mappings:
 - id: FissRevenueLine
   messageClassName: gov.cms.mpsm.rda.v1.fiss.FissRevenueLine
-  entityClassName: gov.cms.bfd.model.rda.RdaFissRevenueLine
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaFissRevenueLine
   table:
     name: fiss_revenue_lines
     schema: rda

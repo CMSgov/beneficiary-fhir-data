@@ -4,13 +4,24 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_key_alias
 }
 
-data "aws_ssm_parameters_by_path" "nonsensitive_common" {
-  path = "/bfd/${local.env}/common/nonsensitive"
+# This is a distinct parameter as we need to retrieve the list of partners first so that we know
+# which SSM hierarchies to get
+data "aws_ssm_parameter" "partners_list_json" {
+  name            = "/bfd/${local.env}/${local.service}/sensitive/partners_list_json"
+  with_decryption = true
 }
 
-data "aws_ssm_parameters_by_path" "sensitive_service" {
-  path            = "/bfd/${local.env}/${local.service}/sensitive"
+data "aws_ssm_parameters_by_path" "sensitive" {
+  for_each = local.ssm_all_paths
+
+  path            = "/${each.value.hierarchy}/${local.env}/${each.value.service}/sensitive"
   with_decryption = true
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive" {
+  for_each = local.ssm_all_paths
+
+  path = "/${each.value.hierarchy}/${local.env}/${each.value.service}/nonsensitive"
 }
 
 data "aws_ec2_managed_prefix_list" "vpn" {
@@ -38,10 +49,34 @@ data "aws_subnet" "this" {
 }
 
 data "aws_network_interface" "vpc_endpoint" {
-  for_each = toset(aws_vpc_endpoint.this.network_interface_ids)
-  id       = each.key
+  # This is a bit strange looking, but we cannot use network_interface_ids within a for_each as its
+  # value is not determined until _after_ aws_vpc_endpoint.this is applied. Terraform expects the
+  # set it iterates upon is known prior to apply, so instead we iterate on a common, known
+  # constraint which is the subnets that this service exists in
+  count = length(local.available_endpoint_subnets)
+  # network_interface_ids is a set by default, and sets have no index in Terraform, so we need to
+  # convert it to a list. Then, to make it consistent between runs, we sort it
+  id = sort(tolist(aws_vpc_endpoint.this.network_interface_ids))[count.index]
 }
 
 data "aws_vpc_endpoint_service" "transfer_server" {
   service_name = "com.amazonaws.us-east-1.transfer.server"
+}
+
+data "aws_ssm_parameter" "zone_name" {
+  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_${local.eft_r53_hosted_zone}_domain"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "zone_is_private" {
+  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_${local.eft_r53_hosted_zone}_is_private"
+  with_decryption = true
+}
+
+data "aws_route53_zone" "this" {
+  name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
+  private_zone = nonsensitive(data.aws_ssm_parameter.zone_is_private.value)
+  tags = {
+    "ConfigId" = local.eft_r53_hosted_zone
+  }
 }

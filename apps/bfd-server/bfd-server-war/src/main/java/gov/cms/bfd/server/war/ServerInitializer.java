@@ -104,8 +104,17 @@ public final class ServerInitializer implements WebApplicationInitializer {
       Class<?> configurationClass,
       Function<String, String> getenv) {
     springContext.setServletContext(servletContext);
-    ConfigLoader config = SpringConfiguration.createConfigLoader(getenv);
-    servletContext.setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, config);
+    final ConfigLoader config;
+    if (servletContext.getAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME) != null) {
+      // ServerExecutor passes in an appropriate ConfigLoader that we can use as-is.
+      config =
+          (ConfigLoader)
+              servletContext.getAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME);
+    } else {
+      // In real life we create our own ConfigLoader and add it to the context.
+      config = SpringConfiguration.createConfigLoader(getenv);
+      servletContext.setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, config);
+    }
 
     ConfigurableEnvironment springEnv = springContext.getEnvironment();
     MutablePropertySources sources = springEnv.getPropertySources();

@@ -5,6 +5,7 @@ import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
+import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
@@ -12,13 +13,16 @@ import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
-import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
+import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,17 +67,29 @@ public final class MigratorApp {
 
   /**
    * This method is called when the application is launched from the command line. Creates a new
-   * instance and calls its {@link MigratorApp#run} method. Terminates with an appropriate error
-   * code.
+   * instance and calls its {@link MigratorApp#performMigrations} method. Terminates with an
+   * appropriate error code.
    *
    * @param args generally, should be empty. Application <strong>will</strong> accept configuration
    *     via layered configuration sources.
    */
   public static void main(String[] args) {
+    int exitCode = new MigratorApp().performMigrationsAndHandleExceptions();
+    System.exit(exitCode);
+  }
+
+  /**
+   * Wrapper around {@link #performMigrations()} that catches any thrown exceptions and returns an
+   * appropriate exit code for use by the {@link #main(String[])} method.
+   *
+   * @return exit code for {@link System#exit}
+   */
+  @VisibleForTesting
+  int performMigrationsAndHandleExceptions() {
     try {
-      new MigratorApp().run();
-      System.exit(EXIT_CODE_SUCCESS);
-    } catch (FatalErrorException ex) {
+      performMigrations();
+      return EXIT_CODE_SUCCESS;
+    } catch (FatalAppException ex) {
       if (ex.getCause() != null) {
         LOGGER.error(
             "app terminating due to exception: message={}",
@@ -82,32 +98,33 @@ public final class MigratorApp {
       } else {
         LOGGER.error("{}, shutting down", ex.getMessage());
       }
-      System.exit(ex.getExitCode());
+      return ex.getExitCode();
     } catch (RuntimeException ex) {
       LOGGER.error("app terminating due to unhandled exception: message={}", ex.getMessage(), ex);
-      System.exit(EXIT_CODE_FAILED_UNHANDLED_EXCEPTION);
+      return EXIT_CODE_FAILED_UNHANDLED_EXCEPTION;
     }
   }
 
   /**
    * Main application logic. Performs the schema creation, migration and validation.
    *
-   * @throws FatalErrorException to report an error that should terminate the application
+   * @throws FatalAppException to report an error that should terminate the application
    */
-  private void run() throws FatalErrorException {
+  private void performMigrations() throws FatalAppException {
     LOGGER.info("Successfully started");
     final AppConfiguration appConfig = loadAppConfiguration();
 
     final MigratorProgressTracker progressTracker = createProgressTracker(appConfig);
     progressTracker.appStarted();
 
+    final DataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
     final MetricRegistry appMetrics = setupMetrics(appConfig);
     createOrUpdateSchema(
-        appConfig.getDatabaseOptions(),
+        dataSourceFactory,
         appConfig.getFlywayScriptLocationOverride(),
         progressTracker,
         appMetrics);
-    validateSchema(appConfig.getDatabaseOptions(), progressTracker, appMetrics);
+    validateSchema(dataSourceFactory, progressTracker, appMetrics);
 
     LOGGER.info("Migration and validation passed, shutting down");
     progressTracker.appFinished();
@@ -116,18 +133,19 @@ public final class MigratorApp {
   /**
    * Uses {@link HibernateValidator} to validate the database matches our entities.
    *
-   * @param databaseOptions used to connect to database
+   * @param dataSourceFactory used to connect to database
    * @param progressTracker used to record app progress
    * @param appMetrics used to track app metrics
-   * @throws FatalErrorException to report an error that should terminate the application
+   * @throws FatalAppException to report an error that should terminate the application
    */
   private void validateSchema(
-      DatabaseOptions databaseOptions,
+      DataSourceFactory dataSourceFactory,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
-      throws FatalErrorException {
+      throws FatalAppException {
     // Hibernate suggests not reusing data sources for validations
-    try (HikariDataSource pooledDataSource = createPooledDataSource(databaseOptions, appMetrics)) {
+    try (HikariDataSource pooledDataSource =
+        createPooledDataSource(dataSourceFactory, appMetrics)) {
       boolean validationSuccess;
       // Run hibernate validation after the migrations have succeeded
       HibernateValidator validator =
@@ -136,7 +154,7 @@ public final class MigratorApp {
 
       if (!validationSuccess) {
         progressTracker.appFailed();
-        throw new FatalErrorException("Validation failed", EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
+        throw new FatalAppException("Validation failed", EXIT_CODE_FAILED_HIBERNATE_VALIDATION);
       }
     }
   }
@@ -144,21 +162,22 @@ public final class MigratorApp {
   /**
    * Uses {@link DatabaseSchemaManager} to create and apply migrations to the database as necessary.
    *
-   * @param databaseOptions used to connect to database
+   * @param dataSourceFactory used to connect to database
    * @param flywayScriptLocationOverride the flyway script location override, can be null if no
    *     override
    * @param progressTracker used to record app progress
    * @param appMetrics used to track app metrics
-   * @throws FatalErrorException to report an error that should terminate the application
+   * @throws FatalAppException to report an error that should terminate the application
    */
   private void createOrUpdateSchema(
-      DatabaseOptions databaseOptions,
+      DataSourceFactory dataSourceFactory,
       String flywayScriptLocationOverride,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
-      throws FatalErrorException {
+      throws FatalAppException {
     // Hibernate suggests not reusing data sources for validations
-    try (HikariDataSource pooledDataSource = createPooledDataSource(databaseOptions, appMetrics)) {
+    try (HikariDataSource pooledDataSource =
+        createPooledDataSource(dataSourceFactory, appMetrics)) {
       progressTracker.appConnected();
 
       // run migration
@@ -168,25 +187,36 @@ public final class MigratorApp {
 
       if (!migrationSuccess) {
         progressTracker.appFailed();
-        throw new FatalErrorException("Migration failed", EXIT_CODE_FAILED_MIGRATION);
+        throw new FatalAppException("Migration failed", EXIT_CODE_FAILED_MIGRATION);
       }
     }
+  }
+
+  /**
+   * Creates a {@link ConfigLoader} that can be used to populate an {@link AppConfiguration}.
+   * Intended as an insertion point for a mock during testing.
+   *
+   * @return the config loader
+   */
+  @VisibleForTesting
+  ConfigLoader createConfigLoader() {
+    return LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
   }
 
   /**
    * Loads and returns the app configuration.
    *
    * @return the configuration
-   * @throws FatalErrorException to report an error that should terminate the application
+   * @throws FatalAppException to report an error that should terminate the application
    */
-  private AppConfiguration loadAppConfiguration() throws FatalErrorException {
-
+  private AppConfiguration loadAppConfiguration() throws FatalAppException {
     try {
-      AppConfiguration appConfig = AppConfiguration.loadConfig(System::getenv);
+      ConfigLoader configLoader = createConfigLoader();
+      AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
       return appConfig;
     } catch (ConfigException | AppConfigurationException e) {
-      throw new FatalErrorException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
+      throw new FatalAppException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
     }
   }
 
@@ -260,50 +290,17 @@ public final class MigratorApp {
    *
    * <p>TODO: BFD-1558 Move to shared location for pipeline + this app
    *
-   * @param dbOptions the {@link DatabaseOptions} to use for the application's DB
+   * @param dataSourceFactory the {@link DataSourceFactory} to use to create a {@link
+   *     HikariDataSource}
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
   private HikariDataSource createPooledDataSource(
-      DatabaseOptions dbOptions, MetricRegistry metrics) {
-    HikariDataSource pooledDataSource = new HikariDataSource();
-
-    pooledDataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
-    pooledDataSource.setUsername(dbOptions.getDatabaseUsername());
-    pooledDataSource.setPassword(dbOptions.getDatabasePassword());
-    pooledDataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
-    pooledDataSource.setRegisterMbeans(true);
+      DataSourceFactory dataSourceFactory, MetricRegistry metrics) {
+    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
+    // we know that flyway requires at least two connections so override the value if it's 1
+    pooledDataSource.setMaximumPoolSize(Math.max(2, pooledDataSource.getMaximumPoolSize()));
     pooledDataSource.setMetricRegistry(metrics);
-
     return pooledDataSource;
-  }
-
-  /** Thrown to inform {@link #main} that app should be shut down with a specific exit code. */
-  private static class FatalErrorException extends Exception {
-    /** Code to pass to {@link System#exit}. */
-    @Getter private final int exitCode;
-
-    /**
-     * Initializes an instance.
-     *
-     * @param message Error message to log on exit.
-     * @param exitCode Exit code for the application.
-     */
-    public FatalErrorException(String message, int exitCode) {
-      super(message);
-      this.exitCode = exitCode;
-    }
-
-    /**
-     * Initializes an instance.
-     *
-     * @param message Error message to log on exit.
-     * @param cause Exception that triggered the shutdown.
-     * @param exitCode Exit code for the application.
-     */
-    public FatalErrorException(String message, Throwable cause, int exitCode) {
-      super(message, cause);
-      this.exitCode = exitCode;
-    }
   }
 }

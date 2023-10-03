@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 public class AccessJsonIT extends ServerRequiredTest {
   /** Verifies that access.json is written to within BFD-server-war via API call. */
   @Test
-  public void VerifyAccessJson() throws IOException {
+  public void verifyAccessJson() throws IOException {
     /*
      * Write to access.json by checking {@link
      * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}

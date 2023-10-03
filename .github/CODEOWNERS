@@ -2,22 +2,22 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@mackec1 @keithdadkins @lsmitchell @mjburling @brianburton 
+@mackec1 @keithdadkins @lsmitchell @mjburling @brianburton @brandoncruz3
 
 # BFD Pipeline and Server Codeowners
-/docs/rfcs @mackec1 @keithdadkins @lsmitchell @mjburling
-/ops @keithdadkins @mjburling @malessi @billie-rose
-/apps @mackec1 @mjburling @lsmitchell @brianburton
+/docs/rfcs @mackec1 @keithdadkins @lsmitchell @mjburling @brandoncruz3
+/ops @keithdadkins @mjburling @malessi @billie-rose @brandoncruz3
+/apps @mackec1 @mjburling @lsmitchell @brianburton @brandoncruz3
 
 # BFD Performance Testing Utilities
-/apps/utils/locust_tests @lsmitchell @mjburling @malessi @billie-rose
+/apps/utils/locust_tests @lsmitchell @mjburling @malessi @billie-rose @brandoncruz3 
 
 # BFD Insights Codeowners
-/insights @keithdadkins @mackec1 @lsmitchell @mjburling @malessi @billie-rose
+/insights @keithdadkins @mackec1 @lsmitchell @mjburling @malessi @billie-rose @brandoncruz3
 
 # GitHub Actions Workflows
-/.github/workflows @keithdadkins @mjburling @malessi @billie-rose
+/.github/workflows @keithdadkins @mjburling @malessi @billie-rose @brandoncruz3
 
 # Administration
-/.github/CODEOWNERS @keithdadkins @mjburling
+/.github/CODEOWNERS @keithdadkins @mjburling @brandoncruz3
 

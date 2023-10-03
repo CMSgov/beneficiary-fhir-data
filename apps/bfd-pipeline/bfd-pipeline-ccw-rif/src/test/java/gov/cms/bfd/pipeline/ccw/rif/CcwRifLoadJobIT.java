@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -45,23 +47,29 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              options,
-              s3ClientFactory);
-      CcwRifLoadJob ccwJob =
+          spy(
+              new S3TaskManager(
+                  PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                  options,
+                  s3ClientFactory));
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
               listener,
-              false);
-      ccwJob.call();
+              false,
+              Optional.empty())) {
+        ccwJob.call();
+      }
 
       // Verify that no data sets were generated.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
+
+      // verifies that close called shutdown on the task manager
+      verify(s3TaskManager).shutdownSafely();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -152,25 +160,31 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              options,
-              s3ClientFactory);
-      CcwRifLoadJob ccwJob =
+          spy(
+              new S3TaskManager(
+                  PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                  options,
+                  s3ClientFactory));
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
               listener,
-              false);
-      // Process both sets
-      ccwJob.call();
-      ccwJob.call();
+              false,
+              Optional.empty())) {
+        // Process both sets
+        ccwJob.call();
+        ccwJob.call();
+      }
 
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(2, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
+
+      // verifies that close called shutdown on the task manager
+      verify(s3TaskManager).shutdownSafely();
 
       /*
        * Verify that the datasets were moved to their respective locations.
@@ -306,18 +320,21 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              options,
-              s3ClientFactory);
-      CcwRifLoadJob ccwJob =
+          spy(
+              new S3TaskManager(
+                  PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                  options,
+                  s3ClientFactory));
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
               listener,
-              false);
-      ccwJob.call();
+              false,
+              Optional.empty())) {
+        ccwJob.call();
+      }
 
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(0, listener.getNoDataAvailableEvents());
@@ -326,6 +343,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(
           manifestA.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
+
+      // verifies that close called shutdown on the task manager
+      verify(s3TaskManager).shutdownSafely();
 
       /*
        * Verify that the first data set was renamed and the second is
@@ -393,23 +413,29 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              options,
-              s3ClientFactory);
-      CcwRifLoadJob ccwJob =
+          spy(
+              new S3TaskManager(
+                  PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                  options,
+                  s3ClientFactory));
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
               listener,
-              false);
-      ccwJob.call();
+              false,
+              Optional.empty())) {
+        ccwJob.call();
+      }
 
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
+
+      // verifies that close called shutdown on the task manager
+      verify(s3TaskManager).shutdownSafely();
 
       // Verify that the data set was not renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
@@ -473,23 +499,29 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              options,
-              s3ClientFactory);
-      CcwRifLoadJob ccwJob =
+          spy(
+              new S3TaskManager(
+                  PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                  options,
+                  s3ClientFactory));
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
               listener,
-              false);
-      ccwJob.call();
+              false,
+              Optional.empty())) {
+        ccwJob.call();
+      }
 
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
+
+      // verifies that close called shutdown on the task manager
+      verify(s3TaskManager).shutdownSafely();
 
       // Verify that the data set was not renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
@@ -548,19 +580,22 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              options,
-              s3ClientFactory);
-      CcwRifLoadJob ccwJob =
+          spy(
+              new S3TaskManager(
+                  PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                  options,
+                  s3ClientFactory));
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               PipelineTestUtils.get().getPipelineApplicationState(),
               options,
               s3TaskManager,
               listener,
-              false);
+              false,
+              Optional.empty())) {
+        ccwJob.call();
+      }
 
-      ccwJob.call();
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(1, listener.getDataEvents().size());
@@ -568,6 +603,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(
           manifest.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
       assertEquals(0, listener.getErrorEvents().size());
+
+      // verifies that close called shutdown on the task manager
+      verify(s3TaskManager).shutdownSafely();
 
       // Verify that the data set was renamed.
       DataSetTestUtilities.waitForBucketObjectCount(

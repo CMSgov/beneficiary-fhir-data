@@ -46,3 +46,9 @@ variable "jdbc_suffix" {
   description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
   type        = string
 }
+
+variable "scaling_networkin_interval_mb" {
+  description = "The interval value in megabytes for evaluating the asg scaling capacity, based on the metric FilteredNetworkIn"
+  type        = number
+  default     = 100000000
+}

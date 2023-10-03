@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -29,7 +28,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     final var ssmCommonPath = ssmBasePath + "common/";
     final var ssmSpecificPath = ssmBasePath + "specific/";
     final var ssmRegion = localstack.getRegion();
-    final var ssmEndpoint = localstack.getEndpointOverride(LocalStackContainer.Service.SSM);
+    final var ssmEndpoint = localstack.getEndpoint();
     final var ssmAccessKey = localstack.getAccessKey();
     final var ssmSecretKey = localstack.getSecretKey();
     final var baseName = LayeredConfigurationIT.class.getSimpleName();
@@ -53,13 +52,13 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
         ImmutableMap.<String, String>builder().put(nameA, "a-system-property").build();
     final var envVars =
         ImmutableMap.<String, String>builder()
-            .put(LayeredConfiguration.ENV_VAR_KEY_SSM_REGION, ssmRegion)
+            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION, ssmRegion)
             .put(
                 LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH,
                 ssmCommonPath + "," + ssmSpecificPath)
-            .put(LayeredConfiguration.ENV_VAR_KEY_SSM_ENDPOINT, ssmEndpoint.toString())
-            .put(LayeredConfiguration.ENV_VAR_KEY_SSM_ACCESS_KEY, ssmAccessKey)
-            .put(LayeredConfiguration.ENV_VAR_KEY_SSM_SECRET_KEY, ssmSecretKey)
+            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, ssmEndpoint.toString())
+            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, ssmAccessKey)
+            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, ssmSecretKey)
             .put(LayeredConfiguration.ENV_VAR_KEY_PROPERTIES_FILE, propertiesFile.getAbsolutePath())
             .put(nameA, "a-env-var")
             .put(nameB, "b-env-var")

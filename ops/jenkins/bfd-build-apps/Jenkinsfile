@@ -96,8 +96,11 @@ spec:
 
     parameters {
         booleanParam(name: 'verbose_mvn_logging',
-        description: 'When true, `mvn` will produce verbose logs.',
-        defaultValue: false)
+            description: 'When true, `mvn` will produce verbose logs.',
+            defaultValue: false)
+        booleanParam(name: 'skip_docker_host_ami',
+            description: 'When true, the docker-host AMI will not be built.',
+            defaultValue: true)
     }
 
     stages {
@@ -120,7 +123,6 @@ spec:
                     awsAuth.assumeRole()
 
                     // Find the most current AMI IDs (if any).
-                    amiIds = null
                     amiIds = scriptForDeploys.findAmis()
                 }
             }
@@ -170,6 +172,10 @@ spec:
                     try {
                         awsAuth.assumeRole()
                         amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+                        if (!params.skip_docker_host_ami) {
+                            amiIds.bfdDockerHostAmiId = scriptForDeploys.buildDockerHostAmi(gitBranchName, gitCommitId,
+                                amiIds.platinumAmiId)
+                        }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                         currentBuild.result = 'ABORTED'
                         throw e

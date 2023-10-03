@@ -51,6 +51,7 @@
         <module>bfd-pipeline</module>
         <module>bfd-server</module>
         <module>bfd-db-migrator</module>
+        <module>bfd-ops</module>
     </modules>
 
     <properties>
@@ -67,19 +68,26 @@
             they are reproducible bit-by-bit no matter when/where they are generated.
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
         <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
+        <bfd.data.fda.version>1.0-SNAPSHOT</bfd.data.fda.version>
+        <bfd.data.npi.version>1.0-SNAPSHOT</bfd.data.npi.version>
         <maven.jacoco.plugin.version>0.8.10</maven.jacoco.plugin.version>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
-        <sonar.jacoco.itReportPath>${project.build.directory}/coverage-reports/jacoco-it.exec</sonar.jacoco.itReportPath>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/coverage-reports/jacoco-ut/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.itReportPath>${project.build.directory}/coverage-reports/jacoco-it/jacoco.xml</sonar.coverage.jacoco.itReportPath>
+        <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>
+            **/*.java
+        </sonar.issue.ignore.multicriteria.e1.resourceKey>
         <micrometer.version>1.11.2</micrometer.version>
         <metrics.version>4.2.19</metrics.version>
         <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.20.62</aws-java-sdk-bom.version>
-        <aws.crt.version>0.23.2</aws.crt.version>
+        <aws.crt.version>0.25.0</aws.crt.version>
         <spring-data-jpa.version>2.7.14</spring-data-jpa.version>
         <spring-framework.version>5.3.23</spring-framework.version>
 
@@ -136,7 +144,7 @@
         <itextpdf.version>5.5.13.3</itextpdf.version>
         <auto-service.version>1.1.1</auto-service.version>
         <maven-plugin-api.version>3.9.4</maven-plugin-api.version>
-        <maven-core.version>3.9.3</maven-core.version>
+        <maven-core.version>3.9.4</maven-core.version>
         <maven-plugin-annotations.version>3.9.0</maven-plugin-annotations.version>
         <maven.plugin.version>3.7.1</maven.plugin.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
@@ -144,7 +152,7 @@
         <poi.version>5.2.3</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
         <!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
-        <jetty.version>10.0.15</jetty.version>
+        <jetty.version>10.0.16</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.0.0-M9</maven.failsafe.plugin.version>
@@ -177,7 +185,7 @@
         <!-- Dependencies required for connecting to a gRPC API -->
         <grpc_java.version>1.57.2</grpc_java.version>
         <protoc.version>3.21.12</protoc.version>
-        <protobuf.version>3.23.4</protobuf.version>
+        <protobuf.version>3.24.0</protobuf.version>
 
         <!-- The default DB that will be used in integration tests. -->
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
@@ -852,6 +860,9 @@
                     <configuration>
                         <!-- Delay deployment of build artifacts until after all modules build successfully. -->
                         <deployAtEnd>true</deployAtEnd>
+                        <!-- We aren't publishing libraries for consumption via maven so we want to limit which projects
+                             are pushed to CodeArtifact.-->
+                        <skip>true</skip>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -867,12 +878,15 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>3.0.1</version>
                     <configuration>
-                        <!-- Require manual pushes after releases. Makes it easier to clean
-                            things up if releases fail. -->
-                        <pushChanges>false</pushChanges>
+                        <tagNameFormat>v@{project.version}</tagNameFormat>
+                        <!-- Automatically push after release. -->
+                        <pushChanges>true</pushChanges>
                         <localCheckout>true</localCheckout>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <commitByProject>false</commitByProject>
+                        <arguments>--threads 1C -DskipTests=true -DskipITs -Dmaven.build.cache.enabled=false</arguments>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1010,6 +1024,7 @@
                     <!-- Exclude javadocs on certain generated files, reduces build warnings -->
                     <excludePackageNames>gov.cms.mpsm.rda.*</excludePackageNames>
                     <excludePackageNames>gov.cms.bfd.model.rif.entities.*</excludePackageNames>
+                    <excludePackageNames>gov.cms.bfd.model.rda.entities.*</excludePackageNames>
                     <quiet>true</quiet>
                     <!-- This notimestamp option does not make our *-javadoc.jar files completely
                         reproducible, but the option is recommended by Maven for a reproducible
@@ -1203,6 +1218,23 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>test-release</id>
+            <properties>
+                <jib.skip>false</jib.skip>
+                <jib.goal>build</jib.goal>
+                <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
+                <maven.build.cache.enabled>false</maven.build.cache.enabled>
+                <!-- Source jars are large and we don't need to publish them. -->
+                <maven.source.skip>true</maven.source.skip>
+            </properties>
+            <distributionManagement>
+                <repository>
+                    <id>${env.CA_DOMAIN}-${env.CA_REPOSITORY}</id>
+                    <url>${env.CA_REPOSITORY_ENDPOINT}</url>
+                </repository>
+            </distributionManagement>
+        </profile>
         <profile>
             <!-- This profile will only be active for builds inside of Eclipse (managed
                 by m2e). It's primarily used to manage the execution of plugins in that environment. -->

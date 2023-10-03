@@ -177,6 +177,14 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         CcwCodebookVariable.IME_OP_CLM_VAL_AMT,
         claimGroup.getIndirectMedicalEducationAmount());
 
+    // CLM_UNCOMPD_CARE_PMT_AMT => ExplanationOfBenefit.extension[N].valueMoney.value
+    if (claimGroup.getClaimUncompensatedCareAmount().isPresent()) {
+      TransformerUtilsV2.addAdjudicationTotal(
+          eob,
+          CcwCodebookVariable.CLM_UNCOMPD_CARE_PMT_AMT,
+          claimGroup.getClaimUncompensatedCareAmount().get());
+    }
+
     // DSH_OP_CLM_VAL_AMT => ExplanationOfBenefit.extension
     TransformerUtilsV2.addAdjudicationTotal(
         eob, CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claimGroup.getDisproportionateShareAmount());
@@ -194,8 +202,12 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         Optional.ofNullable(claimGroup.getProfessionalComponentCharge()));
 
     // CLM_TOT_PPS_CPTL_AMT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
-        eob, CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT, claimGroup.getClaimTotalPPSCapitalAmount());
+    if (claimGroup.getClaimTotalPPSCapitalAmount().isPresent()) {
+      TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
+          eob,
+          CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
+          claimGroup.getClaimTotalPPSCapitalAmount());
+    }
 
     /*
      * add field values to the benefit balances that are common between the

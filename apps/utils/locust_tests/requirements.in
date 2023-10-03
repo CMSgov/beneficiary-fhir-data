@@ -1,7 +1,8 @@
-locust==2.10.1
-psycopg2-binary==2.9.3
+locust==2.16.1
+psycopg2-binary==2.9.7
 psycogreen==1.0.2
-boto3==1.22.12
-setuptools>=65.5.1
-flask==2.2.5
+boto3==1.28.52
+setuptools>=68.2.2
+flask==2.3.3
 requests==2.31.0
+gevent==23.9.1

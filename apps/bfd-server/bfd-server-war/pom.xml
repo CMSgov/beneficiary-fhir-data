@@ -309,7 +309,34 @@
             <artifactId>bfd-shared-test-utils</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-            <!-- Scope cannot be test due to SpringConfiguration using test classes, fix that to properly scope this -->
+        </dependency>
+        <dependency>
+            <!-- We need to be able to run the server in-process during tests. -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-server-launcher</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Jetty is the embedded web server that this project uses to run WARs. -->
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Jetty is the embedded web server that this project uses to run WARs. -->
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+            <version>${jetty.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Jetty is the embedded web server that this project uses to run WARs. -->
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-annotations</artifactId>
+            <version>${jetty.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>gov.cms.bfd</groupId>
@@ -320,7 +347,7 @@
         <dependency>
             <groupId>gov.cms.bfd.data.fda.utility</groupId>
             <artifactId>bfd-data-fda</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${bfd.data.fda.version}</version>
         </dependency>
     </dependencies>
 
@@ -328,50 +355,11 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <!-- When its 'attach-artifact' goal is run, this plugin will attach
-                        the server management scripts that should be used to run this project's WAR.
-                        This ensures that it is included in install, deploy, etc. operations. -->
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${build.helper.maven.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <!-- Use the dependency plugin to copy the test dependency artifacts,
-                        for use in ITs. -->
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven.dependency.plugin.version}</version>
+                    <artifactId>maven-deploy-plugin</artifactId>
                     <configuration>
-                        <artifactItems>
-                            <artifactItem>
-                                <!-- Unpack the BFD Server Launcher (whitelabeled Jetty) assembly zip into
-                                    this project's build directory, for use in ITs. -->
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>bfd-server-launcher</artifactId>
-                                <version>${project.version}</version>
-                                <type>zip</type>
-                                <outputDirectory>${project.build.directory}/server-work</outputDirectory>
-                            </artifactItem>
-                        </artifactItems>
-                        <overWriteReleases>false</overWriteReleases>
-                        <overWriteSnapshots>true</overWriteSnapshots>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <!-- The exec plugin can be used in child modules to run the 'src/main/config/server-*.sh'
-                        scripts, which will start and stop the BFD Server for use in testing. -->
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>${exec.maven.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven.surefire.plugin.version}</version>
-                    <configuration>
-                        <!-- for grpc ITs, need testcontainers to startup/teardown without reuse -->
-                        <parallel>classesAndMethods</parallel>
-                        <forkCount>1</forkCount>
+                        <!-- We do want to publish this project to CodeArtifact. -->
+                        <skip>false</skip>
                     </configuration>
                 </plugin>
             </plugins>
@@ -379,24 +367,26 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
-                </configuration>
-            </plugin>
-            <plugin>
-                <!-- Use the dependency plugin to copy and unpack the test dependency artifacts,
-                    for use in ITs. -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven.antrun.plugin.version}</version>
                 <executions>
-                    <execution>
-                        <id>server-copy-artifacts</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                    </execution>
+                  <execution>
+                    <phase> pre-integration-test </phase>
+                    <configuration>
+                      <tasks>
+                          <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war"
+                                 dest="${project.build.directory}/test-webapp-directory">
+                              <patternset>
+                                  <exclude name="**/lib/*"/>
+                                  <exclude name="**/classes/**"/>
+                              </patternset>
+                          </unzip>
+                      </tasks>
+                    </configuration>
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
+                  </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -428,6 +418,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build.helper.maven.plugin.version}</version>
                 <executions>
                     <execution>
                         <!-- Reserve random available ports for the server to use. -->

@@ -10,7 +10,6 @@ import groovy.json.JsonSlurper
  * </p>
  */
 
-
 /**
  * Models the results of a call to {@link #buildAppAmis}: contains the IDs of the AMIs that were built.
  */
@@ -45,6 +44,11 @@ class AmiIds implements Serializable {
 	 * The ID of the AMI that will run the bfd-server-load service's controller, or <code>null</code> if such an AMI does not yet exist.
 	 */
 	String bfdServerLoadAmiId
+
+	/**
+	 * The ID of the AMI that will run the docker host service, or <code>null</code> if such an AMI does not yet exist.
+	 */
+	String bfdDockerHostAmiId
 }
 
 /**
@@ -56,45 +60,12 @@ class AmiIds implements Serializable {
 def findAmis(String branchName = 'master') {
 	// Replace this lookup either with a lookup in SSM or in a build artifact.
 	return new AmiIds(
-		platinumAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-jdk17-platinum-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdPipelineAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=bfd-amzn2-jdk17-etl-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdServerAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=bfd-amzn2-jdk17-fhir-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdMigratorAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=bfd-amzn2-jdk17-db-migrator-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		).trim(),
-		bfdServerLoadAmiId: sh(
-			returnStdout: true,
-			script: "aws ec2 describe-images --owners self --filters \
-			'Name=tag:Branch,Values=${branchName}' \
-			'Name=name,Values=server-load-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \
-			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-		)
+		platinumAmiId: awsEc2.getAmiId("", "bfd-amzn2-jdk17-platinum-??????????????"),
+		bfdPipelineAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-etl-??????????????"),
+		bfdServerAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-fhir-??????????????"),
+		bfdMigratorAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-db-migrator-??????????????"),
+		bfdServerLoadAmiId:awsEc2.getAmiId(branchName, "server-load-??????????????"),
+		bfdDockerHostAmiId: awsEc2.getAmiId(branchName, "docker-host-??????????????")
 	)
 }
 
@@ -107,6 +78,7 @@ def findAmis(String branchName = 'master') {
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
 def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
+	amiIdsWrapper = new AmiIds();
 
 	amis = [
 		'data_server_launcher': "${workspace}/${appBuildResults.dataServerLauncher}",
@@ -118,32 +90,61 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 	dir('ops/ansible/playbooks-ccs'){
 
 		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
+			packerBuildAmis(amiIds.platinumAmiId, gitBranchName, gitCommitId,
+					"../../packer/build_bfd-all.json")
 
-		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-			withEnv(["platinumAmiId=${amiIds.platinumAmiId}", "gitBranchName=${gitBranchName}",
-					 "gitCommitId=${gitCommitId}"]) {
-					// build AMIs in parallel
-				sh '''
+			amiIdsWrapper.platinumAmiId = amiIds.platinumAmiId
+			amiIdsWrapper.bfdPipelineAmiId = extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json"))
+			amiIdsWrapper.bfdServerAmiId = extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json"))
+			amiIdsWrapper.bfdMigratorAmiId = extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json"))
+			amiIdsWrapper.bfdServerLoadAmiId = extractAmiIdFromPackerManifest(readFile(
+						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json"))
+	}
+
+	return amiIdsWrapper
+}
+
+/**
+ * Builds the Docker Host AMI.
+ *
+ * @param gitBranchName the name of the Git branch this build is for
+ * @param gitCommitId the hash/ID of the Git commit that this build is for
+ * @param the ID of the base "platinum" AMI to use for new instances/AMIs
+ * @return the AMI id of the Docker Host AMI
+ * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
+ */
+def buildDockerHostAmi(String gitBranchName, String gitCommitId, String platinumAmiId) {
+	dir('ops/packer'){
+		packerBuildAmis(platinumAmiId, gitBranchName, gitCommitId, "./build_bfd-docker-host.json")
+		return extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/packer/manifest_docker-host.json"))
+	}
+}
+
+/**
+ * Uses Packer to build the specified AMI from the given templateFile. Also creates a JSON manifest per AMI.
+ *
+ * @param platinumAmiId the ID of the base "platinum" AMI to use for new instances/AMIs
+ * @param gitBranchName the name of the Git branch this build is for
+ * @param gitCommitId the hash/ID of the Git commit that this build is for
+ * @param templateFile the relative path to the packer template file
+ */
+def packerBuildAmis(String platinumAmiId, String gitBranchName, String gitCommitId, String templateFile) {
+	withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
+		withEnv(["platinumAmiId=${platinumAmiId}", "gitBranchName=${gitBranchName}",
+				 "gitCommitId=${gitCommitId}", "templateFile=${templateFile}"]) {
+			// build AMIs in parallel
+			sh '''
 packer build -color=false \
 -var vault_password_file="$vaultPasswordFile" \
 -var source_ami="$platinumAmiId" \
 -var subnet_id=subnet-092c2a68bd18b34d1 \
 -var git_branch="$gitBranchName" \
 -var git_commit="$gitCommitId" \
-../../packer/build_bfd-all.json
+"$templateFile"
 '''
-			}
-			return new AmiIds(
-					platinumAmiId: amiIds.platinumAmiId,
-					bfdPipelineAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
-					bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
-					bfdMigratorAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json")),
-					bfdServerLoadAmiId: extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json")),
-			)
 		}
 	}
 }
@@ -183,12 +184,16 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 	}
 }
 
+/**
+ * Extracts and returns the AMI id from the contents of a Packer manifest
+ *
+ * @param manifest the text content contained in the Packer manifest file
+ * @return the AMI id from the given manifest content
+ */
 def extractAmiIdFromPackerManifest(String manifest) {
-	dir('ops/ansible/playbooks-ccs'){
-		def manifestJson = new JsonSlurper().parseText(manifest)
-		// artifactId will be of the form $region:$amiId
-		return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
-	}
+	def manifestJson = new JsonSlurper().parseText(manifest)
+	// artifactId will be of the form $region:$amiId
+	return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
 }
 
 return this

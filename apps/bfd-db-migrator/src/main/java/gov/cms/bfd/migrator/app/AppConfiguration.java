@@ -4,29 +4,16 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import java.net.URI;
-import java.util.Map;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import lombok.Getter;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 /** Models the configuration options for the application. */
 public class AppConfiguration extends BaseAppConfiguration {
   /** Name of setting containing name of SQS queue to which progress messages can be sent. */
   public static final String ENV_VAR_KEY_SQS_QUEUE_NAME = "DB_MIGRATOR_SQS_QUEUE";
-  /** Name of setting containing alternative endpoint URL for SQS service. */
-  public static final String ENV_VAR_KEY_SQS_ENDPOINT = "DB_MIGRATOR_SQS_ENDPOINT";
-  /** Name of setting containing region name for SQS service queue. */
-  public static final String ENV_VAR_KEY_SQS_REGION = "DB_MIGRATOR_SQS_REGION";
-  /** Name of setting containing access key for SQS service. */
-  public static final String ENV_VAR_KEY_SQS_ACCESS_KEY = "DB_MIGRATOR_SQS_ACCESS_KEY";
-  /** Name of setting containing secret key for SQS service. */
-  public static final String ENV_VAR_KEY_SQS_SECRET_KEY = "DB_MIGRATOR_SQS_SECRET_KEY";
 
   /**
    * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway
@@ -53,6 +40,7 @@ public class AppConfiguration extends BaseAppConfiguration {
    *
    * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
+   * @param awsClientConfig used to configure AWS services
    * @param flywayScriptLocationOverride if non-empty, will override the default location that
    *     flyway looks for migration scripts
    * @param sqsClient null or a valid {@link SqsClient}
@@ -61,10 +49,11 @@ public class AppConfiguration extends BaseAppConfiguration {
   private AppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
+      AwsClientConfig awsClientConfig,
       String flywayScriptLocationOverride,
       @Nullable SqsClient sqsClient,
       String sqsQueueName) {
-    super(metricOptions, databaseOptions);
+    super(metricOptions, databaseOptions, awsClientConfig);
     this.flywayScriptLocationOverride = flywayScriptLocationOverride;
     this.sqsClient = sqsClient;
     this.sqsQueueName = sqsQueueName;
@@ -86,54 +75,40 @@ public class AppConfiguration extends BaseAppConfiguration {
    * Read configuration variables from a layered {@link ConfigLoader} and build an {@link
    * AppConfiguration} instance from them.
    *
-   * @param getenv function used to access environment variables (provided explicitly for testing)
-   * @return instance representing the configuration provided to this application via the
-   *     environment variables
+   * @param configLoader used to access settings (provided explicitly for testing)
+   * @return instance representing the configuration provided to this application via the {@link
+   *     ConfigLoader}
    * @throws ConfigException if the configuration passed to the application is invalid
    */
-  public static AppConfiguration loadConfig(Function<String, String> getenv) {
-    final var configLoader = LayeredConfiguration.createConfigLoader(Map.of(), getenv);
-
+  public static AppConfiguration loadConfig(ConfigLoader configLoader) {
     MetricOptions metricOptions = loadMetricOptions(configLoader);
     DatabaseOptions databaseOptions = loadDatabaseOptions(configLoader);
 
     String flywayScriptLocation =
         configLoader.stringOptionEmptyOK(ENV_VAR_FLYWAY_SCRIPT_LOCATION).orElse("");
 
+    final AwsClientConfig awsClientConfig = loadAwsClientConfig(configLoader);
     final String sqsQueueName = configLoader.stringValue(ENV_VAR_KEY_SQS_QUEUE_NAME, "");
-    final SqsClient sqsClient = sqsQueueName.isEmpty() ? null : createSqsClient(configLoader);
+    final SqsClient sqsClient = sqsQueueName.isEmpty() ? null : createSqsClient(awsClientConfig);
 
     return new AppConfiguration(
-        metricOptions, databaseOptions, flywayScriptLocation, sqsClient, sqsQueueName);
+        metricOptions,
+        databaseOptions,
+        awsClientConfig,
+        flywayScriptLocation,
+        sqsClient,
+        sqsQueueName);
   }
 
   /**
-   * Creates a {@link SqsClient} instance using settings from the provided {@link ConfigLoader}.
+   * Creates a {@link SqsClient} instance using settings from the provided {@link AwsClientConfig}.
    *
-   * @param configLoader used to load configuration values
+   * @param awsClientConfig used to configure AWS services
    * @return the {@link SqsClient}
    */
-  static SqsClient createSqsClient(ConfigLoader configLoader) {
-    final var sqsClientConfig = loadSqsConfig(configLoader);
+  static SqsClient createSqsClient(AwsClientConfig awsClientConfig) {
     final var clientBuilder = SqsClient.builder();
-    sqsClientConfig.configureAwsService(clientBuilder);
+    awsClientConfig.configureAwsService(clientBuilder);
     return clientBuilder.build();
-  }
-
-  /**
-   * Loads {@link AwsClientConfig} for use in configuring SQS clients. These settings are generally
-   * only changed from defaults during localstack based tests.
-   *
-   * @param config used to load configuration values
-   * @return the aws client settings
-   */
-  private static AwsClientConfig loadSqsConfig(ConfigLoader config) {
-    return AwsClientConfig.awsBuilder()
-        .region(config.parsedOption(ENV_VAR_KEY_SQS_REGION, Region.class, Region::of).orElse(null))
-        .endpointOverride(
-            config.parsedOption(ENV_VAR_KEY_SQS_ENDPOINT, URI.class, URI::create).orElse(null))
-        .accessKey(config.stringValue(ENV_VAR_KEY_SQS_ACCESS_KEY, null))
-        .secretKey(config.stringValue(ENV_VAR_KEY_SQS_SECRET_KEY, null))
-        .build();
   }
 }

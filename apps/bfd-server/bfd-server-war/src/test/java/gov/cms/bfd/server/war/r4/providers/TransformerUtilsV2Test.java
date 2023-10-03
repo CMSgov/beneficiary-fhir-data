@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
@@ -25,6 +26,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -756,6 +758,105 @@ public class TransformerUtilsV2Test {
         careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getDisplay());
   }
 
+  /**
+   * Tests that addCareTeamQualification adds a qualification if the input Optional is not empty.
+   */
+  @Test
+  public void addCareTeamQualificationWhenNotEmptyCodeExpectQualificationAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    String expectedValue = "ABC-TESTID";
+    Optional<String> value = Optional.of(expectedValue);
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtilsV2.addCareTeamQualification(careTeam, eob, codebookVariable, value);
+
+    // careTeam object should have the qualification added with expected values
+    assertTrue(careTeam.hasQualification());
+    assertTrue(careTeam.getQualification().hasCoding());
+    assertEquals(expectedUrl, careTeam.getQualification().getCoding().get(0).getSystem());
+    assertEquals(expectedValue, careTeam.getQualification().getCoding().get(0).getCode());
+  }
+
+  /**
+   * Tests that addCareTeamExtension correctly adds an extension when the value Optional and its
+   * string value is not empty.
+   */
+  @Test
+  public void addCareTeamExtensionWhenNotEmptyOptionalExpectExtensionAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    String expectedValue = "DDD-TESTID";
+    Optional<String> value = Optional.of(expectedValue);
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtilsV2.addCareTeamExtension(codebookVariable, value, careTeam, eob);
+
+    assertTrue(careTeam.hasExtension(expectedUrl));
+    Extension extension = careTeam.getExtensionByUrl(expectedUrl);
+    String extensionValue = ((Coding) extension.getValue()).getCode();
+    assertEquals(expectedValue, extensionValue);
+  }
+
+  /**
+   * Tests that addCareTeamExtension correctly adds an extension when the value is required and a
+   * char.
+   */
+  @Test
+  public void addCareTeamExtensionWhenRequiredCharExpectExtensionAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    char expectedValue = 'V';
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtilsV2.addCareTeamExtension(codebookVariable, expectedValue, careTeam, eob);
+
+    assertTrue(careTeam.hasExtension(expectedUrl));
+    Extension extension = careTeam.getExtensionByUrl(expectedUrl);
+    String extensionValue = ((Coding) extension.getValue()).getCode();
+    assertEquals(String.valueOf(expectedValue), extensionValue);
+  }
+
+  /**
+   * Tests that addCareTeamExtension does not add an extension when the value Optional string value
+   * is empty.
+   */
+  @Test
+  public void addCareTeamExtensionWhenOptionalEmptyStringExpectNoExtensionAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    String expectedValue = "";
+    Optional<String> value = Optional.of(expectedValue);
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtilsV2.addCareTeamExtension(codebookVariable, value, careTeam, eob);
+
+    assertFalse(careTeam.hasExtension(expectedUrl));
+  }
+
+  /** Tests that addCareTeamExtension does not add an extension when the value Optional is empty. */
+  @Test
+  public void addCareTeamExtensionWhenEmptyOptionalExpectNoExtensionAdded() {
+
+    CareTeamComponent careTeam = new CareTeamComponent();
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    CcwCodebookVariable codebookVariable = CcwCodebookVariable.CCW_PRSCRBR_ID;
+    Optional<String> value = Optional.empty();
+    String expectedUrl = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CCW_PRSCRBR_ID);
+
+    TransformerUtilsV2.addCareTeamExtension(codebookVariable, value, careTeam, eob);
+
+    assertFalse(careTeam.hasExtension(expectedUrl));
+  }
+
   /** Verifies that {@link TransformerUtilsV2#createBundle} sets bundle size of 2 correctly. */
   @Test
   public void createBundleWithoutPagingWithASizeOf2() throws IOException {
@@ -838,6 +939,86 @@ public class TransformerUtilsV2Test {
     Bundle bundle = TransformerUtilsV2.createBundle(paging, eobs, Instant.now());
     assertEquals(4, bundle.getTotal());
     assertEquals(2, Integer.parseInt(BfdMDC.get("resources_returned_count")));
+  }
+
+  /**
+   * Verifies that {@link TransformerUtilsV2#createBundle} returns an empty bundle when no eob items
+   * are present and pagination is requested.
+   */
+  @Test
+  public void createBundleWithNoResultsAndPagingExpectEmptyBundle() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
+    pagingParams.put("startIndex", new String[] {"1"});
+
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
+
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<IBaseResource> eobs = new ArrayList<>();
+
+    Bundle bundle = TransformerUtilsV2.createBundle(paging, eobs, Instant.now());
+    assertEquals(0, bundle.getTotal());
+  }
+
+  /**
+   * Verifies that creating a bundle with a start index greater than the resource count throws a
+   * {@link InvalidRequestException}.
+   */
+  @Test
+  public void createBundleWithStartIndexGreaterThanResourceCountExpectException() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
+    pagingParams.put("startIndex", new String[] {"12"});
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<IBaseResource> eobs = new ArrayList<>();
+    // Add three resources
+    eobs.add(new ExplanationOfBenefit());
+    eobs.add(new ExplanationOfBenefit());
+    eobs.add(new ExplanationOfBenefit());
+
+    InvalidRequestException expectedException =
+        assertThrows(
+            InvalidRequestException.class,
+            () -> TransformerUtilsV2.createBundle(paging, eobs, Instant.now()));
+    assertEquals(
+        "Value for startIndex (12) must be less than than result size (3)",
+        expectedException.getMessage());
+  }
+
+  /**
+   * Verifies that creating a bundle with a start index equal to the resource count throws a {@link
+   * InvalidRequestException} (its 0-indexed).
+   */
+  @Test
+  public void createBundleWithStartIndexEqualsResourceCountExpectException() {
+
+    RequestDetails requestDetails = mock(RequestDetails.class);
+    Map<String, String[]> pagingParams = new HashMap<>();
+    pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
+    pagingParams.put("startIndex", new String[] {"3"});
+    when(requestDetails.getParameters()).thenReturn(pagingParams);
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    List<IBaseResource> eobs = new ArrayList<>();
+    // Add three resources
+    eobs.add(new ExplanationOfBenefit());
+    eobs.add(new ExplanationOfBenefit());
+    eobs.add(new ExplanationOfBenefit());
+
+    InvalidRequestException expectedException =
+        assertThrows(
+            InvalidRequestException.class,
+            () -> TransformerUtilsV2.createBundle(paging, eobs, Instant.now()));
+    assertEquals(
+        "Value for startIndex (3) must be less than than result size (3)",
+        expectedException.getMessage());
   }
 
   /** Verifies that {@link TransformerUtilsV2#createBundle} sets bundle size correctly. */

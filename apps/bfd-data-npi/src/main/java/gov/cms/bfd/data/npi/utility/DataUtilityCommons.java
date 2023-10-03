@@ -199,7 +199,7 @@ public class DataUtilityCommons {
       Files.walk(tempDir)
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
-          .peek(System.out::println)
+          .peek(f -> LOGGER.info("deleting {}", f))
           .forEach(File::delete);
     } catch (IOException e) {
       LOGGER.warn("Failed to cleanup the temporary folder", e);
@@ -219,6 +219,14 @@ public class DataUtilityCommons {
     Path originalNpiDataFile;
     String fileUrl;
 
+    // don't recreate the file if it already exists
+    if (Files.isRegularFile(convertedNpiDataFile)) {
+      LOGGER.info(
+          "using existing data file {}, delete file if it is broken and re-run",
+          convertedNpiDataFile);
+      return;
+    }
+
     if (downloadUrl.isPresent()) {
       try {
         originalNpiDataFile = getOriginalNpiDataFile(workingDir, downloadUrl.get());
@@ -228,7 +236,7 @@ public class DataUtilityCommons {
         int day = cal.get(Calendar.DAY_OF_MONTH);
         if (day >= DAYS_IN_EXPIRATION) {
           throw new IOException(
-              "NPI file is not available for the month and should of been made available by the NPI Files team.");
+              "NPI file is not available for the month and should have been made available by the NPI Files team.");
         } else {
           throw new IOException("NPI file is not for the month.");
         }
