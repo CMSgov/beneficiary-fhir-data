@@ -22,32 +22,22 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > server_vars.json
 
-# the previous ssm get-paramter will also pick the certs up due to the 'recursive' arg;.
-# we'll process the ".../client_certs/" path separately
-temp_dir=$(mktemp -d)
-temp_fn="${temp_dir}/client_certs.json"
-aws ssm get-parameters-by-path \
-    --path "/bfd/${env}/server/client_certs" \
-    --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > "$temp_fn"
-
-# convert flattened JSON into an array of certs
+# the previous ssm get-parameter will also pick the certs up due to the 'recursive' arg;.
+# we'll process the ".../client_certs/" path separately.
 json_array=()
-# Read the file line by line
-while IFS= read -r line; do
-    # Split the line into tag and value using a delimiter (e.g., ':')
-    IFS=":" read -r tag value <<< "$line";
-    value="${value%,}";
-
-    # Create a JSON object and add it to the array
-    if [ ! -z "$value" ]; then
-		json_object="{\"alias\": $tag, \"certificate\": $value}";
-		json_object="${json_object%,}";
-		json_array+=("$json_object");
-	fi
-done < "$temp_fn"
-
-# Convert the array to a JSON array
+for key in \
+$(aws ssm get-parameters-by-path \
+--path "/bfd/${env}/server/nonsensitive/client_certificates" \
+--region=us-east-1 --query 'Parameters[].Name' --output text)
+do \
+cn_val="$(echo "$key" |sed 's/.*\///')":
+val=$(aws ssm get-parameter \
+--name "$key" \
+--region=us-east-1 --query 'Parameter.Value' --output text)
+json_object="{\"alias\": \"$cn_val\", \"certificate\": \"$val\"}";
+json_object="${json_object%,}";
+json_array+=("$json_object");
+done
 json_output="["
 for json_object in "${json_array[@]}"; do
     json_output+="$json_object,"
@@ -55,7 +45,6 @@ done
 json_output="${json_output%,}"  # Remove the trailing comma
 json_output+="]"
 echo "$json_output" |jq . > client_certificates.json
-rm -fR "$temp_dir"
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
