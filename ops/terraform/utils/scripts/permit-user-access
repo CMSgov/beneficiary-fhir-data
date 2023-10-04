@@ -2,20 +2,32 @@
 
 set -e
 
+###########################################################
+# This script serves to grant SSH and sudo access to users
+# whose properties and permissions are stored in SSM.
+###########################################################
+
 ENV=$1
 
+# Return users from SSM, filtering results to include only the relevant user data
+# based on their respective EUA codes. AWS Cli doesn't support this type of filtering
+# natively, so we do so via jq.
 get_ssm_users () {
   user_ssm="/bfd/mgmt/common/sensitive/user/"
+  # SSM path ends with a valid, alphanumeric EUA code
+  eua_identifier_pattern="[A-Z0-9]{4}$"
   users=$(aws ssm get-parameters-by-path \
     --with-decryption \
     --path $user_ssm \
     --recursive \
     --region us-east-1 \
     --query 'Parameters' \
-    | jq -r "map(select(.Name | test(\"^${user_ssm}[A-Z0-9]{4}$\")))")
+    | jq -r "map(select(.Name | test(\"^${user_ssm}${eua_identifier_pattern}\")))")
   echo $users
 }
 
+# Grants SSH access to the specified user, if applicable, based
+# on their environment permissions stored in SSM.
 permit_user_ssh () {
   user=$1
 
@@ -38,6 +50,8 @@ permit_user_ssh () {
   chmod 600 $user_ssh_dir/authorized_keys
 }
 
+# Grants sudo access to the specified user, if applicable, based
+# on their environment permissions stored in SSM.
 permit_user_sudo () {
   user=$1
   user_name=$(echo "$user" | jq -r '.user_name')
@@ -53,6 +67,8 @@ ${user_name} ALL=(ALL) NOPASSWD: ALL
 EOF
 }
 
+# Fetch the privileged users from SSM and grant them SSH or sudo access, if
+# applicable for the current environment.
 add_ssh_users_and_sudoers() {
   users=$(get_ssm_users)
   for encoded_user in $(echo "$users" | jq -r '.[].Value | @base64'); do
