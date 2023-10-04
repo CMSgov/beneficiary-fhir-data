@@ -48,7 +48,9 @@ permit_user_sudo () {
     return
   fi
 
-  usermod -aG sudo $user_name
+  cat <<EOF >> /etc/sudoers
+${user_name} ALL=(ALL) NOPASSWD: ALL
+EOF
 }
 
 add_ssh_users_and_sudoers() {
