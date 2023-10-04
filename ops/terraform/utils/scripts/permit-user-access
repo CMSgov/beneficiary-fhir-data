@@ -5,7 +5,7 @@ set -e
 ENV=$1
 
 get_ssm_users () {
-  user_ssm="/bfd/mgmt/common/sensitive/user"
+  user_ssm="/bfd/mgmt/common/sensitive/user/"
   users=$(aws ssm get-parameters-by-path \
     --with-decryption \
     --path $user_ssm \
