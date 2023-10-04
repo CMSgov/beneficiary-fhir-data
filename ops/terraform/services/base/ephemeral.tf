@@ -28,25 +28,42 @@ locals {
     "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"
   } : {}
 
+  # FUTURE: Fix this when hierarchies are supported with Terraform module
+  seed_env_certs = {
+    prod = {
+      # TODO: Add prod certs
+    }
+    prod-sbx = {
+      # TODO: Add prod-sbx certs
+    }
+    test = {
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov"                          = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
+    }
+  }
+
   # Targeted SERVER hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
-  server_seed_paths = local.is_ephemeral_env ? {
-    "/bfd/${local.env}/server/nonsensitive/asg_desired_instance_count"               = "/bfd/${local.seed_env}/server/nonsensitive/asg_desired_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/asg_instance_warmup_time"                 = "/bfd/${local.seed_env}/server/nonsensitive/asg_instance_warmup_time"
-    "/bfd/${local.env}/server/nonsensitive/asg_max_instance_count"                   = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/asg_max_warm_instance_count"              = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_warm_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/asg_min_instance_count"                   = "/bfd/${local.seed_env}/server/nonsensitive/asg_min_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/data_server_ssl_client_certificates_json" = "/bfd/${local.seed_env}/server/nonsensitive/data_server_ssl_client_certificates_json"
-    "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"            = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
-    "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb"           = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
-    "/bfd/${local.env}/server/sensitive/server_keystore_base64"                      = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
-    "/bfd/${local.env}/server/sensitive/data_server_appserver_https_port"            = "/bfd/${local.seed_env}/server/sensitive/data_server_appserver_https_port"
-    "/bfd/${local.env}/server/sensitive/data_server_db_password"                     = "/bfd/${local.seed_env}/server/sensitive/data_server_db_password"
-    "/bfd/${local.env}/server/sensitive/data_server_db_username"                     = "/bfd/${local.seed_env}/server/sensitive/data_server_db_username"
-    "/bfd/${local.env}/server/sensitive/data_server_new_relic_license_key"           = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_license_key"
-    "/bfd/${local.env}/server/sensitive/data_server_new_relic_metric_key"            = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_metric_key"
-    "/bfd/${local.env}/server/sensitive/test_client_cert"                            = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
-    "/bfd/${local.env}/server/sensitive/test_client_key"                             = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
-  } : {}
+  server_seed_paths = local.is_ephemeral_env ? merge({
+    "/bfd/${local.env}/server/nonsensitive/asg_desired_instance_count"     = "/bfd/${local.seed_env}/server/nonsensitive/asg_desired_instance_count"
+    "/bfd/${local.env}/server/nonsensitive/asg_instance_warmup_time"       = "/bfd/${local.seed_env}/server/nonsensitive/asg_instance_warmup_time"
+    "/bfd/${local.env}/server/nonsensitive/asg_max_instance_count"         = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_instance_count"
+    "/bfd/${local.env}/server/nonsensitive/asg_max_warm_instance_count"    = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_warm_instance_count"
+    "/bfd/${local.env}/server/nonsensitive/asg_min_instance_count"         = "/bfd/${local.seed_env}/server/nonsensitive/asg_min_instance_count"
+    "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"  = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
+    "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb" = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
+    "/bfd/${local.env}/server/sensitive/server_keystore_base64"            = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
+    "/bfd/${local.env}/server/sensitive/data_server_appserver_https_port"  = "/bfd/${local.seed_env}/server/sensitive/data_server_appserver_https_port"
+    "/bfd/${local.env}/server/sensitive/data_server_db_password"           = "/bfd/${local.seed_env}/server/sensitive/data_server_db_password"
+    "/bfd/${local.env}/server/sensitive/data_server_db_username"           = "/bfd/${local.seed_env}/server/sensitive/data_server_db_username"
+    "/bfd/${local.env}/server/sensitive/data_server_new_relic_license_key" = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_license_key"
+    "/bfd/${local.env}/server/sensitive/data_server_new_relic_metric_key"  = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_metric_key"
+    "/bfd/${local.env}/server/sensitive/test_client_cert"                  = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
+    "/bfd/${local.env}/server/sensitive/test_client_key"                   = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
+  }, local.seed_env_certs[local.seed_env]) : {}
+
+
 }
 
 data "aws_db_cluster_snapshot" "seed" {
