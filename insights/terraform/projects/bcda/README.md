@@ -24,12 +24,12 @@ following the instructions [here](https://github.com/terraform-docs/terraform-do
 
 Optional, but recommended to make installing the correct version of terraform easier:
 
-* [tfswitch](https://tfswitch.warrensbox.com/Installation) or [tfenv](https://github.com/tfutils/tfenv)
+* [tfswitch](https://tfswitch.warrensbox.com/Install/) or [tfenv](https://github.com/tfutils/tfenv)
 
 Example on macOS using [Homebrew](https://brew.sh/):
 
 ```bash
-brew install terraform awscli aws-vault tfswitch
+brew install terraform awscli aws-vault warrensbox/tap/tfswitch
 mkdir -p ~/.aws
 touch ~/.aws/config
 aws-vault add bfd # add your BFD access credentials to your systems keychain
@@ -109,8 +109,6 @@ Manually updating the README.md will be overwritten.
 For more details, see the file '.terraform-docs.yml' or
 https://terraform-docs.io/user-guide/configuration/
 -->
-
-
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.
