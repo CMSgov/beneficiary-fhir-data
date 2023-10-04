@@ -16,9 +16,13 @@ locals {
   # alarm.
   topic_names_by_env = {
     prod = {
-      alert      = local.victor_ops_sns
-      warning    = local.bfd_warnings_slack_sns
-      alert_ok   = local.default_alert_ok_sns
+      # FUTURE: When SLO Alarms are known to correctly alarm, reevaluate alarm destinations
+      # alert      = local.victor_ops_sns
+      # warning    = local.bfd_warnings_slack_sns
+      # alert_ok   = local.default_alert_ok_sns
+      alert      = local.bfd_test_slack_sns
+      warning    = local.bfd_test_slack_sns
+      alert_ok   = null
       warning_ok = null
     }
     prod-sbx = {
@@ -94,7 +98,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
   evaluation_periods  = 1
   datapoints_to_alarm = 1
   threshold           = 1
-  treat_missing_data  = "notBreaching"
+  treat_missing_data  = "ignore"
 
   alarm_actions = local.alert_arn
   ok_actions    = local.alert_ok_arn
@@ -132,33 +136,40 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
   metric_query {
     expression  = "(e1 - (DAY(e1) + 5) * 86400 - (HOUR(e1) + 7) * 3600 - (${local.eastern_seconds_utc_offset} + (MINUTE(e1) * 60)) + 604800)"
     id          = "e4"
-    label       = "currentMonday9AMEastern"
+    label       = "Unix Timestamp of Week's Current Monday 9 AM ET"
     return_data = false
   }
 
   metric_query {
     expression  = "EPOCH(m1)"
     id          = "e1"
-    label       = "Expression1"
+    label       = "Unix Time"
     return_data = false
   }
 
   metric_query {
     expression  = "FILL(m1, REPEAT)"
     id          = "e7"
-    label       = "Expression7"
+    label       = "Filled Fully Loaded"
     return_data = false
   }
 
   metric_query {
     expression  = "FILL(m2, REPEAT)"
     id          = "e9"
-    label       = "Expression9"
+    label       = "Filled Time Available"
     return_data = false
   }
 
   metric_query {
-    expression  = "IF(e9 > e7 && e4 > e9, 1, 0)"
+    # Breaking this down:
+    # 1. e9 > e7 - If the Pipeline is currently loading something
+    # 2. e4 > e9 - If the Pipeline was started prior to the upcoming Monday
+    # 3. e1 > e4 - If the current time (when the Alarm evaluates) exceeds Monday at 9 AM; basically,
+    #    is current time after current Monday 9 AM ET?
+    # If all are true, this means that an ongoing load did not finish prior to the current Monday at
+    # 9 AM ET, and so the SLO has been broken 
+    expression  = "IF(e9 > e7 && e4 > e9 && e1 > e4, 1, 0)"
     id          = "e3"
     label       = "Has ongoing load exceeded Monday 9 AM EST/EDT?"
     return_data = true
@@ -173,10 +184,10 @@ resource "aws_cloudwatch_metric_alarm" "slo_data_load_ingestion_time" {
   datapoints_to_alarm = 1
   evaluation_periods  = 1
   threshold           = each.value.threshold
-  treat_missing_data  = "notBreaching"
+  treat_missing_data  = "ignore"
 
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
+  alarm_actions = each.value.type == "warning" ? local.warning_arn : local.alert_arn
+  ok_actions    = each.value.type == "warning" ? local.warning_ok_arn : local.alert_ok_arn
 
   alarm_description = join("", [
     "BFD Pipeline in ${local.env} environment failed to load data within a ",
