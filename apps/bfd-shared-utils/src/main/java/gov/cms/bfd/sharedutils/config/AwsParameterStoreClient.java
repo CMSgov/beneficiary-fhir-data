@@ -28,14 +28,15 @@ public class AwsParameterStoreClient {
    * @return {@link Map} of values
    * @throws ConfigException if AWS call fails
    */
-  public Map<String, String> loadParametersAtPath(String path) {
+  public Map<String, String> loadParametersAtPath(String path,
+                                                  boolean recursive) {
     try {
       final var mapBuilder = ImmutableMap.<String, String>builder();
       var request =
           GetParametersByPathRequest.builder()
               .path(path)
               .withDecryption(true)
-              .recursive(false)
+              .recursive(recursive)
               .maxResults(batchSize)
               .build();
       do {
@@ -43,7 +44,7 @@ public class AwsParameterStoreClient {
         final var response = ssmClient.getParametersByPath(request);
         for (Parameter parameter : response.parameters()) {
           final var paramPath = parameter.name();
-          final var paramName = paramPath.substring(prefix.length());
+          final var paramName = paramPath.substring(prefix.length()).replace('/', '.');
           mapBuilder.put(paramName, parameter.value());
         }
         request = request.toBuilder().nextToken(response.nextToken()).build();

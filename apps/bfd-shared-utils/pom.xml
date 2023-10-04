@@ -71,6 +71,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
+        <!-- Required for JSON encoded settings in LayeredConfiguration. -->
+        <dependency>
+            <!-- Used to deserialize JSON into objects. -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
         <!-- Testing -->
         <dependency>

@@ -2,8 +2,10 @@ package gov.cms.bfd.sharedutils.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.AbstractLocalStackTest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -16,7 +18,7 @@ import software.amazon.awssdk.services.ssm.model.PutParameterRequest;
 public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
   /** Upload some variables and verify that we can retrieve them. */
   @Test
-  public void testGetParameters() {
+  public void testGetParametersAtPath() {
     final var ssmClient =
         SsmClient.builder()
             .region(Region.of(localstack.getRegion()))
@@ -28,19 +30,10 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
             .build();
 
     // These are the parameters we hope to retrieve.
-    final String basePath = "/test";
-    ssmClient.putParameter(
-        PutParameterRequest.builder()
-            .name(basePath + "/port")
-            .value("18")
-            .type(ParameterType.STRING)
-            .build());
-    ssmClient.putParameter(
-        PutParameterRequest.builder()
-            .name(basePath + "/mascot")
-            .value("alpaca")
-            .type(ParameterType.STRING)
-            .build());
+    final var expectedParameters = new HashMap<String, String>();
+    final String basePath = "/flat";
+    addValue(ssmClient, expectedParameters, basePath + "/port", "18", "port");
+    addValue(ssmClient, expectedParameters, basePath + "/mascot", "alpaca", "mascot");
 
     // This should be ignored because nested parameters are ignored when retrieving parameters.
     ssmClient.putParameter(
@@ -50,9 +43,7 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
             .type(ParameterType.STRING)
             .build());
 
-    final var expectedParameters =
-        ImmutableMap.<String, String>builder().put("port", "18").put("mascot", "alpaca");
-
+    // We'll verify the default batch size works
     final var batchSize = AwsParameterStoreClient.DEFAULT_BATCH_SIZE;
 
     // Insert extra parameters so that we can test batching .
@@ -60,17 +51,81 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
       String paramName = "extra." + i;
       String paramPath = basePath + "/" + paramName;
       String paramValue = "value-" + i;
-      ssmClient.putParameter(
-          PutParameterRequest.builder()
-              .name(paramPath)
-              .value(paramValue)
-              .type(ParameterType.STRING)
-              .build());
-      expectedParameters.put(paramName, paramValue);
+      addValue(ssmClient, expectedParameters, paramPath, paramValue, paramName);
     }
 
     final var client = new AwsParameterStoreClient(ssmClient, batchSize);
-    var actualParameters = client.loadParametersAtPath(basePath);
-    assertEquals(expectedParameters.build(), actualParameters);
+    var actualParameters = client.loadParametersAtPath(basePath, false);
+    assertEquals(expectedParameters, actualParameters);
+  }
+
+  /** Upload some variables in a hierarchy and verify that we can retrieve them. */
+  @Test
+  public void testGetParametersInHierarchy() {
+    final var ssmClient =
+        SsmClient.builder()
+            .region(Region.of(localstack.getRegion()))
+            .endpointOverride(localstack.getEndpoint())
+            .credentialsProvider(
+                StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(
+                        localstack.getAccessKey(), localstack.getSecretKey())))
+            .build();
+
+    // These are the parameters we hope to retrieve.
+    final var expectedParameters = new HashMap<String, String>();
+    final String basePath = "/tree";
+    addValue(ssmClient, expectedParameters, basePath + "/mascot", "alpaca", "mascot");
+
+    for (var folderName : List.of("alpha", "bravo", "charlie")) {
+      final var folderPath = basePath + "/" + folderName;
+
+      // put a value into the folder
+      addValue(
+          ssmClient, expectedParameters, folderPath + "/port", "443", folderName + "." + "port");
+
+      // put values into sub-folders within the folder
+      for (var subFolderName : List.of("delta", "echo", "foxtrot")) {
+        final var subFolderPath = folderPath + "/" + subFolderName;
+
+        for (int i = 1; i < 5; ++i) {
+          String paramName = "extra_" + i;
+          String paramPath = subFolderPath + "/" + paramName;
+          String paramValue = "value-" + i;
+          String mapKey = folderName + "." + subFolderName + "." + paramName;
+          addValue(ssmClient, expectedParameters, paramPath, paramValue, mapKey);
+        }
+      }
+    }
+
+    // We'll verify the a smaller batch size works
+    final var batchSize = 3;
+    final var client = new AwsParameterStoreClient(ssmClient, batchSize);
+    var actualParameters = client.loadParametersAtPath(basePath, true);
+    assertEquals(expectedParameters, actualParameters);
+  }
+
+  /**
+   * Upload a parameter value and add it to the map of expected values.
+   *
+   * @param ssmClient ssm client
+   * @param expectedParameters map of expected values
+   * @param paramPath ssm path for parameter
+   * @param paramValue parameter value
+   * @param mapKey key to use in map of expected values
+   */
+  private void addValue(
+      SsmClient ssmClient,
+      Map<String, String> expectedParameters,
+      String paramPath,
+      String paramValue,
+      String mapKey) {
+    ssmClient.putParameter(
+        PutParameterRequest.builder()
+            .name(paramPath)
+            .value(paramValue)
+            .type(ParameterType.STRING)
+            .build());
+    expectedParameters.put(mapKey, paramValue);
   }
 }
