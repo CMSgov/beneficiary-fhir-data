@@ -12,7 +12,7 @@ get_ssm_users () {
     --recursive \
     --region us-east-1 \
     --query 'Parameters' \
-    | jq -r "map(select(.Name | test(\"^${user_ssm}/[A-Z0-9]{4}$\")))")
+    | jq -r "map(select(.Name | test(\"^${user_ssm}[A-Z0-9]{4}$\")))")
   echo $users
 }
 
