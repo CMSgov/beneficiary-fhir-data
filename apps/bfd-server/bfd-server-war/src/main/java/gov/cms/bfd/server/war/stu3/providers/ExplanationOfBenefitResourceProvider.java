@@ -375,6 +375,9 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
                 Optional.ofNullable(serviceDate),
                 filterSamhsa,
                 includeTaxNumbers);
+      } catch (InvalidRequestException e) {
+        // If we're throwing a 400, pass it back up
+        throw e;
       } catch (Exception e) {
         LOGGER.error(e.getMessage(), e);
       }

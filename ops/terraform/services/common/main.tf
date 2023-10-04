@@ -1,8 +1,15 @@
+module "terraservice" {
+  source = "../_modules/bfd-terraservice"
+
+  environment_name     = terraform.workspace
+  relative_module_root = "ops/terraform/services/common"
+}
+
 locals {
-  env              = terraform.workspace
-  established_envs = ["test", "prod-sbx", "prod"]
-  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  default_tags     = module.terraservice.default_tags
+  env              = module.terraservice.env
+  is_ephemeral_env = module.terraservice.is_ephemeral_env
+  seed_env         = module.terraservice.seed_env
 
   service        = "common"
   legacy_service = "admin"
@@ -23,15 +30,6 @@ locals {
   # we need to clarify the logging and admin bucket relationships
   admin_bucket   = "bfd-${local.env}-admin-${local.account_id}"
   logging_bucket = "bfd-${local.env}-logs-${local.account_id}"
-
-  default_tags = {
-    Environment    = local.seed_env
-    application    = "bfd"
-    business       = "oeda"
-    stack          = local.env
-    Terraform      = true
-    tf_module_root = "ops/terraform/services/common"
-  }
 
   # Two-step map creation and redefinition creates `config` and `secret` maps of simplified parameter names to values
   nonsensitive_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive.values))

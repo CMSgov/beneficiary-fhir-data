@@ -7,18 +7,18 @@ locals {
   }
   namespace = "bfd-${local.env}/bfd-server"
   endpoints = {
-    all                = "*/fhir/*"
-    metadata           = "*/fhir/metadata*"
-    coverage_all       = "*/fhir/Coverage*"
-    patient_all        = "*/fhir/Patient*"
-    eob_all            = "*/fhir/ExplanationOfBenefit*"
-    claim_all          = "*/fhir/Claim"
-    claim_response_all = "*/fhir/ClaimResponse"
+    all                = ["*/fhir/*"]
+    metadata           = ["*/fhir/metadata*"]
+    coverage_all       = ["*/fhir/Coverage*"]
+    patient_all        = ["*/fhir/Patient*"]
+    eob_all            = ["*/fhir/ExplanationOfBenefit*"]
+    claim_all          = ["*/fhir/Claim", "*/fhir/Claim/"]
+    claim_response_all = ["*/fhir/ClaimResponse", "*/fhir/ClaimResponse/"]
   }
 
   endpoint_patterns = {
-    for name, pattern in local.endpoints :
-    replace(name, "_", "-") => "$.mdc.http_access_request_uri = \"${pattern}\""
+    for name, patterns in local.endpoints :
+    name => "(${join(" || ", [for pattern in patterns : "$.mdc.http_access_request_uri = \"${pattern}\""])})"
   }
 
   client_ssl_pattern = "$.mdc.http_access_request_clientSSL_DN = \"*\""
@@ -39,8 +39,8 @@ locals {
   endpoint_filters_config = merge([
     for endpoint_key, endpoint_pattern in local.endpoint_patterns : {
       for variation, variation_config in local.filter_variations :
-      "${replace(endpoint_key, "-", "_")}_${variation}" => {
-        "resource_name"    = endpoint_key
+      "${endpoint_key}_${variation}" => {
+        "resource_name"    = replace(endpoint_key, "_", "-")
         "endpoint_pattern" = endpoint_pattern
         "name_suffix"      = variation_config.name_suffix
         "dimensions"       = variation_config.dimensions
@@ -143,7 +143,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_not_b
   # Terraform HCL has no support for breaking long strings, so the join() function is used as a
   # poor, but functional, substitute. Otherwise this pattern would be far too long
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.patient_all}\" && ",
+    "{${local.endpoint_patterns.patient_all} && ",
     "$.mdc.http_access_request_operation != \"*by=*contract*\" && ",
     "$.mdc.http_access_request_operation != \"*by=*Contract*\" && ",
     "${local.client_ssl_pattern} && ",
@@ -168,7 +168,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_patient_by_co
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.patient_all}\" && ",
+    "{${local.endpoint_patterns.patient_all} && ",
     "$.mdc.http_access_request_query_string = \"*_count=4000*\" && ",
     "($.mdc.http_access_request_operation = \"*by=*contract*\" || ",
     "$.mdc.http_access_request_operation = \"*by=*Contract*\") && ",
@@ -193,7 +193,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
+    "{${local.endpoint_patterns.eob_all} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.http_access_response_duration_per_kb = *}"
   ])
@@ -215,7 +215,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_with_
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
+    "{${local.endpoint_patterns.eob_all} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
@@ -238,7 +238,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_eob_all
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
+    "{${local.endpoint_patterns.eob_all} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_per_kb = *}"
@@ -262,7 +262,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_eob_all_no_re
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.eob_all}\" && ",
+    "{${local.endpoint_patterns.eob_all} && ",
     "$.mdc.resources_returned_count = 0 && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
@@ -285,7 +285,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_claim_a
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_all}\" && ",
+    "{${local.endpoint_patterns.claim_all} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_per_kb = *}"
@@ -309,7 +309,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claim_all_no_
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_all}\" && ",
+    "{${local.endpoint_patterns.claim_all} && ",
     "$.mdc.resources_returned_count = 0 && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
@@ -332,7 +332,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claim_all_wit
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_all}\" && ",
+    "{${local.endpoint_patterns.claim_all} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
@@ -355,7 +355,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_by_kb_claimre
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_response_all}\" && ",
+    "{${local.endpoint_patterns.claim_response_all} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_per_kb = *}"
@@ -379,7 +379,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_response_all}\" && ",
+    "{${local.endpoint_patterns.claim_response_all} && ",
     "$.mdc.resources_returned_count = 0 && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"
@@ -402,7 +402,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency_claimresponse
   log_group_name = local.log_groups.access
 
   pattern = join("", [
-    "{$.mdc.http_access_request_uri = \"${local.endpoints.claim_response_all}\" && ",
+    "{${local.endpoint_patterns.claim_response_all} && ",
     "${local.client_ssl_pattern} && ",
     "$.mdc.resources_returned_count != 0 && ",
     "$.mdc.http_access_response_duration_milliseconds = *}"

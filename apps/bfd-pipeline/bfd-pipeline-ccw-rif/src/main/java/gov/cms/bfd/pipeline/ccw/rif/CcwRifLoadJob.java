@@ -155,7 +155,8 @@ public final class CcwRifLoadJob implements PipelineJob {
   private final DataSetQueue dataSetQueue;
 
   /**
-   * Constructs a new {@link CcwRifLoadJob} instance.
+   * Constructs a new {@link CcwRifLoadJob} instance. The {@link S3TaskManager} will be
+   * automatically shut down when this job's {@link #close} method is called.
    *
    * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
@@ -188,7 +189,6 @@ public final class CcwRifLoadJob implements PipelineJob {
         interval -> new PipelineJobSchedule(interval.toMillis(), ChronoUnit.MILLIS));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     /*
@@ -199,7 +199,6 @@ public final class CcwRifLoadJob implements PipelineJob {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
@@ -359,6 +358,17 @@ public final class CcwRifLoadJob implements PipelineJob {
     s3TaskManager.submit(new DataSetMoveTask(s3TaskManager, options, manifestToProcess));
 
     return PipelineJobOutcome.WORK_DONE;
+  }
+
+  /**
+   * Shuts down our {@link S3TaskManager}. If any download or move tasks are still running this
+   * method will wait for them to complete before returning.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public void close() throws Exception {
+    s3TaskManager.shutdownSafely();
   }
 
   /**

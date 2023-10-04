@@ -15,12 +15,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import com.google.common.collect.ImmutableList;
-import gov.cms.bfd.model.rif.entities.Beneficiary;
+import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.HHAClaim;
+import gov.cms.bfd.model.rif.entities.HospiceClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
-import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.PipelineTestUtils;
+import gov.cms.bfd.model.rif.entities.PartDEvent;
+import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -34,70 +37,110 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /** Endpoint end-to-end test for the V2 explanation of benefits endpoint. */
 public class ExplanationOfBenefitE2E extends ServerRequiredTest {
 
   /** The base eob endpoint. */
-  public static String EOB_ENDPOINT;
+  private static String eobEndpoint;
 
   /** Sets up the test resources. */
   @BeforeEach
   public void setupTest() {
     // Set this up once, after the server has run
-    if (EOB_ENDPOINT == null) {
-      EOB_ENDPOINT = baseServerUrl + "/v2/fhir/ExplanationOfBenefit/";
+    if (eobEndpoint == null) {
+      eobEndpoint = baseServerUrl + "/v2/fhir/ExplanationOfBenefit/";
     }
   }
 
   /**
-   * Verifies that an EOB carrier claim can be requested using the read endpoint, successfully
+   * Verifies that an EOB Carrier claim can be requested using the read endpoint, successfully
    * returns a 200 response, and has the claim id and a couple other EOB details present in the
    * body.
    */
   @Test
-  public void testReadEobIdExpectClmIdInResponse() {
+  public void testReadEobCarrierIdExpectClmIdInResponse() {
+    verifySuccessfulResponseAndClaimIdFor(ClaimType.CARRIER);
+  }
 
-    List<Object> loadedRecords = loadData();
-    CarrierClaim claim = getCarrierClaim(loadedRecords);
-    String claimId = String.valueOf(claim.getClaimId());
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.CARRIER, claim.getClaimId());
+  /**
+   * Verifies that an EOB DME claim can be requested using the read endpoint, successfully returns a
+   * 200 response, and has the claim id and a couple other EOB details present in the body.
+   */
+  @Test
+  public void testReadDmeEobIdExpectClmIdInResponse() {
+    verifySuccessfulResponseAndClaimIdFor(ClaimType.DME);
+  }
 
-    given()
-        .spec(requestAuth)
-        .expect()
-        // For non-array items, we can use equalTo (or stringContains for partial matches)
-        .body("resourceType", equalTo("ExplanationOfBenefit"))
-        .body("id", equalTo(eobId))
-        /* RestAssured uses Groovy under the hood, so our search query closures can use Groovy's collection API.
-         * See https://www.baeldung.com/rest-assured-groovy for some examples.
-         */
-        .body(
-            "identifier.find {it.system == 'https://bluebutton.cms.gov/resources/variables/clm_id'}.value",
-            equalTo(claimId))
-        .statusCode(200)
-        .when()
-        .get(EOB_ENDPOINT + eobId);
+  /**
+   * Verifies that an EOB HHA claim can be requested using the read endpoint, successfully returns a
+   * 200 response, and has the claim id and a couple other EOB details present in the body.
+   */
+  @Test
+  public void testReadHhaEobIdExpectClmIdInResponse() {
+    verifySuccessfulResponseAndClaimIdFor(ClaimType.HHA);
+  }
+
+  /**
+   * Verifies that an EOB Hospice claim can be requested using the read endpoint, successfully
+   * returns a 200 response, and has the claim id and a couple other EOB details present in the
+   * body.
+   */
+  @Test
+  public void testReadHospiceEobIdExpectClmIdInResponse() {
+    verifySuccessfulResponseAndClaimIdFor(ClaimType.HOSPICE);
+  }
+
+  /**
+   * Verifies that an EOB Inpatient claim can be requested using the read endpoint, successfully
+   * returns a 200 response, and has the claim id and a couple other EOB details present in the
+   * body.
+   */
+  @Test
+  public void testReadInpatientEobIdExpectClmIdInResponse() {
+    verifySuccessfulResponseAndClaimIdFor(ClaimType.INPATIENT);
+  }
+
+  /**
+   * Verifies that an EOB Outpatient claim can be requested using the read endpoint, successfully
+   * returns a 200 response, and has the claim id and a couple other EOB details present in the
+   * body.
+   */
+  @Test
+  public void testReadOutpatientEobIdExpectClmIdInResponse() {
+    verifySuccessfulResponseAndClaimIdFor(ClaimType.OUTPATIENT);
+  }
+
+  /**
+   * Verifies that an EOB PDE claim can be requested using the read endpoint, successfully returns a
+   * 200 response, and has the claim id and a couple other EOB details present in the body.
+   */
+  @Test
+  public void testReadPdeEobIdExpectClmIdInResponse() {
+    verifySuccessfulResponseAndClaimIdFor(ClaimType.PDE);
+  }
+
+  /**
+   * Verifies that an EOB SNF claim can be requested using the read endpoint, successfully returns a
+   * 200 response, and has the claim id and a couple other EOB details present in the body.
+   */
+  @Test
+  public void testReadSnfEobIdExpectClmIdInResponse() {
+    verifySuccessfulResponseAndClaimIdFor(ClaimType.SNF);
   }
 
   /** Verifies that the EOB returns a 400 when called with a negative count parameter. */
   @Test
   public void testEobByPatientIdWithNegativeCountExpect400() {
 
-    String patientId = getPatientId(loadData());
-    // It's also possible to add these to the call below, but I liked the request string as
-    // one would write it when calling the API
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&_count=-10";
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    // Its possible to add these via the API, but this is easier to liken to actual request strings
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=-10";
 
     given()
         .spec(requestAuth)
@@ -120,10 +163,10 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdWithValidPatientIdExpectValidEob() {
 
-    List<Object> loadedData = loadData();
-    String patientId = getPatientId(loadedData);
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId;
-    OutpatientClaim expectedOutpatientClaim = getOutpatientClaim(loadedData);
+    List<Object> loadedData = testUtils.loadSampleAData();
+    String patientId = testUtils.getPatientId(loadedData);
+    String requestString = eobEndpoint + "?patient=" + patientId;
+    OutpatientClaim expectedOutpatientClaim = getClaim(loadedData, OutpatientClaim.class);
 
     given()
         .spec(requestAuth)
@@ -167,8 +210,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdWithValidNonPagingResponseExpectCanAddPagingToResults() {
 
-    String patientId = getPatientId(loadData());
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId;
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId;
 
     Response response =
         given()
@@ -185,7 +228,7 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
             .get(requestString);
 
     // Get the 'self' link
-    String selfLink = getPaginationLink(response, "self");
+    String selfLink = testUtils.getPaginationLink(response, "self");
 
     // Add a start index to the self link to get a subset of the results
     String indexedSelfLink = selfLink + "&startIndex=4";
@@ -221,8 +264,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdWithPageSizeZeroReturnsNoPaging() {
 
-    String patientId = getPatientId(loadData());
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&_count=0";
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=0";
 
     // This test is interesting. In the E2E, we have a test that checks that count=0 does
     // a specific thing (returns the result as normal with no paging). However, if we run this test,
@@ -269,35 +312,41 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdWithBadRequestParamExpect400() {
 
-    String patientId = getPatientId(loadData());
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&unknownParam=124";
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId + "&unknownParam=124";
 
     given().spec(requestAuth).expect().statusCode(400).when().get(requestString);
   }
 
   /**
    * Tests that when searching for EOB by patient id and a number of pages, we can cycle through all
-   * pages and all expected pages exist.
+   * pages and all expected pages exist. Also makes sure when we have a page count of higher than
+   * the remaining entries at the end, we do not encounter an out-of-bounds exception.
    */
   @Test
   public void testEobByPatientIdWithPagingExpectAllPages() {
 
-    String patientId = getPatientId(loadData());
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     // Make a request with paging by adding startIndex or pageSize (_count in FHIR)
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&_count=2";
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=3";
 
-    // Page 1/4
+    // Page 1/3
 
     Response response =
         given()
             .spec(requestAuth)
             .expect()
+            .log()
+            .ifError()
             .body("resourceType", equalTo("Bundle"))
-            // we should have 2 entries, since we set page size to 2
-            .body("entry.size()", equalTo(2))
-            // Our entries should contain the first two claim types (we return claim types in order)
+            // we should have 3 entries, since we set page size to 3
+            .body("entry.size()", equalTo(3))
+            // Our entries should contain the first three claim types (we return claim types in
+            // order)
             .body(
-                "entry.resource.id", hasItems(containsString("outpatient"), containsString("dme")))
+                "entry.resource.id",
+                hasItems(
+                    containsString("outpatient"), containsString("dme"), containsString("hha")))
             // there should be 4 entries for the paging section; first, next, last, self
             .body("link.size()", equalTo(4))
             .body("link.relation", hasItems("first", "next", "last", "self"))
@@ -310,19 +359,23 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
 
     // The first line gets the array of json objects inside the "link" path, then we find the one
     // that matches 'next' and get its url
-    String nextLink = getPaginationLink(response, "next");
+    String nextLink = testUtils.getPaginationLink(response, "next");
 
-    // Page 2/4
+    // Page 2/3
 
     response =
         given()
             .spec(requestAuth)
             .expect()
+            .log()
+            .ifError()
             .body("resourceType", equalTo("Bundle"))
-            // we should have 2 entries, since we set page size to 2
-            .body("entry.size()", equalTo(2))
+            // we should have 3 entries, since we set page size to 3
+            .body("entry.size()", equalTo(3))
             // Our entries should contain the first two claim types (we return claim types in order)
-            .body("entry.resource.id", hasItems(containsString("hha"), containsString("inpatient")))
+            .body(
+                "entry.resource.id",
+                hasItems(containsString("snf"), containsString("pde"), containsString("inpatient")))
             // there should still be the 4 entries for the paging section; first, next, last, self,
             // plus a new "previous" entry
             .body("link.size()", equalTo(5))
@@ -331,36 +384,17 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
             .when()
             .get(nextLink);
 
-    // page 3/4
+    // page 3/3
 
-    nextLink = getPaginationLink(response, "next");
-
-    response =
-        given()
-            .spec(requestAuth)
-            .expect()
-            .body("resourceType", equalTo("Bundle"))
-            // we should have 2 entries, since we set page size to 2
-            .body("entry.size()", equalTo(2))
-            .body("entry.resource.id", hasItems(containsString("pde"), containsString("snf")))
-            .body("link.size()", equalTo(5))
-            .body("link.relation", hasItems("first", "next", "last", "self", "previous"))
-            .statusCode(200)
-            .when()
-            .get(nextLink);
-
-    // page 4/4
-
-    nextLink = getPaginationLink(response, "next");
+    nextLink = testUtils.getPaginationLink(response, "next");
 
     given()
         .spec(requestAuth)
         .expect()
-        // Can use this to log the response; requires an empty body call after the log
         .log()
-        .body()
+        .ifError()
         .body("resourceType", equalTo("Bundle"))
-        // we should have 2 entries, since we set page size to 2
+        // we should have 2 entries, since we only have 2 elements left in the list
         .body("entry.size()", equalTo(2))
         .body("entry.resource.id", hasItems(containsString("carrier"), containsString("hospice")))
         // expect 4 entries for the paging section; first, last, self, previous; should be no "next"
@@ -372,14 +406,39 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   }
 
   /**
+   * Tests that when searching for EOB by patient id and using startIndex, returns paging results,
+   * as startIndex (alongside _count) is one of the indicators to return paged results.
+   */
+  @Test
+  public void testEobByPatientIdWithOnlyStartIndexExpectingPaging() {
+
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    // Make a request with paging by adding startIndex or pageSize (_count in FHIR)
+    String requestString = eobEndpoint + "?patient=" + patientId + "&startIndex=3";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // we should have 5 entries, since we entered on index 3 with 8 results
+        .body("entry.size()", equalTo(5))
+        // there should be 4 entries for the paging section; first, previous, last, self
+        .body("link.size()", equalTo(4))
+        .body("link.relation", hasItems("first", "previous", "last", "self"))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
    * a {@link Patient} that does exist in the DB, with a page size of 50 with fewer (8) results.
    */
   @Test
   public void searchForEobsWithLargePageSizesOnFewerResults() {
 
-    String patientId = getPatientId(loadData());
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&_count=50";
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=50";
 
     given()
         .spec(requestAuth)
@@ -401,19 +460,70 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
    * higher than the maximum number of results.
    */
   @Test
-  @Disabled("Broken; needs looking into/fixing")
   public void testEobByPatientIdWithPagingStartBeyondMaxExpect400() {
-    String patientId = getPatientId(loadData());
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&_count=2&startIndex=12";
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=2&startIndex=12";
 
     // This request should only have 8 entries, so startIndex=12 is an error scenario
     // Keep in mind startIndex is which _entry_ to start on, not which _page_ of entries
-    // This should be a 400 since its a user input error, however it returns a 500; we can improve
-    // this by adjusting
-    // paths in the code which are user errors to return a 400 (already partly done, but not in this
-    // case).
-    // This type of testing could help us discover and fix issues like this.
-    given().spec(requestAuth).expect().log().body().statusCode(400).when().get(requestString);
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("issue.severity", hasItem("error"))
+        .body(
+            "issue.diagnostics",
+            hasItem("Value for startIndex (12) must be less than than result size (8)"))
+        .statusCode(400)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verify that EOB by patient id throws a 400 error when the paging start (startIndex) is set to
+   * the maximum number of results, since the highest index must be less than the number of results
+   * as a 0-based index.
+   */
+  @Test
+  public void testEobByPatientIdWithPagingStartSetToMaxResultsExpect400() {
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=2&startIndex=8";
+
+    // This request should only have 8 entries, so startIndex=8 is an error scenario
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        .body("issue.severity", hasItem("error"))
+        .body(
+            "issue.diagnostics",
+            hasItem("Value for startIndex (8) must be less than than result size (8)"))
+        .statusCode(400)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verify that EOB by patient id does not error when the paging start (startIndex) is set to be
+   * equal to one less than the maximum number of results.
+   */
+  @Test
+  public void testEobByPatientIdWithPagingStartOneLessThanMaxExpect200() {
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=2&startIndex=7";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        .body("resourceType", equalTo("Bundle"))
+        // we should have 1 claim, since the startIndex was equal to the max number of claims
+        .body("entry.size()", equalTo(1))
+        .statusCode(200)
+        .body("total", equalTo(8))
+        .when()
+        .get(requestString);
   }
 
   /**
@@ -426,18 +536,17 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
     // Adjust the sampleA data that was loaded to include some samhsa data
     // We could also just keep a samhsa set, or have the default set have samhsa
     // so that we don't need a separate set or modification
-    String patientId = getPatientId(loadData(true));
-    String requestString =
-        EOB_ENDPOINT + "?patient=" + patientId + "&type=CARRIER&excludeSAMHSA=true";
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(true));
+    String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
 
     given()
         .spec(requestAuth)
         .expect()
         .body("resourceType", equalTo("Bundle"))
-        // check the samhsa data is not present in the claim (carrier, in this example)
-        .body(
-            "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            not(hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE)))
+        // Make sure we found only the PDE claim that was not modified
+        // (claims with samhsa data are entirely filtered out of the result set)
+        .body("entry.size()", equalTo(1))
+        .body("entry.resource.id", hasItem(containsString("pde")))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -451,18 +560,83 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   public void testEobByPatientIdWithExcludeSamhsaFalseExpectNoFiltering() {
 
     // Adjust the sampleA data that was loaded to include some samhsa data by passing true
-    String patientId = getPatientId(loadData(true));
-    String requestString =
-        EOB_ENDPOINT + "?patient=" + patientId + "&type=CARRIER&excludeSAMHSA=false";
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(true));
+    String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=false";
 
     given()
         .spec(requestAuth)
         .expect()
         .body("resourceType", equalTo("Bundle"))
-        // check the samhsa data is not present in the claim (carrier, in this example)
+        .body("entry.size()", equalTo(8))
+        // Check nothing is filtered and samhsa data is returned
         .body(
             "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
             hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('dme') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        // Make sure pde is there too
+        .body("entry.resource.id", hasItem(containsString("pde")))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is not
+   * explicitly set (should default to false internally).
+   */
+  @Test
+  public void testEobByPatientIdWithExcludeSamhsaDefaultExpectNoFiltering() {
+
+    // Adjust the sampleA data that was loaded to include some samhsa data by passing true
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(true));
+    String requestString = eobEndpoint + "?patient=" + patientId;
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        .body("entry.size()", equalTo(8))
+        // Check nothing is filtered and samhsa data is returned
+        .body(
+            "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('dme') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        // Make sure pde is there too
+        .body("entry.resource.id", hasItem(containsString("pde")))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -476,9 +650,9 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   public void testEobByPatientIdForNonSamhsaEobsWithExcludeSamhsaTrueExpectNoError() {
 
     // dont load samhsa data
-    String patientId = getPatientId(loadData(false));
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(false));
     // call samhsa filter, but it shouldn't do anything since there is nothing to filter
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&excludeSAMHSA=true";
+    String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
 
     // make sure all 8 entries come back as expected and no 400/500/other errors
     given()
@@ -500,12 +674,12 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdWithIncludeTaxNumbersTrueExpectTaxNumbers() {
 
-    List<Object> loadedData = loadData();
-    String patientId = getPatientId(loadedData);
+    List<Object> loadedData = testUtils.loadSampleAData();
+    String patientId = testUtils.getPatientId(loadedData);
     // IncludeTaxNumbers is a header, so added below in restAssured API
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId;
-    CarrierClaim carrierClaim = getCarrierClaim(loadedData);
-    DMEClaim dmeClaim = getDmeClaim(loadedData);
+    String requestString = eobEndpoint + "?patient=" + patientId;
+    CarrierClaim carrierClaim = getClaim(loadedData, CarrierClaim.class);
+    DMEClaim dmeClaim = getClaim(loadedData, DMEClaim.class);
 
     // make sure all 8 entries come back as expected and no 400/500/other errors
     given()
@@ -523,12 +697,6 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
         .body(
             "entry.find { it.resource.id.contains('dme') }.resource.item[0].extension.find { it.url == 'https://bluebutton.cms.gov/resources/variables/tax_num' }.valueCoding.code",
             equalTo(dmeClaim.getLines().get(0).getProviderTaxNumber()))
-        // Couldnt get the above find on tax num working for this; some quirk of Gpath i think?
-        // Needs some research, but this works too.
-        // Manually looked at the raw response and dont see any reason why the above find shouldnt
-        // work,
-        // the path and structure is the same between carrier and dme for the tax num extension in
-        // item
         .body(
             "entry.find { it.resource.id.contains('carrier') }.resource.item[0].extension.valueCoding.code.flatten()",
             hasItem(carrierClaim.getLines().get(0).getProviderTaxNumber()))
@@ -544,9 +712,9 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdWithIncludeTaxNumbersFalseExpectNoTaxNumbers() {
 
-    String patientId = getPatientId(loadData());
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     // IncludeTaxNumbers is a header, so added below in restAssured API
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId;
+    String requestString = eobEndpoint + "?patient=" + patientId;
 
     // make sure all 8 entries come back as expected and no 400/500/other errors
     Response response =
@@ -582,8 +750,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdAndClaimTypeExpectOneResult() {
 
-    String patientId = getPatientId(loadData());
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId + "&type=PDE";
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId + "&type=PDE";
 
     given()
         .spec(requestAuth)
@@ -609,8 +777,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdWithLastUpdated() {
 
-    String patientId = getPatientId(loadData());
-    String baseRequestString = EOB_ENDPOINT + "?patient=" + patientId;
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String baseRequestString = eobEndpoint + "?patient=" + patientId;
 
     // Build up a list of lastUpdatedURLs that return all claim types
     String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
@@ -657,21 +825,18 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
    * lastUpdated parameter after yesterday and pagination links work and contain lastUpdated.
-   *
-   * <p>FIXME: Count doesnt seem to work with the query string as-is; may be a bug?
    */
   @Test
-  @Disabled("Broken, needs investigation/fixing")
   public void searchEobByPatientIdWithLastUpdatedAndPagination() {
-
-    String patientId = getPatientId(loadData());
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     int expectedCount = 5;
+    int expectedTotal = 8;
     String yesterday =
         new DateTimeDt(Date.from(Instant.now().minus(1, ChronoUnit.DAYS))).getValueAsString();
     String now = new DateTimeDt(new Date()).getValueAsString();
     String requestString =
         String.format(
-            EOB_ENDPOINT + "?patient=%s&_lastUpdated=ge%s&_lastUpdated=le%s&_count=%s",
+            eobEndpoint + "?patient=%s&_lastUpdated=ge%s&_lastUpdated=le%s&_count=%s",
             patientId,
             yesterday,
             now,
@@ -683,30 +848,33 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
             .spec(requestAuth)
             .expect()
             .body("entry.size()", equalTo(expectedCount))
-            .body("total", equalTo(expectedCount))
+            .body("total", equalTo(expectedTotal))
             .statusCode(200)
             .when()
             .get(requestString);
 
     // Check links have lastUpdated
-    String selfLink = getPaginationLink(response, "self");
+    String selfLink = testUtils.getPaginationLink(response, "self");
     assertTrue(selfLink.contains("_lastUpdated"));
 
-    String nextLink = getPaginationLink(response, "next");
+    String nextLink = testUtils.getPaginationLink(response, "next");
     assertTrue(nextLink.contains("_lastUpdated"));
 
-    String lastLink = getPaginationLink(response, "last");
+    String lastLink = testUtils.getPaginationLink(response, "last");
     assertTrue(lastLink.contains("_lastUpdated"));
 
-    String firstLink = getPaginationLink(response, "first");
+    String firstLink = testUtils.getPaginationLink(response, "first");
     assertTrue(firstLink.contains("_lastUpdated"));
 
     // Ensure using the next link works appropriately and returns the last 3 results
     given()
         .spec(requestAuth)
+        /* RestAssured will url encode urls by default, and we use pre-encoded urls during pagination, so turn it off
+         * since it will double-encode the lastUpdated field otherwise. */
+        .urlEncodingEnabled(false)
         .expect()
         .body("entry.size()", equalTo(3))
-        .body("total", equalTo(3))
+        .body("total", equalTo(expectedTotal))
         .statusCode(200)
         .when()
         .get(nextLink);
@@ -718,11 +886,10 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
    */
   @Test
   public void searchEobByPatientIdWhenNullLastUpdatedExpectFallback() {
-
-    List<Object> loadedRecords = loadData();
-    String patientId = getPatientId(loadedRecords);
-    Long claimId = getCarrierClaim(loadedRecords).getClaimId();
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId;
+    List<Object> loadedRecords = testUtils.loadSampleAData();
+    String patientId = testUtils.getPatientId(loadedRecords);
+    Long claimId = Long.valueOf(getClaimIdFor(loadedRecords, ClaimType.CARRIER));
+    String requestString = eobEndpoint + "?patient=" + patientId;
     // Do some annoying date formatting since the json response and constant have different
     // precisions/formats
     String expectedFallbackDate =
@@ -791,8 +958,8 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
   @Test
   public void searchEobByPatientIdWithServiceDate() {
 
-    String patientId = getPatientId(loadData());
-    String requestString = EOB_ENDPOINT + "?patient=" + patientId;
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = eobEndpoint + "?patient=" + patientId;
 
     // For SampleA data, we have the following service dates
     // HHA 23-JUN-2015
@@ -847,170 +1014,125 @@ public class ExplanationOfBenefitE2E extends ServerRequiredTest {
     }
   }
 
-  // Helper methods; could easily be in a utils class, if desired
-
   /**
-   * Gets the pagination link by name from the response. Throws an exception if the given link name
-   * does not exist in the response.
-   *
-   * <p>Should be one of: next, previous, self, last, first
-   *
-   * @param response the response
-   * @param paginationLinkName the pagination link name
-   * @return the pagination link
+   * Verify that an empty bundle is returned when pagination is requested but no results are
+   * returned. Normally this would return a 400 since the default startIndex is equal to the number
+   * of results, but we make a special exception for empty returns since there's nothing to paginate
+   * anyway.
    */
-  public String getPaginationLink(Response response, String paginationLinkName) {
+  @Test
+  public void searchEobByPatientIdWithNoResultsAndPaginationRequestedExpect200() {
+    String patientId = "0";
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_count=50";
 
-    List<Map<String, ?>> links = response.jsonPath().getList("link");
-    return links.stream()
-        .filter(m -> m.get("relation").equals(paginationLinkName))
-        .findFirst()
-        .orElseThrow()
-        .get("url")
-        .toString();
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+
+    // check with startIndex as well
+    requestString = eobEndpoint + "?patient=" + patientId + "&startIndex=2";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString);
   }
 
   /**
-   * Gets a carrier claim for basic test information.
+   * Instantiates a new Get claim.
    *
    * @param loadedRecords the loaded records
-   * @return the carrier claim
+   * @param clazz the rif record type
+   * @param <T> the rif record type (must match clazz)
+   * @return the claim of the given type from the sample data
    */
-  public CarrierClaim getCarrierClaim(List<Object> loadedRecords) {
+  private <T extends RifRecordBase> T getClaim(List<Object> loadedRecords, Class<T> clazz) {
+
     return loadedRecords.stream()
-        .filter(r -> r instanceof CarrierClaim)
-        .map(CarrierClaim.class::cast)
+        .filter(clazz::isInstance)
+        .map(clazz::cast)
         .findFirst()
-        .get();
+        .orElseThrow();
   }
 
   /**
-   * Gets an outpatient claim for basic test information.
+   * Gets the claim id for the specified record type in the loaded records.
    *
    * @param loadedRecords the loaded records
-   * @return the outpatient claim
+   * @param claimType the claim type
+   * @return the claim id for
    */
-  public OutpatientClaim getOutpatientClaim(List<Object> loadedRecords) {
-    return loadedRecords.stream()
-        .filter(r -> r instanceof OutpatientClaim)
-        .map(OutpatientClaim.class::cast)
-        .findFirst()
-        .get();
+  private String getClaimIdFor(List<Object> loadedRecords, ClaimType claimType) {
+    return switch (claimType) {
+      case CARRIER:
+        CarrierClaim carrier = getClaim(loadedRecords, CarrierClaim.class);
+        yield String.valueOf(carrier.getClaimId());
+      case DME:
+        DMEClaim dme = getClaim(loadedRecords, DMEClaim.class);
+        yield String.valueOf(dme.getClaimId());
+      case HHA:
+        HHAClaim hha = getClaim(loadedRecords, HHAClaim.class);
+        yield String.valueOf(hha.getClaimId());
+      case HOSPICE:
+        HospiceClaim hospiceClaim = getClaim(loadedRecords, HospiceClaim.class);
+        yield String.valueOf(hospiceClaim.getClaimId());
+      case INPATIENT:
+        InpatientClaim inpatientClaim = getClaim(loadedRecords, InpatientClaim.class);
+        yield String.valueOf(inpatientClaim.getClaimId());
+      case OUTPATIENT:
+        OutpatientClaim outpatientClaim = getClaim(loadedRecords, OutpatientClaim.class);
+        yield String.valueOf(outpatientClaim.getClaimId());
+      case PDE:
+        PartDEvent pde = getClaim(loadedRecords, PartDEvent.class);
+        yield String.valueOf(pde.getEventId());
+      case SNF:
+        SNFClaim snfClaim = getClaim(loadedRecords, SNFClaim.class);
+        yield String.valueOf(snfClaim.getClaimId());
+    };
   }
 
   /**
-   * Gets a dme claim for basic test information.
+   * Verify a successful EOB response returns when searching for the specified claim type's id (as
+   * taken from the sample data).
    *
-   * @param loadedRecords the loaded records
-   * @return the dme claim
+   * @param claimType the claim type to search for
    */
-  public DMEClaim getDmeClaim(List<Object> loadedRecords) {
-    return loadedRecords.stream()
-        .filter(r -> r instanceof DMEClaim)
-        .map(DMEClaim.class::cast)
-        .findFirst()
-        .get();
-  }
-
-  /**
-   * Loads the sample A test data.
-   *
-   * @return the loaded records
-   */
-  public List<Object> loadData() {
-    return loadData(false);
-  }
-
-  /**
-   * Loads the sample A data to use in tests.
-   *
-   * @param addSamhsa if samhsa data should be added to the test data
-   * @return the loaded records
-   */
-  public List<Object> loadData(boolean addSamhsa) {
-
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    if (addSamhsa) {
-      addSamhsaToLoadedRecords(loadedRecords);
+  private void verifySuccessfulResponseAndClaimIdFor(ClaimType claimType) {
+    List<Object> loadedRecords = testUtils.loadSampleAData();
+    String claimId = getClaimIdFor(loadedRecords, claimType);
+    String eobId = TransformerUtilsV2.buildEobId(claimType, claimId);
+    String systemId = "https://bluebutton.cms.gov/resources/variables/clm_id";
+    if (claimType == ClaimType.PDE) {
+      // PDE uses a diff identifier for its ID
+      systemId = "https://bluebutton.cms.gov/resources/variables/pde_id";
     }
 
-    return loadedRecords;
-  }
-
-  /**
-   * Gets the first beneficiary in the provided data.
-   *
-   * @param loadedRecords the loaded records
-   * @return the first beneficiary
-   */
-  public Beneficiary getFirstBeneficiary(List<Object> loadedRecords) {
-    return loadedRecords.stream()
-        .filter(r -> r instanceof Beneficiary)
-        .map(Beneficiary.class::cast)
-        .findFirst()
-        .get();
-  }
-
-  /**
-   * Gets the patient id.
-   *
-   * @param loadedRecords the loaded records
-   * @return the patient id from the first beneficiary
-   */
-  public String getPatientId(List<Object> loadedRecords) {
-    return TransformerUtilsV2.buildPatientId(getFirstBeneficiary(loadedRecords)).getIdPart();
-  }
-
-  /**
-   * Load the SAMPLE_A resources and then tweak carrier claim types to have a SAMHSA diagnosis code.
-   *
-   * <p>FUTURE: Ideally get rid of this and add samhsa to the default set.
-   *
-   * @param loadedRecords the loaded records
-   */
-  private void addSamhsaToLoadedRecords(List<Object> loadedRecords) {
-    // Load the SAMPLE_A resources normally.
-    EntityManager entityManager = null;
-
-    try {
-      EntityManagerFactory entityManagerFactory =
-          PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
-      entityManager = entityManagerFactory.createEntityManager();
-
-      // Tweak the SAMPLE_A claims such that they are SAMHSA-related.
-      adjustCarrierClaimForSamhsaDiagnosis(loadedRecords, entityManager);
-
-    } finally {
-      if (entityManager != null && entityManager.getTransaction().isActive())
-        entityManager.getTransaction().rollback();
-      if (entityManager != null) entityManager.close();
-    }
-  }
-
-  /**
-   * Adjusts the carrier claim to support samhsa.
-   *
-   * @param loadedRecords the loaded records
-   * @param entityManager the entity manager
-   */
-  private void adjustCarrierClaimForSamhsaDiagnosis(
-      List<Object> loadedRecords, EntityManager entityManager) {
-
-    CarrierClaim carrierRifRecord =
-        loadedRecords.stream()
-            .filter(r -> r instanceof CarrierClaim)
-            .map(CarrierClaim.class::cast)
-            .findFirst()
-            .get();
-
-    entityManager.getTransaction().begin();
-    carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
-    carrierRifRecord.setDiagnosis2Code(
-        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-    carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-    entityManager.merge(carrierRifRecord);
-    entityManager.getTransaction().commit();
+    given()
+        .spec(requestAuth)
+        .expect()
+        .log()
+        .ifError()
+        // For non-array items, we can use equalTo (or stringContains for partial matches)
+        .body("resourceType", equalTo("ExplanationOfBenefit"))
+        .body("id", equalTo(eobId))
+        /* RestAssured uses Groovy under the hood, so our search query closures can use Groovy's collection API.
+         * See https://www.baeldung.com/rest-assured-groovy for some examples.
+         */
+        .body(
+            String.format("identifier.find {it.system == '%s'}.value", systemId), equalTo(claimId))
+        .statusCode(200)
+        .when()
+        .get(eobEndpoint + eobId);
   }
 }

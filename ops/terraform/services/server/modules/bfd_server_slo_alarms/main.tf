@@ -614,8 +614,12 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
   metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
 
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
+  # FUTURE: Alarm actions sending notifications to destinations other than #bfd-test have been
+  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated in BFD-2949
+
+  # alarm_actions = local.alert_arn
+  # ok_actions    = local.alert_ok_arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -638,8 +642,12 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m
   metric_name = local.metrics.patient_no_contract_latency
   namespace   = local.namespace
 
-  alarm_actions = local.warning_arn
-  ok_actions    = local.warning_ok_arn
+  # FUTURE: Alarm actions sending notifications to destinations other than #bfd-test have been
+  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated in BFD-2949
+
+  # alarm_actions = local.alert_arn
+  # ok_actions    = local.alert_ok_arn
+  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -910,8 +918,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
   metric_name = local.metrics.claim_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
-  ok_actions    = null
+  alarm_actions = local.alert_arn
+  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -934,8 +942,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
   metric_name = local.metrics.claim_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
-  ok_actions    = null
+  alarm_actions = local.warning_arn
+  ok_actions    = local.warning_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -968,8 +976,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_with_resources_bulk_latency_99
     client_ssl = data.external.client_ssls_by_partner["claim_resources_latency"].result[each.key]
   }
 
-  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
-  ok_actions    = null
+  alarm_actions = local.alert_arn
+  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -992,8 +1000,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
   metric_name = local.metrics.claimresponse_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
-  ok_actions    = null
+  alarm_actions = local.alert_arn
+  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -1005,7 +1013,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "1000"
+  threshold           = "950"
 
   alarm_description = join("", [
     "/v*/fhir/ClaimResponse response with no resources returned mean 15 minute latency ",
@@ -1016,8 +1024,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
   metric_name = local.metrics.claimresponse_no_resources_latency
   namespace   = local.namespace
 
-  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
-  ok_actions    = null
+  alarm_actions = local.warning_arn
+  ok_actions    = local.warning_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -1050,8 +1058,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_with_resources_bulk_la
     client_ssl = data.external.client_ssls_by_partner["claimresponse_resources_latency"].result[each.key]
   }
 
-  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
-  ok_actions    = null
+  alarm_actions = local.alert_arn
+  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
