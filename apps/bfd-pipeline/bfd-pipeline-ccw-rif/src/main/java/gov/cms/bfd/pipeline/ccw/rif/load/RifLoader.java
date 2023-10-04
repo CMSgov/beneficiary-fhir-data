@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.ccw.rif.load;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedBatchBuilder;
 import gov.cms.bfd.model.rif.LoadedFile;
@@ -16,61 +15,41 @@ import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.SkippedRifRecord.SkipReasonCode;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
-import gov.cms.bfd.model.rif.entities.BeneficiaryCsvWriter;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
-import gov.cms.bfd.model.rif.entities.CarrierClaim;
-import gov.cms.bfd.model.rif.entities.CarrierClaimCsvWriter;
-import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.postgresql.copy.CopyManager;
-import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1377,289 +1356,6 @@ public final class RifLoader {
    */
   static String computeMbiHash(IdHasher idHasher, String mbi) {
     return idHasher.computeIdentifierHash(mbi);
-  }
-
-  /**
-   * Provides the state tracking and logic needed for {@link RifLoader} to handle PostgreSQL {@link
-   * RecordAction#INSERT}s via the use of PostgreSQL's non-standard {@link CopyManager} APIs.
-   *
-   * <p>In <a href="https://www.postgresql.org/docs/9.6/static/populate.html">PostgreSQL 9.6 Manual:
-   * Populating a Database</a>, this is recommended as the fastest way to insert large amounts of
-   * data. However, real-world testing with Blue Button data has shown that to be not be exactly
-   * true: highly parallelized <code>INSERT</code>s (e.g. hundreds of simultaneous connections) can
-   * actually be about 18% faster. Even still, this code may eventually be useful for some
-   * situations, so we'll keep it around.
-   */
-  private static final class PostgreSqlCopyInserter implements AutoCloseable {
-    /** The entity manager factory. */
-    private final EntityManagerFactory entityManagerFactory;
-    /** The metrics registry. */
-    private final MetricRegistry metrics;
-    /** The state and tracking information for a SQL table's {@link CSVPrinter}. */
-    private final List<CsvPrinterBundle> csvPrinterBundles;
-
-    /**
-     * Constructs a new {@link PostgreSqlCopyInserter} instance.
-     *
-     * @param entityManagerFactory the {@link EntityManagerFactory} to use
-     * @param metrics the {@link MetricRegistry} to use
-     */
-    public PostgreSqlCopyInserter(
-        EntityManagerFactory entityManagerFactory, MetricRegistry metrics) {
-      this.entityManagerFactory = entityManagerFactory;
-      this.metrics = metrics;
-
-      List<CsvPrinterBundle> csvPrinters = new LinkedList<>();
-      csvPrinters.add(createCsvPrinter(Beneficiary.class));
-      csvPrinters.add(createCsvPrinter(CarrierClaim.class));
-      csvPrinters.add(createCsvPrinter(CarrierClaimLine.class));
-      this.csvPrinterBundles = csvPrinters;
-    }
-
-    /**
-     * Creates a csv printer for a specified SQL table.
-     *
-     * @param entityType the JPA {@link Entity} to create a {@link CSVPrinter} for
-     * @return the {@link CSVPrinter} for the specified SQL table
-     */
-    private CsvPrinterBundle createCsvPrinter(Class<?> entityType) {
-      Table tableAnnotation = entityType.getAnnotation(Table.class);
-      String tableName = tableAnnotation.name().replaceAll("`", "");
-
-      CSVFormat baseCsvFormat = CSVFormat.DEFAULT;
-
-      try {
-        CsvPrinterBundle csvPrinterBundle = new CsvPrinterBundle();
-        csvPrinterBundle.tableName = tableName;
-        csvPrinterBundle.backingTempFile = File.createTempFile(tableName, ".postgreSqlCsv");
-        csvPrinterBundle.csvPrinter =
-            new CSVPrinter(new FileWriter(csvPrinterBundle.backingTempFile), baseCsvFormat);
-        return csvPrinterBundle;
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      } finally {
-      }
-    }
-
-    /**
-     * Queues the specified {@link RifRecordEvent#getRecord()} top-level entity instance (e.g. a
-     * {@link Beneficiary}, {@link CarrierClaim}, etc.) for insertion when {@link #submit()} is
-     * called.
-     *
-     * @param record the {@link RifRecordEvent#getRecord()} top-level entity instance (e.g. a {@link
-     *     Beneficiary}, {@link CarrierClaim} , etc.) to queue for insertion
-     */
-    public void add(Object record) {
-      /*
-       * Use the auto-generated *CsvWriter helpers to convert the JPA
-       * entity to its raw field values, in a format suitable for use with
-       * PostgreSQL's CopyManager. Each Map entry will represent a single
-       * JPA table, and each Object[] in there represents a single entity
-       * instance, with the first Object[] containing the (correctly
-       * ordered) SQL column names. So, for a CarrierClaim, there will be
-       * two "CarrerClaims" Object[]s: one column header and one with the
-       * claim header values. In addition, there will be multiple
-       * "CarrierClaimLines" Objects[]: one for the column header and then
-       * one for each CarrierClaim.getLines() entry.
-       */
-      Map<String, Object[][]> csvRecordsByTable;
-      if (record instanceof Beneficiary) {
-        csvRecordsByTable = BeneficiaryCsvWriter.toCsvRecordsByTable((Beneficiary) record);
-      } else if (record instanceof CarrierClaim) {
-        csvRecordsByTable = CarrierClaimCsvWriter.toCsvRecordsByTable((CarrierClaim) record);
-      } else throw new BadCodeMonkeyException();
-
-      /*
-       * Hand off the *CsvWriter results to the appropriate
-       * CsvPrinterBundle entries.
-       */
-      for (Entry<String, Object[][]> tableRecordsEntry : csvRecordsByTable.entrySet()) {
-        String tableName = tableRecordsEntry.getKey();
-        CsvPrinterBundle tablePrinterBundle =
-            csvPrinterBundles.stream().filter(b -> tableName.equals(b.tableName)).findAny().get();
-
-        // Set the column header if it hasn't been yet.
-        if (tablePrinterBundle.columnNames == null) {
-          Object[] columnNamesAsObjects = tableRecordsEntry.getValue()[0];
-          String[] columnNames =
-              Arrays.copyOf(columnNamesAsObjects, columnNamesAsObjects.length, String[].class);
-          tablePrinterBundle.columnNames = columnNames;
-        }
-
-        /*
-         * Write out each Object[] entity row to the temp CSV for the
-         * appropriate SQL table. These HAVE to be written out now, as
-         * there isn't enough RAM to store all of them in memory until
-         * submit() gets called.
-         */
-        for (int recordIndex = 1;
-            recordIndex < tableRecordsEntry.getValue().length;
-            recordIndex++) {
-          Object[] csvRecord = tableRecordsEntry.getValue()[recordIndex];
-          tablePrinterBundle.recordsPrinted.getAndIncrement();
-
-          try {
-            /*
-             * This will be called by multiple loader threads
-             * (possibly hundreds), so it must be synchronized to
-             * ensure that writes aren't corrupted. This isn't the
-             * most efficient possible strategy, but has proven to
-             * not be a bottleneck.
-             */
-            synchronized (tablePrinterBundle.csvPrinter) {
-              tablePrinterBundle.csvPrinter.printRecord(csvRecord);
-            }
-          } catch (IOException e) {
-            throw new UncheckedIOException(e);
-          }
-        }
-      }
-    }
-
-    /**
-     * Determines if the {@link #csvPrinterBundles} is empty (if {@link #add} hasn't been called
-     * yet).
-     *
-     * @return <code>true</code> if {@link #add(Object)} hasn't been called yet, <code>false</code>
-     *     if it has
-     */
-    public boolean isEmpty() {
-      return !csvPrinterBundles.stream()
-          .filter(b -> b.recordsPrinted.get() > 0)
-          .findAny()
-          .isPresent();
-    }
-
-    /**
-     * Uses PostgreSQL's {@link CopyManager} API to bulk-insert all of the JPA entities that have
-     * been queued via {@link #add(Object)}.
-     *
-     * <p>Note: this is an <em>efficient</em> operation, but still not necessarily a <em>fast</em>
-     * one: it can take hours to run for large amounts of data.
-     */
-    public void submit() {
-      Timer.Context submitTimer =
-          metrics
-              .timer(
-                  MetricRegistry.name(
-                      getClass().getSimpleName(), "postgresSqlBatches", "submitted"))
-              .time();
-
-      EntityManager entityManager = null;
-      try {
-        entityManager = entityManagerFactory.createEntityManager();
-
-        /*
-         * PostgreSQL's CopyManager needs a raw PostgreSQL
-         * BaseConnection. So here we unwrap one from the EntityManager.
-         */
-        Session session = entityManager.unwrap(Session.class);
-        session.doWork(
-            new Work() {
-              /**
-               * @see org.hibernate.jdbc.Work#execute(java.sql.Connection)
-               */
-              @Override
-              public void execute(Connection connection) throws SQLException {
-                /*
-                 * Further connection unwrapping: go from a pooled
-                 * Hikari connection to a raw PostgreSQL one.
-                 */
-                HikariProxyConnection pooledConnection = (HikariProxyConnection) connection;
-                BaseConnection postgreSqlConnection = pooledConnection.unwrap(BaseConnection.class);
-
-                /*
-                 * Use that PostgreSQL connection to construct a
-                 * CopyManager instance. Finally!
-                 */
-                CopyManager copyManager = new CopyManager(postgreSqlConnection);
-
-                /*
-                 * Run the CopyManager against each CsvPrinterBundle
-                 * with queued records.
-                 */
-                csvPrinterBundles.stream()
-                    .filter(b -> b.recordsPrinted.get() > 0)
-                    .forEach(
-                        b -> {
-                          try {
-                            LOGGER.debug(
-                                "Flushing PostgreSQL COPY queue: '{}'.", b.backingTempFile);
-                            /*
-                             * First, flush the CSVPrinter to ensure that
-                             * all queued records are available on disk.
-                             */
-                            b.csvPrinter.flush();
-
-                            /*
-                             * Crack open the queued CSV records and feed
-                             * them into the CopyManager.
-                             */
-                            Timer.Context postgresCopyTimer =
-                                metrics
-                                    .timer(
-                                        MetricRegistry.name(
-                                            getClass().getSimpleName(),
-                                            "postgresCopy",
-                                            "completed"))
-                                    .time();
-                            LOGGER.info("Submitting PostgreSQL COPY queue: '{}'...", b.tableName);
-                            FileReader reader = new FileReader(b.backingTempFile);
-                            String columnsList =
-                                Arrays.stream(b.columnNames)
-                                    .map(c -> "\"" + c + "\"")
-                                    .collect(Collectors.joining(", "));
-                            copyManager.copyIn(
-                                String.format(
-                                    "COPY \"%s\" (%s) FROM STDIN DELIMITERS ',' CSV ENCODING 'UTF8'",
-                                    b.tableName, columnsList),
-                                reader);
-                            LOGGER.info("Submitted PostgreSQL COPY queue: '{}'.", b.tableName);
-                            postgresCopyTimer.stop();
-                          } catch (Exception e) {
-                            throw new RifLoadFailure(e);
-                          }
-                        });
-              }
-            });
-      } finally {
-        if (entityManager != null) entityManager.close();
-      }
-
-      submitTimer.stop();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void close() {
-      csvPrinterBundles.stream()
-          .forEach(
-              b -> {
-                try {
-                  b.csvPrinter.close();
-                  b.backingTempFile.delete();
-                } catch (IOException e) {
-                  throw new UncheckedIOException(e);
-                }
-              });
-    }
-
-    /**
-     * A simple struct for storing all of the state and tracking information for each SQL table's
-     * {@link CSVPrinter}.
-     */
-    private static final class CsvPrinterBundle {
-      /** The table name. */
-      String tableName = null;
-      /** The csv printer. */
-      CSVPrinter csvPrinter = null;
-      /** The backing temp file. */
-      File backingTempFile = null;
-      /** The array of column names. */
-      String[] columnNames = null;
-      /** The number of records printed. */
-      AtomicInteger recordsPrinted = new AtomicInteger(0);
-    }
   }
 
   /** Enumerates the {@link RifLoader} record handling strategies. */

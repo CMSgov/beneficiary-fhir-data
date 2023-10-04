@@ -437,8 +437,13 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
     if (paging.isPagingRequested()) {
       paging.setTotal(resources.size()).addLinks(bundle);
-      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
-      resources = resources.subList(paging.getStartIndex(), endIndex);
+      // dont sublist unless we have something to paginate, else indexing issues
+      if (resources.size() > 0) {
+        int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+        // Throw a 400 if startIndex >= results, since we cant sublist with these values
+        TransformerUtilsV2.validateStartIndexSize(paging.getStartIndex(), resources.size());
+        resources = resources.subList(paging.getStartIndex(), endIndex);
+      }
     }
 
     resources.forEach(

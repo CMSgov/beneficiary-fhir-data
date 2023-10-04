@@ -113,6 +113,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingDueToException(any(), any());
     verify(tracker).stopped(job);
     verifyNoInteractions(sleeper);
+    verify(job).close();
 
     // Verify that the job summary matches expectations
     var expectedSummary =
@@ -156,6 +157,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingDueToException(any(), any());
     verify(tracker).stopped(job);
     verifyNoInteractions(sleeper);
+    verify(job).close();
 
     // Verify that the job summary matches expectations
     var expectedSummary =
@@ -200,6 +202,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).sleeping(any());
     verify(tracker).stopped(job);
     verifyNoInteractions(sleeper);
+    verify(job).close();
 
     // Verify that the job summary matches expectations
     var expectedSummary =
@@ -247,6 +250,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingDueToException(any(), any());
     verify(tracker).stopped(job);
     verify(sleeper, times(2)).accept(repeatMills);
+    verify(job).close();
 
     // Verify that the job summary matches expectations
     var expectedSummaries =
@@ -305,6 +309,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingDueToException(any(), any());
     verify(tracker).stopped(job);
     verify(sleeper, times(2)).accept(repeatMills);
+    verify(job).close();
 
     // Verify that the job summary matches expectations
     var expectedSummaries =
@@ -364,6 +369,7 @@ public class PipelineJobRunnerTest {
     verify(tracker).stoppingDueToException(job, error);
     verify(tracker).stopped(job);
     verify(sleeper, times(2)).accept(repeatMills);
+    verify(job).close();
 
     // Verify that the job summary matches expectations
     var expectedSummaries =

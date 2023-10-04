@@ -1,6 +1,8 @@
-# `base_config` Submodule
+# `base_config` Module
 
-This submodule of the `mgmt` environment's Terraform module defines global SSM parameter data
+**Note: This module _must_ be `apply`'d prior to `apply`ing the `mgmt` module**
+
+This module is a _distinct_, seperate module within the `mgmt` environment's Terraform module that defines global SSM parameter data
 belonging to the `mgmt` "environment". Such data is shared between _all_ environments and services,
 and so duplicating it across environments is unnecessary. If data needs to be accessed in multiple
 environments, and its value should not change between them, then it should probably live in this
@@ -20,7 +22,9 @@ as this module contains similar scripts for doing this work.
 -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.22 |
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.
@@ -33,5 +37,7 @@ https://terraform-docs.io/user-guide/configuration/
 | Name | Type |
 |------|------|
 | [aws_ssm_parameter.common_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [external_external.eyaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 <!-- END_TF_DOCS -->

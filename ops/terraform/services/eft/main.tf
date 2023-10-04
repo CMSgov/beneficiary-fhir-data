@@ -1,61 +1,99 @@
-locals {
-  account_id = data.aws_caller_identity.current.account_id
-  vpc_id     = data.aws_vpc.this.id
+module "terraservice" {
+  source = "../_modules/bfd-terraservice"
 
-  env              = terraform.workspace
-  established_envs = ["test", "prod-sbx", "prod"]
-  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  environment_name     = terraform.workspace
+  relative_module_root = "ops/terraform/services/eft"
+  additional_tags = {
+    Layer = local.layer
+    Name  = local.full_name
+    role  = local.service
+  }
+}
+
+locals {
+  default_tags     = module.terraservice.default_tags
+  env              = module.terraservice.env
+  seed_env         = module.terraservice.seed_env
+  is_ephemeral_env = module.terraservice.is_ephemeral_env
 
   service   = "eft"
   layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"
 
-  default_tags = {
-    application    = "bfd"
-    business       = "oeda"
-    stack          = local.env
-    Environment    = local.seed_env
-    Terraform      = true
-    tf_module_root = "ops/terraform/services/${local.service}"
-    Layer          = local.layer
-    role           = local.service
+  eft_partners    = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json.value))
+  ssm_hierarchies = concat(["bfd"], local.eft_partners)
+  ssm_services    = ["common", local.service]
+  ssm_all_paths = {
+    for x in setproduct(local.ssm_hierarchies, local.ssm_services) :
+    "${x[0]}-${x[1]}" => {
+      hierarchy = x[0]
+      service   = x[1]
+    }
   }
-
-  nonsensitive_common_map = zipmap(
-    data.aws_ssm_parameters_by_path.nonsensitive_common.names,
-    nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values)
-  )
-  nonsensitive_common_config = {
-    for key, value in local.nonsensitive_common_map
-    : split("/", key)[5] => value
-  }
-  sensitive_service_map = zipmap(
-    data.aws_ssm_parameters_by_path.sensitive_service.names,
-    nonsensitive(data.aws_ssm_parameters_by_path.sensitive_service.values)
-  )
-  sensitive_service_config = {
-    for key, value in local.sensitive_service_map : split("/", key)[5] => value
-  }
-
-  kms_key_alias = local.nonsensitive_common_config["kms_key_alias"]
-  vpc_name      = local.nonsensitive_common_config["vpc_name"]
-
-  subnet_ip_reservations = jsondecode(
-    local.sensitive_service_config["subnet_to_ip_reservations_nlb_json"]
-  )
-  host_key              = local.sensitive_service_config["sftp_transfer_server_host_private_key"]
-  eft_user_sftp_pub_key = local.sensitive_service_config["sftp_eft_user_public_key"]
-  eft_user_username     = local.sensitive_service_config["sftp_eft_user_username"]
-  eft_bucket_partners   = jsondecode(local.sensitive_service_config["partners_with_bucket_access_json"])
-  eft_bucket_partners_iam = {
-    for partner in local.eft_bucket_partners :
-    partner => {
-      bucket_iam_assumer_arn = local.sensitive_service_config["partner_iam_assumer_arn_${partner}"]
-      bucket_home_path       = trim(local.sensitive_service_config["partner_bucket_home_path_${partner}"], "/")
+  # This returns an object with nested keys in the following format: ssm_config.<top-level hierarchy
+  # name>.<service name>; for example, to get a parameter named "vpc_name" in BFD's hierarchy in the
+  # "common" service, it would be: local.ssm_config.bfd.common.vpc_name.
+  # FUTURE: Refactor this out into a distinct module much like bfd-terraservice above
+  ssm_config = {
+    # This would be much easier if Terraform had a reduce() or if merge() was a deep merge instead
+    # of shallow. We must do a double iteration otherwise we end up with objects with the same
+    # top-level keys but different inner keys (i.e. {bfd = common = ...} and {bfd = eft = ...}).
+    # Using merge() to merge those would result in only the last object being taken ({bfd = eft = ...})
+    for hierarchy in local.ssm_hierarchies :
+    hierarchy => {
+      for key, meta in local.ssm_all_paths :
+      # We know all services within a given hierarchy are distinct, so we can just iterate over them
+      # and build a full object at once.
+      "${meta.service}" => zipmap(
+        [
+          for name in concat(
+            data.aws_ssm_parameters_by_path.nonsensitive[key].names,
+            data.aws_ssm_parameters_by_path.sensitive[key].names
+          ) : element(split("/", name), length(split("/", name)) - 1)
+        ],
+        nonsensitive(
+          concat(
+            data.aws_ssm_parameters_by_path.nonsensitive[key].values,
+            data.aws_ssm_parameters_by_path.sensitive[key].values
+          )
+        )
+      )
+      if hierarchy == meta.hierarchy
     }
   }
 
+  # SSM Lookup
+  kms_key_alias = local.ssm_config.bfd.common["kms_key_alias"]
+  vpc_name      = local.ssm_config.bfd.common["vpc_name"]
+
+  subnet_ip_reservations = jsondecode(
+    local.ssm_config.bfd[local.service]["subnet_to_ip_reservations_nlb_json"]
+  )
+  host_key              = local.ssm_config.bfd[local.service]["sftp_transfer_server_host_private_key"]
+  eft_r53_hosted_zone   = local.ssm_config.bfd[local.service]["r53_hosted_zone"]
+  eft_user_sftp_pub_key = local.ssm_config.bfd[local.service]["sftp_eft_user_public_key"]
+  eft_user_username     = local.ssm_config.bfd[local.service]["sftp_eft_user_username"]
+  eft_partners_config = {
+    for partner in local.eft_partners :
+    partner => {
+      bucket_iam_assumer_arn             = local.ssm_config[partner][local.service]["bucket_iam_assumer_arn"]
+      bucket_home_path                   = trim(local.ssm_config[partner][local.service]["bucket_home_path"], "/")
+      bucket_notifs_subscriber_principal = lookup(local.ssm_config[partner][local.service], "bucket_notifications_subscriber_principal_arn", null)
+      bucket_notifs_subscriber_arn       = lookup(local.ssm_config[partner][local.service], "bucket_notifications_subscriber_arn", null)
+      bucket_notifs_subscriber_protocol  = lookup(local.ssm_config[partner][local.service], "bucket_notifications_subscriber_protocol", null)
+    }
+  }
+  eft_partners_with_s3_notifs = [
+    for partner, config in local.eft_partners_config : partner
+    if config.bucket_notifs_subscriber_principal != null &&
+    config.bucket_notifs_subscriber_arn != null &&
+    config.bucket_notifs_subscriber_protocol != null
+  ]
+
+  # Data source lookups
+
+  account_id     = data.aws_caller_identity.current.account_id
+  vpc_id         = data.aws_vpc.this.id
   kms_key_id     = data.aws_kms_key.cmk.arn
   sftp_port      = 22
   logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
@@ -76,7 +114,70 @@ locals {
 
 resource "aws_s3_bucket" "this" {
   bucket = local.full_name
-  tags   = { Name = local.full_name }
+}
+
+resource "aws_s3_bucket_notification" "bucket_notifications" {
+  count = length(local.eft_partners_with_s3_notifs) > 0 ? 1 : 0
+
+  bucket = aws_s3_bucket.this.id
+
+  dynamic "topic" {
+    for_each = toset(local.eft_partners_with_s3_notifs)
+
+    content {
+      events        = ["s3:ObjectCreated:*"]
+      filter_prefix = "${local.eft_user_username}/${local.eft_partners_config[topic.key].bucket_home_path}/"
+      id            = "${local.full_name}-s3-event-notifications-${topic.key}"
+      topic_arn     = aws_sns_topic.bucket_notifications[topic.key].arn
+    }
+  }
+}
+
+resource "aws_sns_topic" "bucket_notifications" {
+  for_each = toset(local.eft_partners_with_s3_notifs)
+
+  name              = "${local.full_name}-s3-event-notifications-${each.key}"
+  kms_master_key_id = local.kms_key_id
+}
+
+resource "aws_sns_topic_policy" "bucket_notifications" {
+  for_each = toset(local.eft_partners_with_s3_notifs)
+
+  arn = aws_sns_topic.bucket_notifications[each.key].arn
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid       = "Allow_Publish_from_S3"
+          Effect    = "Allow"
+          Principal = { Service = "s3.amazonaws.com" }
+          Action    = "SNS:Publish"
+          Resource  = aws_sns_topic.bucket_notifications[each.key].arn
+          Condition = {
+            ArnLike = {
+              "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
+            }
+          }
+        },
+        {
+          Sid       = "Allow_Subscribe_from_${each.key}"
+          Effect    = "Allow"
+          Principal = { AWS = local.eft_partners_config[each.key].bucket_notifs_subscriber_principal }
+          Action    = ["SNS:Subscribe", "SNS:Receive"]
+          Resource  = aws_sns_topic.bucket_notifications[each.key].arn
+          Condition = {
+            StringEquals = {
+              "sns:Protocol" = local.eft_partners_config[each.key].bucket_notifs_subscriber_protocol
+            }
+            "ForAllValues:StringEquals" = {
+              "sns:Endpoint" = [local.eft_partners_config[each.key].bucket_notifs_subscriber_arn]
+            }
+          }
+        }
+      ]
+    }
+  )
 }
 
 resource "aws_s3_bucket_versioning" "this" {
@@ -164,6 +265,10 @@ resource "aws_ec2_subnet_cidr_reservation" "this" {
   cidr_block       = "${each.value}/32"
   reservation_type = "explicit"
   subnet_id        = data.aws_subnet.this[each.key].id
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_lb" "this" {
@@ -174,12 +279,24 @@ resource "aws_lb" "this" {
   tags                             = { Name = "${local.full_name}-nlb" }
 
   dynamic "subnet_mapping" {
-    for_each = local.subnet_ip_reservations
+    for_each = local.available_endpoint_subnets
 
     content {
-      subnet_id            = data.aws_subnet.this[subnet_mapping.key].id
-      private_ipv4_address = subnet_mapping.value
+      subnet_id            = subnet_mapping.value.id
+      private_ipv4_address = local.subnet_ip_reservations[subnet_mapping.value.tags["Name"]]
     }
+  }
+}
+
+resource "aws_route53_record" "nlb_alias" {
+  name    = "${local.env}.${local.service}.${data.aws_route53_zone.this.name}"
+  type    = "A"
+  zone_id = data.aws_route53_zone.this.zone_id
+
+  alias {
+    name                   = aws_lb.this.dns_name
+    zone_id                = aws_lb.this.zone_id
+    evaluate_target_health = true
   }
 }
 
@@ -194,10 +311,10 @@ resource "aws_lb_target_group" "nlb_to_vpc_endpoint" {
 }
 
 resource "aws_alb_target_group_attachment" "nlb_to_vpc_endpoint" {
-  for_each = toset(values(data.aws_network_interface.vpc_endpoint)[*].private_ip)
+  count = length(local.available_endpoint_subnets)
 
   target_group_arn = aws_lb_target_group.nlb_to_vpc_endpoint.arn
-  target_id        = each.key
+  target_id        = data.aws_network_interface.vpc_endpoint[count.index].private_ip
 }
 
 resource "aws_lb_listener" "nlb_to_vpc_endpoint" {
@@ -231,7 +348,7 @@ resource "aws_security_group" "nlb" {
     from_port   = local.sftp_port
     to_port     = local.sftp_port
     protocol    = "tcp"
-    cidr_blocks = [for ip in values(data.aws_network_interface.vpc_endpoint)[*].private_ip : "${ip}/32"]
+    cidr_blocks = [for ip in data.aws_network_interface.vpc_endpoint[*].private_ip : "${ip}/32"]
   }
 }
 
@@ -302,7 +419,7 @@ resource "aws_vpc_endpoint" "this" {
 
   private_dns_enabled = false
   security_group_ids  = [aws_security_group.vpc_endpoint.id]
-  service_name        = "com.amazonaws.us-east-1.transfer.server"
+  service_name        = data.aws_vpc_endpoint_service.transfer_server.service_name
   subnet_ids          = local.available_endpoint_subnets[*].id
   vpc_endpoint_type   = "Interface"
   vpc_id              = local.vpc_id

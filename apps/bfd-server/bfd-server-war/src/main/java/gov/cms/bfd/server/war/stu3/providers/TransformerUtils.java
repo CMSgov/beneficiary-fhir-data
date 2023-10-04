@@ -3172,6 +3172,7 @@ public final class TransformerUtils {
   public static Bundle createBundle(
       OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime) {
     Bundle bundle = new Bundle();
+    List<IBaseResource> resourcesSubList = resources;
     if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
@@ -3179,8 +3180,18 @@ public final class TransformerUtils {
        * working
        * correctly.
        */
-      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
-      List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
+      // If we have no resources, don't sublist anything since it causes indexing issues
+      if (resources.size() > 0) {
+        int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+        // Throw a 400 if startIndex >= results, since we cant sublist with these values
+        if (paging.getStartIndex() >= resources.size()) {
+          throw new InvalidRequestException(
+              String.format(
+                  "Value for startIndex (%s) must be less than than result size (%s)",
+                  paging.getStartIndex(), resources.size()));
+        }
+        resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
+      }
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
       paging.setTotal(resources.size()).addLinks(bundle);
 
@@ -3203,7 +3214,7 @@ public final class TransformerUtils {
      * the timestamp.
      */
     Instant maxBundleDate =
-        resources.stream()
+        resourcesSubList.stream()
             .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
             .max(Instant::compareTo)

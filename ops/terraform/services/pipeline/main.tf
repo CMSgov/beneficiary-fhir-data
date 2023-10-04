@@ -1,31 +1,29 @@
+module "terraservice" {
+  source = "../_modules/bfd-terraservice"
+
+  environment_name     = terraform.workspace
+  relative_module_root = "ops/terraform/services/pipeline"
+}
+
 locals {
-  env              = terraform.workspace
-  established_envs = ["test", "prod-sbx", "prod"]
-  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  default_tags     = module.terraservice.default_tags
+  env              = module.terraservice.env
+  seed_env         = module.terraservice.seed_env
+  is_ephemeral_env = module.terraservice.is_ephemeral_env
   is_prod          = local.env == "prod"
 
   account_id        = data.aws_caller_identity.current.account_id
   layer             = "data"
   create_etl_user   = local.is_prod || var.force_etl_user_creation
-  create_slis       = contains(local.established_envs, local.env) || var.force_sli_creation
-  create_dashboard  = contains(local.established_envs, local.env) || var.force_dashboard_creation
-  create_slo_alarms = (contains(local.established_envs, local.env) || var.force_slo_alarms_creation) && local.create_slis
+  create_slis       = !local.is_ephemeral_env || var.force_sli_creation
+  create_dashboard  = !local.is_ephemeral_env || var.force_dashboard_creation
+  create_slo_alarms = (!local.is_ephemeral_env || var.force_slo_alarms_creation) && local.create_slis
   jdbc_suffix       = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
   service        = "pipeline"
   legacy_service = "etl"
-
-  default_tags = {
-    Environment    = local.seed_env
-    application    = "bfd"
-    business       = "oeda"
-    stack          = local.env
-    Terraform      = true
-    tf_module_root = "ops/terraform/services/pipeline"
-  }
 
   # NOTE: nonsensitive service-oriented and common config
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))

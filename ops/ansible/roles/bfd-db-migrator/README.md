@@ -18,17 +18,18 @@ Role Variables
 
 This role is highly configurable, though it tries to provide reasonable defaults where possible: Here are the variables that must be defined by users:
 
-| Name                                | Description                                                                                   | Default              | Required        |
-|-------------------------------------|-----------------------------------------------------------------------------------------------|----------------------|-----------------|
-| db_migrator_db_password             | password for targeted database                                                                | n/a                  | yes             |
-| db_migrator_db_url                  | url for targeted database, e.g. `jdbc:postgresql://mydbserver.example.com:5432/mydb`          | n/a                  | yes             |
-| db_migrator_db_username             | username for targeted database                                                                | n/a                  | yes             |
-| env                                 | deployment env, e.g. `prod`, `prod-sbx`, `test` **required by migrator-monitor**<sup>\*</sup> | test                 | no<sup>\*</sup> |
-| db_migrator_dir                     | primary, on-host directory for migrator-related resources                                     | /opt/bfd-db-migrator | no              |
-| db_migrator_tmp_dir                 | defines the `-Djava.io.tmpdir` for the migrator's jvm                                         | /tmp                 | no              |
-| db_migrator_user                    | user to be created to run migrator and migrator-monitor service                               | bb-migrator          | no              |
-| migrator_monitor_enabled            | migrator-monitor enabled for sqs message passing, **requires `env`**                          | false                | no              |
-| migrator_monitor_heartbeat_interval | sleep interval between monitor heartbeats                                                     | 300                  | no              |
+| Name                                | Description                                                                                               | Default              | Required        |
+|-------------------------------------|-----------------------------------------------------------------------------------------------------------|----------------------|-----------------|
+| db_migrator_db_password             | password for targeted database                                                                            | n/a                  | yes             |
+| db_migrator_db_url                  | url for targeted database, e.g. `jdbc:postgresql://mydbserver.example.com:5432/mydb`                      | n/a                  | yes             |
+| db_migrator_db_username             | username for targeted database                                                                            | n/a                  | yes             |
+| env                                 | deployment env, e.g. `prod`, `prod-sbx`, `test` **required by the migrator monitor**<sup>\*</sup>         | test                 | no<sup>\*</sup> |
+| db_migrator_dir                     | primary, on-host directory for migrator-related resources                                                 | /opt/bfd-db-migrator | no              |
+| db_migrator_tmp_dir                 | defines the `-Djava.io.tmpdir` for the migrator's jvm                                                     | /tmp                 | no              |
+| db_migrator_user                    | user to be created to run migrator service                                                                | bb-migrator          | no              |
+| migrator_monitor_enabled            | migrator-monitor enabled for sqs message passing, **requires `env`**                                      | false                | no              |
+| migrator_monitor_heartbeat_interval | sleep interval between monitor heartbeats                                                                 | 300                  | no              |
+| sqs_queue_name                      | the sqs queue to read from when monitoring the migrator **required by the migrator monitor**<sup>\*</sup> | bfd-test-migrator    | no<sup>\*</sup> |
 
 See [defaults/main.yml](./defaults/main.yml) for the list of defaulted variables and their default values.
 

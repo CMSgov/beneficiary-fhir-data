@@ -17,8 +17,6 @@
 
     <properties>
         <checkstyle.skip>true</checkstyle.skip>
-        <bfd-shared-utils.version>1.0.0-SNAPSHOT</bfd-shared-utils.version>
-        <bfd-pipeline-rda-grpcs.version>1.0.0-SNAPSHOT</bfd-pipeline-rda-grpcs.version>
     </properties>
 
     <dependencies>
@@ -67,7 +65,7 @@
         <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-pipeline-rda-grpc</artifactId>
-            <version>${bfd-pipeline-rda-grpcs.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <!-- Testing -->
         <dependency>
