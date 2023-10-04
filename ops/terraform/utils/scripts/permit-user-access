@@ -45,7 +45,7 @@ permit_user_ssh () {
   mkdir -p $user_ssh_dir
   touch $user_ssh_dir/authorized_keys
   echo $ssh_public_key > $user_ssh_dir/authorized_keys
-  chown -R '' $user_ssh_dir
+  chown -R "$user_name:$user_name" $user_ssh_dir
   chmod 700 $user_ssh_dir
   chmod 600 $user_ssh_dir/authorized_keys
 }
