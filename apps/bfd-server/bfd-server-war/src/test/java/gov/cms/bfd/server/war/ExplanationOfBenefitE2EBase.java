@@ -37,6 +37,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Test;
 
 /** Abstract base class for RestAssured E2E tests shared between BFD versions. */
 public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
@@ -52,6 +53,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * returns a 200 response, and has the claim id and a couple other EOB details present in the
    * body.
    */
+  @Test
   public void testReadEobCarrierIdExpectClmIdInResponse() {
     verifySuccessfulResponseAndClaimIdFor(ClaimType.CARRIER);
   }
@@ -60,6 +62,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that an EOB DME claim can be requested using the read endpoint, successfully returns a
    * 200 response, and has the claim id and a couple other EOB details present in the body.
    */
+  @Test
   public void testReadDmeEobIdExpectClmIdInResponse() {
     verifySuccessfulResponseAndClaimIdFor(ClaimType.DME);
   }
@@ -68,6 +71,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that an EOB HHA claim can be requested using the read endpoint, successfully returns a
    * 200 response, and has the claim id and a couple other EOB details present in the body.
    */
+  @Test
   public void testReadHhaEobIdExpectClmIdInResponse() {
     verifySuccessfulResponseAndClaimIdFor(ClaimType.HHA);
   }
@@ -77,6 +81,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * returns a 200 response, and has the claim id and a couple other EOB details present in the
    * body.
    */
+  @Test
   public void testReadHospiceEobIdExpectClmIdInResponse() {
     verifySuccessfulResponseAndClaimIdFor(ClaimType.HOSPICE);
   }
@@ -86,6 +91,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * returns a 200 response, and has the claim id and a couple other EOB details present in the
    * body.
    */
+  @Test
   public void testReadInpatientEobIdExpectClmIdInResponse() {
     verifySuccessfulResponseAndClaimIdFor(ClaimType.INPATIENT);
   }
@@ -95,6 +101,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * returns a 200 response, and has the claim id and a couple other EOB details present in the
    * body.
    */
+  @Test
   public void testReadOutpatientEobIdExpectClmIdInResponse() {
     verifySuccessfulResponseAndClaimIdFor(ClaimType.OUTPATIENT);
   }
@@ -103,6 +110,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that an EOB PDE claim can be requested using the read endpoint, successfully returns a
    * 200 response, and has the claim id and a couple other EOB details present in the body.
    */
+  @Test
   public void testReadPdeEobIdExpectClmIdInResponse() {
     verifySuccessfulResponseAndClaimIdFor(ClaimType.PDE);
   }
@@ -111,11 +119,13 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that an EOB SNF claim can be requested using the read endpoint, successfully returns a
    * 200 response, and has the claim id and a couple other EOB details present in the body.
    */
+  @Test
   public void testReadSnfEobIdExpectClmIdInResponse() {
     verifySuccessfulResponseAndClaimIdFor(ClaimType.SNF);
   }
 
   /** Test that an EOB read request returns a 404 if the eob Id does not match any claims. */
+  @Test
   public void testReadForMissingEobExpect404() {
     // Set eobId to something that will return no results
     String eobId = "carrier-9999999999";
@@ -136,6 +146,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Test that an EOB read request returns a 404 if the eob Id does not match any claims and is
    * negative. Tests negative ID will pass regex pattern.
    */
+  @Test
   public void testReadForMissingNegativeEobExpect404() {
     // Set eobId to something that will return no results, and is negative
     String eobId = "carrier--9999999999";
@@ -153,6 +164,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   }
 
   /** Verifies that EOB read returns a 400 when a non-numeric id is passed in. */
+  @Test
   public void testReadEobForNonNumericClmIdExpect400() {
     String requestString = eobEndpoint + "junk";
 
@@ -172,6 +184,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   }
 
   /** Verifies that the EOB returns a 400 when called with a negative count parameter. */
+  @Test
   public void testEobByPatientIdWithNegativeCountExpect400() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -196,6 +209,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   /**
    * Verifies that the EOB returns a 200 with the expected DD paths for each claim type returned.
    */
+  @Test
   public void testEobByPatientIdWithValidPatientIdExpectValidEob() {
 
     List<Object> loadedData = testUtils.loadSampleAData();
@@ -242,6 +256,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Test that when we get a valid EOB by patient ID response, if we did not initially request
    * paging we can still request paging into the results by using startIndex.
    */
+  @Test
   public void testEobByPatientIdWithValidNonPagingResponseExpectCanAddPagingToResults() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -295,6 +310,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * functionality does no work currently (see https://github.com/jamesagnew/hapi-fhir/issues/1074)
    * and so for now paging with _count=0 should behave as though paging was not requested.
    */
+  @Test
   public void testEobByPatientIdWithPageSizeZeroReturnsNoPaging() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -342,6 +358,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Tests that when searching for EOB by patient id and an unrecognized request param results in a
    * 400 http code.
    */
+  @Test
   public void testEobByPatientIdWithBadRequestParamExpect400() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -355,6 +372,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * pages and all expected pages exist. Also makes sure when we have a page count of higher than
    * the remaining entries at the end, we do not encounter an out-of-bounds exception.
    */
+  @Test
   public void testEobByPatientIdWithPagingExpectAllPages() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -440,6 +458,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Tests that when searching for EOB by patient id and using startIndex, returns paging results,
    * as startIndex (alongside _count) is one of the indicators to return paged results.
    */
+  @Test
   public void testEobByPatientIdWithOnlyStartIndexExpectingPaging() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -464,6 +483,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that findByPatient works as expected for a {@link Patient} that does exist in the DB,
    * with a page size of 50 with fewer (8) results.
    */
+  @Test
   public void searchForEobsWithLargePageSizesOnFewerResults() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -488,6 +508,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verify that EOB by patient id throws a 400 error when the paging start (startIndex) is set
    * higher than the maximum number of results.
    */
+  @Test
   public void testEobByPatientIdWithPagingStartBeyondMaxExpect400() {
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     String requestString = eobEndpoint + "?patient=" + patientId + "&_count=2&startIndex=12";
@@ -511,6 +532,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * the maximum number of results, since the highest index must be less than the number of results
    * as a 0-based index.
    */
+  @Test
   public void testEobByPatientIdWithPagingStartSetToMaxResultsExpect400() {
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     String requestString = eobEndpoint + "?patient=" + patientId + "&_count=2&startIndex=8";
@@ -534,6 +556,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verify that EOB by patient id does not error when the paging start (startIndex) is set to be
    * equal to one less than the maximum number of results.
    */
+  @Test
   public void testEobByPatientIdWithPagingStartOneLessThanMaxExpect200() {
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     String requestString = eobEndpoint + "?patient=" + patientId + "&_count=2&startIndex=7";
@@ -556,6 +579,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Test that searching by patient id with samhsa filtering = true does filter the samhsa data from
    * the response.
    */
+  @Test
   public void testEobByPatientIdWithExcludeSamhsaTrueExpectFiltering() {
 
     // Adjust the sampleA data that was loaded to include some samhsa data
@@ -581,6 +605,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is set
    * to false.
    */
+  @Test
   public void testEobByPatientIdWithExcludeSamhsaFalseExpectNoFiltering() {
 
     // Adjust the sampleA data that was loaded to include some samhsa data by passing true
@@ -625,6 +650,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is not
    * explicitly set (should default to false internally).
    */
+  @Test
   public void testEobByPatientIdWithExcludeSamhsaDefaultExpectNoFiltering() {
 
     // Adjust the sampleA data that was loaded to include some samhsa data by passing true
@@ -669,6 +695,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Ensure nothing unusual happens when we excludeSAMHSA = false and the result has non-samhsa
    * data.
    */
+  @Test
   public void testEobByPatientIdForNonSamhsaEobsWithExcludeSamhsaTrueExpectNoError() {
 
     // dont load samhsa data
@@ -693,6 +720,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Test eob by patient id does not return tax numbers for applicable claim types when
    * IncludeTaxNumbers = false.
    */
+  @Test
   public void testEobByPatientIdWithIncludeTaxNumbersFalseExpectNoTaxNumbers() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -730,6 +758,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Validates that passing patient id and claim type returns only the requested claim type in the
    * response.
    */
+  @Test
   public void testEobByPatientIdAndClaimTypeExpectOneResult() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -756,6 +785,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Tests EOB search by patient id with various lastUpdated values returns the expected number of
    * results for that query.
    */
+  @Test
   public void testEobByPatientIdWithLastUpdated() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -807,6 +837,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that findByPatient works as with a lastUpdated parameter after yesterday and
    * pagination links work and contain lastUpdated.
    */
+  @Test
   public void searchEobByPatientIdWithLastUpdatedAndPagination() {
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     int expectedCount = 5;
@@ -864,6 +895,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that the EOB findByPatient logic falls back to using the correct dates for querying
    * the database when lastUpdated is not set / null.
    */
+  @Test
   public void searchEobByPatientIdWhenNullLastUpdatedExpectFallback() {
     List<Object> loadedRecords = testUtils.loadSampleAData();
     String patientId = testUtils.getPatientId(loadedRecords);
@@ -933,6 +965,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   /**
    * Verifies that search by patient id returns the expected data when filtering by service date.
    */
+  @Test
   public void searchEobByPatientIdWithServiceDate() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
@@ -997,6 +1030,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * of results, but we make a special exception for empty returns since there's nothing to paginate
    * anyway.
    */
+  @Test
   public void searchEobByPatientIdWithNoResultsAndPaginationRequestedExpect200() {
     String patientId = "0";
     String requestString = eobEndpoint + "?patient=" + patientId + "&_count=50";
