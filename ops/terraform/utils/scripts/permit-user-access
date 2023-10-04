@@ -29,7 +29,7 @@ permit_user_ssh () {
   ssh_public_key=$(echo "$user" | jq -r '.ssh_public_key')
   user_ssh_dir="/home/$user_name/.ssh"
 
-  adduser --disabled-password --gecos '' $user_name
+  adduser --comment '' $user_name
   mkdir -p $user_ssh_dir
   touch $user_ssh_dir/authorized_keys
   echo $ssh_public_key > $user_ssh_dir/authorized_keys
