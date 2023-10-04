@@ -6,12 +6,6 @@
   hosts: localhost
 
   tasks:
-    - name: Add SSH users for current environment
-      import_role:
-        name: ssh_users
-      tags:
-        - post-ami
-
     - name: Apply Blue Button Data Pipeline Role
       import_role:
         name: bfd-pipeline

@@ -36,9 +36,3 @@
         name: bfd-db-migrator
       vars:
         db_migrator_tmp_dir: "{{ db_migrator_dir }}/tmp"
-
-    - name: Add SSH users
-      import_role:
-        name: ssh_users
-      tags:
-        - pre-ami
