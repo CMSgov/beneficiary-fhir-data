@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+set -e
+
+ENV=$1
+
+get_ssm_users () {
+  user_ssm="/bfd/mgmt/common/sensitive/user"
+  users=$(aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path $user_ssm \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' \
+    | jq -r "map(select(.Name | test(\"^${user_ssm}/[A-Z0-9]{4}$\")))")
+  echo $users
+}
+
+permit_user_ssh () {
+  user=$1
+
+  # Skip the user if they do not have ssh access to the current environment
+  has_env_access=$(echo "$user" | jq -r ".env_access | any(. == \"${ENV}\")")
+  if ! $has_env_access ; then
+    return
+  fi
+
+  user_name=$(echo "$user" | jq -r '.user_name')
+  ssh_public_key=$(echo "$user" | jq -r '.ssh_public_key')
+  user_ssh_dir="/home/$user_name/.ssh"
+
+  adduser --disabled-password --gecos '' $user_name
+  mkdir -p $user_ssh_dir
+  touch $user_ssh_dir/authorized_keys
+  echo $ssh_public_key > $user_ssh_dir/authorized_keys
+  chown -R '' $user_ssh_dir
+  chmod 700 $user_ssh_dir
+  chmod 600 $user_ssh_dir/authorized_keys
+}
+
+permit_user_sudo () {
+  user=$1
+  user_name=$(echo "$user" | jq -r '.user_name')
+
+  # Skip the user if they do not have sudo access to the current environment
+  has_sudo_env_access=$(echo "$user" | jq -r ".env_privileged_access | any(. == \"${ENV}\")")
+  if ! $has_sudo_env_access ; then
+    return
+  fi
+
+  usermod -aG sudo $user_name
+}
+
+add_ssh_users_and_sudoers() {
+  users=$(get_ssm_users)
+  for encoded_user in $(echo "$users" | jq -r '.[].Value | @base64'); do
+    _jq() {
+      user=$(echo "$encoded_user" | base64 --decode | jq -r ${1})
+      permit_user_ssh "$user"
+      permit_user_sudo "$user"
+    }
+    _jq '.'
+  done
+}
+
+add_ssh_users_and_sudoers
