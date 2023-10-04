@@ -175,6 +175,12 @@ resource "aws_autoscaling_group" "main" {
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
   load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
 
+  # With Lifecycle Hooks, BFD Server instances will not reach the InService state until the BFD
+  # Server application running on the instance is ready to start serving traffic. As a result, it is
+  # unnecessary to have any cooldown or instance warmup period
+  default_cooldown        = 0
+  default_instance_warmup = 0
+
   launch_template {
     name    = aws_launch_template.main.name
     version = aws_launch_template.main.latest_version
@@ -306,11 +312,12 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_low" {
 resource "aws_autoscaling_policy" "filtered_networkin_low_scaling" {
   for_each = { for v in local.scalein_config : "${v.desired_capacity}-instances" => v }
 
-  name                    = "bfd-${var.role}-${local.env}-networkin-low-scalein-${each.key}"
-  autoscaling_group_name  = aws_autoscaling_group.main.name
-  adjustment_type         = "ExactCapacity"
-  metric_aggregation_type = "Average"
-  policy_type             = "StepScaling"
+  name                      = "bfd-${var.role}-${local.env}-networkin-low-scalein-${each.key}"
+  autoscaling_group_name    = aws_autoscaling_group.main.name
+  estimated_instance_warmup = 0 # explicitly disable warmup as lifecycle hooks handle it more accurately
+  adjustment_type           = "ExactCapacity"
+  metric_aggregation_type   = "Average"
+  policy_type               = "StepScaling"
 
   step_adjustment {
     metric_interval_lower_bound = 0
@@ -401,11 +408,12 @@ resource "aws_cloudwatch_metric_alarm" "filtered_networkin_high" {
 }
 
 resource "aws_autoscaling_policy" "filtered_networkin_high_scaling" {
-  name                    = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
-  autoscaling_group_name  = aws_autoscaling_group.main.name
-  adjustment_type         = "ExactCapacity"
-  metric_aggregation_type = "Average"
-  policy_type             = "StepScaling"
+  name                      = "bfd-${var.role}-${local.env}-networkin-high-scaleout"
+  autoscaling_group_name    = aws_autoscaling_group.main.name
+  estimated_instance_warmup = 0 # explicitly disable warmup as lifecycle hooks handle it more accurately
+  adjustment_type           = "ExactCapacity"
+  metric_aggregation_type   = "Average"
+  policy_type               = "StepScaling"
 
   dynamic "step_adjustment" {
     for_each = local.scaleout_config
