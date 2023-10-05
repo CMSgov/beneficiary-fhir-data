@@ -19,6 +19,7 @@ module "glue-table-api-requests" {
   bucket_cmk     = data.aws_kms_key.kms_key.arn
   storage_format = "parquet"
   serde_format   = "parquet"
+  owner          = "bfd"
   tags           = local.tags
 
   partitions = [
