@@ -45,6 +45,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     final var nameE = "e";
     final var nameF = "f";
     final var nameG = "g";
+    final var nameH = "h";
     final var nameZ = "z";
 
     final var configSettings =
@@ -92,6 +93,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .put(nameB, "b-ssm-specific-parameter")
             .put(nameC, "c-ssm-specific-parameter")
             .put(nameD, "d-ssm-specific-parameter")
+            .put(nameH, "h-ssm-specific-parameter")
             .build();
     final var ssmCommonParameters =
         ImmutableMap.<String, String>builder()
@@ -102,7 +104,9 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .put(nameE, "e-ssm-common-parameter")
             .build();
     final var ssmParentParameters =
-        ImmutableMap.<String, String>builder().put(nameG, "g-ssm-parent-parameter").build();
+        ImmutableMap.<String, String>builder().put(nameG, "g-ssm-parent-parameter")
+            .put(nameH, "h-ssm-parent-parameter")
+            .build();
     final var ssmChildParameters =
         ImmutableMap.<String, String>builder().put(nameG, "g-ssm-child-parameter").build();
     final var defaultValues =
@@ -181,6 +185,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
       assertEquals("f-default", config.stringValue(nameF));
       assertEquals("g-ssm-parent-parameter", config.stringValue(nameG));
       assertEquals("g-ssm-child-parameter", config.stringValue(ssmChildName + "." + nameG));
+      assertEquals("h-ssm-specific-parameter", config.stringValue(nameH));
       assertEquals(Optional.empty(), config.stringOption(nameZ));
 
     } finally {

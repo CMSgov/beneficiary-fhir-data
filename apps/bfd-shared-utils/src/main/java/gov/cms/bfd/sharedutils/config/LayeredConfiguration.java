@@ -88,15 +88,15 @@ public final class LayeredConfiguration {
 
       final var parameterStore = createAwsParameterStoreClient(awsConfig);
 
-      // load parameters from flat AWS SSM paths if configured
-      if (settings.hasSsmPaths()) {
-        addSsmParametersToBuilder(settings.getSsmPaths(), false, parameterStore, configBuilder);
-      }
-
       // load parameters from hierarchical AWS SSM paths if configured
       if (settings.hasSsmHierarchies()) {
         addSsmParametersToBuilder(
             settings.getSsmHierarchies(), true, parameterStore, configBuilder);
+      }
+
+      // load parameters from flat AWS SSM paths if configured
+      if (settings.hasSsmPaths()) {
+        addSsmParametersToBuilder(settings.getSsmPaths(), false, parameterStore, configBuilder);
       }
     }
 
