@@ -39,7 +39,7 @@
             "additional": [],
             "derived": "",
             "note": "The eob.item[N].modifier[N].coding[N].version is set by the hcpcs year.",
-            "example": "[\\n  {\\n    \"system\": \"https://bluebutton.cms.gov/resources/codesystem/hcpcs\",\\n    \"version\": \"5\",\\n    \"code\": \"LT\"\\n  }\\n]\\n"
+            "example": "[\\n  {\\n    \"coding\": [\\n      {\\n        \"system\": \"https://bluebutton.cms.gov/resources/codesystem/hcpcs\",\\n        \"version\": \"5\",\\n        \"code\": \"LT\"\\n      }\\n    ]\\n  }\\n]"
         }
     ]
 }
