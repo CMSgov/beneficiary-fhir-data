@@ -1,62 +1,76 @@
 locals {
-  tags       = { business = "OEDA", application = "bfd-insights", project = "bcda" }
-  project    = "bcda"
-  database   = "bcda"
-  partitions = [{ name = "dt", type = "string", comment = "Approximate delivery time" }]
+  project  = "bcda"
+  database = "bcda"
+  owner    = "bcda"
+  partitions = [
+    { name = "dt", type = "string", comment = "Approximate delivery time" }
+  ]
   columns = [
     { name = "name", type = "string", comment = "" },
     { name = "timestamp", type = "bigint", comment = "" },
     { name = "json_result", type = "string", comment = "" },
   ]
+
+  # List of arns for cross account access to the bucket. This value is populated from the SSM parameter store and is
+  # encrypted with this project's CMK. It is currently managed manually, but will be managed by Terraform in the future.
+  cross_account_arns = tolist(split(",", data.aws_ssm_parameter.cross_account_arns.value))
+
+  # The following tags get applied to all resources in this project. They are used to enforce ABAC policies, so modify
+  # with caution. To append custom tags to specific resource, simply add them to the resource's tags map, not here.
+  default_tags = {
+    Terraform   = true
+    business    = "oeda"
+    application = "bfd"
+    project     = "insights"
+    subproject  = "bcda"
+    owner       = "bcda"
+  }
 }
 
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
-
-## Bucket for the project's data
-
-module "bucket" {
-  source         = "../../modules/bucket"
-  name           = local.project
-  sensitivity    = "moderate"
-  tags           = local.tags
-  cross_accounts = var.bcda_cross_accounts
+# As of 08/2023 this parameter is currently managed manually. It was populated from a now deprecated tfvars file.
+data "aws_ssm_parameter" "cross_account_arns" {
+  name = "/bcda/global/sensitive/insights/bucket/cross_account_arns"
+  with_decryption = true
 }
 
 data "aws_s3_bucket" "moderate_bucket" {
   bucket = "bfd-insights-moderate-${data.aws_caller_identity.current.account_id}"
 }
-
 data "aws_kms_alias" "moderate_cmk" {
   name = "alias/bfd-insights-moderate-cmk"
 }
 
-## Athena workgroup
+## Bucket for the project's data
+module "bucket" {
+  source         = "../../modules/bucket"
+  name           = local.project
+  sensitivity    = "moderate"
+  cross_accounts = local.cross_account_arns
+}
 
+## Athena workgroup
 module "workgroup" {
   source     = "../../modules/workgroup"
   bucket     = module.bucket.id
   bucket_cmk = module.bucket.bucket_cmk
   name       = local.database
-  tags       = local.tags
 }
 
-## Database for the project
-
+## Glue Catalog Database for the project
 module "database" {
   source     = "../../modules/database"
   database   = local.database
   bucket     = module.bucket.id
   bucket_cmk = module.bucket.bucket_cmk
-  tags       = local.tags
 }
 
 ## Glue setup
-
 module "glue_jobs" {
   source  = "../../modules/jobs"
   project = local.project
-  tags    = local.tags
 
   # Setup access to both the BCDA and common moderate bucket
   buckets = [
@@ -65,52 +79,57 @@ module "glue_jobs" {
   ]
 }
 
+# Tables
 module "insights_data_table_dev" {
-  source      = "../../modules/table"
-  database    = module.database.name
-  table       = "dev_insights"
-  description = "dev insights data"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
-  tags        = local.tags
-  partitions  = local.partitions
-  columns     = local.columns
+  source             = "../../modules/table"
+  owner              = local.owner
+  database           = module.database.name
+  table              = "dev_insights"
+  description        = "dev insights data"
+  bucket             = module.bucket.id
+  bucket_cmk         = module.bucket.bucket_cmk
+  partitions         = local.partitions
+  columns            = local.columns
+  storage_compressed = false
 }
 
 module "insights_data_table_test" {
-  source      = "../../modules/table"
-  database    = module.database.name
-  table       = "test_insights"
-  description = "test insights data"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
-  tags        = local.tags
-  partitions  = local.partitions
-  columns     = local.columns
+  source             = "../../modules/table"
+  owner              = local.owner
+  database           = module.database.name
+  table              = "test_insights"
+  description        = "test insights data"
+  bucket             = module.bucket.id
+  bucket_cmk         = module.bucket.bucket_cmk
+  partitions         = local.partitions
+  columns            = local.columns
+  storage_compressed = false
 }
 
 module "insights_data_table_opensbx" {
-  source      = "../../modules/table"
-  database    = module.database.name
-  table       = "opensbx_insights"
-  description = "opensbx insights data"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
-  tags        = local.tags
-  partitions  = local.partitions
-  columns     = local.columns
+  source             = "../../modules/table"
+  owner              = local.owner
+  database           = module.database.name
+  table              = "opensbx_insights"
+  description        = "opensbx insights data"
+  bucket             = module.bucket.id
+  bucket_cmk         = module.bucket.bucket_cmk
+  partitions         = local.partitions
+  columns            = local.columns
+  storage_compressed = false
 }
 
 module "insights_data_table_prod" {
-  source      = "../../modules/table"
-  database    = module.database.name
-  table       = "prod_insights"
-  description = "prod insights data"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
-  tags        = local.tags
-  partitions  = local.partitions
-  columns     = local.columns
+  source             = "../../modules/table"
+  owner              = local.owner
+  database           = module.database.name
+  table              = "prod_insights"
+  description        = "prod insights data"
+  bucket             = module.bucket.id
+  bucket_cmk         = module.bucket.bucket_cmk
+  partitions         = local.partitions
+  columns            = local.columns
+  storage_compressed = false
 }
 
 # lambda to reload partitions
@@ -129,57 +148,33 @@ resource "aws_cloudwatch_log_group" "bcda_load_partitions" {
   name              = "/aws/lambda/bcda_load_partitions"
   retention_in_days = 14
 }
+
 resource "aws_iam_role" "bcda_load_partitions" {
-  name_prefix        = "BcdaLoadPartitions-"
-  assume_role_policy = data.aws_iam_policy_document.bcda_load_partitions.json
-}
-
-data "aws_iam_policy_document" "bcda_load_partitions" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "sts:AssumeRole",
-    ]
-
-    principals {
-      type = "Service"
-      identifiers = [
-        "lambda.amazonaws.com"
+  name_prefix = "BcdaLoadPartitions-"
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          }
+        }
       ]
     }
-  }
-}
+  )
 
-data "aws_iam_policy" "glue_service" {
-  arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
-}
-
-data "aws_iam_policy" "athena_service" {
-  arn = "arn:aws:iam::aws:policy/AmazonAthenaFullAccess"
-}
-
-data "aws_iam_policy" "s3_service" {
-  arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-}
-
-data "aws_iam_policy" "glue_console_service" {
-  arn = "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess"
-}
-
-locals {
-  lambda_role_policies = [
+  # we are not using these policies anywhere else, so just inline them here instead of the previous use of data sources
+  # and policy attachments (does the same thing, but less verbose)
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole",
+    "arn:aws:iam::aws:policy/AmazonAthenaFullAccess",
+    "arn:aws:iam::aws:policy/AmazonS3FullAccess",
+    "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess",
     module.glue_jobs.s3_access_policy_arn,
-    data.aws_iam_policy.glue_service.arn,
-    data.aws_iam_policy.athena_service.arn,
-    data.aws_iam_policy.s3_service.arn,
-    data.aws_iam_policy.glue_console_service.arn
   ]
-}
-
-resource "aws_iam_role_policy_attachment" "bcda_load_partitions" {
-  count      = length(local.lambda_role_policies)
-  role       = aws_iam_role.bcda_load_partitions.name
-  policy_arn = local.lambda_role_policies[count.index]
 }
 
 data "archive_file" "bcda_load_partitions" {
