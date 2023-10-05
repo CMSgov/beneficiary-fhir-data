@@ -7,8 +7,8 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.InpatientClaimLine;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -154,8 +154,7 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
           claimGroup.getProfessionalComponentCharge());
     }
 
-    // TODO If actually nullable, should be Optional.
-    if (claimGroup.getClaimTotalPPSCapitalAmount() != null) {
+    if (claimGroup.getClaimTotalPPSCapitalAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob,
           CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,

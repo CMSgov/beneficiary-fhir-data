@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.BeneficiaryHistory
+- entityClassName: gov.cms.bfd.model.rif.entities.BeneficiaryHistory
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: BeneficiaryHistory
@@ -143,7 +143,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: BeneficiaryHistoryColumn
-    packageName: gov.cms.bfd.model.rif
+    packageName: gov.cms.bfd.model.rif.entities
     values:
     - BENE_ID
     - STATE_CODE
@@ -211,4 +211,4 @@ mappings:
     to: mbiEffectiveDate
   - from: EFCTV_END_DT
     to: mbiObsoleteDate
-  transformerClassName: gov.cms.bfd.model.rif.BeneficiaryHistoryParser
+  transformerClassName: gov.cms.bfd.model.rif.entities.BeneficiaryHistoryParser

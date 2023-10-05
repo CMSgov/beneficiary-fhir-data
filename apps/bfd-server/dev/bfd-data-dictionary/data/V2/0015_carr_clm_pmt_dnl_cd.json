@@ -21,7 +21,8 @@
         "CARR_CLM_PMT_DNL_CD"
     ],
     "cclfMapping": [
-        "CCLF5.CLM_CARR_PMT_DNL_CD"
+        "CCLF5.CLM_CARR_PMT_DNL_CD",
+        "CCLF6.CLM_CARR_PMT_DNL_CD"
     ],
     "fhirMapping": [
         {

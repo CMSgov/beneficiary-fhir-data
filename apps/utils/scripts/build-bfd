@@ -54,6 +54,14 @@ of maven arguments.
 -D          Download data projects. (SLOW)
 -F          Just run code formatter and exit (no build).
 -h          Prints this help message.
+
+Supported long options:
+
+--profile name
+  Build using the specified profile.
+
+--deploy
+  Push build artifacts to remote maven repository.
 EOF
 }
 
@@ -86,8 +94,10 @@ run_formatter=false
 show_dependencies=false
 build_image=false
 resume_from=""
+profile_name=""
+deploy_artifacts=false
 
-while getopts "atijJscmxXp:P:I:T:r:zdDFh" option ; do
+while getopts "atijJscmxXp:P:I:T:r:zdDFh-:" option ; do
   case $option in
   a) run_tests=true ; run_its=true ; javadoc=true ; checkstyle=true ; prevent_full_cache=true ;;
   t) run_tests=true ; prevent_full_cache=true ;;
@@ -108,6 +118,17 @@ while getopts "atijJscmxXp:P:I:T:r:zdDFh" option ; do
   D) download_data=true ;;
   F) run_formatter=true ;;
   z) dry_run=true ;;
+  -) case $OPTARG in
+       profile)
+         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+         profile_name=$val
+         ;;
+       deploy)
+         deploy_artifacts=true
+         ;;
+       *) usage ; exit 1
+     esac
+     ;;
   h) usage ; exit 0 ;;
   *) usage ; exit 1 ;;
   esac
@@ -126,6 +147,7 @@ args=""
 [[ $it_test_arg != "" ]] && args="$args -Dit.test=\"$it_test_arg\""
 [[ $resume_from != "" ]] && args="$args -rf $resume_from"
 [[ $build_image == "true" ]] && args="$args -Djib.skip=false"
+[[ $profile_name != "" ]] && args="$args -P${profile_name}"
 
 if [[ "$test_arg" != "" ]] || [[ "$it_test_arg" != "" ]] ; then
   if [[ "$projects" = "" ]] || [[ $include_dependencies = "true" ]] ; then
@@ -146,6 +168,7 @@ case $cache_flag_count in
 esac
 
 goals="install"
+[[ $deploy_artifacts == "true" ]] && goals="deploy"
 [[ $clean == "true" ]] && goals="clean $goals"
 [[ $run_formatter == "true" ]] && goals="com.spotify.fmt:fmt-maven-plugin:format"
 [[ $show_dependencies == "true" ]] && goals="dependency::tree"

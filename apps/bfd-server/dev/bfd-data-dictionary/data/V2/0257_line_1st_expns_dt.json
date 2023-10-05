@@ -23,7 +23,8 @@
         "LINE_1ST_EXPNS_DT"
     ],
     "cclfMapping": [
-        "CCLF5.CLM_LINE_FROM_DT"
+        "CCLF5.CLM_LINE_FROM_DT",
+        "CCLF6.CLM_LINE_FROM_DT"
     ],
     "fhirMapping": [
         {

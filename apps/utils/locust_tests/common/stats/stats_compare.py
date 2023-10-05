@@ -119,7 +119,7 @@ def do_stats_comparison(
             str(stats_config.stats_store.value),
             str(ex),
         )
-        return FinalCompareResult.NOT_APPLICABLE
+        return FinalCompareResult.FAILED
 
     if not previous_stats:
         logger.warning(

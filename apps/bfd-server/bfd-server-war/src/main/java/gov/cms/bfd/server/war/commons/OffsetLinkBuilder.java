@@ -48,14 +48,27 @@ public final class OffsetLinkBuilder implements LinkBuilder {
    */
   public OffsetLinkBuilder(RequestDetails requestDetails, String resource) {
     this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
-    startIndex = parseIntegerParameters(requestDetails, "startIndex");
+    this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
+    this.serverBase = requestDetails.getServerBaseForRequest();
+    this.resource = resource;
+    this.requestDetails = requestDetails;
+    validate();
+  }
+
+  /**
+   * Verifies that the link parameters, if not empty, are legal values. If the values are not legal,
+   * throws an {@link InvalidRequestException} to describe the error and return an http 400 to the
+   * caller.
+   */
+  private void validate() {
+    if (pageSize.isPresent() && pageSize.get() < 0) {
+      throw new InvalidRequestException(
+          String.format("Value for pageSize cannot be negative: %s", pageSize.get()));
+    }
     if (startIndex.isPresent() && startIndex.get() < 0) {
       throw new InvalidRequestException(
           String.format("Value for startIndex cannot be negative: %d", startIndex.get()));
     }
-    this.serverBase = requestDetails.getServerBaseForRequest();
-    this.resource = resource;
-    this.requestDetails = requestDetails;
   }
 
   /**
@@ -95,12 +108,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
   @Override
   public int getPageSize() {
     if (!isPagingRequested()) throw new BadCodeMonkeyException();
-    if (!pageSize.isPresent()) return 10;
-    if (pageSize.get() < 0) {
-      throw new InvalidRequestException(
-          String.format("Value for pageSize cannot be negative: %s", pageSize.get()));
-    }
-    return pageSize.get();
+    return pageSize.orElse(10);
   }
 
   /** {@inheritDoc} */
@@ -117,14 +125,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
    */
   public int getStartIndex() {
     if (!isPagingRequested()) throw new BadCodeMonkeyException();
-    if (startIndex.isPresent()) {
-      if (startIndex.get() < 0) {
-        throw new InvalidRequestException(
-            String.format("Value for startIndex cannot be negative: %s", startIndex.get()));
-      }
-      return startIndex.get();
-    }
-    return 0;
+    return startIndex.orElse(0);
   }
 
   /**

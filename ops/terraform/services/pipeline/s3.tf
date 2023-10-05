@@ -1,6 +1,7 @@
 resource "aws_s3_bucket" "this" {
   bucket        = local.is_ephemeral_env ? null : local.pipeline_bucket
   bucket_prefix = local.is_ephemeral_env ? "bfd-${local.env}-${local.legacy_service}" : null
+  force_destroy = local.is_ephemeral_env
 
   tags = {
     Layer = local.layer,

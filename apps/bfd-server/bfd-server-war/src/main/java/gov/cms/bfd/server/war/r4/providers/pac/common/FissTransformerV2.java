@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
-import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaFissPayer;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissPayer;
 import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Enumerations;

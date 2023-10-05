@@ -137,8 +137,8 @@ fi
 # Autodetect if localstack is running based on whether we can connect to its port locally.
 if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   echo "using localstack"
-  export SSM_REGION=us-east-1
-  export SSM_ENDPOINT=http://${localstack_ip}:4566
+  export AWS_REGION=us-east-1
+  export AWS_ENDPOINT=http://${localstack_ip}:4566
   export SSM_PARAMETER_PATH=/bfd-server
 fi
 
@@ -163,7 +163,7 @@ properties=""
 function setprop() {
   name="$1"
   value="$2"
-  if [[ -z "$SSM_REGION" ]] ; then
+  if [[ -z "$AWS_REGION" ]] ; then
     properties="${properties} -D${name}=${value}"
   else
     echo put-parameter $name
@@ -261,8 +261,8 @@ else
     run \
     --rm \
     --name $image_name \
-    --env SSM_REGION \
-    --env SSM_ENDPOINT \
+    --env AWS_REGION \
+    --env AWS_ENDPOINT \
     --env SSM_PARAMETER_PATH \
     --env HOME=/home/app \
     --env BFD_TRUSTSTORE=$ssl_mount/$truststore_file \

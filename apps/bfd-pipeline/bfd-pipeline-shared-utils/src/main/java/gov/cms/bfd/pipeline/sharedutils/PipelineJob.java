@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
  * <strong>SHALL</strong> also provide a {@code JOB_TYPE} constant for other jobs to reference,
  * which must return the same value as {@link #getType()}.
  */
-public interface PipelineJob extends Callable<PipelineJobOutcome> {
+public interface PipelineJob extends Callable<PipelineJobOutcome>, AutoCloseable {
   /**
    * Gets the {@link PipelineJobType} that uniquely identifies this {@link PipelineJob}
    * implementation.
@@ -77,4 +77,15 @@ public interface PipelineJob extends Callable<PipelineJobOutcome> {
    */
   @Override
   PipelineJobOutcome call() throws Exception;
+
+  /**
+   * Releases any long-lived resources used by the job. Must be called once the job is no longer
+   * needed.
+   *
+   * @throws Exception if cleanup fails
+   */
+  @Override
+  default void close() throws Exception {
+    // default implementation does nothing
+  }
 }

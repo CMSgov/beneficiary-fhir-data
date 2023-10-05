@@ -1,7 +1,7 @@
 mappings:
 - id: McsAdjustment
   messageClassName: gov.cms.mpsm.rda.v1.mcs.McsAdjustment
-  entityClassName: gov.cms.bfd.model.rda.RdaMcsAdjustment
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaMcsAdjustment
   table:
     name: mcs_adjustments
     schema: rda

@@ -74,7 +74,7 @@ public class OffsetLinkBuilderTest {
     assertThrows(
         InvalidRequestException.class,
         () -> {
-          OffsetLinkBuilder linkBuilder = new OffsetLinkBuilder(requestDetails, "");
+          new OffsetLinkBuilder(requestDetails, "");
         },
         "Value for startIndex cannot be negative: -1");
   }
@@ -92,12 +92,11 @@ public class OffsetLinkBuilderTest {
     String[] value = {"-1"};
     params.put(Constants.PARAM_COUNT, value);
     when(requestDetails.getParameters()).thenReturn(params);
-    OffsetLinkBuilder linkBuilder = new OffsetLinkBuilder(requestDetails, "");
 
     assertThrows(
         InvalidRequestException.class,
         () -> {
-          linkBuilder.getPageSize();
+          new OffsetLinkBuilder(requestDetails, "");
         },
         "Value for pageSize cannot be negative: -1");
   }

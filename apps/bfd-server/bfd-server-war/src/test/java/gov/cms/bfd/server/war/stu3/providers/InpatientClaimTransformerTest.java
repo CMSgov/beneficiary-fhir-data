@@ -8,8 +8,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.InpatientClaimLine;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -121,6 +121,8 @@ public final class InpatientClaimTransformerTest {
         CcwCodebookVariable.IME_OP_CLM_VAL_AMT, claim.getIndirectMedicalEducationAmount(), eob);
     TransformerTestUtils.assertAdjudicationTotalAmountEquals(
         CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claim.getDisproportionateShareAmount(), eob);
+    TransformerTestUtils.assertAdjudicationTotalAmountEquals(
+        CcwCodebookVariable.CLM_UNCOMPD_CARE_PMT_AMT, claim.getClaimUncompensatedCareAmount(), eob);
 
     // test common eob information between Inpatient, HHA, Hospice and SNF claims
     // are set as

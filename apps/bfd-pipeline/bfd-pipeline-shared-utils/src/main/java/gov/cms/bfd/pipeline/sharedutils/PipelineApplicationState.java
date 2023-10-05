@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.sharedutils;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import java.util.HashMap;
@@ -88,20 +88,14 @@ public final class PipelineApplicationState implements AutoCloseable {
   /**
    * Create pooled data source used to communicate with the database.
    *
-   * @param dbOptions the {@link DatabaseOptions} to use for the application's DB (which this will
-   *     use to create {@link #getPooledDataSource()})
+   * @param dataSourceFactory the {@link DataSourceFactory} to use for the application's DB (which
+   *     this will use to create {@link #getPooledDataSource()})
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
   public static HikariDataSource createPooledDataSource(
-      DatabaseOptions dbOptions, MetricRegistry metrics) {
-    HikariDataSource pooledDataSource = new HikariDataSource();
-
-    pooledDataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
-    pooledDataSource.setUsername(dbOptions.getDatabaseUsername());
-    pooledDataSource.setPassword(dbOptions.getDatabasePassword());
-    pooledDataSource.setMaximumPoolSize(dbOptions.getMaxPoolSize());
-    pooledDataSource.setRegisterMbeans(true);
+      DataSourceFactory dataSourceFactory, MetricRegistry metrics) {
+    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
     pooledDataSource.setMetricRegistry(metrics);
 
     // In order to store and retrieve JSON in postgresql without adding any additional maven

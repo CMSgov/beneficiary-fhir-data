@@ -1,7 +1,7 @@
 mappings:
 - id: FissAuditTrail
   messageClassName: gov.cms.mpsm.rda.v1.fiss.FissAuditTrail
-  entityClassName: gov.cms.bfd.model.rda.RdaFissAuditTrail
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaFissAuditTrail
   table:
     name: fiss_audit_trails
     schema: rda

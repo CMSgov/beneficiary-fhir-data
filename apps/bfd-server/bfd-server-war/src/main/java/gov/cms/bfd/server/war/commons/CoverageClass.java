@@ -2,7 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 /**
  * Enumerates the value codeset indicating the class of coverage of the {@link
- * gov.cms.bfd.model.rif.Beneficiary}.
+ * gov.cms.bfd.model.rif.entities.Beneficiary}.
  */
 public enum CoverageClass {
   /** Group coverage. */

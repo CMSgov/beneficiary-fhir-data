@@ -76,7 +76,7 @@ class SqsDaoIT extends AbstractLocalStackTest {
   static SqsClient createSqsClientForLocalStack(LocalStackContainer localstack) {
     return SqsClient.builder()
         .region(Region.of(localstack.getRegion()))
-        .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SQS))
+        .endpointOverride(localstack.getEndpoint())
         .credentialsProvider(
             StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))

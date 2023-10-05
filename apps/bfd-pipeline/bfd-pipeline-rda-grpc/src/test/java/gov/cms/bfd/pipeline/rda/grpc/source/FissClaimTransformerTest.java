@@ -7,12 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.model.rda.Mbi;
-import gov.cms.bfd.model.rda.RdaFissAuditTrail;
-import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
-import gov.cms.bfd.model.rda.RdaFissPayer;
-import gov.cms.bfd.model.rda.RdaFissProcCode;
-import gov.cms.bfd.model.rda.RdaFissRevenueLine;
+import gov.cms.bfd.model.rda.entities.RdaFissAuditTrail;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
+import gov.cms.bfd.model.rda.entities.RdaFissPayer;
+import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
+import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;

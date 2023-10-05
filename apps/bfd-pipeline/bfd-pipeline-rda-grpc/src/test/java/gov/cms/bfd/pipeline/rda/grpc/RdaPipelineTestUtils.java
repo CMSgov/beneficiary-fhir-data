@@ -9,8 +9,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Timer;
@@ -91,10 +93,17 @@ public class RdaPipelineTestUtils {
     // the HSQLDB database will be destroyed when this connection is closed
     try (Connection dbLifetimeConnection =
         DriverManager.getConnection(dbUrl + ";shutdown=true", "", "")) {
-      final DatabaseOptions dbOptions = new DatabaseOptions(dbUrl, "", "", 10);
+      final DatabaseOptions dbOptions =
+          DatabaseOptions.builder()
+              .databaseUrl(dbUrl)
+              .databaseUsername("")
+              .databasePassword("")
+              .maxPoolSize(10)
+              .build();
       final MetricRegistry appMetrics = new MetricRegistry();
+      final DataSourceFactory dataSourceFactory = new HikariDataSourceFactory(dbOptions);
       final HikariDataSource dataSource =
-          PipelineApplicationState.createPooledDataSource(dbOptions, appMetrics);
+          PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics);
       assertTrue(
           DatabaseSchemaManager.createOrUpdateSchema(dataSource), "schema migration failure");
       try (PipelineApplicationState appState =

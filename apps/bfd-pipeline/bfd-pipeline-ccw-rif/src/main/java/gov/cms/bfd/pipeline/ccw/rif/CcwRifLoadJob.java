@@ -20,6 +20,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,41 +149,46 @@ public final class CcwRifLoadJob implements PipelineJob {
   private final PipelineApplicationState appState;
   /** If the application is in idempotent mode. */
   private final boolean isIdempotentMode;
+  /** Time between runs of the {@link CcwRifLoadJob}. Empty means to run exactly once. */
+  private final Optional<Duration> runInterval;
   /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
   /**
-   * Constructs a new {@link CcwRifLoadJob} instance.
+   * Constructs a new {@link CcwRifLoadJob} instance. The {@link S3TaskManager} will be
+   * automatically shut down when this job's {@link #close} method is called.
    *
    * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
-   * @param isIdempotentMode the {@link boolean} TRUE if running in idenpotent mode
+   * @param isIdempotentMode the {@link boolean} TRUE if running in idempotent mode
+   * @param runInterval used to construct the job schedule
    */
   public CcwRifLoadJob(
       PipelineApplicationState appState,
       ExtractionOptions options,
       S3TaskManager s3TaskManager,
       DataSetMonitorListener listener,
-      boolean isIdempotentMode) {
+      boolean isIdempotentMode,
+      Optional<Duration> runInterval) {
     this.appState = appState;
     this.appMetrics = appState.getMetrics();
     this.options = options;
     this.s3TaskManager = s3TaskManager;
     this.listener = listener;
     this.isIdempotentMode = isIdempotentMode;
+    this.runInterval = runInterval;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
-    return Optional.of(new PipelineJobSchedule(1, ChronoUnit.SECONDS));
+    return runInterval.map(
+        interval -> new PipelineJobSchedule(interval.toMillis(), ChronoUnit.MILLIS));
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isInterruptible() {
     /*
@@ -193,7 +199,6 @@ public final class CcwRifLoadJob implements PipelineJob {
     return false;
   }
 
-  /** {@inheritDoc} */
   @Override
   public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
@@ -353,6 +358,17 @@ public final class CcwRifLoadJob implements PipelineJob {
     s3TaskManager.submit(new DataSetMoveTask(s3TaskManager, options, manifestToProcess));
 
     return PipelineJobOutcome.WORK_DONE;
+  }
+
+  /**
+   * Shuts down our {@link S3TaskManager}. If any download or move tasks are still running this
+   * method will wait for them to complete before returning.
+   *
+   * <p>{@inheritDoc}
+   */
+  @Override
+  public void close() throws Exception {
+    s3TaskManager.shutdownSafely();
   }
 
   /**

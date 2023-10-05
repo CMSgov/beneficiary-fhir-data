@@ -21,7 +21,8 @@
         "LINE_PRCSG_IND_CD"
     ],
     "cclfMapping": [
-        "CCLF5.CLM_PRCSG_IND_CD"
+        "CCLF5.CLM_PRCSG_IND_CD",
+        "CCLF6.CLM_PRCSG_IND_CD"
     ],
     "fhirMapping": [
         {

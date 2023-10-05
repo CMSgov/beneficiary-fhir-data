@@ -166,7 +166,6 @@
                         <goals>
                             <goal>entities</goal>
                             <goal>sql</goal>
-                            <goal>csv-writers</goal>
                             <goal>transformers</goal>
                         </goals>
                     </execution>

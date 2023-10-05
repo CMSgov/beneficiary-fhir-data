@@ -21,7 +21,11 @@
     "ccwMapping": [
         "REV_CNTR_PRVDR_PMT_AMT"
     ],
-    "cclfMapping": [],
+    "cclfMapping": [
+        "CCLF2.CLM_LINE_CVRD_PD_AMT",
+        "CCLF5.CLM_LINE_CVRD_PD_AMT",
+        "CCLF6.CLM_LINE_CVRD_PD_AMT"
+    ],
     "fhirMapping": [
         {
             "version": "R4",

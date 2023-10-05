@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.AbstractLocalStackTest;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -21,7 +20,7 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
     final var ssmClient =
         SsmClient.builder()
             .region(Region.of(localstack.getRegion()))
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.SSM))
+            .endpointOverride(localstack.getEndpoint())
             .credentialsProvider(
                 StaticCredentialsProvider.create(
                     AwsBasicCredentials.create(

@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.CarrierClaimLine
+- entityClassName: gov.cms.bfd.model.rif.entities.CarrierClaimLine
   id: CarrierClaimLine
   messageClassName: gov.cms.model.dsl.codegen.library.RifObjectWrapper
   minStringLength: 0
@@ -227,7 +227,7 @@ mappings:
     compositeKeyClassName: LineId
     equalsNeeded: false
     joins:
-    - entityClass: gov.cms.bfd.model.rif.CarrierClaim
+    - entityClass: gov.cms.bfd.model.rif.entities.CarrierClaim
       fetchType: EAGER
       fieldName: parentClaim
       foreignKey: carrier_claim_lines_clm_id_to_carrier_claims

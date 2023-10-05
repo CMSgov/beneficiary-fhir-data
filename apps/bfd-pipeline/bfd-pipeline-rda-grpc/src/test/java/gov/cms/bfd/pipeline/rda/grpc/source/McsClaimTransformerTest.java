@@ -8,12 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.model.rda.Mbi;
-import gov.cms.bfd.model.rda.RdaMcsAdjustment;
-import gov.cms.bfd.model.rda.RdaMcsAudit;
-import gov.cms.bfd.model.rda.RdaMcsClaim;
-import gov.cms.bfd.model.rda.RdaMcsDetail;
-import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
-import gov.cms.bfd.model.rda.RdaMcsLocation;
+import gov.cms.bfd.model.rda.entities.RdaMcsAdjustment;
+import gov.cms.bfd.model.rda.entities.RdaMcsAudit;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
+import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.entities.RdaMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;

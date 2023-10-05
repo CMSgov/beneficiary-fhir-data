@@ -77,7 +77,7 @@ boolean monitorServerRegression(Map args = [:]) {
             awsRegion: awsRegion,
             visibilityTimeoutSeconds: 30,
             waitTimeSeconds: 20,
-            maxMessages: 1
+            maxMessages: 10
         )
 
         // The server-regression lambda will post only one message once finished,

@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.bridge.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.model.rif.InpatientClaimColumn;
+import gov.cms.bfd.model.rif.entities.InpatientClaimColumn;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

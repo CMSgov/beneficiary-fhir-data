@@ -19,9 +19,9 @@ public interface CommonHeaders {
    * The header key used to determine whether or not tax numbers should be included in responses.
    *
    * <p>Should be set to <code>"true"</code> if {@link
-   * gov.cms.bfd.model.rif.CarrierClaimColumn#TAX_NUM} or {@link
-   * gov.cms.bfd.model.rif.DMEClaimColumn#TAX_NUM} should be mapped and included in the results,
-   * <code>"false"</code> if not. Defaults to <code>"false"</code>.
+   * gov.cms.bfd.model.rif.entities.CarrierClaimColumn#TAX_NUM} or {@link
+   * gov.cms.bfd.model.rif.entities.DMEClaimColumn#TAX_NUM} should be mapped and included in the
+   * results, <code>"false"</code> if not. Defaults to <code>"false"</code>.
    */
   public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 

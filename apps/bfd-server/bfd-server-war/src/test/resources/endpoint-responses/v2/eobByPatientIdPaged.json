@@ -2257,6 +2257,12 @@
           "currency" : "USD"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt",
+        "valueMoney" : {
+          "value" : 120.56,
+          "currency" : "USD"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/dsh_op_clm_val_amt",
         "valueMoney" : {
           "value" : 25.0,

@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
-import gov.cms.bfd.model.rda.RdaMcsClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import java.util.Map;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;

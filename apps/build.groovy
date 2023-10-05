@@ -22,10 +22,11 @@ class AppBuildResults implements Serializable {
  * Builds the Java applications and utilities in this directory: Data Pipeline, Data Server, etc.
  *
  * @param verboseMaven when `false`, maven runs with `--quiet` and `--batch-mode` flags
+ * @param runTests when `true`, runs unit and integration tests, default is `false`
  * @return An {@link AppBuildResults} instance containing the paths to the artifacts that were built.
  * @throws Exception An exception will be bubbled up if the Maven build fails.
  */
-def build(boolean verboseMaven) {
+def build(boolean verboseMaven, boolean runTests = false) {
 	withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'ACCOUNT_ID')]) {
 		// Set the auth token for aws code artifact
 		env.CODEARTIFACT_AUTH_TOKEN = sh(
@@ -85,7 +86,11 @@ EOF
 
 	dir ('apps') {
 		quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
-		sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true -Dmaven.build.cache.enabled=false clean verify"
+		if (runTests) {
+			sh "mvn ${quietFlags} --threads 1C -Dmaven.javadoc.skip=true -Dcheckstyle.skip -Dmaven.build.cache.enabled=false -Dmaven.jacoco.skip=false clean install"
+		} else {
+			sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true -Dmaven.build.cache.enabled=false clean verify"
+		}
 	}
 
 	return new AppBuildResults(

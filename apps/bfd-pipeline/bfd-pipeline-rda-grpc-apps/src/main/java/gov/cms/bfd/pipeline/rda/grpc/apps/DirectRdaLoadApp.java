@@ -13,16 +13,22 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * Simple application that invokes an RDA API server and writes FISS claims to a database using
@@ -64,8 +70,16 @@ public class DirectRdaLoadApp {
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(options);
     final DatabaseOptions databaseConfig =
         readDatabaseOptions(options, jobConfig.getJobConfig().getWriteThreads());
+    final AwsClientConfig awsClientConfig = readAwsClientConfig(options);
+    final DataSourceFactory dataSourceFactory =
+        awsClientConfig != null
+            ? RdsDataSourceFactory.builder()
+                .awsClientConfig(awsClientConfig)
+                .databaseOptions(databaseConfig)
+                .build()
+            : new HikariDataSourceFactory(databaseConfig);
     HikariDataSource pooledDataSource =
-        PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+        PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);
     System.out.printf("thread count is %d%n", jobConfig.getJobConfig().getWriteThreads());
     System.out.printf("database pool size %d%n", pooledDataSource.getMaximumPoolSize());
     try (PipelineApplicationState appState =
@@ -117,18 +131,23 @@ public class DirectRdaLoadApp {
    * @return the database options
    */
   private static DatabaseOptions readDatabaseOptions(ConfigLoader options, int threadCount) {
-    return new DatabaseOptions(
-        options.stringValue("database.url", null),
-        options.stringValue("database.user", null),
-        options.stringValue("database.password", null),
-        options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)));
+    return DatabaseOptions.builder()
+        .authenticationType(
+            options
+                .enumOption("database.authType", DatabaseOptions.AuthenticationType.class)
+                .orElse(DatabaseOptions.AuthenticationType.JDBC))
+        .databaseUrl(options.stringValue("database.url"))
+        .databaseUsername(options.stringValue("database.user"))
+        .databasePassword(options.stringValue("database.password", ""))
+        .maxPoolSize(options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)))
+        .build();
   }
 
   /**
    * Reads and sets the rda options to load from a config file.
    *
    * @param options the config options to use
-   * @return the rda confic load options
+   * @return the rda load options
    */
   private static RdaLoadOptions readRdaLoadOptionsFromProperties(ConfigLoader options) {
     final IdHasher.Config idHasherConfig =
@@ -157,5 +176,18 @@ public class DirectRdaLoadApp {
             .build();
     return new RdaLoadOptions(
         jobConfig.build(), grpcConfig, new RdaServerJob.Config(), 0, idHasherConfig);
+  }
+
+  /**
+   * Reads aws client settings from the configuration.
+   *
+   * @param options the config options to use
+   * @return the aws config settings
+   */
+  @Nullable
+  private static AwsClientConfig readAwsClientConfig(ConfigLoader options) {
+    return AwsClientConfig.awsBuilder()
+        .region(options.parsedOption("aws.region", Region.class, Region::of).orElse(null))
+        .build();
   }
 }

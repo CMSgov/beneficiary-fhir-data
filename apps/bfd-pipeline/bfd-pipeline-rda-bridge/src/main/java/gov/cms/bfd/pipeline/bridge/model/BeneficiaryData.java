@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.bridge.model;
 
-import gov.cms.bfd.model.rif.BeneficiaryColumn;
+import gov.cms.bfd.model.rif.entities.BeneficiaryColumn;
 import gov.cms.bfd.pipeline.bridge.etl.Parser;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

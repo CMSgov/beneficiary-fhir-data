@@ -20,6 +20,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
@@ -27,7 +28,6 @@ import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
-import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +88,14 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * configure the CCW RIF data load job. Defaults to true to run the job unless disabled.
    */
   public static final String ENV_VAR_KEY_CCW_RIF_JOB_ENABLED = "CCW_RIF_JOB_ENABLED";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getRunInterval()} value. This variable's
+   * value should be the frequency at which this job runs in seconds.
+   */
+  public static final String ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS =
+      "CCW_RIF_JOB_INTERVAL_SECONDS";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -368,16 +376,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
   /**
-   * Optional endpoint override URI used to connect to S3. Intended for use with localstack based
-   * tests.
-   */
-  public static final String ENV_VAR_KEY_S3_ENDPOINT_URI = "S3_ENDPOINT_URI";
-  /** Optional access key used to connect to S3. Intended for use with localstack based tests. */
-  public static final String ENV_VAR_KEY_S3_ACCESS_KEY = "S3_ACCESS_KEY";
-  /** Optional secret key used to connect to S3. Intended for use with localstack based tests. */
-  public static final String ENV_VAR_KEY_S3_SECRET_KEY = "S3_SECRET_KEY";
-
-  /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
    */
@@ -395,6 +393,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES, "true")
           .put(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "25")
           .put(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "2")
+          .put(ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS, "30")
           .put(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, "300")
           .put(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "1")
           .put(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS, "1")
@@ -413,15 +412,17 @@ public final class AppConfiguration extends BaseAppConfiguration {
    *
    * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
+   * @param awsClientConfig used to configure AWS services
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
    */
   private AppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
+      AwsClientConfig awsClientConfig,
       @Nullable CcwRifLoadOptions ccwRifLoadOptions,
       @Nullable RdaLoadOptions rdaLoadOptions) {
-    super(metricOptions, databaseOptions);
+    super(metricOptions, databaseOptions, awsClientConfig);
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
   }
@@ -472,6 +473,17 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
+   * Build a {@link ConfigLoader} for use in tests that just uses default values and those returned
+   * by the provided function.
+   *
+   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @return appropriately configured {@link ConfigLoader}
+   */
+  static ConfigLoader createConfigLoaderForTesting(Function<String, String> getenv) {
+    return ConfigLoader.builder().addSingle(DEFAULT_CONFIG_VALUES::get).addSingle(getenv).build();
+  }
+
+  /**
    * Load configuration variables using the provided {@link ConfigLoader} instance and build an
    * {@link AppConfiguration} instance from them.
    *
@@ -519,7 +531,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
     CcwRifLoadOptions ccwRifLoadOptions = loadCcwRifLoadOptions(config, loadOptions);
 
     RdaLoadOptions rdaLoadOptions = loadRdaLoadOptions(config, loadOptions.getIdHasherConfig());
-    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+    AwsClientConfig awsClientConfig = BaseAppConfiguration.loadAwsClientConfig(config);
+    return new AppConfiguration(
+        metricOptions, databaseOptions, awsClientConfig, ccwRifLoadOptions, rdaLoadOptions);
   }
 
   /**
@@ -565,7 +579,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    *     pool size
    * @return the database options
    */
-  private static DatabaseOptions loadDatabaseOptions(ConfigLoader config, int loaderThreads) {
+  static DatabaseOptions loadDatabaseOptions(ConfigLoader config, int loaderThreads) {
     DatabaseOptions databaseOptions = loadDatabaseOptions(config);
 
     Optional<Integer> databaseMaxPoolSize = config.intOption(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
@@ -585,9 +599,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
       databaseMaxPoolSize = Optional.of(loaderThreads * 2);
     }
 
-    return new DatabaseOptions(
-        databaseOptions.getDatabaseUrl(), databaseOptions.getDatabaseUsername(),
-        databaseOptions.getDatabasePassword(), databaseMaxPoolSize.orElse(1));
+    return databaseOptions.toBuilder().maxPoolSize(databaseMaxPoolSize.orElse(1)).build();
   }
 
   /**
@@ -598,12 +610,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * @return the aws client settings
    */
   static S3ClientConfig loadS3ServiceConfig(ConfigLoader config) {
-    return S3ClientConfig.s3Builder()
-        .endpointOverride(
-            config.parsedOption(ENV_VAR_KEY_S3_ENDPOINT_URI, URI.class, URI::create).orElse(null))
-        .accessKey(config.stringValue(ENV_VAR_KEY_S3_ACCESS_KEY, null))
-        .secretKey(config.stringValue(ENV_VAR_KEY_S3_SECRET_KEY, null))
-        .build();
+    return S3ClientConfig.s3Builder().awsClientConfig(loadAwsClientConfig(config)).build();
   }
 
   /**
@@ -637,12 +644,16 @@ public final class AppConfiguration extends BaseAppConfiguration {
       allowedRifFileType = Optional.empty();
     }
     final S3ClientConfig s3ClientConfig = loadS3ServiceConfig(config);
-    if (s3ClientConfig.isCredentialCheckUseful()) {
+    if (s3ClientConfig.getAwsClientConfig().isCredentialCheckUseful()) {
       LayeredConfiguration.ensureAwsCredentialsConfiguredCorrectly();
     }
-    ExtractionOptions extractionOptions =
+    final ExtractionOptions extractionOptions =
         new ExtractionOptions(s3BucketName, allowedRifFileType, Optional.empty(), s3ClientConfig);
-    return new CcwRifLoadOptions(extractionOptions, loadOptions);
+    final Optional<Duration> runInterval =
+        config
+            .positiveIntOptionZeroOK(ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS)
+            .map(Duration::ofSeconds);
+    return new CcwRifLoadOptions(extractionOptions, loadOptions, runInterval);
   }
 
   /**

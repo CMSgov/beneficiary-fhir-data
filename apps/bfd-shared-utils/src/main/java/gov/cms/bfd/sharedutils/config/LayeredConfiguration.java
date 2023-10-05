@@ -1,5 +1,10 @@
 package gov.cms.bfd.sharedutils.config;
 
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -18,30 +23,6 @@ public final class LayeredConfiguration {
 
   /** Prevents instance creation. */
   private LayeredConfiguration() {}
-
-  /**
-   * The name of the environment variable that should be used to provide the region used for looking
-   * up configuration variables in AWS SSM parameter store.
-   */
-  public static final String ENV_VAR_KEY_SSM_REGION = "SSM_REGION";
-
-  /**
-   * The name of the environment variable that should be used to provide an override endpoint used
-   * for looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
-   */
-  public static final String ENV_VAR_KEY_SSM_ENDPOINT = "SSM_ENDPOINT";
-
-  /**
-   * The name of the environment variable that should be used to provide an access key used for
-   * looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
-   */
-  public static final String ENV_VAR_KEY_SSM_ACCESS_KEY = "SSM_ACCESS_KEY";
-
-  /**
-   * The name of the environment variable that should be used to provide a secret key used for
-   * looking up configuration variables in AWS SSM parameter store. Intended for use in tests.
-   */
-  public static final String ENV_VAR_KEY_SSM_SECRET_KEY = "SSM_SECRET_KEY";
 
   /**
    * The name of the environment variable that should be used to provide a path for looking up
@@ -152,11 +133,11 @@ public final class LayeredConfiguration {
    */
   private static AwsClientConfig loadSsmConfig(ConfigLoader config) {
     return AwsClientConfig.awsBuilder()
-        .region(config.parsedOption(ENV_VAR_KEY_SSM_REGION, Region.class, Region::of).orElse(null))
+        .region(config.parsedOption(ENV_VAR_KEY_AWS_REGION, Region.class, Region::of).orElse(null))
         .endpointOverride(
-            config.parsedOption(ENV_VAR_KEY_SSM_ENDPOINT, URI.class, URI::create).orElse(null))
-        .accessKey(config.stringValue(ENV_VAR_KEY_SSM_ACCESS_KEY, null))
-        .secretKey(config.stringValue(ENV_VAR_KEY_SSM_SECRET_KEY, null))
+            config.parsedOption(ENV_VAR_KEY_AWS_ENDPOINT, URI.class, URI::create).orElse(null))
+        .accessKey(config.stringValue(ENV_VAR_KEY_AWS_ACCESS_KEY, null))
+        .secretKey(config.stringValue(ENV_VAR_KEY_AWS_SECRET_KEY, null))
         .build();
   }
 }

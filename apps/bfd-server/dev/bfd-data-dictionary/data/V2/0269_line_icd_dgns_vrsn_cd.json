@@ -21,7 +21,10 @@
         "LINE_ICD_DGNS_VRSN_CD"
     ],
     "cclfMapping": [
-        "CCLF3.DGNS_PRCDR_ICD_IND"
+        "CCLF1.DGNS_PRCDR_ICD_IND",
+        "CCLF3.DGNS_PRCDR_ICD_IND",
+        "CCLF4.DGNS_PRCDR_ICD_IND",
+        "CCLF5.DGNS_PRCDR_ICD_IND"
     ],
     "fhirMapping": [
         {

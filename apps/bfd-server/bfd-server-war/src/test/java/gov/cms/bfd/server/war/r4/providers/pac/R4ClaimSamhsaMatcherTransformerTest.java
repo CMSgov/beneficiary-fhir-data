@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.rda.RdaFissClaim;
-import gov.cms.bfd.model.rda.RdaFissDiagnosisCode;
-import gov.cms.bfd.model.rda.RdaFissProcCode;
-import gov.cms.bfd.model.rda.RdaMcsClaim;
-import gov.cms.bfd.model.rda.RdaMcsDetail;
-import gov.cms.bfd.model.rda.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
+import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
+import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;

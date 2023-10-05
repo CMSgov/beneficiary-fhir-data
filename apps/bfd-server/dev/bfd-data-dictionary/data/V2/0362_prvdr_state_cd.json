@@ -22,7 +22,7 @@
         "PRVDR_STATE_CD"
     ],
     "cclfMapping": [
-        "CCLF1.PRVDR_FAC_FIPS_ST_CD"
+        "CCLF5.RNDRG_PRVDR_FIPS_ST_CD"
     ],
     "fhirMapping": [
         {

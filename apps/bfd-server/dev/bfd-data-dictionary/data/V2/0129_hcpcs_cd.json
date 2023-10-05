@@ -28,7 +28,9 @@
         "HCPCS_CD"
     ],
     "cclfMapping": [
-        "CCLF2.CLM_LINE_HCPCS_CD"
+        "CCLF2.CLM_LINE_HCPCS_CD",
+        "CCLF5.CLM_LINE_HCPCS_CD",
+        "CCLF6.CLM_LINE_HCPCS_CD"
     ],
     "fhirMapping": [
         {

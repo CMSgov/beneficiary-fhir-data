@@ -46,7 +46,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -335,16 +334,17 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     boolean filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_EOB);
     operation.setOption("by", "patient");
-    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
+    operation.setOption("IncludeTaxNumbers", String.valueOf(includeTaxNumbers));
     operation.setOption(
         "types",
         (claimTypesRequested.size() == ClaimType.values().length)
             ? "*"
             : claimTypesRequested.stream()
                 .sorted(Comparator.comparing(ClaimType::name))
-                .collect(Collectors.toList())
+                .toList()
                 .toString());
-    operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+    operation.setOption(
+        "pageSize", paging.isPagingRequested() ? String.valueOf(paging.getPageSize()) : "*");
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.setOption(
@@ -377,6 +377,9 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
                 Optional.ofNullable(serviceDate),
                 filterSamhsa,
                 includeTaxNumbers);
+      } catch (InvalidRequestException e) {
+        // If we're throwing a 400, pass it back up
+        throw e;
       } catch (Exception e) {
         LOGGER.error(e.getMessage(), e);
       }

@@ -27,9 +27,7 @@
     "ccwMapping": [
         "CLM_ID"
     ],
-    "cclfMapping": [
-        "CCLF1.CUR_CLM_UNIQ_ID"
-    ],
+    "cclfMapping": [],
     "fhirMapping": [
         {
             "version": "STU3",

@@ -28,7 +28,7 @@
         "ICD_DGNS_CD1"
     ],
     "cclfMapping": [
-        "CCLF4.CLM_DGNS_CD"
+        "CCLF5.CLM_DGNS_CD"
     ],
     "fhirMapping": [
         {

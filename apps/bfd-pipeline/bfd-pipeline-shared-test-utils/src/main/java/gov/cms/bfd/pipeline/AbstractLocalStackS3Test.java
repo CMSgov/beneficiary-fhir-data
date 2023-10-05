@@ -7,7 +7,6 @@ import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.regions.Region;
 
 /**
@@ -29,7 +28,7 @@ public abstract class AbstractLocalStackS3Test extends AbstractLocalStackTest {
     s3ClientConfig =
         S3ClientConfig.s3Builder()
             .region(Region.of(localstack.getRegion()))
-            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
+            .endpointOverride(localstack.getEndpoint())
             .accessKey(localstack.getAccessKey())
             .secretKey(localstack.getSecretKey())
             .build();

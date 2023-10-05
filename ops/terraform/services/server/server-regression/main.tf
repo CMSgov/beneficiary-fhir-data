@@ -1,20 +1,19 @@
-locals {
-  default_tags = {
-    Environment    = local.seed_env
-    Layer          = local.layer
-    Name           = "bfd-${local.env}-${local.service}"
-    application    = "bfd"
-    business       = "oeda"
-    role           = local.service
-    stack          = local.env
-    Terraform      = true
-    tf_module_root = "ops/terraform/services/server/server-regression"
-  }
+module "terraservice" {
+  source = "../../_modules/bfd-terraservice"
 
-  env              = terraform.workspace
-  established_envs = ["test", "prod-sbx", "prod"]
-  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
-  is_ephemeral_env = !(contains(local.established_envs, local.env))
+  environment_name     = terraform.workspace
+  relative_module_root = "ops/terraform/services/server/server-regression"
+  additional_tags = {
+    Layer = local.layer
+    Name  = "bfd-${local.env}-${local.service}"
+    role  = local.service
+  }
+}
+
+locals {
+  default_tags = module.terraservice.default_tags
+  env          = module.terraservice.env
+  seed_env     = module.terraservice.seed_env
 
   account_id = data.aws_caller_identity.current.account_id
   layer      = "app"

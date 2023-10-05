@@ -307,8 +307,11 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
       this.processDLQ = processDLQ;
       this.sinkTypePreference = sinkTypePreference;
       this.rdaVersion = rdaVersion;
+      // zero is ok because that means the job should run exactly once
       Preconditions.checkArgument(
-          runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
+          runInterval.toMillis() == 0 || runInterval.toMillis() >= 1_000,
+          "runInterval less than 1s: %s",
+          runInterval);
       Preconditions.checkArgument(
           this.writeThreads >= 1, "writeThreads less than 1: %s", writeThreads);
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s", batchSize);

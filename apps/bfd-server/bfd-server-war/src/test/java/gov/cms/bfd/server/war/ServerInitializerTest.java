@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 /** Unit test for {@link ServerInitializer}. */
@@ -70,7 +69,6 @@ public class ServerInitializerTest {
    * Little configuration class that just provides the {@link ConfigLoader} and a {@link
    * PropertyTestBean}.
    */
-  @Configuration
   static class TestConfiguration {
     /**
      * Property name used by a unit test to validate that spring is providing access to properties

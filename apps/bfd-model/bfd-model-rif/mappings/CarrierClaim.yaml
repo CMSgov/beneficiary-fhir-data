@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.CarrierClaim
+- entityClassName: gov.cms.bfd.model.rif.entities.CarrierClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: CarrierClaim
@@ -312,7 +312,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: CarrierClaimColumn
-    packageName: gov.cms.bfd.model.rif
+    packageName: gov.cms.bfd.model.rif.entities
     values:
     - BENE_ID
     - CLM_ID
@@ -557,4 +557,4 @@ mappings:
   - from: lines
     to: lines
     transformer: Array
-  transformerClassName: gov.cms.bfd.model.rif.CarrierClaimParser
+  transformerClassName: gov.cms.bfd.model.rif.entities.CarrierClaimParser

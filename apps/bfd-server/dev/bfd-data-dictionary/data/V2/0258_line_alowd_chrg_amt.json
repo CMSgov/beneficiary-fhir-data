@@ -22,7 +22,8 @@
         "LINE_ALOWD_CHRG_AMT"
     ],
     "cclfMapping": [
-        "CCLF5.CLM_LINE_ALOWD_CHRG_AMT"
+        "CCLF5.CLM_LINE_ALOWD_CHRG_AMT",
+        "CCLF6.CLM_LINE_ALOWD_CHRG_AMT"
     ],
     "fhirMapping": [
         {

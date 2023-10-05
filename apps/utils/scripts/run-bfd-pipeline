@@ -208,8 +208,8 @@ localstack_running=false
 if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   echo "using localstack"
   localstack_running=true
-  export SSM_REGION=us-east-1
-  export SSM_ENDPOINT=http://${localstack_ip}:4566/
+  export AWS_REGION=us-east-1
+  export AWS_ENDPOINT=http://${localstack_ip}:4566/
   export SSM_PARAMETER_PATH=/bfd-pipeline
 fi
 
@@ -411,8 +411,8 @@ else
     run \
     --rm \
     --name $image_name \
-    --env SSM_REGION \
-    --env SSM_ENDPOINT \
+    --env AWS_REGION \
+    --env AWS_ENDPOINT \
     --env SSM_PARAMETER_PATH \
     --env HOME=/home/app \
     --env BFD_ENV_NAME="$BFD_ENV_NAME" \

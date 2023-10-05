@@ -1,10 +1,28 @@
 - name: Configure server-load Controller
   hosts: localhost
+  vars:
+    # TODO: Resolve this as feasible
+    python3_version: '3.9.16'
 
   tasks:
     - name: Add SSH users for current environment
       import_role:
         name: ssh_users
+      tags:
+        - post-ami
+
+    # TODO: Resolve this as feasible
+    - name: Create symbolic links
+      file:
+        src: "{{ item.src }}"
+        path: "{{ item.path }}"
+        state: link
+        force: true
+      loop:
+        - src: /usr/local/bin/python3.{{ python3_version.split('.')[1] }}
+          path: /usr/bin/python3
+        - src: /usr/local/bin/pip3.{{ python3_version.split('.')[1] }}
+          path: /usr/bin/pip3
       tags:
         - post-ami
 

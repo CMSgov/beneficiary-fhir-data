@@ -124,11 +124,9 @@ fi
 # Autodetect if localstack is running based on whether we can connect to its port locally.
 if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   echo "using localstack"
-  export SSM_REGION=us-east-1
-  export SSM_ENDPOINT=http://${localstack_ip}:4566
+  export AWS_REGION=us-east-1
+  export AWS_ENDPOINT=http://${localstack_ip}:4566
   export SSM_PARAMETER_PATH=/bfd-db-migrator
-  export DB_MIGRATOR_SQS_REGION=$SSM_REGION
-  export DB_MIGRATOR_SQS_ENDPOINT=$SSM_ENDPOINT
   export DB_MIGRATOR_SQS_QUEUE=migrator-status.fifo
   echo "ensuring migrator progress queue exists in SQS"
   aws --endpoint-url=$DB_MIGRATOR_SQS_ENDPOINT sqs create-queue --queue-name=migrator-status.fifo --attributes '{"FifoQueue":"true","VisibilityTimeout":"1"}'
@@ -140,7 +138,7 @@ fi
 function setvar() {
   name="$1"
   value="$2"
-  if [[ -z "$SSM_REGION" ]] ; then
+  if [[ -z "$AWS_REGION" ]] ; then
     eval "export ${name}=\"${value}\""
   else
     echo put-parameter $name
@@ -233,11 +231,9 @@ else
     run \
     --rm \
     --name $image_name \
-    --env SSM_REGION \
-    --env SSM_ENDPOINT \
+    --env AWS_REGION \
+    --env AWS_ENDPOINT \
     --env SSM_PARAMETER_PATH \
-    --env DB_MIGRATOR_SQS_REGION \
-    --env DB_MIGRATOR_SQS_ENDPOINT \
     --env DB_MIGRATOR_SQS_QUEUE \
     --env HOME=/home/app \
     -v $HOME/.aws/credentials:/home/app/.aws/credentials:ro \

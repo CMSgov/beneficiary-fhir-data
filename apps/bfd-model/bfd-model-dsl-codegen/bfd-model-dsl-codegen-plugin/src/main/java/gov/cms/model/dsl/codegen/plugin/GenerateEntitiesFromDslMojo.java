@@ -70,6 +70,9 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   /** Value to use for the {@link BatchSize} annotation value on arrays. */
   static final int BATCH_SIZE_FOR_ARRAY_FIELDS = 100;
 
+  /** Value to use for the ignoring @Builder annotations. */
+  static final int NUM_FIELDS_TO_IGNORE_BUILDER_ANNOTATION = 100;
+
   /**
    * {@link FieldSpec} used to add a {@code serialVersionUID} static member variable to a composite
    * key class.
@@ -260,7 +263,7 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
 
     // lombok does not react well to classes with a huge number of fields.
     // This is a safety to omit adding the nice-to-have lombok annotations for such classes.
-    if (mapping.getTable().getColumns().size() < 100) {
+    if (mapping.getTable().getColumns().size() < NUM_FIELDS_TO_IGNORE_BUILDER_ANNOTATION) {
       annotationSpecs.add(AnnotationSpec.builder(Builder.class).build());
       annotationSpecs.add(AnnotationSpec.builder(AllArgsConstructor.class).build());
       annotationSpecs.add(AnnotationSpec.builder(NoArgsConstructor.class).build());
@@ -443,8 +446,14 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
           .addAnnotation(
               AnnotationSpec.builder(BatchSize.class)
                   .addMember("size", "$L", BATCH_SIZE_FOR_ARRAY_FIELDS)
-                  .build())
-          .addAnnotation(Builder.Default.class);
+                  .build());
+      // We previously skipped adding the @Builder annotation to an entity that
+      // has an excessive number of fields; the check here is to prevent spurious
+      // Lombok warnings that correctly point out that since we are not adding the
+      // @Builder annotation, we should also not add a @Builder.Default annotation.
+      if (mapping.getTable().getColumns().size() < NUM_FIELDS_TO_IGNORE_BUILDER_ANNOTATION) {
+        fieldSpec.addAnnotation(Builder.Default.class);
+      }
     }
     final var accessorSpec =
         AccessorSpec.builder()

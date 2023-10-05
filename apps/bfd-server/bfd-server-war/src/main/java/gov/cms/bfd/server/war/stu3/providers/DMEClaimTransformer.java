@@ -7,8 +7,8 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.DMEClaim;
-import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -176,25 +176,18 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
          * extension. TODO: suggest that the spec allows more than one
          * `qualification` entry.
          */
-        performingCareTeamMember.setQualification(
-            TransformerUtils.createCodeableConcept(
-                eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
+        TransformerUtils.addCareTeamQualification(
+            performingCareTeamMember,
+            eob,
+            CcwCodebookVariable.PRVDR_SPCLTY,
+            claimLine.getProviderSpecialityCode());
 
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-        boolean performingHasMatchingExtension =
-            claimLine.getProviderParticipatingIndCode().isPresent()
-                && TransformerUtils.careTeamHasMatchingExtension(
-                    performingCareTeamMember,
-                    TransformerUtils.getReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD),
-                    String.valueOf(claimLine.getProviderParticipatingIndCode()));
-
-        if (!performingHasMatchingExtension) {
-          performingCareTeamMember.addExtension(
-              TransformerUtils.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.PRTCPTNG_IND_CD,
-                  claimLine.getProviderParticipatingIndCode()));
-        }
+        TransformerUtils.addCareTeamExtension(
+            CcwCodebookVariable.PRTCPTNG_IND_CD,
+            claimLine.getProviderParticipatingIndCode(),
+            performingCareTeamMember,
+            eob);
       }
 
       TransformerUtils.mapHcpcs(

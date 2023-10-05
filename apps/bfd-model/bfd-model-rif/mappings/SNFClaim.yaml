@@ -1,5 +1,5 @@
 mappings:
-- entityClassName: gov.cms.bfd.model.rif.SNFClaim
+- entityClassName: gov.cms.bfd.model.rif.entities.SNFClaim
   entityInterfaces:
   - gov.cms.bfd.model.rif.RifRecordBase
   id: SNFClaim
@@ -1203,7 +1203,7 @@ mappings:
     quoteNames: false
   enumTypes:
   - name: SNFClaimColumn
-    packageName: gov.cms.bfd.model.rif
+    packageName: gov.cms.bfd.model.rif.entities
     values:
     - BENE_ID
     - CLM_ID
@@ -1923,4 +1923,4 @@ mappings:
   - from: lines
     to: lines
     transformer: Array
-  transformerClassName: gov.cms.bfd.model.rif.SNFClaimParser
+  transformerClassName: gov.cms.bfd.model.rif.entities.SNFClaimParser

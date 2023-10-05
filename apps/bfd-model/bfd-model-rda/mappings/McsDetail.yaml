@@ -1,7 +1,7 @@
 mappings:
 - id: McsDetail
   messageClassName: gov.cms.mpsm.rda.v1.mcs.McsDetail
-  entityClassName: gov.cms.bfd.model.rda.RdaMcsDetail
+  entityClassName: gov.cms.bfd.model.rda.entities.RdaMcsDetail
   table:
     name: mcs_details
     schema: rda

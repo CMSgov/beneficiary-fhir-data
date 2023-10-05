@@ -1,16 +1,16 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.subset;
 
-import gov.cms.bfd.model.rif.BeneficiaryColumn;
-import gov.cms.bfd.model.rif.CarrierClaimColumn;
-import gov.cms.bfd.model.rif.DMEClaimColumn;
-import gov.cms.bfd.model.rif.HHAClaimColumn;
-import gov.cms.bfd.model.rif.HospiceClaimColumn;
-import gov.cms.bfd.model.rif.InpatientClaimColumn;
-import gov.cms.bfd.model.rif.OutpatientClaimColumn;
-import gov.cms.bfd.model.rif.PartDEventColumn;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.SNFClaimColumn;
+import gov.cms.bfd.model.rif.entities.BeneficiaryColumn;
+import gov.cms.bfd.model.rif.entities.CarrierClaimColumn;
+import gov.cms.bfd.model.rif.entities.DMEClaimColumn;
+import gov.cms.bfd.model.rif.entities.HHAClaimColumn;
+import gov.cms.bfd.model.rif.entities.HospiceClaimColumn;
+import gov.cms.bfd.model.rif.entities.InpatientClaimColumn;
+import gov.cms.bfd.model.rif.entities.OutpatientClaimColumn;
+import gov.cms.bfd.model.rif.entities.PartDEventColumn;
+import gov.cms.bfd.model.rif.entities.SNFClaimColumn;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.model.rif.samples.TestDataSetLocation;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;

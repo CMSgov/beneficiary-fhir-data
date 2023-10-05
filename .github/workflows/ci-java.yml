@@ -128,16 +128,6 @@ jobs:
           docker push "$FULL_BRANCH_TAG"
           docker push "$FULL_COMMIT_TAG"
         working-directory: apps
-      - name: 'Upload test artifacts'
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: mvn-verify-build-logs
-          path: |
-            **/target/surefire-reports/*
-            **/target/failsafe-reports/*
-            bfd-server/bfd-server-war/target/server-work/access.*
-            bfd-server/bfd-server-war/target/server-work/server-console.log
 
   # NOTE: Temporarily disable fhir-validation in support of BFD-2198
   # TODO: Re-enable post BFD-2198 with more thoughtful implementation

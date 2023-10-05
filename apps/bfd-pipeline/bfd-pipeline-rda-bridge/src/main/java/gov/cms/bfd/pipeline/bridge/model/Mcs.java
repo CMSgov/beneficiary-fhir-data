@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.bridge.model;
 
 import static gov.cms.bfd.pipeline.bridge.model.ModelUtil.listNumberedEnumNames;
 
-import gov.cms.bfd.model.rif.CarrierClaimColumn;
+import gov.cms.bfd.model.rif.entities.CarrierClaimColumn;
 import java.util.List;
 
 /**

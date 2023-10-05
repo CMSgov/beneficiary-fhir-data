@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
-import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.entities.Beneficiary;
 
 /** Enumerates the value codeset indicating the sex of the {@link Beneficiary}. */
 public enum Sex {

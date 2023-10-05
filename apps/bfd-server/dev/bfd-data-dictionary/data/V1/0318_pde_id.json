@@ -20,9 +20,7 @@
     "ccwMapping": [
         "PDE_ID"
     ],
-    "cclfMapping": [
-        "CCLF7.CUR_CLM_UNIQ_ID"
-    ],
+    "cclfMapping": [],
     "fhirMapping": [
         {
             "version": "STU3",

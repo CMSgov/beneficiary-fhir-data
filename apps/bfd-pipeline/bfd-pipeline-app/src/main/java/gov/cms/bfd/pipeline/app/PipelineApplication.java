@@ -8,6 +8,7 @@ import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
+import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
@@ -29,6 +30,8 @@ import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
+import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
 import io.micrometer.cloudwatch2.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -42,6 +45,7 @@ import io.micrometer.core.instrument.util.HierarchicalNameMapper;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +54,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.postgresql.core.BaseConnection;
-import org.postgresql.jdbc.PgConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
@@ -62,6 +65,9 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
  */
 public final class PipelineApplication {
   static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplication.class);
+
+  /** This {@link System#exit(int)} value should be used when the application exits successfully. */
+  static final int EXIT_CODE_SUCCESS = 0;
 
   /**
    * This {@link System#exit(int)} value should be used when the provided configuration values are
@@ -81,8 +87,11 @@ public final class PipelineApplication {
    */
   static final int EXIT_CODE_SMOKE_TEST_FAILURE = 3;
 
-  /** Keep this around for cleanup in the event of an error with the CCW pipeline. */
-  private static S3TaskManager s3TaskManager;
+  /**
+   * This {@link System#exit(int)} value should be used when any {@link RuntimeException} is passed
+   * through to the {@link #main} method.
+   */
+  static final int EXIT_CODE_FAILED_UNHANDLED_EXCEPTION = 4;
 
   /**
    * This method is the one that will get called when users launch the application from the command
@@ -90,31 +99,102 @@ public final class PipelineApplication {
    *
    * @param args (should be empty, as this application accepts configuration via environment
    *     variables)
-   * @throws Exception any unhandled checked {@link Exception}s that are encountered will cause the
-   *     application to halt
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
+    int exitCode = new PipelineApplication().runPipelineAndHandleExceptions();
+    System.exit(exitCode);
+  }
+
+  /**
+   * Wrapper around {@link #runPipeline} that catches any thrown exceptions and returns an
+   * appropriate exit code for use by the {@link #main} method.
+   *
+   * @return exit code for {@link System#exit}
+   */
+  @VisibleForTesting
+  int runPipelineAndHandleExceptions() {
+    try {
+      runPipeline();
+      return EXIT_CODE_SUCCESS;
+    } catch (FatalAppException ex) {
+      if (ex.getCause() != null) {
+        LOGGER.error(
+            "app terminating due to exception: message={}",
+            ex.getCause().getMessage(),
+            ex.getCause());
+      } else {
+        LOGGER.error("{}, shutting down", ex.getMessage());
+      }
+      return ex.getExitCode();
+    } catch (Exception ex) {
+      LOGGER.error("app terminating due to unhandled exception: message={}", ex.getMessage(), ex);
+      return EXIT_CODE_FAILED_UNHANDLED_EXCEPTION;
+    }
+  }
+
+  /**
+   * Creates a {@link ConfigLoader} that can be used to populate an {@link AppConfiguration}.
+   * Intended as an insertion point for a mock during testing.
+   *
+   * @return the config loader
+   */
+  @VisibleForTesting
+  ConfigLoader createConfigLoader() {
+    return AppConfiguration.createConfigLoader(System::getenv);
+  }
+
+  /**
+   * Runs the actual pipeline logic and throws an exception if any problems are encountered.
+   *
+   * @throws FatalAppException if app shutdown required
+   * @throws SQLException for database errors
+   */
+  private void runPipeline() throws FatalAppException, SQLException {
+
     LOGGER.info("Application starting up!");
 
-    AppConfiguration appConfig = null;
-    ConfigLoader configLoader = null;
+    final AppConfiguration appConfig;
+    final ConfigLoader configLoader;
     try {
       // add any additional sources of configuration variables then load the app config
-      configLoader = AppConfiguration.createConfigLoader(System::getenv);
+      configLoader = createConfigLoader();
       appConfig = AppConfiguration.loadConfig(configLoader);
       LOGGER.info("Application configured: '{}'", appConfig);
     } catch (ConfigException | AppConfigurationException e) {
       System.err.println(e.getMessage());
       LOGGER.warn("Invalid app configuration.", e);
-      System.exit(EXIT_CODE_BAD_CONFIG);
+      throw new FatalAppException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
     }
 
-    assert appConfig != null;
-    assert configLoader != null;
     final MetricOptions metricOptions = appConfig.getMetricOptions();
-    final var micrometerClock = io.micrometer.core.instrument.Clock.SYSTEM;
     final var appMeters = new CompositeMeterRegistry();
+    final var appMetrics = new MetricRegistry();
 
+    configureMetrics(metricOptions, configLoader, appMeters, appMetrics);
+
+    // Create a pooled data source for use by any registered jobs.
+    final DataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
+    try (HikariDataSource pooledDataSource =
+        PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics)) {
+      logDatabaseDetails(pooledDataSource);
+      createJobsAndRunPipeline(appConfig, appMeters, appMetrics, pooledDataSource);
+    }
+  }
+
+  /**
+   * Configures all of our metrics. This can include NewRelic, CloudWatch, JMX, and Slf4j.
+   *
+   * @param metricOptions metric related configuration
+   * @param configLoader used to obtain additional settings
+   * @param appMeters micrometer registry
+   * @param appMetrics drop wizard registry
+   */
+  private void configureMetrics(
+      MetricOptions metricOptions,
+      ConfigLoader configLoader,
+      CompositeMeterRegistry appMeters,
+      MetricRegistry appMetrics) {
+    final var micrometerClock = io.micrometer.core.instrument.Clock.SYSTEM;
     final var commonTags =
         List.of(
             Tag.of("host", metricOptions.getHostname().orElse("unknown")),
@@ -140,7 +220,6 @@ public final class PipelineApplication {
       LOGGER.info("Added JmxMeterRegistry.");
     }
 
-    MetricRegistry appMetrics = new MetricRegistry();
     appMetrics.registerAll(new MemoryUsageGaugeSet());
     appMetrics.registerAll(new GarbageCollectorMetricSet());
     Slf4jReporter appMetricsReporter =
@@ -177,14 +256,16 @@ public final class PipelineApplication {
     new JvmMemoryMetrics().bindTo(appMeters);
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
+  }
 
-    // Create a pooled data source for use by any registered jobs.
-    final HikariDataSource pooledDataSource =
-        PipelineApplicationState.createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
-
-    HikariProxyConnection dbConn = null;
-    try {
-      dbConn = (HikariProxyConnection) pooledDataSource.getConnection();
+  /**
+   * Extracts database details from the pool and writes them to the log file.
+   *
+   * @param pooledDataSource our connection pool
+   * @throws SQLException if database details cannot be obtained
+   */
+  private void logDatabaseDetails(HikariDataSource pooledDataSource) throws SQLException {
+    try (HikariProxyConnection dbConn = (HikariProxyConnection) pooledDataSource.getConnection()) {
       DatabaseMetaData dbmeta = dbConn.getMetaData();
       String dbName = dbmeta.getDatabaseProductName();
       LOGGER.info(
@@ -197,19 +278,26 @@ public final class PipelineApplication {
 
       if (dbName.equals("PostgreSQL")) {
         BaseConnection pSqlConnection = dbConn.unwrap(BaseConnection.class);
-        LOGGER.info(
-            "pgjdbc, logServerDetail: {}",
-            ((PgConnection) pSqlConnection).getLogServerErrorDetail());
-      }
-    } finally {
-      if (dbConn != null) {
-        try {
-          dbConn.close();
-        } catch (Exception ex) {
-        }
+        LOGGER.info("pgjdbc, logServerDetail: {}", pSqlConnection.getLogServerErrorDetail());
       }
     }
+  }
 
+  /**
+   * Creates all of the configured jobs and runs them using a {@link PipelineManager}.
+   *
+   * @param appConfig our {@link AppConfiguration} for configuring jobs
+   * @param appMeters the app meters
+   * @param appMetrics the {@link MetricRegistry} to receive metrics
+   * @param pooledDataSource our connection pool
+   * @throws FatalAppException if app shutdown required
+   */
+  private void createJobsAndRunPipeline(
+      AppConfiguration appConfig,
+      CompositeMeterRegistry appMeters,
+      MetricRegistry appMetrics,
+      HikariDataSource pooledDataSource)
+      throws FatalAppException {
     /*
      * Create all jobs and run their smoke tests.
      */
@@ -227,6 +315,11 @@ public final class PipelineApplication {
     LOGGER.info("Job processing started.");
 
     pipelineManager.awaitCompletion();
+
+    if (pipelineManager.getError() != null) {
+      throw new FatalAppException(
+          "Pipeline job threw exception", pipelineManager.getError(), EXIT_CODE_JOB_FAILED);
+    }
   }
 
   /**
@@ -238,7 +331,7 @@ public final class PipelineApplication {
    * @param micrometerClock the {@link io.micrometer.core.instrument.Clock} used to compute time
    * @return the {@link DropwizardMeterRegistry}
    */
-  private static DropwizardMeterRegistry getDropWizardMeterRegistry(
+  private DropwizardMeterRegistry getDropWizardMeterRegistry(
       MetricRegistry appMetrics,
       List<Tag> commonTags,
       io.micrometer.core.instrument.Clock micrometerClock) {
@@ -273,7 +366,7 @@ public final class PipelineApplication {
    * @return a {@link HierarchicalNameMapper}
    */
   @Nonnull
-  private static HierarchicalNameMapper getHierarchicalNameMapper(List<Tag> commonTags) {
+  private HierarchicalNameMapper getHierarchicalNameMapper(List<Tag> commonTags) {
     final var commonTagNames = commonTags.stream().map(Tag::getKey).collect(Collectors.toSet());
     final var convention = NamingConvention.identity;
     return (id, ignored) -> {
@@ -297,7 +390,7 @@ public final class PipelineApplication {
    * @param jobs all {@link PipelineJob} to test
    * @return true if any test failed
    */
-  private static boolean anySmokeTestFailed(List<PipelineJob> jobs) {
+  private boolean anySmokeTestFailed(List<PipelineJob> jobs) {
     boolean anyTestFailed = false;
     for (PipelineJob job : jobs) {
       try {
@@ -326,7 +419,7 @@ public final class PipelineApplication {
    * @param pooledDataSource our {@link javax.sql.DataSource}
    * @return list of {@link PipelineJob}s to be registered
    */
-  private static List<PipelineJob> createAllJobs(
+  private List<PipelineJob> createAllJobs(
       AppConfiguration appConfig,
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
@@ -394,13 +487,13 @@ public final class PipelineApplication {
    * @param appState the {@link PipelineApplicationState} to use
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
-  private static PipelineJob createCcwRifLoadJob(
+  private PipelineJob createCcwRifLoadJob(
       CcwRifLoadOptions loadOptions, PipelineApplicationState appState) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
-     * load process.
+     * load process.  The task manager will be automatically closed by the job.
      */
-    s3TaskManager =
+    final var s3TaskManager =
         new S3TaskManager(
             appState.getMetrics(),
             loadOptions.getExtractionOptions(),
@@ -426,7 +519,8 @@ public final class PipelineApplication {
             loadOptions.getExtractionOptions(),
             s3TaskManager,
             dataSetMonitorListener,
-            loadOptions.getLoadOptions().isIdempotencyRequired());
+            loadOptions.getLoadOptions().isIdempotencyRequired(),
+            loadOptions.getRunInterval());
 
     return ccwRifLoadJob;
   }
@@ -438,30 +532,31 @@ public final class PipelineApplication {
    * <p>The way the JVM handles all of this can be a bit surprising. Some observational notes:
    *
    * <ul>
-   *   <li>If a user sends a <code>SIGINT</code> signal to the application (e.g. by pressing <code>
-   *       ctrl+c</code>), the JVM will do the following: 1) it will run all registered shutdown
-   *       hooks and wait for them to complete, and then 2) all threads will be stopped. No
-   *       exceptions will be thrown on those threads that they could catch to prevent this; they
-   *       just die.
-   *   <li>If a user sends a more aggressive <code>SIGKILL</code> signal to the application (e.g. by
+   *   <li>If a user sends a {@code SIGINT} signal to the application (e.g. by pressing {@code
+   *       ctrl+c}), the JVM will do the following: 1) it will run all registered shutdown hooks and
+   *       wait for them to complete, and then 2) all threads will be stopped. No exceptions will be
+   *       thrown on those threads that they could catch to prevent this; they just die.
+   *   <li>If a user sends a more aggressive {@code SIGKILL} signal to the application (e.g. by
    *       using their task manager), the JVM will just immediately stop all threads.
    *   <li>If an application has a poorly designed shutdown hook that never completes, the
-   *       application will never stop any of its threads or exit (in response to a <code>SIGINT
-   *       </code>).
-   *   <li>I haven't verified this in a while, but the <code>-Xrs</code> JVM option (which we're not
-   *       using) should cause the application to completely ignore <code>SIGINT</code> signals.
+   *       application will never stop any of its threads or exit (in response to a {@code SIGINT
+   *       }).
+   *   <li>I haven't verified this in a while, but the {@code -Xrs} JVM option (which we're not
+   *       using) should cause the application to completely ignore {@code SIGINT} signals.
    *   <li>If all of an application's non-daemon threads complete, the application will then run all
    *       registered shutdown hooks and exit.
    *   <li>You can't call {@link System#exit(int)} (to set the exit code) inside a shutdown hook. If
    *       you do, the application will hang forever.
    * </ul>
    *
+   * <p>Visible so that it can be disabled during testing using a Mockito spy.
+   *
    * @param metrics the {@link MetricRegistry} to log out before the application exits
    * @param pipelineManager the {@link PipelineManager} to be gracefully shut down before the
    *     application exits
    */
-  private static void registerShutdownHook(
-      MetricRegistry metrics, PipelineManager pipelineManager) {
+  @VisibleForTesting
+  void registerShutdownHook(MetricRegistry metrics, PipelineManager pipelineManager) {
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(

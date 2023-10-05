@@ -1,0 +1,49 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>zip</id>
+    <includeBaseDirectory>true</includeBaseDirectory>
+
+    <formats>
+        <format>tar.bz2</format>
+    </formats>
+    <!--
+        File permissions are not preserved when we copy them so this assembly tries to set them
+        in a reasonable way.  Files are not executable unless they meet specific criteria.
+        An exclusion in the non-executable file set needs to be paired with a inclusion in the
+        executable file set.
+     -->
+    <fileSets>
+        <!-- Copy all of the non-executable files with 0600 permissions. -->
+        <fileSet>
+            <directory>${assembly.copy.dir}</directory>
+            <outputDirectory>/</outputDirectory>
+            <directoryMode>0700</directoryMode>
+            <fileMode>0600</fileMode>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>**/*.sh</exclude>
+                <exclude>**/*.py</exclude>
+                <exclude>ansible/playbooks-ccs/ansible-playbook-wrapper</exclude>
+                <exclude>ccs-ops-misc/scripts/*</exclude>
+                <exclude>ccs-ops-misc/synthetic-data/scripts/synthea-automation/*</exclude>
+            </excludes>
+        </fileSet>
+        <!-- Copy all of the executable files with 0700 permissions. -->
+        <fileSet>
+            <directory>${assembly.copy.dir}</directory>
+            <outputDirectory>/</outputDirectory>
+            <directoryMode>0700</directoryMode>
+            <fileMode>0700</fileMode>
+            <includes>
+                <include>**/*.sh</include>
+                <include>**/*.py</include>
+                <include>ansible/playbooks-ccs/ansible-playbook-wrapper</include>
+                <include>ccs-ops-misc/scripts/*</include>
+                <include>ccs-ops-misc/synthetic-data/scripts/synthea-automation/*</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

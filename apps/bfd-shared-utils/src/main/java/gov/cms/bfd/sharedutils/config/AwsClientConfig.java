@@ -19,25 +19,25 @@ import software.amazon.awssdk.regions.Region;
  */
 @Getter
 @EqualsAndHashCode
-public class AwsClientConfig {
+public final class AwsClientConfig {
   /** The default AWS {@link Region} to interact with. */
   public static final Region REGION_DEFAULT = Region.US_EAST_1;
 
   /** The AWS region to connect to. Defaults to {@link #REGION_DEFAULT}. */
-  protected final Optional<Region> region;
+  private final Optional<Region> region;
 
   /** Alternative endpoint URI for service. Generally only used for testing with localstack. */
-  protected final Optional<URI> endpointOverride;
+  private final Optional<URI> endpointOverride;
 
   /**
    * Access key for authenticating with service. Generally only used for testing with localstack.
    */
-  protected final Optional<String> accessKey;
+  private final Optional<String> accessKey;
 
   /**
    * Secret key for authenticating with service. Generally only used for testing with localstack.
    */
-  protected final Optional<String> secretKey;
+  private final Optional<String> secretKey;
 
   /**
    * Initializes an instance. Any variable can be null. Region defaults to {@link #REGION_DEFAULT}.

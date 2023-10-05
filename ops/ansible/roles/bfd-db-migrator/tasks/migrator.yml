@@ -62,34 +62,6 @@
   tags:
     - pre-ami
 
-- name: Create Migrator Monitor Script
-  template:
-    src: migrator-monitor.sh.j2
-    dest: "{{ db_migrator_dir }}/migrator-monitor.sh"
-    owner: "{{ db_migrator_user }}"
-    group: "{{ db_migrator_user }}"
-    mode: u=rwx,g=rx,o=rx
-  become: true
-  when:
-    - migrator_monitor_enabled | default('', true)
-    - env | default('', true)
-  tags:
-    - post-ami
-
-- name: Create Migrator Monitor Service Definition
-  template:
-    src: migrator-monitor.service.j2
-    dest: /etc/systemd/system/migrator-monitor.service
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-  become: true
-  when:
-    - migrator_monitor_enabled | default('', true)
-    - env | default('', true)
-  tags:
-    - post-ami
-
 - name: Create DB Migrator Service Wrapper Script
   template:
     src: bfd-db-migrator-service.sh.j2

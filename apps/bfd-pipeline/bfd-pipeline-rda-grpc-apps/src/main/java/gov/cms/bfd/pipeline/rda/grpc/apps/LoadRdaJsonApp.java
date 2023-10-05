@@ -15,9 +15,13 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
@@ -92,8 +96,16 @@ public class LoadRdaJsonApp {
               port -> {
                 final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
                 final DatabaseOptions databaseConfig = config.createDatabaseOptions();
+                final AwsClientConfig awsClientConfig = config.createAwsClientConfig();
+                final DataSourceFactory dataSourceFactory =
+                    databaseConfig.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS
+                        ? RdsDataSourceFactory.builder()
+                            .awsClientConfig(awsClientConfig)
+                            .databaseOptions(databaseConfig)
+                            .build()
+                        : new HikariDataSourceFactory(databaseConfig);
                 final HikariDataSource pooledDataSource =
-                    PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+                    PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);
                 if (config.runSchemaMigration) {
                   LOGGER.info("running database migration");
                   DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
@@ -151,6 +163,8 @@ public class LoadRdaJsonApp {
     private final byte[] hashPepper;
     /** The hash iterations. */
     private final int hashIterations;
+    /** The database authentication type to use. */
+    private final DatabaseOptions.AuthenticationType dbAuthType;
     /** The database url. */
     private final String dbUrl;
     /** The database user. */
@@ -179,7 +193,7 @@ public class LoadRdaJsonApp {
     /** The starting MCS sequence number. */
     private final Optional<Long> startingMcsSequenceNumber;
     /** The S3 region to use if the source is an S3 connection. */
-    private final Optional<Region> s3Region;
+    private final Optional<Region> awsRegion;
     /** The S3 bucket to use if the source is an S3 connection. */
     private final Optional<String> s3Bucket;
     /** Optional directory name within our S3 bucket. */
@@ -193,6 +207,10 @@ public class LoadRdaJsonApp {
     private Config(ConfigLoader options) {
       hashPepper = options.hexBytes("hash.pepper");
       hashIterations = options.intValue("hash.iterations");
+      dbAuthType =
+          options
+              .enumOption("database.authType", DatabaseOptions.AuthenticationType.class)
+              .orElse(DatabaseOptions.AuthenticationType.JDBC);
       dbUrl = options.stringValue("database.url", "jdbc:hsqldb:mem:LoadRdaJsonApp");
       dbUser = options.stringValue("database.user", "");
       dbPassword = options.stringValue("database.password", "");
@@ -209,7 +227,7 @@ public class LoadRdaJsonApp {
       mcsFile = options.readableFileOption("file.mcs");
       startingFissSequenceNumber = options.longOption("sequenceNumber.fiss");
       startingMcsSequenceNumber = options.longOption("sequenceNumber.mcs");
-      s3Region = options.parsedOption("s3.region", Region.class, Region::of);
+      awsRegion = options.parsedOption("aws.region", Region.class, Region::of);
       s3Bucket = options.stringOption("s3.bucket");
       s3Directory = options.stringOption("s3.directory");
     }
@@ -230,7 +248,13 @@ public class LoadRdaJsonApp {
      * @return the database options to be used
      */
     private DatabaseOptions createDatabaseOptions() {
-      return new DatabaseOptions(dbUrl, dbUser, dbPassword, 10);
+      return DatabaseOptions.builder()
+          .authenticationType(dbAuthType)
+          .databaseUrl(dbUrl)
+          .databaseUsername(dbUser)
+          .databasePassword(dbPassword)
+          .maxPoolSize(10)
+          .build();
     }
 
     /**
@@ -268,11 +292,14 @@ public class LoadRdaJsonApp {
      * @return the config
      */
     private RdaMessageSourceFactory.Config createMessageSourceFactoryConfig() {
+      final AwsClientConfig awsClientConfig = createAwsClientConfig();
+      final S3ClientConfig s3ClientConfig =
+          S3ClientConfig.s3Builder().awsClientConfig(awsClientConfig).build();
       return RdaMessageSourceFactory.Config.builder()
           .fissClaimJsonFile(fissFile.orElse(null))
           .mcsClaimJsonFile(mcsFile.orElse(null))
           .s3Bucket(s3Bucket.orElse(null))
-          .s3ClientConfig(S3ClientConfig.s3Builder().region(s3Region.orElse(null)).build())
+          .s3ClientConfig(s3ClientConfig)
           .s3Directory(s3Directory.orElse(null))
           .build();
     }
@@ -290,6 +317,15 @@ public class LoadRdaJsonApp {
       return List.of(
           jobConfig.createFissClaimsLoadJob(appState, mbiCache),
           jobConfig.createMcsClaimsLoadJob(appState, mbiCache));
+    }
+
+    /**
+     * Creates {@link AwsClientConfig} containing common settings used for all AWS services.
+     *
+     * @return the config
+     */
+    private AwsClientConfig createAwsClientConfig() {
+      return AwsClientConfig.awsBuilder().region(awsRegion.orElse(null)).build();
     }
   }
 }

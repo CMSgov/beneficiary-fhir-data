@@ -1,8 +1,10 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -12,11 +14,12 @@ import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.CarrierClaim;
-import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -127,6 +130,47 @@ public final class CarrierClaimTransformerTest {
   }
 
   /**
+   * Tests that the transformer sets the expected values for the care team member extensions and
+   * does not error when only the required care team values exist.
+   */
+  @Test
+  public void testCareTeamExtensionsWhenOptionalValuesAbsent() {
+
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    CarrierClaim loadedClaim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(CarrierClaim.class::cast)
+            .findFirst()
+            .get();
+    loadedClaim.setLastUpdated(Instant.now());
+
+    // Set the optional care team fields to empty
+    for (CarrierClaimLine line : loadedClaim.getLines()) {
+      line.setProviderParticipatingIndCode(Optional.empty());
+      line.setProviderSpecialityCode(Optional.empty());
+      line.setOrganizationNpi(Optional.empty());
+    }
+
+    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
+
+    // Ensure the extension for PRTCPTNG_IND_CD wasnt added
+    // Also the qualification coding should be empty if specialty code is not set
+    // organization npi should also not be added if its optional is empty
+    String prtIndCdUrl =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD);
+    for (ExplanationOfBenefit.CareTeamComponent careTeam : genEob.getCareTeam()) {
+      assertFalse(careTeam.getExtension().stream().anyMatch(i -> i.getUrl().equals(prtIndCdUrl)));
+      assertFalse(
+          careTeam.getExtension().stream()
+              .anyMatch(i -> i.getUrl().equals(TransformerConstants.CODING_NPI_US)));
+      assertTrue(careTeam.getQualification().getCoding().isEmpty());
+    }
+  }
+
+  /**
    * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
    * works as expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link
    * CarrierClaim}.
@@ -223,7 +267,7 @@ public final class CarrierClaimTransformerTest {
         performingCareTeamEntry,
         TransformerConstants.CODING_NPI_US,
         TransformerConstants.CODING_NPI_US,
-        "" + claimLine1.getOrganizationNpi().get());
+        claimLine1.getOrganizationNpi().get());
 
     CareTeamComponent taxNumberCareTeamEntry =
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(

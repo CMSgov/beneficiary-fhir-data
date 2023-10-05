@@ -27,7 +27,15 @@
         "NCH_CLM_TYPE_CD"
     ],
     "cclfMapping": [
-        "CCLF1.CLM_TYPE_CD"
+        "CCLF1.CLM_TYPE_CD",
+        "CCLF2.CLM_TYPE_CD",
+        "CCLF3.CLM_TYPE_CD",
+        "CCLF4.CLM_TYPE_CD",
+        "CCLF5.CLM_TYPE_CD",
+        "CCLF6.CLM_TYPE_CD",
+        "CCLF7.CLM_TYPE_CD",
+        "CCLFA.CLM_TYPE_CD",
+        "CCLFB.CLM_TYPE_CD"
     ],
     "fhirMapping": [
         {

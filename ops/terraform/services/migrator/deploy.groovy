@@ -1,5 +1,12 @@
 #!/usr/bin/env groovy
 
+/** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
+STATUS_FINISHED = "Finished"
+
+String getFormattedMonitorMsg(String msg) {
+    return "[Migrator monitor]: ${msg}"
+}
+
 // entrypoint to migrator deployment, requires mapped arguments and an aws authentication closure
 // attempts to deploy and monitor and return `true` when the migrator signals a zero exit status
 boolean deployMigrator(Map args = [:]) {
@@ -12,8 +19,10 @@ boolean deployMigrator(Map args = [:]) {
     // authenticate
     awsAuth.assumeRole()
 
-    // set sqsQueueName
-    sqsQueueName = "bfd-${bfdEnv}-migrator"
+    sqsQueueName = awsSsm.getParameter(
+        parameterName: "/bfd/${bfdEnv}/migrator/nonsensitive/sqs_queue_name",
+        awsRegion: awsRegion
+    )
 
     // prechecks
     if (isMigratorDeploymentRequired(bfdEnv, awsRegion) || forceDeployment) {
@@ -53,7 +62,7 @@ boolean deployMigrator(Map args = [:]) {
     awsAuth.assumeRole()
 
     // set return value for final disposition
-    if (finalMigratorStatus[0] == '0') {
+    if (finalMigratorStatus[0] == STATUS_FINISHED) {
         migratorDeployedSuccessfully = true
         awsSsm.putParameter(
             parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
@@ -81,53 +90,64 @@ boolean deployMigrator(Map args = [:]) {
     return migratorDeployedSuccessfully
 }
 
-
 // polls the given AWS SQS Queue `sqsQueueName` for migrator messages for
 // 20s at the `heartbeatInterval`
 def monitorMigrator(Map args = [:]) {
+    migratorStartTimestamp = java.time.LocalDateTime.now().toString()
+    println getFormattedMonitorMsg("Begin Migrator monitoring - ${migratorStartTimestamp}")
+    println getFormattedMonitorMsg("NOTE - Messages may appear out of order. Refer to the messageId for the true " +
+        "order when debugging.")
+
     sqsQueueName = args.sqsQueueName
     awsRegion = args.awsRegion
     heartbeatInterval = args.heartbeatInterval
     maxMessages = args.maxMessages
-
     sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
-    while (true) {
+    latestSchemaVersion = null
+    while(true) {
         awsAuth.assumeRole()
-        messages = awsSqs.receiveMessages(
-            sqsQueueUrl: sqsQueueUrl,
-            awsRegion: awsRegion,
-            visibilityTimeoutSeconds: 30,
-            waitTimeSeconds: 20,
-            maxMessages: maxMessages
-        )
+        hasMessages = true;
+        while(hasMessages) {
+            messages = awsSqs.receiveMessages(
+                sqsQueueUrl: sqsQueueUrl,
+                awsRegion: awsRegion,
+                visibilityTimeoutSeconds: 30,
+                waitTimeSeconds: 20,
+                maxMessages: maxMessages
+            )
 
-        // 1. "handle" (capture status, print, delete) each message
-        // 2. if the message body contains a non "0/0" (running) value, return it
-        for (msg in messages) {
-            migratorStatus = msg.body.status
-            schemaVersion = msg.body.schema_version
-            println "Migrator schema version is at ${schemaVersion}"
-            printMigratorMessage(msg)
-            awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-            if (migratorStatus != '0/0') {
-                def resultsList = [migratorStatus, schemaVersion]
-                return resultsList
+            // 1. "handle" (capture status, print, delete) each message
+            // 2. if the message body contains a non-running value, return it
+            for (msg in messages) {
+                body = msg.body
+                println getFormattedMonitorMsg(getMigratorStatus(body))
+                awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
+                latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
+                if (body.appStage == STATUS_FINISHED) {
+                    return [body.appStage, latestSchemaVersion]
+                }
             }
+            hasMessages = messages.size() > 0
         }
         sleep(heartbeatInterval)
     }
+    println getFormattedMonitorMsg("Migrator started at ${migratorStartTimestamp} is no longer running with a final status of '${migratorStatus}' at ${java.time.LocalDateTime.now().toString()}")
 }
 
-// print formatted migrator messages
-void printMigratorMessage(message) {
-    body = message.body
-    println "Timestamp: ${java.time.LocalDateTime.now().toString()}"
-
-    if (body.stop_time == "n/a") {
-        println "Migrator ${body.pid} started at ${body.start_time} is running"
-    } else {
-        println "Migrator ${body.pid} started at ${body.start_time} is no longer running: '${body.code}' '${body.status}' as of ${body.stop_time}"
+// return migrator status as a formatted string
+String getMigratorStatus(Map body = [:]) {
+    migratorStatus = body.appStage
+    migrationStage = body?.migrationStage
+    msgIdPrefix = "[${body.messageId}]"
+    if (migrationStage != null) {
+        statusStage = "${migratorStatus} (${migrationStage.stage})"
+        if (migrationStage?.migrationFile != null) {
+            return "${msgIdPrefix} ${statusStage}: ${migrationStage.migrationFile} (schema version ${migrationStage.version}) ..."
+        } else {
+            return "${msgIdPrefix} ${statusStage}"
+        }
     }
+    return "${msgIdPrefix} ${migratorStatus}"
 }
 
 // checks for indications of a running migrator deployment by looking for unconsumed SQS messages
@@ -138,11 +158,12 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
         sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
         println "Queue ${sqsQueueName} exists. Checking for messages in ${sqsQueueUrl} ..."
         migratorMessages = awsSqs.receiveMessages(
-                sqsQueueUrl: sqsQueueUrl,
-                awsRegion: awsRegion,
-                maxMessages: 10,
-                visibilityTimeoutSeconds: 0,
-                waitTimeSeconds: 0)
+            sqsQueueUrl: sqsQueueUrl,
+            awsRegion: awsRegion,
+            maxMessages: 10,
+            visibilityTimeoutSeconds: 0,
+            waitTimeSeconds: 0
+        )
         if (migratorMessages?.isEmpty()) {
             println "Queue ${sqsQueueName} is empty. Migrator deployment can proceed!"
             return true

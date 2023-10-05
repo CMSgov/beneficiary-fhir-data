@@ -22,7 +22,8 @@
         "LINE_CMS_TYPE_SRVC_CD"
     ],
     "cclfMapping": [
-        "CCLF5.CLM_FED_TYPE_SRVC_CD"
+        "CCLF5.CLM_FED_TYPE_SRVC_CD",
+        "CCLF6.CLM_FED_TYPE_SRVC_CD"
     ],
     "fhirMapping": [
         {

@@ -70,6 +70,8 @@ Configuration settings and their associated properties are:
 
 | Option                  | Default         | Description                                                         |
 |-------------------------|-----------------|---------------------------------------------------------------------|
+| aws.region              | us-east-1       | Region containing RDS (only used when authType == RDS)              |
+| database.authType       | JDBC            | Authentication type (RDS or JDBC).                                  |
 | database.url            | none            | JDBC URL to connect to database.                                    |
 | database.user           | none            | User ID to use when authenticating to database.                     |
 | database.password       | none            | Password to use when authenticating to database.                    |
@@ -100,18 +102,20 @@ The only command line argument is an optional path to a java properties file con
 
 Configuration settings and their associated properties are:
 
-| Option                  | Default        | Description                                                                           |
-|-------------------------|----------------|---------------------------------------------------------------------------------------|
-| database.url            | none           | JDBC URL to connect to database.                                                      |
-| database.user           | none           | User ID to use when authenticating to database.                                       |
-| database.password       | none           | Password to use when authenticating to database.                                      |
-| hash.iterations         | 100            | Number of iterations to use when hashing MBI values.                                  |
-| hash.pepper             | notarealpepper | Pepper to use when hashing MBI values.                                                |
-| job.batchSize           | 1              | Number of claims per batch when writing to database.                                  |
-| job.writeThreads        | 1              | Number of writer threads to use when writing to the database.                         |
-| job.migration           | false          | If true the program will perform a schema migration before running the pipeline jobs. |
-| file.fiss               | none           | Path to a NDJSON file containing FISS claims data.                                    |
-| file.mcs                | none           | Path to a NDJSON file containing MCS claims data.                                     |
+| Option            | Default        | Description                                                                           |
+|-------------------|----------------|---------------------------------------------------------------------------------------|
+| aws.region        | us-east-1      | Region containing RDS (only used when authType == RDS)                                |
+| database.authType | JDBC           | Authentication type (RDS or JDBC).                                                    |
+| database.url      | none           | JDBC URL to connect to database.                                                      |
+| database.user     | none           | User ID to use when authenticating to database.                                       |
+| database.password | none           | Password to use when authenticating to database.                                      |
+| hash.iterations   | 100            | Number of iterations to use when hashing MBI values.                                  |
+| hash.pepper       | notarealpepper | Pepper to use when hashing MBI values.                                                |
+| job.batchSize     | 1              | Number of claims per batch when writing to database.                                  |
+| job.writeThreads  | 1              | Number of writer threads to use when writing to the database.                         |
+| job.migration     | false          | If true the program will perform a schema migration before running the pipeline jobs. |
+| file.fiss         | none           | Path to a NDJSON file containing FISS claims data.                                    |
+| file.mcs          | none           | Path to a NDJSON file containing MCS claims data.                                     |
 
 ## StoreRdaJsonApp
 
@@ -128,6 +132,10 @@ Configuration settings and their associated properties are:
 
 | Option          | Default   | Description                                                                |
 |-----------------|-----------|----------------------------------------------------------------------------|
+| api.host        | localhost | Host name for connection to RDA API server.                                |
+| api.port        | 5003      | TCP port for connection to RDA API server.                                 |
+| api.token       | none      | JWT for authentication to RDA API server.                                  |
+| job.idleSeconds | unlimited | Maximum idle time before closing connection to RDA API server.             |
 | output.type     | none      | Specifies type of claims to download. Either `FISS` or `MCS`.              |
 | output.maxCount | unlimited | Specifies maximum number of claims to download.                            |
 | output.file     | none      | Path to file to store the claims. The file will be created or overwritten. |

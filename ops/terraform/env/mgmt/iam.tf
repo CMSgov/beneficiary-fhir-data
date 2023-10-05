@@ -366,6 +366,17 @@ resource "aws_iam_policy" "bfd_ssm_ro" {
 {
   "Statement": [
     {
+      "Sid": "ListParameters",
+      "Action": [
+        "ssm:DescribeParameters"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:ssm:us-east-1:${local.account_id}:*"
+      ]
+    },
+    {
+      "Sid": "AllowReadBFDParams",
       "Action": [
         "ssm:GetParametersByPath",
         "ssm:GetParameters",
@@ -377,6 +388,7 @@ resource "aws_iam_policy" "bfd_ssm_ro" {
       ]
     },
     {
+      "Sid": "AllowKeyUsage",
       "Action": [
         "kms:Decrypt"
       ],
