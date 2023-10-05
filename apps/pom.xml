@@ -148,7 +148,7 @@
         <maven-plugin-annotations.version>3.9.0</maven-plugin-annotations.version>
         <maven.plugin.version>3.7.1</maven.plugin.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-        <jakarta.el.version>5.0.0-M1</jakarta.el.version>
+        <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.2.4</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
         <!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
