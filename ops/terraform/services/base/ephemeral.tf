@@ -28,13 +28,35 @@ locals {
     "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"
   } : {}
 
-  # FUTURE: Fix this when hierarchies are supported with Terraform module
+  # FUTURE: Fix this when hierarchies are supported with Terraform module.
   seed_env_certs = {
     prod = {
-      # TODO: Add prod certs
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"          = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_prod_client"            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"           = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests" 
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_client"             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_client"            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"
     }
     prod-sbx = {
-      # TODO: Add prod-sbx certs
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov"                         = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bb2_local_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bb2_local_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_dev_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_dev_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_test_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_test_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_sbx_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_sbx_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_local_client"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_local_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_sbx_client"                            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_sbx_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_test_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_test_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_dev_client"                                 = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_dev_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_local_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_local_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_dev_prod_sbx_client"                       = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_dev_prod_sbx_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_sbx_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_sbx_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_imp_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_imp_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/prod_sbx_bfd_cms_gov"                           = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/prod_sbx_bfd_cms_gov"
     }
     test = {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test"
@@ -44,7 +66,7 @@ locals {
     }
   }
 
-  # Targeted SERVER hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
+  # Targeted SERVER hierarchy paths to be "copied" from the (merged) seed environment into requested ephemeral environment
   server_seed_paths = local.is_ephemeral_env ? merge({
     "/bfd/${local.env}/server/nonsensitive/asg_desired_instance_count"     = "/bfd/${local.seed_env}/server/nonsensitive/asg_desired_instance_count"
     "/bfd/${local.env}/server/nonsensitive/asg_instance_warmup_time"       = "/bfd/${local.seed_env}/server/nonsensitive/asg_instance_warmup_time"
@@ -62,8 +84,6 @@ locals {
     "/bfd/${local.env}/server/sensitive/test_client_cert"                  = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
     "/bfd/${local.env}/server/sensitive/test_client_key"                   = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
   }, local.seed_env_certs[local.seed_env]) : {}
-
-
 }
 
 data "aws_db_cluster_snapshot" "seed" {
