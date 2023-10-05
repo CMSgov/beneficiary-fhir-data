@@ -46,7 +46,7 @@ public class LayeredConfigurationSettings {
       @JsonProperty("ssmPaths") @Nullable List<String> ssmPaths,
       @JsonProperty("ssmHierarchies") @Nullable List<String> ssmHierarchies) {
     this.propertiesFile = Strings.nullToEmpty(propertiesFile);
-    this.ssmPaths = ssmHierarchies == null ? List.of() : List.copyOf(ssmPaths);
+    this.ssmPaths = ssmPaths == null ? List.of() : List.copyOf(ssmPaths);
     this.ssmHierarchies = ssmHierarchies == null ? List.of() : List.copyOf(ssmHierarchies);
   }
 

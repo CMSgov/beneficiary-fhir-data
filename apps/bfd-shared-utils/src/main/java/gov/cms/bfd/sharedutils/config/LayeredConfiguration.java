@@ -31,12 +31,12 @@ public final class LayeredConfiguration {
    * The name of the environment variable that can be used to provide a JSON string defining a
    * {@link LayeredConfigurationSettings} object.
    */
-  public static final String ENV_VAR_SETTINGS_JSON = "LAYERED_CONFIG_SETTINGS_JSON";
+  public static final String ENV_VAR_KEY_SETTINGS_JSON = "LAYERED_CONFIG_SETTINGS_JSON";
 
   /**
    * The name of the environment variable that can be used to provide a path for looking up
    * configuration variables in AWS SSM parameter store. Intended to be used when {@link
-   * #ENV_VAR_SETTINGS_JSON} is not being used.
+   * #ENV_VAR_KEY_SETTINGS_JSON} is not being used.
    */
   public static final String ENV_VAR_KEY_SSM_PARAMETER_PATH = "SSM_PARAMETER_PATH";
 
@@ -116,7 +116,7 @@ public final class LayeredConfiguration {
    * be simulated in tests without having to fork a process.
    *
    * <p>Creates a {@link LayeredConfigurationSettings} object either by parsing the JSON value in
-   * {@link #ENV_VAR_SETTINGS_JSON} or the comma separated list of paths in {@link
+   * {@link #ENV_VAR_KEY_SETTINGS_JSON} or the comma separated list of paths in {@link
    * #ENV_VAR_KEY_SSM_PARAMETER_PATH}. Then creates an instance of this class and returns a value
    * using its {@link #createConfigLoader} method.
    *
@@ -220,32 +220,44 @@ public final class LayeredConfiguration {
 
   /**
    * Uses the provided {@link ConfigLoader} to create a {@link LayeredConfigurationSettings} object.
-   * The settings are either provided in a JSON string contained in {@link #ENV_VAR_SETTINGS_JSON}
-   * or produced using any SSM paths contained in {@link #ENV_VAR_KEY_SSM_PARAMETER_PATH}.
+   * The settings are either provided in a JSON string contained in {@link
+   * #ENV_VAR_KEY_SETTINGS_JSON} or produced using any SSM paths contained in {@link
+   * #ENV_VAR_KEY_SSM_PARAMETER_PATH} and properties file path contained in {@link
+   * #ENV_VAR_KEY_PROPERTIES_FILE}.
    *
    * @param config used to read settings
    * @return the created settings
    */
   @VisibleForTesting
-  static LayeredConfigurationSettings loadLayeredConfigurationSettings(
-      ConfigLoader config) {
-    final var configJson = config.stringValue(ENV_VAR_SETTINGS_JSON, "");
+  static LayeredConfigurationSettings loadLayeredConfigurationSettings(ConfigLoader config) {
+    final var configJson = config.stringValue(ENV_VAR_KEY_SETTINGS_JSON, "");
     final LayeredConfigurationSettings settings;
     if (configJson.length() > 0) {
       ObjectMapper mapper = new ObjectMapper();
       try {
         settings = mapper.readValue(configJson, LayeredConfigurationSettings.class);
       } catch (JsonProcessingException e) {
-        throw new ConfigException(ENV_VAR_SETTINGS_JSON, "error parsing settings JSON", e);
+        throw new ConfigException(ENV_VAR_KEY_SETTINGS_JSON, "error parsing settings JSON", e);
       }
     } else {
       settings =
           LayeredConfigurationSettings.builder()
-              .ssmPaths(
-                  Arrays.asList(config.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "").split(",")))
+              .ssmPaths(splitPathCsv(config.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "")))
               .propertiesFile(config.stringValue(ENV_VAR_KEY_PROPERTIES_FILE, ""))
               .build();
     }
     return settings;
+  }
+
+  /**
+   * Split the given CSV string to create a list. All empty strings are removed from the list before
+   * it is returned.
+   *
+   * @param rawPathString CSV string
+   * @return list of non-empty values
+   */
+  @VisibleForTesting
+  static List<String> splitPathCsv(String rawPathString) {
+    return Arrays.stream(rawPathString.split(",")).filter(s -> !s.isEmpty()).toList();
   }
 }

@@ -22,14 +22,15 @@ public class AwsParameterStoreClient {
 
   /**
    * Load all parameters at the specified path into an immutable {@link Map} and return it. Can be
-   * used with {@link ConfigLoader.Builder#addMap}.
+   * used with {@link ConfigLoader.Builder#addMap}. When loading parameters recursively the '/'
+   * character is converted to a '.' character in the final parameter name.
    *
    * @param path path containing the parameters
+   * @param recursive true if parameters from sub-folders should also be downlaoded
    * @return {@link Map} of values
    * @throws ConfigException if AWS call fails
    */
-  public Map<String, String> loadParametersAtPath(String path,
-                                                  boolean recursive) {
+  public Map<String, String> loadParametersAtPath(String path, boolean recursive) {
     try {
       final var mapBuilder = ImmutableMap.<String, String>builder();
       var request =
