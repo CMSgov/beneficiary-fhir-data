@@ -25,7 +25,7 @@
             "version": "R4",
             "resource": "ExplanationOfBenefit",
             "element": "provider.identifier.value",
-            "fhirPath": "provider.identifer.value",
+            "fhirPath": "provider.identifier.where(system='https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num').value",
             "discriminator": [
                 "provider.identifier.system='https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num'"
             ],

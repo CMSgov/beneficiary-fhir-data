@@ -1,6 +1,6 @@
 {
     "id": 428,
-    "name": "Coverage Resource Last Updated Date",
+    "name": "Patient Resource Last Updated Date",
     "description": "The date that this record was last updated within the database.",
     "appliesTo": [
         ""

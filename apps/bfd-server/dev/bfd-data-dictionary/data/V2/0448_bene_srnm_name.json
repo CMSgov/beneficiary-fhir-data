@@ -1,7 +1,7 @@
 {
     "id": 448,
-    "name": "Beneficiary Middle Name",
-    "description": "The middle name of the beneficiary.",
+    "name": "Beneficiary Last Name",
+    "description": "The last name of the beneficiary.",
     "appliesTo": [
         ""
     ],
