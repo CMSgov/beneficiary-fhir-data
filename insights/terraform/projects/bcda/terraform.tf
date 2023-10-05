@@ -1,6 +1,11 @@
+provider "aws" {
+  region = "us-east-1"
+  default_tags {
+    tags = local.default_tags
+  }
+}
+
 terraform {
-  required_version = "~> 0.13.4"
-  # Use the common terraform bucket for all of BFD's state
   backend "s3" {
     bucket         = "bfd-tf-state"
     key            = "bfd-insights/bcda/terraform.tfstate"
@@ -9,9 +14,10 @@ terraform {
     encrypt        = "1"
     kms_key_id     = "alias/bfd-tf-state"
   }
-}
-
-provider "aws" {
-  version = "~> 2.57"
-  region  = "us-east-1"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.30"
+    }
+  }
 }

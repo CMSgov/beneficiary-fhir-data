@@ -16,4 +16,5 @@ variable "bucket_cmk" {
 variable "tags" {
   description = "tags"
   type        = map(string)
+  default     = {}
 }

@@ -112,13 +112,13 @@ resource "aws_iam_policy" "full" {
         }
     ]
 }
-POLICY  
+POLICY
 }
 
 resource "aws_iam_group_policy_attachment" "full_attach" {
-  count       = length(var.full_groups)
-  group       = var.full_groups[count.index]
-  policy_arn  = aws_iam_policy.full.arn
+  count      = length(var.full_groups)
+  group      = var.full_groups[count.index]
+  policy_arn = aws_iam_policy.full.arn
 }
 
 # Allows writes to outputs
@@ -160,20 +160,20 @@ resource "aws_iam_policy" "athena_query" {
       ],
       "Resource": "${aws_kms_key.main.arn}"
     }]
-  } 
-  POLICY  
+  }
+  POLICY
 }
 
 resource "aws_iam_group_policy_attachment" "athena_attach" {
-  count       = length(var.athena_groups)
-  group       = var.athena_groups[count.index]
-  policy_arn  = aws_iam_policy.full.arn
+  count      = length(var.athena_groups)
+  group      = var.athena_groups[count.index]
+  policy_arn = aws_iam_policy.full.arn
 }
 
 resource "aws_s3_bucket_policy" "cross_account" {
-    count       = length(var.cross_accounts) > 0 ? 1 : 0
-    bucket      = aws_s3_bucket.main.id
-    policy      = <<-POLICY
+  count  = length(var.cross_accounts) > 0 ? 1 : 0
+  bucket = aws_s3_bucket.main.id
+  policy = <<-POLICY
     {
       "Version": "2012-10-17",
       "Id": "AccessToDB",
@@ -218,7 +218,7 @@ resource "aws_s3_bucket_policy" "cross_account" {
     POLICY
 }
 
-## KMS CMK 
+## KMS CMK
 
 data "aws_iam_policy_document" "cmk_policy" {
   statement {
@@ -226,21 +226,21 @@ data "aws_iam_policy_document" "cmk_policy" {
     effect  = "Allow"
     actions = ["kms:*"]
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
     resources = ["*"]
   }
-  
+
   statement {
-    sid = "AllowUse"
+    sid    = "AllowUse"
     effect = "Allow"
     actions = [
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
     ]
     resources = ["*"]
     principals {

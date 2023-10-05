@@ -6,6 +6,7 @@
 !.gitattributes
 !.github
 !.sensitive-files
+!.terraform-docs.yml
 
 # OSX system files
 .DS_Store
