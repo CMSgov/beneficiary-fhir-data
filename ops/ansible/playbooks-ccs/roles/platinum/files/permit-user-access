@@ -23,7 +23,7 @@ get_ssm_users () {
     --region us-east-1 \
     --query 'Parameters' \
     | jq -r "map(select(.Name | test(\"^${user_ssm}${eua_identifier_pattern}\")))")
-  echo $users
+  echo "$users"
 }
 
 # Grants SSH access to the specified user, if applicable, based
@@ -41,13 +41,13 @@ permit_user_ssh () {
   ssh_public_key=$(echo "$user" | jq -r '.ssh_public_key')
   user_ssh_dir="/home/$user_name/.ssh"
 
-  adduser --comment '' $user_name
-  mkdir -p $user_ssh_dir
-  touch $user_ssh_dir/authorized_keys
-  echo $ssh_public_key > $user_ssh_dir/authorized_keys
-  chown -R $user_name:$user_name $user_ssh_dir
-  chmod 700 $user_ssh_dir
-  chmod 600 $user_ssh_dir/authorized_keys
+  adduser --comment '' "$user_name"
+  mkdir -p "$user_ssh_dir"
+  touch "$user_ssh_dir"/authorized_keys
+  echo "$ssh_public_key" > "$user_ssh_dir"/authorized_keys
+  chown -R "$user_name":"$user_name" "$user_ssh_dir"
+  chmod 700 "$user_ssh_dir"
+  chmod 600 "$user_ssh_dir"/authorized_keys
 }
 
 # Grants sudo access to the specified user, if applicable, based
@@ -73,7 +73,7 @@ add_ssh_users_and_sudoers() {
   users=$(get_ssm_users)
   for encoded_user in $(echo "$users" | jq -r '.[].Value | @base64'); do
     _jq() {
-      user=$(echo "$encoded_user" | base64 --decode | jq -r ${1})
+      user=$(echo "$encoded_user" | base64 --decode | jq -r "${1}")
       permit_user_ssh "$user"
       permit_user_sudo "$user"
     }
