@@ -8,43 +8,99 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.Data;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
-public interface ConfigLoaderSource {
-  Set<String> keySet();
+/** Implementations serve as sources of configuration values for use by a {@link ConfigLoader}. */
+public abstract class ConfigLoaderSource {
+  /**
+   * Returns a {@link Set} containing all of the known keys that are accessible through this object.
+   *
+   * @return set of keys
+   */
+  @Nonnull
+  public abstract Set<String> keySet();
 
-  Collection<String> lookup(String key);
+  /**
+   * Looks for a value mapped to the specified key. Returns null if there is no mapping or a {@link
+   * Collection} containing all values if a mapping exists.
+   *
+   * @param key key to look up
+   * @return null or all of the values mapped to the key
+   */
+  @Nullable
+  public abstract Collection<String> lookup(String key);
 
-  static ConfigLoaderSource fromMap(Map<String, String> map) {
+  /**
+   * Create an instance that uses the given {@link Map} as its source of values.
+   *
+   * @param map contains the values
+   * @return the source that was created
+   */
+  public static ConfigLoaderSource fromMap(Map<String, String> map) {
 
     return new MapSource(map);
   }
 
-  static ConfigLoaderSource fromMultiMap(Map<String, ? extends Collection<String>> map) {
+  /**
+   * Create an instance that uses the given {@link Map} as its source of values.
+   *
+   * @param map contains the values
+   * @return the source that was created
+   */
+  public static ConfigLoaderSource fromMultiMap(Map<String, ? extends Collection<String>> map) {
     return new MultiMapSource(map);
   }
 
-  static ConfigLoaderSource fromEnv() {
+  /**
+   * Create an instance that uses {@link System::getenv} as its source of values.
+   *
+   * @return the source that was created
+   */
+  public static ConfigLoaderSource fromEnv() {
     return new MapSource(System.getenv());
   }
 
-  static ConfigLoaderSource fromProperties(Properties properties) {
+  /**
+   * Create an instance that uses the given {@link Properties} as its source of values.
+   *
+   * @param properties contains the values
+   * @return the source that was created
+   */
+  public static ConfigLoaderSource fromProperties(Properties properties) {
     return new PropertiesSource(properties);
   }
 
-  static ConfigLoaderSource fromPrioritizedSources(List<ConfigLoaderSource> sources) {
+  /**
+   * Create an instance that uses all of the given {@link ConfigLoaderSource}s as its source of
+   * values. When looking for a mapping for any given key the value returned will always be that
+   * from the last source in the list that contains a value. That means the list should contain the
+   * sources in order of increasing priority.
+   *
+   * @param sources all sources in order of increasing priority
+   * @return the source that was created
+   */
+  public static ConfigLoaderSource fromPrioritizedSources(List<ConfigLoaderSource> sources) {
     return new CombinedSource(sources);
   }
 
-  @Data
-  class PropertiesSource implements ConfigLoaderSource {
+  /** Implementation used by {@link ConfigLoaderSource#fromProperties}. */
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @EqualsAndHashCode(callSuper = false)
+  private static class PropertiesSource extends ConfigLoaderSource {
+    /** All of our values. */
     private final Properties properties;
 
+    @Nonnull
     @Override
     public Set<String> keySet() {
       return properties.stringPropertyNames();
     }
 
+    @Nullable
     @Override
     public Collection<String> lookup(String key) {
       var value = properties.getProperty(key);
@@ -52,30 +108,40 @@ public interface ConfigLoaderSource {
     }
   }
 
-  @Data
-  class MultiMapSource implements ConfigLoaderSource {
+  /** Implementation used by {@link ConfigLoaderSource#fromMultiMap}. */
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @EqualsAndHashCode(callSuper = false)
+  private static class MultiMapSource extends ConfigLoaderSource {
+    /** All of our values. */
     private final Map<String, ? extends Collection<String>> map;
 
+    @Nonnull
     @Override
     public Set<String> keySet() {
       return map.keySet();
     }
 
+    @Nullable
     @Override
     public Collection<String> lookup(String key) {
       return map.get(key);
     }
   }
 
-  @Data
-  class MapSource implements ConfigLoaderSource {
+  /** Implementation used by {@link ConfigLoaderSource#fromMap}. */
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @EqualsAndHashCode(callSuper = false)
+  private static class MapSource extends ConfigLoaderSource {
+    /** All of our values. */
     private final Map<String, String> map;
 
+    @Nonnull
     @Override
     public Set<String> keySet() {
       return map.keySet();
     }
 
+    @Nullable
     @Override
     public Collection<String> lookup(String key) {
       final String value = map.get(key);
@@ -83,18 +149,27 @@ public interface ConfigLoaderSource {
     }
   }
 
-  @Data
-  class CombinedSource implements ConfigLoaderSource {
+  /** Implementation used by {@link ConfigLoaderSource#fromPrioritizedSources}. */
+  @EqualsAndHashCode(callSuper = false)
+  private static class CombinedSource extends ConfigLoaderSource {
+    /** All sources in order of decreasing priority. */
     private final List<ConfigLoaderSource> sources;
 
-    public CombinedSource(List<ConfigLoaderSource> sources) {
+    /**
+     * Initializes an instance. Ensures our list of sources is in order of decreasing priority so
+     * that a simple loop can be used to find the highest priority value.
+     *
+     * @param sources all sources to use when looking up values
+     */
+    private CombinedSource(List<ConfigLoaderSource> sources) {
       // Caller passes a list in increasing priority order but we need it in decreasing order so we
-      // reverse it.
+      // create a copy with the order reversed.
       var temp = new ArrayList<>(sources);
       Collections.reverse(temp);
       this.sources = List.copyOf(temp);
     }
 
+    @Nonnull
     @Override
     public Set<String> keySet() {
       return sources.stream()
@@ -102,6 +177,7 @@ public interface ConfigLoaderSource {
           .collect(Collectors.toUnmodifiableSet());
     }
 
+    @Nullable
     @Override
     public Collection<String> lookup(String key) {
       for (ConfigLoaderSource source : sources) {
