@@ -69,10 +69,14 @@
 /bfd/${env}/server/nonsensitive/pac_resources_enabled: true
 /bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
 ## SERVER+MTLS CONFIGURATION
-## NOTE: data_server_ssl_client_certificates_json stores escaped json string to be pre-processed
-##       by e.g. jq's `fromjson` method before being consumed by ansible, et al
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test: >-
+## NOTE: x509 PEM-encoded certs require "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----"
+##       content to be on their own (separate) line. The ">" yaml block style causes the BEGIN/END lines
+##       to be 'foled' into a single line content which will fail in openssl. Thus, in order to get a
+##       newline using folded sytle, we create a blank line after the "-----BEGIN CERTIFICATE-----"
+##       and before the "-----END CERTIFICATE-----" to comply with openssl requirements.
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test: >
   -----BEGIN CERTIFICATE-----
+
   MIIFETCCAvmgAwIBAgIEGBhgATANBgkqhkiG9w0BAQsFADA5MTcwNQYDVQQDEy5i
   bHVlYnV0dG9uLWJhY2tlbmQtZHByLWRhdGEtc2VydmVyLWNsaWVudC10ZXN0MB4X
   DTE5MDEwNzE1MzgzN1oXDTI5MDEwNDE1MzgzN1owOTE3MDUGA1UEAxMuYmx1ZWJ1
@@ -101,10 +105,12 @@
   39xFSgBO/ackF/comzvbxOfxhmN0XGr8xKFGyQeaspkZJ7QHKxqh3+eMlQ8KzWpu
   lJjPPAd/xjhgeMmPuzQpY/V72FXel3wc7lfLSkSFe3zEPI72N8p463GHke/LrT9j
   wN13nug=
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov: >-
+/bfd/${env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov: >
   -----BEGIN CERTIFICATE-----
+
   MIIGDDCCA/QCCQD1uLtqu5XdxjANBgkqhkiG9w0BAQsFADCBxzELMAkGA1UEBhMC
   VVMxETAPBgNVBAgMCE1hcnlsYW5kMRIwEAYDVQQHDAlCYWx0aW1vcmUxMTAvBgNV
   BAoMKENlbnRlcnMgZm9yIE1lZGljYXJlICYgTWVkaWNhaWQgU2VydmljZXMxDDAK
@@ -138,10 +144,12 @@
   lGYTKODxkcrxwQHMsbtNVKbvd5g8VOv2tT/KYjG3O4OA/zWKNvfK1wfUyfot5Z2r
   bhCYDMNSEOlkkhcV6E0qja4v4dsqsoTFrSHuUUHeD+9zyZ1X4nRqbkG5p3eW/sBw
   +giWtJcv9BkoLYTLFVn9ow==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: >-
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: >
   -----BEGIN CERTIFICATE-----
+
   MIIGhzCCBG+gAwIBAgIJAJILDQr1gSr2MA0GCSqGSIb3DQEBCwUAMIHRMQswCQYD
   VQQGEwJVUzERMA8GA1UECAwITWFyeWxhbmQxEjAQBgNVBAcMCUJhbHRpbW9yZTEz
   MDEGA1UECgwqQ2VudGVycyBmb3IgTWVkaWNhcmUgYW5kIE1lZGljYWlkIFNlcnZp
@@ -177,10 +185,12 @@
   s3CS7SAipcWta9OZ9vMppRIRxDBpvkv7o9+piwlo+fRXYJiqvHie0lmSpJ4UN7Pw
   HPtt20zAVNaGsm5T/2czwM5P2C6DkBLYY07+D0VAh9IdNBskAqu6cSuJWpjehf71
   BWRkyCz062TqXM56wU5z3rcSM0Bq7AwkViPYxgwtAfz3olDasvEWrOZimg==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: >-
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: >
   -----BEGIN CERTIFICATE-----
+
   MIIGnDCCBISgAwIBAgIJAJEYkN0EbTuAMA0GCSqGSIb3DQEBCwUAMIHaMQswCQYD
   VQQGEwJVUzERMA8GA1UECAwITWFyeWxhbmQxEjAQBgNVBAcMCUJhbHRpbW9yZTEz
   MDEGA1UECgwqQ2VudGVycyBmb3IgTWVkaWNhcmUgYW5kIE1lZGljYWlkIFNlcnZp
@@ -217,10 +227,12 @@
   Zo21GcFKvpdZhNOKjv2Fs2k/FUysO+TuPlTtSA5UnT8plkRBSlWMEQmA8xSd4s0a
   OC++Kha4eJqj26eF72/UmvXfMQzp4f2157Uu7EKvPGItUJZ26QIEpmL6Wq+MOifT
   EkQDhbqeBrt+KG+YW/SlNg==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bb2_local_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/bb2_local_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIE1TCCAr2gAwIBAgIEX7+G6zANBgkqhkiG9w0BAQsFADAbMRkwFwYDVQQDExBi
   YjItbG9jYWwtY2xpZW50MB4XDTIwMDEyOTIxMjgxMVoXDTIxMDEyODIxMjgxMVow
   GzEZMBcGA1UEAxMQYmIyLWxvY2FsLWNsaWVudDCCAiIwDQYJKoZIhvcNAQEBBQAD
@@ -247,10 +259,12 @@
   BMGaDqYJUM4pU11eXjW72VSvzKnRhP+vGehCDxf7RsrwVU3WM9Epx2RSOq9F59f/
   7BTeso7rJ9w2jkdNEwO21GKjSTv1Ev+zy3TnE+YJkkXgqfii5RjsDoDIAAdkqI9E
   0gYuwL5v4OXZm1FtYxhzRYKJVdqXkeveHC3jKEXwRFB6hAmbmw5CTvo=
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bcda_dev_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/bcda_dev_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIFBzCCAu+gAwIBAgIJANzk8viSWNB9MA0GCSqGSIb3DQEBCwUAMBoxGDAWBgNV
   BAMMD2JjZGEtZGV2LWNsaWVudDAeFw0xOTAxMzAxNzI4MzVaFw0yOTAxMjcxNzI4
   MzVaMBoxGDAWBgNVBAMMD2JjZGEtZGV2LWNsaWVudDCCAiIwDQYJKoZIhvcNAQEB
@@ -278,10 +292,12 @@
   Y3rgBNxpwPU84j6K0Pfa98bMUgjNjAs2pXrlu740EGWfMjXkPGSCR8vPfYmi/YuG
   ngcTWVUAs5Vic2eIaqkF22nKMR7UE65IArOrylyB9KHCzt0fpyq3aOpYAT0tHA+9
   kprtx6EBil/ZL5RB/cRXV8LSsyC+EZTAIGlmenNorzl+fkEtaeCuFwj/Xg==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bcda_test_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/bcda_test_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIFCTCCAvGgAwIBAgIJAPkpEg+9tr40MA0GCSqGSIb3DQEBCwUAMBsxGTAXBgNV
   BAMMEGJjZGEtdGVzdC1jbGllbnQwHhcNMTkwMTMwMTcyODQwWhcNMjkwMTI3MTcy
   ODQwWjAbMRkwFwYDVQQDDBBiY2RhLXRlc3QtY2xpZW50MIICIjANBgkqhkiG9w0B
@@ -309,10 +325,12 @@
   kTld73oBeWw4Xd04BV9AV3gzb9JRDZstb/Y7C1QMSp3yZxWp+SHPvQTYEnAHBEZd
   kD4RK64wzGy5JrNHtVBudJifDfI0+RuqH3IlT/pRd/qis0VVISWO/OLd7/JXpgES
   IiUiCrkADC8NIx1nGQ3MWIdlS7Khs0mPq8F1UjH3WLfrE9x0TNwRi5QjUsHU
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bcda_sbx_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/bcda_sbx_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIFBzCCAu+gAwIBAgIJANX9I+yU8PPKMA0GCSqGSIb3DQEBCwUAMBoxGDAWBgNV
   BAMMD2JjZGEtc2J4LWNsaWVudDAeFw0xOTAxMzAxNzI4MzlaFw0yOTAxMjcxNzI4
   MzlaMBoxGDAWBgNVBAMMD2JjZGEtc2J4LWNsaWVudDCCAiIwDQYJKoZIhvcNAQEB
@@ -340,10 +358,12 @@
   L2EFhaqXo6sGPzyNJvoRpxJwQN6jtLGG39dIu/YHhqG8i+YWrZKzSsUSw4wWjpW+
   Tw9PBoN3kXQf86iS7BfPXOhNQhBRyw4RDW4AlofikiIbCKtPZjnbWdrA7mcQVBGN
   L4hqD7kfvSQl9m81ELo9vntw+k4f2FGXG5z1Q3LplgZ3kKAp4T31FzD8UA==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bcda_local_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/bcda_local_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIEtDCCApwCCQDla/zZyVfuGzANBgkqhkiG9w0BAQsFADAcMRowGAYDVQQDDBFi
   Y2RhLWxvY2FsLWNsaWVudDAeFw0yMDAxMjkxNDQxMTlaFw0zMDAxMjYxNDQxMTla
   MBwxGjAYBgNVBAMMEWJjZGEtbG9jYWwtY2xpZW50MIICIjANBgkqhkiG9w0BAQEF
@@ -370,10 +390,12 @@
   UEQnudOUNHSGzhd5TnMYlMmUu7zBmZPZ6AT9WPdnbeyLHUSDEhqf4M8ivyV4ApR2
   GarPtue4xicCrv63TvvNj6NQ2GkU+DOw/NCdCFwHiYZo87sAA6pq2vRc6uRVMGq8
   LDyfRgkx5KU=
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/performance_tests: >-
+/bfd/${env}/server/nonsensitive/client_certificates/performance_tests: >
   -----BEGIN CERTIFICATE-----
+
   MIIEKjCCAxKgAwIBAgIJALOr3EprlQkNMA0GCSqGSIb3DQEBCwUAMGwxCzAJBgNV
   BAYTAlVTMREwDwYDVQQIEwhNYXJ5bGFuZDESMBAGA1UEBxMJQmFsdGltb3JlMQww
   CgYDVQQKEwNDTVMxDDAKBgNVBAsTA0JGUzEaMBgGA1UEAxMRUGVyZm9ybWFuY2Ug
@@ -397,10 +419,12 @@
   AAp2xQqVBH7/rKSp8vNp0FN0vcrAm3cvYqRgLX3bRkMjbOkHN1ETtFRhAJQ095mM
   2A4JGl9KxtrXpP9mI6jTLsNsLtgkllbIRLySTl7kcqpQW+chTsHTupIxeLsi4V0m
   qN983wo6kAit3mgkEAU=
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/dpc_prod_sbx_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/dpc_prod_sbx_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIEuDCCAqCgAwIBAgIEXW++kTANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNk
   cGMtcHJvZC1zYngtY2xpZW50MB4XDTE5MDkwNDEzMzkyOVoXDTI5MDkwMTEzMzky
   OVowHjEcMBoGA1UEAwwTZHBjLXByb2Qtc2J4LWNsaWVudDCCAiIwDQYJKoZIhvcN
@@ -427,10 +451,12 @@
   KYjk0lQyuc1ac5c5+P4dz1lG2TvEKrosrLFSrhtRBZWmwiJFt6K1X1PX+znfy9Ha
   w/MdjfPUJD55tRC93YCK8+HfuOA7yN/dHndAWs0XOzP4bDtCnQGyXfQhHGKULfJB
   5xUA4OT3ETZMsYWO
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/dpc_test_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/dpc_test_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIEsDCCApigAwIBAgIEXW++/zANBgkqhkiG9w0BAQsFADAaMRgwFgYDVQQDDA9k
   cGMtdGVzdC1jbGllbnQwHhcNMTkwOTA0MTM0MTE5WhcNMjkwOTAxMTM0MTE5WjAa
   MRgwFgYDVQQDDA9kcGMtdGVzdC1jbGllbnQwggIiMA0GCSqGSIb3DQEBAQUAA4IC
@@ -457,10 +483,12 @@
   o6M0JaQMIU3CYcVAoAkY/EdcufP2BU/nBCnCZNfO0U034Liin6GRIAeXr67uIiET
   apcmXtWUugZb7N50/5VYtonOOHatHCrWfTFI/aGHczgSnSEphT+UHCK61i/jqF2P
   aa+UmA==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/dpc_dev_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/dpc_dev_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIEzjCCAragAwIBAgIEXcAvPzANBgkqhkiG9w0BAQsFADAZMRcwFQYDVQQDDA5k
   cGMtZGV2LWNsaWVudDAeFw0xOTExMDQxNDAxMzVaFw0yMDExMDMxNDAxMzVaMBkx
   FzAVBgNVBAMMDmRwYy1kZXYtY2xpZW50MIICIjANBgkqhkiG9w0BAQEFAAOCAg8A
@@ -487,10 +515,12 @@
   IGnBn8Zmb/P6BfUljabvK6tlLrv0gn0Kc0MUXSsVu6rAlJiwdllEq9fTU5579Gn6
   kYMl2/DoeZtTC7+xvWbPMkTKZmxmKpaqlcTwwTlroGYN2xbvHF+QKD1z5+e4LFw+
   50VuzIMZyeBKlo+ADmwk3a71ZdC8xONZ/THXHQZi3bGxWQ==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/dpc_local_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/dpc_local_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIE1TCCAr2gAwIBAgIEBH0XMzANBgkqhkiG9w0BAQwFADAbMRkwFwYDVQQDExBk
   cGMtbG9jYWwtY2xpZW50MB4XDTIwMDIxOTA0MjU0OVoXDTMwMDIxNjA0MjU0OVow
   GzEZMBcGA1UEAxMQZHBjLWxvY2FsLWNsaWVudDCCAiIwDQYJKoZIhvcNAQEBBQAD
@@ -517,10 +547,12 @@
   ERcnGY36f1aQo+hAbpo6d3XkSncO1NV+8CwLL1V1fImhgxg1nPc8G/yT2nlu/2Ct
   XfmNfZn6i4dJ+XAH1WEhlJh5rGGh/TNKqlEpfORCBFuLG7wCHdCsugPknAhTt7Sl
   40IKfFSSjR0PbpHlwRWXfkVfgTQUFBB4c71xyLKYUAuf0P7LM0a560U=
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/ab2d_dev_prod_sbx_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/ab2d_dev_prod_sbx_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIFGTCCAwGgAwIBAgIJAMcQ6ar85gCdMA0GCSqGSIb3DQEBCwUAMCMxITAfBgNV
   BAMMGGFiMmQtZGV2LXByb2Qtc2J4LWNsaWVudDAeFw0yMTAzMDIxOTQxNDhaFw0y
   NjAzMDExOTQxNDhaMCMxITAfBgNVBAMMGGFiMmQtZGV2LXByb2Qtc2J4LWNsaWVu
@@ -549,10 +581,12 @@
   L57vFmweMR27BKZ9AJQEvW+Us3tg5jyRd9PA5yBM7ppDU8LeFDQ3abUxfMJE72Ai
   tB0DPlwuQJ+lLP5lnu24xRzM/yNr6agUlQTzJQWZ57Qu/AbNwQmu3hGMqTmSdgke
   Ex/kgdxIehDTc7RJ+g==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/ab2d_sbx_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/ab2d_sbx_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIEsDCCApgCCQD2KLEEIwKWMDANBgkqhkiG9w0BAQsFADAaMRgwFgYDVQQDDA9h
   YjJkLXNieC1jbGllbnQwHhcNMjAwMTIzMTQ0NzIzWhcNMjUwMTIxMTQ0NzIzWjAa
   MRgwFgYDVQQDDA9hYjJkLXNieC1jbGllbnQwggIiMA0GCSqGSIb3DQEBAQUAA4IC
@@ -579,10 +613,12 @@
   ulaoFugpy9q4EaNqZzQmh9sOYI9Vk6SKHwQvlOhQt9gRBNjLA6j+7vkWLUbVCFZx
   MdoTmtkGSzp1/1TcIhcGxwUqyk/jFKYvsoTsIWaUmdGb50QyHBIgfPj2AU1xaARb
   67UkIw==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/ab2d_imp_client: >-
+/bfd/${env}/server/nonsensitive/client_certificates/ab2d_imp_client: >
   -----BEGIN CERTIFICATE-----
+
   MIIEsDCCApgCCQDVY5whus7LJzANBgkqhkiG9w0BAQsFADAaMRgwFgYDVQQDDA9h
   YjJkLWltcC1jbGllbnQwHhcNMjAwMTIzMTQ0ODM4WhcNMjUwMTIxMTQ0ODM4WjAa
   MRgwFgYDVQQDDA9hYjJkLWltcC1jbGllbnQwggIiMA0GCSqGSIb3DQEBAQUAA4IC
@@ -609,10 +645,12 @@
   YAKHhN+39X3tlBIyfQIn6t02zOksrAzIZZ23iOTIqOLs0vzSrxsRD0pbmF+KjFcn
   xRsAXUHSKEyIBJt4aSIEBaR01X3pxveAq0PyM5uR156thHJmIsVZFdRvHbotbuQL
   m2Xpzw==
+
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/prod_sbx_bfd_cms_gov: >-
+/bfd/${env}/server/nonsensitive/client_certificates/prod_sbx_bfd_cms_gov: >
   -----BEGIN CERTIFICATE-----
+
   MIIFHzCCAwegAwIBAgIUQeny4GmZastRlDu71KLf2DUbTlkwDQYJKoZIhvcNAQEL
   BQAwHzEdMBsGA1UEAwwUcHJvZC1zYnguYmZkLmNtcy5nb3YwHhcNMjIxMDEyMTkw
   NDA4WhcNMjIxMjExMTkwNDA4WjAfMR0wGwYDVQQDDBRwcm9kLXNieC5iZmQuY21z
@@ -641,6 +679,7 @@
   THwBCPrZEN9PhXPIk5KQjLPC6hqecrwPjqdwEmtVcxZWKch1ZwiZw8zzja6hPgFg
   VP4SODeRPHXzkzlyRm+cFWCI+GEGH8dy8W+tdKdP+5CTN+rFkvEmcbCcNzg2qyHC
   uasJ/R5hG+geJ+ydxt8EmVKpmA==
+
   -----END CERTIFICATE-----
   
 /bfd/${env}/server/nonsensitive/lb_is_public: true
