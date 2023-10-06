@@ -24,6 +24,7 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
@@ -33,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
@@ -468,7 +468,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * @param getenv function used to access environment variables (provided explicitly for testing)
    * @return appropriately configured {@link ConfigLoader}
    */
-  static ConfigLoader createConfigLoader(Function<String, String> getenv) {
+  static ConfigLoader createConfigLoader(ConfigLoaderSource getenv) {
     return LayeredConfiguration.createConfigLoader(DEFAULT_CONFIG_VALUES, getenv);
   }
 
@@ -479,8 +479,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * @param getenv function used to access environment variables (provided explicitly for testing)
    * @return appropriately configured {@link ConfigLoader}
    */
-  static ConfigLoader createConfigLoaderForTesting(Function<String, String> getenv) {
-    return ConfigLoader.builder().addSingle(DEFAULT_CONFIG_VALUES::get).addSingle(getenv).build();
+  static ConfigLoader createConfigLoaderForTesting(Map<String, String> getenv) {
+    return ConfigLoader.builder().addMap(DEFAULT_CONFIG_VALUES).addMap(getenv).build();
   }
 
   /**

@@ -104,7 +104,8 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .put(nameE, "e-ssm-common-parameter")
             .build();
     final var ssmParentParameters =
-        ImmutableMap.<String, String>builder().put(nameG, "g-ssm-parent-parameter")
+        ImmutableMap.<String, String>builder()
+            .put(nameG, "g-ssm-parent-parameter")
             .put(nameH, "h-ssm-parent-parameter")
             .build();
     final var ssmChildParameters =
@@ -176,7 +177,9 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
         System.setProperty(entry.getKey(), entry.getValue());
       }
 
-      final var config = LayeredConfiguration.createConfigLoader(defaultValues, envVars::get);
+      final var config =
+          LayeredConfiguration.createConfigLoader(
+              defaultValues, ConfigLoaderSource.fromMap(envVars));
       assertEquals("a-system-property", config.stringValue(nameA));
       assertEquals("b-env-var", config.stringValue(nameB));
       assertEquals("c-file-property", config.stringValue(nameC));

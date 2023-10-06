@@ -14,7 +14,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -105,7 +104,7 @@ public final class LayeredConfiguration {
       addPropertiesFileToBuilder(settings.getPropertiesFile(), configBuilder);
     }
 
-    configBuilder.addSingle(key -> baseConfig.stringValue(key, null));
+    configBuilder.add(baseConfig.getSource());
     configBuilder.addSystemProperties();
     return configBuilder.build();
   }
@@ -125,8 +124,8 @@ public final class LayeredConfiguration {
    * @return appropriately configured {@link ConfigLoader}
    */
   public static ConfigLoader createConfigLoader(
-      Map<String, String> defaultValues, Function<String, String> getenv) {
-    final var baseConfig = ConfigLoader.builder().addSingle(getenv).build();
+      Map<String, String> defaultValues, ConfigLoaderSource getenv) {
+    final var baseConfig = ConfigLoader.builder().add(getenv).build();
     final var settings = loadLayeredConfigurationSettings(baseConfig);
     final var layeredConfig = new LayeredConfiguration(baseConfig, settings);
     return layeredConfig.createConfigLoader(defaultValues);

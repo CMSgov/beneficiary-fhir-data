@@ -388,7 +388,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
           "filesystem:" + testFileDir + testDirectory.getPath());
     }
 
-    return ConfigLoader.builder().addSingle(environment.build()::get).build();
+    return ConfigLoader.builder().addMap(environment.build()).build();
   }
 
   /**

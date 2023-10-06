@@ -51,7 +51,7 @@ public class ConfigLoaderTest {
   @BeforeEach
   public void setUp() {
     values = new HashMap<>();
-    loader = spy(ConfigLoader.builder().addSingle(values::get).build());
+    loader = spy(ConfigLoader.builder().addMap(values).build());
   }
 
   /** Validates that getting lists of strings work properly for multi-value sources. */
@@ -61,7 +61,7 @@ public class ConfigLoaderTest {
     multiValues.put("a", List.of());
     multiValues.put("b", List.of("", ""));
     multiValues.put("d", List.of("D"));
-    loader = new ConfigLoader(multiValues::get);
+    loader = ConfigLoader.builder().addMultiMap(multiValues).build();
     assertThrows(ConfigException.class, () -> loader.stringValues("a"));
     assertThrows(ConfigException.class, () -> loader.stringValues("z"));
     assertEquals(List.of("x"), loader.stringValues("a", List.of("x")));
@@ -569,8 +569,7 @@ public class ConfigLoaderTest {
     final Map<String, String> primary = ImmutableMap.of("in-primary", "A");
     final Map<String, String> fallback =
         ImmutableMap.of("in-primary", "hidden", "in-fallback", "B");
-    final ConfigLoader config =
-        ConfigLoader.builder().addSingle(fallback::get).addSingle(primary::get).build();
+    final ConfigLoader config = ConfigLoader.builder().addMap(fallback).addMap(primary).build();
     assertEquals("A", config.stringValue("in-primary"));
     assertEquals("B", config.stringValue("in-fallback"));
   }
