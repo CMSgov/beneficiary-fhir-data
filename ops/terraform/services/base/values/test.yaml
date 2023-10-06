@@ -70,13 +70,9 @@
 /bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
 ## SERVER+MTLS CONFIGURATION
 ## NOTE: x509 PEM-encoded certs require "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----"
-##       content to be on their own (separate) line. The ">" yaml block style causes the BEGIN/END lines
-##       to be 'folded' into a single line content which will fail in openssl. Thus, in order to get a
-##       newline using folded sytle, we create a blank line after the "-----BEGIN CERTIFICATE-----"
-##       and before the "-----END CERTIFICATE-----" to comply with openssl requirements.
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test: >
+##       content to be on their own (separate) line.
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test: |-
   -----BEGIN CERTIFICATE-----
-
   MIIFEzCCAvugAwIBAgIEeQaszDANBgkqhkiG9w0BAQsFADA6MTgwNgYDVQQDEy9i
   bHVlYnV0dG9uLWJhY2tlbmQtdGVzdC1kYXRhLXNlcnZlci1jbGllbnQtdGVzdDAe
   Fw0xOTAxMDcxNTI3MTRaFw0yOTAxMDQxNTI3MTRaMDoxODA2BgNVBAMTL2JsdWVi
@@ -105,12 +101,10 @@
   Lz7QEZicyP0Y/BwDeWXa41fjrL4DneOllCg4HMMeX/wqKAiqTQJtlgIECGv+Q0gy
   AFqcuenFwtL+bHtwd2t164qRTxRIDjoZx0JiJ4nBRt2TqyaSHWqTHs07jr3JCtvu
   VZmnvGDiTA==
-
   -----END CERTIFICATE-----
 
-/bfd/${env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov: >
+/bfd/${env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov: |-
   -----BEGIN CERTIFICATE-----
-
   MIIGDDCCA/QCCQD1uLtqu5XdxjANBgkqhkiG9w0BAQsFADCBxzELMAkGA1UEBhMC
   VVMxETAPBgNVBAgMCE1hcnlsYW5kMRIwEAYDVQQHDAlCYWx0aW1vcmUxMTAvBgNV
   BAoMKENlbnRlcnMgZm9yIE1lZGljYXJlICYgTWVkaWNhaWQgU2VydmljZXMxDDAK
@@ -144,12 +138,10 @@
   lGYTKODxkcrxwQHMsbtNVKbvd5g8VOv2tT/KYjG3O4OA/zWKNvfK1wfUyfot5Z2r
   bhCYDMNSEOlkkhcV6E0qja4v4dsqsoTFrSHuUUHeD+9zyZ1X4nRqbkG5p3eW/sBw
   +giWtJcv9BkoLYTLFVn9ow==
-
   -----END CERTIFICATE-----
 
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: >
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: |-
   -----BEGIN CERTIFICATE-----
-
   MIIGhzCCBG+gAwIBAgIJAJILDQr1gSr2MA0GCSqGSIb3DQEBCwUAMIHRMQswCQYD
   VQQGEwJVUzERMA8GA1UECAwITWFyeWxhbmQxEjAQBgNVBAcMCUJhbHRpbW9yZTEz
   MDEGA1UECgwqQ2VudGVycyBmb3IgTWVkaWNhcmUgYW5kIE1lZGljYWlkIFNlcnZp
@@ -185,12 +177,10 @@
   s3CS7SAipcWta9OZ9vMppRIRxDBpvkv7o9+piwlo+fRXYJiqvHie0lmSpJ4UN7Pw
   HPtt20zAVNaGsm5T/2czwM5P2C6DkBLYY07+D0VAh9IdNBskAqu6cSuJWpjehf71
   BWRkyCz062TqXM56wU5z3rcSM0Bq7AwkViPYxgwtAfz3olDasvEWrOZimg==
-
   -----END CERTIFICATE-----
 
-/bfd/${env}/server/nonsensitive/client_certificates/performance_tests: >
+/bfd/${env}/server/nonsensitive/client_certificates/performance_tests: |-
   -----BEGIN CERTIFICATE-----
-
   MIIEKjCCAxKgAwIBAgIJALOr3EprlQkNMA0GCSqGSIb3DQEBCwUAMGwxCzAJBgNV
   BAYTAlVTMREwDwYDVQQIEwhNYXJ5bGFuZDESMBAGA1UEBxMJQmFsdGltb3JlMQww
   CgYDVQQKEwNDTVMxDDAKBgNVBAsTA0JGUzEaMBgGA1UEAxMRUGVyZm9ybWFuY2Ug
@@ -214,7 +204,6 @@
   AAp2xQqVBH7/rKSp8vNp0FN0vcrAm3cvYqRgLX3bRkMjbOkHN1ETtFRhAJQ095mM
   2A4JGl9KxtrXpP9mI6jTLsNsLtgkllbIRLySTl7kcqpQW+chTsHTupIxeLsi4V0m
   qN983wo6kAit3mgkEAU=
-
   -----END CERTIFICATE-----
   
 /bfd/${env}/server/nonsensitive/lb_is_public: false
