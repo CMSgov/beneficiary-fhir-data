@@ -380,6 +380,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * Serializable.
    */
   @Nullable private final CcwRifLoadOptions ccwRifLoadOptions;
+
   /**
    * The RDA rif load options. This can be null if the RDA job is not configured, Optional is not
    * Serializable.

@@ -6,6 +6,8 @@ import gov.cms.bfd.AbstractLocalStackTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -16,10 +18,13 @@ import software.amazon.awssdk.services.ssm.model.PutParameterRequest;
 
 /** Integration test for {@link AwsParameterStoreClient}. */
 public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
-  /** Upload some variables and verify that we can retrieve them. */
-  @Test
-  public void testGetParametersAtPath() {
-    final var ssmClient =
+  /** Shared client used by all tests. */
+  private SsmClient ssmClient;
+
+  /** Create a {@link SsmClient} before each test. */
+  @BeforeEach
+  void setUp() {
+    ssmClient =
         SsmClient.builder()
             .region(Region.of(localstack.getRegion()))
             .endpointOverride(localstack.getEndpoint())
@@ -28,7 +33,17 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
                     AwsBasicCredentials.create(
                         localstack.getAccessKey(), localstack.getSecretKey())))
             .build();
+  }
 
+  /** Close the {@link SsmClient} after each test. */
+  @AfterEach
+  void tearDown() {
+    ssmClient.close();
+  }
+
+  /** Upload some variables and verify that we can retrieve them. */
+  @Test
+  public void testGetParametersAtPath() {
     // These are the parameters we hope to retrieve.
     final var expectedParameters = new HashMap<String, String>();
     final String basePath = "/flat";
@@ -62,16 +77,6 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
   /** Upload some variables in a hierarchy and verify that we can retrieve them. */
   @Test
   public void testGetParametersInHierarchy() {
-    final var ssmClient =
-        SsmClient.builder()
-            .region(Region.of(localstack.getRegion()))
-            .endpointOverride(localstack.getEndpoint())
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(
-                        localstack.getAccessKey(), localstack.getSecretKey())))
-            .build();
-
     // These are the parameters we hope to retrieve.
     final var expectedParameters = new HashMap<String, String>();
     final String basePath = "/tree";
@@ -98,7 +103,7 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
       }
     }
 
-    // We'll verify the a smaller batch size works
+    // We'll verify that a smaller batch size works
     final var batchSize = 3;
     final var client = new AwsParameterStoreClient(ssmClient, batchSize);
     var actualParameters = client.loadParametersAtPath(basePath, true);

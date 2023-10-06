@@ -19,6 +19,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -32,6 +34,7 @@ import org.apache.commons.codec.binary.Hex;
  * default values but allow environment variables to override anything in the Map.
  */
 @Data
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ConfigLoader {
   /** Format string for {@link String#format} for unparseable value. */
   @VisibleForTesting
@@ -71,8 +74,13 @@ public class ConfigLoader {
     return new Builder();
   }
 
-  public Set<String> keySet() {
-    return source.keySet();
+  /**
+   * Returns a set containing all names that are known to have values.
+   *
+   * @return the set of keys
+   */
+  public Set<String> validNames() {
+    return source.validNames();
   }
 
   /**
@@ -599,8 +607,8 @@ public class ConfigLoader {
    */
   public static class Builder {
     /**
-     * The data source to load data from. A lambda function or method reference can be used as the
-     * source of data (e.g. System::getenv or myMap::get).
+     * The data sources to load data from. New layers are added to the end of the list and take
+     * priority over sources added previously.
      */
     private final List<ConfigLoaderSource> sources = new ArrayList<>();
 
@@ -675,7 +683,6 @@ public class ConfigLoader {
      * @return this builder
      */
     public Builder addMap(Map<String, String> valuesMap) {
-      final var immutableMap = ImmutableMap.copyOf(valuesMap);
       return add(ConfigLoaderSource.fromMap(valuesMap));
     }
 
@@ -686,7 +693,6 @@ public class ConfigLoader {
      * @return this builder
      */
     public Builder addMultiMap(Map<String, ? extends Collection<String>> valuesMap) {
-      final var immutableMap = ImmutableMap.copyOf(valuesMap);
       return add(ConfigLoaderSource.fromMultiMap(valuesMap));
     }
 

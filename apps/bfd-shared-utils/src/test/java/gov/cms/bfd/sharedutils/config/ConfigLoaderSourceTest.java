@@ -17,7 +17,7 @@ public class ConfigLoaderSourceTest {
     Map<String, String> values = Map.of("a", "A", "b", "B");
     ConfigLoaderSource source = ConfigLoaderSource.fromMap(values);
 
-    assertEquals(Set.of("a", "b"), source.keySet());
+    assertEquals(Set.of("a", "b"), source.validNames());
     for (String key : values.keySet()) {
       assertEquals(List.of(values.get(key)), source.lookup(key));
     }
@@ -30,13 +30,15 @@ public class ConfigLoaderSourceTest {
   /** Verifies that sources created from {@link Map}s of collections of strings work correctly. */
   @Test
   void testFromMultiMap() {
-    Map<String, Set<String>> values = Map.of("a", Set.of("A"), "b", Set.of("B", "BB"));
+    // a key with an empty collection should be ignored
+    Map<String, Set<String>> values =
+        Map.of("a", Set.of("A"), "b", Set.of("B", "BB"), "c", Set.of());
     ConfigLoaderSource source = ConfigLoaderSource.fromMultiMap(values);
 
-    assertEquals(Set.of("a", "b"), source.keySet());
-    for (String key : values.keySet()) {
-      assertEquals(values.get(key), source.lookup(key));
-    }
+    assertEquals(Set.of("a", "b"), source.validNames());
+    assertEquals(Set.of("A"), source.lookup("a"));
+    assertEquals(Set.of("B", "BB"), source.lookup("b"));
+    assertNull(source.lookup("c"));
     assertNull(source.lookup("z"));
 
     // verify that the lombok generated equals method works
@@ -48,7 +50,7 @@ public class ConfigLoaderSourceTest {
   void testFromEnv() {
     ConfigLoaderSource source = ConfigLoaderSource.fromEnv();
 
-    assertEquals(System.getenv().keySet(), source.keySet());
+    assertEquals(System.getenv().keySet(), source.validNames());
     for (Map.Entry<String, String> entry : System.getenv().entrySet()) {
       assertEquals(List.of(entry.getValue()), source.lookup(entry.getKey()));
     }
@@ -65,7 +67,7 @@ public class ConfigLoaderSourceTest {
     values.setProperty("b", "B");
     ConfigLoaderSource source = ConfigLoaderSource.fromProperties(values);
 
-    assertEquals(Set.of("a", "b"), source.keySet());
+    assertEquals(Set.of("a", "b"), source.validNames());
     for (String key : values.stringPropertyNames()) {
       assertEquals(List.of(values.getProperty(key)), source.lookup(key));
     }
@@ -86,7 +88,7 @@ public class ConfigLoaderSourceTest {
         ConfigLoaderSource.fromPrioritizedSources(
             List.of(lowPriority, middlePriority, highPriority));
 
-    assertEquals(Set.of("a", "b", "c"), source.keySet());
+    assertEquals(Set.of("a", "b", "c"), source.validNames());
     assertEquals(middlePriority.lookup("a"), source.lookup("a"));
     assertEquals(highPriority.lookup("b"), source.lookup("b"));
     assertEquals(lowPriority.lookup("c"), source.lookup("c"));

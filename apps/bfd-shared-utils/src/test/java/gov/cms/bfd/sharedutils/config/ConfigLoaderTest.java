@@ -28,15 +28,19 @@ public class ConfigLoaderTest {
   /** Expected error message when parsing invalid float value. */
   private static final String NOT_VALID_FLOAT =
       "not a valid Float value: exception=NumberFormatException message=For input string: \"***\"";
+
   /** Expected error message when parsing invalid integer value. */
   private static final String NOT_VALID_INTEGER =
       "not a valid Integer value: exception=NumberFormatException message=For input string: \"***\"";
+
   /** Expected error message when parsing invalid long value. */
   private static final String NOT_VALID_LONG =
       "not a valid Long value: exception=NumberFormatException message=For input string: \"***\"";
+
   /** Expected error message when parsing invalid boolean value. */
   private static final String NOT_VALID_BOOLEAN =
       "not a valid Boolean value: exception=IllegalArgumentException message=invalid boolean value";
+
   /** Expected error message when parsing invalid enum value. */
   private static final String NOT_VALID_ENUM =
       "not a valid TestEnum value: exception=IllegalArgumentException message=No enum constant gov.cms.bfd.sharedutils.config.ConfigLoaderTest.TestEnum.***";
@@ -51,7 +55,7 @@ public class ConfigLoaderTest {
   @BeforeEach
   public void setUp() {
     values = new HashMap<>();
-    loader = spy(ConfigLoader.builder().addMap(values).build());
+    loader = spy(ConfigLoader.builder().add(ConfigLoaderSource.fromMap(values)).build());
   }
 
   /** Validates that getting lists of strings work properly for multi-value sources. */

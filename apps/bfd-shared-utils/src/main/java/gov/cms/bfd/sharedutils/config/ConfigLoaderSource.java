@@ -17,22 +17,22 @@ import lombok.EqualsAndHashCode;
 /** Implementations serve as sources of configuration values for use by a {@link ConfigLoader}. */
 public abstract class ConfigLoaderSource {
   /**
-   * Returns a {@link Set} containing all of the known keys that are accessible through this object.
+   * Returns a {@link Set} containing all of the names that are known to have a value.
    *
-   * @return set of keys
+   * @return set of names
    */
   @Nonnull
-  public abstract Set<String> keySet();
+  public abstract Set<String> validNames();
 
   /**
-   * Looks for a value mapped to the specified key. Returns null if there is no mapping or a {@link
+   * Looks for a value mapped to the specified name. Returns null if there is no mapping or a {@link
    * Collection} containing all values if a mapping exists.
    *
-   * @param key key to look up
-   * @return null or all of the values mapped to the key
+   * @param name name to look up
+   * @return null or all of the values mapped to the name
    */
   @Nullable
-  public abstract Collection<String> lookup(String key);
+  public abstract Collection<String> lookup(String name);
 
   /**
    * Create an instance that uses the given {@link Map} as its source of values.
@@ -56,7 +56,7 @@ public abstract class ConfigLoaderSource {
   }
 
   /**
-   * Create an instance that uses {@link System::getenv} as its source of values.
+   * Create an instance that uses {@link System#getenv} as its source of values.
    *
    * @return the source that was created
    */
@@ -76,7 +76,7 @@ public abstract class ConfigLoaderSource {
 
   /**
    * Create an instance that uses all of the given {@link ConfigLoaderSource}s as its source of
-   * values. When looking for a mapping for any given key the value returned will always be that
+   * values. When looking for a mapping for any given name the value returned will always be that
    * from the last source in the list that contains a value. That means the list should contain the
    * sources in order of increasing priority.
    *
@@ -96,14 +96,14 @@ public abstract class ConfigLoaderSource {
 
     @Nonnull
     @Override
-    public Set<String> keySet() {
+    public Set<String> validNames() {
       return properties.stringPropertyNames();
     }
 
     @Nullable
     @Override
-    public Collection<String> lookup(String key) {
-      var value = properties.getProperty(key);
+    public Collection<String> lookup(String name) {
+      var value = properties.getProperty(name);
       return value == null ? null : List.of(value);
     }
   }
@@ -115,16 +115,25 @@ public abstract class ConfigLoaderSource {
     /** All of our values. */
     private final Map<String, ? extends Collection<String>> map;
 
+    /**
+     * Names that are in the map but have empty values are ignored.
+     *
+     * <p>{@inheritDoc}
+     */
     @Nonnull
     @Override
-    public Set<String> keySet() {
-      return map.keySet();
+    public Set<String> validNames() {
+      return map.entrySet().stream()
+          .filter(e -> !e.getValue().isEmpty())
+          .map(Map.Entry::getKey)
+          .collect(Collectors.toUnmodifiableSet());
     }
 
     @Nullable
     @Override
-    public Collection<String> lookup(String key) {
-      return map.get(key);
+    public Collection<String> lookup(String name) {
+      Collection<String> value = map.get(name);
+      return (value == null || value.isEmpty()) ? null : value;
     }
   }
 
@@ -137,14 +146,14 @@ public abstract class ConfigLoaderSource {
 
     @Nonnull
     @Override
-    public Set<String> keySet() {
+    public Set<String> validNames() {
       return map.keySet();
     }
 
     @Nullable
     @Override
-    public Collection<String> lookup(String key) {
-      final String value = map.get(key);
+    public Collection<String> lookup(String name) {
+      final String value = map.get(name);
       return value == null ? null : List.of(value);
     }
   }
@@ -171,18 +180,18 @@ public abstract class ConfigLoaderSource {
 
     @Nonnull
     @Override
-    public Set<String> keySet() {
+    public Set<String> validNames() {
       return sources.stream()
-          .flatMap(source -> source.keySet().stream())
+          .flatMap(source -> source.validNames().stream())
           .collect(Collectors.toUnmodifiableSet());
     }
 
     @Nullable
     @Override
-    public Collection<String> lookup(String key) {
+    public Collection<String> lookup(String name) {
       for (ConfigLoaderSource source : sources) {
-        Collection<String> values = source.lookup(key);
-        if (values != null) {
+        Collection<String> values = source.lookup(name);
+        if (values != null && !values.isEmpty()) {
           return values;
         }
       }
