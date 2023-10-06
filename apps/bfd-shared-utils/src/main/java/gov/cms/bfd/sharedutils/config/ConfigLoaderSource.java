@@ -106,6 +106,11 @@ public abstract class ConfigLoaderSource {
       var value = properties.getProperty(name);
       return value == null ? null : List.of(value);
     }
+
+    @Override
+    public String toString() {
+      return String.format("%s with %d properties", getClass().getSimpleName(), properties.size());
+    }
   }
 
   /** Implementation used by {@link ConfigLoaderSource#fromMultiMap}. */
@@ -135,6 +140,12 @@ public abstract class ConfigLoaderSource {
       Collection<String> value = map.get(name);
       return (value == null || value.isEmpty()) ? null : value;
     }
+
+    @Override
+    public String toString() {
+      return String.format(
+          "%s with %d keys: %s", getClass().getSimpleName(), map.size(), map.keySet());
+    }
   }
 
   /** Implementation used by {@link ConfigLoaderSource#fromMap}. */
@@ -155,6 +166,12 @@ public abstract class ConfigLoaderSource {
     public Collection<String> lookup(String name) {
       final String value = map.get(name);
       return value == null ? null : List.of(value);
+    }
+
+    @Override
+    public String toString() {
+      return String.format(
+          "%s with %d keys: %s", getClass().getSimpleName(), map.size(), map.keySet());
     }
   }
 
@@ -196,6 +213,12 @@ public abstract class ConfigLoaderSource {
         }
       }
       return null;
+    }
+
+    @Override
+    public String toString() {
+      return String.format(
+          "%s with %d sources: %s", getClass().getSimpleName(), sources.size(), sources);
     }
   }
 }

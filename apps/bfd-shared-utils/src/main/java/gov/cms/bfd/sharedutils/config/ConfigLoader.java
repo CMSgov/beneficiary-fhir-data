@@ -618,7 +618,9 @@ public class ConfigLoader {
      * @return the config loader
      */
     public ConfigLoader build() {
-      return new ConfigLoader(ConfigLoaderSource.fromPrioritizedSources(sources));
+      final var combinedSources =
+          sources.size() == 1 ? sources.get(0) : ConfigLoaderSource.fromPrioritizedSources(sources);
+      return new ConfigLoader(combinedSources);
     }
 
     /**
