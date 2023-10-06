@@ -16,8 +16,9 @@
         data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
         data_server_ssl_client_certificates:
           - alias: client_foo
-            certificate: |
+            certificate: >
               -----BEGIN CERTIFICATE-----
+
               MIIE1TCCAr2gAwIBAgIEQbImGTANBgkqhkiG9w0BAQsFADAbMRkwFwYDVQQDExBj
               bGllbnQtbG9jYWwtZGV2MB4XDTIwMDcxNTE5MjMxN1oXDTMwMDcxMzE5MjMxN1ow
               GzEZMBcGA1UEAxMQY2xpZW50LWxvY2FsLWRldjCCAiIwDQYJKoZIhvcNAQEBBQAD
@@ -44,14 +45,17 @@
               HYV6JQ+AQ2dY5s97TsPRUz0XXFldRE/THK3WWkAv2zVUAXAj0zEYXWo3A35Yqkhb
               xh/MDSCsPLpFFbAlgaUUoTQM8+O1ykOFbfe081udmVffnF4cJDbRPS9aC7vGrl10
               43zlQzGM5qi5HbI2orE/MbpqkNh5HwVsLooefZnKaeVxHXzgkxorBxk=
+              
               -----END CERTIFICATE-----
+
         data_server_db_url: jdbc:postgresql://db:5432/fhirdb?logServerErrorDetail=false
-        data_server_ssl_client_certificate_test: |
+        data_server_ssl_client_certificate_test: >
           Bag Attributes
               friendlyName: client-local-dev
               localKeyID: 54 69 6D 65 20 31 35 39 34 38 34 31 33 32 33 32 33 37 
           Key Attributes: <No Attributes>
           -----BEGIN PRIVATE KEY-----
+
           MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQCFmU7OMBRG1iEj
           jBCIHi8hDuEhfWOim38w4Em9QArEss+TAp4Pq3Sv904bh6obuVGzb1Nq343tB4GU
           +rfKqlXxF/9Ow6Y6ezQ0/TkgFVrEdXUNfmgZwyrrhBjN8dHKbgNzc+VL3UzSAwK+
@@ -102,6 +106,7 @@
           z0RLA3Hdoh546+yaXxPWRJdC/SilZx5y7BcKiNKUFhTIeztt0DpnCyNIO4qIbxfl
           8ZID0+R67LGECbMmHMQgEr83UmXoqef+b4UkGVAxzmNGVaXm/aJvbA/usDO0j7a4
           hOl/KjCBIhTgrodm/5x5nhhTDoKmUnc=
+
           -----END PRIVATE KEY-----
           Bag Attributes
               friendlyName: client-local-dev
@@ -111,6 +116,7 @@
           issuer=CN = client-local-dev
           
           -----BEGIN CERTIFICATE-----
+
           MIIE1TCCAr2gAwIBAgIEQbImGTANBgkqhkiG9w0BAQsFADAbMRkwFwYDVQQDExBj
           bGllbnQtbG9jYWwtZGV2MB4XDTIwMDcxNTE5MjMxN1oXDTMwMDcxMzE5MjMxN1ow
           GzEZMBcGA1UEAxMQY2xpZW50LWxvY2FsLWRldjCCAiIwDQYJKoZIhvcNAQEBBQAD
@@ -137,7 +143,9 @@
           HYV6JQ+AQ2dY5s97TsPRUz0XXFldRE/THK3WWkAv2zVUAXAj0zEYXWo3A35Yqkhb
           xh/MDSCsPLpFFbAlgaUUoTQM8+O1ykOFbfe081udmVffnF4cJDbRPS9aC7vGrl10
           43zlQzGM5qi5HbI2orE/MbpqkNh5HwVsLooefZnKaeVxHXzgkxorBxk=
+
           -----END CERTIFICATE-----
+          
         data_server_db_username: bfd
         data_server_db_password: bfd
         server_keystore_base64: |
@@ -217,8 +225,9 @@
           LNa8hDO5xtQS6C2TI2cA7D07cOs9JnVH3UYxve62MKp5D8ys3Vxy8zBNMDEwDQYJYIZIAWUDBAIB
           BQAEINGOc5F8FFRtaKCvuKS+NS5ihEPeFYJ0YyPRrVWOeWlxBBQxra3Ucbq6Y5c7HW/8tepxhnl8
           bAICJxA=
-        test_client_cert: |
+        test_client_cert: >
           -----BEGIN CERTIFICATE-----
+
           MIIE1TCCAr2gAwIBAgIEQbImGTANBgkqhkiG9w0BAQsFADAbMRkwFwYDVQQDExBj
           bGllbnQtbG9jYWwtZGV2MB4XDTIwMDcxNTE5MjMxN1oXDTMwMDcxMzE5MjMxN1ow
           GzEZMBcGA1UEAxMQY2xpZW50LWxvY2FsLWRldjCCAiIwDQYJKoZIhvcNAQEBBQAD
@@ -245,9 +254,12 @@
           HYV6JQ+AQ2dY5s97TsPRUz0XXFldRE/THK3WWkAv2zVUAXAj0zEYXWo3A35Yqkhb
           xh/MDSCsPLpFFbAlgaUUoTQM8+O1ykOFbfe081udmVffnF4cJDbRPS9aC7vGrl10
           43zlQzGM5qi5HbI2orE/MbpqkNh5HwVsLooefZnKaeVxHXzgkxorBxk=
+
           -----END CERTIFICATE-----
-        test_client_key: |
+
+        test_client_key: >
           -----BEGIN PRIVATE KEY-----
+
           MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQCFmU7OMBRG1iEj
           jBCIHi8hDuEhfWOim38w4Em9QArEss+TAp4Pq3Sv904bh6obuVGzb1Nq343tB4GU
           +rfKqlXxF/9Ow6Y6ezQ0/TkgFVrEdXUNfmgZwyrrhBjN8dHKbgNzc+VL3UzSAwK+
@@ -298,7 +310,9 @@
           z0RLA3Hdoh546+yaXxPWRJdC/SilZx5y7BcKiNKUFhTIeztt0DpnCyNIO4qIbxfl
           8ZID0+R67LGECbMmHMQgEr83UmXoqef+b4UkGVAxzmNGVaXm/aJvbA/usDO0j7a4
           hOl/KjCBIhTgrodm/5x5nhhTDoKmUnc=
+
           -----END PRIVATE KEY-----
+
         # NOTE: `-Djavax.net.debug=all:handshake:verbose` can be a helpful option for SSL issues
         data_server_appserver_jvmargs: '-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=1024m'
         data_server_dir: &data_server_dir /usr/local/bfd-server
