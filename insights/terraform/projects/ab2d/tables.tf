@@ -7,7 +7,7 @@ locals {
     {name="aws_id", type="string", comment="this is the AWS request id that may be saved back to the DB"},
     {name="time_of_event", type="timestamp", comment="ISO format in UTC timezone"},
     {name="user", type="string", comment="a user identifier"},
-    {name="job_id", type="string", comment="the batch job id"}  
+    {name="job_id", type="string", comment="the batch job id"}
   ]
 }
 
@@ -18,6 +18,7 @@ module "api_request_event" {
   description     = "Raw API request events"
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "ab2d"
   tags            = local.tags
   partitions      = local.partitions
   columns = concat(local.common_columns, [
@@ -35,6 +36,7 @@ module "api_response_event" {
   description     = "Raw API response events"
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "ab2d"
   tags            = local.tags
   partitions      = local.partitions
   columns = concat(local.common_columns, [
@@ -52,6 +54,7 @@ module "beneficiary_search_event" {
   description     = ""
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "ab2d"
   tags            = local.tags
   partitions      = local.partitions
   columns = concat(local.common_columns, [
@@ -69,6 +72,7 @@ module "contract_bene_search_event" {
   description     = ""
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "ab2d"
   tags            = local.tags
   partitions      = local.partitions
   columns = concat(local.common_columns, [
@@ -87,6 +91,7 @@ module "error_event" {
   description     = ""
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "ab2d"
   tags            = local.tags
   partitions      = local.partitions
   columns = concat(local.common_columns, [
@@ -102,6 +107,7 @@ module "file_event" {
   description     = ""
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "ab2d"
   tags            = local.tags
   partitions      = local.partitions
   columns = concat(local.common_columns, [
@@ -119,6 +125,7 @@ module "job_status_change_event" {
   description     = ""
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "ab2d"
   tags            = local.tags
   partitions      = local.partitions
   columns = concat(local.common_columns, [
@@ -135,6 +142,7 @@ module "reload_event" {
   description     = ""
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "ab2d"
   tags            = local.tags
   partitions      = local.partitions
   columns = concat(local.common_columns, [

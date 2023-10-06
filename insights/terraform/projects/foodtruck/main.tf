@@ -54,6 +54,7 @@ module "table" {
   description     = "Raw purchase events"
   bucket          = module.bucket.id
   bucket_cmk      = module.bucket.bucket_cmk
+  owner           = "foodtruck"
   tags            = local.tags
   partitions      = module.firehose.partitions
   columns = [
@@ -65,5 +66,5 @@ module "table" {
     {name="curly_fries", type="int", comment="Number of curly fries"},
     {name="cokes", type="int", comment="Number of cokes"},
     {name="shakes", type="int", comment="Number of shakes"}
-  ] 
+  ]
 }
