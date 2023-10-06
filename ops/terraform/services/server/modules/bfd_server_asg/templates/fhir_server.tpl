@@ -62,5 +62,4 @@ fi
 EOF
 chmod 0644 /etc/profile.d/set-bfd-login-env.sh
 
-cd /beneficiary-fhir-data/ops/terraform/utils/scripts
-chmod 0644 permit-user-access && bash permit-user-access "${env}"
+bash /usr/local/bin/permit-user-access "${env}"
