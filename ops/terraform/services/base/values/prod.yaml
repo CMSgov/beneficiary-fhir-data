@@ -71,7 +71,7 @@
 ## SERVER+MTLS CONFIGURATION
 ## NOTE: x509 PEM-encoded certs require "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----"
 ##       content to be on their own (separate) line. The ">" yaml block style causes the BEGIN/END lines
-##       to be 'foled' into a single line content which will fail in openssl. Thus, in order to get a
+##       to be 'folded' into a single line content which will fail in openssl. Thus, in order to get a
 ##       newline using folded sytle, we create a blank line after the "-----BEGIN CERTIFICATE-----"
 ##       and before the "-----END CERTIFICATE-----" to comply with openssl requirements.
 /bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: >
