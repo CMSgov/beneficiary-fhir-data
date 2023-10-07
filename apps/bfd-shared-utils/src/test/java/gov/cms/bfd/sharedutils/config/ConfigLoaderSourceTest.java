@@ -3,6 +3,7 @@ package gov.cms.bfd.sharedutils.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -31,13 +32,13 @@ public class ConfigLoaderSourceTest {
   @Test
   void testFromMultiMap() {
     // a key with an empty collection should be ignored
-    Map<String, Set<String>> values =
-        Map.of("a", Set.of("A"), "b", Set.of("B", "BB"), "c", Set.of());
+    Map<String, Collection<String>> values =
+        Map.of("a", Set.of("A"), "b", List.of("B", "BB"), "c", Set.of());
     ConfigLoaderSource source = ConfigLoaderSource.fromMultiMap(values);
 
     assertEquals(Set.of("a", "b"), source.validNames());
     assertEquals(Set.of("A"), source.lookup("a"));
-    assertEquals(Set.of("B", "BB"), source.lookup("b"));
+    assertEquals(List.of("B", "BB"), source.lookup("b"));
     assertNull(source.lookup("c"));
     assertNull(source.lookup("z"));
 

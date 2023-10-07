@@ -16,19 +16,19 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class LayeredConfigurationSettings {
-  /** Optional path to a java properties file. Will be empty if no path was provided. */
+  /** Optional path to a java properties file. Will be empty string if no path was provided. */
   private final String propertiesFile;
 
   /**
    * List of SSM parameter paths. Each path is a folder containing parameter values to be loaded.
-   * Will be empty if no paths were provided.
+   * Will be empty list if no paths were provided.
    */
   private final List<String> ssmPaths;
 
   /**
    * List of SSM parameter paths. Each path is a folder containing parameter values to be loaded
-   * and/or sub-folders that themselves can contain parameter values to be loaded. Will be empty if
-   * no paths were provided.
+   * and/or sub-folders that themselves can contain parameter values to be loaded. Will be empty
+   * list if no paths were provided.
    */
   private final List<String> ssmHierarchies;
 

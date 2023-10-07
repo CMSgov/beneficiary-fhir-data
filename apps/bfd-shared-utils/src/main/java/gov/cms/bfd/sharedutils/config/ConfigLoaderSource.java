@@ -25,8 +25,8 @@ public abstract class ConfigLoaderSource {
   public abstract Set<String> validNames();
 
   /**
-   * Looks for a value mapped to the specified name. Returns null if there is no mapping or a {@link
-   * Collection} containing all values if a mapping exists.
+   * Looks for a value mapped to the specified name. Returns null if there are no values for the
+   * name or a non-empty {@link Collection} containing all values if a mapping exists.
    *
    * @param name name to look up
    * @return null or all of the values mapped to the name
@@ -46,7 +46,8 @@ public abstract class ConfigLoaderSource {
   }
 
   /**
-   * Create an instance that uses the given {@link Map} as its source of values.
+   * Create an instance that uses the given {@link Map} as its source of values. An empty collection
+   * for any name is treated the same as if there was no collection at all for that name.
    *
    * @param map contains the values
    * @return the source that was created
@@ -75,10 +76,10 @@ public abstract class ConfigLoaderSource {
   }
 
   /**
-   * Create an instance that uses all of the given {@link ConfigLoaderSource}s as its source of
-   * values. When looking for a mapping for any given name the value returned will always be that
-   * from the last source in the list that contains a value. That means the list should contain the
-   * sources in order of increasing priority.
+   * Create an instance that uses all of the given sources as its source of values. When looking for
+   * a mapping for any given name the value returned will always be that from the last source in the
+   * list that contains a value. That means the list should contain the sources in order of
+   * increasing priority.
    *
    * @param sources all sources in order of increasing priority
    * @return the source that was created
@@ -121,9 +122,9 @@ public abstract class ConfigLoaderSource {
     private final Map<String, ? extends Collection<String>> map;
 
     /**
-     * Names that are in the map but have empty values are ignored.
+     * {@inheritDoc}
      *
-     * <p>{@inheritDoc}
+     * <p>Names that are mapped to an empty collection are ignored.
      */
     @Nonnull
     @Override
@@ -138,7 +139,14 @@ public abstract class ConfigLoaderSource {
     @Override
     public Collection<String> lookup(String name) {
       Collection<String> value = map.get(name);
-      return (value == null || value.isEmpty()) ? null : value;
+      // ensure we return an unmodifiable collection of the same type
+      if (value == null || value.isEmpty()) {
+        return null;
+      } else if (value instanceof Set<String>) {
+        return Set.copyOf(value);
+      } else {
+        return List.copyOf(value);
+      }
     }
 
     @Override

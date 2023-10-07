@@ -17,10 +17,10 @@ public class LayeredConfigurationTest {
   @Test
   void splitPathsStringEdgeCases() {
     assertEquals(List.of(), LayeredConfiguration.splitPathCsv(""));
-    assertEquals(List.of(), LayeredConfiguration.splitPathCsv(","));
+    assertEquals(List.of(), LayeredConfiguration.splitPathCsv(", "));
     assertEquals(List.of("a"), LayeredConfiguration.splitPathCsv("a,"));
     assertEquals(List.of("b"), LayeredConfiguration.splitPathCsv(",b"));
-    assertEquals(List.of("a", "b"), LayeredConfiguration.splitPathCsv("a,,b"));
+    assertEquals(List.of("a", "b"), LayeredConfiguration.splitPathCsv("a, , b"));
   }
 
   /** Verify that default settings are used when no environment variables are present. */

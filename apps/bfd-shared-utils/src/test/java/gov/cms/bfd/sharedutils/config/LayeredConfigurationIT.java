@@ -255,24 +255,24 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     //
 
     // no layered config variables so only defaults, env and properties should be used
-    var configLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
-    assertEquals(
-        ConfigLoader.builder().addMap(defaultValues).add(getenv).addSystemProperties().build(),
-        configLoader);
+    var expectedLoader =
+        ConfigLoader.builder().addMap(defaultValues).add(getenv).addSystemProperties().build();
+    var actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
+    assertEquals(expectedLoader, actualLoader);
 
     // with the param path and properties file env vars set those should be added as layers
     envVars.put(LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH, paramPath);
     envVars.put(LayeredConfiguration.ENV_VAR_KEY_PROPERTIES_FILE, propertiesFile.getPath());
-    configLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
-    assertEquals(
+    expectedLoader =
         ConfigLoader.builder()
             .addMap(defaultValues)
             .addMap(paramsMap)
             .addProperties(expectedProperties)
             .add(getenv)
             .addSystemProperties()
-            .build(),
-        configLoader);
+            .build();
+    actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
+    assertEquals(expectedLoader, actualLoader);
 
     // using json settings we should have all layers added
     final var configSettings =
@@ -285,8 +285,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     envVars.remove(LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH);
     envVars.remove(LayeredConfiguration.ENV_VAR_KEY_PROPERTIES_FILE);
     envVars.put(LayeredConfiguration.ENV_VAR_KEY_SETTINGS_JSON, configSettingsJson);
-    configLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
-    assertEquals(
+    expectedLoader =
         ConfigLoader.builder()
             .addMap(defaultValues)
             .addMap(hierarchiesMap)
@@ -294,8 +293,9 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .addProperties(expectedProperties)
             .add(getenv)
             .addSystemProperties()
-            .build(),
-        configLoader);
+            .build();
+    actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
+    assertEquals(expectedLoader, actualLoader);
   }
 
   /**

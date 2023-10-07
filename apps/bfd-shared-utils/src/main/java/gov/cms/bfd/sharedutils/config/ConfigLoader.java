@@ -58,10 +58,7 @@ public class ConfigLoader {
   /** Group number for trimmed string group in {@link #TRIM_PATTERN}. */
   private static final int TRIM_PATTERN_CENTER_GROUP = 2;
 
-  /**
-   * The data source to load data from. A lambda function or method reference can be used as the
-   * source of data (e.g. System::getenv or myMap::get).
-   */
+  /** The data source to load data from. */
   private final ConfigLoaderSource source;
 
   /**
@@ -689,7 +686,9 @@ public class ConfigLoader {
     }
 
     /**
-     * Adds a lookup function that retrieves values from the specified {@link Map}.
+     * Adds a lookup function that retrieves values from the specified {@link Map} of collections.
+     * An empty collection for any name is treated the same as if there was no collection at all for
+     * that name.
      *
      * @param valuesMap source of values
      * @return this builder

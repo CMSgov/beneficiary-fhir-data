@@ -47,8 +47,8 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
     // These are the parameters we hope to retrieve.
     final var expectedParameters = new HashMap<String, String>();
     final String basePath = "/flat";
-    addValue(ssmClient, expectedParameters, basePath + "/port", "18", "port");
-    addValue(ssmClient, expectedParameters, basePath + "/mascot", "alpaca", "mascot");
+    addValue(expectedParameters, basePath + "/port", "18", "port");
+    addValue(expectedParameters, basePath + "/mascot", "alpaca", "mascot");
 
     // This should be ignored because nested parameters are ignored when retrieving parameters.
     ssmClient.putParameter(
@@ -66,7 +66,7 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
       String paramName = "extra." + i;
       String paramPath = basePath + "/" + paramName;
       String paramValue = "value-" + i;
-      addValue(ssmClient, expectedParameters, paramPath, paramValue, paramName);
+      addValue(expectedParameters, paramPath, paramValue, paramName);
     }
 
     final var client = new AwsParameterStoreClient(ssmClient, batchSize);
@@ -80,14 +80,13 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
     // These are the parameters we hope to retrieve.
     final var expectedParameters = new HashMap<String, String>();
     final String basePath = "/tree";
-    addValue(ssmClient, expectedParameters, basePath + "/mascot", "alpaca", "mascot");
+    addValue(expectedParameters, basePath + "/mascot", "alpaca", "mascot");
 
     for (var folderName : List.of("alpha", "bravo", "charlie")) {
       final var folderPath = basePath + "/" + folderName;
 
       // put a value into the folder
-      addValue(
-          ssmClient, expectedParameters, folderPath + "/port", "443", folderName + "." + "port");
+      addValue(expectedParameters, folderPath + "/port", "443", folderName + "." + "port");
 
       // put values into sub-folders within the folder
       for (var subFolderName : List.of("delta", "echo", "foxtrot")) {
@@ -98,7 +97,7 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
           String paramPath = subFolderPath + "/" + paramName;
           String paramValue = "value-" + i;
           String mapKey = folderName + "." + subFolderName + "." + paramName;
-          addValue(ssmClient, expectedParameters, paramPath, paramValue, mapKey);
+          addValue(expectedParameters, paramPath, paramValue, mapKey);
         }
       }
     }
@@ -113,18 +112,13 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
   /**
    * Upload a parameter value and add it to the map of expected values.
    *
-   * @param ssmClient ssm client
    * @param expectedParameters map of expected values
    * @param paramPath ssm path for parameter
    * @param paramValue parameter value
    * @param mapKey key to use in map of expected values
    */
   private void addValue(
-      SsmClient ssmClient,
-      Map<String, String> expectedParameters,
-      String paramPath,
-      String paramValue,
-      String mapKey) {
+      Map<String, String> expectedParameters, String paramPath, String paramValue, String mapKey) {
     ssmClient.putParameter(
         PutParameterRequest.builder()
             .name(paramPath)

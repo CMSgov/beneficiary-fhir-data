@@ -26,7 +26,7 @@ public class AwsParameterStoreClient {
    * character is converted to a '.' character in the final parameter name.
    *
    * @param path path containing the parameters
-   * @param recursive true if parameters from sub-folders should also be downlaoded
+   * @param recursive true if parameters from sub-folders should also be downloaded
    * @return {@link Map} of values
    * @throws ConfigException if AWS call fails
    */

@@ -460,13 +460,14 @@ public final class AppConfiguration extends BaseAppConfiguration {
 
   /**
    * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
-   * information. The provided function is used to look up environment variables so that these can
-   * be simulated in tests without having to fork a process.
+   * information. The provided {@link ConfigLoaderSource} is used to look up environment variables
+   * so that these can be simulated in tests without having to fork a process.
    *
    * <p>{@see LayeredConfiguration#createConfigLoader} for possible sources of configuration
    * variables.
    *
-   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @param getenv {@link ConfigLoaderSource} used to access environment variables (provided
+   *     explicitly for testing)
    * @return appropriately configured {@link ConfigLoader}
    */
   static ConfigLoader createConfigLoader(ConfigLoaderSource getenv) {
@@ -474,10 +475,10 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
-   * Build a {@link ConfigLoader} for use in tests that just uses default values and those returned
-   * by the provided function.
+   * Build a {@link ConfigLoader} for use in tests that just uses default values and those in the
+   * provided {@link Map}.
    *
-   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @param getenv map containing environment variables
    * @return appropriately configured {@link ConfigLoader}
    */
   static ConfigLoader createConfigLoaderForTesting(Map<String, String> getenv) {

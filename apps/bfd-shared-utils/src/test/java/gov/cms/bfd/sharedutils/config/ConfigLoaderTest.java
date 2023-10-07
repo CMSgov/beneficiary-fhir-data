@@ -55,7 +55,7 @@ public class ConfigLoaderTest {
   @BeforeEach
   public void setUp() {
     values = new HashMap<>();
-    loader = spy(ConfigLoader.builder().add(ConfigLoaderSource.fromMap(values)).build());
+    loader = spy(ConfigLoader.builder().addMap(values).build());
   }
 
   /** Validates that getting lists of strings work properly for multi-value sources. */
