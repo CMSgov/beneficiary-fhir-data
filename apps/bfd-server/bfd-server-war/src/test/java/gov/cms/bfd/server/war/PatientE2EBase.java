@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 public class PatientE2EBase extends ServerRequiredTest {
 
   /** The base patient endpoint. */
-  protected static String patientEndpoint;
+  protected String patientEndpoint;
 
   /**
    * A list of expected historical mbis for adding to the sample A loaded data (as data coming back
