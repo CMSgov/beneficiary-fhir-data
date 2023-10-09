@@ -17,10 +17,7 @@ public class CoverageE2E extends ServerRequiredTest {
   /** Sets up the test resources. */
   @BeforeEach
   public void setupTest() {
-    // Set this up once, after the server has run
-    if (coverageEndpoint == null) {
-      coverageEndpoint = baseServerUrl + "/v2/fhir/Coverage/";
-    }
+    coverageEndpoint = baseServerUrl + "/v2/fhir/Coverage/";
   }
 
   /**

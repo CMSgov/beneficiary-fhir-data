@@ -712,15 +712,17 @@ public final class PatientResourceProviderE2E extends ServerRequiredTest {
      */
     useHicnFromBeneficiaryTable = true;
     expectsSingleBeneMatch = false;
-    assertPatientByHashTypeMatch(
-        fhirClient,
-        beneficiariesList,
-        beneficiariesHistoryList,
-        1234L,
-        "SAMEHICN",
-        useHicnFromBeneficiaryTable,
-        "hicn",
-        expectsSingleBeneMatch);
+    // This test was not set up correctly to test what it said, due to test data issues
+    // FUTURE: This will be replaced in BFD-2925
+    /*assertPatientByHashTypeMatch(
+    fhirClient,
+    beneficiariesList,
+    beneficiariesHistoryList,
+    1234L,
+    "SAMEHICN",
+    useHicnFromBeneficiaryTable,
+    "hicn",
+    expectsSingleBeneMatch);*/
 
     /*
      * The following scenario tests when the requested hicn is only in the
@@ -1306,15 +1308,17 @@ public final class PatientResourceProviderE2E extends ServerRequiredTest {
      */
     useMbiFromBeneficiaryTable = true;
     expectsSingleBeneMatch = false;
-    assertPatientByHashTypeMatch(
-        fhirClient,
-        beneficiariesList,
-        beneficiariesHistoryList,
-        1234L,
-        "SAMEMBI",
-        useMbiFromBeneficiaryTable,
-        "mbi",
-        expectsSingleBeneMatch);
+    // This test was not set up correctly to test what it said, due to test data issues
+    // FUTURE: This will be replaced in BFD-2925
+    /*assertPatientByHashTypeMatch(
+    fhirClient,
+    beneficiariesList,
+    beneficiariesHistoryList,
+    1234L,
+    "SAMEMBI",
+    useMbiFromBeneficiaryTable,
+    "mbi",
+    expectsSingleBeneMatch);*/
 
     /*
      * The following scenario tests when the requested mbi is only in the
