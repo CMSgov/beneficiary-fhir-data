@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
 
   /** The base eob endpoint. */
-  protected static String eobEndpoint;
+  protected String eobEndpoint;
 
   /** The SAMHSA ICD9 diagnosis code. */
   protected static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
