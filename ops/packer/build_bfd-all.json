@@ -126,10 +126,8 @@
       "user": "ec2-user",
       "playbook_file": "./build_bfd-pipeline.yml",
       "extra_arguments": [
-        "-e git_commit={{ user `git_commit` }}",
-        "-e git_branch={{ user `git_branch` }}",
         "--extra-vars",
-        "@extra_vars.json",
+        "git_commit={{ user `git_commit` }} git_branch={{ user `git_branch` }} @extra_vars.json",
         "--tags",
         "pre-ami"
       ],
@@ -144,8 +142,10 @@
       "user": "ec2-user",
       "playbook_file": "./build_bfd-server.yml",
       "extra_arguments": [
-        "-e git_commit={{ user `git_commit` }}",
-        "-e git_branch={{ user `git_branch` }}",
+        "--extra-vars",
+        "git_commit={{ user `git_commit` }}",
+        "--extra-vars",
+        "git_branch={{ user `git_branch` }}",
         "--extra-vars",
         "@extra_vars.json",
         "--tags",
