@@ -35,25 +35,6 @@ public class LayeredConfigurationTest {
   }
 
   /**
-   * Verify that parameter path and properties file env vars are used when no json var is present.
-   */
-  @Test
-  void loadsSettingsFromSeparateEnvVars() {
-    final var expectedSettings =
-        LayeredConfigurationSettings.builder()
-            .propertiesFile("myProperties.properties")
-            .ssmPaths(List.of("top", "bottom"))
-            .build();
-    final var configMap = new HashMap<String, String>();
-    configMap.put(LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH, "top,bottom");
-    configMap.put(LayeredConfiguration.ENV_VAR_KEY_PROPERTIES_FILE, "myProperties.properties");
-    final var configLoader = ConfigLoader.builder().addMap(configMap).build();
-
-    final var actualSettings = LayeredConfiguration.loadLayeredConfigurationSettings(configLoader);
-    assertEquals(expectedSettings, actualSettings);
-  }
-
-  /**
    * Verify that json env var is used when present.
    *
    * @throws JsonProcessingException pass through from jackson
@@ -65,12 +46,11 @@ public class LayeredConfigurationTest {
         LayeredConfigurationSettings.builder()
             .propertiesFile("myProperties.properties")
             .ssmHierarchies(List.of("common", "specific"))
-            .ssmPaths(List.of("top", "bottom"))
             .build();
     final var settingsJson = objectMapper.writeValueAsString(expectedSettings);
 
     final var configMap = new HashMap<String, String>();
-    configMap.put(LayeredConfiguration.ENV_VAR_KEY_SETTINGS_JSON, settingsJson);
+    configMap.put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, settingsJson);
     final var configLoader = ConfigLoader.builder().addMap(configMap).build();
 
     final var actualSettings = LayeredConfiguration.loadLayeredConfigurationSettings(configLoader);
@@ -84,7 +64,7 @@ public class LayeredConfigurationTest {
     final var settingsJson = "{}";
 
     final var configMap = new HashMap<String, String>();
-    configMap.put(LayeredConfiguration.ENV_VAR_KEY_SETTINGS_JSON, settingsJson);
+    configMap.put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, settingsJson);
     final var configLoader = ConfigLoader.builder().addMap(configMap).build();
 
     final var actualSettings = LayeredConfiguration.loadLayeredConfigurationSettings(configLoader);

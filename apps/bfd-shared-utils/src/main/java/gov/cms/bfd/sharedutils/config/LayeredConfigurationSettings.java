@@ -20,12 +20,6 @@ public class LayeredConfigurationSettings {
   private final String propertiesFile;
 
   /**
-   * List of SSM parameter paths. Each path is a folder containing parameter values to be loaded.
-   * Will be empty list if no paths were provided.
-   */
-  private final List<String> ssmPaths;
-
-  /**
    * List of SSM parameter paths. Each path is a folder containing parameter values to be loaded
    * and/or sub-folders that themselves can contain parameter values to be loaded. Will be empty
    * list if no paths were provided.
@@ -37,16 +31,13 @@ public class LayeredConfigurationSettings {
    * properties so the constructor handles those using appropriate empty values.
    *
    * @param propertiesFile value for {@link #propertiesFile}
-   * @param ssmPaths value for {@link #ssmPaths}
    * @param ssmHierarchies value for {@link #ssmHierarchies}
    */
   @Builder
   public LayeredConfigurationSettings(
       @JsonProperty("propertiesFile") @Nullable String propertiesFile,
-      @JsonProperty("ssmPaths") @Nullable List<String> ssmPaths,
       @JsonProperty("ssmHierarchies") @Nullable List<String> ssmHierarchies) {
     this.propertiesFile = Strings.nullToEmpty(propertiesFile);
-    this.ssmPaths = ssmPaths == null ? List.of() : List.copyOf(ssmPaths);
     this.ssmHierarchies = ssmHierarchies == null ? List.of() : List.copyOf(ssmHierarchies);
   }
 
@@ -57,15 +48,6 @@ public class LayeredConfigurationSettings {
    */
   public boolean hasPropertiesFile() {
     return !propertiesFile.isEmpty();
-  }
-
-  /**
-   * Determines if any paths have been provided.
-   *
-   * @return true if any SSM paths have been provided
-   */
-  public boolean hasSsmPaths() {
-    return !ssmPaths.isEmpty();
   }
 
   /**

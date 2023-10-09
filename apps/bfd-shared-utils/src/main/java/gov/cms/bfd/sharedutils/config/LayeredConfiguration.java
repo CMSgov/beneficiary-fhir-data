@@ -30,26 +30,7 @@ public final class LayeredConfiguration {
    * The name of the environment variable that can be used to provide a JSON string defining a
    * {@link LayeredConfigurationSettings} object.
    */
-  public static final String ENV_VAR_KEY_SETTINGS_JSON = "LAYERED_CONFIG_SETTINGS_JSON";
-
-  /**
-   * The name of the environment variable that can be used to provide a path for looking up
-   * configuration variables in AWS SSM parameter store. May contain multiple paths separated by
-   * commas. If multiple paths are provided they must be in order of increasing priority.
-   *
-   * <p>Intended to be used when {@link #ENV_VAR_KEY_SETTINGS_JSON} is not being used. Any value
-   * will be ignored if {@link #ENV_VAR_KEY_SETTINGS_JSON} is also defined in the environment.
-   */
-  public static final String ENV_VAR_KEY_SSM_PARAMETER_PATH = "SSM_PARAMETER_PATH";
-
-  /**
-   * The path to a java properties file that should be used to provide a source of configuration
-   * variables.
-   *
-   * <p>Intended to be used when {@link #ENV_VAR_KEY_SETTINGS_JSON} is not being used. Any value
-   * will be ignored if {@link #ENV_VAR_KEY_SETTINGS_JSON} is also defined in the environment.
-   */
-  public static final String ENV_VAR_KEY_PROPERTIES_FILE = "PROPERTIES_FILE";
+  public static final String ENV_VAR_KEY_CONFIG_SETTINGS_JSON = "CONFIG_SETTINGS_JSON";
 
   /** Source of basic configuration data (usually environment variables). */
   private final ConfigLoader baseConfig;
@@ -69,8 +50,6 @@ public final class LayeredConfiguration {
    *   <li>Values from our base config object.
    *   <li>If {@link LayeredConfigurationSettings#propertiesFile} is defined use properties in that
    *       file.
-   *   <li>If {@link LayeredConfigurationSettings#ssmPaths} is defined use parameters at each of
-   *       those paths.
    *   <li>If {@link LayeredConfigurationSettings#ssmHierarchies} is defined use parameters at any
    *       level of the hierarchy rooted at each of those paths.
    *   <li>default values from provided {@link Map}.
@@ -85,24 +64,15 @@ public final class LayeredConfiguration {
     // the defaults are our last resort
     configBuilder.addMap(defaultValues);
 
-    if (settings.hasSsmPaths() || settings.hasSsmHierarchies()) {
+    // load parameters from hierarchical AWS SSM paths if configured
+    if (settings.hasSsmHierarchies()) {
       final var awsConfig = loadAwsClientConfig();
       if (awsConfig.isCredentialCheckUseful()) {
         ensureAwsCredentialsConfiguredCorrectly();
       }
 
       final var parameterStore = createAwsParameterStoreClient(awsConfig);
-
-      // load parameters from hierarchical AWS SSM paths if configured
-      if (settings.hasSsmHierarchies()) {
-        addSsmParametersToBuilder(
-            settings.getSsmHierarchies(), true, parameterStore, configBuilder);
-      }
-
-      // load parameters from flat AWS SSM paths if configured
-      if (settings.hasSsmPaths()) {
-        addSsmParametersToBuilder(settings.getSsmPaths(), false, parameterStore, configBuilder);
-      }
+      addSsmParametersToBuilder(settings.getSsmHierarchies(), parameterStore, configBuilder);
     }
 
     // load properties from file if configured
@@ -120,10 +90,9 @@ public final class LayeredConfiguration {
    * information. The provided {@link ConfigLoaderSource} is used to look up environment variables
    * so that these can be simulated in tests without having to fork a process.
    *
-   * <p>Internally this creates a {@link LayeredConfigurationSettings} object either by parsing the
-   * JSON value in {@link #ENV_VAR_KEY_SETTINGS_JSON} or the comma separated list of paths in {@link
-   * #ENV_VAR_KEY_SSM_PARAMETER_PATH}. Then creates an instance of this class and returns a value
-   * using its {@link #createConfigLoader} method.
+   * <p>Internally this creates a {@link LayeredConfigurationSettings} by parsing the JSON value in
+   * {@link #ENV_VAR_KEY_CONFIG_SETTINGS_JSON} and then creates an instance of this class and
+   * returns a value using its {@link #createConfigLoader} method.
    *
    * @param defaultValues map containing default values for variables
    * @param getenv source of environment variables (provided explicitly for testing)
@@ -162,17 +131,15 @@ public final class LayeredConfiguration {
    * ConfigLoader.Builder}.
    *
    * @param ssmPaths paths to read parameters from
-   * @param recursive true means to read from entire hierarchy, false just from the root paths
    * @param parameterStore used to read parameters from ssm
    * @param configBuilder builder to add parameters to
    */
   private static void addSsmParametersToBuilder(
       List<String> ssmPaths,
-      boolean recursive,
       AwsParameterStoreClient parameterStore,
       ConfigLoader.Builder configBuilder) {
     for (String ssmPath : ssmPaths) {
-      final var parametersMap = parameterStore.loadParametersAtPath(ssmPath, recursive);
+      final var parametersMap = parameterStore.loadParametersAtPath(ssmPath, true);
       configBuilder.addMap(parametersMap);
     }
   }
@@ -189,7 +156,7 @@ public final class LayeredConfiguration {
       final var file = new File(propertiesFile);
       configBuilder.addPropertiesFile(file);
     } catch (IOException ex) {
-      throw new ConfigException(ENV_VAR_KEY_PROPERTIES_FILE, "error parsing file", ex);
+      throw new ConfigException("propertiesFile", "error parsing file", ex);
     }
   }
 
@@ -225,31 +192,26 @@ public final class LayeredConfiguration {
 
   /**
    * Uses the provided {@link ConfigLoader} to create a {@link LayeredConfigurationSettings} object.
-   * The settings are either provided in a JSON string contained in {@link
-   * #ENV_VAR_KEY_SETTINGS_JSON} or produced using any SSM paths contained in {@link
-   * #ENV_VAR_KEY_SSM_PARAMETER_PATH} and properties file path contained in {@link
-   * #ENV_VAR_KEY_PROPERTIES_FILE}.
+   * The settings are provided in a JSON string contained in {@link
+   * #ENV_VAR_KEY_CONFIG_SETTINGS_JSON}. Defaults are used if no settings are defined.
    *
    * @param config used to read settings
    * @return the created settings
    */
   @VisibleForTesting
   static LayeredConfigurationSettings loadLayeredConfigurationSettings(ConfigLoader config) {
-    final var configJson = config.stringValue(ENV_VAR_KEY_SETTINGS_JSON, "");
+    final var configJson = config.stringValue(ENV_VAR_KEY_CONFIG_SETTINGS_JSON, "");
     final LayeredConfigurationSettings settings;
     if (configJson.length() > 0) {
       ObjectMapper mapper = new ObjectMapper();
       try {
         settings = mapper.readValue(configJson, LayeredConfigurationSettings.class);
       } catch (JsonProcessingException e) {
-        throw new ConfigException(ENV_VAR_KEY_SETTINGS_JSON, "error parsing settings JSON", e);
+        throw new ConfigException(
+            ENV_VAR_KEY_CONFIG_SETTINGS_JSON, "error parsing settings JSON", e);
       }
     } else {
-      settings =
-          LayeredConfigurationSettings.builder()
-              .ssmPaths(splitPathCsv(config.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "")))
-              .propertiesFile(config.stringValue(ENV_VAR_KEY_PROPERTIES_FILE, ""))
-              .build();
+      settings = LayeredConfigurationSettings.builder().build();
     }
     return settings;
   }

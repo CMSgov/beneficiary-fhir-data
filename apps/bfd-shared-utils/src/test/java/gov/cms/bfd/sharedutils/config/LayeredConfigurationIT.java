@@ -90,8 +90,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     final var configSettings =
         LayeredConfigurationSettings.builder()
             .propertiesFile(propertiesFile.getPath())
-            .ssmPaths(List.of(ssmCommonPath, ssmSpecificPath))
-            .ssmHierarchies(List.of(ssmParentPath))
+            .ssmHierarchies(List.of(ssmCommonPath, ssmSpecificPath, ssmParentPath))
             .build();
     final var configSettingsJson = new ObjectMapper().writeValueAsString(configSettings);
 
@@ -109,14 +108,10 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     final var envVars =
         ImmutableMap.<String, String>builder()
             .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION, localstack.getRegion())
-            .put(
-                LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH,
-                ssmCommonPath + "," + ssmSpecificPath)
-            .put(LayeredConfiguration.ENV_VAR_KEY_SETTINGS_JSON, configSettingsJson)
+            .put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, configSettingsJson)
             .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString())
             .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey())
             .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey())
-            .put(LayeredConfiguration.ENV_VAR_KEY_PROPERTIES_FILE, propertiesFile.getAbsolutePath())
             .put(nameA, "a-env-var")
             .put(nameB, "b-env-var")
             .build();
@@ -143,10 +138,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .put(nameE, "e-ssm-common-parameter")
             .build();
     final var ssmParentParameters =
-        ImmutableMap.<String, String>builder()
-            .put(nameG, "g-ssm-parent-parameter")
-            .put(nameH, "h-ssm-parent-parameter")
-            .build();
+        ImmutableMap.<String, String>builder().put(nameG, "g-ssm-parent-parameter").build();
     final var ssmChildParameters =
         ImmutableMap.<String, String>builder().put(nameG, "g-ssm-child-parameter").build();
     final var defaultValues =
@@ -221,15 +213,9 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     expectedProperties.setProperty("p1", "1");
     writePropertiesFile(expectedProperties);
 
-    // set up the values to pull as a parameter path
+    // set up the values to pull as a hierarchy
     final var baseName = LayeredConfigurationIT.class.getSimpleName();
     final var ssmBasePath = "/" + baseName + "/shouldBuildConfigLoaderBasedOnEnvVars/";
-    final var paramPath = ssmBasePath + "param/";
-    final var paramsMap = new HashMap<String, String>();
-    paramsMap.put("p", "P");
-    addParameterToSsm(paramPath + "p", "P");
-
-    // set up the values to pull as a hierarchy
     final var hierarchyPath = ssmBasePath + "root/";
     final var hierarchiesMap = new HashMap<String, String>();
     hierarchiesMap.put("new", "data");
@@ -260,36 +246,18 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     var actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
     assertEquals(expectedLoader, actualLoader);
 
-    // with the param path and properties file env vars set those should be added as layers
-    envVars.put(LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH, paramPath);
-    envVars.put(LayeredConfiguration.ENV_VAR_KEY_PROPERTIES_FILE, propertiesFile.getPath());
-    expectedLoader =
-        ConfigLoader.builder()
-            .addMap(defaultValues)
-            .addMap(paramsMap)
-            .addProperties(expectedProperties)
-            .add(getenv)
-            .addSystemProperties()
-            .build();
-    actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
-    assertEquals(expectedLoader, actualLoader);
-
     // using json settings we should have all layers added
     final var configSettings =
         LayeredConfigurationSettings.builder()
             .propertiesFile(propertiesFile.getPath())
-            .ssmPaths(List.of(paramPath))
             .ssmHierarchies(List.of(hierarchyPath))
             .build();
     final var configSettingsJson = new ObjectMapper().writeValueAsString(configSettings);
-    envVars.remove(LayeredConfiguration.ENV_VAR_KEY_SSM_PARAMETER_PATH);
-    envVars.remove(LayeredConfiguration.ENV_VAR_KEY_PROPERTIES_FILE);
-    envVars.put(LayeredConfiguration.ENV_VAR_KEY_SETTINGS_JSON, configSettingsJson);
+    envVars.put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, configSettingsJson);
     expectedLoader =
         ConfigLoader.builder()
             .addMap(defaultValues)
             .addMap(hierarchiesMap)
-            .addMap(paramsMap)
             .addProperties(expectedProperties)
             .add(getenv)
             .addSystemProperties()
