@@ -98,9 +98,9 @@ spec:
         booleanParam(name: 'verbose_mvn_logging',
             description: 'When true, `mvn` will produce verbose logs.',
             defaultValue: false)
-        booleanParam(name: 'skip_docker_host_ami',
-            description: 'When true, the docker-host AMI will not be built.',
-            defaultValue: true)
+        booleanParam(name: 'force_build_docker_host_ami',
+            description: 'When true, the docker-host AMI will be built.',
+            defaultValue: false)
     }
 
     stages {
@@ -172,7 +172,7 @@ spec:
                     try {
                         awsAuth.assumeRole()
                         amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
-                        if (!params.skip_docker_host_ami) {
+                        if (params.force_build_docker_host_ami) {
                             amiIds.bfdDockerHostAmiId = scriptForDeploys.buildDockerHostAmi(gitBranchName, gitCommitId,
                                 amiIds.platinumAmiId)
                         }
