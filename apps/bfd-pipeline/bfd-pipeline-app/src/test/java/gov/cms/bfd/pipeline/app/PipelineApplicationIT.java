@@ -433,7 +433,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     // ensure the job runs only once so the app doesn't loop forever
     environment.put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS, "0");
 
-    return AppConfiguration.createConfigLoaderForTesting(environment::get);
+    return AppConfiguration.createConfigLoaderForTesting(environment);
   }
 
   /**
@@ -454,7 +454,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     // ensure the job runs only once so the app doesn't loop forever
     environment.put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, "0");
 
-    return AppConfiguration.createConfigLoaderForTesting(environment::get);
+    return AppConfiguration.createConfigLoaderForTesting(environment);
   }
 
   /**

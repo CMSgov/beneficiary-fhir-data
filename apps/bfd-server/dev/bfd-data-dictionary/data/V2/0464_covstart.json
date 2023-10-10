@@ -31,7 +31,7 @@
             "version": "R4",
             "resource": "Coverage",
             "element": "period.start",
-            "fhirPath": "coverage.period.start",
+            "fhirPath": "period.start",
             "discriminator": [],
             "additional": [],
             "derived": "",

@@ -119,7 +119,7 @@ running the apps directly in the JVM.
 The scripts will auto-detect when localstack is running by checking port 4566 (the localstack port)
 for a listener. If one is found all configuration settings will be stored in localstack
 SSM instead of being provided in environment variables and the app will be executed with
-the `SSM_REGION`, `SSM_ENDPOINT`, and `SSM_PARAMETER_PATH` environment variables set accordingly.
+the `SSM_REGION`, `SSM_ENDPOINT`, and `CONFIG_SETTINGS_JSON` environment variables set accordingly.
 
 Because of the complexities of docker networking the app will not be able to find a localstack
 service using `localhost`. Instead it needs to use an IP address on the docker bridge network.

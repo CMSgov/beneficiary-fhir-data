@@ -7,7 +7,7 @@ import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import java.util.function.Function;
+import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -45,7 +45,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
     // creating a static field.
     var springContext = new AnnotationConfigWebApplicationContext();
     initializeSpringConfiguration(
-        springContext, servletContext, SpringConfiguration.class, System::getenv);
+        springContext, servletContext, SpringConfiguration.class, ConfigLoaderSource.fromEnv());
 
     // Set the Spring PRODUCTION profile as the default.
     ConfigurableEnvironment springEnv = springContext.getEnvironment();
@@ -102,7 +102,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
       AnnotationConfigWebApplicationContext springContext,
       ServletContext servletContext,
       Class<?> configurationClass,
-      Function<String, String> getenv) {
+      ConfigLoaderSource getenv) {
     springContext.setServletContext(servletContext);
     final ConfigLoader config;
     if (servletContext.getAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME) != null) {

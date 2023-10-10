@@ -39,7 +39,7 @@
             ],
             "derived": "",
             "note": "Note that the value of this field is rule-based, and is not stored in the BFD database",
-            "example": ""
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType\",\\n    \"code\": \"inpatient\"\\n  }\\n]\\n"
         }
     ]
 }

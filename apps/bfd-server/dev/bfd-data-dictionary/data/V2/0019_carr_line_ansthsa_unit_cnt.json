@@ -33,7 +33,7 @@
             "additional": [],
             "derived": "",
             "note": "",
-            "example": ""
+            "example": "[\\n    {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/carr_line_ansthsa_unit_cnt\",\\n        \"valueQuantity\": {\\n            \"value\": 6\\n        }\\n    }\\n]"
         }
     ]
 }

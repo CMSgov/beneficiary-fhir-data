@@ -112,19 +112,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Used in tests to verify that requests work as expected. -->
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${org.apache.httpcomponents.httpclient.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <!-- Used for launching the server with Jetty 10. -->
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

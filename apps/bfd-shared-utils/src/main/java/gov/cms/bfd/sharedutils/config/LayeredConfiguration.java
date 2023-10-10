@@ -5,11 +5,16 @@ import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AW
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import lombok.AllArgsConstructor;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
@@ -19,83 +24,86 @@ import software.amazon.awssdk.services.ssm.SsmClient;
  * Utility class to allow creation of {@link ConfigLoader} instances in multiple applications using
  * a common algorithm.
  */
+@AllArgsConstructor
 public final class LayeredConfiguration {
-
-  /** Prevents instance creation. */
-  private LayeredConfiguration() {}
-
   /**
-   * The name of the environment variable that should be used to provide a path for looking up
-   * configuration variables in AWS SSM parameter store.
+   * The name of the environment variable that can be used to provide a JSON string defining a
+   * {@link LayeredConfigurationSettings} object.
    */
-  public static final String ENV_VAR_KEY_SSM_PARAMETER_PATH = "SSM_PARAMETER_PATH";
+  public static final String ENV_VAR_KEY_CONFIG_SETTINGS_JSON = "CONFIG_SETTINGS_JSON";
 
-  /**
-   * The name of a java properties file that should be used to provide a source of configuration
-   * variables.
-   */
-  public static final String ENV_VAR_KEY_PROPERTIES_FILE = "PROPERTIES_FILE";
+  /** Source of basic configuration data (usually environment variables). */
+  private final ConfigLoader baseConfig;
+
+  /** Settings that control which sources to include when building a {@link ConfigLoader}. */
+  private final LayeredConfigurationSettings settings;
 
   /**
    * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
-   * information. The provided function is used to look up environment variables so that these can
-   * be simulated in tests without having to fork a process.
+   * information based on our settings and base config.
    *
-   * <p>Config values will be loaded from these sources. Sources are checked in order with first
-   * matching value used.
+   * <p>Config values will be loaded from the following sources. Sources are checked in order with
+   * first matching value used.
    *
    * <ol>
    *   <li>System properties.
-   *   <li>Environment variables (using provided function).
-   *   <li>If {@link #ENV_VAR_KEY_PROPERTIES_FILE} is defined use properties in that file.
-   *   <li>If {@link #ENV_VAR_KEY_SSM_PARAMETER_PATH} is defined use parameters at that path.
-   *   <li>default values from map
+   *   <li>Values from our base config object.
+   *   <li>If {@link LayeredConfigurationSettings#propertiesFile} is defined use properties in that
+   *       file.
+   *   <li>If {@link LayeredConfigurationSettings#ssmHierarchies} is defined use parameters at any
+   *       level of the hierarchy rooted at each of those paths.
+   *   <li>default values from provided {@link Map}.
    * </ol>
    *
-   * @param defaultValues possibly map containing default values for variables
-   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @param defaultValues map containing default values for variables
    * @return appropriately configured {@link ConfigLoader}
    */
-  public static ConfigLoader createConfigLoader(
-      Map<String, String> defaultValues, Function<String, String> getenv) {
-    final var baseConfig = ConfigLoader.builder().addSingle(getenv).build();
+  public ConfigLoader createConfigLoader(Map<String, String> defaultValues) {
     final var configBuilder = ConfigLoader.builder();
 
     // the defaults are our last resort
     configBuilder.addMap(defaultValues);
 
-    // load parameters from AWS SSM if configured
-    final var ssmPath = baseConfig.stringValue(ENV_VAR_KEY_SSM_PARAMETER_PATH, "");
-    if (ssmPath.length() > 0) {
-      final AwsClientConfig ssmConfig = loadSsmConfig(baseConfig);
-      if (ssmConfig.isCredentialCheckUseful()) {
+    // load parameters from hierarchical AWS SSM paths if configured
+    if (settings.hasSsmHierarchies()) {
+      final var awsConfig = loadAwsClientConfig();
+      if (awsConfig.isCredentialCheckUseful()) {
         ensureAwsCredentialsConfiguredCorrectly();
       }
-      final var ssmClient = SsmClient.builder();
-      ssmConfig.configureAwsService(ssmClient);
-      final var parameterStore =
-          new AwsParameterStoreClient(
-              ssmClient.build(), AwsParameterStoreClient.DEFAULT_BATCH_SIZE);
-      for (String singlePath : ssmPath.split(",")) {
-        final var parametersMap = parameterStore.loadParametersAtPath(singlePath);
-        configBuilder.addMap(parametersMap);
-      }
+
+      final var parameterStore = createAwsParameterStoreClient(awsConfig);
+      addSsmParametersToBuilder(settings.getSsmHierarchies(), parameterStore, configBuilder);
     }
 
     // load properties from file if configured
-    final var propertiesFile = baseConfig.stringValue(ENV_VAR_KEY_PROPERTIES_FILE, "");
-    if (propertiesFile.length() > 0) {
-      try {
-        final var file = new File(propertiesFile);
-        configBuilder.addPropertiesFile(file);
-      } catch (IOException ex) {
-        throw new ConfigException(ENV_VAR_KEY_PROPERTIES_FILE, "error parsing file", ex);
-      }
+    if (settings.hasPropertiesFile()) {
+      addPropertiesFileToBuilder(settings.getPropertiesFile(), configBuilder);
     }
 
-    configBuilder.addSingle(getenv);
+    configBuilder.add(baseConfig.getSource());
     configBuilder.addSystemProperties();
     return configBuilder.build();
+  }
+
+  /**
+   * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
+   * information. The provided {@link ConfigLoaderSource} is used to look up environment variables
+   * so that these can be simulated in tests without having to fork a process.
+   *
+   * <p>Internally this creates a {@link LayeredConfigurationSettings} by parsing the JSON value in
+   * {@link #ENV_VAR_KEY_CONFIG_SETTINGS_JSON} and then creates an instance of this class and
+   * returns a value using its {@link #createConfigLoader} method.
+   *
+   * @param defaultValues map containing default values for variables
+   * @param getenv source of environment variables (provided explicitly for testing)
+   * @return appropriately configured {@link ConfigLoader}
+   */
+  public static ConfigLoader createConfigLoader(
+      Map<String, String> defaultValues, ConfigLoaderSource getenv) {
+    final var baseConfig = ConfigLoader.builder().add(getenv).build();
+    final var settings = loadLayeredConfigurationSettings(baseConfig);
+    final var layeredConfig = new LayeredConfiguration(baseConfig, settings);
+    return layeredConfig.createConfigLoader(defaultValues);
   }
 
   /**
@@ -103,13 +111,7 @@ public final class LayeredConfiguration {
    * to use any AWS resources.
    */
   public static void ensureAwsCredentialsConfiguredCorrectly() {
-    /*
-     * Just for convenience: make sure DefaultCredentialsProvider
-     * has whatever it needs.
-     */
-    try {
-      DefaultCredentialsProvider awsCredentialsProvider =
-          DefaultCredentialsProvider.builder().build();
+    try (var awsCredentialsProvider = DefaultCredentialsProvider.builder().build()) {
       awsCredentialsProvider.resolveCredentials();
     } catch (SdkClientException e) {
       /*
@@ -125,19 +127,107 @@ public final class LayeredConfiguration {
   }
 
   /**
+   * Reads parameters from SSM using the provided client and adds them to the provided {@link
+   * ConfigLoader.Builder}.
+   *
+   * @param ssmPaths paths to read parameters from
+   * @param parameterStore used to read parameters from ssm
+   * @param configBuilder builder to add parameters to
+   */
+  private static void addSsmParametersToBuilder(
+      List<String> ssmPaths,
+      AwsParameterStoreClient parameterStore,
+      ConfigLoader.Builder configBuilder) {
+    for (String ssmPath : ssmPaths) {
+      final var parametersMap = parameterStore.loadParametersAtPath(ssmPath, true);
+      configBuilder.addMap(parametersMap);
+    }
+  }
+
+  /**
+   * Reads properties from a file and adds them to the provided {@link ConfigLoader.Builder}.
+   *
+   * @param propertiesFile path to a properties file
+   * @param configBuilder builder to add parameters to
+   */
+  private static void addPropertiesFileToBuilder(
+      String propertiesFile, ConfigLoader.Builder configBuilder) {
+    try {
+      final var file = new File(propertiesFile);
+      configBuilder.addPropertiesFile(file);
+    } catch (IOException ex) {
+      throw new ConfigException("propertiesFile", "error parsing file", ex);
+    }
+  }
+
+  /**
    * Loads {@link AwsClientConfig} for use in configuring SSM clients. These settings are generally
    * only changed from defaults during localstack based tests.
    *
-   * @param config used to load configuration values
    * @return the aws client settings
    */
-  private static AwsClientConfig loadSsmConfig(ConfigLoader config) {
+  private AwsClientConfig loadAwsClientConfig() {
     return AwsClientConfig.awsBuilder()
-        .region(config.parsedOption(ENV_VAR_KEY_AWS_REGION, Region.class, Region::of).orElse(null))
+        .region(
+            baseConfig.parsedOption(ENV_VAR_KEY_AWS_REGION, Region.class, Region::of).orElse(null))
         .endpointOverride(
-            config.parsedOption(ENV_VAR_KEY_AWS_ENDPOINT, URI.class, URI::create).orElse(null))
-        .accessKey(config.stringValue(ENV_VAR_KEY_AWS_ACCESS_KEY, null))
-        .secretKey(config.stringValue(ENV_VAR_KEY_AWS_SECRET_KEY, null))
+            baseConfig.parsedOption(ENV_VAR_KEY_AWS_ENDPOINT, URI.class, URI::create).orElse(null))
+        .accessKey(baseConfig.stringValue(ENV_VAR_KEY_AWS_ACCESS_KEY, null))
+        .secretKey(baseConfig.stringValue(ENV_VAR_KEY_AWS_SECRET_KEY, null))
         .build();
+  }
+
+  /**
+   * Constructs an {@link AwsParameterStoreClient} configured using the given client settings.
+   *
+   * @param awsConfig configuration settings to communicate with AWS SSM
+   * @return the created object
+   */
+  private AwsParameterStoreClient createAwsParameterStoreClient(AwsClientConfig awsConfig) {
+    final var ssmClient = SsmClient.builder();
+    awsConfig.configureAwsService(ssmClient);
+    return new AwsParameterStoreClient(
+        ssmClient.build(), AwsParameterStoreClient.DEFAULT_BATCH_SIZE);
+  }
+
+  /**
+   * Uses the provided {@link ConfigLoader} to create a {@link LayeredConfigurationSettings} object.
+   * The settings are provided in a JSON string contained in {@link
+   * #ENV_VAR_KEY_CONFIG_SETTINGS_JSON}. Defaults are used if no settings are defined.
+   *
+   * @param config used to read settings
+   * @return the created settings
+   */
+  @VisibleForTesting
+  static LayeredConfigurationSettings loadLayeredConfigurationSettings(ConfigLoader config) {
+    final var configJson = config.stringValue(ENV_VAR_KEY_CONFIG_SETTINGS_JSON, "");
+    final LayeredConfigurationSettings settings;
+    if (configJson.length() > 0) {
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+        settings = mapper.readValue(configJson, LayeredConfigurationSettings.class);
+      } catch (JsonProcessingException e) {
+        throw new ConfigException(
+            ENV_VAR_KEY_CONFIG_SETTINGS_JSON, "error parsing settings JSON", e);
+      }
+    } else {
+      settings = LayeredConfigurationSettings.builder().build();
+    }
+    return settings;
+  }
+
+  /**
+   * Split the given CSV string to create a list. All empty strings are removed from the list before
+   * it is returned.
+   *
+   * @param rawPathString CSV string
+   * @return list of non-empty values
+   */
+  @VisibleForTesting
+  static List<String> splitPathCsv(String rawPathString) {
+    return Arrays.stream(rawPathString.split(","))
+        .map(String::trim)
+        .filter(s -> !s.isEmpty())
+        .toList();
   }
 }
