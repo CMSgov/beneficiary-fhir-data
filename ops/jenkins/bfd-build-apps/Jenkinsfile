@@ -104,6 +104,23 @@ spec:
     }
 
     stages {
+        /* This stage switches the gitBranchName (needed for our CCS downsream stages)
+        value if the build is a PR as the BRANCH_NAME var is populated with the build
+        name during PR builds.
+        */
+        stage('Set Branch Name') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    if (env.BRANCH_NAME.startsWith('PR')) {
+                        gitBranchName = env.CHANGE_BRANCH
+                    } else {
+                        gitBranchName = env.BRANCH_NAME
+                    }
+                }
+            }
+        }
+
         stage('Prepare') {
             steps {
                 script {
@@ -123,24 +140,7 @@ spec:
                     awsAuth.assumeRole()
 
                     // Find the most current AMI IDs (if any).
-                    amiIds = scriptForDeploys.findAmis()
-                }
-            }
-        }
-
-        /* This stage switches the gitBranchName (needed for our CCS downsream stages)
-            value if the build is a PR as the BRANCH_NAME var is populated with the build
-            name during PR builds.
-            */
-        stage('Set Branch Name') {
-            steps {
-                script {
-                    currentStage = env.STAGE_NAME
-                    if (env.BRANCH_NAME.startsWith('PR')) {
-                        gitBranchName = env.CHANGE_BRANCH
-                        } else {
-                        gitBranchName = env.BRANCH_NAME
-                    }
+                    amiIds = scriptForDeploys.findAmis(gitBranchName)
                 }
             }
         }

@@ -50,6 +50,10 @@ spec:
         description: 'When true, AMI IDs based on branch will be built.',
         defaultValue: false)
 
+        booleanParam(name: 'force_build_docker_host_ami',
+        description: 'When true, the docker host AMI based on branch will be built.',
+        defaultValue: false)
+
         string(
         name: 'migrator_ami_override',
         description: 'The AMI ID to deploy migrator from',
@@ -132,7 +136,8 @@ spec:
             build job:
               jobToRun,
               parameters: [
-                booleanParam(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}")
+                booleanParam(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}"),
+                booleanParam(name: "force_build_docker_host_ami", value: "${params.force_build_docker_host_ami}")
               ],
               wait: true
           } else {
@@ -149,24 +154,13 @@ spec:
 
           awsAuth.assumeRole()
 
-          if (params.migrator_ami_override.length() == 0 || params.server_ami_override.length() == 0 || pipeline_ami_override.length() == 0) {
-            amiIds = scriptForDeploys.findAmis(gitBranchName)
-            migratorAmiId = amiIds.bfdMigratorAmiId
-            pipelineAmiId = amiIds.bfdPipelineAmiId
-            serverAmiId = amiIds.bfdServerAmiId
-          } else {
-            migratorAmiId = params.migrator_ami_override
-            pipelineAmiId = params.pipeline_ami_override
-            serverAmiId = params.server_ami_override
-          }
-
           build job:
                 jobToRun,
                 parameters: [
                   string(name: "env", value: "test"),
-                  string(name: "migrator_ami_override", value: "${migratorAmiId}"),
-                  string(name: "pipeline_ami_override", value: "${pipelineAmiId}"),
-                  string(name: "server_ami", value: "${serverAmiId}"),
+                  string(name: "migrator_ami_override", value: "${params.migrator_ami_override}"),
+                  string(name: "pipeline_ami_override", value: "${params.pipeline_ami_override}"),
+                  string(name: "server_ami", value: "${params.server_ami_override}"),
                   booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
                   string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
                 ],
