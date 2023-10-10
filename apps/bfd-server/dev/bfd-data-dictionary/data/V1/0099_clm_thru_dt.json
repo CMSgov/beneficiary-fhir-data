@@ -1,6 +1,6 @@
 {
     "id": 99,
-    "name": "Through Date",
+    "name": "Claim Through Date",
     "description": "The last day on the billing statement covering services rendered to the beneficiary (a.k.a. 'Statement Covers Thru Date').",
     "appliesTo": [
         "Carrier",

@@ -1,6 +1,6 @@
 {
     "id": 626,
-    "name": "Medicare Coverage D Start Date (available Q1 2023)",
+    "name": "Medicare Coverage D Start Date",
     "description": "That date that Medicare Coverage Part D started for the Beneficiary.",
     "appliesTo": [
         "Part-D"
@@ -30,7 +30,7 @@
             "additional": [],
             "derived": "",
             "note": "",
-            "example": ""
+            "example": "[\\n  {\\n    \"start\": \"2020-03-17\",\\n    \"end\": \"2020-06-17\"\\n  }\\n]\\n"
         }
     ]
 }

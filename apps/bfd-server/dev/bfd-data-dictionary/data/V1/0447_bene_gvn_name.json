@@ -27,7 +27,7 @@
         {
             "version": "STU3",
             "resource": "Patient",
-            "element": "name[N].given[1]",
+            "element": "name[N].given[0]",
             "fhirPath": "",
             "discriminator": [
                 "name[N].use = 'usual'"

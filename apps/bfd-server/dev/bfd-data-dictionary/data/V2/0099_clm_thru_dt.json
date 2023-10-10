@@ -1,6 +1,6 @@
 {
     "id": 99,
-    "name": "Through Date",
+    "name": "Claim Through Date",
     "description": "The last day on the billing statement covering services rendered to the beneficiary (a.k.a. 'Statement Covers Thru Date').",
     "appliesTo": [
         "Carrier",
@@ -45,7 +45,7 @@
             "additional": [],
             "derived": "",
             "note": "",
-            "example": "[\\n  \"1999-10-27\"\\n]"
+            "example": "[\\n  {\\n    \"start\": \"1999-10-27\",\\n    \"end\": \"1999-10-27\"\\n  }\\n]\\n"
         }
     ]
 }

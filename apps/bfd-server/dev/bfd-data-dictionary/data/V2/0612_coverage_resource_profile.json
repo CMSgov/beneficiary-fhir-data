@@ -27,12 +27,12 @@
             "version": "R4",
             "resource": "Coverage",
             "element": "meta.profile[N]",
-            "fhirPath": "meta.Profile",
+            "fhirPath": "meta.profile",
             "discriminator": [],
             "additional": [],
             "derived": "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage",
             "note": "",
-            "example": ""
+            "example": "[\\n  \"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage\"\\n]\\n"
         }
     ]
 }

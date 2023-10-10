@@ -46,7 +46,7 @@ public final class AppConfigurationIT {
             .resolve(Paths.get("target", "sample", "bfd-server-launcher-sample-1.0.0-SNAPSHOT.war"))
             .toString());
 
-    ConfigLoader config = ConfigLoader.builder().addSingle(envValues::get).build();
+    ConfigLoader config = ConfigLoader.builder().addMap(envValues).build();
 
     AppConfiguration testAppConfig = AppConfiguration.loadConfig(config);
     assertNotNull(testAppConfig);
@@ -104,7 +104,7 @@ public final class AppConfigurationIT {
   @Test
   public void noEnvVarsSpecified() {
     Map<String, String> envValues = Collections.emptyMap();
-    ConfigLoader config = ConfigLoader.builder().addSingle(envValues::get).build();
+    ConfigLoader config = ConfigLoader.builder().addMap(envValues).build();
     ConfigException exception =
         assertThrows(ConfigException.class, () -> AppConfiguration.loadConfig(config));
     assertEquals(AppConfiguration.ENV_VAR_KEY_PORT, exception.getName());

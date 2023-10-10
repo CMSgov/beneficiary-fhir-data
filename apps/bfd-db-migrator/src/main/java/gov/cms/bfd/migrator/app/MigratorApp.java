@@ -14,6 +14,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
@@ -200,7 +201,7 @@ public final class MigratorApp {
    */
   @VisibleForTesting
   ConfigLoader createConfigLoader() {
-    return LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
+    return LayeredConfiguration.createConfigLoader(Map.of(), ConfigLoaderSource.fromEnv());
   }
 
   /**

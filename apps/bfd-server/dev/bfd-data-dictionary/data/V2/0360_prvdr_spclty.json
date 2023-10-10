@@ -38,7 +38,7 @@
             ],
             "derived": "",
             "note": "This is only set for the 'Performing' Provider in the list of CareTeam members, if one exists.",
-            "example": ""
+            "example": "[\\n  {\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/prvdr_spclty\",\\n    \"code\": \"41\",\\n    \"display\": \"Optometrist\"\\n  }\\n]\\n"
         }
     ]
 }

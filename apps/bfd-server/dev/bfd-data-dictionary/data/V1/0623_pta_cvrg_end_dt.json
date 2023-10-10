@@ -1,6 +1,6 @@
 {
     "id": 623,
-    "name": "Medicare Coverage A End Date (available Q1 2023)",
+    "name": "Medicare Coverage A End Date",
     "description": "That date that Medicare Coverage Part A ended for the Beneficiary.",
     "appliesTo": [
         "Part-A"

@@ -1,6 +1,6 @@
 {
     "id": 627,
-    "name": "Medicare Coverage D End Date (available Q1 2023)",
+    "name": "Medicare Coverage D End Date",
     "description": "That date that Medicare Coverage Part D ended for the Beneficiary.",
     "appliesTo": [
         "Part-D"
@@ -29,8 +29,8 @@
             "discriminator": [],
             "additional": [],
             "derived": "",
-            "note": "",
-            "example": ""
+            "note": "This attribute is supplied for CARIN conformance.  However, Eob.type is recommended as it provides more detailed information.",
+            "example": "[\\n  {\\n    \"start\": \"2020-03-17\",\\n    \"end\": \"2020-06-17\"\\n  }\\n]\\n"
         }
     ]
 }

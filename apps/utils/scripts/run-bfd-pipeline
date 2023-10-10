@@ -210,7 +210,12 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   localstack_running=true
   export AWS_REGION=us-east-1
   export AWS_ENDPOINT=http://${localstack_ip}:4566/
-  export SSM_PARAMETER_PATH=/bfd-pipeline
+  SSM_PARAMETER_PATH=/bfd-pipeline
+  export CONFIG_SETTINGS_JSON=$(cat <<EOF
+{
+  "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
+}
+EOF)
 fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
@@ -413,7 +418,7 @@ else
     --name $image_name \
     --env AWS_REGION \
     --env AWS_ENDPOINT \
-    --env SSM_PARAMETER_PATH \
+    --env CONFIG_SETTINGS_JSON \
     --env HOME=/home/app \
     --env BFD_ENV_NAME="$BFD_ENV_NAME" \
     -v $HOME/.aws/credentials:/home/app/.aws/credentials:ro \

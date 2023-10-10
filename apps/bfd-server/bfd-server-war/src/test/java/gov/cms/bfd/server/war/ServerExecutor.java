@@ -81,7 +81,7 @@ public class ServerExecutor {
 
     final var appSettings = new HashMap<String, String>();
     addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
-    final var configLoader = ConfigLoader.builder().addSingle(appSettings::get).build();
+    final var configLoader = ConfigLoader.builder().addMap(appSettings).build();
     appSettings.put("BFD_PORT", serverPort);
     appSettings.put("BFD_KEYSTORE", keyStore);
     appSettings.put("BFD_TRUSTSTORE", trustStore);

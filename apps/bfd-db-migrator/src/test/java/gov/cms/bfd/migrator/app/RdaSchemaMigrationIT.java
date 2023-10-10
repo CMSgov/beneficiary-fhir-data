@@ -141,7 +141,7 @@ public class RdaSchemaMigrationIT {
         AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
     environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
 
-    return ConfigLoader.builder().addSingle(environment.build()::get).build();
+    return ConfigLoader.builder().addMap(environment.build()).build();
   }
 
   /**
