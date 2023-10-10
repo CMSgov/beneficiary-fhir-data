@@ -64,7 +64,7 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
   database_name = var.database
   description   = var.description
   table_type    = "EXTERNAL_TABLE"
-  owner         = "owner"
+  owner         = var.owner
 
   parameters = local.table_parameters[var.storage_format]
 
@@ -82,7 +82,7 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
     location      = "s3://${data.aws_s3_bucket.main.id}/databases/${var.database}/${var.table}"
     input_format  = local.storage_options[var.storage_format].input_format
     output_format = local.storage_options[var.storage_format].output_format
-    compressed    = true
+    compressed    = var.storage_compressed
 
     dynamic "columns" {
       for_each = var.columns

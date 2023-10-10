@@ -6,6 +6,7 @@ variable "project" {
 variable "tags" {
   description = "tags"
   type        = map(string)
+  default     = {}
 }
 
 variable "buckets" {

@@ -12,15 +12,12 @@ import org.junit.jupiter.api.Test;
 public class CoverageE2E extends ServerRequiredTest {
 
   /** The base coverage endpoint. */
-  private static String coverageEndpoint;
+  private String coverageEndpoint;
 
   /** Sets up the test resources. */
   @BeforeEach
   public void setupTest() {
-    // Set this up once, after the server has run
-    if (coverageEndpoint == null) {
-      coverageEndpoint = baseServerUrl + "/v1/fhir/Coverage/";
-    }
+    coverageEndpoint = baseServerUrl + "/v1/fhir/Coverage/";
   }
 
   /**

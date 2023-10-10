@@ -69,6 +69,7 @@ module "bb2_events" {
   description = "Raw BB2 events"
   bucket      = module.bucket.id
   bucket_cmk  = module.bucket.bucket_cmk
+  owner       = "bb2"
   tags        = local.tags
   partitions  = local.partitions
   columns     = local.common_columns
