@@ -27,7 +27,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
 /** Abstract base class for RestAssured Patient E2E tests shared between BFD versions. */
-public class PatientE2EBase extends ServerRequiredTest {
+public abstract class PatientE2EBase extends ServerRequiredTest {
 
   /** The base patient endpoint. */
   protected String patientEndpoint;
