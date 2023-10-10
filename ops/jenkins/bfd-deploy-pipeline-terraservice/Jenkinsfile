@@ -1,3 +1,6 @@
+// Variables defined here are accessible throughout this file (except inside methods and classes).
+def gitBranchName
+
 pipeline {
   agent {
     kubernetes {
@@ -42,6 +45,19 @@ spec:
   }
 
   stages {
+    stage('Set Branch Name') {
+      steps {
+        script {
+          currentStage = env.STAGE_NAME
+            if (env.BRANCH_NAME.startsWith('PR')) {
+              gitBranchName = env.CHANGE_BRANCH
+            } else {
+              gitBranchName = env.BRANCH_NAME
+            }
+        }
+      }
+    }
+
     stage('Deploy Pipeline Terraservice') {
       steps {
         script {
@@ -57,7 +73,8 @@ spec:
               directory: 'ops/terraform/services/pipeline',
               tfVars: [
                 create_ccw_pipeline: params.create_ccw_pipeline_instance,
-                create_rda_pipeline: params.create_rda_pipeline_instance
+                create_rda_pipeline: params.create_rda_pipeline_instance,
+                git_branch_name: gitBranchName
               ] + amiOverride
             )
           }

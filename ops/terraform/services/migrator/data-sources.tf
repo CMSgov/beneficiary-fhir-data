@@ -7,14 +7,13 @@ data "external" "rds" {
 
 data "aws_caller_identity" "current" {}
 
-# TODO: this is a temporary work-around until versioning becomes a reality
 # the following logic produces a map of ami filters to their filter values:
 # `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided
-# `{"tag:Branch" => "master"}` when the var.ami_id_override is not provided
+# `{"tag:Branch" => "var.git_branch_name|master"}` when the var.ami_id_override is not provided
 locals {
   filters = { for k, v in {
     "image-id" = var.ami_id_override,
-    "tag:Branch" = var.ami_id_override == null ? "master" : null } : k => v if v != null
+    "tag:Branch" = var.ami_id_override == null ? var.git_branch_name : null } : k => v if v != null
   }
 }
 

@@ -22,7 +22,7 @@ https://terraform-docs.io/user-guide/configuration/
 |------|-------------|------|---------|:--------:|
 | <a name="input_alert_ok_sns_override"></a> [alert\_ok\_sns\_override](#input\_alert\_ok\_sns\_override) | Overrides the default, per-environment SNS topic used for Alert Alarms that transition from ALARM to OK | `string` | `null` | no |
 | <a name="input_alert_sns_override"></a> [alert\_sns\_override](#input\_alert\_sns\_override) | Overrides the default, per-environment SNS topic used for Alert SLO alarms | `string` | `null` | no |
-| <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Pipeline override ami-id. Defaults to latest pipeline/etl AMI from `master`. | `string` | `null` | no |
+| <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Pipeline override ami-id. Defaults to latest pipeline/etl AMI from `git_branch_name|master`. | `string` | `null` | no |
 | <a name="input_create_ccw_pipeline"></a> [create\_ccw\_pipeline](#input\_create\_ccw\_pipeline) | Creates a BFD Pipeline to run CCW Rif jobs; RDA jobs on the pipeline are disabled by default. | `bool` | `true` | no |
 | <a name="input_create_rda_pipeline"></a> [create\_rda\_pipeline](#input\_create\_rda\_pipeline) | Creates a BFD Pipeline to run RDA jobs; CCW Rif jobs on the pipeline are disabled by default. | `bool` | `true` | no |
 | <a name="input_force_dashboard_creation"></a> [force\_dashboard\_creation](#input\_force\_dashboard\_creation) | Forces the creation of BFD Pipeline CloudWatch Dashboards; note dashboards are created by-default for established environments | `bool` | `false` | no |
@@ -32,6 +32,7 @@ https://terraform-docs.io/user-guide/configuration/
 | <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix) | boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging | `string` | `"?logServerErrorDetail=false"` | no |
 | <a name="input_warning_ok_sns_override"></a> [warning\_ok\_sns\_override](#input\_warning\_ok\_sns\_override) | Overrides the default, per-environment SNS topic used for Warning Alarms that transition from ALARM to OK | `string` | `null` | no |
 | <a name="input_warning_sns_override"></a> [warning\_sns\_override](#input\_warning\_sns\_override) | Overrides the default, per-environment SNS topic used for Warning SLO alarms | `string` | `null` | no |
+| <a name="git_branch_name"></a> [git\_branch\_name](#input\git\_branch\_name)                                                            | The name of the git branch to reference during creation. Defaults to `master`                                    | `string` | `master`                        | no |
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.

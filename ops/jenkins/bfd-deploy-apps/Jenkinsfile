@@ -178,8 +178,8 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/base'
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/base'
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -203,8 +203,8 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/common'
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/common'
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -233,7 +233,8 @@ spec:
                                 bfdEnv: trimmedEnv,
                                 heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
                                 awsRegion: awsRegion,
-                                forceDeployment: params.force_migrator_deployment
+                                forceDeployment: params.force_migrator_deployment,
+                                gitBranchName: gitBranchName
                             )
 
                             if (migratorDeploymentSuccessful) {
@@ -263,13 +264,13 @@ spec:
                     try {
                         def terraformVars = (params.pipeline_ami_override?.trim())
                                                   ? [ami_id_override: params.pipeline_ami_override?.trim()]
-                                                  : []
+                                                  : [gitBranchName: gitBranchName]
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                            env: trimmedEnv,
-                            directory: 'ops/terraform/services/pipeline',
-                            tfVars: terraformVars
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/pipeline',
+                                tfVars: terraformVars
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -292,7 +293,7 @@ spec:
                     try {
                         def terraformVars = (params.server_ami_override?.trim())
                                                   ? [ami_id_override: params.server_ami_override?.trim()]
-                                                  : []
+                                                  : [gitBranchName: gitBranchName]
                         lock(resource: lockResource) {
                             // Deploy the Server
                             awsAuth.assumeRole()
@@ -303,11 +304,11 @@ spec:
                             )
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server/server-regression',
-                                    tfVars: [
-                                        docker_image_tag_override: params.server_regression_image_override
-                                    ]
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server/server-regression',
+                                tfVars: [
+                                    docker_image_tag_override: params.server_regression_image_override
+                                ]
                             )
 
                             // Deploy the API requests Insights Lambda
