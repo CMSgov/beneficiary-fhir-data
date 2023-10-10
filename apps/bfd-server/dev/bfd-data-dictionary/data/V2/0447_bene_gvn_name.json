@@ -27,7 +27,7 @@
         {
             "version": "R4",
             "resource": "Patient",
-            "element": "name[N].given[1]",
+            "element": "name[N].given[0]",
             "fhirPath": "name.given[0]",
             "discriminator": [
                 "name[N].use = 'usual'"
@@ -35,7 +35,7 @@
             "additional": [],
             "derived": "",
             "note": "",
-            "example": "[\\n  \"John\"\\n]"
+            "example": "[\\n  {\\n    \"use\": \"usual\",\\n    \"family\": \"Doe\",\\n    \"given\": [\\n      \"John\",\\n      \"A\"\\n    ]\\n  }\\n]\\n"
         }
     ]
 }

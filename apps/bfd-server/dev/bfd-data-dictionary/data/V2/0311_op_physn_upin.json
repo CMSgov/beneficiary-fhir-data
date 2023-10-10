@@ -40,7 +40,7 @@
             ],
             "derived": "",
             "note": "",
-            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"3333444555\"\\n  }\\n]"
+            "example": ""
         }
     ]
 }

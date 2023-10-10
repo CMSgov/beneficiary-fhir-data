@@ -34,7 +34,7 @@
             "additional": [],
             "derived": "Centers for Medicare and Medicaid Services",
             "note": "",
-            "example": "[\\n  {\\n    \"value\": \"Centers for Medicare and Medicaid Services\"\\n  }\\n]"
+            "example": "[\\n  {\\n    \"identifier\": {\\n      \"value\": \"Centers for Medicare and Medicaid Services\"\\n    }\\n  }\\n]\\n"
         }
     ]
 }

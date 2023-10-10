@@ -28,8 +28,7 @@
             "element": "extension[N].valueCoding.code",
             "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd').valueCoding.code",
             "discriminator": [
-                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd'",
-                ""
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd'"
             ],
             "additional": [
                 "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
