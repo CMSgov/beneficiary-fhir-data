@@ -27,6 +27,7 @@ import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvide
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
@@ -43,7 +44,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -73,16 +73,22 @@ import software.amazon.awssdk.regions.Region;
 public class SpringConfiguration {
   /** The authentication type that BFD will use for all database connections. */
   public static final String PROP_DB_AUTH_TYPE = "bfdServer.db.authType";
+
   /** The database url that BFD will use for all database calls. */
   public static final String PROP_DB_URL = "bfdServer.db.url";
+
   /** The database username. */
   public static final String PROP_DB_USERNAME = "bfdServer.db.username";
+
   /** The database password. */
   public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
+
   /** The max number of database connections to be used. */
   public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
+
   /** The schema apply text. */
   public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
+
   /**
    * The {@link String } Boolean property that is used to enable the fake drug code (00000-0000)
    * that is used for integration testing. When this property is set to the string 'true', this fake
@@ -92,6 +98,7 @@ public class SpringConfiguration {
    * should only be set to true when the server is under test in a local environment.
    */
   public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
+
   /**
    * The {@link String } Boolean property that is used to enable the fake org name that is used for
    * integration testing.
@@ -145,7 +152,7 @@ public class SpringConfiguration {
   public ConfigLoader configLoader(@Autowired ServletContext servletContext) {
     return servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME) != null
         ? (ConfigLoader) servletContext.getAttribute(CONFIG_LOADER_CONTEXT_NAME)
-        : createConfigLoader(System::getenv);
+        : createConfigLoader(ConfigLoaderSource.fromEnv());
   }
 
   /**
@@ -486,16 +493,17 @@ public class SpringConfiguration {
 
   /**
    * Build a {@link ConfigLoader} that accounts for all possible sources of configuration
-   * information. The provided function is used to look up environment variables so that these can
-   * be simulated in tests without having to fork a process.
+   * information. The provided {@link ConfigLoaderSource} is used to look up environment variables
+   * so that these can be simulated in tests without having to fork a process.
    *
    * <p>{@see LayeredConfiguration#createConfigLoader} for possible sources of configuration
    * variables.
    *
-   * @param getenv function used to access environment variables (provided explicitly for testing)
+   * @param getenv {@link ConfigLoaderSource} used to access environment variables (provided
+   *     explicitly for testing)
    * @return appropriately configured {@link ConfigLoader}
    */
-  public static ConfigLoader createConfigLoader(Function<String, String> getenv) {
+  public static ConfigLoader createConfigLoader(ConfigLoaderSource getenv) {
     return LayeredConfiguration.createConfigLoader(Map.of(), getenv);
   }
 

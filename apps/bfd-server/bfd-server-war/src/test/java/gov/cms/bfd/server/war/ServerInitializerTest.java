@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,7 +54,10 @@ public class ServerInitializerTest {
     var springContext = new AnnotationConfigWebApplicationContext();
     var envVars = Map.of(TestConfiguration.PROP_PROPERTY_TEST, "hello");
     ServerInitializer.initializeSpringConfiguration(
-        springContext, servletContext, TestConfiguration.class, envVars::get);
+        springContext,
+        servletContext,
+        TestConfiguration.class,
+        ConfigLoaderSource.fromMap(envVars));
 
     // Check that our ConfigLoader and its property were used as expected.
     assertNotNull(configLoader.get());

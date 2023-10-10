@@ -92,7 +92,7 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
     envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, "unreal-access-key");
     envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, "unreal-secret-key");
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
     AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
 
     assertNotNull(testAppConfig);
@@ -171,7 +171,7 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "14");
     addRequiredSettingsForTest(envVars);
 
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
     AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
 
     assertEquals(
@@ -197,7 +197,7 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, "unreal-secret-key");
     addRequiredSettingsForTest(envVars);
 
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
     AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
 
     assertEquals(
@@ -217,7 +217,7 @@ public class AppConfigurationTest {
   @Test
   void testBeneficiaryPerformanceSettings() {
     final var envVars = new HashMap<String, String>();
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
 
     assertThrows(ConfigException.class, () -> loadBeneficiaryPerformanceSettings(configLoader));
 
@@ -256,7 +256,7 @@ public class AppConfigurationTest {
   @Test
   void testClaimPerformanceSettings() {
     final var envVars = new HashMap<String, String>();
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
 
     // verify defaults are used as expected
     final var benePerformanceSettings = new LoadAppOptions.PerformanceSettings(1, 2, 3);
@@ -306,7 +306,7 @@ public class AppConfigurationTest {
   @Test
   public void testCloudWatchMicrometerConfigSettings() {
     final var envVars = new HashMap<String, String>();
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
     final var helper = AppConfiguration.createMicrometerConfigHelper(configLoader);
     final CloudWatchConfig config = helper::get;
     assertEquals("cloudwatch", config.prefix());
@@ -333,7 +333,7 @@ public class AppConfigurationTest {
   @Test
   public void testLoadRdaLoadJobConfigOptions() {
     var settingsMap = new HashMap<String, String>();
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(settingsMap::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(settingsMap);
     settingsMap.put(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, "42");
     settingsMap.put(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "5");
     settingsMap.put(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS, "11");
@@ -379,7 +379,7 @@ public class AppConfigurationTest {
   @Test
   public void testLoadRdaSourceConfig() {
     var settingsMap = new HashMap<String, String>();
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(settingsMap::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(settingsMap);
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.InProcess.name());
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_HOST, "host.test.com");
     settingsMap.put(ENV_VAR_KEY_RDA_GRPC_PORT, "450");
@@ -426,7 +426,7 @@ public class AppConfigurationTest {
   @Test
   public void testLoadRdaServerJobConfig() {
     var settingsMap = new HashMap<String, String>();
-    final var configLoader = AppConfiguration.createConfigLoaderForTesting(settingsMap::get);
+    final var configLoader = AppConfiguration.createConfigLoaderForTesting(settingsMap);
 
     // set up the one value used in the RdaSourceConfig
     RdaSourceConfig sourceConfig = mock(RdaSourceConfig.class);
