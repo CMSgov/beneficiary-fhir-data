@@ -35,8 +35,8 @@ PLATINUM_AMI_FILTER = [
 ## Unassociated APP AMI's (fhir, pipeline, etc)
 # Retain the last two application ami's just in case (this leaves the current set and two previous)
 # Don't delete any app amis that are less than n days old (setting this to 1 day to be safe)
-APP_AMI_RETENTION_NUM = 2  # retain last n app amis
-APP_AMI_RETENTION_DAYS = 1 # older than n days
+APP_AMI_RETENTION_NUM = 2  # retain the last n app amis, purge the rest
+APP_AMI_RETENTION_DAYS = 1 # if the rest is older than n days
 APP_AMI_FILTERS = [
     {'Name': 'name','Values': ['bfd-fhir-*']},
     {'Name': 'state','Values': ['available']},
@@ -65,7 +65,7 @@ RDS_CLUSTER_IDS=[
 ]
 RDS_DAILY_RETENTION_NUM = 3          # retain last 3 dailes (we can't delete automatic snapshots so we just log them)
 RDS_CPM_WEEKLY_RETENTION_NUM = 5     # retain last 5 weeklies (cpm-policy-590-.*)
-RDS_CPM_MONTHLY_RETENTION_NUM = 2    # retain last 2 monthlies (cpm-policy-591-.*)
+RDS_CPM_MONTHLY_RETENTION_NUM = 0    # retain last 2 monthlies (cpm-policy-591-.*)
 RDS_REPLICA_RETENTION_NUM = 1        # retain last 1 replicas (same policy as weekly
 RDS_FILTERS_RE={
     'dailies': "^rds:bfd-.*-aurora-cluster-.*$",
@@ -149,7 +149,7 @@ def get_rds_cluster_snapshots(cluster_id, region='us-east-1'):
     paginator = client.get_paginator('describe_db_cluster_snapshots')
     for page in paginator.paginate(DBClusterIdentifier=cluster_id):
         if not bucket.fill() or page['ResponseMetadata']['HTTPStatusCode'] == 503:
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
         snapshots.extend(page['DBClusterSnapshots'])
     logger.debug(f"Found {len(snapshots)} RDS cluster snapshots in {region} for {cluster_id}")
@@ -186,6 +186,7 @@ def delete_rds_cluster_snapshots(region='us-east-1'):
     # gather snapshots
     logger.debug("Gathering snapshots")
     for cluster in RDS_CLUSTER_IDS:
+        logger.info("Processing RDS cluster snapshots for {cluster} in {region}")
         daily_snapshots = []
         weekly_snapshots = []
         monthly_snapshots = []
@@ -204,27 +205,27 @@ def delete_rds_cluster_snapshots(region='us-east-1'):
         logger.info(f"Found {num_weeklies}/{RDS_CPM_WEEKLY_RETENTION_NUM} weekly {cluster} snapshots in {region}")
         logger.info(f"Found {num_monthlies}/{RDS_CPM_MONTHLY_RETENTION_NUM} monthly {cluster} snapshots in {region}")
 
-        # retain the last n daily snapshots
+        # retain the last n daily snapshots, abort all purges if there are no dailes
         if num_dailies == 0:
-            logger.warning(f"{cluster} has zero daily snapshots in {region}... skipping")
+            logger.warning(f"{cluster} has 0 daily snapshots in {region}... skipping snapshot pruning for this cluster")
             continue
         if len(daily_snapshots) > RDS_DAILY_RETENTION_NUM:
             for snapshot in daily_snapshots[RDS_DAILY_RETENTION_NUM:]:
                 if not bucket.fill():
-                    logger.warning("Throttle bucket full or throttled, backing off...")
+                    logger.debug("Throttle bucket full or throttled, backing off...")
                     time.sleep(1)
-                logger.info(f"*** {cluster} daily snapshot in {region} cannot be deleted because it"
+                logger.info(f"*** {cluster} daily snapshot in {region} cannot be deleted because it "
                             "is an AWS Managed Automatic Snapshot ***")
 
-        # retain the last n weekly snapshots
+        # retain the last n weekly snapshots, abort weeklies and monthlies if there are no weeklies
         if num_weeklies == 0:
-            logger.warning(f"{cluster} has zero weekly snapshots in {region}... skipping")
+            logger.warning(f"{cluster} has 0 weekly snapshots in {region}... skipping weekly/monthly snapshot pruning")
             continue
         if num_weeklies > RDS_CPM_WEEKLY_RETENTION_NUM:
             logger.info(f"Found {num_weeklies} {cluster} weekly snapshots in {region} to delete!")
             for snapshot in weekly_snapshots[RDS_CPM_WEEKLY_RETENTION_NUM:]:
                 if not bucket.fill():
-                    logger.warning("Throttle bucket full or throttled, backing off...")
+                    logger.debug("Throttle bucket full or throttled, backing off...")
                     time.sleep(1)
                 if DRY_RUN:
                     logger.info(f"Would delete {snapshot['DBClusterIdentifier']} weekly snapshot "
@@ -241,13 +242,13 @@ def delete_rds_cluster_snapshots(region='us-east-1'):
 
         # retain the last n monthly snapshots
         if num_monthlies == 0:
-            logger.warning(f"{cluster} has zero monthly snapshots in {region}... skipping")
+            logger.warning(f"{cluster} has zero monthly snapshots in {region}... skipping monthly snapshot pruning")
             continue
         if num_monthlies > RDS_CPM_MONTHLY_RETENTION_NUM:
             logger.info(f"Found {num_monthlies} {cluster} monthly snapshots in {region} to delete!")
             for snapshot in monthly_snapshots[RDS_CPM_MONTHLY_RETENTION_NUM:]:
                 if not bucket.fill():
-                    logger.warning("Throttle bucket full or throttled, backing off...")
+                    logger.debug("Throttle bucket full or throttled, backing off...")
                     time.sleep(1)
                 if DRY_RUN:
                     logger.info(f"Would delete {snapshot['DBClusterIdentifier']} monthly snapshot "
@@ -276,13 +277,13 @@ def delete_rds_cluster_replicas(region='us-west-2'):
     paginator = client.get_paginator('describe_db_cluster_snapshots')
     for page in paginator.paginate():
         if not bucket.fill() or page['ResponseMetadata']['HTTPStatusCode'] == 503:
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
         snapshots.extend(page['DBClusterSnapshots'])
 
     # filter out non-available snapshots
     snapshots = [snapshot for snapshot in snapshots if snapshot['Status'] == 'available']
-    logger.debug(f"Found {len(snapshots)} RDS cluster snapshots in {region}")
+    logger.debug(f"Found {len(snapshots)} total RDS cluster snapshots in {region}")
 
     # build a map of cluster ids with their list of snapshots sorted by creation time desc
     # doing this because there are no actual clusters in the failover region, just replicated snapshots
@@ -293,6 +294,7 @@ def delete_rds_cluster_replicas(region='us-west-2'):
 
     # for each cluster, retain the last n replicas
     for cluster in RDS_CLUSTER_IDS:
+        logger.info(f"Processing RDS cluster replicas for {cluster} in {region}")
         replicas = []
         for snapshot in clusters[cluster]:
             if replicas_re.match(snapshot['DBClusterSnapshotIdentifier']):
@@ -304,14 +306,14 @@ def delete_rds_cluster_replicas(region='us-west-2'):
         # retain the last n replicas
         num_replicas = len(replicas)
         if num_replicas == 0:
-            logger.warning(f"{cluster} has zero replicated snapshots in {region} found... skipping")
+            logger.warning(f"Found zero replicated snapshots for {cluster} in {region}... skipping")
             continue
 
         if num_replicas > RDS_REPLICA_RETENTION_NUM:
             logger.info(f"Found {num_replicas} {cluster} replicated snapshots in {region} to delete!")
             for snapshot in replicas[RDS_REPLICA_RETENTION_NUM:]:
                 if not bucket.fill():
-                    logger.warning("Throttle bucket full or throttled, backing off...")
+                    logger.debug("Throttle bucket full or throttled, backing off...")
                     time.sleep(1)
                 if DRY_RUN:
                     logger.info(f"Would delete {cluster} {region} replicated snapshot "
@@ -345,7 +347,7 @@ def get_amis_older_than(days, filter, region='us-east-1'):
     for page in ami_paginator.paginate(Owners=['self'], Filters=filter):
         # backoff if our bucket is full or if we get throttled
         if not bucket.fill() or page['ResponseMetadata']['HTTPStatusCode'] == 503:
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
         amis.extend(page['Images'])
         logger.debug(f"Found {len(amis)} AMIs in {region} matching filter")
@@ -363,7 +365,7 @@ def delete_platinum_amis_older_than(days=PLATINUM_AMI_MIN_RETENTION_DAYS, region
     """
     Unregisters old Platinum AMIs and deletes any associated snapshots.
     """
-    logger.debug(f"Processing Platinum AMIs in {region}")
+    logger.info(f"Processing Platinum AMIs in {region}")
     client = boto3.client('ec2', region_name=region)
     bucket = LeakyBucket(EC2_MUT_RATE_BUCKET, EC2_MUT_LEAK_RATE)
     logger.debug(f"EC2 MUT LeakyBucket: CAP {bucket.capacity}, RATE {bucket.leak_rate}")
@@ -384,7 +386,7 @@ def delete_platinum_amis_older_than(days=PLATINUM_AMI_MIN_RETENTION_DAYS, region
     logger.info(f"Found {num_old} Platinum AMIs in {region} to delete!")
     for ami in old_platinum_amis:
         if not bucket.fill():
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
 
         if DRY_RUN:
@@ -419,7 +421,7 @@ def delete_unassocaited_app_amis_older_than(days=APP_AMI_RETENTION_DAYS, region=
     - Finds all AMIs associated with EC2 instances
     - Deletes all unassociated AMIs older than n days along with any associated snapshots
     """
-    logger.debug(f"Processing unassociated APP AMIs in {region}")
+    logger.info(f"Processing unassociated APP AMIs in {region}")
     client = boto3.client('ec2', region_name=region)
     bucket = LeakyBucket(EC2_MUT_RATE_BUCKET, EC2_MUT_LEAK_RATE)
 
@@ -428,7 +430,7 @@ def delete_unassocaited_app_amis_older_than(days=APP_AMI_RETENTION_DAYS, region=
     instance_paginator = client.get_paginator('describe_instances')
     for page in instance_paginator.paginate():
         if not bucket.fill() or page['ResponseMetadata']['HTTPStatusCode'] == 503:
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
         for reservation in page['Reservations']:
             for instance in reservation['Instances']:
@@ -450,7 +452,7 @@ def delete_unassocaited_app_amis_older_than(days=APP_AMI_RETENTION_DAYS, region=
     logger.info(f"Found {num_unassociated_amis} unassociated APP AMIs in {region} to delete!")
     for ami in unassociated_amis:
         if not bucket.fill():
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
 
         if DRY_RUN:
@@ -496,7 +498,7 @@ def get_unassociated_ebs_snapshots(region='us-east-1'):
     snapshot_paginator = client.get_paginator('describe_snapshots')
     for page in snapshot_paginator.paginate(OwnerIds=['self'], Filters=EC2_DAILY_EBS_SNAPSHOT_FILTER):
         if not bucket.fill() or page['ResponseMetadata']['HTTPStatusCode'] == 503:
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
         snapshots.extend(page['Snapshots'])
     num_snapshots = len(snapshots)
@@ -512,7 +514,7 @@ def get_unassociated_ebs_snapshots(region='us-east-1'):
     volume_paginator = client.get_paginator('describe_volumes')
     for page in volume_paginator.paginate():
         if not bucket.fill() or page['ResponseMetadata']['HTTPStatusCode'] == 503:
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
         existing_volumes.extend(page['Volumes'])
     num_volumes = len(existing_volumes)
@@ -559,7 +561,7 @@ def delete_unassociated_ebs_snapshots(days=7, region='us-east-1'):
     # DO IT
     for snapshot in old_snapshots:
         if not bucket.fill():
-            logger.warning("Throttle bucket full or throttled, backing off...")
+            logger.debug("Throttle bucket full or throttled, backing off...")
             time.sleep(1)
 
         if DRY_RUN:
@@ -590,12 +592,15 @@ def main():
 
     # purge
     delete_rds_cluster_snapshots(region='us-east-1')
+    print()
     delete_rds_cluster_replicas(region='us-west-2')
+    print()
     delete_unassocaited_app_amis_older_than(days=APP_AMI_RETENTION_DAYS, region='us-east-1')
+    print()
     delete_platinum_amis_older_than(days=PLATINUM_AMI_MIN_RETENTION_DAYS, region='us-east-1')
+    print()
     delete_unassociated_ebs_snapshots(days=EC2_MIN_RETENTION_DAYS, region='us-east-1')
-    logger.info("Done")
-
+    logger.info("PRUNING COMPLETE")
 
 if __name__ == '__main__':
     main()
