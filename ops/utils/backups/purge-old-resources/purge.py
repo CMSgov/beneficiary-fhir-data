@@ -65,7 +65,7 @@ RDS_CLUSTER_IDS=[
 ]
 RDS_DAILY_RETENTION_NUM = 3          # retain last 3 dailes (we can't delete automatic snapshots so we just log them)
 RDS_CPM_WEEKLY_RETENTION_NUM = 5     # retain last 5 weeklies (cpm-policy-590-.*)
-RDS_CPM_MONTHLY_RETENTION_NUM = 2    # retain last 2 monthlies (cpm-policy-591-.*)
+RDS_CPM_MONTHLY_RETENTION_NUM = 0    # retain last 0 monthlies (cpm-policy-591-.*)
 RDS_REPLICA_RETENTION_NUM = 1        # retain last 1 replicas (same policy as weekly
 RDS_FILTERS_RE={
     'dailies': "^rds:bfd-.*-aurora-cluster-.*$",
@@ -213,14 +213,32 @@ def delete_rds_cluster_snapshots(region='us-east-1'):
                 if not bucket.fill():
                     logger.warning("Throttle bucket full or throttled, backing off...")
                     time.sleep(1)
-                logger.info(f"*** {cluster} daily snapshot in {region} cannot be deleted because it"
+                logger.info(f"*** {cluster} daily snapshot in {region} cannot be deleted because it "
                             "is an AWS Managed Automatic Snapshot ***")
 
-        # retain the last n weekly snapshots
+        # retain the last n weekly snapshots if there are at least the minimum number of dailies
         if num_weeklies == 0:
             logger.warning(f"{cluster} has zero weekly snapshots in {region}... skipping")
             continue
+
         if num_weeklies > RDS_CPM_WEEKLY_RETENTION_NUM:
+            # don't delete any weeklies if there are less than the minimum number of dailies
+            if num_dailies < RDS_DAILY_RETENTION_NUM:
+                    logger.warning(f"{cluster} has less than {RDS_DAILY_RETENTION_NUM} daily snapshots in {region} "
+                                   "skipping purge of weekly snapshots to avoid gaps in retention")
+                    continue
+
+            # don't delete weeklies unless the oldest weekly is at least 5 calendar weeks old to help ensure we capture
+            # one of the once-a-month large data loads from ccw
+            cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=35)
+            oldest_weekly = datetime.datetime.fromisoformat(weekly_snapshots[-1]['SnapshotCreateTime'].replace('Z', '+00:00'))
+            logger.debug(f"Oldest weekly snapshot for {cluster} in {region} is {oldest_weekly} cutoff is {cutoff}")
+            if oldest_weekly > cutoff:
+                logger.warning(f"{cluster} has less than 5 calendar weeks of weekly snapshots in {region} "
+                               "skipping purge of weekly snapshots to help ensure we captured one of the "
+                               "once-a-month large data loads from ccw")
+                continue
+
             logger.info(f"Found {num_weeklies} {cluster} weekly snapshots in {region} to delete!")
             for snapshot in weekly_snapshots[RDS_CPM_WEEKLY_RETENTION_NUM:]:
                 if not bucket.fill():
@@ -239,11 +257,15 @@ def delete_rds_cluster_snapshots(region='us-east-1'):
                     except Exception as e:
                         logger.error(f"Error deleting snapshot {snapshot['DBClusterSnapshotIdentifier']}: {e}")
 
-        # retain the last n monthly snapshots
+        # retain the last n monthly snapshots if there are at least the minimum number of weeklies
         if num_monthlies == 0:
             logger.warning(f"{cluster} has zero monthly snapshots in {region}... skipping")
             continue
         if num_monthlies > RDS_CPM_MONTHLY_RETENTION_NUM:
+            if num_weeklies < RDS_CPM_WEEKLY_RETENTION_NUM:
+                logger.warning(f"{cluster} has less than {RDS_CPM_WEEKLY_RETENTION_NUM} weekly snapshots in {region} "
+                               "skipping purge of monthly snapshots to avoid gaps in retention")
+                continue
             logger.info(f"Found {num_monthlies} {cluster} monthly snapshots in {region} to delete!")
             for snapshot in monthly_snapshots[RDS_CPM_MONTHLY_RETENTION_NUM:]:
                 if not bucket.fill():
