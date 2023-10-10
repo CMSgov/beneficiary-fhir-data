@@ -122,8 +122,6 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
     given()
         .spec(requestAuth)
         .expect()
-        .log()
-        .body()
         .body("issue.severity", hasItem("error"))
         .body(
             "issue.diagnostics",
