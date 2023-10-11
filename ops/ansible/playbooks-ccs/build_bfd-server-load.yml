@@ -51,9 +51,3 @@
     - name: Apply server-load Role
       import_role:
         name: bfd-server-load
-
-    - name: Add SSH users
-      import_role:
-        name: ssh_users
-      tags:
-        - pre-ami
