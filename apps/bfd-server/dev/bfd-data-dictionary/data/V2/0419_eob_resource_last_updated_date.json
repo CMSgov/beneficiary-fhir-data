@@ -37,7 +37,7 @@
             "additional": [],
             "derived": "",
             "note": "Format of the timestamp with time zone, of this field is as follows:  YYYY-MM-DDTHH24:MI:SS.TIMEZONE",
-            "example": "[\\n  \"IGNORED_FIELD\"\\n]"
+            "example": "[\\n  {\\n    \"lastUpdated\": \"2021-05-15T08:22:38.251+00:00\",\\n    \"profile\": [\\n      \"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional\"\\n    ]\\n  }\\n]"
         }
     ]
 }

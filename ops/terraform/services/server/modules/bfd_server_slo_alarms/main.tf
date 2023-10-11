@@ -597,62 +597,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_nonbulk_latency_p
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m_alert" {
-  alarm_name          = "${local.app}-${local.env}-slo-patient-no-contract-latency-mean-15m-alert"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "80"
-
-  alarm_description = join("", [
-    "/v*/fhir/Patient (not by contract) response mean 15 minute latency exceeded ALERT SLO ",
-    "threshold of 80 ms for ${local.app} in ${local.env} environment.",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_name = local.metrics.patient_no_contract_latency
-  namespace   = local.namespace
-
-  # FUTURE: Alarm actions sending notifications to destinations other than #bfd-test have been
-  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated in BFD-2949
-
-  # alarm_actions = local.alert_arn
-  # ok_actions    = local.alert_ok_arn
-  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_latency_mean_15m_warning" {
-  alarm_name          = "${local.app}-${local.env}-slo-patient-no-contract-latency-mean-15m-warning"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "60"
-
-  alarm_description = join("", [
-    "/v*/fhir/Patient (not by contract) response mean 15 minute latency exceeded WARNING SLO ",
-    "threshold of 60 ms for ${local.app} in ${local.env} environment.",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_name = local.metrics.patient_no_contract_latency
-  namespace   = local.namespace
-
-  # FUTURE: Alarm actions sending notifications to destinations other than #bfd-test have been
-  # disabled until the usefulness of this Alarm's corresponding SLO is evaluated in BFD-2949
-
-  # alarm_actions = local.alert_arn
-  # ok_actions    = local.alert_ok_arn
-  alarm_actions = [data.aws_sns_topic.bfd_test_sns.arn]
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
 resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p_15m_alert" {
   for_each = setintersection(
     toset(keys(local.partners.bulk)),

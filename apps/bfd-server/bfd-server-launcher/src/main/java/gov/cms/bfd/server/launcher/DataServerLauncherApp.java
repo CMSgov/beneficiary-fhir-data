@@ -8,6 +8,7 @@ import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
@@ -252,7 +253,8 @@ public final class DataServerLauncherApp {
     // Parse the app config.
     AppConfiguration appConfig = null;
     try {
-      ConfigLoader config = LayeredConfiguration.createConfigLoader(Map.of(), System::getenv);
+      ConfigLoader config =
+          LayeredConfiguration.createConfigLoader(Map.of(), ConfigLoaderSource.fromEnv());
       appConfig = AppConfiguration.loadConfig(config);
       LOGGER.info("Launcher configured: '{}'", appConfig);
     } catch (ConfigException | AppConfigurationException e) {

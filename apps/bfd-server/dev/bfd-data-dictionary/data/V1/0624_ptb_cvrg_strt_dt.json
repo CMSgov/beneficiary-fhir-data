@@ -1,6 +1,6 @@
 {
     "id": 624,
-    "name": "Medicare Coverage B Start Date (available Q1 2023)",
+    "name": "Medicare Coverage B Start Date",
     "description": "That date that Medicare Coverage Part B started for the Beneficiary.",
     "appliesTo": [
         "Part-B"

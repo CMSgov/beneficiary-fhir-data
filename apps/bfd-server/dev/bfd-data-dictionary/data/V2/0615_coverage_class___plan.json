@@ -37,7 +37,7 @@
             ],
             "derived": "Medicare Coverage Part (ie. If Part-A then 'Part A', if Part-D then 'Part D', etc..)",
             "note": "",
-            "example": "[\\n  \"Part A\"\\n]"
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/coverage-class\",\\n          \"code\": \"plan\",\\n          \"display\": \"Plan\"\\n        }\\n      ]\\n    },\\n    \"value\": \"Part A\"\\n  }\\n]\\n"
         }
     ]
 }

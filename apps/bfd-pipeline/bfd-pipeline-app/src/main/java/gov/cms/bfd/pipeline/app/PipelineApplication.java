@@ -29,6 +29,7 @@ import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
@@ -140,7 +141,7 @@ public final class PipelineApplication {
    */
   @VisibleForTesting
   ConfigLoader createConfigLoader() {
-    return AppConfiguration.createConfigLoader(System::getenv);
+    return AppConfiguration.createConfigLoader(ConfigLoaderSource.fromEnv());
   }
 
   /**

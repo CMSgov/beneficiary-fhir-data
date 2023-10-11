@@ -459,7 +459,7 @@ public class RDABridge {
               .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.getMbiSource()))
               .build();
 
-      return new ConfigLoader(mapConfig::get);
+      return ConfigLoader.builder().addMultiMap(mapConfig).build();
     }
   }
 
@@ -499,7 +499,7 @@ public class RDABridge {
 
     ImmutableMap<String, Collection<String>> mapConfig = builder.build();
 
-    return new ConfigLoader(mapConfig::get);
+    return ConfigLoader.builder().addMultiMap(mapConfig).build();
   }
 
   /**

@@ -9,14 +9,19 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -28,6 +33,8 @@ import org.apache.commons.codec.binary.Hex;
  * set of defaults but allow something else to override them selectively. For example using a Map of
  * default values but allow environment variables to override anything in the Map.
  */
+@Data
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ConfigLoader {
   /** Format string for {@link String#format} for unparseable value. */
   @VisibleForTesting
@@ -51,22 +58,8 @@ public class ConfigLoader {
   /** Group number for trimmed string group in {@link #TRIM_PATTERN}. */
   private static final int TRIM_PATTERN_CENTER_GROUP = 2;
 
-  /**
-   * The data source to load data from. A lambda function or method reference can be used as the
-   * source of data (e.g. System::getenv or myMap::get).
-   */
-  private final Function<String, Collection<String>> source;
-
-  /**
-   * Constructs a ConfigLoader that uses the provided Function as the source of key/value
-   * configuration data. The function will be called whenever a specific configuration value is
-   * needed. It can return null to indicate that no value is available for the requested key.
-   *
-   * @param source function used to obtain key/value configuration data
-   */
-  public ConfigLoader(Function<String, Collection<String>> source) {
-    this.source = source;
-  }
+  /** The data source to load data from. */
+  private final ConfigLoaderSource source;
 
   /**
    * Creates a Builder that can be used to combine multiple sources of configuration data into a
@@ -79,6 +72,15 @@ public class ConfigLoader {
   }
 
   /**
+   * Returns a set containing all names that are known to have values.
+   *
+   * @return the set of keys
+   */
+  public Set<String> validNames() {
+    return source.validNames();
+  }
+
+  /**
    * Returns the string values for the specified configuration data. Null values are converted into
    * empty strings. Strings have leading and trailing whitespace removed. Empty strings are
    * retained. If there are no values for the given name an empty immutable list is returned.
@@ -87,7 +89,7 @@ public class ConfigLoader {
    * @return the values in a list
    */
   public List<String> stringValues(String name) {
-    final Collection<String> values = source.apply(name);
+    final Collection<String> values = source.lookup(name);
 
     if (values == null || values.isEmpty()) {
       throw new ConfigException(name, NOT_PROVIDED);
@@ -108,7 +110,7 @@ public class ConfigLoader {
    *     defaults if no value was found
    */
   public List<String> stringValues(String name, Collection<String> defaults) {
-    final Collection<String> values = source.apply(name);
+    final Collection<String> values = source.lookup(name);
 
     return (values == null || values.isEmpty())
         ? ImmutableList.copyOf(defaults)
@@ -144,7 +146,7 @@ public class ConfigLoader {
    * @return empty Option if there is no non-empty value, otherwise Option holding the value
    */
   public Optional<String> stringOption(String name) {
-    final Collection<String> values = source.apply(name);
+    final Collection<String> values = source.lookup(name);
     if (values == null || values.isEmpty()) {
       return Optional.empty();
     } else {
@@ -163,7 +165,7 @@ public class ConfigLoader {
    * @return empty Option if there is a value, otherwise Option holding the value
    */
   public Optional<String> stringOptionEmptyOK(String name) {
-    final Collection<String> values = source.apply(name);
+    final Collection<String> values = source.lookup(name);
     if (values == null || values.isEmpty()) {
       return Optional.empty();
     } else {
@@ -602,10 +604,10 @@ public class ConfigLoader {
    */
   public static class Builder {
     /**
-     * The data source to load data from. A lambda function or method reference can be used as the
-     * source of data (e.g. System::getenv or myMap::get).
+     * The data sources to load data from. New layers are added to the end of the list and take
+     * priority over sources added previously.
      */
-    private Function<String, Collection<String>> source = ignored -> null;
+    private final List<ConfigLoaderSource> sources = new ArrayList<>();
 
     /**
      * Builds a new {@link ConfigLoader}.
@@ -613,7 +615,9 @@ public class ConfigLoader {
      * @return the config loader
      */
     public ConfigLoader build() {
-      return new ConfigLoader(source);
+      final var combinedSources =
+          sources.size() == 1 ? sources.get(0) : ConfigLoaderSource.fromPrioritizedSources(sources);
+      return new ConfigLoader(combinedSources);
     }
 
     /**
@@ -622,31 +626,9 @@ public class ConfigLoader {
      * @param newSource the source to add
      * @return the builder for chaining
      */
-    public Builder add(Function<String, Collection<String>> newSource) {
-      Function<String, Collection<String>> oldSource = this.source;
-      this.source =
-          name -> {
-            Collection<String> values = newSource.apply(name);
-            return (values == null || values.isEmpty()) ? oldSource.apply(name) : values;
-          };
+    public Builder add(ConfigLoaderSource newSource) {
+      sources.add(newSource);
       return this;
-    }
-
-    /**
-     * Adds a new configuration source that returns a single value per key rather than a collection
-     * of values.
-     *
-     * @param newSource the source to add
-     * @return the builder for chaining
-     */
-    public Builder addSingle(Function<String, String> newSource) {
-      Function<String, Collection<String>> wrappedNewSource =
-          name -> {
-            String value = newSource.apply(name);
-            return value == null ? null : ImmutableList.of(value);
-          };
-
-      return add(wrappedNewSource);
     }
 
     /**
@@ -655,7 +637,7 @@ public class ConfigLoader {
      * @return the builder for chaining
      */
     public Builder addEnvironmentVariables() {
-      return addSingle(System::getenv);
+      return add(ConfigLoaderSource.fromEnv());
     }
 
     /**
@@ -664,7 +646,7 @@ public class ConfigLoader {
      * @return the builder for chaining
      */
     public Builder addSystemProperties() {
-      return addSingle(System::getProperty);
+      return add(ConfigLoaderSource.fromProperties(System.getProperties()));
     }
 
     /**
@@ -674,7 +656,7 @@ public class ConfigLoader {
      * @return the builder for chaining
      */
     public Builder addProperties(Properties properties) {
-      return addSingle(properties::getProperty);
+      return add(ConfigLoaderSource.fromProperties(properties));
     }
 
     /**
@@ -700,8 +682,19 @@ public class ConfigLoader {
      * @return this builder
      */
     public Builder addMap(Map<String, String> valuesMap) {
-      final var immutableMap = ImmutableMap.copyOf(valuesMap);
-      return addSingle(immutableMap::get);
+      return add(ConfigLoaderSource.fromMap(valuesMap));
+    }
+
+    /**
+     * Adds a lookup function that retrieves values from the specified {@link Map} of collections.
+     * An empty collection for any name is treated the same as if there was no collection at all for
+     * that name.
+     *
+     * @param valuesMap source of values
+     * @return this builder
+     */
+    public Builder addMultiMap(Map<String, ? extends Collection<String>> valuesMap) {
+      return add(ConfigLoaderSource.fromMultiMap(valuesMap));
     }
 
     /**

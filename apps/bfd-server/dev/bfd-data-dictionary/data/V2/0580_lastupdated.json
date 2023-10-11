@@ -1,6 +1,6 @@
 {
     "id": 580,
-    "name": "Last Updated Date",
+    "name": "Coverage Resource Last Updated Date",
     "description": "The date that this record was last updated within the database.",
     "appliesTo": [
         "Part-A",
@@ -32,7 +32,7 @@
             "additional": [],
             "derived": "",
             "note": "",
-            "example": "[\\n  \"IGNORED_FIELD\"\\n]"
+            "example": "{\\n    \"lastUpdated\": \"2021-05-15T08:22:38.251+00:00\"\\n}"
         }
     ]
 }

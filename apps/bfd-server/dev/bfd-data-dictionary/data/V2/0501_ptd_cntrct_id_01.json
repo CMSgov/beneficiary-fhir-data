@@ -35,7 +35,7 @@
             ],
             "derived": "",
             "note": "",
-            "example": ""
+            "example": "{\\n    \"url\" : \"https://bluebutton.cms.gov/resources/variables/ptdcntrct01\",\\n    \"valueCoding\" : {\\n      \"system\" : \"https://bluebutton.cms.gov/resources/variables/ptdcntrct01\",\\n      \"code\" : \"S4607\"\\n}\\n"
         }
     ]
 }

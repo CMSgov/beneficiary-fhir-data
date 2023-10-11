@@ -144,7 +144,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
       throw new InvalidRequestException(
           "Coverage ID pattern: '"
               + coverageIdText
-              + "' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}}");
+              + "' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}");
     }
 
     String coverageIdSegmentText = coverageIdMatcher.group(1);
