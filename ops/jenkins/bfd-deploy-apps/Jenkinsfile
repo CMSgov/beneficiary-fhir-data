@@ -264,7 +264,7 @@ spec:
                     try {
                         def terraformVars = (params.pipeline_ami_override?.trim())
                                                   ? [ami_id_override: params.pipeline_ami_override?.trim()]
-                                                  : [gitBranchName: gitBranchName]
+                                                  : [git_branch_name: gitBranchName]
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
@@ -293,7 +293,7 @@ spec:
                     try {
                         def terraformVars = (params.server_ami_override?.trim())
                                                   ? [ami_id_override: params.server_ami_override?.trim()]
-                                                  : [gitBranchName: gitBranchName]
+                                                  : [git_branch_name: gitBranchName]
                         lock(resource: lockResource) {
                             // Deploy the Server
                             awsAuth.assumeRole()
