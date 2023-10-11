@@ -73,7 +73,6 @@ locals {
     "/bfd/${local.env}/server/nonsensitive/asg_max_instance_count"                   = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_instance_count"
     "/bfd/${local.env}/server/nonsensitive/asg_max_warm_instance_count"              = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_warm_instance_count"
     "/bfd/${local.env}/server/nonsensitive/asg_min_instance_count"                   = "/bfd/${local.seed_env}/server/nonsensitive/asg_min_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/data_server_ssl_client_certificates_json" = "/bfd/${local.seed_env}/server/nonsensitive/data_server_ssl_client_certificates_json"
     "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"            = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
     "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb"           = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
     "/bfd/${local.env}/server/sensitive/server_keystore_base64"                      = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
