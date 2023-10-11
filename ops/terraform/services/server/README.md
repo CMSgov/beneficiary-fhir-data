@@ -34,18 +34,16 @@ https://terraform-docs.io/user-guide/configuration/
 
 ## Inputs
 
-| Name                                                                                                                                    | Description                                                                                                      | Type | Default                         | Required |
-|-----------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|------|---------------------------------|:--------:|
-| <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override)                                                     | BFD Server override ami-id. Defaults to latest server/fhir AMI from `git_branch_name\|master`                    | `string`                        | `null` | no |
-| <a name="input_force_create_server_dashboards"></a> [force\_create\_server\_dashboards](#input\_force\_create\_server\_dashboards)      | Forces the creation of bfd\_server\_dashboards for ephemeral environments                                        | `bool` | `false`                         | no |
-| <a name="input_force_create_server_disk_alarms"></a> [force\_create\_server\_disk\_alarms](#input\_force\_create\_server\_disk\_alarms) | Forces the creation of bfd\_server\_disk\_alarms for ephemeral environments                                      | `bool` | `false`                         | no |
-| <a name="input_force_create_server_lb_alarms"></a> [force\_create\_server\_lb\_alarms](#input\_force\_create\_server\_lb\_alarms)       | Forces the creation of bfd\_server\_lb\_alarms for ephemeral environments                                        | `bool` | `false`                         | no |
-| <a name="input_force_create_server_log_alarms"></a> [force\_create\_server\_log\_alarms](#input\_force\_create\_server\_log\_alarms)    | Forces the creation of bfd\_server\_log\_alarms for ephemeral environments                                       | `bool` | `false`                         | no |
-| <a name="input_force_create_server_metrics"></a> [force\_create\_server\_metrics](#input\_force\_create\_server\_metrics)               | Forces the creation of bfd\_server\_metrics for ephemeral environments                                           | `bool` | `false`                         | no |
-| <a name="input_force_create_server_slo_alarms"></a> [force\_create\_server\_slo\_alarms](#input\_force\_create\_server\_slo\_alarms)    | Forces the creation of bfd\_server\_slo\_alarms for ephemeral environments                                       | `bool` | `false`                         | no |
-| <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix)                                                                   | boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging | `string` | `"?logServerErrorDetail=false"` | no |
-| <a name="git_branch_name"></a> [git\_branch\_name](#input\git\_branch\_name)                                                            | The name of the git branch to reference during creation. Defaults to `master`                                    | `string` | `master`                        | no |
-
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Server override ami-id. Defaults to latest server/fhir AMI from `master`. | `string` | `null` | no |
+| <a name="input_force_create_server_dashboards"></a> [force\_create\_server\_dashboards](#input\_force\_create\_server\_dashboards) | Forces the creation of bfd\_server\_dashboards for ephemeral environments | `bool` | `false` | no |
+| <a name="input_force_create_server_disk_alarms"></a> [force\_create\_server\_disk\_alarms](#input\_force\_create\_server\_disk\_alarms) | Forces the creation of bfd\_server\_disk\_alarms for ephemeral environments | `bool` | `false` | no |
+| <a name="input_force_create_server_lb_alarms"></a> [force\_create\_server\_lb\_alarms](#input\_force\_create\_server\_lb\_alarms) | Forces the creation of bfd\_server\_lb\_alarms for ephemeral environments | `bool` | `false` | no |
+| <a name="input_force_create_server_log_alarms"></a> [force\_create\_server\_log\_alarms](#input\_force\_create\_server\_log\_alarms) | Forces the creation of bfd\_server\_log\_alarms for ephemeral environments | `bool` | `false` | no |
+| <a name="input_force_create_server_metrics"></a> [force\_create\_server\_metrics](#input\_force\_create\_server\_metrics) | Forces the creation of bfd\_server\_metrics for ephemeral environments | `bool` | `false` | no |
+| <a name="input_force_create_server_slo_alarms"></a> [force\_create\_server\_slo\_alarms](#input\_force\_create\_server\_slo\_alarms) | Forces the creation of bfd\_server\_slo\_alarms for ephemeral environments | `bool` | `false` | no |
+| <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix) | boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging | `string` | `"?logServerErrorDetail=false"` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
 Manually updating the README.md will be overwritten.

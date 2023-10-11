@@ -7,9 +7,7 @@
  */
 
 // These variables are accessible throughout this file (except inside methods and classes).
-def amiIds
 def gitBranchName
-def scriptForDeploys
 
 pipeline {
     agent {
@@ -126,12 +124,6 @@ spec:
 
             // Load the child Jenkinsfiles.
             scriptForApps = load('apps/build.groovy')
-            scriptForDeploys = load('ops/deploy-ccs.groovy')
-
-            awsAuth.assumeRole()
-
-            // Find the most current AMI IDs (if any).
-            amiIds = scriptForDeploys.findAmis(gitBranchName)
         }
       }
     }
