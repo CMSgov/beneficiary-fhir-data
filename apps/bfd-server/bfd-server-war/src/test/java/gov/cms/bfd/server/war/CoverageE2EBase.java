@@ -12,6 +12,7 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
+import io.restassured.response.Response;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -92,6 +93,25 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
   }
 
   /**
+   * Verifies that {@link R4CoverageResourceProvider#read} returns a 404 when requesting a contract
+   * that does not exist and is negative (to test the id validation regex).
+   */
+  @Test
+  public void testReadWhenNonExistingNegativeCoverageIdExpect404() {
+    // Use a coverage id that does not exist
+    String requestString = coverageEndpoint + "part-d--9999999";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("issue.severity", hasItem("error"))
+        .body("issue.diagnostics", hasItem("HAPI-0971: Resource Beneficiary/-9999999 is not known"))
+        .statusCode(404)
+        .when()
+        .get(requestString);
+  }
+
+  /**
    * Verifies that {@link R4CoverageResourceProvider#read} returns a 400 and error message when
    * requesting a contract id which is improperly formatted.
    */
@@ -146,6 +166,64 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
   }
 
   /**
+   * Verify that Coverage returns a 404 when searching by a bene id that does not exist in the data.
+   */
+  @Test
+  public void testSearchByBeneWithMissingBeneExpectNoResults() {
+    String requestString = coverageEndpoint + "?beneficiary=1234";
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verify that Coverage with paging requested returns the paging links and navigating to those
+   * links returns valid paged results.
+   */
+  @Test
+  public void testSearchByBeneWithPagingExpectAllPagesWork() {
+    String beneficiaryId =
+        String.valueOf(
+            testUtils.getFirstBeneficiary(testUtils.loadSampleAData()).getBeneficiaryId());
+    String requestString = coverageEndpoint + "?beneficiary=" + beneficiaryId + "&_count=2";
+
+    Response response =
+        given()
+            .spec(requestAuth)
+            .expect()
+            .body("resourceType", equalTo("Bundle"))
+            // count set to 2
+            .body("entry.size()", equalTo(2))
+            // Check paging links are there
+            .body("link.size()", equalTo(4))
+            .body("link.relation", hasItems("self", "next", "first", "last"))
+            .statusCode(200)
+            .when()
+            .get(requestString);
+
+    // Get the next link, and make the call
+    String nextLink = testUtils.getPaginationLink(response, "next");
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // count set to 2 (4 results total, so last page)
+        .body("entry.size()", equalTo(2))
+        // Check paging links are there
+        .body("link.size()", equalTo(4))
+        .body("link.relation", hasItems("self", "previous", "first", "last"))
+        .statusCode(200)
+        .when()
+        .get(nextLink);
+  }
+
+  /**
    * Verify that Coverage search by id returns a 200 and no results filtered out when searching by
    * an existing bene id using lastUpdated dates that are inclusive of the record's lastUpdated
    * date.
@@ -167,8 +245,6 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
     given()
         .spec(requestAuth)
         .expect()
-        .log()
-        .body()
         // should get back all records
         .body("total", equalTo(4))
         .statusCode(200)
@@ -202,8 +278,6 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
     given()
         .spec(requestAuth)
         .expect()
-        .log()
-        .body()
         // should filter all records
         .body("total", equalTo(0))
         .statusCode(200)
@@ -251,8 +325,6 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
     given()
         .spec(requestAuth)
         .expect()
-        .log()
-        .ifError()
         .body("issue.severity", hasItem("error"))
         .body(
             "issue.diagnostics",
