@@ -1,6 +1,6 @@
 variable "ami_id_override" {
   default     = null
-  description = "BFD Pipeline override ami-id. Defaults to latest server/fhir AMI from `master`"
+  description = "BFD Pipeline override ami-id. Defaults to latest pipeline/etl AMI from `master`."
   type        = string
 }
 

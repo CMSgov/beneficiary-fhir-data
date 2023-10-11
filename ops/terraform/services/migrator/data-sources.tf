@@ -9,7 +9,7 @@ data "aws_caller_identity" "current" {}
 
 # the following logic produces a map of ami filters to their filter values:
 # `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided
-# `{"tag:Branch" => "var.git_branch_name|master"}` when the var.ami_id_override is not provided
+# `{"tag:Branch" => "master"}` when the var.ami_id_override is not provided
 locals {
   filters = { for k, v in {
     "image-id" = var.ami_id_override,

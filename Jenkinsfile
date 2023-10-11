@@ -246,11 +246,11 @@ try {
 					container('bfd-cbc-build') {
 
 						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-								amiId: amiIds.bfdMigratorAmiId,
-								bfdEnv: bfdEnv,
-								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								forceDeployment: params.force_migrator_deployment
+							amiId: amiIds.bfdMigratorAmiId,
+							bfdEnv: bfdEnv,
+							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+							awsRegion: awsRegion,
+							forceDeployment: params.force_migrator_deployment
 						)
 						if (migratorDeploymentSuccessful) {
 							println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
@@ -401,11 +401,11 @@ try {
 						container('bfd-cbc-build') {
 
 							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-									amiId: amiIds.bfdMigratorAmiId,
-									bfdEnv: bfdEnv,
-									heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-									awsRegion: awsRegion,
-									forceDeployment: params.force_migrator_deployment
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -543,11 +543,11 @@ try {
 						container('bfd-cbc-build') {
 
 							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-									amiId: amiIds.bfdMigratorAmiId,
-									bfdEnv: bfdEnv,
-									heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-									awsRegion: awsRegion,
-									forceDeployment: params.force_migrator_deployment
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {

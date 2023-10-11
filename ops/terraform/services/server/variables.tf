@@ -1,5 +1,5 @@
 variable "ami_id_override" {
-  description = "BFD Server override ami-id. Defaults to latest server/fhir AMI from `master`"
+  description = "BFD Server override ami-id. Defaults to latest server/fhir AMI from `master`."
   type        = string
   default     = null
 }
