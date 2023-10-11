@@ -172,6 +172,7 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		sh "terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='ssh_key_name=bfd-${environmentId}' \
+		-var='git_branch_name=${gitBranchName}' \
 		-var='git_commit_id=${gitCommitId}' \
 		-no-color -out=tfplan"
 
