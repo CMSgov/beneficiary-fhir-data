@@ -1,6 +1,6 @@
 variable "ami_id_override" {
   default     = null
-  description = "BFD Pipeline override ami-id. Defaults to latest pipeline/etl AMI from `git_branch_name|master`."
+  description = "BFD Pipeline override ami-id. Defaults to latest server/fhir AMI from `master`"
   type        = string
 }
 
@@ -68,10 +68,4 @@ variable "warning_ok_sns_override" {
   description = "Overrides the default, per-environment SNS topic used for Warning Alarms that transition from ALARM to OK"
   type        = string
   default     = null
-}
-
-variable "git_branch_name" {
-  default     = "master"
-  description = "The name of the git branch to reference during creation. Defaults to `master`"
-  type        = string
 }

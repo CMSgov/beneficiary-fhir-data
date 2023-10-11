@@ -13,7 +13,7 @@ data "aws_caller_identity" "current" {}
 locals {
   filters = { for k, v in {
     "image-id" = var.ami_id_override,
-    "tag:Branch" = var.ami_id_override == null ? var.git_branch_name : null } : k => v if v != null
+    "tag:Branch" = var.ami_id_override == null ? "master" : null } : k => v if v != null
   }
 }
 

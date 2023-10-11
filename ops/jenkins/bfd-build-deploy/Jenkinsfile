@@ -9,9 +9,7 @@
 // These variables are accessible throughout this file (except inside methods and classes).
 def amiIds
 def gitBranchName
-def migratorAmiId
-def pipelineAmiId
-def serverAmiId
+def scriptForDeploys
 
 pipeline {
     agent {
@@ -92,6 +90,28 @@ spec:
   }
 
   stages {
+    /* This stage switches the gitBranchName (needed for our CCS downsream stages)
+       value if the build is a PR as the BRANCH_NAME var is populated with the build
+       name during PR builds.
+    */
+    stage('Set Branch Name') {
+        steps {
+            script {
+                currentStage = env.STAGE_NAME
+                // Set git branch name to master if not building amis
+                if (!params.force_build_amis) {
+                    gitBranchName = 'master'
+                } else {
+                    if (env.BRANCH_NAME.startsWith('PR')) {
+                        gitBranchName = env.CHANGE_BRANCH
+                    } else {
+                        gitBranchName = env.BRANCH_NAME
+                    }
+                }
+            }
+        }
+    }
+
     stage('Prepare') {
       steps {
         script {
@@ -107,28 +127,11 @@ spec:
             // Load the child Jenkinsfiles.
             scriptForApps = load('apps/build.groovy')
             scriptForDeploys = load('ops/deploy-ccs.groovy')
-        }
-      }
-    }
 
-      /* This stage switches the gitBranchName (needed for our CCS downsream stages)
-          value if the build is a PR as the BRANCH_NAME var is populated with the build
-          name during PR builds.
-      */
-      stage('Set Branch Name') {
-        steps {
-          script {
-            currentStage = env.STAGE_NAME
-            // Set git branch name to master if not building amis
-            if (!params.force_build_amis) {
-              gitBranchName = 'master'
-            } else {
-              if (env.BRANCH_NAME.startsWith('PR')) {
-                gitBranchName = env.CHANGE_BRANCH
-              } else {
-                gitBranchName = env.BRANCH_NAME
-            }
-          }
+            awsAuth.assumeRole()
+
+            // Find the most current AMI IDs (if any).
+            amiIds = scriptForDeploys.findAmis(gitBranchName)
         }
       }
     }
@@ -136,7 +139,7 @@ spec:
     stage('Run Build Apps') {
       steps {
         script {
-            if (params.force_build_amis) {
+          if (params.force_build_amis) {
               def jobToRun = "bfd-build-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
               build job:
                 jobToRun,
@@ -160,16 +163,16 @@ spec:
           awsAuth.assumeRole()
 
           build job:
-                jobToRun,
-                parameters: [
-                  string(name: "env", value: "${params.env}"),
-                  string(name: "migrator_ami_override", value: "${params.migrator_ami_override}"),
-                  string(name: "pipeline_ami_override", value: "${params.pipeline_ami_override}"),
-                  string(name: "server_ami", value: "${params.server_ami_override}"),
-                  booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
-                  string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
-                ],
-                wait: true
+            jobToRun,
+            parameters: [
+              string(name: "env", value: "${params.env}"),
+              string(name: "migrator_ami_override", value: "${params.migrator_ami_override}"),
+              string(name: "pipeline_ami_override", value: "${params.pipeline_ami_override}"),
+              string(name: "server_ami", value: "${params.server_ami_override}"),
+              booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
+              string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
+            ],
+            wait: true
         }
       }
     }

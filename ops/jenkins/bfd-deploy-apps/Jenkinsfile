@@ -12,6 +12,7 @@ def migratorScripts
 def serverScripts
 def trimmedEnv
 def lockResource
+def scriptForDeploys
 def awsRegion = 'us-east-1'
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/wiki/how-to-recover-from-migrator-failures#how-to-recover-from-migrator-failures"
 
@@ -120,9 +121,9 @@ spec:
         )
 
         booleanParam(
-            name: 'force_migrator_deployment', 
-            description: 'When true, force the migrator to deploy.', 
-            defaultValue: false
+        name: 'force_migrator_deployment',
+        description: 'When true, force the migrator to deploy.',
+        defaultValue: false
         )
 
         string(
@@ -148,11 +149,15 @@ spec:
                     // Load the child Jenkinsfiles.
                     migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
                     serverScripts = load('ops/terraform/services/server/deploy.groovy')
+                    scriptForDeploys = load('ops/deploy-ccs.groovy')
 
                     trimmedEnv = params.env.trim()
                     lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
 
                     awsAuth.assumeRole()
+
+                    // Find the most current AMI IDs (if any).
+                    amiIds = scriptForDeploys.findAmis(gitBranchName)
                 }
             }
         }
@@ -225,7 +230,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def migratorAmiOverride = params.migrator_ami_override?.trim()
+                        def migratorAmiOverride = params.migrator_ami_override?.trim() ?: amiIds.bfdMigratorAmiId
 
                         lock(resource: lockResource) {
                             migratorDeploymentSuccessful = migratorScripts.deployMigrator(
@@ -233,8 +238,7 @@ spec:
                                 bfdEnv: trimmedEnv,
                                 heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
                                 awsRegion: awsRegion,
-                                forceDeployment: params.force_migrator_deployment,
-                                gitBranchName: gitBranchName
+                                forceDeployment: params.force_migrator_deployment
                             )
 
                             if (migratorDeploymentSuccessful) {
@@ -262,9 +266,8 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def terraformVars = (params.pipeline_ami_override?.trim())
-                                                  ? [ami_id_override: params.pipeline_ami_override?.trim()]
-                                                  : [git_branch_name: gitBranchName]
+                        def pipelineAmiId = params.pipeline_ami_override?.trim() ?: amiIds.bfdPipelineAmiId
+                        def terraformVars = [ami_id_override: pipelineAmiId]
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
@@ -291,9 +294,8 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def terraformVars = (params.server_ami_override?.trim())
-                                                  ? [ami_id_override: params.server_ami_override?.trim()]
-                                                  : [git_branch_name: gitBranchName]
+                        def serverAmiId = params.server_ami_override?.trim() ?: amiIds.bfdServerAmiId
+                        def terraformVars = [ami_id_override: serverAmiId]
                         lock(resource: lockResource) {
                             // Deploy the Server
                             awsAuth.assumeRole()

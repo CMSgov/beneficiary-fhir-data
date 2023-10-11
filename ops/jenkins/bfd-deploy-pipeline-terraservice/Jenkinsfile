@@ -1,5 +1,5 @@
 // Variables defined here are accessible throughout this file (except inside methods and classes).
-def gitBranchName
+def scriptForDeploys
 
 pipeline {
   agent {
@@ -58,13 +58,19 @@ spec:
       }
     }
 
+    stage('Prepare') {
+      scriptForDeploys = load('ops/deploy-ccs.groovy')
+      awsAuth.assumeRole()
+
+      // Find the most current AMI IDs (if any).
+      amiIds = scriptForDeploys.findAmis(gitBranchName)
+    }
+
     stage('Deploy Pipeline Terraservice') {
       steps {
         script {
           def trimmedEnv = params.env.trim()
-          def amiOverride = (params.ami_override?.trim())
-                            ? [ami_id_override: params.ami_override.trim()]
-                            : []
+          def amiId = params.ami_override?.trim() ?: amiIds.bfdPipelineAmiId
           def lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
           lock(resource: lockResource) {
             awsAuth.assumeRole()
@@ -74,8 +80,8 @@ spec:
               tfVars: [
                 create_ccw_pipeline: params.create_ccw_pipeline_instance,
                 create_rda_pipeline: params.create_rda_pipeline_instance,
-                git_branch_name: gitBranchName
-              ] + amiOverride
+                ami_id_override: amiId
+              ]
             )
           }
         }

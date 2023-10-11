@@ -1,5 +1,5 @@
 variable "ami_id_override" {
-  description = "BFD Server override ami-id. Defaults to latest server/fhir AMI from `git_branch_name|master`."
+  description = "BFD Server override ami-id. Defaults to latest server/fhir AMI from `master`"
   type        = string
   default     = null
 }
@@ -50,10 +50,4 @@ variable "force_create_server_error_alerts" {
   description = "Forces the creation of bfd_server_error_alerts for ephemeral environments"
   default     = false
   type        = bool
-}
-
-variable "git_branch_name" {
-  default     = "master"
-  description = "The name of the git branch to reference during creation. Defaults to `master`"
-  type        = string
 }
