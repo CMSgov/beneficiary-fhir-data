@@ -37,7 +37,6 @@ properties([
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
-def awsCredentials
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
@@ -47,6 +46,7 @@ def willDeployToProdEnvs
 def appBuildResults
 def amiIds
 def currentStage
+def gitBranchName
 def gitCommitId
 def gitRepoUrl
 def awsRegion = 'us-east-1'
@@ -173,7 +173,7 @@ try {
 					amiIds = scriptForDeploys.findAmis(gitBranchName)
 
 					// These variables track our decision on whether or not to deploy to prod-like envs.
-					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
+					canDeployToProdEnvs = gitBranchName == "master" || params.deploy_prod_from_non_master
 					willDeployToProdEnvs = false
 
 					// Get the current commit id
