@@ -61,3 +61,5 @@ if [[ \$- == *i* ]]; then
 fi
 EOF
 chmod 0644 /etc/profile.d/set-bfd-login-env.sh
+
+bash /usr/local/bin/permit-user-access "${env}"

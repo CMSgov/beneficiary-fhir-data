@@ -36,9 +36,3 @@
         name: bfd-pipeline
       vars:
         data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
-
-    - name: Add SSH users
-      import_role:
-        name: ssh_users
-      tags:
-        - pre-ami
