@@ -13,6 +13,7 @@ def serverScripts
 def trimmedEnv
 def lockResource
 def scriptForDeploys
+def amiIds
 def awsRegion = 'us-east-1'
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/wiki/how-to-recover-from-migrator-failures#how-to-recover-from-migrator-failures"
 
@@ -134,6 +135,19 @@ spec:
     }
 
     stages {
+        stage('Set Branch Name') {
+            steps {
+                script {
+                    currentStage = env.STAGE_NAME
+                    if (env.BRANCH_NAME.startsWith('PR')) {
+                        gitBranchName = env.CHANGE_BRANCH
+                    } else {
+                        gitBranchName = env.BRANCH_NAME
+                    }
+                }
+            }
+        }
+
         stage('Prepare') {
             steps {
                 script {
@@ -158,19 +172,6 @@ spec:
 
                     // Find the most current AMI IDs (if any).
                     amiIds = scriptForDeploys.findAmis(gitBranchName)
-                }
-            }
-        }
-
-        stage('Set Branch Name') {
-            steps {
-                script {
-                    currentStage = env.STAGE_NAME
-                    if (env.BRANCH_NAME.startsWith('PR')) {
-                        gitBranchName = env.CHANGE_BRANCH
-                    } else {
-                        gitBranchName = env.BRANCH_NAME
-                    }
                 }
             }
         }
