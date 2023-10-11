@@ -60,7 +60,7 @@ public class CoverageResourceProviderTest {
               coverageProvider.read(coverageId);
             });
     assertEquals(
-        "Coverage ID pattern: '1?234' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}}",
+        "Coverage ID pattern: '1?234' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}",
         exception.getLocalizedMessage());
   }
 
