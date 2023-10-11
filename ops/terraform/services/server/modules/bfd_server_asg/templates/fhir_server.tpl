@@ -23,7 +23,8 @@ aws ssm get-parameters-by-path \
 aws ssm get-parameters-by-path \
 --path "/bfd/${env}/server/nonsensitive/client_certificates/" \
 --recursive --region us-east-1 \
---query 'Parameters' | jq '.[] | {"alias": (.Name|split("/")[6]), "certificate": .Value}' | jq -s . > client_certificates.json
+--query 'Parameters' | jq '.[] | {"alias": (.Name|split("/")[6]), "certificate": .Value}' \
+| jq -s '{ "data_server_ssl_client_certificates": . }' > client_certificates.json
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
