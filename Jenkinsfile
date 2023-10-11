@@ -25,18 +25,19 @@
  */
 
 properties([
-	parameters([
-		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
-		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
-		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
-		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
-		booleanParam(name: 'force_migrator_deployment', description: 'When true, force the migrator to deploy.', defaultValue: false),
-		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
-	]),
-	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
+		parameters([
+				booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
+				booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
+				booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
+				booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
+				booleanParam(name: 'force_migrator_deployment', description: 'When true, force the migrator to deploy.', defaultValue: false),
+				string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
+		]),
+		buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
+def awsCredentials
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
@@ -46,7 +47,6 @@ def willDeployToProdEnvs
 def appBuildResults
 def amiIds
 def currentStage
-def gitBranchName
 def gitCommitId
 def gitRepoUrl
 def awsRegion = 'us-east-1'
@@ -122,34 +122,19 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 try {
 	// See ops/jenkins/cbc-build-push.sh for this image's definition.
 	podTemplate(
-		containers: [
-			containerTemplate(
-				name: 'bfd-cbc-build',
-				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk17-mvn3-tfenv3-latest', // TODO: consider a smarter solution for resolving this image
-				command: 'cat',
-				ttyEnabled: true,
-				alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
-				resourceRequestCpu: '8000m',
-				resourceLimitCpu: '8000m',
-				resourceLimitMemory: '16384Mi',
-				resourceRequestMemory: '16384Mi'
-			)], serviceAccount: 'bfd') {
+			containers: [
+					containerTemplate(
+							name: 'bfd-cbc-build',
+							image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk17-mvn3-tfenv3-latest', // TODO: consider a smarter solution for resolving this image
+							command: 'cat',
+							ttyEnabled: true,
+							alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
+							resourceRequestCpu: '8000m',
+							resourceLimitCpu: '8000m',
+							resourceLimitMemory: '16384Mi',
+							resourceRequestMemory: '16384Mi'
+					)], serviceAccount: 'bfd') {
 		node(POD_LABEL) {
-			/* This stage switches the gitBranchName (needed for our CCS downsream stages)
-			value if the build is a PR as the BRANCH_NAME var is populated with the build
-			name during PR builds.
-			*/
-			stage('Set Branch Name') {
-				currentStage = env.STAGE_NAME
-				script {
-					if (env.BRANCH_NAME.startsWith('PR')) {
-						gitBranchName = env.CHANGE_BRANCH
-					} else {
-						gitBranchName = env.BRANCH_NAME
-					}
-				}
-			}
-
 			stage('Prepare') {
 				currentStage = env.STAGE_NAME
 				container('bfd-cbc-build') {
@@ -170,10 +155,11 @@ try {
 					awsAuth.assumeRole()
 
 					// Find the most current AMI IDs (if any).
-					amiIds = scriptForDeploys.findAmis(gitBranchName)
+					amiIds = null
+					amiIds = scriptForDeploys.findAmis()
 
 					// These variables track our decision on whether or not to deploy to prod-like envs.
-					canDeployToProdEnvs = gitBranchName == "master" || params.deploy_prod_from_non_master
+					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
 					willDeployToProdEnvs = false
 
 					// Get the current commit id
@@ -184,6 +170,21 @@ try {
 
 					// Send notifications that the build has started
 					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+				}
+			}
+
+			/* This stage switches the gitBranchName (needed for our CCS downsream stages)
+			value if the build is a PR as the BRANCH_NAME var is populated with the build
+			name during PR builds.
+			*/
+			stage('Set Branch Name') {
+				currentStage = env.STAGE_NAME
+				script {
+					if (env.BRANCH_NAME.startsWith('PR')) {
+						gitBranchName = env.CHANGE_BRANCH
+					} else {
+						gitBranchName = env.BRANCH_NAME
+					}
 				}
 			}
 
@@ -217,8 +218,8 @@ try {
 					container('bfd-cbc-build') {
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/base"
+								env: bfdEnv,
+								directory: "ops/terraform/services/base"
 						)
 					}
 				}
@@ -231,8 +232,8 @@ try {
 					container('bfd-cbc-build') {
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/common"
+								env: bfdEnv,
+								directory: "ops/terraform/services/common"
 						)
 					}
 				}
@@ -245,11 +246,11 @@ try {
 					container('bfd-cbc-build') {
 
 						migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-							amiId: amiIds.bfdMigratorAmiId,
-							bfdEnv: bfdEnv,
-							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-							awsRegion: awsRegion,
-							forceDeployment: params.force_migrator_deployment
+								amiId: amiIds.bfdMigratorAmiId,
+								bfdEnv: bfdEnv,
+								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+								awsRegion: awsRegion,
+								forceDeployment: params.force_migrator_deployment
 						)
 						if (migratorDeploymentSuccessful) {
 							println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
@@ -268,11 +269,11 @@ try {
 					container('bfd-cbc-build') {
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/pipeline",
-							tfVars: [
-								ami_id_override: amiIds.bfdPipelineAmiId
-							]
+								env: bfdEnv,
+								directory: "ops/terraform/services/pipeline",
+								tfVars: [
+										ami_id_override: amiIds.bfdPipelineAmiId
+								]
 						)
 					}
 				}
@@ -286,33 +287,33 @@ try {
 					container('bfd-cbc-build') {
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/server",
-							tfVars: [
-								ami_id_override: amiIds.bfdServerAmiId
-							]
+								env: bfdEnv,
+								directory: "ops/terraform/services/server",
+								tfVars: [
+										ami_id_override: amiIds.bfdServerAmiId
+								]
 						)
 
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/server/server-regression",
-							tfVars: [
-								docker_image_tag_override: params.server_regression_image_override
-							]
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/server-regression",
+								tfVars: [
+										docker_image_tag_override: params.server_regression_image_override
+								]
 						)
 
 						// Deploy the API requests Insights Lambda
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/server/insights/api-requests"
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/insights/api-requests"
 						)
 
 						awsAuth.assumeRole()
 						hasRegressionRunSucceeded = serverScripts.runServerRegression(
-							bfdEnv: bfdEnv,
-							gitBranchName: gitBranchName
+								bfdEnv: bfdEnv,
+								gitBranchName: gitBranchName
 						)
 
 						if (hasRegressionRunSucceeded) {
@@ -364,8 +365,8 @@ try {
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/base"
+									env: bfdEnv,
+									directory: "ops/terraform/services/base"
 							)
 						}
 					}
@@ -382,8 +383,8 @@ try {
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/common"
+									env: bfdEnv,
+									directory: "ops/terraform/services/common"
 							)
 						}
 					}
@@ -400,11 +401,11 @@ try {
 						container('bfd-cbc-build') {
 
 							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-								amiId: amiIds.bfdMigratorAmiId,
-								bfdEnv: bfdEnv,
-								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								forceDeployment: params.force_migrator_deployment
+									amiId: amiIds.bfdMigratorAmiId,
+									bfdEnv: bfdEnv,
+									heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+									awsRegion: awsRegion,
+									forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -428,11 +429,11 @@ try {
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/pipeline",
-								tfVars: [
-									ami_id_override: amiIds.bfdPipelineAmiId
-								]
+									env: bfdEnv,
+									directory: "ops/terraform/services/pipeline",
+									tfVars: [
+											ami_id_override: amiIds.bfdPipelineAmiId
+									]
 							)
 						}
 					}
@@ -449,33 +450,33 @@ try {
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server",
-								tfVars: [
-									ami_id_override: amiIds.bfdServerAmiId
-								]
+									env: bfdEnv,
+									directory: "ops/terraform/services/server",
+									tfVars: [
+											ami_id_override: amiIds.bfdServerAmiId
+									]
 							)
 
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server/server-regression",
-								tfVars: [
-									docker_image_tag_override: params.server_regression_image_override
-								]
+									env: bfdEnv,
+									directory: "ops/terraform/services/server/server-regression",
+									tfVars: [
+											docker_image_tag_override: params.server_regression_image_override
+									]
 							)
 
 							// Deploy the API requests Insights Lambda
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server/insights/api-requests"
+									env: bfdEnv,
+									directory: "ops/terraform/services/server/insights/api-requests"
 							)
 
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
-								bfdEnv: bfdEnv,
-								gitBranchName: gitBranchName
+									bfdEnv: bfdEnv,
+									gitBranchName: gitBranchName
 							)
 
 							if (hasRegressionRunSucceeded) {
@@ -505,8 +506,8 @@ try {
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/base"
+									env: bfdEnv,
+									directory: "ops/terraform/services/base"
 							)
 						}
 					}
@@ -523,8 +524,8 @@ try {
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/common"
+									env: bfdEnv,
+									directory: "ops/terraform/services/common"
 							)
 						}
 					}
@@ -542,11 +543,11 @@ try {
 						container('bfd-cbc-build') {
 
 							migratorDeploymentSuccessful = migratorScripts.deployMigrator(
-								amiId: amiIds.bfdMigratorAmiId,
-								bfdEnv: bfdEnv,
-								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
-								awsRegion: awsRegion,
-								forceDeployment: params.force_migrator_deployment
+									amiId: amiIds.bfdMigratorAmiId,
+									bfdEnv: bfdEnv,
+									heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
+									awsRegion: awsRegion,
+									forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -570,11 +571,11 @@ try {
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/pipeline",
-								tfVars: [
-									ami_id_override: amiIds.bfdPipelineAmiId
-								]
+									env: bfdEnv,
+									directory: "ops/terraform/services/pipeline",
+									tfVars: [
+											ami_id_override: amiIds.bfdPipelineAmiId
+									]
 							)
 						}
 					}
@@ -593,33 +594,33 @@ try {
 						container('bfd-cbc-build') {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server",
-								tfVars: [
-									ami_id_override: amiIds.bfdServerAmiId
-								]
+									env: bfdEnv,
+									directory: "ops/terraform/services/server",
+									tfVars: [
+											ami_id_override: amiIds.bfdServerAmiId
+									]
 							)
 
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server/server-regression",
-								tfVars: [
-									docker_image_tag_override: params.server_regression_image_override
-								]
+									env: bfdEnv,
+									directory: "ops/terraform/services/server/server-regression",
+									tfVars: [
+											docker_image_tag_override: params.server_regression_image_override
+									]
 							)
 
 							// Deploy the API requests Insights Lambda
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server/insights/api-requests"
+									env: bfdEnv,
+									directory: "ops/terraform/services/server/insights/api-requests"
 							)
 
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
-								bfdEnv: bfdEnv,
-								gitBranchName: gitBranchName
+									bfdEnv: bfdEnv,
+									gitBranchName: gitBranchName
 							)
 
 							if (hasRegressionRunSucceeded) {

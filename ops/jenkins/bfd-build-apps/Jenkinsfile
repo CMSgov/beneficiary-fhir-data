@@ -137,11 +137,6 @@ spec:
                     // Load the child Jenkinsfiles.
                     scriptForApps = load('apps/build.groovy')
                     scriptForDeploys = load('ops/deploy-ccs.groovy')
-
-                    awsAuth.assumeRole()
-
-                    // Find the most current AMI IDs (if any).
-                    amiIds = scriptForDeploys.findAmis()
                 }
             }
         }
@@ -171,6 +166,8 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
+                        awsAuth.assumeRole()
+                        amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
                         if (params.force_build_docker_host_ami) {
                             amiIds.bfdDockerHostAmiId = scriptForDeploys.buildDockerHostAmi(gitBranchName, gitCommitId,
                                 amiIds.platinumAmiId)
