@@ -1,5 +1,6 @@
 // Variables defined here are accessible throughout this file (except inside methods and classes).
 def scriptForDeploys
+def gitBranchName
 
 pipeline {
   agent {
