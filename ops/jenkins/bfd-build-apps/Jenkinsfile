@@ -141,7 +141,7 @@ spec:
                     awsAuth.assumeRole()
 
                     // Find the most current AMI IDs (if any).
-                    amiIds = scriptForDeploys.findAmis()
+                    amiIds = scriptForDeploys.findAmis(gitBranchName)
                 }
             }
         }
