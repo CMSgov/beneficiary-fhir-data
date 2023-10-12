@@ -144,6 +144,7 @@ module "fhir_asg" {
   role          = local.legacy_service
   layer         = "app"
   lb_config     = module.fhir_lb.lb_config
+  seed_env      = local.seed_env
 
   # Initial size is one server per AZ
   asg_config = {

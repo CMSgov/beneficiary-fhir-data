@@ -1,5 +1,6 @@
 locals {
-  env = terraform.workspace
+  env      = terraform.workspace
+  seed_env = var.seed_env
 
   # When the CustomEndpoint is empty, fall back to the ReaderEndpoint
   rds_reader_endpoint = data.external.rds.result["ReaderEndpoint"]
@@ -138,6 +139,7 @@ resource "aws_launch_template" "main" {
 
   user_data = base64encode(templatefile("${path.module}/templates/${var.launch_config.user_data_tpl}", {
     env                   = local.env
+    seed_env              = local.seed_env
     port                  = var.lb_config.port
     accountId             = var.launch_config.account_id
     data_server_db_url    = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${var.jdbc_suffix}"

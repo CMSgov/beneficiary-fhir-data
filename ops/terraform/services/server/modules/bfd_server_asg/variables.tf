@@ -3,6 +3,11 @@ variable "env_config" {
   type        = object({ default_tags = map(string), vpc_id = string, azs = list(string) })
 }
 
+variable "seed_env" {
+  description = "The solution's source environment. For established environments this is equal to the environment's name"
+  sensitive   = false
+}
+
 variable "kms_key_alias" {
   description = "Key alias of environment's KMS key"
   type        = string

@@ -88,6 +88,7 @@ resource "aws_instance" "this" {
     account_id                                  = local.account_id
     db_migrator_db_url                          = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
     env                                         = local.env
+    seed_env                                    = local.seed_env
     migrator_monitor_enabled                    = local.migrator_monitor_enabled
     migrator_monitor_heartbeat_interval_seconds = local.migrator_monitor_heartbeat_interval_seconds
   })
