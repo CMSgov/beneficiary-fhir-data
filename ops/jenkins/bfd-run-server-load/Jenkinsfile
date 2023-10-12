@@ -2,6 +2,10 @@
 
 // Global variable where the terraform variable map will be stored
 def terraformVars
+def gitBranchName
+def scriptForApps
+def scriptForDeploys
+def amiIds
 
 pipeline {
   agent {
@@ -118,14 +122,43 @@ spec:
   }
 
   stages {
+    stage('Set Branch Name') {
+      steps {
+        script {
+          if (env.BRANCH_NAME.startsWith('PR')) {
+            gitBranchName = env.CHANGE_BRANCH
+          } else {
+            gitBranchName = env.BRANCH_NAME
+          }
+        }
+      }
+    }
+
+    stage('Prepare') {
+      steps {
+        script {
+          // Load the child Jenkinsfiles.
+          scriptForApps = load('apps/build.groovy')
+          scriptForDeploys = load('ops/deploy-ccs.groovy')
+
+          awsAuth.assumeRole()
+
+          // Find the most current AMI IDs (if any).
+          amiIds = scriptForDeploys.findAmis(gitBranchName)
+        }
+      }
+    }
+
     stage('Run Load Tests') {
       steps {
         script {
           hostUnderTest = String.format(params.TEST_HOST, params.ENVIRONMENT)
-          //ignore ENVIRONMENT, TEST_HOST, and any parameters that have empty-string values
-          terraformVars = params.findAll { it.key != 'ENVIRONMENT' && it.key != 'TEST_HOST' && it.value != '' }
+          amiId = params.AMI_ID_OVERRIDE?.trim() ?: amiIds.bfdServerLoadAmiId
+
+          //ignore ENVIRONMENT, TEST_HOST specifically
+          terraformVars = params.findAll { it.key != 'ENVIRONMENT' && it.key != 'TEST_HOST' }
                                 .collectEntries { key, value -> [(key.toLowerCase()): value] }
-          terraformVars.putAll(['test_host': hostUnderTest])
+          terraformVars.putAll(['test_host': hostUnderTest, 'ami_id_override': amiId])
 
           awsAuth.assumeRole()
           terraform.deployTerraservice(
