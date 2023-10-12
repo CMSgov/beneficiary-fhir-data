@@ -553,7 +553,7 @@ def delete_unassociated_ebs_snapshots(days=7, region='us-east-1'):
         snapshot for snapshot in old_snapshots if snapshot['StartTime'].replace(tzinfo=datetime.timezone.utc) < cutoff
     ]
     num_unassociated = len(old_snapshots)
-    logger.debug(f"Found {num_unassociated} unassociated EBS snapshots in {region} older than {days} days")
+    logger.info(f"Found {num_unassociated} unassociated EBS snapshots in {region} older than {days} days to delete!")
     if len(old_snapshots) == 0:
         logger.info(f"No unassociated EBS snapshots older than {days} days in {region} found.. skipping")
         return
