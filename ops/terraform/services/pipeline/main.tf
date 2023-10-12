@@ -151,6 +151,7 @@ resource "aws_launch_template" "this" {
   user_data = base64encode(templatefile("${path.module}/user-data.sh.tftpl", {
     account_id        = local.account_id
     env               = local.env
+    seed_env          = local.seed_env
     pipeline_bucket   = aws_s3_bucket.this.bucket
     pipeline_instance = each.value.instance_name
     writer_endpoint   = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
@@ -324,6 +325,7 @@ resource "aws_instance" "pipeline" {
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     account_id        = local.account_id
     env               = local.env
+    seed_env          = local.seed_env
     pipeline_bucket   = aws_s3_bucket.this.bucket
     pipeline_instance = each.value.instance_name
     writer_endpoint   = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb${local.jdbc_suffix}"
