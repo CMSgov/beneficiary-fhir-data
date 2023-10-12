@@ -94,6 +94,7 @@ No modules.
 | <a name="input_mgmt_config"></a> [mgmt\_config](#input\_mgmt\_config) | n/a | `object({ vpn_sg = string, tool_sg = string, remote_sg = string, ci_cidrs = list(string) })` | n/a | yes |
 | <a name="input_role"></a> [role](#input\_role) | n/a | `string` | n/a | yes |
 | <a name="input_scaling_networkin_interval_mb"></a> [scaling\_networkin\_interval\_mb](#input\_scaling\_networkin\_interval\_mb) | The interval value in megabytes for evaluating the asg scaling capacity, based on the metric FilteredNetworkIn | `number` | `100000000` | no |
+| <a name="input_seed_env"></a> [seed\_env](#input\_seed\_env) | The solution's source environment. For established environments this is equal to the environment's name | `any` | n/a | yes |
 
 ## Outputs
 

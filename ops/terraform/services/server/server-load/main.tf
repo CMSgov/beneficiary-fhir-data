@@ -104,6 +104,7 @@ resource "aws_instance" "this" {
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
     account_id         = local.account_id
     env                = local.env
+    seed_env           = local.seed_env
     aws_current_region = data.aws_region.current.name
     asg_name           = data.aws_autoscaling_group.asg.name
 
