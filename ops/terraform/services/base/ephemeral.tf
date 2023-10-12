@@ -42,7 +42,6 @@ locals {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov"                         = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dev_bluebutton_cms_gov"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bb2_local_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bb2_local_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_dev_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_dev_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_test_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_test_client"
