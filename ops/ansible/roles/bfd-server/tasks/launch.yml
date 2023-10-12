@@ -58,7 +58,7 @@
 
 - name: Save App Server SSL Truststore Certificates
   copy:
-    content: "{{ lookup('file', playbook_dir + '/' + item.certificate) }}"
+    content: "{{ item.certificate }}"
     dest: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
   with_items: "{{ data_server_ssl_client_certificates }}"
   changed_when: false
