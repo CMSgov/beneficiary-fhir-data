@@ -62,14 +62,18 @@ spec:
     }
 
     stage('Prepare') {
-      // Load the child Jenkinsfiles.
-      scriptForApps = load('apps/build.groovy')
-      scriptForDeploys = load('ops/deploy-ccs.groovy')
+      steps {
+        script {
+          // Load the child Jenkinsfiles.
+          scriptForApps = load('apps/build.groovy')
+          scriptForDeploys = load('ops/deploy-ccs.groovy')
 
-      awsAuth.assumeRole()
+          awsAuth.assumeRole()
 
-      // Find the most current AMI IDs (if any).
-      amiIds = scriptForDeploys.findAmis(gitBranchName)
+          // Find the most current AMI IDs (if any).
+          amiIds = scriptForDeploys.findAmis(gitBranchName)
+        }
+      }
     }
 
     stage('Deploy Pipeline Terraservice') {
