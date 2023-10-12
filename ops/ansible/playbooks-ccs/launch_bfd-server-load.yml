@@ -5,12 +5,6 @@
     python3_version: '3.9.16'
 
   tasks:
-    - name: Add SSH users for current environment
-      import_role:
-        name: ssh_users
-      tags:
-        - post-ami
-
     # TODO: Resolve this as feasible
     - name: Create symbolic links
       file:

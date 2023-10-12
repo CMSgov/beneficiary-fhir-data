@@ -36,9 +36,3 @@
       import_role:
         name: cloudwatch-agent-instrumented
       when: env is defined
-
-    - name: Add SSH users
-      import_role:
-        name: ssh_users
-      tags:
-        - pre-ami
