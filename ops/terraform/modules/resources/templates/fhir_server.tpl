@@ -22,12 +22,8 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > server_vars.json
 
-# the previous ssm get-parameter will also pick the certs up due to the 'recursive' arg;.
-# we'll process the ".../client_certs/" path separately.
-aws ssm get-parameters-by-path \
---path "/bfd/${env}/server/nonsensitive/client_certificates/" \
---recursive --region us-east-1 \
---query 'Parameters' | jq '.[] | {"alias": (.Name|split("/")[6]), "certificate": .Value}' | jq -s . > client_certificates.json
+# build `data_server_ssl_client_certificates` from json values stored in SSM
+jq '{data_server_ssl_client_certificates: .data_server_ssl_client_certificates_json|fromjson}' server_vars.json > client_certificates.json
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
