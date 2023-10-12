@@ -206,7 +206,7 @@ def delete_rds_cluster_snapshots(region='us-east-1'):
         logger.info(f"Found {num_monthlies}/{RDS_CPM_MONTHLY_RETENTION_NUM} monthly {cluster} snapshots in {region}")
 
         # retain the last n daily snapshots, abort all purges if there are no dailes
-        if num_dailies == 0:
+        if num_dailies == 0 and RDS_DAILY_RETENTION_NUM > 0:
             logger.warning(f"{cluster} has 0 daily snapshots in {region}... skipping snapshot pruning for this cluster")
             continue
         if len(daily_snapshots) > RDS_DAILY_RETENTION_NUM:
@@ -218,7 +218,7 @@ def delete_rds_cluster_snapshots(region='us-east-1'):
                             "is an AWS Managed Automatic Snapshot ***")
 
         # retain the last n weekly snapshots, abort weeklies and monthlies if there are no weeklies
-        if num_weeklies == 0:
+        if num_weeklies == 0 and RDS_CPM_WEEKLY_RETENTION_NUM > 0:
             logger.warning(f"{cluster} has 0 weekly snapshots in {region}... skipping weekly/monthly snapshot pruning")
             continue
         if num_weeklies > RDS_CPM_WEEKLY_RETENTION_NUM:
@@ -241,7 +241,7 @@ def delete_rds_cluster_snapshots(region='us-east-1'):
                         logger.error(f"Error deleting snapshot {snapshot['DBClusterSnapshotIdentifier']}: {e}")
 
         # retain the last n monthly snapshots
-        if num_monthlies == 0:
+        if num_monthlies == 0 and RDS_CPM_MONTHLY_RETENTION_NUM > 0:
             logger.warning(f"{cluster} has zero monthly snapshots in {region}... skipping monthly snapshot pruning")
             continue
         if num_monthlies > RDS_CPM_MONTHLY_RETENTION_NUM:
