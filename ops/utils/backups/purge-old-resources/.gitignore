@@ -1,0 +1,6 @@
+.venv
+*.json
+*.log
+*.pem
+*.env
+
