@@ -77,9 +77,8 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
   /**
    * Verifies that Patient read returns a 200 and response when the beneficiary exists in the DB but
-   * has no {@link BeneficiaryHistory} records. Primarily this
-   * checks that the table joins do not cause any issue retrieving the patient when there is nothing
-   * found in the history table.
+   * has no {@link BeneficiaryHistory} records. Primarily this checks that the table joins do not
+   * cause any issue retrieving the patient when there is nothing found in the history table.
    */
   @Test
   public void testReadWhenNoHistoricalMbisExpect200() {
