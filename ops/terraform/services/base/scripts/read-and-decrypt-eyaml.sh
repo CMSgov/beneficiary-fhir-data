@@ -15,30 +15,11 @@
 # Arguments:
 #   $1 is the desired eyaml file that can be entered with or without qualifying path or
 #      suffix. `values/foo.eyaml`, `values/foo`, `foo.eyaml` and `foo` are equivalent.
-EYAML_FILE="$(basename "$1" | sed 's/\.eyaml//').eyaml"
-SSM_VAULT_PASSWORD_PATH="/bfd/mgmt/jenkins/sensitive/ansible_vault_password"
-
+EYAML_FILE="$(basename "$1" | sed 's/\.yaml//').yaml"
+CMK_ARN="$2"
 
 if test -f "values/${EYAML_FILE}"; then
-    # temporarily store vault password
-    aws ssm get-parameter \
-        --region us-east-1 \
-        --output text \
-        --with-decryption \
-        --query 'Parameter.Value' \
-        --name "$SSM_VAULT_PASSWORD_PATH" > vault.password
-
-    # decrypt desired eyaml file to stdout, reformat as JSON, and explicitly cast all values to strings
-    ansible-vault decrypt --vault-password-file vault.password "values/${EYAML_FILE}" --output - | yq eval -o=j | jq 'with_entries(.value |= tostring)'
+  kotlin /Users/mitchellalessio/Repositories/beneficiary-fhir-data/apps/utils/cipher/cipher.main.kts --key "$CMK_ARN" cat "values/${EYAML_FILE}" | yq eval -o=j | jq 'with_entries(.value |= tostring)'
 else
-    echo '{}'
+  echo '{}'
 fi
-
-#######################################
-# Ensure temporary ansible-vault password file is destroyed.
-# To be called as the action in `trap [action] [signal]`.
-#######################################
-cleanup() {
-    rm -rf vault.password
-}
-trap cleanup EXIT
