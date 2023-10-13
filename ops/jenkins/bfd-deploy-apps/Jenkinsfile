@@ -12,6 +12,9 @@ def migratorScripts
 def serverScripts
 def trimmedEnv
 def lockResource
+def scriptForApps
+def scriptForDeploys
+def amiIds
 def awsRegion = 'us-east-1'
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/wiki/how-to-recover-from-migrator-failures#how-to-recover-from-migrator-failures"
 
@@ -120,9 +123,9 @@ spec:
         )
 
         booleanParam(
-            name: 'force_migrator_deployment', 
-            description: 'When true, force the migrator to deploy.', 
-            defaultValue: false
+        name: 'force_migrator_deployment',
+        description: 'When true, force the migrator to deploy.',
+        defaultValue: false
         )
 
         string(
@@ -133,30 +136,6 @@ spec:
     }
 
     stages {
-        stage('Prepare') {
-            steps {
-                script {
-                    // Address limitations resulting from CVE-2022-24767
-                    sh 'git config --global --add safe.directory "$WORKSPACE"'
-
-                    // Get the current commit id
-                    gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-
-                    // Get the remote repo url. This assumes we are using git+https not git+ssh.
-                    gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/, '')
-
-                    // Load the child Jenkinsfiles.
-                    migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
-                    serverScripts = load('ops/terraform/services/server/deploy.groovy')
-
-                    trimmedEnv = params.env.trim()
-                    lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
-
-                    awsAuth.assumeRole()
-                }
-            }
-        }
-
         stage('Set Branch Name') {
             steps {
                 script {
@@ -170,6 +149,37 @@ spec:
             }
         }
 
+        stage('Prepare') {
+            steps {
+                script {
+                    // Address limitations resulting from CVE-2022-24767
+                    sh 'git config --global --add safe.directory "$WORKSPACE"'
+
+                    // Get the current commit id
+                    gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+                    // Get the remote repo url. This assumes we are using git+https not git+ssh.
+                    gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/, '')
+
+                    // Load the child Jenkinsfiles.
+                    scriptForApps = load('apps/build.groovy')
+                    scriptForDeploys = load('ops/deploy-ccs.groovy')
+
+                    // Load the child Jenkinsfiles.
+                    migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
+                    serverScripts = load('ops/terraform/services/server/deploy.groovy')
+
+                    trimmedEnv = params.env.trim()
+                    lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
+
+                    awsAuth.assumeRole()
+
+                    // Find the most current AMI IDs (if any).
+                    amiIds = scriptForDeploys.findAmis(gitBranchName)
+                }
+            }
+        }
+
         stage('Deploy Base') {
             steps {
                 script {
@@ -178,8 +188,8 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/base'
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/base'
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -203,8 +213,8 @@ spec:
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/common'
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/common'
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -225,7 +235,7 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def migratorAmiOverride = params.migrator_ami_override?.trim()
+                        def migratorAmiOverride = params.migrator_ami_override?.trim() ?: amiIds.bfdMigratorAmiId
 
                         lock(resource: lockResource) {
                             migratorDeploymentSuccessful = migratorScripts.deployMigrator(
@@ -261,15 +271,14 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def terraformVars = (params.pipeline_ami_override?.trim())
-                                                  ? [ami_id_override: params.pipeline_ami_override?.trim()]
-                                                  : []
+                        def pipelineAmiId = params.pipeline_ami_override?.trim() ?: amiIds.bfdPipelineAmiId
+                        def terraformVars = [ami_id_override: pipelineAmiId]
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                            env: trimmedEnv,
-                            directory: 'ops/terraform/services/pipeline',
-                            tfVars: terraformVars
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/pipeline',
+                                tfVars: terraformVars
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
@@ -290,9 +299,8 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
-                        def terraformVars = (params.server_ami_override?.trim())
-                                                  ? [ami_id_override: params.server_ami_override?.trim()]
-                                                  : []
+                        def serverAmiId = params.server_ami_override?.trim() ?: amiIds.bfdServerAmiId
+                        def terraformVars = [ami_id_override: serverAmiId]
                         lock(resource: lockResource) {
                             // Deploy the Server
                             awsAuth.assumeRole()
@@ -303,11 +311,11 @@ spec:
                             )
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server/server-regression',
-                                    tfVars: [
-                                        docker_image_tag_override: params.server_regression_image_override
-                                    ]
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server/server-regression',
+                                tfVars: [
+                                    docker_image_tag_override: params.server_regression_image_override
+                                ]
                             )
 
                             // Deploy the API requests Insights Lambda

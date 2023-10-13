@@ -23,8 +23,7 @@ data "aws_vpc_peering_connection" "peers" {
   tags  = { Name = local.lb_vpc_peerings[count.index] }
 }
 
-# TODO: this is a temporary work-around until versioning becomes a reality
-# the following logic produces a map of ami filters to their filter values:
+# The following logic produces a map of ami filters to their filter values:
 # `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided
 # `{"tag:Branch" => "master"}` when the var.ami_id_override is not provided
 locals {

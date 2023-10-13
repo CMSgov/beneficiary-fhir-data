@@ -69,4 +69,3 @@ variable "warning_ok_sns_override" {
   type        = string
   default     = null
 }
-

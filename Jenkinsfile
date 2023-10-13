@@ -37,7 +37,6 @@ properties([
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
-def awsCredentials
 def scriptForApps
 def scriptForDeploys
 def migratorScripts
@@ -49,6 +48,7 @@ def amiIds
 def currentStage
 def gitCommitId
 def gitRepoUrl
+def gitBranchName
 def awsRegion = 'us-east-1'
 def verboseMaven = params.verbose_mvn_logging
 def migratorRunbookUrl = "https://github.com/CMSgov/beneficiary-fhir-data/wiki/how-to-recover-from-migrator-failures"
@@ -135,6 +135,21 @@ try {
 				resourceRequestMemory: '16384Mi'
 			)], serviceAccount: 'bfd') {
 		node(POD_LABEL) {
+			/* This stage switches the gitBranchName (needed for our CCS downsream stages)
+			value if the build is a PR as the BRANCH_NAME var is populated with the build
+			name during PR builds.
+			*/
+			stage('Set Branch Name') {
+				currentStage = env.STAGE_NAME
+				script {
+					if (env.BRANCH_NAME.startsWith('PR')) {
+						gitBranchName = env.CHANGE_BRANCH
+					} else {
+						gitBranchName = env.BRANCH_NAME
+					}
+				}
+			}
+
 			stage('Prepare') {
 				currentStage = env.STAGE_NAME
 				container('bfd-cbc-build') {
@@ -155,8 +170,7 @@ try {
 					awsAuth.assumeRole()
 
 					// Find the most current AMI IDs (if any).
-					amiIds = null
-					amiIds = scriptForDeploys.findAmis()
+					amiIds = scriptForDeploys.findAmis(gitBranchName)
 
 					// These variables track our decision on whether or not to deploy to prod-like envs.
 					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
@@ -170,21 +184,6 @@ try {
 
 					// Send notifications that the build has started
 					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
-				}
-			}
-
-			/* This stage switches the gitBranchName (needed for our CCS downsream stages)
-			value if the build is a PR as the BRANCH_NAME var is populated with the build
-			name during PR builds.
-			*/
-			stage('Set Branch Name') {
-				currentStage = env.STAGE_NAME
-				script {
-					if (env.BRANCH_NAME.startsWith('PR')) {
-						gitBranchName = env.CHANGE_BRANCH
-					} else {
-						gitBranchName = env.BRANCH_NAME
-					}
 				}
 			}
 

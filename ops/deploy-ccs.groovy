@@ -57,7 +57,7 @@ class AmiIds implements Serializable {
  * @return a new {@link AmiIds} instance detailing the already-existing, latest AMIs (if any) that are now available for use
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
 */
-def findAmis(String branchName = 'master') {
+def findAmis(String branchName) {
 	// Replace this lookup either with a lookup in SSM or in a build artifact.
 	return new AmiIds(
 		platinumAmiId: awsEc2.getAmiId("", "bfd-amzn2-jdk17-platinum-??????????????"),
