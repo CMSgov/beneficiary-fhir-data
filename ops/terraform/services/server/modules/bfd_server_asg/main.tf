@@ -153,7 +153,7 @@ resource "aws_launch_template" "main" {
 
   tag_specifications {
     resource_type = "volume"
-    tags          = merge({ snapshot = "true", Name = "bfd-${local.env}-${var.role}" }, local.additional_tags)
+    tags          = merge({ Name = "bfd-${local.env}-${var.role}" }, local.additional_tags)
   }
 }
 
