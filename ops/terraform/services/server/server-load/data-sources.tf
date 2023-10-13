@@ -24,7 +24,7 @@ locals {
 data "aws_ami" "main" {
   most_recent = true
   owners      = ["self"]
-  name_regex  = ".*server-load.*"
+  name_regex  = ".*docker-host.*"
 
   dynamic "filter" {
     for_each = local.filters
