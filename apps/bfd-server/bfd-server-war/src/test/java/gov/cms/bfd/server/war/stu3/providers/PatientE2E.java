@@ -569,6 +569,48 @@ public class PatientE2E extends PatientE2EBase {
   }
 
   /**
+   * Verifies that searching by a known existing part D contract number returns a 200 and the
+   * unhashed MBI values are returned by default.
+   *
+   * <p>V1 handles the response differently, namely returning historical MBIs whereas v2 doesnt,
+   * which means this test needs to be split between v1/v2
+   */
+  @Test
+  public void testPatientByPartDContractExpectUnhashedMbis() {
+    Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
+    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
+    String requestString =
+        patientEndpoint
+            + "?_has:Coverage.extension="
+            + contractId
+            + "&_has:Coverage.rfrncyr="
+            + refYear;
+
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        .log()
+        .body()
+        .body("resourceType", equalTo("Bundle"))
+        .body("entry.size()", equalTo(1))
+        /* Check there are 4 unhashed bene ids returned (regression test for  BFD-525; we should have 4 unique entries, 3 historical and 1 current mbi) */
+        .body(
+            "entry[0].resource.identifier.findAll { it.system == 'http://hl7.org/fhir/sid/us-mbi' }.size()",
+            equalTo(4))
+        .body("entry.resource.id", hasItem(String.valueOf(beneficiary.getBeneficiaryId())))
+        // Check current MBI is returned
+        .body("entry.resource.identifier.value.flatten()", hasItem(currentMbi))
+        // Historical benes are returned from contract search in v1
+        .body("entry.resource.identifier.value.flatten()", hasItems(historicalMbis.toArray()))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
    * Verifies that searching by a known existing part D contract number with paging requested
    * returns a 200 as well as the expected paging links.
    */

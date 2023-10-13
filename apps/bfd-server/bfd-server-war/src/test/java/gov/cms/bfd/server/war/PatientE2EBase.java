@@ -439,39 +439,6 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that searching by a known existing part D contract number returns a 200 and the
-   * unhashed MBI values are returned by default.
-   */
-  @Test
-  public void testPatientByPartDContractExpectUnhashedMbis() {
-    Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
-    String contractId =
-        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
-    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
-    String requestString =
-        patientEndpoint
-            + "?_has:Coverage.extension="
-            + contractId
-            + "&_has:Coverage.rfrncyr="
-            + refYear;
-
-    given()
-        .spec(requestAuth)
-        .headers(headers)
-        .expect()
-        .body("resourceType", equalTo("Bundle"))
-        .body("entry.size()", equalTo(1))
-        .body("entry.resource.id", hasItem(String.valueOf(beneficiary.getBeneficiaryId())))
-        // Check current MBI is returned
-        .body("entry.resource.identifier.value.flatten()", hasItem(currentMbi))
-        // Historical benes are not returned from contract search, since they are only
-        // added when searching by mbi hash. See R4PatientResourceProvider.queryDatabaseByHash
-        .statusCode(200)
-        .when()
-        .get(requestString);
-  }
-
-  /**
    * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} works as expected,
    * when an invalid year is specified.
    */
