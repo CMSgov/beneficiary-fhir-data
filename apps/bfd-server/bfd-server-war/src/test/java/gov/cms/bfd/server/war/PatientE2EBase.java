@@ -4,25 +4,31 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
+import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
-import io.restassured.response.Response;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Year;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Root;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +37,12 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
   /** The base patient endpoint. */
   protected String patientEndpoint;
+
+  /**
+   * Headers to use for the test cases; needed due to V1 requiring MBI headers to return MBIs, and
+   * V2 not requiring them.
+   */
+  protected Map<String, String> headers;
 
   /**
    * A list of expected historical mbis for adding to the sample A loaded data (as data coming back
@@ -50,6 +62,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Patient"))
         .body("id", equalTo(patientId))
@@ -63,21 +76,20 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that Patient searchByLogicalId returns a 200 and response when the beneficiary exists
-   * in the DB but has no {@link BeneficiaryHistory} or MedicareBeneficiaryIdHistory records.
-   * Primarily this checks that the table joins do not cause any issue retrieving the patient when
-   * there is nothing found in the history table.
+   * Verifies that Patient read returns a 200 and response when the beneficiary exists in the DB but
+   * has no {@link BeneficiaryHistory} records. Primarily this checks that the table joins do not
+   * cause any issue retrieving the patient when there is nothing found in the history table.
    */
   @Test
   public void testReadWhenNoHistoricalMbisExpect200() {
     // Load data without bene history
-    List<Object> loadedRecords =
-        ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    List<Object> loadedRecords = testUtils.loadData(List.of(StaticRifResource.SAMPLE_A_BENES));
     String patientId = testUtils.getPatientId(loadedRecords);
     String requestString = patientEndpoint + patientId;
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Patient"))
         .body("id", equalTo(patientId))
@@ -107,6 +119,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // we should have 3 entries, since we set page size to 3
@@ -143,6 +156,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     // Should return a 404
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
@@ -172,6 +186,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     // Should return a 404
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
@@ -213,6 +228,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     // Should return a 200 with the bene table data
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
         .body("entry.size()", equalTo(1))
@@ -249,6 +265,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     // Should return a 200 with the history+bene mbis
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
         .body("entry.size()", equalTo(1))
@@ -285,6 +302,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     // based on the inputs, we expect a single result
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
         .body("entry.size()", equalTo(1))
@@ -313,6 +331,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
         .body("total", equalTo(0))
@@ -333,6 +352,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
         .body("entry.size()", equalTo(1))
@@ -340,6 +360,26 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .body("entry.resource.identifier.value.flatten()", hasItem(currentMbi))
         // Check historical MBIs are returned too
         .body("entry.resource.identifier.value.flatten()", hasItems(historicalMbis.toArray()))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verifies that Patient searchByLogicalId returns a 200 and empty bundle for a {@link Patient}
+   * that does not exist in the DB.
+   */
+  @Test
+  public void testPatientByLogicalIdWhenUnknownBeneIdExpectEmptyBundle() {
+
+    String requestString = patientEndpoint + "?_id=99999999";
+
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        .body("total", equalTo(0))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -370,6 +410,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
       given()
           .spec(requestAuth)
+          .headers(headers)
           .expect()
           .body("resourceType", equalTo("Bundle"))
           .body("entry.size()", equalTo(1))
@@ -386,6 +427,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
       given()
           .spec(requestAuth)
+          .headers(headers)
           .expect()
           .body("resourceType", equalTo("Bundle"))
           .body("total", equalTo(0))
@@ -396,198 +438,14 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that searching by a known existing part D contract number returns a 200 and the
-   * unhashed MBI values are returned by default.
-   */
-  @Test
-  public void testPatientByPartDContractExpectUnhashedMbis() {
-    Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
-    String contractId =
-        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
-    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
-    String requestString =
-        patientEndpoint
-            + "?_has:Coverage.extension="
-            + contractId
-            + "&_has:Coverage.rfrncyr="
-            + refYear;
-
-    given()
-        .spec(requestAuth)
-        .expect()
-        .body("resourceType", equalTo("Bundle"))
-        .body("entry.size()", equalTo(1))
-        .body("entry.resource.id", hasItem(String.valueOf(beneficiary.getBeneficiaryId())))
-        // Check current MBI is returned
-        .body("entry.resource.identifier.value.flatten()", hasItem(currentMbi))
-        // Historical benes are not returned from contract search, since they are only
-        // added when searching by mbi hash. See R4PatientResourceProvider.queryDatabaseByHash
-        .statusCode(200)
-        .when()
-        .get(requestString);
-  }
-
-  /**
-   * Verifies that searching by a known existing part D contract number with paging requested
-   * returns a 200 as well as the expected paging links.
-   */
-  @Test
-  public void testPatientByPartDContractWhenPaginationExpectPagingLinks() {
-    ServerTestUtils.get()
-        .loadData(
-            Arrays.asList(
-                StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
-    String contractId =
-        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
-    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
-    String requestString =
-        patientEndpoint
-            + "?_has:Coverage.extension="
-            + contractId
-            + "&_has:Coverage.rfrncyr="
-            + refYear
-            + "&_count=1";
-
-    Response response =
-        given()
-            .spec(requestAuth)
-            .expect()
-            .body("resourceType", equalTo("Bundle"))
-            // Should match the paging size
-            .body("entry.size()", equalTo(1))
-            // Check pagination has the right number of links
-            .body("link.size()", equalTo(3))
-            /* Patient (specifically search by contract) uses different paging
-            than all other resources, due to using bene id cursors.
-            There is no "last" page or "previous", only first/next/self
-            */
-            .body("link.relation", hasItems("first", "next", "self"))
-            .statusCode(200)
-            .when()
-            .get(requestString);
-
-    // Try to get the next page
-    String nextLink = testUtils.getPaginationLink(response, "next");
-
-    // However, there is no next page. Patient contract pagination doesnt check this until its
-    // called
-    given()
-        .spec(requestAuth)
-        .urlEncodingEnabled(false)
-        .expect()
-        .body("resourceType", equalTo("Bundle"))
-        // Check there were no additional results
-        .body("$", not(hasKey("entry")))
-        // We should only have first and self link now
-        .body("link.size()", equalTo(2))
-        .body("link.relation", hasItems("first", "self"))
-        .statusCode(200)
-        .when()
-        .get(nextLink);
-  }
-
-  /**
-   * Regression test for part of BFD-525, which verifies that duplicate entries are not returned
-   * when 1) plain-text identifiers are requested, 2) a beneficiary has multiple historical
-   * identifiers, and 3) paging is requested. (This oddly specific combo had been bugged earlier and
-   * was quite tricky to resolve).
-   */
-  @Test
-  public void testPatientByPartDContractWithPagingAndMultipleMbisExpectNoDupes() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(
-                Arrays.asList(
-                    StaticRifResource.SAMPLE_A_BENES,
-                    StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
-    Beneficiary beneficiary = testUtils.getFirstBeneficiary(loadedRecords);
-    String contractId =
-        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
-    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
-    String requestString =
-        patientEndpoint
-            + "?_has:Coverage.extension="
-            + contractId
-            + "&_has:Coverage.rfrncyr="
-            + refYear
-            + "&_count=1";
-
-    given()
-        .spec(requestAuth)
-        .expect()
-        .body("resourceType", equalTo("Bundle"))
-        // Verify that the bene wasn't duplicated, per the bugfix
-        .body("entry.size()", equalTo(1))
-        .body("entry.resource.id", hasItem(String.valueOf(beneficiary.getBeneficiaryId())))
-        .body("entry.resource.identifier.value.flatten()", hasItem(currentMbi))
-        // Double-check that the mbi only appears once and is not duplicated
-        .body(
-            "entry[0].resource.identifier.findAll { it.system == '"
-                + TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED
-                + "' }",
-            hasSize(1))
-        .statusCode(200)
-        .when()
-        .get(requestString);
-  }
-
-  /**
-   * Regression test for part of BFD-525, which verifies that duplicate entries are not returned
-   * when 1) plain-text identifiers are requested, 2) a beneficiary has multiple historical
-   * identifiers, and 3) paging is not requested. (This oddly specific combo had been bugged earlier
-   * and was quite tricky to resolve).
-   */
-  @Test
-  public void testPatientByPartDContractWithNoPagingAndMultipleMbisExpectNoDupes() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(
-                Arrays.asList(
-                    StaticRifResource.SAMPLE_A_BENES,
-                    StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
-    Beneficiary beneficiary = testUtils.getFirstBeneficiary(loadedRecords);
-    String contractId =
-        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
-    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
-    String requestString =
-        patientEndpoint
-            + "?_has:Coverage.extension="
-            + contractId
-            + "&_has:Coverage.rfrncyr="
-            + refYear;
-
-    given()
-        .spec(requestAuth)
-        .expect()
-        .body("resourceType", equalTo("Bundle"))
-        // Verify that the bene wasn't duplicated, per the bugfix
-        .body("entry.size()", equalTo(1))
-        .body("entry.resource.id", hasItem(String.valueOf(beneficiary.getBeneficiaryId())))
-        .body("entry.resource.identifier.value.flatten()", hasItem(currentMbi))
-        // Double-check that the mbi only appears once and is not duplicated
-        .body(
-            "entry[0].resource.identifier.findAll { it.system == '"
-                + TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED
-                + "' }",
-            hasSize(1))
-        .statusCode(200)
-        .when()
-        .get(requestString);
-  }
-
-  /**
    * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} works as expected,
    * when an invalid year is specified.
    */
   @Test
   public void testPatientByPartDContractWithInvalidYearExpect400() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(
-                Arrays.asList(
-                    StaticRifResource.SAMPLE_A_BENES,
-                    StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
-    Beneficiary beneficiary = testUtils.getFirstBeneficiary(loadedRecords);
+    testUtils.loadData(
+        Arrays.asList(
+            StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
     String contractId =
         CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
     String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|ABC";
@@ -600,10 +458,120 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("issue.severity", hasItem("error"))
         .body("issue.diagnostics", hasItem("Contract year must be a number."))
         .statusCode(400)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} returns a 200 when no
+   * year is specified, as it will default to the current year.
+   *
+   * <p>Once AB2D has switched to always specifying the year, this needs to become an invalid
+   * request and this test will need to be updated to reflect that.
+   */
+  @Test
+  public void testPatientByPartDContractWithNoYearExpect200() {
+    // Load the data and get the bene id to check for later
+    String beneId =
+        String.valueOf(
+            testUtils.getFirstBeneficiary(testUtils.loadSampleAData()).getBeneficiaryId());
+
+    // First, adjust the bene's reference year in the DB so it matches this year.
+    testUtils.doTransaction(
+        (entityManager) -> {
+          CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+          CriteriaQuery<BeneficiaryMonthly> select = builder.createQuery(BeneficiaryMonthly.class);
+          select.from(BeneficiaryMonthly.class);
+          List<BeneficiaryMonthly> beneMonthlys = entityManager.createQuery(select).getResultList();
+
+          for (BeneficiaryMonthly beneMonthly : beneMonthlys) {
+            LocalDate yearMonth = beneMonthly.getYearMonth();
+            CriteriaUpdate<BeneficiaryMonthly> update =
+                builder.createCriteriaUpdate(BeneficiaryMonthly.class);
+            Root<BeneficiaryMonthly> beneMonthlyRoot = update.from(BeneficiaryMonthly.class);
+            update.set(
+                BeneficiaryMonthly_.yearMonth,
+                LocalDate.of(
+                    Year.now().getValue(), yearMonth.getMonthValue(), yearMonth.getDayOfMonth()));
+            update.where(
+                builder.equal(
+                    beneMonthlyRoot.get(BeneficiaryMonthly_.parentBeneficiary),
+                    beneMonthly.getParentBeneficiary()),
+                builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth));
+
+            entityManager.createQuery(update).executeUpdate();
+          }
+        });
+
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
+    String requestString = patientEndpoint + "?_has:Coverage.extension=" + contractId;
+
+    // Verify that it found the expected bene and got a result
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        .body("entry.size()", equalTo(1))
+        .body("entry[0].resource.id", equalTo(beneId))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} returns an empty
+   * bundle when an empty contract is searched for.
+   */
+  @Test
+  public void testPatientByPartDContractWithEmptyContractExpectEmptyBundle() {
+    testUtils.loadData(
+        Arrays.asList(
+            StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|A1234";
+    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2010";
+    String requestString =
+        patientEndpoint
+            + "?_has:Coverage.extension="
+            + contractId
+            + "&_has:Coverage.rfrncyr="
+            + refYear;
+
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /** Verify that Patient returns a 200 with paging links when paging is requested. */
+  @Test
+  public void testPatientByLogicalIdWithPagingExpect200WithPages() {
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = patientEndpoint + "?_id=" + patientId + "&_count=1";
+
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        // Should match the paging size
+        .body("entry.size()", equalTo(1))
+        // Check pagination has the right number of links
+        .body("link.size()", equalTo(3))
+        // Patient paging for non-contract works the same between v1/v2.
+        .body("link.relation", hasItems("first", "last", "self"))
+        .statusCode(200)
         .when()
         .get(requestString);
   }
@@ -619,6 +587,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("issue.severity", hasItem("error"))
         .body(
@@ -641,6 +610,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("issue.severity", hasItem("error"))
         .body(
@@ -662,6 +632,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
         .body("entry.size()", equalTo(1))
@@ -684,6 +655,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("total", equalTo(0))
         .statusCode(200)
@@ -695,6 +667,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     given()
         .spec(requestAuth)
+        .headers(headers)
         .expect()
         .body("total", equalTo(0))
         .statusCode(200)
@@ -708,16 +681,15 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
    *
    * @return the list of loaded records
    */
-  private List<Object> loadDataWithAdditionalBeneHistory() {
+  protected List<Object> loadDataWithAdditionalBeneHistory() {
 
     List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        testUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     // load additional Beneficiary and Beneficiary History records
     loadedRecords.addAll(
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_HICN_MULT_BENES.getResources())));
+        testUtils.loadData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_HICN_MULT_BENES.getResources())));
 
     return loadedRecords;
   }
@@ -733,7 +705,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
    * @param loadedRecords the loaded records to check for the mbi
    * @return the mbi hash, or an exception if no mbi was found that matched the input
    */
-  private String getMbiHash(
+  protected String getMbiHash(
       String unhashedMbiValue, boolean useMbiHashFromBeneHistory, List<Object> loadedRecords) {
 
     if (useMbiHashFromBeneHistory) {
