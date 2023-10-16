@@ -76,7 +76,7 @@ resource "aws_instance" "this" {
   }
 
   root_block_device {
-    tags                  = merge(local.default_tags, { snapshot = "true" }) # TODO: Consider removing the tag from migrator instances
+    tags                  = local.default_tags
     volume_type           = "gp2"
     volume_size           = local.volume_size
     delete_on_termination = true
