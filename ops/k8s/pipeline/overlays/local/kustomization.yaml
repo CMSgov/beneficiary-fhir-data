@@ -8,9 +8,9 @@ resources:
 - ../../base
 
 secretGenerator:
-- name: migrator-config
+- name: pipeline-config
   envs:
-  - migrator-config.env
+  - pipeline-config.env
 
 patchesStrategicMerge:
-- migrator-config.yaml
+- pipeline-config.yaml

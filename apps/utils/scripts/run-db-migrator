@@ -86,7 +86,7 @@ Runs BFD database migrator.  Use command line options to change behaviors.
 $script_name [options]
 -d db_host[:db_port]  Name of database host.  Optional :n uses port n.
 -i image_tag          Runs the migrator as a containing using the image with given tag.
--k                    Run using kubernetes (must run from ops/k8s directory).
+-k                    Run using kubernetes (using ops/k8s).
 -l localstack_ip      Localstack IP address (for bridge networking).
 -x                    Do not install latest version before running.
 -z                    Enable debugger support but start immediately.

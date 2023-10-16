@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pipeline
+spec:
+  template:
+    spec:
+      containers:
+      - name: pipeline
+        image: bfd-pipeline-app:1.0.0-SNAPSHOT
+        args:
+          - "-Dorg.jboss.logging.provider=slf4j"
+      restartPolicy: Never
+  backoffLimit: 4
