@@ -34,6 +34,9 @@ repo_dir=$HOME/.m2/repository
 # Maximum heap size to use when running
 max_heap=512m
 
+# Location of kubernetes configurations.
+kubernetes_root=$BFD_PATH/ops/k8s
+
 if [[ ! -d $project_dir ]] ; then
   echo ERROR: $project_dir does not exist. 1>&2
   echo Please set BFD_PATH to the root of the BFD source tree. 1>&2
@@ -73,6 +76,7 @@ install=true
 image_tag=
 image_name=bfd-db-migrator
 localstack_ip=localhost
+kubernetes=false
 
 usage() {
   script_name=`basename $0`
@@ -82,6 +86,7 @@ Runs BFD database migrator.  Use command line options to change behaviors.
 $script_name [options]
 -d db_host[:db_port]  Name of database host.  Optional :n uses port n.
 -i image_tag          Runs the migrator as a containing using the image with given tag.
+-k                    Run using kubernetes (must run from ops/k8s directory).
 -l localstack_ip      Localstack IP address (for bridge networking).
 -x                    Do not install latest version before running.
 -z                    Enable debugger support but start immediately.
@@ -93,7 +98,7 @@ Option defaults:
 EOF
 }
 
-while getopts "d:i:l:xzZh" option ; do
+while getopts "d:i:kl:xzZh" option ; do
   case $option in
   d) IFS=':' read h p <<<"$OPTARG"
      db_host=${h:=$db_host}
@@ -101,6 +106,7 @@ while getopts "d:i:l:xzZh" option ; do
      unset h p
      ;;
   i) image_tag=$OPTARG ; install=false ;;
+  k) kubernetes=true ; install=false ; db_host=postgres ;;
   l) localstack_ip=$OPTARG ;;
   x) install=false ;;
   z) debug_enabled=true ;;
@@ -131,7 +137,8 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
 {
   "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
 }
-EOF)
+EOF
+)
   export DB_MIGRATOR_SQS_QUEUE=migrator-status
   echo "ensuring migrator progress queue exists in SQS"
   aws --endpoint-url=$AWS_ENDPOINT sqs create-queue --queue-name=$DB_MIGRATOR_SQS_QUEUE
@@ -227,7 +234,16 @@ classpath="${jar_file}:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.migrator.app.MigratorApp"
 [ -n "${JAVA_HOME}" ] && java=${JAVA_HOME}/bin/java || java=java
 
-if [[ x$image_tag = x ]] ; then
+if [[ x$kubernetes = xtrue ]] ; then
+  cd $kubernetes_root
+  if [[ ! -r migrator/overlays/local/kustomization.yaml ]] ; then
+    echo ERROR: run this script from inside the ops/k8s directory 1>&2
+    exit 1
+  fi
+  echo running kubernetes job
+  kubectl delete -k migrator/overlays/local || true
+  kubectl apply -k migrator/overlays/local
+elif [[ x$image_tag = x ]] ; then
   export CLASSPATH="$classpath"
   exec $java $ARGS $mainClass
 else
