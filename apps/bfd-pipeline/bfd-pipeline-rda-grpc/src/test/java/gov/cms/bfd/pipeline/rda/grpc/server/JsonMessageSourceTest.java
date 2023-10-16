@@ -62,6 +62,7 @@ public class JsonMessageSourceTest {
       }
       """
           .replaceAll("\n", "");
+
   /** Sample claim 2, in json format. */
   private static final String CLAIM_2 =
       """

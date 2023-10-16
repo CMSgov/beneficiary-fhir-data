@@ -63,16 +63,22 @@ import org.mockito.quality.Strictness;
 public final class DMEClaimTransformerV2Test {
   /** The parsed claim used to generate the EOB and for validating with. */
   DMEClaim claim;
+
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
+
   /** The transformer under test. */
   DMEClaimTransformerV2 dmeClaimTransformer;
+
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** The mock metric registry. */
   @Mock MetricRegistry mockMetricRegistry;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 

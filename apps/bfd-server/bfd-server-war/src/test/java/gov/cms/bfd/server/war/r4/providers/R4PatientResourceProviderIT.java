@@ -66,16 +66,22 @@ public final class R4PatientResourceProviderIT {
 
   /** The Metric registry. */
   @Mock private MetricRegistry metricRegistry;
+
   /** The Loaded filter manager. */
   @Mock private LoadedFilterManager loadedFilterManager;
+
   /** The mock entity manager for mocking database calls. */
   @Mock private EntityManager entityManager;
+
   /** The Beneficiary transformer. */
   private BeneficiaryTransformerV2 beneficiaryTransformer;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
+
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
 

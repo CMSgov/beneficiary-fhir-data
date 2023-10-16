@@ -34,8 +34,10 @@ public final class DataSetQueue {
 
   /** The metric registry. */
   private final MetricRegistry appMetrics;
+
   /** The extraction options. */
   private final ExtractionOptions options;
+
   /** The S3 task manager. */
   private final S3TaskManager s3TaskManager;
 

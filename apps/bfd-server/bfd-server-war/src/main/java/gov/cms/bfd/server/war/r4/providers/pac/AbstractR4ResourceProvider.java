@@ -71,6 +71,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   /** The metric registry. */
   private final MetricRegistry metricRegistry;
+
   /** The samhsa matcher. */
   private final R4ClaimSamhsaMatcher samhsaMatcher;
 
@@ -91,6 +92,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   /** The fiss transformer. */
   private final ResourceTransformer<T> fissTransformer;
+
   /** The mcs transformer. */
   private final ResourceTransformer<T> mcsTransformer;
 
@@ -460,8 +462,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
     /** Indicates if the given MBI of the search request was hashed. */
     private final boolean isHashed;
+
     /** Indicates if SAMHSA data should be excluded from the bundle results. */
     private final boolean excludeSamhsa;
+
     /** Indicates if the tax numbers should be included in the bundle results. */
     private final boolean includeTaxNumbers;
 

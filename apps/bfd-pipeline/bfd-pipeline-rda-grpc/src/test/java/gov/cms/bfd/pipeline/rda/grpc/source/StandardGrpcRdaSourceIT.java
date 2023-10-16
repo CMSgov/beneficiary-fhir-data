@@ -90,6 +90,7 @@ public class StandardGrpcRdaSourceIT {
       }
       """
           .replaceAll("\n", "");
+
   /** Example rejected claim. */
   private static final String SOURCE_CLAIM_2 =
       """
@@ -137,6 +138,7 @@ public class StandardGrpcRdaSourceIT {
       }
       """
           .replaceAll("\n", "");
+
   /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
@@ -190,6 +192,7 @@ public class StandardGrpcRdaSourceIT {
           + "  \"sequenceNumber\" : 1,\n"
           + "  \"totalChargeAmount\" : 3.75\n"
           + "}";
+
   /** Example rejected claim. */
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
@@ -242,17 +245,23 @@ public class StandardGrpcRdaSourceIT {
 
   /** Clock for creating for consistent values in JSON (2021-06-03T18:02:37Z). */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+
   /** The test hasher. */
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(5, "pepper-pepper-pepper"));
+
   /** The transformer to create results for correctness verification. */
   private final FissClaimTransformer transformer =
       new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
+
   /** The stream caller for calling the service. */
   private final FissClaimStreamCaller streamCaller = new FissClaimStreamCaller();
+
   /** The test metrics. */
   private MeterRegistry appMetrics;
+
   /** The json sink. */
   private JsonCaptureSink sink;
+
   /** The RdaVersion to require. */
   private RdaVersion rdaVersion;
 
@@ -460,6 +469,7 @@ public class StandardGrpcRdaSourceIT {
   private class JsonCaptureSink implements RdaSink<FissClaimChange, RdaChange<RdaFissClaim>> {
     /** The values being written. */
     private final List<String> values = new ArrayList<>();
+
     /** The mapper for the json mapping config. */
     private final ObjectMapper mapper;
 

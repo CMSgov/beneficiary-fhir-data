@@ -38,13 +38,16 @@ public final class CoverageTransformerV2Test {
 
   /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** The beneficiary parsed from SAMPLE_A data. */
   private static Beneficiary beneficiary = null;
+
   /**
    * The current medicare segment. TODO: Should likely be moved to a local var and passed around as
    * needed.
    */
   private static MedicareSegment currSegment = null;
+
   /**
    * Coverage being tested. TODO: Should likely be moved to a local var and passed around as needed
    * to avoid cross-pollution between tests.

@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class ClaimDaoIT {
   /** Test utils. */
   private static final RDATestUtils testUtils = new RDATestUtils();
+
   /** The test metric registry. */
   private final MetricRegistry metricRegistry = new MetricRegistry();
 
@@ -392,12 +393,16 @@ public class ClaimDaoIT {
   private static class ServiceDateQueryParam {
     /** Meaningful name for test case. Used for toString() method. */
     private final String testName;
+
     /** MBI hash value for {@link ClaimDaoIT#runMcsServiceDateQuery}. */
     private final String mbiHash;
+
     /** lastUpdatedParam value for {@link ClaimDaoIT#runMcsServiceDateQuery}. */
     @Nullable private final DateRangeParam lastUpdatedParam;
+
     /** serviceDateParam value for {@link ClaimDaoIT#runMcsServiceDateQuery}. */
     @Nullable private final DateRangeParam serviceDateParam;
+
     /** List of claimId values expected in the query result. */
     private final List<String> expectedClaimIds;
 

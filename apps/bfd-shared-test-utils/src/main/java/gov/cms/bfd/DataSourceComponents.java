@@ -15,8 +15,10 @@ import org.postgresql.ds.PGSimpleDataSource;
 public final class DataSourceComponents {
   /** The JDBC URL that should be used to connect to the test DB. */
   private final String url;
+
   /** The username that should be used to connect to the test DB. */
   private final String username;
+
   /** The password that should be used to connect to the test DB. */
   private final String password;
 

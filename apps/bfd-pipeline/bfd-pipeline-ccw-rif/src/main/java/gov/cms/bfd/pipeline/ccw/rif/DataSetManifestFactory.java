@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 public class DataSetManifestFactory {
   /** The {@link String} pipeline manifest XML Schema Definition (XSD) filename. */
   private static final String MANIFEST_XSD_FILENAME = "bfd-manifest.xsd";
+
   /** The {@link Schema} XML schema validator data stream. */
   private static Schema schema = null;
 

@@ -45,14 +45,19 @@ public final class Stu3EobSamhsaMatcherTest {
   // TODO complete and verify that these exactly match real values in our DB
   /** The SAMHSA CPT code. */
   public static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
+
   /** The SAMHSA ICD9 diagnosis code. */
   public static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
+
   /** The SAMHSA ICD9 procedure code. */
   public static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "9445";
+
   /** The SAMHSA ICD10 diagnosis code. */
   public static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
+
   /** The SAMHSA ICD10 procedure code. */
   public static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
+
   /** The SAMHSA DRG code. */
   public static final String SAMPLE_SAMHSA_DRG_CODE = "522";
 

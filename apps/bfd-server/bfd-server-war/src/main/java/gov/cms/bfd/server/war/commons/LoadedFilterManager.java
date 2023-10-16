@@ -55,8 +55,10 @@ public class LoadedFilterManager {
   public static class LoadedTuple {
     /** The id for the loaded file. */
     private long loadedFileId;
+
     /** The load start time for the loaded file. */
     private Instant firstUpdated;
+
     /** The load end time for the loaded file. */
     private Instant lastUpdated;
 

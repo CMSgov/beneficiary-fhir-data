@@ -52,6 +52,7 @@ class S3DaoIT extends AbstractLocalStackTest {
 
   /** Object we're testing. */
   private S3Dao s3Dao;
+
   /** Name of bucket created for each test. */
   private String bucket;
 

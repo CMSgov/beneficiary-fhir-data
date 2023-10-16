@@ -33,17 +33,22 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
   /** Represents a code that will match a samhsa ICD9 matcher. */
   private static final String ICD_9_DX_SAMHSA_CODE = "291.0";
+
   /** Represents a code that will match a samhsa ICD9 proc matcher. */
   private static final String ICD_9_PROC_SAMHSA_CODE = "94.45";
+
   /** Represents a code that will match a samhsa ICD10 matcher. */
   private static final String ICD_10_DX_SAMHSA_CODE = "F10.10";
+
   /** Represents a code that will match a samhsa ICD10 matcher. */
   private static final String ICD_10_PROC_SAMHSA_CODE = "HZ30ZZZ";
+
   /** Represents a code that will match a CPT samhsa matcher. */
   private static final String CPT_SAMHSA_CODE = "H0005";
 
   /** A date to use for ICD9 testing. */
   private static final LocalDate ICD_9_DATE = LocalDate.of(2000, 1, 1);
+
   /** A date to use for ICD10 testing. */
   private static final LocalDate ICD_10_DATE = LocalDate.of(2020, 1, 1);
 

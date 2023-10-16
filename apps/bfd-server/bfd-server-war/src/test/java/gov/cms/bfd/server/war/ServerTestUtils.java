@@ -95,6 +95,7 @@ public final class ServerTestUtils {
 
   /** The singleton {@link ServerTestUtils} instance to use everywhere. */
   private static ServerTestUtils SINGLETON;
+
   /** The server's base url. */
   private final String serverBaseUrl;
 

@@ -20,8 +20,10 @@ import java.util.Set;
 public class SimpleAuthorizationInterceptor implements ServerInterceptor {
   /** The authorization header name. */
   static final String AUTH_HEADER_NAME = "authorization";
+
   /** The authorization header prefix. */
   static final String AUTH_HEADER_PREFIX = "Bearer ";
+
   /** The metadata key. */
   static final Metadata.Key<String> METADATA_KEY =
       Metadata.Key.of(AUTH_HEADER_NAME, Metadata.ASCII_STRING_MARSHALLER);

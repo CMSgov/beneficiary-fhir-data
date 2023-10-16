@@ -40,10 +40,13 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
 
   /** A clock for generating timestamps. */
   private final Clock clock;
+
   /** The start of the sequence numbers. */
   private final Optional<Long> startingSequenceNumber;
+
   /** Expected time before RDA API server drops its connection when it has nothing to send. */
   private final long minIdleMillisBeforeConnectionDrop;
+
   /** The type of RDA API server to connect to. */
   private final RdaSourceConfig.ServerType serverType;
 

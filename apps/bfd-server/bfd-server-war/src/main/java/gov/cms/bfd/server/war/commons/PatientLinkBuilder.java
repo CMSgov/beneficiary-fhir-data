@@ -22,10 +22,13 @@ public final class PatientLinkBuilder implements LinkBuilder {
 
   /** The uri components. */
   private final UriComponents components;
+
   /** The count. */
   private final Integer count;
+
   /** The cursor value. */
   private final Long cursor;
+
   /** If there is another page for this link. */
   private final boolean hasAnotherPage;
 

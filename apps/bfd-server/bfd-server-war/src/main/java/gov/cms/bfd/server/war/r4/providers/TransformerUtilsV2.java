@@ -172,6 +172,7 @@ public final class TransformerUtilsV2 {
 
   /** Constant used to look up and identify an internal `contained` Organization resource. */
   private static final String PROVIDER_ORG_ID = "provider-org";
+
   /** Constant for finding a provider org reference. */
   private static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
 

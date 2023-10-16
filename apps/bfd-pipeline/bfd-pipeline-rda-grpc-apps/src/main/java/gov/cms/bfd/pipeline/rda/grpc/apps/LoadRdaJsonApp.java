@@ -161,41 +161,58 @@ public class LoadRdaJsonApp {
   private static class Config {
     /** The hash pepper. */
     private final byte[] hashPepper;
+
     /** The hash iterations. */
     private final int hashIterations;
+
     /** The database authentication type to use. */
     private final DatabaseOptions.AuthenticationType dbAuthType;
+
     /** The database url. */
     private final String dbUrl;
+
     /** The database user. */
     private final String dbUser;
+
     /** The database password. */
     private final String dbPassword;
+
     /**
      * Indicates the type of {@link AbstractRdaLoadJob.SinkTypePreference} to use when building
      * sinks.
      */
     private final AbstractRdaLoadJob.SinkTypePreference sinkTypePreference;
+
     /** The number of write threads. */
     private final int writeThreads;
+
     /** The batch size. */
     private final int batchSize;
+
     /** Whether to run the schema migration. */
     private final boolean runSchemaMigration;
+
     /** The RDA Version for the data to load. */
     private final String rdaVersion;
+
     /** The name of the FISS file to read from at the source. */
     private final Optional<File> fissFile;
+
     /** The starting FISS sequence number. */
     private final Optional<Long> startingFissSequenceNumber;
+
     /** The name of the MCS file to read from at the source. */
     private final Optional<File> mcsFile;
+
     /** The starting MCS sequence number. */
     private final Optional<Long> startingMcsSequenceNumber;
+
     /** The S3 region to use if the source is an S3 connection. */
     private final Optional<Region> awsRegion;
+
     /** The S3 bucket to use if the source is an S3 connection. */
     private final Optional<String> s3Bucket;
+
     /** Optional directory name within our S3 bucket. */
     private final Optional<String> s3Directory;
 

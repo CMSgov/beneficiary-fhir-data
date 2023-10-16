@@ -34,18 +34,25 @@ import org.mockito.quality.Strictness;
 public class TransactionManagerTest {
   /** Mock for the entity manager factory. */
   @Mock private EntityManagerFactory entityManagerFactory;
+
   /** Mock for the first created entity manager. */
   @Mock private EntityManager entityManager1;
+
   /** Mock for the second created entity manager. */
   @Mock private EntityManager entityManager2;
+
   /** Mock for the second created entity manager. */
   @Mock private EntityManager entityManager3;
+
   /** Mock for transactions within first entity manager. */
   @Mock private EntityTransaction transaction1;
+
   /** Mock for transactions within second entity manager. */
   @Mock private EntityTransaction transaction2;
+
   /** Mock for transactions within second entity manager. */
   @Mock private EntityTransaction transaction3;
+
   /** The {@link TransactionManager} being tested. */
   private TransactionManager transactionManager;
 

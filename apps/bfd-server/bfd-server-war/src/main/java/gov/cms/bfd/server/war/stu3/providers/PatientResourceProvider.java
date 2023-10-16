@@ -89,8 +89,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
   /** The Entity manager. */
   private EntityManager entityManager;
+
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
+
   /** The Loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
 

@@ -13,8 +13,10 @@ public final class MockDataSetMonitorListener implements DataSetMonitorListener 
 
   /** Tracks the number of events where no data was available; primarily used for testing. */
   private int noDataAvailableEvents = 0;
+
   /** The list of data available events. */
   private final List<RifFilesEvent> dataEvents = new LinkedList<>();
+
   /** The list of load error events. */
   final List<Throwable> errorEvents = new LinkedList<>();
 

@@ -456,20 +456,28 @@ public class AbstractTransformerV2 {
 
     /** The first name. */
     private final String firstName;
+
     /** The last name. */
     private final String lastName;
+
     /** The middle name. */
     private final String middleName;
+
     /** The date of birth. */
     private final LocalDate dob;
+
     /** The gender. */
     private final String gender;
+
     /** The map of gender strings to the enum values. */
     private final Map<String, Enumerations.AdministrativeGender> genderMap;
+
     /** The first name format. */
     private final String firstNameFormat;
+
     /** The middle name format. */
     private final String middleNameFormat;
+
     /** The last name format. */
     private final String lastNameFormat;
 

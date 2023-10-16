@@ -29,10 +29,13 @@ abstract class AbstractRandomClaimGenerator<T> {
    * letters like 'l').
    */
   private static final String ALPHA = "bcdfghjkmnpqrstvwxz";
+
   /** Numbers, zero through nine. */
   private static final String DIGIT = "1234567890";
+
   /** Aggregated sequence of letters and numbers. */
   private static final String ALNUM = ALPHA + DIGIT;
+
   /** The maximum number of days in the past that a random date value can be generated for. */
   private static final int MAX_DAYS_AGO = 180;
 

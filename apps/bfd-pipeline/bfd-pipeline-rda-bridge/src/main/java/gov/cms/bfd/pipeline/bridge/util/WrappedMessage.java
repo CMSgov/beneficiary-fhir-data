@@ -10,6 +10,7 @@ public class WrappedMessage {
 
   /** The currently stored claim still being processed. */
   private MessageOrBuilder message;
+
   /** Tracks the last line number processed so sequence order integrity can be verified. */
   private long lineNumber = 0;
 

@@ -75,8 +75,10 @@ import org.slf4j.LoggerFactory;
 /** Integration tests for {@link RifLoader}. */
 public final class RifLoaderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderIT.class);
+
   /** Represents using an idempotent strategy for the test. */
   private static final boolean USE_INSERT_IDEMPOTENT_STRATEGY = true;
+
   /** Represents using a non-idempotent strategy for the test. */
   private static final boolean USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY = false;
 

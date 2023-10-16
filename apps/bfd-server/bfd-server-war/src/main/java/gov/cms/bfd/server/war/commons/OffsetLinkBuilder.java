@@ -26,14 +26,19 @@ public final class OffsetLinkBuilder implements LinkBuilder {
 
   /** The page size for paging. */
   private final Optional<Integer> pageSize;
+
   /** The start index for paging. */
   private final Optional<Integer> startIndex;
+
   /** The server url base. */
   private final String serverBase;
+
   /** The resource to use with the base url. */
   private final String resource;
+
   /** The request details. */
   private final RequestDetails requestDetails;
+
   /**
    * The number of results to return during paging; the default of -1 returns the bundle size by
    * default.

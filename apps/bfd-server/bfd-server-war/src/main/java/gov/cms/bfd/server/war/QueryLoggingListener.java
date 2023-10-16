@@ -207,6 +207,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
 
     /** A unique identifier for this {@link QueryType}, suitable for use in logs and such. */
     private final String id;
+
     /**
      * The {@link Predicate} that should return <code>true</code> if a given {@link
      * QueryInfo#getQuery()} represents this {@link QueryType}.

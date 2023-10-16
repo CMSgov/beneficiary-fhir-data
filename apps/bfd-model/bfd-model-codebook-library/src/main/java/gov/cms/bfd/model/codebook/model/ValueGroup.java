@@ -28,6 +28,7 @@ public final class ValueGroup {
    * (which will only be the case for {@link Variable}s with a single {@link ValueGroup}).
    */
   private List<String> description;
+
   /** The mutable {@link List} of {@link Value}s in this {@link ValueGroup}. */
   private final List<Value> values;
 

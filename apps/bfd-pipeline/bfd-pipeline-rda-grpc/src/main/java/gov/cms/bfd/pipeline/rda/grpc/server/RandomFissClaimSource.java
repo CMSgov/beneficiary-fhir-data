@@ -16,10 +16,13 @@ import java.util.NoSuchElementException;
 public class RandomFissClaimSource implements MessageSource<FissClaimChange> {
   /** The random claim generator. */
   private final RandomFissClaimGenerator generator;
+
   /** The maximum number of claims to send. */
   private final long maxToSend;
+
   /** Used to generate timestamps. */
   private final Clock clock;
+
   /** The number of sent claims. */
   private long sent;
 

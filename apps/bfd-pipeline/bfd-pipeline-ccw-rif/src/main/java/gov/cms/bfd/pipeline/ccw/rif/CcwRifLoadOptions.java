@@ -12,8 +12,10 @@ public final class CcwRifLoadOptions {
 
   /** The data extraction options. */
   private final ExtractionOptions extractionOptions;
+
   /** The application load options. */
   private final LoadAppOptions loadOptions;
+
   /** Time between runs of the {@link CcwRifLoadJob}. Empty means to run exactly once. */
   private final Optional<Duration> runInterval;
 

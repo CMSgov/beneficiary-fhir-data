@@ -32,26 +32,37 @@ import org.slf4j.LoggerFactory;
 @AllArgsConstructor
 public final class PdfParser {
   private static final Logger LOGGER = LoggerFactory.getLogger(PdfParser.class);
+
   /** Primary prefix for various header field names. */
   public static final String FIELD_NAME_LABEL = "LABEL";
+
   /** Secondary prefix for various header field names. */
   private static final String FIELD_NAME_LABEL_ALT1 = "NAME";
+
   /** The 'description' header field name. */
   public static final String FIELD_NAME_DESCRIPTION = "DESCRIPTION";
+
   /** The 'short name' header field name. */
   public static final String FIELD_NAME_SHORT_NAME = "SHORT NAME";
+
   /** The 'long name' header field name. */
   public static final String FIELD_NAME_LONG_NAME = "LONG NAME";
+
   /** The 'type' header field name. */
   public static final String FIELD_NAME_TYPE = "TYPE";
+
   /** The 'length' header field name. */
   private static final String FIELD_NAME_LENGTH = "LENGTH";
+
   /** The 'source' header field name. */
   private static final String FIELD_NAME_SOURCE = "SOURCE";
+
   /** The 'values' header field name. */
   private static final String FIELD_NAME_VALUES = "VALUES";
+
   /** The 'code values' header field name. */
   private static final String FIELD_NAME_VALUES_ALT1 = "CODE VALUES";
+
   /** The 'comment' header field name. */
   private static final String FIELD_NAME_COMMENT = "COMMENT";
 

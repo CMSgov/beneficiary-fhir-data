@@ -56,17 +56,22 @@ import org.mockito.quality.Strictness;
 public class AbstractClaimRdaSinkTest {
   /** Test value for version. */
   private static final String VERSION = "version";
+
   /** The clock used for creating fixed timestamps. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
 
   /** The mock datasource. */
   @Mock private HikariDataSource dataSource;
+
   /** The mock entity manager factory. */
   @Mock private EntityManagerFactory entityManagerFactory;
+
   /** The mock entity manager. */
   @Mock private EntityManager entityManager;
+
   /** The mock entity transaction. */
   @Mock private EntityTransaction transaction;
+
   /** The sink under test. */
   private TestClaimRdaSink sink;
 

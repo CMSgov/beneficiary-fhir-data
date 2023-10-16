@@ -30,8 +30,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class GrpcResponseStreamTest {
   /** Mock iterator used by the response stream. */
   @Mock private Iterator<Integer> iterator;
+
   /** Mock client call used by the response stream. */
   @Mock private ClientCall<Integer, Integer> clientCall;
+
   /** The response stream under test. */
   private GrpcResponseStream<Integer> stream;
 

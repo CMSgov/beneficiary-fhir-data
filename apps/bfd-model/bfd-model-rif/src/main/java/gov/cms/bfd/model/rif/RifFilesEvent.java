@@ -14,8 +14,10 @@ import java.util.List;
 public final class RifFilesEvent {
   /** The timestamp that this event was fired at. */
   private final Instant timestamp;
+
   /** The {@link RifFileEvent}s contained in this {@link RifFilesEvent}. */
   private final List<RifFileEvent> fileEvents;
+
   /** boolean indicator denoting if data is synthetic (true). */
   private final boolean syntheticData;
 

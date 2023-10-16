@@ -205,6 +205,7 @@ public class JoinBean implements ModelBean {
 
     /** The annotation class to use when adding the join annotation to the entity. */
     @Getter private final ClassName annotationClass;
+
     /** Whether the join has a single value or multiple values. */
     @Getter private final boolean multiValue;
 
@@ -228,8 +229,10 @@ public class JoinBean implements ModelBean {
     List(ClassName.get(List.class), ClassName.get(LinkedList.class)),
     /** Set. */
     Set(ClassName.get(Set.class), ClassName.get(HashSet.class));
+
     /** Collection interface used to declare the field in the entity class. */
     @Getter private final ClassName interfaceName;
+
     /** Collection class used to create an instance for the field in the entity class. */
     @Getter private final ClassName className;
   }

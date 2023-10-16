@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 public class McsClaimStreamCallerIT {
   /** Clock for creating for consistent values in JSON (2021-06-03T18:02:37Z). */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+
   /** The transformer to create results for correctness verification. */
   private final McsClaimTransformer transformer =
       new McsClaimTransformer(

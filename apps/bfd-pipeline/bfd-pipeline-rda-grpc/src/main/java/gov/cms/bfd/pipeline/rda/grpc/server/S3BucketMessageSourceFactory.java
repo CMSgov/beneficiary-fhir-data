@@ -33,11 +33,13 @@ import lombok.ToString;
 public class S3BucketMessageSourceFactory<T> {
   /** Used to access data from S3 bucket. */
   private final S3DirectoryDao s3Dao;
+
   /**
    * A function that, when passed an S3 object key, produces a {@link MessageSource} that parses the
    * S3 object to produce messages.
    */
   private final Function<String, MessageSource<T>> s3ObjectParser;
+
   /** The pattern to use to find files from S3. */
   private final Pattern matchPattern;
 
@@ -127,6 +129,7 @@ public class S3BucketMessageSourceFactory<T> {
   private class MultiS3MessageSource implements MessageSource<T> {
     /** The list of S3 files yet to be downloaded. */
     private final List<FileEntry> remaining;
+
     /** The current message source stream. */
     private MessageSource<T> current;
 
@@ -201,8 +204,10 @@ public class S3BucketMessageSourceFactory<T> {
   static class FileEntry implements Comparable<FileEntry> {
     /** The file's S3 key. */
     private final String objectKey;
+
     /** The minimum sequence number. */
     private final long minSequenceNumber;
+
     /** The maximum sequence number. */
     private final long maxSequenceNumber;
 

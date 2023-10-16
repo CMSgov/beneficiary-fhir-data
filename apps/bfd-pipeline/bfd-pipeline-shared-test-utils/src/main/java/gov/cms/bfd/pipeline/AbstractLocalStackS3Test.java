@@ -17,8 +17,10 @@ import software.amazon.awssdk.regions.Region;
 public abstract class AbstractLocalStackS3Test extends AbstractLocalStackTest {
   /** Configuration settings to connect to localstack container. */
   protected S3ClientConfig s3ClientConfig;
+
   /** Factory to create clients connected to localstack container. */
   protected S3ClientFactory s3ClientFactory;
+
   /** A {@link S3Dao} connected to the localstack container for use in test methods. */
   protected S3Dao s3Dao;
 

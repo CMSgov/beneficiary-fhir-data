@@ -30,6 +30,7 @@ public class RdaServerJob implements PipelineJob {
 
   /** The server configuration. */
   private final Config config;
+
   /** Keeps track of how many servers are running, primarily for integration testing. */
   private final AtomicInteger running;
 
@@ -129,6 +130,7 @@ public class RdaServerJob implements PipelineJob {
      * determines which mode the server will use.
      */
     private final ServerMode serverMode;
+
     /**
      * Name given to the in-process gRPC server. Clients use this name to open a ManagedChannel to
      * the server.

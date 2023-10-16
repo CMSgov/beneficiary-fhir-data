@@ -137,6 +137,7 @@ public class ValidationUtil {
   private static class ValidationPayload {
     /** Used to look up other objects in the data model. */
     private final RootBean root;
+
     /**
      * Used to provide context to validator about which mapping the bean being validated belongs to.
      */
@@ -149,6 +150,7 @@ public class ValidationUtil {
   public static class ValidationResult {
     /** The mapping that was validated. */
     private final MappingBean mapping;
+
     /** Set containing a message for every error that was found. Empty if none were found. */
     private final Set<String> errors;
 

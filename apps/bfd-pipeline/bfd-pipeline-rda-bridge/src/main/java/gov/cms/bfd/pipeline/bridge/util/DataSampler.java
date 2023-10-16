@@ -27,6 +27,7 @@ public class DataSampler<T> implements Iterable<T> {
 
   /** Sample proportions are sets of ids and a normalized proportion of the data. */
   private final Map<Integer, Float> sampleProportions;
+
   /** The maximum value allowed allowed for the sampler id. */
   private final int maxValues;
 
@@ -144,6 +145,7 @@ public class DataSampler<T> implements Iterable<T> {
      * store.
      */
     private int maxValues = Integer.MAX_VALUE;
+
     /** Defines the sample data values the {@link DataSampler} will be configured to store. */
     private final Map<Integer, Float> sampleProportions = new HashMap<>();
 
@@ -199,6 +201,7 @@ public class DataSampler<T> implements Iterable<T> {
 
     /** Map of iterators used during the Data Sampler for FISS and MCS data. */
     private final Iterator<Set<T>> mapIterator;
+
     /** The Curret Iterator for the mapIterator for FISS and MCS data. */
     private Iterator<T> currentSetIterator;
 

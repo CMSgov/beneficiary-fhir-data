@@ -173,10 +173,13 @@ public class S3BucketMessageSourceFactoryTest {
 
     /** The filename the mock message source is pretending to use. */
     @Getter private final String filename;
+
     /** The max sequence value. */
     private final long maxValue;
+
     /** The current sequence value. */
     private long currentValue;
+
     /** Represents if the source is closed. */
     @Getter private boolean closed;
 

@@ -10,8 +10,10 @@ public final class RifFileEvent {
    * RifFileRecords}.
    */
   private final MetricRegistry eventMetrics;
+
   /** The {@link RifFilesEvent} that this {@link RifFileEvent} is a part of. */
   private final RifFilesEvent parentFilesEvent;
+
   /** The {@link RifFile} represented by this {@link RifFileEvent}. */
   private final RifFile file;
 

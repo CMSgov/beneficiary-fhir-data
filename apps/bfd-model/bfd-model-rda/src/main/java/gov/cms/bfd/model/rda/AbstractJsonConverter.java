@@ -37,6 +37,7 @@ public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
 
   /** The class of objects being converted to and from JSON. */
   private final Class<T> klass;
+
   /** Function used to create new instances if the value in the database is null. */
   private final Supplier<T> defaultInstanceFactory;
 

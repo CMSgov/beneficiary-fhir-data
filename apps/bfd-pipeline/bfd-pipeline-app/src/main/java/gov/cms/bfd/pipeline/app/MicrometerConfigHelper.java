@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 public class MicrometerConfigHelper {
   /** Maps property names to {@link MicrometerConfigHelper.PropertyMapping}s. */
   private final Map<String, PropertyMapping> propertiesByName;
+
   /**
    * Maps names to values in some way. Usually just {@code System#getenv} but in tests might be
    * {@code Map#get}.
@@ -125,8 +126,10 @@ public class MicrometerConfigHelper {
   public static class PropertyMapping {
     /** Property name used by micrometer config objects. */
     private final String propertyName;
+
     /** Lookup (env var) name used to look up the object. */
     private final String lookupVariableName;
+
     /** Default value (if any) for value if not found during lookup. */
     private final Optional<String> defaultValue;
   }

@@ -27,10 +27,13 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
 
   /** Metrics for this class. */
   private final MetricRegistry appMetrics;
+
   /** The application's error handler. */
   private final Consumer<Throwable> errorHandler;
+
   /** Handles processing of new RIF files. */
   private final RifFilesProcessor rifProcessor;
+
   /** Loads RIF files into the database. */
   private final RifLoader rifLoader;
 

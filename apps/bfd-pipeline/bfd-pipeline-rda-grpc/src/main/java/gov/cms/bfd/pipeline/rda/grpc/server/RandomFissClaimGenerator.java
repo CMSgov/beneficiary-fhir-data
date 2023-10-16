@@ -46,97 +46,127 @@ import java.util.List;
 public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissClaim> {
   /** The max proc codes to generate. */
   private static final int MAX_PROC_CODES = 7;
+
   /** The max diagnosis codes to generate. */
   private static final int MAX_DIAG_CODES = 7;
+
   /** The max payers to generate. */
   private static final int MAX_PAYERS = 5;
+
   /** The max audits to generate. */
   private static final int MAX_AUDITS = 20;
+
   /** The max revenue lines to generate. */
   private static final int MAX_REVENUE_LINES = 10;
+
   /** A list of the enums for the fiss claim statuses. */
   private static final List<FissClaimStatus> FissClaimStatusEnums =
       enumValues(FissClaimStatus.values());
+
   /** A list of the enums for the fiss processing types. */
   private static final List<FissProcessingType> FissProcessingTypeEnums =
       enumValues(FissProcessingType.values());
+
   /** A list of the enums for the fiss current locations. */
   private static final List<FissCurrentLocation2> FissCurrentLocation2Enums =
       enumValues(FissCurrentLocation2.values());
+
   /** A list of the enums for the fiss admission diagnosis indicators. */
   private static final List<FissDiagnosisPresentOnAdmissionIndicator>
       FissDiagnosisPresentOnAdmissionIndicatorEnums =
           enumValues(FissDiagnosisPresentOnAdmissionIndicator.values());
+
   /** A list of the enums for the fiss bill facility types. */
   private static final List<FissBillFacilityType> FissBillFacilityTypeEnums =
       enumValues(FissBillFacilityType.values());
+
   /** A list of the enums for the fiss bill classifications. */
   private static final List<FissBillClassification> FissBillClassificationEnums =
       enumValues(FissBillClassification.values());
+
   /** A list of the enums for the fiss bill classification for clinics. */
   private static final List<FissBillClassificationForClinics>
       FissBillClassificationForClinicsEnums = enumValues(FissBillClassificationForClinics.values());
+
   /** A list of the enums for the fiss bill classification for special facilities. */
   private static final List<FissBillClassificationForSpecialFacilities>
       FissBillClassificationForSpecialFacilitiesEnums =
           enumValues(FissBillClassificationForSpecialFacilities.values());
+
   /** A list of the enums for the fiss bill frequency. */
   private static final List<FissBillFrequency> FissBillFrequencyEnums =
       enumValues(FissBillFrequency.values());
+
   /** A list of the enums for the fiss payers codes. */
   private static final List<FissPayersCode> FissPayersCodeEnums =
       enumValues(FissPayersCode.values());
+
   /** A list of the enums for the fiss release of information. */
   private static final List<FissReleaseOfInformation> FissReleaseOfInformationEnums =
       enumValues(FissReleaseOfInformation.values());
+
   /** A list of the enums for the fiss assignment of benefits indicators. */
   private static final List<FissAssignmentOfBenefitsIndicator>
       FissAssignmentOfBenefitsIndicatorEnums =
           enumValues(FissAssignmentOfBenefitsIndicator.values());
+
   /** A list of the enums for the fiss patient relationship codes. */
   private static final List<FissPatientRelationshipCode> FissPatientRelationshipCodeEnums =
       enumValues(FissPatientRelationshipCode.values());
+
   /** A list of the enums for the fiss beneficiary sexes. */
   private static final List<FissBeneficiarySex> FissBeneficiarySexEnums =
       enumValues(FissBeneficiarySex.values());
+
   /** A list of the enums for the fiss adjustment requestor codes. */
   private static final List<FissAdjustmentRequestorCode> FissAdjustmentRequestorCodeEnums =
       enumValues(FissAdjustmentRequestorCode.values());
+
   /** A list of the enums for the fiss adjustment codes. */
   private static final List<FissCancelAdjustmentCode> FissCancelAdjustmentCodeEnums =
       enumValues(FissCancelAdjustmentCode.values());
+
   /** A list of the enums for the fiss sources of admission. */
   private static final List<FissSourceOfAdmission> FissSourceOfAdmissionEnums =
       enumValues(FissSourceOfAdmission.values());
+
   /** A list of the enums for the fiss physician flags. */
   private static final List<FissPhysicianFlag> FissPhysicianFlagEnums =
       enumValues(FissPhysicianFlag.values());
+
   /** A list of the enums for the fiss new health insurance claim number indicators. */
   private static final List<FissProcessNewHealthInsuranceClaimNumberIndicator>
       FissProcessNewHealthInsuranceClaimNumberIndicatorEnums =
           enumValues(FissProcessNewHealthInsuranceClaimNumberIndicator.values());
+
   /** A list of the enums for the fiss claim type indicators. */
   private static final List<FissClaimTypeIndicator> FissClaimTypeIndicatorEnums =
       enumValues(FissClaimTypeIndicator.values());
+
   /** A list of the enums for the fiss repository indicators. */
   private static final List<FissRepositoryIndicator> FissRepositoryIndicatorEnums =
       enumValues(FissRepositoryIndicator.values());
+
   /** A list of the enums for the fiss health insurance claim number / medicare bene identifiers. */
   private static final List<FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier>
       FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifierEnums =
           enumValues(FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.values());
+
   /** A list of the enums for the fiss adjustment medicare bene id indicators. */
   private static final List<FissAdjustmentMedicareBeneficiaryIdentifierIndicator>
       FissAdjustmentMedicareBeneficiaryIdentifierIndicatorEnums =
           enumValues(FissAdjustmentMedicareBeneficiaryIdentifierIndicator.values());
+
   /** A list of the enums for the fiss non bill rev codes. */
   private static final List<FissNonBillRevCode> FissNonBillRevCodeEnums =
       enumValues(FissNonBillRevCode.values());
 
   /** Max length of a FISS claim id. */
   private static final int FissClaimIdLength = 32;
+
   /** Max length of a MBI. */
   private static final int MbiLength = 11;
+
   /** Field length used when forcing a transformation error in a claim. */
   @VisibleForTesting static final int ForcedErrorFieldLength = 50;
 

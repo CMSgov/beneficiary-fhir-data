@@ -69,18 +69,25 @@ import org.mockito.quality.Strictness;
 public final class HospiceClaimTransformerV2Test {
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob = null;
+
   /** The parsed claim used to generate the EOB and for validating with. */
   HospiceClaim claim = null;
+
   /** The transformer under test. */
   HospiceClaimTransformerV2 hospiceClaimTransformer;
+
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** The mock metric registry. */
   @Mock MetricRegistry mockMetricRegistry;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
+
   /**
    * Generates the Claim object to be used in multiple tests.
    *
