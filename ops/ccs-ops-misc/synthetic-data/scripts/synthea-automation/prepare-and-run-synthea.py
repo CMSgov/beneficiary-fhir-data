@@ -61,6 +61,7 @@ def validate_and_run(args):
 
     generated_benes = args[2]
     future_months = int(args[3])
+    
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
     
@@ -78,6 +79,17 @@ def validate_and_run(args):
         sys.exit(1)
     
     end_state_properties_file = read_file_lines(end_state_file_path)
+    
+    ## If contract target is passed/set, add a line to replace the synthea properties:
+    ## exporter.bfd.partd_contract_start and exporter.bfd.partd_contract_count
+    if len(args) > 4:
+        contract_target = args[4]
+        print("Generating using partD contract: " + contract_target)
+        end_state_properties_file.append("exporter.bfd.partd_contract_start=" + contract_target)
+        end_state_properties_file.append("exporter.bfd.partd_contract_count=1")
+    else:
+        print("No partD contract target specified, using default")
+    
     update_property_file(end_state_properties_file, synthea_prop_filepath)
     print("Updated synthea properties")
     
