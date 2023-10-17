@@ -10,6 +10,6 @@
         <ignoreVersion type="regex">.*.Final</ignoreVersion>
         <ignoreVersion type="regex">.*CR.</ignoreVersion>
         <ignoreVersion type="regex">.*[rR][cC]*.*</ignoreVersion>
-        <ignoreVersion type="regex">.*/.*-M\d+/*</ignoreVersion>
+        <ignoreVersion type="regex">.*-M\d+</ignoreVersion>
     </ignoreVersions>
 </ruleset>

@@ -84,7 +84,7 @@
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
         <micrometer.version>1.11.4</micrometer.version>
         <metrics.version>4.2.21</metrics.version>
-        <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
+        <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.21.1</aws-java-sdk-bom.version>
         <aws.crt.version>0.27.3</aws.crt.version>
@@ -128,7 +128,7 @@
 
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logback.json.classic.version>0.1.5</logback.json.classic.version>
-        <mockito.version>5.5.0</mockito.version>
+        <mockito.version>5.6.0</mockito.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
         <rest-assured.version>5.3.2</rest-assured.version>
         <assertj.version>3.24.2</assertj.version>
@@ -137,7 +137,7 @@
         <hsqldb.version>2.7.2</hsqldb.version>
         <slf4j.version>2.0.9</slf4j.version>
         <hikari.version>5.0.1</hikari.version>
-        <flyway.version>9.22.2</flyway.version>
+        <flyway.version>9.22.3</flyway.version>
         <newrelic.agent.version>8.6.0</newrelic.agent.version>
         <checkstyle.version>10.12.4</checkstyle.version>
         <checkstyle.plugin.version>3.3.0</checkstyle.plugin.version>
@@ -159,8 +159,8 @@
         <!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
         <jetty.version>10.0.16</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
-        <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.0.0-M9</maven.failsafe.plugin.version>
+        <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
         <datasource-proxy.version>1.9</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
         <org.apache.spark.version>3.5.0</org.apache.spark.version>
@@ -294,12 +294,6 @@
                 <version>${flyway.version}</version>
             </dependency>
             <dependency>
-                <!-- Used to create mock objects for unit tests. -->
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-inline</artifactId>
                 <version>${mockito-inline.version}</version>
@@ -340,12 +334,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <!-- Adds convenience features for working with mocks in tests -->
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-junit-jupiter</artifactId>
-                <version>${mockito.version}</version>
             </dependency>
             <dependency>
                 <!-- An implementation of the Log4J API that routes everything through
@@ -715,7 +703,7 @@
                             <configuration>
                                 <rules>
                                     <requireMavenVersion>
-                                        <version>3.2.5</version>
+                                        <version>3.9.4</version>
                                     </requireMavenVersion>
                                 </rules>
                             </configuration>
