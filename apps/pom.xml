@@ -203,7 +203,7 @@
         <its.testcontainer.db.image>postgres:14.7-alpine</its.testcontainer.db.image>
         <!-- Docker image used with testcontainers to simulate AWS services for testing. -->
         <!-- This has a default value in gov.cms.bfd.AbstractLocalStackTest that must also be changed when changing this property. -->
-        <its.testcontainer.aws.image>localstack/localstack:2.3.0</its.testcontainer.aws.image>
+        <its.testcontainer.aws.image>localstack/localstack:2.2.0</its.testcontainer.aws.image>
 
         <!-- Whether the partially adjudicated claims endpoints should be enabled -->
         <local.pac.enabled>true</local.pac.enabled>
