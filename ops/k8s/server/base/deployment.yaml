@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+        - name: server
+          image: bfd-server:1.0.0-SNAPSHOT
+          ports:
+            - containerPort: 6500
+          env:
+              - name: BFD_PORT
+                value: "6500"
+          volumeMounts:
+            - name: ssl-volume
+              readOnly: true
+              mountPath: "/app/ssl"
+      volumes:
+        - name: ssl-volume
+          secret:
+            secretName: server-ssl-files
