@@ -28,4 +28,4 @@ spec:
       volumes:
         - name: ssl-volume
           secret:
-            secretName: server-ssl-files
+            secretName: dev-server-ssl-files

@@ -237,7 +237,7 @@ mainClass="gov.cms.bfd.migrator.app.MigratorApp"
 if [[ x$kubernetes = xtrue ]] ; then
   cd $kubernetes_root
   if [[ ! -r migrator/overlays/local/kustomization.yaml ]] ; then
-    echo ERROR: run this script from inside the ops/k8s directory 1>&2
+    echo ERROR: unable to find kubernetes resource files in $kubernetes_root 1>&2
     exit 1
   fi
   echo running kubernetes job

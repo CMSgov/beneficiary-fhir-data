@@ -8,7 +8,5 @@ spec:
       containers:
       - name: migrator
         image: bfd-db-migrator:1.0.0-SNAPSHOT
-        args:
-          - "-Dorg.jboss.logging.provider=slf4j"
       restartPolicy: Never
   backoffLimit: 4
