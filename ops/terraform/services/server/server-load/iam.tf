@@ -159,6 +159,57 @@ resource "aws_iam_policy" "sqs" {
 EOF
 }
 
+
+resource "aws_iam_policy" "ecr" {
+  name        = "bfd-${local.env}-${local.service}-ecr"
+  description = "Allow ECR permissions"
+  policy      = <<-EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:ListImages"
+            ],
+            "Resource": [
+              "arn:aws:ecr:us-east-1:577373831711:repository/bfd-mgmt-server-load-node"
+            ]
+        },
+        {
+             "Sid":"GetAuthorizationToken",
+             "Effect":"Allow",
+             "Action":[
+                "ecr:GetAuthorizationToken",
+                "ecr:DescribeRegistry"
+             ],
+             "Resource":"*"
+          },
+          {
+             "Sid":"ManageRepositoryContents",
+             "Effect":"Allow",
+             "Action":[
+                    "ecr:BatchCheckLayerAvailability",
+                    "ecr:GetDownloadUrlForLayer",
+                    "ecr:GetRepositoryPolicy",
+                    "ecr:DescribeRepositories",
+                    "ecr:ListImages",
+                    "ecr:DescribeImages",
+                    "ecr:BatchGetImage",
+                    "ecr:InitiateLayerUpload",
+                    "ecr:UploadLayerPart",
+                    "ecr:CompleteLayerUpload",
+                    "ecr:PutImage",
+                    "ecr:DescribeRegistry"
+             ],
+             "Resource":"arn:aws:ecr:us-east-1:577373831711:repository/bfd-mgmt-server-load-node"
+          }
+    ]
+}
+EOF
+}
+
+
 resource "aws_iam_role" "lambda" {
   name        = "bfd-${local.env}-${local.service}-lambda"
   path        = "/"
@@ -190,6 +241,8 @@ resource "aws_iam_role" "lambda" {
   ]
 }
 
+
+
 resource "aws_iam_role" "ec2" {
   name        = "bfd-${local.env}-${local.service}-ec2"
   path        = "/"
@@ -217,7 +270,8 @@ resource "aws_iam_role" "ec2" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.sqs.arn,
-    aws_iam_policy.lambda.arn
+    aws_iam_policy.lambda.arn,
+    aws_iam_policy.ecr.arn
   ]
 }
 
