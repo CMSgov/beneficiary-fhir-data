@@ -14,11 +14,11 @@ DRY_RUN = False
 DEBUG = False
 
 ## EC2 EBS Retention
-# Retain any snapshots associated with an active EC2 volume and purge all others after n days. The filter
-# will match DLM lifecycle created snapshots.
+# Retain any snapshots associated with an active EC2 volume and purge any snapshots created by the defunct DLM policy
+# after n days. The filter will match DLM lifecycle created snapshots.
 EC2_MIN_RETENTION_DAYS = 1
 EC2_DAILY_EBS_SNAPSHOT_FILTER = [
-    {'Name': 'description','Values': ['Created for policy*']},
+    {'Name': 'description','Values': ['Created for policy-0abe3036d255e9ae0']},
     {'Name': 'status','Values': ['completed']},
 ]
 #

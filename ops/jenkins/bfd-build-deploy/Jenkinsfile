@@ -7,11 +7,7 @@
  */
 
 // These variables are accessible throughout this file (except inside methods and classes).
-def amiIds
 def gitBranchName
-def migratorAmiId
-def pipelineAmiId
-def serverAmiId
 
 pipeline {
     agent {
@@ -46,7 +42,12 @@ spec:
         defaultValue: false)
 
         booleanParam(name: 'force_build_amis',
-        description: 'When true, AMI IDs based on branch will be built.',
+        description: 'When true, AMIs based on branch will be built.',
+        defaultValue: false)
+
+        booleanParam(name: 'force_build_docker_host_ami',
+        description: 'When true, the docker host AMI based on branch will be built. Note: `force_build_amis` must' +
+                'also be true.',
         defaultValue: false)
 
         string(
@@ -87,6 +88,28 @@ spec:
   }
 
   stages {
+    /* This stage switches the gitBranchName (needed for our CCS downsream stages)
+       value if the build is a PR as the BRANCH_NAME var is populated with the build
+       name during PR builds.
+    */
+    stage('Set Branch Name') {
+        steps {
+            script {
+                currentStage = env.STAGE_NAME
+                // Set git branch name to master if not building amis
+                if (!params.force_build_amis) {
+                    gitBranchName = 'master'
+                } else {
+                    if (env.BRANCH_NAME.startsWith('PR')) {
+                        gitBranchName = env.CHANGE_BRANCH
+                    } else {
+                        gitBranchName = env.BRANCH_NAME
+                    }
+                }
+            }
+        }
+    }
+
     stage('Prepare') {
       steps {
         script {
@@ -101,29 +124,6 @@ spec:
 
             // Load the child Jenkinsfiles.
             scriptForApps = load('apps/build.groovy')
-            scriptForDeploys = load('ops/deploy-ccs.groovy')
-        }
-      }
-    }
-
-      /* This stage switches the gitBranchName (needed for our CCS downsream stages)
-          value if the build is a PR as the BRANCH_NAME var is populated with the build
-          name during PR builds.
-      */
-      stage('Set Branch Name') {
-        steps {
-          script {
-            currentStage = env.STAGE_NAME
-            // Set git branch name to master if not building amis
-            if (!params.force_build_amis) {
-              gitBranchName = 'master'
-            } else {
-              if (env.BRANCH_NAME.startsWith('PR')) {
-                gitBranchName = env.CHANGE_BRANCH
-              } else {
-                gitBranchName = env.BRANCH_NAME
-            }
-          }
         }
       }
     }
@@ -131,13 +131,13 @@ spec:
     stage('Run Build Apps') {
       steps {
         script {
-            if (params.force_build_amis) {
+          if (params.force_build_amis) {
               def jobToRun = "bfd-build-apps/${env.BRANCH_NAME.replace('/', '%2F')}"
-
               build job:
                 jobToRun,
                 parameters: [
-                  booleanParam(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}")
+                  booleanParam(name: "verbose_mvn_logging", value: "${params.verbose_mvn_logging}"),
+                  booleanParam(name: "force_build_docker_host_ami", value: "${params.force_build_docker_host_ami}")
                 ],
                 wait: true
           } else {
@@ -154,28 +154,17 @@ spec:
 
           awsAuth.assumeRole()
 
-          if (params.migrator_ami_override.length() == 0 || params.server_ami_override.length() == 0 || pipeline_ami_override.length() == 0) {
-            amiIds = scriptForDeploys.findAmis(gitBranchName)
-            migratorAmiId = amiIds.bfdMigratorAmiId
-            pipelineAmiId = amiIds.bfdPipelineAmiId
-            serverAmiId = amiIds.bfdServerAmiId
-          } else {
-            migratorAmiId = params.migrator_ami_override
-            pipelineAmiId = params.pipeline_ami_override
-            serverAmiId = params.server_ami_override
-          }
-
           build job:
-                jobToRun,
-                parameters: [
-                  string(name: "env", value: "${params.env}"),
-                  string(name: "migrator_ami_override", value: "${migratorAmiId}"),
-                  string(name: "pipeline_ami_override", value: "${pipelineAmiId}"),
-                  string(name: "server_ami", value: "${server_ami_override}"),
-                  booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
-                  string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
-                ],
-                wait: true
+            jobToRun,
+            parameters: [
+              string(name: "env", value: "${params.env}"),
+              string(name: "migrator_ami_override", value: "${params.migrator_ami_override}"),
+              string(name: "pipeline_ami_override", value: "${params.pipeline_ami_override}"),
+              string(name: "server_ami", value: "${params.server_ami_override}"),
+              booleanParam(name: "force_migrator_deployment", value: "${params.force_migrator_deployment}"),
+              string(name: "server_regression_image_override", value: "${params.server_regression_image_override}")
+            ],
+            wait: true
         }
       }
     }

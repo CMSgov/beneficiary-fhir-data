@@ -1,3 +1,9 @@
+// Variables defined here are accessible throughout this file (except inside methods and classes).
+def scriptForDeploys
+def scriptForApps
+def gitBranchName
+def amiIds
+
 pipeline {
   agent {
     kubernetes {
@@ -42,13 +48,39 @@ spec:
   }
 
   stages {
+    stage('Set Branch Name') {
+      steps {
+        script {
+          currentStage = env.STAGE_NAME
+            if (env.BRANCH_NAME.startsWith('PR')) {
+              gitBranchName = env.CHANGE_BRANCH
+            } else {
+              gitBranchName = env.BRANCH_NAME
+            }
+        }
+      }
+    }
+
+    stage('Prepare') {
+      steps {
+        script {
+          // Load the child Jenkinsfiles.
+          scriptForApps = load('apps/build.groovy')
+          scriptForDeploys = load('ops/deploy-ccs.groovy')
+
+          awsAuth.assumeRole()
+
+          // Find the most current AMI IDs (if any).
+          amiIds = scriptForDeploys.findAmis(gitBranchName)
+        }
+      }
+    }
+
     stage('Deploy Pipeline Terraservice') {
       steps {
         script {
           def trimmedEnv = params.env.trim()
-          def amiOverride = (params.ami_override?.trim())
-                            ? [ami_id_override: params.ami_override.trim()]
-                            : []
+          def amiId = params.ami_override?.trim() ?: amiIds.bfdPipelineAmiId
           def lockResource = trimmedEnv == 'prod-sbx' ? 'env_prod_sbx' : "env_${trimmedEnv}"
           lock(resource: lockResource) {
             awsAuth.assumeRole()
@@ -57,8 +89,9 @@ spec:
               directory: 'ops/terraform/services/pipeline',
               tfVars: [
                 create_ccw_pipeline: params.create_ccw_pipeline_instance,
-                create_rda_pipeline: params.create_rda_pipeline_instance
-              ] + amiOverride
+                create_rda_pipeline: params.create_rda_pipeline_instance,
+                ami_id_override: amiId
+              ]
             )
           }
         }

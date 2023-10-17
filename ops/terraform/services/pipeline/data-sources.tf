@@ -23,7 +23,6 @@ data "aws_security_group" "enterprise_tools" {
   }
 }
 
-# TODO: this is a temporary work-around until versioning becomes a reality
 # the following logic produces a map of ami filters to their filter values:
 # `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided
 # `{"tag:Branch" => "master"}` when the var.ami_id_override is not provided

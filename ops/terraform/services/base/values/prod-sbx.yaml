@@ -140,7 +140,7 @@
   +giWtJcv9BkoLYTLFVn9ow==
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: |-
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca_test: |-
   -----BEGIN CERTIFICATE-----
   MIIGhzCCBG+gAwIBAgIJAJILDQr1gSr2MA0GCSqGSIb3DQEBCwUAMIHRMQswCQYD
   VQQGEwJVUzERMA8GA1UECAwITWFyeWxhbmQxEjAQBgNVBAcMCUJhbHRpbW9yZTEz
@@ -179,7 +179,7 @@
   BWRkyCz062TqXM56wU5z3rcSM0Bq7AwkViPYxgwtAfz3olDasvEWrOZimg==
   -----END CERTIFICATE-----
   
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca: |-
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_root_ca_sbx: |-
   -----BEGIN CERTIFICATE-----
   MIIGnDCCBISgAwIBAgIJAJEYkN0EbTuAMA0GCSqGSIb3DQEBCwUAMIHaMQswCQYD
   VQQGEwJVUzERMA8GA1UECAwITWFyeWxhbmQxEjAQBgNVBAcMCUJhbHRpbW9yZTEz

@@ -10,8 +10,7 @@ data "aws_kms_key" "cmk" {
   key_id = local.nonsensitive_common_config["kms_key_alias"]
 }
 
-# TODO: this is a temporary work-around until versioning becomes a reality
-# the following logic produces a map of ami filters to their filter values:
+# The following logic produces a map of ami filters to their filter values:
 # `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided
 # `{"tag:Branch" => "master"}` when the var.ami_id_override is not provided
 locals {

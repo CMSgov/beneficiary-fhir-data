@@ -59,7 +59,7 @@ locals {
   }
 
   pipeline_log_availability = {
-    period       = 1 * 60 * 60 # 1 hour 
+    period       = 1 * 60 * 60 # 1 hour
     eval_periods = 1
     threshold    = 0
     datapoints   = 1
@@ -86,7 +86,7 @@ locals {
   ok_actions    = local.is_prod ? [data.aws_sns_topic.ok[0].arn] : []
 
   # The log availability alarm will post an incident in prod; in other envs it will get posted
-  # to #bfd-test 
+  # to #bfd-test
   # TODO: Replace testing SNS topic in BFD-2244
   log_availability_alarm_actions = local.is_ephemeral_env ? [] : local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm[0].arn]
 
@@ -213,7 +213,6 @@ resource "aws_launch_template" "this" {
         {
           Layer    = local.layer
           role     = local.legacy_service
-          snapshot = true
         },
         each.value.tags
       )
@@ -315,7 +314,6 @@ resource "aws_instance" "pipeline" {
     {
       Layer    = local.layer
       role     = local.legacy_service
-      snapshot = true
     },
     each.value.tags
   )
@@ -336,7 +334,6 @@ resource "aws_instance" "pipeline" {
     {
       Layer    = local.layer
       role     = local.legacy_service
-      snapshot = true
     },
     each.value.tags
   )
