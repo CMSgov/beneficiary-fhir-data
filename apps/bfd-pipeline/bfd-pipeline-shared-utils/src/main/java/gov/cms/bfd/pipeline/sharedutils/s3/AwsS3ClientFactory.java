@@ -23,6 +23,10 @@ public class AwsS3ClientFactory implements S3ClientFactory {
     final S3ClientBuilder builder = S3Client.builder();
     builder.defaultsMode(DefaultsMode.STANDARD);
     s3ClientConfig.getAwsClientConfig().configureAwsService(builder);
+    if (s3ClientConfig.getAwsClientConfig().getEndpointOverride().isPresent()) {
+      // prevents AWS SDK from adding bucket name to host name when using localstack
+      builder.forcePathStyle(true);
+    }
     return builder.build();
   }
 
@@ -30,6 +34,10 @@ public class AwsS3ClientFactory implements S3ClientFactory {
   public S3AsyncClient createS3AsyncClient() {
     final S3CrtAsyncClientBuilder builder = S3AsyncClient.crtBuilder();
     s3ClientConfig.configureS3ServiceForAsyncS3(builder);
+    if (s3ClientConfig.getAwsClientConfig().getEndpointOverride().isPresent()) {
+      // prevents AWS SDK from adding bucket name to host name when using localstack
+      builder.forcePathStyle(true);
+    }
     return builder.build();
   }
 

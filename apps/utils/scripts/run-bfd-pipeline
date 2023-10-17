@@ -261,9 +261,6 @@ local)
     usage
     exit 1
   fi
-  # S3 prepends bucket name to override hostname and needs this special value to work.
-  # https://stackoverflow.com/questions/68034637/unknown-host-when-using-localstack-with-spring-cloud-aws-2-3
-  setvar S3_ENDPOINT_URI "http://s3.localhost.localstack.cloud:4566"
   ;;
 aws) ;;
 *) echo error: s3 mode must be '"local" or "aws"' 1>&2 ; usage ; exit 1 ;;
