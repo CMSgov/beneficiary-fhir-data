@@ -36,14 +36,19 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
 
   /** The {@link ManagedChannel} the source messages will be streamed on. */
   protected ManagedChannel channel;
+
   /** Client for calling the remote RDA gRPC service. */
   protected final GrpcStreamCaller<TMessage> caller;
+
   /** The type of claim being read from the source (i.e. FISS/MCS). */
   protected final String claimType;
+
   /** Factory for creating {@link CallOptions}. */
   protected final Supplier<CallOptions> callOptionsFactory;
+
   /** Metrics for doing later application and processing analysis. */
   @Getter protected final DLQGrpcRdaSource.Metrics metrics;
+
   /** The RDA API Version we are allowed to ingest from. */
   private final RdaVersion rdaVersion;
 
@@ -132,8 +137,10 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   protected static class ProcessResult {
     /** If this process is interrupted. */
     private boolean interrupted = false;
+
     /** The count of results. */
     private int count = 0;
+
     /** Holds any unexpected issue with the processing. */
     private Exception exception = null;
 
@@ -248,21 +255,28 @@ public abstract class AbstractGrpcRdaSource<TMessage, TClaim>
   protected static class Metrics {
     /** Number of times the source has been called to retrieve data from the RDA API. */
     private final Counter calls;
+
     /** Number of calls that successfully called service and stored results. */
     private final Counter successes;
+
     /** Number of calls that ended in some sort of failure. */
     private final Counter failures;
+
     /** Number of objects that have been received from the RDA API. */
     private final Counter objectsReceived;
+
     /**
      * Number of objects that have been successfully stored by the sink. Generally {@code batches *
      * maxPerBatch}.
      */
     private final Counter objectsStored;
+
     /** Number of {@link gov.cms.mpsm.rda.v1.ChangeType#CHANGE_TYPE_DELETE} messages skipped. */
     private final Counter deleteMessagesSkipped;
+
     /** Number of invalid objects skipped. */
     private final Counter invalidObjectsSkipped;
+
     /**
      * Number of batches/transactions used to store the objects. Generally {@code objectsReceived /
      * maxPerBatch}.

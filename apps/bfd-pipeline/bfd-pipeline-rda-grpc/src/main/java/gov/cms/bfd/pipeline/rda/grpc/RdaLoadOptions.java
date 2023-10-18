@@ -32,10 +32,13 @@ public class RdaLoadOptions {
 
   /** The job configuration. */
   private final AbstractRdaLoadJob.Config jobConfig;
+
   /** The RDA source configuration. */
   private final RdaSourceConfig rdaSourceConfig;
+
   /** The mock server configuration. */
   private final RdaServerJob.Config mockServerConfig;
+
   /** The number of transformation errors that can exist before a job will exit. */
   private final int errorLimit;
 

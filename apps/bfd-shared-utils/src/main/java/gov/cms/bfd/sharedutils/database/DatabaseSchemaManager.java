@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 public final class DatabaseSchemaManager {
   /** Logger for writing messages. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
+
   /**
    * Creates or updates, as appropriate, the backend database schema for the specified database.
    * Does not report any progress.

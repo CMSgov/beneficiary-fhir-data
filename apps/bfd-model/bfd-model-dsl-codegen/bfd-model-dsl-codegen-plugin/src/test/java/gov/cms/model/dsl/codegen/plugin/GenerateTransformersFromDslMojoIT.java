@@ -13,6 +13,7 @@ public class GenerateTransformersFromDslMojoIT extends AbstractMojoIntegrationTe
 
   /** The directory to find the mappings in for the test. */
   private final File mappingsDir = new File(baseFilesDir, "mappings");
+
   /** The directory to find the expected output for verifying the test. */
   private final File expectedDir = new File(baseFilesDir, "expected");
 

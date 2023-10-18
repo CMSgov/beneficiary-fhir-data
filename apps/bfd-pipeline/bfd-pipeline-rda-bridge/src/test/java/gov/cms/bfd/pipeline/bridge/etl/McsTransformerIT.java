@@ -39,20 +39,25 @@ public class McsTransformerIT {
   private static class TransformerArguments {
     /** Map of the mbis from the beneficiary data. */
     private final Map<String, BeneficiaryData> mbiMap;
+
     /**
      * Helper class for carrying claims between processing iterations so additional line items can
      * be added to the claim if any are found.
      */
     private final WrappedMessage wrappedMessage;
+
     /** Wrapped long value used for keeping a counter between method scopes. */
     private final WrappedCounter wrappedCounter;
+
     /** Abstract classes for predefined methods. */
     private final Parser.Data<String> data;
+
     /**
      * Used to create a sample of data from various sources, enforcing sampling proportions per
      * source.
      */
     private final DataSampler<String> mbiSampler;
+
     /** The sample id for the data. */
     private final int sampleId;
   }
@@ -65,10 +70,13 @@ public class McsTransformerIT {
      * be added to the claim if any are found.
      */
     private final WrappedMessage wrappedMessage;
+
     /** Wrapped long value used for keeping a counter between method scopes. */
     private final WrappedCounter wrappedCounter;
+
     /** Used to for the expected response. */
     private final Optional<MessageOrBuilder> response;
+
     /** Used to store a set of expected sample mbis. */
     private final Set<String> sampledMbis;
   }
@@ -439,64 +447,94 @@ public class McsTransformerIT {
   private static class TestData {
     /** Line Number. */
     private static final String LINE_NUM = "1";
+
     /** Beneficiary Id. */
     private static final String BENE_ID = "beneid";
+
     /** Beneficiary First Name. */
     private static final String BENE_FIRST_NAME = "F";
+
     /** Beneficiary Last Name. */
     private static final String BENE_LAST_NAME = "Lastna";
+
     /** Beneficiary Middle Initial. */
     private static final String BENE_MID_INIT = "M";
+
     /** Beneficiary DOB. */
     private static final String BENE_DOB = "2020-01-01";
+
     /** Beneficiary gender. */
     private static final int BENE_GENDER = 1;
+
     /** Carrier Claim Control Number.. */
     private static final String CARR_CLM_CNTL_NUM = "icn12345678";
+
     /** Claim From Date. */
     private static final String CLM_FROM_DT = "01-Jan-2001";
+
     /** Claim Thru Date. */
     private static final String CLM_THRU_DT = "03-Mar-2001";
+
     /** NCH Carrier Claim Submitted Charge Amount. */
     private static final String NCH_CARR_CLM_SBMTD_CHRG_AMT = "832.12";
+
     /** Original NPI Number. */
     private static final String ORG_NPI_NUM = "8888888888";
+
     /** Claim Id. */
     private static final String CLM_ID = "-999999999";
+
     /** Diagnosis Code. */
     private static final String ICD_DGNS_CD1 = "JJJJ";
+
     /** Diagnosis Version Code. */
     private static final String ICD_DGNS_VRSN_CD1 = "0";
+
     /** Line Diagnosis Code. */
     private static final String LINE_ICD_DGNS_CD = "12";
+
     /** Line Diagnosis Version Code. */
     private static final String LINE_ICD_DGNS_VRSN_CD = "0";
+
     /** HCPCS Code. */
     private static final String HCPCS_CD = "123";
+
     /** HCPCS first code. */
     private static final String HCPCS_1ST_MDFR_CD = "abc";
+
     /** HCPCS second code. */
     private static final String HCPCS_2ND_MDFR_CD = "cba";
+
     /** Line Expns Date. */
     private static final String LINE_1ST_EXPNS_DT = "20-Feb-2008";
+
     /** Line Last Expns Date. */
     private static final String LINE_LAST_EXPNS_DT = "30-Jun-2008";
+
     /** MBI number. */
     private static final String MBI = "mbimbimbimbi";
+
     /** Hardcoded Bill EIN. */
     private static final String HARDCODED_BILL_PROV_EIN = "XX-XXXXXXX";
+
     /** Hardcoded Bill Spec. */
     private static final String HARDCODED_BILL_PROV_SPEC = "01";
+
     /** Hardcoded Bill Type. */
     private static final String HARDCODED_BILL_PROV_TYPE = "20";
+
     /** Hardcoded Bill Received Date. */
     private static final String HARDCODED_RECEIVED_DATE_CYMD = "1970-01-01";
+
     /** Hardcoded Control ID. */
     private static final String HARDCODED_CONTROL_ID = "00000";
+
     /** Hardcoded Status Date. */
     private static final String HARDCODED_STATUS_DATE = "1970-01-01";
+
     /** Fiss Sample ID. */
     private static final int FISS_SAMPLE_ID = 0;
+
     /** Mcs Sample ID. */
     private static final int MCS_SAMPLE_ID = 1;
 

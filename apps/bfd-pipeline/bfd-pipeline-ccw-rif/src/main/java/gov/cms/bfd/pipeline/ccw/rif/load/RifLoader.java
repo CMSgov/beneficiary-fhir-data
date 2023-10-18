@@ -64,6 +64,7 @@ public final class RifLoader {
   private static final Period MAX_FILE_AGE_DAYS = Period.ofDays(40);
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoader.class);
+
   /**
    * Logger to count the number of records loaded; only logs when the log level is allowing debug
    * messages.
@@ -73,8 +74,10 @@ public final class RifLoader {
 
   /** The load options. */
   private final LoadAppOptions options;
+
   /** The hasher for ids. */
   private final IdHasher idHasher;
+
   /** The shared application state. */
   private final PipelineApplicationState appState;
 
@@ -1373,6 +1376,7 @@ public final class RifLoader {
   private static final class LoadFeatures {
     /** If idempotency mode should be enabled (inserts treated as updates if the data exists). */
     private final boolean idempotencyRequired;
+
     /** If PostgreSQL's {@link CopyManager} APIs should be used to load data when possible. */
     private final boolean copyDesired;
 

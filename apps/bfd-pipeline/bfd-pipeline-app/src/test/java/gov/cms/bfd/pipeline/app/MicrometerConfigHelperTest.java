@@ -17,10 +17,13 @@ import org.junit.jupiter.api.Test;
 public class MicrometerConfigHelperTest {
   /** {@link PropertyMapping} with no default value. */
   private final PropertyMapping mappingA = new PropertyMapping("a", "AA", Optional.empty());
+
   /** {@link PropertyMapping} with a default value. */
   private final PropertyMapping mappingB = new PropertyMapping("b", "BB", Optional.of("b default"));
+
   /** Values used by lookup function. */
   private final Map<String, String> values = Map.of("AA", "a matched");
+
   /** Object under test. */
   private final MicrometerConfigHelper helper =
       new MicrometerConfigHelper(List.of(mappingA, mappingB), values::get);

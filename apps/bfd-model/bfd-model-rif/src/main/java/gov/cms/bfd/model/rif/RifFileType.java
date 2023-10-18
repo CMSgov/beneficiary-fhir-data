@@ -72,8 +72,10 @@ public enum RifFileType {
    * gov.cms.bfd.model.rif.entities.BeneficiaryColumn}.
    */
   private final Class<Enum<?>> columnEnum;
+
   /** All the columns/entries from this {@link RifFileType}'s columns enum. */
   private final Enum<?>[] columns;
+
   /**
    * The <code>Column</code> enum constant for this {@link RifFileType} ID/grouping column, e.g.
    * {@link gov.cms.bfd.model.rif.entities.BeneficiaryColumn#BENE_ID}

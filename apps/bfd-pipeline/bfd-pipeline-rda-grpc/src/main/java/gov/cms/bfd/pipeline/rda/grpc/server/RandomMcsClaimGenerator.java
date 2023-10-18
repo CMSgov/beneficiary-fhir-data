@@ -43,65 +43,87 @@ import java.util.Set;
 public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsClaim> {
   /** The max adjustments to generate. */
   private static final int MAX_ADJUSTMENTS = 10;
+
   /** The max audits to generate. */
   private static final int MAX_AUDITS = 20;
+
   /** The max details to generate. */
   private static final int MAX_DETAILS = 4;
+
   /** The max diagnosis codes to generate. */
   private static final int MAX_DIAG_CODES = 7;
+
   /** The max locations to generate. */
   private static final int MAX_LOCATIONS = 8;
+
   /** A list of the enums for the MCS claim types. */
   private static final List<McsClaimType> McsClaimTypeEnums = enumValues(McsClaimType.values());
+
   /** A list of the enums for the MCS beneficiary sexes. */
   private static final List<McsBeneficiarySex> McsBeneficiarySexEnums =
       enumValues(McsBeneficiarySex.values());
+
   /** A list of the enums for the MCS status codes. */
   private static final List<McsStatusCode> McsStatusCodeEnums;
+
   /** A list of the enums for the MCS billing provider indicators. */
   private static final List<McsBillingProviderIndicator> McsBillingProviderIndicatorEnums =
       enumValues(McsBillingProviderIndicator.values());
+
   /** A list of the enums for the MCS billing provider status codes. */
   private static final List<McsBillingProviderStatusCode> McsBillingProviderStatusCodeEnums =
       enumValues(McsBillingProviderStatusCode.values());
+
   /** A list of the enums for the MCS diagnosis icd types. */
   private static final List<McsDiagnosisIcdType> McsDiagnosisIcdTypeEnums =
       enumValues(McsDiagnosisIcdType.values());
+
   /** A list of the enums for the MCS detail statuses. */
   private static final List<McsDetailStatus> McsDetailStatusEnums =
       enumValues(McsDetailStatus.values());
+
   /** A list of the enums for the MCS claim assignment codes. */
   private static final List<McsClaimAssignmentCode> McsClaimAssignmentCodeEnums =
       enumValues(McsClaimAssignmentCode.values());
+
   /** A list of the enums for the MCS claim level indicators. */
   private static final List<McsClaimLevelIndicator> McsClaimLevelIndicatorEnums =
       enumValues(McsClaimLevelIndicator.values());
+
   /** A list of the enums for the MCS audit indicators. */
   private static final List<McsAuditIndicator> McsAuditIndicatorEnums =
       enumValues(McsAuditIndicator.values());
+
   /** A list of the enums for the MCS split reason codes. */
   private static final List<McsSplitReasonCode> McsSplitReasonCodeEnums =
       enumValues(McsSplitReasonCode.values());
+
   /** A list of the enums for the MCS types of service. */
   private static final List<McsTypeOfService> McsTypeOfServiceEnums =
       enumValues(McsTypeOfService.values());
+
   /** A list of the enums for the MCS two digit plan of services. */
   private static final List<McsTwoDigitPlanOfService> McsTwoDigitPlanOfServiceEnums =
       enumValues(McsTwoDigitPlanOfService.values());
+
   /** A list of the enums for the MCS cutback audit indicators. */
   private static final List<McsCutbackAuditIndicator> McsCutbackAuditIndicatorEnums =
       enumValues(McsCutbackAuditIndicator.values());
+
   /** A list of the enums for the MCS cutback audit dispositions. */
   private static final List<McsCutbackAuditDisposition> McsCutbackAuditDispositionEnums =
       enumValues(McsCutbackAuditDisposition.values());
+
   /** A list of the enums for the MCS location activity codes. */
   private static final List<McsLocationActivityCode> McsLocationActivityCodeEnums =
       enumValues(McsLocationActivityCode.values());
 
   /** Max length of a FISS claim id. */
   private static final int McsClaimIdLength = 15;
+
   /** Max length of a MBI. */
   private static final int MbiLength = 11;
+
   /** Field length used when forcing a transformation error in a claim. */
   @VisibleForTesting static final int ForcedErrorFieldLength = 50;
 

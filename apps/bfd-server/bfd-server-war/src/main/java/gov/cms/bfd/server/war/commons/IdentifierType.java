@@ -38,8 +38,10 @@ public enum IdentifierType {
 
   /** The system for this code set. */
   public final String system;
+
   /** The code for this code set. */
   public final String code;
+
   /** The display for this code set. */
   public final String display;
 

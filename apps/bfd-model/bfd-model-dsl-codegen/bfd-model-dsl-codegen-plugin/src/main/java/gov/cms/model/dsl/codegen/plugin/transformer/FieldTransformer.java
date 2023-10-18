@@ -26,25 +26,32 @@ public interface FieldTransformer {
    * Variable/argument name used for holding the source object from which data is being extracted.
    */
   String SOURCE_VAR = "from";
+
   /**
    * Variable/argument name used for holding the destination object to which data is being copied.
    */
   String DEST_VAR = "to";
+
   /**
    * Variable/argument name used for holding the {@link DataTransformer} object used to copy data.
    */
   String TRANSFORMER_VAR = "transformer";
+
   /** Variable/argument name used for holding the current timestamp. */
   String NOW_VAR = "now";
+
   /** Variable/argument name used for holding the lambda used to hash MBI values. */
   String HASHER_VAR = "idHasher";
+
   /**
    * Variable/argument name used for holding the name of the field used when generating
    * transformation failure error messages.
    */
   String NAME_PREFIX_VAR = "namePrefix";
+
   /** A {@link CodeBlock} containing code to read the current timestamp. */
   CodeBlock NOW_VALUE = CodeBlock.of("$L", NOW_VAR);
+
   /**
    * Variable/Argument name used for holding the {@link
    * gov.cms.model.dsl.codegen.library.EnumStringExtractor} instance used when transforming an enum

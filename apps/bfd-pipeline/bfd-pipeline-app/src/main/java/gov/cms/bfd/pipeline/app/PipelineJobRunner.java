@@ -21,10 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 public class PipelineJobRunner implements Runnable {
   /** Object that tracks the status of all job runs. */
   private final Tracker tracker;
+
   /** The job we run. */
   private final PipelineJob job;
+
   /** Function used to sleep. Parameterized for use by unit tests. */
   private final ThrowingConsumer<Long, InterruptedException> sleeper;
+
   /** Used to get timestamps. Parameterized for use by unit tests. */
   private final Clock clock;
 
@@ -105,6 +108,7 @@ public class PipelineJobRunner implements Runnable {
     private static final Pattern SUCCESS_REGEX =
         Pattern.compile(
             String.format("%s \\[id=\\d+,.*outcome=([^,]+)", JobRunSummary.class.getSimpleName()));
+
     /** Used to identify log lines indicating job failure. */
     private static final Pattern FAILURE_REGEX =
         Pattern.compile(
@@ -113,14 +117,19 @@ public class PipelineJobRunner implements Runnable {
 
     /** Id for this job run. Assigned by {@link Tracker#beginningRun}. */
     private final long id;
+
     /** The job. */
     private final PipelineJob job;
+
     /** When the run started. */
     private final Instant startTime;
+
     /** When the run stopped. */
     private final Instant stopTime;
+
     /** The outcome if run was successful. */
     private final Optional<PipelineJobOutcome> outcome;
+
     /** The exception if run failed. */
     private final Optional<Exception> exception;
 

@@ -19,8 +19,10 @@ public class SimpleAuthorizationInterceptorTest {
 
   /** A mock call to test is intercepted. */
   @Mock private ServerCall<String, String> call;
+
   /** The mock call handler. */
   @Mock private ServerCallHandler<String, String> handler;
+
   /** The mock call listener. */
   @Mock private ServerCall.Listener<String> listener;
 

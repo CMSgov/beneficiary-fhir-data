@@ -23,6 +23,7 @@ public class LoadedFileFilter {
 
   /** The start time the RIF load took place. */
   private final Instant firstUpdated;
+
   /** The end time the RIF load took place. */
   private final Instant lastUpdated;
 

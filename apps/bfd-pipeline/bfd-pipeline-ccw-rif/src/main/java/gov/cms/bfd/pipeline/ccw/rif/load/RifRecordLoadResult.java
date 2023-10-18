@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.RifRecordEvent;
 public final class RifRecordLoadResult {
   /** The list of successful load events. */
   private final RifRecordEvent<?> rifRecordEvent;
+
   /** The load action. */
   private final LoadAction loadAction;
 

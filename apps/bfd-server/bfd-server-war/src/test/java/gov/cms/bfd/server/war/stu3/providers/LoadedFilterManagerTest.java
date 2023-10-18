@@ -34,10 +34,13 @@ public final class LoadedFilterManagerTest {
 
   /** Sample valid bene for the test. */
   private static final long SAMPLE_BENE = 567834L;
+
   /** Sample invalid bene for the test. */
   private static final long INVALID_BENE = 1L;
+
   /** Array of batches for the test. */
   private static final LoadedBatch[] preBatches = new LoadedBatch[8];
+
   /** Array of dates for the test. */
   private static final Instant[] preDates = new Instant[preBatches.length * 5];
 
@@ -278,6 +281,7 @@ public final class LoadedFilterManagerTest {
   private static class MockDb {
     /** Batches for loading. */
     private final ArrayList<LoadedBatch> batches = new ArrayList<>();
+
     /** Files for loading. */
     private final ArrayList<LoadedFile> files = new ArrayList<>();
 

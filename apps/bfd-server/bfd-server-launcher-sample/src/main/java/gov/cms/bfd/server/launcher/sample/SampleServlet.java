@@ -15,6 +15,7 @@ public final class SampleServlet extends HttpServlet {
 
   /** The logger for the class logic. */
   private static final Logger LOGGER_MISC = LoggerFactory.getLogger(SampleServlet.class);
+
   /** The logger for the http access. */
   private static final Logger LOGGER_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
 

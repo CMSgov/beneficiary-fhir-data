@@ -28,29 +28,40 @@ public class RdaServiceTest {
 
   /** The mocked RdaMessageSourceFactory. */
   @Mock private RdaMessageSourceFactory mockRdaMessageSourceFactory;
+
   /** The mocked RDA version. */
   @Mock private RdaService.Version mockVersion;
+
   /** The mocked api version data. */
   @Mock private ApiVersion mockApiVersion;
+
   /** The mocked api observer. */
   @Mock private StreamObserver<ApiVersion> mockAPIObserver;
+
   /** The mocked Fiss observer. */
   @Mock private StreamObserver<FissClaimChange> mockFissObserver;
+
   /** The mocked Fiss responder. */
   @Mock private RdaService.Responder<FissClaimChange> mockFissResponder;
+
   /** The mocked source. */
   @Mock private MessageSource<FissClaimChange> mockFissSource;
+
   /** The mocked MCS observer. */
   @Mock private StreamObserver<McsClaimChange> mockMcsObserver;
+
   /** The mocked MCS responder. */
   @Mock private RdaService.Responder<McsClaimChange> mockMcsResponder;
+
   /** The mocked MCS source. */
   @Mock private MessageSource<McsClaimChange> mockMcsSource;
+
   /** The mocked MCS request. */
   @Mock private ClaimRequest mockRequest;
 
   /** The empty request to use when the request contents don't matter. */
   private static final Empty request = Empty.newBuilder().build();
+
   /** Sequence number used in test setup. */
   private static final long SINCE_VALUE = 5L;
 

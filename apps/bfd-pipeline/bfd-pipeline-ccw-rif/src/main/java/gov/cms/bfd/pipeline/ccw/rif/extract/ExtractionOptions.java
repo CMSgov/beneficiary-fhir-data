@@ -13,10 +13,13 @@ public final class ExtractionOptions {
 
   /** The S3 bucket name. */
   @Getter private final String s3BucketName;
+
   /** The allowed rif file type for this extraction. */
   @Nullable private final RifFileType allowedRifFileType;
+
   /** The max keys for S3. */
   @Nullable private final Integer s3ListMaxKeys;
+
   /** Common config settings used to configure S3 clients. */
   @Getter private final S3ClientConfig s3ClientConfig;
 

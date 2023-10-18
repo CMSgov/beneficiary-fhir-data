@@ -46,12 +46,16 @@ import org.mockito.quality.Strictness;
 public final class DMEClaimTransformerTest {
   /** The transformer under test. */
   DMEClaimTransformer dmeClaimTransformer;
+
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
+
   /** The FDA drug lookup to use for the test. */
   @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 

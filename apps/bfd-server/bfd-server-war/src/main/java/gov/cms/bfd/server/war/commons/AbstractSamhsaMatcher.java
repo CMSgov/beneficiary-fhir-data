@@ -44,14 +44,19 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
 
   /** The list of DRG codes. */
   private final Set<String> drgCodes;
+
   /** The list of CPT codes. */
   private final Set<String> cptCodes;
+
   /** The list of ICD9 Procedure codes. */
   private final Set<String> icd9ProcedureCodes;
+
   /** The list of ICD9 Diagnosis codes. */
   private final Set<String> icd9DiagnosisCodes;
+
   /** The list of ICD10 Procedure codes. */
   private final Set<String> icd10ProcedureCodes;
+
   /** The list of ICD10 Diagnosis codes. */
   private final Set<String> icd10DiagnosisCodes;
 

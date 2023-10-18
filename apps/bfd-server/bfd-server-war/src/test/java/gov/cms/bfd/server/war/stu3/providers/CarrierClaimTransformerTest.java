@@ -48,14 +48,19 @@ import org.mockito.quality.Strictness;
 public final class CarrierClaimTransformerTest {
   /** The transformer under test. */
   CarrierClaimTransformer carrierClaimTransformer;
+
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
+
   /** The FDA drug lookup to use for the test. */
   @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
+
   /** The NPI org lookup to use for the test. */
   @Mock NPIOrgLookup npiOrgLookup;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 

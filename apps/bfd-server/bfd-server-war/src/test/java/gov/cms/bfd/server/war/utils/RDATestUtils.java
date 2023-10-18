@@ -50,18 +50,25 @@ public class RDATestUtils {
 
   /** Path to use for persistence units. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
+
   /** Test mbi. */
   public static final String MBI = "123456MBI";
+
   /** Test mbi hash. */
   public static final String MBI_HASH = "a7f8e93f09";
+
   /** Test mbi has (old). */
   public static final String MBI_OLD_HASH = "3816a4c752";
+
   /** Test fiss claim (DCN). */
   public static final String FISS_CLAIM_A_DCN = "123456d";
+
   /** Test fiss claim (DCN). */
   public static final String FISS_CLAIM_B_DCN = "123457d";
+
   /** Test fiss claim (ClaimId). */
   public static final String FISS_CLAIM_A_CLAIM_ID = "123456";
+
   /** Test fiss claim (ClaimId). */
   public static final String FISS_CLAIM_B_CLAIM_ID = "123457";
 

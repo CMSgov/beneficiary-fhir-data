@@ -62,21 +62,29 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
     @Builder.Default
     private final RandomClaimGeneratorConfig randomClaimConfig =
         RandomClaimGeneratorConfig.builder().build();
+
     /** Used to create {@link S3ClientFactory} when necessary. */
     @Builder.Default
     private final S3ClientConfig s3ClientConfig = S3ClientConfig.s3Builder().build();
+
     /** NDJSON fiss claim data for the RDA Server. */
     @Nullable private final CharSource fissClaimJson;
+
     /** NDJSON mcs claim data for the RDI Server. */
     @Nullable private final CharSource mcsClaimJson;
+
     /** Name of our S3 bucket. */
     @Nullable private final String s3Bucket;
+
     /** Optional directory name within our S3 bucket. */
     @Nullable private final String s3Directory;
+
     /** Name of a local directory in which to store cached files from S3. */
     @Nullable private final String s3CacheDirectory;
+
     /** Optional hard coded version. */
     @Nullable private final RdaService.Version version;
+
     /**
      * If positive this causes all generated {@link MessageSource}s to be wrapped in {@link
      * ExceptionMessageSource} with {@see ExceptionMessageSource#countBeforeThrow} set to this

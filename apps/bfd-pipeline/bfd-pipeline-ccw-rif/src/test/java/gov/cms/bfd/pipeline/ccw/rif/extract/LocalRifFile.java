@@ -15,6 +15,7 @@ import java.nio.file.Path;
 public final class LocalRifFile implements RifFile {
   /** The local file. */
   private final Path localFile;
+
   /** The file type. */
   private final RifFileType rifFileType;
 

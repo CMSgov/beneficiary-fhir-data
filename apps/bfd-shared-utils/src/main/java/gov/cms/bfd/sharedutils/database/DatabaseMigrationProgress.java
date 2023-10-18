@@ -37,8 +37,10 @@ public class DatabaseMigrationProgress {
 
   /** Stage of processing. */
   private final Stage stage;
+
   /** Current version string reported by Flyway, if available. */
   @Nullable private final String version;
+
   /** Migration file name, if relevant to the stage. */
   @Nullable private final String migrationFile;
 

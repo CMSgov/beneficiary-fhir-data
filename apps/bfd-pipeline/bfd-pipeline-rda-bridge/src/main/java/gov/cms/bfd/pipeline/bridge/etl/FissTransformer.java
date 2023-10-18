@@ -36,8 +36,10 @@ public class FissTransformer extends AbstractTransformer {
 
   /** Hardcoded date values that can't be extracted from RIF */
   public static final String DEFAULT_HARDCODED_DATE = "1970-01-01";
+
   /** Holds the map of beneficiary data from beneficiary_history, keyed by the bene_id. */
   private final Map<String, BeneficiaryData> mbiMap;
+
   /** Constant value used within the code. */
   private static final String MEDICARE = "MEDICARE";
 

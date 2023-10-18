@@ -38,6 +38,7 @@ public class PatientResourceProviderTest {
 
   /** The mock metric registry. */
   @Mock private MetricRegistry metricRegistry;
+
   /** The mock loaded filter manager. */
   @Mock private LoadedFilterManager loadedFilterManager;
 

@@ -11,6 +11,7 @@ import org.testcontainers.utility.DockerImageName;
 public abstract class AbstractLocalStackTest {
   /** The system property defined in pom.xml containing the image to use for test AWS stack. */
   public static final String TEST_CONTAINER_AWS_IMAGE_PROPERTY = "its.testcontainer.aws.image";
+
   /** The default test container image to use when nothing is provided. */
   public static final String TEST_CONTAINER_AWS_IMAGE_DEFAULT = "localstack/localstack:2.2.0";
 

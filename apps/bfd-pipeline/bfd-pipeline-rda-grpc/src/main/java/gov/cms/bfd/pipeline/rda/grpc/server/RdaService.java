@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaService.class);
+
   /** The RDA server version to use when serving messages. */
   public static final String RDA_PROTO_VERSION = "0.13.0";
 
@@ -117,14 +118,18 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   static class Responder<TChange> {
     /** Observer for responses. */
     private final ServerCallStreamObserver<TChange> responseObserver;
+
     /** The message generator. */
     private final MessageSource<TChange> generator;
+
     /** True if the client has cancelled the connection. */
     private final AtomicBoolean cancelled;
+
     /**
      * True if we have sent all changes to the client and called {@link StreamObserver#onCompleted}.
      */
     private final AtomicBoolean completed;
+
     /** Total number of changes we have sent. */
     private final AtomicInteger totalSent;
 
@@ -211,8 +216,10 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   public static class Version {
     /** The RDA version. */
     @Builder.Default String version = RDA_PROTO_VERSION;
+
     /** The commit id. */
     @Builder.Default String commitId = "";
+
     /** The build time. */
     @Builder.Default String buildTime = "";
 

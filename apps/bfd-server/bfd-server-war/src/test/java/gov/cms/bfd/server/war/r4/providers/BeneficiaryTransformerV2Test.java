@@ -55,10 +55,13 @@ public final class BeneficiaryTransformerV2Test {
 
   /** Fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** Beneficiary under test. */
   private static Beneficiary beneficiary = null;
+
   /** Patient under test. */
   private static Patient patient = null;
+
   /** The class under test. */
   private static BeneficiaryTransformerV2 beneficiaryTransformerV2;
 

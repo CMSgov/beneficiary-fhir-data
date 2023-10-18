@@ -66,25 +66,34 @@ public class McsClaimRdaSinkTest {
 
   /** The clock used for creating fixed timestamps. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+
   /** Configuration for the object used for hashing values. */
   private final IdHasher.Config hasherConfig = new IdHasher.Config(1, "notarealpepper");
 
   /** The mock datasource. */
   @Mock private HikariDataSource dataSource;
+
   /** The mock entity manager factory. */
   @Mock private EntityManagerFactory entityManagerFactory;
+
   /** The mock entity manager. */
   @Mock private EntityManager entityManager;
+
   /** The mock entity transaction. */
   @Mock private EntityTransaction transaction;
+
   /** The mock claim transformer. */
   @Mock private McsClaimTransformer transformer;
+
   /** The test meter object. */
   private MeterRegistry meters;
+
   /** The test metric object. */
   private MetricRegistry appMetrics;
+
   /** The sink under test. */
   private McsClaimRdaSink sink;
+
   /** Keeps track of the sequence number in the test. */
   private long nextSeq = 0L;
 

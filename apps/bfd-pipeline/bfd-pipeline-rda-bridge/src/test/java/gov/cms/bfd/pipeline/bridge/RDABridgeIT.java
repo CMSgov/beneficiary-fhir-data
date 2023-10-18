@@ -33,16 +33,22 @@ class RDABridgeIT {
 
   /** Sets the filename for the Bene History CSV. */
   private static final String BENE_HISTORY_CSV = "beneficiary_history.csv";
+
   /** Sets the filename for the expected fiss file. */
   private static final String EXPECTED_FISS = "expected-fiss.ndjson";
+
   /** Sets the filename for the expected mcs file. */
   private static final String EXPECTED_MCS = "expected-mcs.ndjson";
+
   /** Sets the filename for the expected attribution file. */
   private static final String EXPECTED_ATTRIBUTION = "expected-attribution.json";
+
   /** Sets the filename for the actual fiss file. */
   private static final String ACTUAL_FISS = "rda-fiss-test-5-18.ndjson";
+
   /** Sets the filename for the actual mcs file. */
   private static final String ACTUAL_MCS = "rda-mcs-test-1-4.ndjson";
+
   /** Sets the filename for the actual attribution file. */
   private static final String ACTUAL_ATTRIBUTION = "attribution.json";
 

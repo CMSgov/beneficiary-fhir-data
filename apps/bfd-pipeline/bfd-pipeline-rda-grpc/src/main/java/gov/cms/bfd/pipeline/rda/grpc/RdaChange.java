@@ -33,12 +33,16 @@ public class RdaChange<T> {
 
   /** The sequence number for the change. */
   private final long sequenceNumber;
+
   /** The change type. */
   private final Type type;
+
   /** The claim being changed. */
   private final T claim;
+
   /** The timestamp of the change. */
   private final Instant timestamp;
+
   /** The source of the change. */
   private final Source source;
 
@@ -50,10 +54,13 @@ public class RdaChange<T> {
   public static class Source {
     /** The phase. */
     private Short phase;
+
     /** The phase sequence number. */
     private Short phaseSeqNum;
+
     /** The extract date. */
     private LocalDate extractDate;
+
     /** The timestamp of transmission. */
     private Instant transmissionTimestamp;
   }

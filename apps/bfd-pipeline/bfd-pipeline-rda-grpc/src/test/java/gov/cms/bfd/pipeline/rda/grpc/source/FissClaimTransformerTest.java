@@ -87,16 +87,21 @@ public class FissClaimTransformerTest {
 
   /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
+
   /** The test hasher. */
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
+
   /** The transformer under test. */
   private final FissClaimTransformer transformer =
       new FissClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
+
   /** Creates fiss claim changes for testing changes are as expected. */
   private FissClaimChange.Builder changeBuilder;
+
   /** Creates a claim for testing in changes and transformations. */
   private FissClaim.Builder claimBuilder;
+
   /** A claim object used for validation (the expected value of the transformation/change). */
   private RdaFissClaim claim;
 
@@ -2644,6 +2649,7 @@ public class FissClaimTransformerTest {
           .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
           .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaChange<RdaFissClaim> transformClaim(FissClaim claim) {
@@ -2657,6 +2663,7 @@ public class FissClaimTransformerTest {
               .setClaim(claim);
       return transformer.transformClaim(changeBuilder.build());
     }
+
     /** {@inheritDoc} */
     @Override
     FissClaim buildClaim(FissClaim.Builder builder) {
@@ -2675,6 +2682,7 @@ public class FissClaimTransformerTest {
     FissClaim.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       return claimBuilder;
     }
+
     /** {@inheritDoc} */
     @Override
     RdaFissClaim getTestEntity(RdaFissClaim claim) {
@@ -2697,6 +2705,7 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissAuditTrailBuilder(0);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaFissAuditTrail getTestEntity(RdaFissClaim claim) {
@@ -2705,6 +2714,7 @@ public class FissClaimTransformerTest {
       assertEquals(EXPECTED_CLAIM_ID, answer.getClaimId());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
@@ -2726,6 +2736,7 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissPayersBuilder(0).getBeneZPayerBuilder();
     }
+
     /** {@inheritDoc} */
     @Override
     RdaFissPayer getTestEntity(RdaFissClaim claim) {
@@ -2734,6 +2745,7 @@ public class FissClaimTransformerTest {
       assertEquals(EXPECTED_CLAIM_ID, answer.getClaimId());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
@@ -2756,6 +2768,7 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissPayersBuilder(0).getInsuredPayerBuilder();
     }
+
     /** {@inheritDoc} */
     @Override
     RdaFissPayer getTestEntity(RdaFissClaim claim) {
@@ -2764,6 +2777,7 @@ public class FissClaimTransformerTest {
       assertEquals(EXPECTED_CLAIM_ID, answer.getClaimId());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
@@ -2787,6 +2801,7 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissProcCodesBuilder(0);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaFissProcCode getTestEntity(RdaFissClaim claim) {
@@ -2795,6 +2810,7 @@ public class FissClaimTransformerTest {
       assertEquals(EXPECTED_CLAIM_ID, answer.getClaimId());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
@@ -2836,6 +2852,7 @@ public class FissClaimTransformerTest {
       }
       return claimBuilder.getFissDiagCodesBuilder(0);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaFissDiagnosisCode getTestEntity(RdaFissClaim claim) {
@@ -2844,6 +2861,7 @@ public class FissClaimTransformerTest {
       assertEquals(EXPECTED_CLAIM_ID, answer.getClaimId());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {

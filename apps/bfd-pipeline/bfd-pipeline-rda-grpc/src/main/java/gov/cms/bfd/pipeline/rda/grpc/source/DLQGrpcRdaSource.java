@@ -44,8 +44,10 @@ public class DLQGrpcRdaSource<TMessage, TClaim> extends AbstractGrpcRdaSource<TM
 
   /** Object for use in querying the database. */
   private final DLQDao dao;
+
   /** Used to compare sequence values. */
   private final BiPredicate<Long, TMessage> sequencePredicate;
+
   /** Number of days after which processed messages should expire and be deleted from the DLQ. */
   private final Optional<Integer> messageErrorExpirationDays;
 

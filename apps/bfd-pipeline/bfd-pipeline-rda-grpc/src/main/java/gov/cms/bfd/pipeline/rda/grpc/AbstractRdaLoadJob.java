@@ -56,17 +56,23 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
 
   /** The job configuration. */
   private final Config config;
+
   /** Factory for creating pre-job tasks. */
   private final Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory;
+
   /** Factory for the RDA source. */
   private final Callable<RdaSource<TResponse, TClaim>> sourceFactory;
+
   /** Factory for the RDA sink. */
   private final ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception>
       sinkFactory;
+
   /** Logger provided from each subclass. */
   private final Logger logger;
+
   /** Holds the metric data. */
   private final Metrics metrics;
+
   /**
    * This is used to enforce that this job can only be executed by a single thread at any given
    * time. If multiple threads call the job at the same time only the first will do any work.
@@ -357,10 +363,13 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
   static class Metrics {
     /** Number of times the job has been called. */
     private final Counter calls;
+
     /** Number of calls that completed successfully. */
     private final Counter successes;
+
     /** Number of calls that ended in some sort of failure. */
     private final Counter failures;
+
     /** Number of objects that have been successfully processed. */
     private final Counter processed;
 

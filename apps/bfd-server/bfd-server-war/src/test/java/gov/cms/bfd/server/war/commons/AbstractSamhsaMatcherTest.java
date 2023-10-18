@@ -47,22 +47,27 @@ public class AbstractSamhsaMatcherTest {
 
   /** A mock Coding to be used as a HCPCS code. */
   private static final Coding HCPCS_CODING = mock(Coding.class);
+
   /** A mock Coding to be used as a SAMHSA code. */
   private static final Coding SAMHSA_CODING = mock(Coding.class);
+
   /** A mock Coding to be used as a non-hcpcs, non-samhsa code. */
   private static final Coding OTHER_CODING = mock(Coding.class);
 
   /** A list of that contains a HCPCs coding. */
   private static final List<Coding> CODINGS_WITH_HCPCS =
       List.of(OTHER_CODING, HCPCS_CODING, SAMHSA_CODING, OTHER_CODING);
+
   /** A list of that does not contain a HCPCs coding. */
   private static final List<Coding> CODINGS_WITHOUT_HCPCS =
       List.of(OTHER_CODING, SAMHSA_CODING, OTHER_CODING);
 
   /** A mock Coding to be used as a non-DRG code. */
   private static final Coding NON_DRG_CODING = mock(Coding.class);
+
   /** A mock Coding to be used as a DRG non-SAMHSA code. */
   private static final Coding DRG_NON_SAMHSA_CODING = mock(Coding.class);
+
   /** A mock Coding to be used as a DRG + SAMHSA code. */
   private static final Coding DRG_SAMHSA_CODING = mock(Coding.class);
 

@@ -65,12 +65,16 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
 
   /** capture performance metrics. */
   private final MetricRegistry metricRegistry;
+
   /** drug description lookup table. */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
   /** NPI lookup table. */
   private final NPIOrgLookup npiOrgLookup;
+
   /** The samhsa matcher. */
   private final R4EobSamhsaMatcher samhsaMatcher;
+
   /** Database entity manager. */
   private EntityManager entityManager;
 
@@ -80,16 +84,22 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
 
   /** the ClaimTransformer interface for execution. */
   private ClaimTransformerInterfaceV2 claimTransformer = null;
+
   /** the claim type to retreive data for. */
   private ClaimType claimType;
+
   /** beneficiary identifier to process. */
   private Long id = 0L;
+
   /** date range that lastUpdate falls within. */
   private Optional<DateRangeParam> lastUpdated = Optional.empty();
+
   /** date range that clm_thru_dt falls within. */
   private Optional<DateRangeParam> serviceDate = Optional.empty();
+
   /** whether to return tax numbers. */
   private boolean includeTaxNumbers = false;
+
   /** whether to exclude SAMHSA claims. */
   private boolean excludeSamhsa = false;
 
@@ -99,10 +109,13 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
 
   /** capture exception if thrown. */
   private final AtomicReference<Exception> taskException = new AtomicReference<>();
+
   /** keep track of EOBs that were not removed (ignored) by SAMHSA iterations. */
   private final AtomicInteger samhsaIgnoredCount = new AtomicInteger(-1);
+
   /** keep track of SAMHSA removals. */
   private final AtomicInteger samhsaRemovedCount = new AtomicInteger(0);
+
   /** the list of EOBs that we'll return. */
   private final List<ExplanationOfBenefit> eobs = new ArrayList<ExplanationOfBenefit>();
 

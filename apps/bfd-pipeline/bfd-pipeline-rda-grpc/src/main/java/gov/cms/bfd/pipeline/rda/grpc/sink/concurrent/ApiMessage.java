@@ -17,6 +17,7 @@ class ApiMessage<TMessage> {
    * ClaimWriter}.
    */
   private static final long IdleSequenceNumber = -1;
+
   /**
    * Used to identify special message that triggers immediate buffer flush logic in {@link
    * ClaimWriter}.
@@ -25,10 +26,13 @@ class ApiMessage<TMessage> {
 
   /** Unique id of the claim associated with this message. */
   private final String claimId;
+
   /** Unique sequence number of this message. */
   private final long sequenceNumber;
+
   /** Version string from the RDA APi server that produced the message. */
   private final String apiVersion;
+
   /** Message received from the RDA API that contains a claim. */
   private final TMessage message;
 

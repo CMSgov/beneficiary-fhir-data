@@ -16,6 +16,7 @@ import org.hibernate.validator.constraints.Range;
 public class SequenceBean implements ModelBean {
   /** Name of the database sequence. */
   @NotNull @JavaName private String name;
+
   /** Number of values allocated per call to the sequence. */
   @Range(min = 1)
   @Builder.Default

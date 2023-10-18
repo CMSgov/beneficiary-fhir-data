@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 public class DataTransformerTest {
   /** The transformer under test. */
   private DataTransformer transformer;
+
   /** The copied data to test. */
   private List<Object> copied;
 

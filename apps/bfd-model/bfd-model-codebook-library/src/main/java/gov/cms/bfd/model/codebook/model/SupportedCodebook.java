@@ -28,8 +28,10 @@ public enum SupportedCodebook {
 
   /** Describes the name of the resource file for the codebook. */
   private final String codebookPdfResourceName;
+
   /** The human-readable display name of the codebook. */
   private final String displayName;
+
   /** The version of the codebook. */
   private final String version;
 

@@ -126,8 +126,10 @@ public class StringPartitionerTest {
   private static class Distribution {
     /** Number of assignments. */
     private int total;
+
     /** Min number of assignments for any single partition. */
     private int min;
+
     /** Max number of assignments for any single partition. */
     private int max;
 

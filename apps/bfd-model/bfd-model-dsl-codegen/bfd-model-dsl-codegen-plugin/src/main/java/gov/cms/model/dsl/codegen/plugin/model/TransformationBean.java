@@ -35,12 +35,14 @@ public class TransformationBean implements ModelBean {
   @NotNull
   @JavaName(type = JavaNameType.Property)
   private String from;
+
   /**
    * Name of the field/property in the destination object to copy the data to. Can be omitted (left
    * null) if the destination field name is identical to the source field name.
    */
   @JavaName(type = JavaNameType.Property)
   private String to;
+
   /**
    * Specifies which components (if any) of the {@code from} are optional (possess a {@code has}
    * method). Optional values can be null or empty in the source without triggering an error.
@@ -49,14 +51,17 @@ public class TransformationBean implements ModelBean {
    */
   @Builder.Default
   private OptionalComponents optionalComponents = OptionalComponents.FieldAndProperty;
+
   /**
    * Name of the transformer to use when transforming/copying the value. Refer to {@link
    * gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil} for how this is mapped to actual
    * transformer instances.
    */
   @TransformerName private String transformer;
+
   /** Default value to use if a field has empty string value in the source object. */
   private String defaultValue;
+
   /**
    * Map of configuration option key/value pairs that can modify the default behavior of the
    * transformer. Which key/value pairs are appropriate depend on the transformer.

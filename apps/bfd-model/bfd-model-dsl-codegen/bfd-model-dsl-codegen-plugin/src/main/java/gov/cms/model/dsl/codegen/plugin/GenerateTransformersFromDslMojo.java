@@ -432,6 +432,7 @@ public class GenerateTransformersFromDslMojo extends AbstractMojo {
   static class ArrayTransformSpec {
     /** Copy of {@link TransformationBean#from} value. */
     private final String from;
+
     /** Matching {#link {@link JoinBean} to transform. */
     private final JoinBean join;
   }

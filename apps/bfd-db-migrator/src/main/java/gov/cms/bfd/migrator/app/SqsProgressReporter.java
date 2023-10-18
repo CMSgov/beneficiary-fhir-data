@@ -44,10 +44,13 @@ public class SqsProgressReporter {
 
   /** Used to communicate with SQS. */
   private final SqsDao sqsDao;
+
   /** URL of the queue we post messages to. */
   private final String queueUrl;
+
   /** Applied to every message to identify a specific sequence for FIFO purposes. */
   private final String messageGroupId;
+
   /**
    * Applied to every message to uniquely identify it within a specific sequence. Explicit
    * deduplication ids prevent SQS assuming two messages with the same hash are redundant.

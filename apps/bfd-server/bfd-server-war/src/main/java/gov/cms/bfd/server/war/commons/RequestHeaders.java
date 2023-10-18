@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class RequestHeaders {
   /** The request details. */
   RequestDetails requestDetails;
+
   /** A map of all the header names and values. */
   Map<String, Object> headerNVs = new HashMap<String, Object>();
 

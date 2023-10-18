@@ -66,16 +66,22 @@ import org.mockito.quality.Strictness;
 public class CarrierClaimTransformerV2Test {
   /** The claim under test. */
   CarrierClaim claim;
+
   /** The eob loaded before each test from a file. */
   ExplanationOfBenefit eob;
+
   /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** The transformer under test. */
   CarrierClaimTransformerV2 carrierClaimTransformer;
+
   /** The mock metric registry. */
   @Mock MetricRegistry mockMetricRegistry;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 
@@ -1494,6 +1500,7 @@ public class CarrierClaimTransformerV2Test {
         "National Provider Identifier",
         careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getDisplay());
   }
+
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
    * the specified {@link CarrierClaim}.
