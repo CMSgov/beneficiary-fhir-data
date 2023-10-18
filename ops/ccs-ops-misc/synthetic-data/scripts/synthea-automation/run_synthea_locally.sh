@@ -445,11 +445,11 @@ wait_for_manifest_done
 if [[ -n ${BEG_BENE_ID} ]]; then
   upload_props_file_to_s3
 else
-  #error_exit "end state BEG_BENE_ID variables unset...exiting"
-#fi
+  error_exit "end state BEG_BENE_ID variables unset...exiting"
+fi
 
 # cleanup after ourselves...
-#clean_up
+clean_up
 
 echo
 echo "============================================="
