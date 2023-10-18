@@ -105,3 +105,9 @@ variable "ami_id_override" {
   description = "BFD Server Load override ami-id. Defaults to latest server-load AMI from `master`."
   type        = string
 }
+
+variable "server_load_dir" {
+  default     = "/opt/server-load"
+  description = "BFD Server Load directory."
+  type        = string
+}

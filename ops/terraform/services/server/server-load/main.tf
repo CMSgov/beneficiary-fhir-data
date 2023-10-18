@@ -123,6 +123,7 @@ resource "aws_instance" "this" {
     warm_instance_target = var.warm_instance_target
     stop_on_scaling      = var.stop_on_scaling
     stop_on_node_limit   = var.stop_on_node_limit
+    server_load_dir      = var.server_load_dir
   })
 }
 
