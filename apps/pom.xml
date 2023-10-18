@@ -84,7 +84,7 @@
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
         <micrometer.version>1.11.4</micrometer.version>
         <metrics.version>4.2.21</metrics.version>
-        <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
+        <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.15.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.21.1</aws-java-sdk-bom.version>
         <aws.crt.version>0.27.3</aws.crt.version>
@@ -160,7 +160,7 @@
         <jetty.version>10.0.16</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.0.0</maven.failsafe.plugin.version>
+        <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
         <datasource-proxy.version>1.9</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
         <org.apache.spark.version>3.5.0</org.apache.spark.version>
