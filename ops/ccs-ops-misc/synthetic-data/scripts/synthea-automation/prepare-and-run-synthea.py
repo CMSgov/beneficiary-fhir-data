@@ -62,6 +62,9 @@ def validate_and_run(args):
     generated_benes = args[2]
     future_months = int(args[3])
     
+    contract_target = args[4]
+    use_contract_target = args[5]
+    
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
     
@@ -80,15 +83,16 @@ def validate_and_run(args):
     
     end_state_properties_file = read_file_lines(end_state_file_path)
     
-    ## If contract target is passed/set, add a line to replace the synthea properties:
+    ## If contract target is requested via arg5, add a line to replace the synthea properties:
     ## exporter.bfd.partd_contract_start and exporter.bfd.partd_contract_count
-    if len(args) > 4:
-        contract_target = args[4]
+    if use_contract_target == "true":
+        if len(contract_target) != 5:
+            print(f"Given contract number must be 5 characters, received '{contract_target}'")
+            print("Returning with exit code 1")
+            sys.exit(1)
         print("Generating using partD contract: " + contract_target)
         end_state_properties_file.append("exporter.bfd.partd_contract_start=" + contract_target)
         end_state_properties_file.append("exporter.bfd.partd_contract_count=1")
-    else:
-        print("No partD contract target specified, using default")
     
     update_property_file(end_state_properties_file, synthea_prop_filepath)
     print("Updated synthea properties")
@@ -162,9 +166,6 @@ def update_manifest(synthea_output_filepath, end_state_properties_file, new_end_
     lines_to_add.append(f"<clm_id_end>{clm_id_end}</clm_id_end>")
     lines_to_add.append(f"<pde_id_end>{pde_id_end}</pde_id_end>")
     lines_to_add.append(f"<generated>{timestamp}</generated>")
-    
-    ## TODO: grab the NEW end state and list out the ends of fields in here, replace _start with _end in the prop name
-    
     lines_to_add.append("</preValidationProperties>")
     lines_to_add.append("</dataSetManifest>")
     write_string = '\n'.join(lines_to_add)

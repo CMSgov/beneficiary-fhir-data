@@ -14,6 +14,9 @@ help() {
   echo "--synthea_jar, -j       : boolean (true/false) indicating to use Synthea Release jar file (default true)"
   echo "--cleanup, -c           : boolean (true/false) whether to perform 'pre' and 'post' file cleanup (default true)"
   echo "--num_future_months, -f : number of months into the future claims can have their claim dates set to (default 0)"
+  echo "--target_contract, -tc  : indicates a partD contract to tie all generated benes to if --use_target_contract is set to true"
+  echo "--use_target_contract, -utc : If set to true, indicates to tie all generated items to a single partD contract specified by --target_contract, must be 5 characters (default Y9999)"
+
   exit 1;
 }
 
@@ -32,6 +35,10 @@ SKIP_SYNTHEA_BUILD="true"
 GENERATE_FUTURE="false"
 # num of months into future for future claim lines
 NUM_FUTURE_MONTHS=0
+# partD contract to target, if USE_TARGET_CONTRACT is set to true
+TARGET_CONTRACT="Y9999"
+# whether to use the target contract when generating data
+USE_TARGET_CONTRACT="false"
 
 # setup for args we'll handle
 args=$(getopt -l "num:build_root:target_env:synthea_jar:synthea_validate:cleanup:help" -o "n:b:t:j:v:c:h" -- "$@")
@@ -88,6 +95,17 @@ while [ $# -ge 1 ]; do
             fi
             shift
             ;;
+        -tc|--target_contract)
+            TARGET_CONTRACT="$2"
+            shift
+            ;;
+        -utc|--use_target_contract)
+            USE_TARGET_CONTRACT=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+            if [[ "${USE_TARGET_CONTRACT}" != "true" && "${USE_TARGET_CONTRACT}" != "false" ]]; then
+              echo "ERROR, Invalid boolean value for using target contract: ${USE_TARGET_CONTRACT}" >&2; exit 1
+            fi
+            shift
+            ;;
         -h|--help)
               help
               ;;
@@ -97,13 +115,17 @@ done
 
 echo "Runnning script with args:"
 echo "=================================================="
-echo "BFD environment(s)          : ${TARGET_ENV}"
-echo "Num beneficiaries to create : ${NUM_GENERATED_BENES}"
-echo "Synthea build directory     : ${BUILD_ROOT_DIR}"
-echo "Use Synthea release jar     : ${SKIP_SYNTHEA_BUILD}"
-echo "Perform file cleanup        : ${CLEANUP}"
-echo "Generate future months      : ${NUM_FUTURE_MONTHS}"
-echo "Generate future files       : ${GENERATE_FUTURE}"
+echo "BFD environment(s)           : ${TARGET_ENV}"
+echo "Num beneficiaries to create  : ${NUM_GENERATED_BENES}"
+echo "Synthea build directory      : ${BUILD_ROOT_DIR}"
+echo "Use Synthea release jar      : ${SKIP_SYNTHEA_BUILD}"
+echo "Perform file cleanup         : ${CLEANUP}"
+echo "Generate future months       : ${NUM_FUTURE_MONTHS}"
+echo "Generate future files        : ${GENERATE_FUTURE}"
+echo "Using single target contract : ${USE_TARGET_CONTRACT}"
+if [[ "${USE_TARGET_CONTRACT}" == "true" ]]; then
+  echo "Target contract              : ${TARGET_CONTRACT}"
+fi
 echo ""
 
 # the root will probably be passed in by Jenkins (maybe /opt?)...using /opt/dev for now
@@ -198,8 +220,6 @@ clean_up() {
     chmod 644 "${BFD_SYNTHEA_AUTO_LOCATION}/s3_utilities.py"
   fi
 }
-# we'll trap system interrupts and perform cleanup.
-trap "clean_up" INT HUP
 
 # utility function that can be invoked to terminate (exit) the script with a system
 # status denoting non-success.
@@ -211,9 +231,6 @@ error_exit() {
 }
 
 #-------------------- MAIN LOGIC --------------------#
-
-# ensure known good state
-clean_up
 
 # Function to clone the synthea generation application, scripts, and ancillary
 # files from GitHub; it then builds the application via gradle.
@@ -294,11 +311,13 @@ download_props_file_from_s3(){
 # 2: location of synthea git repo
 # 3: number of beneficiaries to be generated
 # 4: environment to load/validate; either: test, prod-sbx, prod or comma-delimited string containing any of them
+# 5: target contract to use, if 6 is set to true
+# 6: true/false whether to associate all generated items with a single contract, using arg5
 #
 prepare_and_run_synthea(){
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
   source .venv/bin/activate
-  python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${NUM_GENERATED_BENES}" "${NUM_FUTURE_MONTHS}"
+  python3 prepare-and-run-synthea.py "${BFD_END_STATE_PROPERTIES}" "${TARGET_SYNTHEA_DIR}" "${NUM_GENERATED_BENES}" "${NUM_FUTURE_MONTHS}" "${TARGET_CONTRACT}" "${USE_TARGET_CONTRACT}"
   deactivate
 }
 
@@ -379,6 +398,9 @@ upload_props_file_to_s3(){
 }
 
 #----------------- GO! ------------------#
+# we'll trap system interrupts and perform cleanup.
+trap "clean_up" INT HUP
+
 # general fail-safe to perform cleanup of any directories and files germane to executing
 # this shell script.
 clean_up
@@ -423,11 +445,11 @@ wait_for_manifest_done
 if [[ -n ${BEG_BENE_ID} ]]; then
   upload_props_file_to_s3
 else
-  error_exit "end state BEG_BENE_ID variables unset...exiting"
-fi
+  #error_exit "end state BEG_BENE_ID variables unset...exiting"
+#fi
 
 # cleanup after ourselves...
-clean_up
+#clean_up
 
 echo
 echo "============================================="
