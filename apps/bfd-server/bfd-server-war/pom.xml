@@ -439,6 +439,32 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <classpathScope>test</classpathScope>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>gov.cms.bfd.server.war.OpenApiDocs</argument>
+                                <argument>${project.version}</argument>
+                                <argument>${project.basedir}</argument>
+                                <argument>${project.basedir}/../../../dist</argument>
+                            </arguments>
+                        </configuration>
+                        <id>create-openapi-artifacts</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
