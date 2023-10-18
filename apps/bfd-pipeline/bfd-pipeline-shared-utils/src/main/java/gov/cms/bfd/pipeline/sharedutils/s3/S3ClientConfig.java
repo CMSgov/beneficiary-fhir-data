@@ -81,7 +81,12 @@ public class S3ClientConfig {
   @CanIgnoreReturnValue
   public void configureS3ServiceForAsyncS3(S3CrtAsyncClientBuilder builder) {
     awsClientConfig.getRegion().ifPresent(builder::region);
-    awsClientConfig.getEndpointOverride().ifPresent(builder::endpointOverride);
+    final var endpointOverride = awsClientConfig.getEndpointOverride().orElse(null);
+    if (endpointOverride != null) {
+      builder.endpointOverride(endpointOverride);
+      // prevents AWS SDK from adding bucket name to host name when using localstack
+      builder.forcePathStyle(true);
+    }
     if (awsClientConfig.getAccessKey().isPresent() && awsClientConfig.getSecretKey().isPresent()) {
       builder.credentialsProvider(
           StaticCredentialsProvider.create(
