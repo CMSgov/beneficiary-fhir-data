@@ -12,6 +12,7 @@ public class ConfigException extends RuntimeException {
 
   /** Name of the configuration variable that triggered this exception. */
   @Getter private final String name;
+
   /** Detail of the particular error. */
   @Getter private final String detail;
 

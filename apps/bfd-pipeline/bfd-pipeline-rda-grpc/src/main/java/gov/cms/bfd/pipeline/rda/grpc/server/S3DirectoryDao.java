@@ -52,10 +52,13 @@ import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 public class S3DirectoryDao implements AutoCloseable {
   /** Prefix added to cache file name to indicate it is a data file. */
   private static final String DataFilePrefix = "s3-";
+
   /** Suffix added to cache file name to indicate it is a data file. */
   private static final String DataFileSuffix = ".dat";
+
   /** Inserted between cache file name and suffix when building a data file name. */
   public static final String EtagSeparator = "-";
+
   /** Arbitrary prefix used to generate temp file name when a file is downloaded. */
   private static final String TempPrefix = "s3d";
 
@@ -67,8 +70,10 @@ public class S3DirectoryDao implements AutoCloseable {
 
   /** The DAO for interacting with AWS S3 buckets and files. */
   private final S3Dao s3Dao;
+
   /** The S3 bucket containing source files. */
   @Getter private final String s3BucketName;
+
   /** The directory path within bucket containing source files. */
   @Getter private final String s3DirectoryPath;
 

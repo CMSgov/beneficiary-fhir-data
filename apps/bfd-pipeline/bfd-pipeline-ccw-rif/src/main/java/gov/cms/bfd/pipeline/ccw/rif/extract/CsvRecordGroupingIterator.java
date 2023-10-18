@@ -25,6 +25,7 @@ import org.apache.commons.csv.CSVRecord;
 public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>> {
   /** An iterator for a record. */
   private final Iterator<CSVRecord> singleRecordIter;
+
   /** Grouper for csv records. */
   private final CsvRecordGrouper grouper;
 

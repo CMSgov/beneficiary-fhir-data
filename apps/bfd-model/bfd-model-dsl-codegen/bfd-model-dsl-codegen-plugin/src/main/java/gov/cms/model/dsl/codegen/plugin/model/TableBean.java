@@ -26,33 +26,43 @@ import lombok.Singular;
 public class TableBean implements ModelBean {
   /** Name of the table in the database. */
   @NotNull @JavaName private String name;
+
   /** Name of the schema containing the table. Can be null to use default schema. */
   @JavaName private String schema;
+
   /** Optional comment to be added to this table's entity class when it is generated. */
   private String comment;
+
   /** True if names should be quoted in the JPA annotation arguments for this table. */
   @Builder.Default private boolean quoteNames = false;
+
   /** True if an {@code equals} method should be generated in the entity class. */
   @Builder.Default private boolean equalsNeeded = true;
+
   /**
    * Name to use for inner class used for composite primary key if this table has more than one
    * column in the key.
    */
   @NotNull @JavaName @Builder.Default private String compositeKeyClassName = "PK";
+
   /**
    * Names of primary key components. Every name must match either a {@link ColumnBean#name} or a
    * {@link JoinBean#fieldName} from this table.
    */
   @NotNull @Singular private List<@JavaName String> primaryKeyColumns = new ArrayList<>();
+
   /**
    * Names of columns used for generated {@code equals} method. Every name must match a {@link
    * ColumnBean#name} from this table. Can be different than the primary key columns if necessary.
    */
   @NotNull @Singular private List<@JavaName String> equalsColumns = new ArrayList<>();
+
   /** All of the {@link ColumnBean} objects for the columns of this table. */
   @NotNull @Singular private List<@Valid ColumnBean> columns = new ArrayList<>();
+
   /** All of the {@link JoinBean} objects for the joins involving this table. */
   @NotNull @Singular private List<@Valid JoinBean> joins = new ArrayList<>();
+
   /** List of additional fields to add to the lombok generated {@code Fields} class. */
   @NotNull @Singular
   private List<@Valid AdditionalFieldName> additionalFieldNames = new ArrayList<>();

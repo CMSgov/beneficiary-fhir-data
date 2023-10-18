@@ -16,8 +16,10 @@ import reactor.core.publisher.Sinks;
 public class BlockingPublisher<T> {
   /** Limits the number of unconsumed messages that can be emitted. */
   private final Semaphore available;
+
   /** Used to actually publish messages to subscribers. */
   private final Sinks.Many<T> reactiveSink;
+
   /** {@link Flux} that subscribers use to receive messages. */
   private final Flux<T> flux;
 

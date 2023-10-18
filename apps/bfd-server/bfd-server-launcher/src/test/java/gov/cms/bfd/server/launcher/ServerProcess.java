@@ -30,12 +30,16 @@ public final class ServerProcess implements AutoCloseable {
 
   /** The App process under test. */
   private Process appProcess;
+
   /** Consumes the app stdout for validation. */
   private ProcessOutputConsumer appRunConsumer;
+
   /** The thread for running the {@link #appRunConsumer}. */
   private Thread appRunConsumerThread;
+
   /** The server uri to use. */
   private URI serverUri;
+
   /** The process output value. */
   private Optional<Integer> exitValue;
 
@@ -290,8 +294,10 @@ public final class ServerProcess implements AutoCloseable {
   public static final class JvmDebugOptions {
     /** If debug mode is on. */
     private final JvmDebugEnableMode debugEnableMode;
+
     /** If debug mode is attached. */
     private final JvmDebugAttachMode debugAttachMode;
+
     /** The port to attach on. */
     private final Integer port;
 

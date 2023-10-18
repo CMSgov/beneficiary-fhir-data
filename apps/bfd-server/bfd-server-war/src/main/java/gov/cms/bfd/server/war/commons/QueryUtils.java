@@ -27,35 +27,49 @@ public class QueryUtils {
 
   /** BitSet index identifier for Carrier Claims. */
   public static final int CARRIER_HAS_DATA = 0;
+
   /** BitSet index identifier for Inpatient Claims. */
   public static final int INPATIENT_HAS_DATA = 1;
+
   /** BitSet index identifier for Outpatient Claims. */
   public static final int OUTPATIENT_HAS_DATA = 2;
+
   /** BitSet index identifier for SNF Claims. */
   public static final int SNF_HAS_DATA = 3;
+
   /** BitSet index identifier for DME Claims. */
   public static final int DME_HAS_DATA = 4;
+
   /** BitSet index identifier for HHA Claims. */
   public static final int HHA_HAS_DATA = 5;
+
   /** BitSet index identifier for Hospice Claims. */
   public static final int HOSPICE_HAS_DATA = 6;
+
   /** BitSet index identifier for Part D Events. */
   public static final int PART_D_HAS_DATA = 7;
 
   /** bitwise value denoting CARRIER_CLAIMS data for a beneficiary. */
   public static final int V_CARRIER_HAS_DATA = (1 << CARRIER_HAS_DATA);
+
   /** bitwise value denoting INPATIENT_CLAIMS data for a beneficiary. */
   public static final int V_INPATIENT_HAS_DATA = (1 << INPATIENT_HAS_DATA);
+
   /** bitwise value denoting OUTPATIENT_CLAIMS data for a beneficiary. */
   public static final int V_OUTPATIENT_HAS_DATA = (1 << OUTPATIENT_HAS_DATA);
+
   /** bitwise value denoting SNF_CLAIMS data for a beneficiary. */
   public static final int V_SNF_HAS_DATA = (1 << SNF_HAS_DATA);
+
   /** bitwise value denoting DME_CLAIMS data for a beneficiary. */
   public static final int V_DME_HAS_DATA = (1 << DME_HAS_DATA);
+
   /** bitwise value denoting HHA_CLAIMS data for a beneficiary. */
   public static final int V_HHA_HAS_DATA = (1 << HHA_HAS_DATA);
+
   /** bitwise value denoting HOSPICE_CLAIMS data for a beneficiary. */
   public static final int V_HOSPICE_HAS_DATA = (1 << HOSPICE_HAS_DATA);
+
   /** bitwise value denoting PARTD_EVENTS data for a beneficiary. */
   public static final int V_PART_D_HAS_DATA = (1 << PART_D_HAS_DATA);
 

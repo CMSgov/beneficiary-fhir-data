@@ -8,8 +8,10 @@ import java.util.List;
 public class LoadedBatchBuilder {
   /** The beneficiaries in this batch. */
   private final List<Long> beneficiaries;
+
   /** The loaded file's identifier. */
   private final long loadedFileId;
+
   /** The batch creation timestamp. */
   private final Instant timestamp;
 

@@ -14,37 +14,49 @@ public class BeneficiaryData {
 
   /** MBI Number. */
   public static final String MBI_NUM = BeneficiaryColumn.MBI_NUM.name();
+
   /** Beneficiary ID. */
   public static final String BENE_ID = BeneficiaryColumn.BENE_ID.name();
+
   /** Beneficiary Hic Number. */
   public static final String BENE_CRNT_HIC_NUM = BeneficiaryColumn.BENE_CRNT_HIC_NUM.name();
 
   /** Beneficiary Sur Name. */
   public static final String BENE_SRNM_NAME = BeneficiaryColumn.BENE_SRNM_NAME.name();
+
   /** Beneficiary Given Name. */
   public static final String BENE_GVN_NAME = BeneficiaryColumn.BENE_GVN_NAME.name();
+
   /** Beneficiary Middle Name. */
   public static final String BENE_MDL_NAME = BeneficiaryColumn.BENE_MDL_NAME.name();
+
   /** Beneficiary Birth Date. */
   public static final String BENE_BIRTH_DT = BeneficiaryColumn.BENE_BIRTH_DT.name();
+
   /** Neneficiary Sex Identification Code. */
   public static final String BENE_SEX_IDENT_CD = BeneficiaryColumn.BENE_SEX_IDENT_CD.name();
 
   /** Benenficiary ID. */
   private final String beneId;
+
   /** MBI Number. */
   private final String mbi;
+
   /** HICN Number. */
   private final String hicNo;
 
   /** Beneficiary First Name. */
   private final String firstName;
+
   /** Beneficiary Last Name. */
   private final String lastName;
+
   /** Beneficiary Middle Name. */
   private final String midName;
+
   /** Beneficiary Date of Birth. */
   private final String dob;
+
   /** Beneficiary Gender. */
   private final String gender;
 

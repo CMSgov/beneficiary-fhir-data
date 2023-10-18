@@ -28,6 +28,7 @@ public class IdHasher {
 
   /** The configuration. */
   @Getter private final Config config;
+
   /** The factory for generating secret keys. */
   private final SecretKeyFactory secretKeyFactory;
 
@@ -94,8 +95,10 @@ public class IdHasher {
 
     /** The number of hash iterations to use. */
     @Getter private final int hashIterations;
+
     /** The hash pepper. */
     private final byte[] hashPepper;
+
     /** The cache size. */
     @Builder.Default @Getter private final int cacheSize = DEFAULT_CACHE_SIZE;
 

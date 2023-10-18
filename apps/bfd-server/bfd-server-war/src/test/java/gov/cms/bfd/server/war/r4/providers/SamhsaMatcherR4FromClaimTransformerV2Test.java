@@ -41,41 +41,56 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
   /** The matcher used in tests. */
   private R4EobSamhsaMatcher samhsaMatcherV2;
+
   /** The HCPCS code for use in test cases. */
   private static final String CODING_SYSTEM_HCPCS_CD =
       TransformerConstants.BASE_URL_CCW_VARIABLES
           + "/"
           + CcwCodebookVariable.HCPCS_CD.getVariable().getId().toLowerCase();
+
   /** The DRG system url for use in test cases. */
   private static final String DRG_SYSTEM =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
+
   /** A blacklisted HCPCS code. */
   private static final String BLACKLISTED_HCPCS_CODE = "G2215";
+
   /** A non-SAMHSA HCPCS code. */
   private static final String NON_SAMHSA_HCPCS_CODE = "11111";
+
   /** A blacklisted IC9 diagnosis code. */
   private static final String BLACKLISTED_IC9_DIAGNOSIS_CODE = "291.0";
+
   /** A blacklisted IC10 diagnosis code. */
   private static final String BLACKLISTED_IC10_DIAGNOSIS_CODE = "F10.10";
+
   /** A blacklisted IC9 procedure code. */
   private static final String BLACKLISTED_IC9_PROCEDURE_CODE = "94.45";
+
   /** A blacklisted IC10 procedure code. */
   private static final String BLACKLISTED_IC10_PROCEDURE_CODE = "HZ2ZZZZ";
+
   /** A non-blacklisted IC code. */
   private static final String NON_BLACKLISTED_IC_CODE = "111111";
+
   /** A blacklisted DRG diagnosis code. */
   private static final String BLACKLISTED_DRG_DIAGNOSIS_CODE = "522";
+
   /** A non-blacklisted DRG diagnosis code. */
   private static final String NON_BLACKLISTED_DRG_DIAGNOSIS_CODE = "1111111";
 
   /** Claim indicator for PDE. */
   private static final String PART_D_EVENT_CLAIM = "PDE";
+
   /** Claim indicator for DME. */
   private static final String DME_CLAIM = "DME";
+
   /** Claim indicator for HHA. */
   private static final String HHA_CLAIM = "HHA";
+
   /** Claim indicator for Hospice. */
   private static final String HOSPICE_CLAIM = "HOSPICE";
+
   /** Claim indicator for Carrier. */
   private static final String CARRIER_CLAIM = "CARRIER";
 

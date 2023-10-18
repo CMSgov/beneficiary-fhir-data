@@ -29,6 +29,7 @@ import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 public final class CanonicalOperation {
   /** The operational endpoint. */
   private final Endpoint endpoint;
+
   /**
    * A mode, query parameter, HTTP header, etc. that meaningfully impacts the behavior of the
    * operation such that {@link CanonicalOperation}s with different values for it should be tracked

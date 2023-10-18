@@ -11,6 +11,7 @@ public class GenerateSqlFromDslMojoIT extends AbstractMojoIntegrationTestCase {
 
   /** The directory to find the mappings in for the test. */
   private final File mappingsDir = new File(baseFilesDir, "mappings");
+
   /** The directory to find the expected output sql for the test validation. */
   private final File expectedDir = new File(baseFilesDir, "expected");
 

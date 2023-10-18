@@ -57,14 +57,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class StandardGrpcRdaSourceTest {
   /** Value used as result from {@link RdaSink#readMaxExistingSequenceNumber()}. */
   public static final long DATABASE_SEQUENCE_NUMBER = 42;
+
   /** Value used when passing a non-empty configured sequence number to the constructor. */
   public static final long CONFIGURED_SEQUENCE_NUMBER = 18;
+
   /**
    * We need a starting time for the {@link Clock} used to compute idle time. The time and date are
    * arbitrary since only relative calculations are used.
    */
   private static final Instant BASE_TIME_FOR_TEST =
       ZonedDateTime.of(LocalDateTime.of(2022, 4, 19, 1, 2, 3), ZoneId.systemDefault()).toInstant();
+
   /** Configuration setting for {@link StandardGrpcRdaSource#minIdleMillisBeforeConnectionDrop}. */
   // JavadocReference - Just for documentation
   @SuppressWarnings("JavadocReference")
@@ -73,14 +76,19 @@ public class StandardGrpcRdaSourceTest {
 
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_1 = 101;
+
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_2 = 102;
+
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_3 = 103;
+
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_4 = 104;
+
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_5 = 105;
+
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer INVALID_CLAIM = 106;
 
@@ -89,22 +97,31 @@ public class StandardGrpcRdaSourceTest {
 
   /** A MeterRegistry used to verify metrics. */
   private MeterRegistry appMetrics;
+
   /** A mock clock used to when testing the idle time for dropped connection exceptions. */
   @Mock private Clock clock;
+
   /** A mock stream caller used to simulate data returned from the RDA API server. */
   @Mock private GrpcStreamCaller<Integer> caller;
+
   /** A mock channel used to simulate a connection to the RDA API server. */
   @Mock private ManagedChannel channel;
+
   /** A mock sink used to simulate writing claims to a database. */
   @Mock private RdaSink<Integer, Integer> sink;
+
   /** A mock gRPC call used to simulate call parameters for a gRPC call. */
   @Mock private ClientCall<Integer, Integer> clientCall;
+
   /** A mock response stream used to simulate claims arriving from the RDA API server. */
   @Mock private GrpcResponseStream<Integer> mockResponseStream;
+
   /** A mock {@link RdaVersion} to use for testing. */
   @Mock private RdaVersion rdaVersion;
+
   /** The object we are testing. */
   private StandardGrpcRdaSource<Integer, Integer> source;
+
   /** Shortcut for accessing the {@link StandardGrpcRdaSource.Metrics} object. */
   private StandardGrpcRdaSource.Metrics metrics;
 

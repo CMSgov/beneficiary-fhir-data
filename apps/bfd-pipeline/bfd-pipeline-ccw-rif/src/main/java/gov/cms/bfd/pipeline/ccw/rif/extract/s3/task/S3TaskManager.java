@@ -25,12 +25,16 @@ public final class S3TaskManager {
 
   /** The metrics registry. */
   private final MetricRegistry appMetrics;
+
   /** The extraction options. */
   private final ExtractionOptions options;
+
   /** Used for accessing objects in S3. */
   @Getter private final S3Dao s3Dao;
+
   /** The executor for file downloads. */
   private final TaskExecutor downloadTasksExecutor;
+
   /** The executor for file moves. */
   private final TaskExecutor moveTasksExecutor;
 

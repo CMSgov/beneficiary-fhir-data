@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 public final class RifFileRecords {
   /** The {@link RifFileEvent} that the {@link #getRecords()} {@link Stream} was produced from. */
   private final RifFileEvent sourceEvent;
+
   /** The {@link Stream} of {@link RifRecordEvent}s that was produced from the {@link RifFile}. */
   private final Stream<RifRecordEvent<?>> records;
 

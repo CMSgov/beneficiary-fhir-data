@@ -59,14 +59,17 @@ class ClaimDaoTest {
   /** Common value used in tests when a non-null lastUpdated parameter is needed. */
   private static final DateRangeParam LastUpdated =
       new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN, "2020-08-01"), null);
+
   /** Common value used in tests when a non-null serviceDate parameter is needed. */
   private static final DateRangeParam ServiceDate =
       new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN, "2020-08-01"), null);
 
   /** Used when creating a {@link ClaimDao}. */
   private MetricRegistry metricRegistry;
+
   /** Used when mocking query construction. */
   @Mock private EntityManager mockEntityManager;
+
   /** Used when mocking query construction. */
   @Mock private CriteriaBuilder mockBuilder;
 
@@ -609,12 +612,16 @@ class ClaimDaoTest {
   private static class MbiLookupTestParameter<TResource extends IBaseResource, TEntity> {
     /** Short name to identify the test case in log output. */
     private final String testName;
+
     /** Valid {@link ResourceTypeV2} instance being looked up. */
     private final ResourceTypeV2<TResource, TEntity> resourceType;
+
     /** Value to pass as lastUpdated parameter. */
     private final DateRangeParam lastUpdated;
+
     /** Value to pass as serviceDate parameter. */
     private final DateRangeParam serviceDate;
+
     /** Constructor to create sample instance of entity class. */
     private final Supplier<TEntity> instanceFactory;
 
@@ -632,8 +639,10 @@ class ClaimDaoTest {
   private static class DateRangeTestParameter {
     /** Short name to identify the test case in log output. */
     private final String testName;
+
     /** Value to pass as lastUpdated parameter. */
     private final DateRangeParam lastUpdated;
+
     /** Value to pass as serviceDate parameter. */
     private final DateRangeParam serviceDate;
 

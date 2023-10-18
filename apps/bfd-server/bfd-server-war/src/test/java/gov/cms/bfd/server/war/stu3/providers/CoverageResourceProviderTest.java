@@ -31,6 +31,7 @@ public class CoverageResourceProviderTest {
 
   /** The Metric registry. */
   @Mock private MetricRegistry metricRegistry;
+
   /** The Loaded filter manager. */
   @Mock private LoadedFilterManager loadedFilterManager;
 

@@ -30,12 +30,16 @@ public class DLQDaoIT {
 
   /** Fixed clock for predictable times. */
   private final Clock clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
+
   /** Expected type for all tests. */
   private final MessageError.ClaimType claimType = MessageError.ClaimType.FISS;
+
   /** Non-expected type for all tests. */
   private final MessageError.ClaimType ignoredClaimType = MessageError.ClaimType.MCS;
+
   /** Expiration age in days for deleting expired records. */
   private final int maxAgeDays = 100;
+
   /** Precomputed value for threshold of record expiration. */
   private final Instant oldestUpdateDateToKeep =
       clock.instant().truncatedTo(ChronoUnit.MICROS).minus(maxAgeDays, ChronoUnit.DAYS);

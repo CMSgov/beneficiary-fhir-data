@@ -12,6 +12,7 @@ public enum ClientSslIdentity {
   TRUSTED(ServerTestUtils.getSslStoresDirectory().resolve("client-trusted-keystore.pfx")),
   /** The untrusted keystore. */
   UNTRUSTED(ServerTestUtils.getSslStoresDirectory().resolve("client-untrusted-keystore.pfx"));
+
   /** The identity keystore. */
   private final Path identityKeyStore;
 

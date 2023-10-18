@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 /** Contains some shared utility code for parsing RIF files. */
 public final class RifParsingUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifParsingUtils.class);
+
   /** The {@link CSVFormat} for RIF file parsing/writing. */
   public static final CSVFormat CSV_FORMAT =
       CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');

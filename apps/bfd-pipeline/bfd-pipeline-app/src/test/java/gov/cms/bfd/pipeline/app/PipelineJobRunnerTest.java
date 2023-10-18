@@ -40,14 +40,19 @@ import org.mockito.quality.Strictness;
 public class PipelineJobRunnerTest {
   /** Mock tracker. */
   @Mock private PipelineJobRunner.Tracker tracker;
+
   /** Mock job. */
   @Mock private PipelineJob job;
+
   /** Mock clock. */
   @Mock private Clock clock;
+
   /** Mock sleep function. */
   @Mock private ThrowingConsumer<Long, InterruptedException> sleeper;
+
   /** Collects the summaries. */
   private List<JobRunSummary> summaries;
+
   /** The runner we are testing. */
   private PipelineJobRunner runner;
 

@@ -73,6 +73,7 @@ import org.junit.jupiter.api.Test;
 public class McsClaimTransformerTest {
   /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
+
   /** The test hasher. */
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
@@ -80,10 +81,13 @@ public class McsClaimTransformerTest {
   /** The transformer under test. */
   private final McsClaimTransformer transformer =
       new McsClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
+
   /** Creates MCS claim changes for testing changes are as expected. */
   private McsClaimChange.Builder changeBuilder;
+
   /** Creates a claim for testing in changes and transformations. */
   private McsClaim.Builder claimBuilder;
+
   /** A claim object used for validation (the expected value of the transformation/change). */
   private RdaMcsClaim claim;
 
@@ -1967,6 +1971,7 @@ public class McsClaimTransformerTest {
           .setIdrContrId("contr")
           .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaChange<RdaMcsClaim> transformClaim(McsClaim claim) {
@@ -1977,6 +1982,7 @@ public class McsClaimTransformerTest {
               .setClaim(claim);
       return transformer.transformClaim(changeBuilder.build());
     }
+
     /** {@inheritDoc} */
     @Override
     McsClaim buildClaim(McsClaim.Builder builder) {
@@ -1996,6 +2002,7 @@ public class McsClaimTransformerTest {
     McsClaim.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
       return claimBuilder;
     }
+
     /** {@inheritDoc} */
     @Override
     RdaMcsClaim getTestEntity(RdaMcsClaim claim) {
@@ -2018,6 +2025,7 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsAdjustmentsBuilder(0);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaMcsAdjustment getTestEntity(RdaMcsClaim claim) {
@@ -2026,6 +2034,7 @@ public class McsClaimTransformerTest {
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
@@ -2048,6 +2057,7 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsAuditsBuilder(0);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaMcsAudit getTestEntity(RdaMcsClaim claim) {
@@ -2056,6 +2066,7 @@ public class McsClaimTransformerTest {
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
@@ -2078,6 +2089,7 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsDetailsBuilder(0);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaMcsDetail getTestEntity(RdaMcsClaim claim) {
@@ -2086,6 +2098,7 @@ public class McsClaimTransformerTest {
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
@@ -2111,6 +2124,7 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsDiagnosisCodesBuilder(0);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaMcsDiagnosisCode getTestEntity(RdaMcsClaim claim) {
@@ -2119,6 +2133,7 @@ public class McsClaimTransformerTest {
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {
@@ -2141,6 +2156,7 @@ public class McsClaimTransformerTest {
       }
       return claimBuilder.getMcsLocationsBuilder(0);
     }
+
     /** {@inheritDoc} */
     @Override
     RdaMcsLocation getTestEntity(RdaMcsClaim claim) {
@@ -2149,6 +2165,7 @@ public class McsClaimTransformerTest {
       assertEquals("idrClmHdIcn", answer.getIdrClmHdIcn());
       return answer;
     }
+
     /** {@inheritDoc} */
     @Override
     String getLabel(String basicLabel) {

@@ -6,6 +6,7 @@ public final class OpenAPIContentProvider {
   /** Open API content short description for /Patient's identifier parameter. */
   public static final String PATIENT_SP_RES_ID_SHORT =
       "The patient resource identifier (_id) to search for";
+
   /** Open API content value for /Patient's identifier parameter. */
   public static final String PATIENT_SP_RES_ID_VALUE =
       """
@@ -28,6 +29,7 @@ public final class OpenAPIContentProvider {
 
   /** Open API content short description for /Patient's identifier parameter. */
   public static final String PATIENT_SP_IDENTIFIER_SHORT = "The patient identifier to search for";
+
   /** Open API content value for /Patient's identifier parameter. */
   public static final String PATIENT_SP_IDENTIFIER_VALUE =
       """
@@ -49,6 +51,7 @@ public final class OpenAPIContentProvider {
   /** Open API content short description for /Patient's resource bundle offset. */
   public static final String PATIENT_START_INDEX_SHORT =
       "The starting offset used for result pagination";
+
   /** Open API content value for /Patient's resource bundle offset. */
   public static final String PATIENT_START_INDEX_VALUE =
       """
@@ -62,6 +65,7 @@ public final class OpenAPIContentProvider {
 
   /** Open API content short description for /Patient's lastUpdated parameter. */
   public static final String PATIENT_LAST_UPDATED_SHORT = "When the resource version last changed";
+
   /** Open API content value for /Patient's lastUpdated parameter. */
   public static final String PATIENT_LAST_UPDATED_VALUE =
       """
@@ -76,6 +80,7 @@ public final class OpenAPIContentProvider {
 
   /** Open API content short description for /Patient's Part D contract ID to be used. */
   public static final String PATIENT_PARTD_CONTRACT_SHORT = "Part D coverage contract identifier";
+
   /**
    * Open API content value for /Patient's Part D contract ID to be used in determining Part D
    * events.
@@ -96,6 +101,7 @@ public final class OpenAPIContentProvider {
    * D events.
    */
   public static final String PATIENT_PARTD_REFYR_SHORT = "Part D contract reference year";
+
   /**
    * Open API content value for /Patient's Part D reference year to be used in determining Part D
    * events.
@@ -113,6 +119,7 @@ public final class OpenAPIContentProvider {
    * of data.
    */
   public static final String PATIENT_PARTD_CURSOR_SHORT = "The cursor used for result pagination";
+
   /**
    * Open API content value for /Patient's Part D event data; provides a URI for the _next_ set of
    * data.
@@ -128,6 +135,7 @@ public final class OpenAPIContentProvider {
   /** Open API content short description for /Patient's identifier parameter. */
   public static final String BENEFICIARY_SP_RES_ID_SHORT =
       "Identifier resource for the covered party";
+
   /** Open API content value for /Patient's identifier parameter. */
   public static final String BENEFICIARY_SP_RES_ID_VALUE =
       """
@@ -148,6 +156,7 @@ public final class OpenAPIContentProvider {
 
   /** Open API short description for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_SHORT = "A list of BFD claim types to include";
+
   /** Open API content value for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_VALUE =
       """
@@ -172,6 +181,7 @@ public final class OpenAPIContentProvider {
   /** Open API short description for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_SHORT =
       "Filter claims by the _billable period_. In other words, filter claims whose _through date_ fall within the given range";
+
   /** Open API content value for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_VALUE =
       """
@@ -188,6 +198,7 @@ public final class OpenAPIContentProvider {
   /** Open API short description for /ExplanationOfBenefit's excludeSAMSHA parameter. */
   public static final String EOB_EXCLUDE_SAMSHA_SHORT =
       "If _true_, exclude any (all) SAMHSA-related claims";
+
   /** Open API content value for /ExplanationOfBenefit's excludeSAMSHA parameter. */
   public static final String EOB_EXCLUDE_SAMSHA_VALUE =
       """
@@ -201,6 +212,7 @@ public final class OpenAPIContentProvider {
   /** Open API short description for /ExplanationOfBenefit's includeTaxNumbers parameter. */
   public static final String EOB_INCLUDE_TAX_NUMBERS_SHORT =
       "If `true`, tax numbers are included in the results.";
+
   /** Open API content value for /ExplanationOfBenefit's includeTaxNumbers parameter. */
   public static final String EOB_INCLUDE_TAX_NUMBERS_VALUE =
       """
@@ -212,6 +224,7 @@ public final class OpenAPIContentProvider {
   /** Open API content short description for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_SHORT =
       "The patient medicare beneficiary identifier (MBI) to search for.";
+
   /** Open API content value for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_VALUE =
       """
@@ -237,6 +250,7 @@ public final class OpenAPIContentProvider {
    */
   public static final String PAC_IS_HASHED =
       "A boolean indicating whether or not the MBI is hashed.";
+
   /** Open API content value for partially aducated claim MBI ID being hashed or not. */
   public static final String PAC_IS_HASHED_VALUE =
       """
@@ -267,6 +281,7 @@ public final class OpenAPIContentProvider {
   /** Open API short description for partially adjudicated claims excludeSAMSHA parameter. */
   public static final String PAC_EXCLUDE_SAMSHA_SHORT =
       "If _true_, exclude any (all) SAMHSA-related claims";
+
   /** Open API content value for partially adjudicated claims excludeSAMSHA parameter. */
   public static final String PAC_EXCLUDE_SAMSHA_VALUE =
       """
@@ -282,6 +297,7 @@ public final class OpenAPIContentProvider {
   /** Open API short description for partially adjudicated claims data. */
   public static final String PAC_SERVICE_DATE_SHORT =
       "Include claims whose date fall within the given range";
+
   /** Open API content value for partially adjudicated claims data. */
   public static final String PAC_SERVICE_DATE_VALUE =
       """

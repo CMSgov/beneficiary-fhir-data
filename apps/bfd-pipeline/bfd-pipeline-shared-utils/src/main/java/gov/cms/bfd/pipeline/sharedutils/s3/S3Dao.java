@@ -58,8 +58,10 @@ public class S3Dao implements AutoCloseable {
 
   /** The client for interacting with AWS S3 buckets and files. */
   private final S3Client s3Client;
+
   /** The client for interacting with AWS S3 buckets and files. */
   private final S3AsyncClient s3AsyncClient;
+
   /** Used to perform high throughput downloads. */
   private final S3TransferManager s3TransferManager;
 
@@ -419,8 +421,10 @@ public class S3Dao implements AutoCloseable {
   public static class S3ObjectSummary {
     /** The object's key. */
     private final String key;
+
     /** The object's eTag. */
     private final String eTag;
+
     /** The object's size. */
     private final long size;
 
@@ -462,10 +466,13 @@ public class S3Dao implements AutoCloseable {
   public static class S3ObjectDetails {
     /** The object's key. */
     private final String key;
+
     /** The object's eTag. */
     private final String eTag;
+
     /** The object's size. */
     private final long size;
+
     /** Key/value pairs of metadata from the object. */
     private final Map<String, String> metaData;
 

@@ -153,12 +153,16 @@ class AbstractRandomClaimGeneratorTest {
 
     /** A mask that dictates which fields are selected for altered testing. */
     private byte fieldMask;
+
     /** Determines how often a field is set when randomly generated. */
     private TestingState testingState;
+
     /** The minimum length of generated string values. */
     private int min;
+
     /** The maximum length of generated string values. */
     private int max;
+
     /** The maximum value for randomly generated integers. */
     private int maxInt;
 
@@ -276,6 +280,7 @@ class AbstractRandomClaimGeneratorTest {
   private static class FieldSet {
     /** The name of the field being set. */
     private final String propertyName;
+
     /** The logic used to supply the field value. */
     private final Supplier<Object> valueSupplier;
 

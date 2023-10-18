@@ -1100,11 +1100,13 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
   static class FieldDefinition {
     /** The {@link FieldSpec} defining how to generate the field itself. */
     private final FieldSpec fieldSpec;
+
     /**
      * The {@link AccessorSpec} defining how to generate the setter and getter methods for the
      * field.
      */
     private final AccessorSpec accessorSpec;
+
     /**
      * Optional value to define how to generate the field within our primary key inner class. Only
      * populated for fields that are part of the primary key.

@@ -86,17 +86,22 @@ public abstract class BaseAppConfiguration {
 
   /** Name of setting containing alternative endpoint URL for AWS services. */
   public static final String ENV_VAR_KEY_AWS_ENDPOINT = "AWS_ENDPOINT";
+
   /** Name of setting containing region name for AWS services. */
   public static final String ENV_VAR_KEY_AWS_REGION = "AWS_REGION";
+
   /** Name of setting containing access key for AWS services. */
   public static final String ENV_VAR_KEY_AWS_ACCESS_KEY = "AWS_ACCESS_KEY";
+
   /** Name of setting containing secret key for AWS services. */
   public static final String ENV_VAR_KEY_AWS_SECRET_KEY = "AWS_SECRET_KEY";
 
   /** Object for capturing the metrics data. */
   @Getter private final MetricOptions metricOptions;
+
   /** Holds the configured options for the database connection. */
   @Getter private final DatabaseOptions databaseOptions;
+
   /** Common configuration settings for all AWS clients. * */
   @Getter private final AwsClientConfig awsClientConfig;
 

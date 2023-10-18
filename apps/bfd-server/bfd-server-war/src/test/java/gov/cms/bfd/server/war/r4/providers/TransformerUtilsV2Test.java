@@ -1034,6 +1034,7 @@ public class TransformerUtilsV2Test {
     assertEquals(0, bundle.getTotal());
     assertEquals(0, Integer.parseInt(BfdMDC.get("resources_returned_count")));
   }
+
   /**
    * Verifies that {@link TransformerUtilsV2#createBundle} sets bundle with paging size correctly.
    */

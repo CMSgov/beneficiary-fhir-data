@@ -20,6 +20,7 @@ import lombok.Singular;
 public class EnumTypeBean implements ModelBean {
   /** Unique name of the enum class. */
   @NotNull @JavaName private String name;
+
   /** Optional package name for this enum if it is not an inner class of the entity. */
   @JavaName(type = JavaNameType.Compound)
   private String packageName;

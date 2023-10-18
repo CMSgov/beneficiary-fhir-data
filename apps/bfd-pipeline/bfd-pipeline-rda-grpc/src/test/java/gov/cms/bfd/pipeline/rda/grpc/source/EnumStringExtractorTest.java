@@ -22,6 +22,7 @@ public class EnumStringExtractorTest {
           FissClaimStatus.UNRECOGNIZED,
           ImmutableSet.of(FissClaimStatus.CLAIM_STATUS_SUSPEND),
           ImmutableSet.of());
+
   /** Test extractor for MCS claims. */
   private final EnumStringExtractor<McsClaim, McsStatusCode> mcsStatusExtractor =
       new EnumStringExtractor<>(
@@ -32,8 +33,10 @@ public class EnumStringExtractorTest {
           McsStatusCode.UNRECOGNIZED,
           ImmutableSet.of(McsStatusCode.STATUS_CODE_NOT_USED),
           ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
+
   /** The test Fiss claim to extract from. */
   private FissClaim.Builder fissClaim;
+
   /** The test MCS claim to extract from. */
   private McsClaim.Builder mcsClaim;
 

@@ -25,74 +25,93 @@ public class ColumnBean implements ModelBean {
   /** Regex used to recognize numeric columns by their SQL type. */
   private static final Pattern NumericTypeRegex =
       Pattern.compile("(numeric|decimal)(\\((\\d+)( *, *(\\d+))?\\))?", Pattern.CASE_INSENSITIVE);
+
   /**
    * Group number in {@link ColumnBean#NumericTypeRegex} that contains the numeric precision value.
    */
   private static final int NumericPrecisionGroup = 3;
+
   /** Group number in {@link ColumnBean#NumericTypeRegex} that contains the numeric scale value. */
   private static final int NumericScaleGroup = 5;
+
   /**
    * Regex to extract the length from a SQL type if it is character type with a defined integer
    * length.
    */
   private static final Pattern CharacterLengthRegex =
       Pattern.compile("(var)?char(\\((\\d+|max)\\))?", Pattern.CASE_INSENSITIVE);
+
   /**
    * Group number in {@link ColumnBean#CharacterLengthRegex} that contains the numeric length value.
    */
   private static final int CharacterLengthGroup = 3;
+
   /** Regex used to recognize date columns by their SQL type. */
   private static final Pattern DateTypeRegex = Pattern.compile("date", Pattern.CASE_INSENSITIVE);
 
   /** Name of the field in the entity object corresponding to this column. */
   @NotNull @JavaName private String name;
+
   /** Alternative name used in database for this column. Defaults to {@link ColumnBean#name}. */
   @JavaName private String dbName;
+
   /** SQL database type for this column. */
   @SqlType private String sqlType;
+
   /** Specific java type for the field in the entity object corresponding to this column. */
   @JavaType private String javaType;
+
   /**
    * Alternative type for generated accessor methods (getter/setter) for the field in the entity
    * object corresponding to this column.
    */
   @JavaType private String javaAccessorType;
+
   /**
    * Name of an enum type defined in the same mapping as this column. Should be found by calling
    * {@link MappingBean#findEnum(String)} on the mapping.
    */
   @EnumExistsInSameMapping @JavaName private String enumType;
+
   /** Text for insertion into the generated entity as a javadoc comment on the field. */
   private String comment;
+
   /**
    * Optional text describing fields of the same group to be returned together via a generated
    * accessor method.
    */
   private String groupName;
+
   /** Indicates whether the column in the database is nullable. */
   @Builder.Default private boolean nullable = true;
+
   /** Indicates whether the column in the database is an {@link GenerationType#IDENTITY} column. */
   @Builder.Default private boolean identity = false;
+
   /**
    * Indicates whether to add the updatable argument to the {@link javax.persistence.Column}
    * annotation.
    */
   @Builder.Default private boolean updatable = true;
+
   /**
    * The {@link FieldType} for the field. Either {@link FieldType#Column} or {@link
    * FieldType#Transient}.
    */
   @NotNull @Builder.Default private FieldType fieldType = FieldType.Column;
+
   /**
    * Minimum allowed length for non-null string value. Negative value means no column specific
    * number has been set.
    */
   @Builder.Default private int minLength = -1;
+
   /**
    * When true this column exists in the database table but is not exposed as a field in the entity
    * class. Intended for use as the target of {@link JoinBean#joinColumnName}.
    */
   @Builder.Default private boolean dbOnly = false;
+
   /** A {@link SequenceBean} if this column's value is set using a database sequence. */
   @Valid private SequenceBean sequence;
 

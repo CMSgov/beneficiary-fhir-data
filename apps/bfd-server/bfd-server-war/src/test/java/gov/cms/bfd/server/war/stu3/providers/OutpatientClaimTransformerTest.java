@@ -48,10 +48,13 @@ public final class OutpatientClaimTransformerTest {
 
   /** The transformer under test. */
   OutpatientClaimTransformer outpatientClaimTransformer;
+
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 

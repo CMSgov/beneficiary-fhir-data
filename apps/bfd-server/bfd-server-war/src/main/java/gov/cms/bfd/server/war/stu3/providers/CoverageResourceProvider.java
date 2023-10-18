@@ -65,8 +65,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
   /** The entity manager. */
   private EntityManager entityManager;
+
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
+
   /** The Loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
 

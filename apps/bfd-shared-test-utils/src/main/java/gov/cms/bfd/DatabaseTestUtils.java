@@ -52,6 +52,7 @@ public final class DatabaseTestUtils {
 
   /** The username used for HSQL locally. */
   public static final String HSQL_SERVER_USERNAME = "test";
+
   /** The password used for HSQL locally. */
   public static final String HSQL_SERVER_PASSWORD = "test";
 
@@ -60,6 +61,7 @@ public final class DatabaseTestUtils {
 
   /** The system property defined in pom.xml containing the image to use for test database. */
   public static final String TEST_CONTAINER_DATABASE_IMAGE_PROPERTY = "its.testcontainer.db.image";
+
   /** The default test container image to use when nothing is provided. */
   public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "postgres:14.7-alpine";
 
@@ -475,6 +477,7 @@ public final class DatabaseTestUtils {
   private static final class LoggerWriter extends Writer {
     /** The logger to use for this writer. */
     private final Logger logger;
+
     /** The message prefix to put before log messages written. */
     private final String messagePrefix;
 

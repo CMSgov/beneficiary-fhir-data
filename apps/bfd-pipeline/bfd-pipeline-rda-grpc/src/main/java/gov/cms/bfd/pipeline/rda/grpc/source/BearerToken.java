@@ -15,9 +15,11 @@ import java.util.concurrent.Executor;
 public class BearerToken extends CallCredentials {
   /** Used as a prefix for the header value. */
   private static final String HEADER_PREFIX = "Bearer ";
+
   /** Used as the header key. */
   private static final Metadata.Key<String> HEADER_KEY =
       Metadata.Key.of("Authorization", ASCII_STRING_MARSHALLER);
+
   /** Used as the header value, prefixed by {@link #HEADER_PREFIX}. */
   private final String headerValue;
 

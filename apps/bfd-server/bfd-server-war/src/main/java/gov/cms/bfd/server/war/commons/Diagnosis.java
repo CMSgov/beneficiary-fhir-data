@@ -12,8 +12,10 @@ public final class Diagnosis extends IcdCode {
 
   /** The ICD presentOnAdmission indicator. */
   private final Character presentOnAdmission;
+
   /** The ICD presentOnAdmission indicator code. * */
   private final CcwCodebookInterface presentOnAdmissionCode;
+
   /** The ICD labels. */
   private final Set<DiagnosisLabel> labels;
 
@@ -248,6 +250,7 @@ public final class Diagnosis extends IcdCode {
 
     /** The fhir code. */
     private final String fhirCode;
+
     /** The display string. */
     private final String fhirDisplay;
 

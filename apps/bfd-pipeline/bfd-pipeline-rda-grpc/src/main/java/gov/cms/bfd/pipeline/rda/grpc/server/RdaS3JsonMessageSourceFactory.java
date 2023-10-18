@@ -15,8 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
   /** S3 key prefix for Fiss files. */
   public static final String FISS_PREFIX = "fiss";
+
   /** S3 key prefix for MCS files. */
   public static final String MCS_PREFIX = "mcs";
+
   /** S3 suffix for files. */
   private static final String FILE_SUFFIX = "ndjson";
 
@@ -28,6 +30,7 @@ public class RdaS3JsonMessageSourceFactory implements RdaMessageSourceFactory {
 
   /** Source of records for {@link RdaService#getFissClaims}. */
   private final S3BucketMessageSourceFactory<FissClaimChange> fissFactory;
+
   /** Source of records for {@link RdaService#getMcsClaims}. */
   private final S3BucketMessageSourceFactory<McsClaimChange> mcsFactory;
 

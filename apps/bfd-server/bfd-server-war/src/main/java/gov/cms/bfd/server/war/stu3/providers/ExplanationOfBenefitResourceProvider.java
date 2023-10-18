@@ -74,28 +74,40 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
 
   /** The entity manager. */
   private EntityManager entityManager;
+
   /** The metric registry. */
   private final MetricRegistry metricRegistry;
+
   /** The loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
+
   /** The ExecutorService entity. */
   private final ExecutorService executorService;
+
   /** The mock spring application context. */
   private final ApplicationContext appContext;
+
   /** The transformer for carrier claims. */
   private final CarrierClaimTransformer carrierClaimTransformer;
+
   /** The transformer for dme claims. */
   private final DMEClaimTransformer dmeClaimTransformer;
+
   /** The transformer for hha claims. */
   private final HHAClaimTransformer hhaClaimTransformer;
+
   /** The transformer for hospice claims. */
   private final HospiceClaimTransformer hospiceClaimTransformer;
+
   /** The transformer for inpatient claims. */
   private final InpatientClaimTransformer inpatientClaimTransformer;
+
   /** The transformer for outpatient claims. */
   private final OutpatientClaimTransformer outpatientClaimTransformer;
+
   /** The transformer for part D events claims. */
   private final PartDEventTransformer partDEventTransformer;
+
   /** The transformer for snf claims. */
   private final SNFClaimTransformer snfClaimTransformer;
 

@@ -19,8 +19,10 @@ public final class LoadAppOptions {
 
   /** The config for the id hasher. */
   @Getter private final IdHasher.Config idHasherConfig;
+
   /** If idempotency mode should be used. */
   @Getter private final boolean idempotencyRequired;
+
   /**
    * Special property used to filter non-2023 beneficiaries from loading, as sometimes our upstream
    * partners have historically sent us previous years mixed with the current year, which causes

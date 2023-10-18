@@ -24,8 +24,10 @@ import java.util.NoSuchElementException;
 public class JsonMessageSource<T> implements MessageSource<T> {
   /** The JSON parser. */
   private final Parser<T> parser;
+
   /** Reads files from the file system. */
   private final BufferedReader reader;
+
   /** The next message to return. */
   private T nextMessage;
 

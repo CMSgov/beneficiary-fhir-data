@@ -16,10 +16,13 @@ import java.util.NoSuchElementException;
 public class RandomMcsClaimSource implements MessageSource<McsClaimChange> {
   /** The claim generator. */
   private final RandomMcsClaimGenerator generator;
+
   /** The maximum number of claims to send. */
   private final long maxToSend;
+
   /** Used to generate timestamps. */
   private final Clock clock;
+
   /** The number of claim sent. */
   private long sent;
 

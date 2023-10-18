@@ -30,6 +30,7 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
 
   /** Valid system url for productOrService coding. */
   private static final Set<String> HCPCS_SYSTEM = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
+
   /**
    * Additional valid coding system URL for backwards-compatibility. See:
    * https://jira.cms.gov/browse/BFD-1345.

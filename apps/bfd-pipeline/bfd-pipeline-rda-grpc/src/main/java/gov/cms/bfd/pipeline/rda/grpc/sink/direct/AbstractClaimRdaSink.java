@@ -47,14 +47,19 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     implements RdaSink<TMessage, RdaChange<TClaim>> {
   /** The {@link TransactionManager} used to execute transactions. */
   protected final TransactionManager transactionManager;
+
   /** The metric reporter. */
   protected final Metrics metrics;
+
   /** Clock for creating timestamps. */
   protected final Clock clock;
+
   /** The log manager. */
   protected final Logger logger;
+
   /** Represents the claim type for this sink. */
   protected final RdaApiProgress.ClaimType claimType;
+
   /** Whether to automatically update the sequence number. */
   protected final boolean autoUpdateLastSeq;
 
@@ -480,38 +485,52 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   static class Metrics {
     /** Number of times the sink has been called to store objects. */
     private final Counter calls;
+
     /** Number of calls that successfully stored the objects. */
     private final Counter successes;
+
     /** Number of calls that failed to store the objects. */
     private final Counter failures;
+
     /** Number of objects written. */
     private final Counter objectsWritten;
+
     /** Number of objects stored using {@code persist()}. */
     private final Counter objectsPersisted;
+
     /** Number of objects stored using {@code merge()}. */
     private final Counter objectsMerged;
+
     /** Number of objects successfully transformed. */
     private final Counter transformSuccesses;
+
     /** Number of objects which failed to be transformed. */
     private final Counter transformFailures;
+
     /**
      * Milliseconds between change timestamp and current time, measures the latency between BFD
      * ingestion and when RDA ingestion.
      */
     private final DistributionSummary changeAgeMillis;
+
     /**
      * Milliseconds between extract date and current time, measures the latency between BFD
      * ingestion and when the MAC processes the data .
      */
     private final DistributionSummary extractAgeMillis;
+
     /** Tracks the elapsed time when we write claims to the database. */
     private final Timer dbUpdateTime;
+
     /** Tracks the number of updates per database transaction. */
     private final DistributionSummary dbBatchSize;
+
     /** Latest sequnce number from writing a batch. * */
     private final AtomicLong latestSequenceNumber;
+
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue;
+
     /** The number of insert statements executed. */
     private final DistributionSummary insertCount;
 

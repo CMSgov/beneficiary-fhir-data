@@ -39,18 +39,23 @@ import org.junit.jupiter.api.Test;
 public class RdaServerJobIT extends AbstractLocalStackS3Test {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
+
   /** The Fiss claim source. */
   private static final URL fissClaimsSource = Resources.getResource("FISS.ndjson");
+
   /** The MCS claim source. */
   private static final URL mcsClaimsSource = Resources.getResource("MCS.ndjson");
 
   /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+
   /** The hasher used for testing hashed values. */
   private final IdHasher.Config hasherConfig = new IdHasher.Config(100, "whatever");
+
   /** The Fiss claim transformer to test the server data. */
   private final FissClaimTransformer fissTransformer =
       new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+
   /** The MCS claim transformer to test the server data. */
   private final McsClaimTransformer mcsTransformer =
       new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));

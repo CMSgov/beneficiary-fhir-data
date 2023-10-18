@@ -15,8 +15,10 @@ public final class DatabaseOptions {
   /** Regex that matches proper JDBC URLs and extracts groups containing their host and port. */
   private static final Pattern URL_PATTERN =
       Pattern.compile("^jdbc:[a-z]+://([^:/]+)(:([0-9]+))?/", Pattern.CASE_INSENSITIVE);
+
   /** Group number for host matched by {@link #URL_PATTERN}. */
   private static final int URL_HOST_GROUP = 1;
+
   /** Group number for port matched by {@link #URL_PATTERN}. */
   private static final int URL_PORT_GROUP = 3;
 
@@ -30,12 +32,16 @@ public final class DatabaseOptions {
 
   /** How to authenticate with the database. */
   @Getter private final AuthenticationType authenticationType;
+
   /** The JDBC URL of the database. */
   @Getter private final String databaseUrl;
+
   /** The username for the database. */
   @Getter private final String databaseUsername;
+
   /** The password for the database. */
   @Getter private final String databasePassword;
+
   /** The maximum size of the database connection pool. */
   @Getter private final int maxPoolSize;
 

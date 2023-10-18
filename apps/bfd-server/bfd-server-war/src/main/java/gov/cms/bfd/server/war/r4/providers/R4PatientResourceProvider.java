@@ -104,10 +104,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
   /** The Entity manager. */
   private EntityManager entityManager;
+
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
+
   /** The Loaded filter manager. */
   private final LoadedFilterManager loadedFilterManager;
+
   /** The Beneficiary transformer. */
   private final BeneficiaryTransformerV2 beneficiaryTransformerV2;
 

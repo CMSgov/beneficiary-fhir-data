@@ -13,12 +13,16 @@ import org.apache.commons.csv.CSVRecord;
 public final class RifRecordEvent<R extends RifRecordBase> {
   /** The {@link RifFileEvent} that this is a child of. */
   private final RifFileEvent fileEvent;
+
   /** The {@link CSVRecord}s that this was built from / represents. */
   private final List<CSVRecord> rawCsvRecords;
+
   /** The RIF {@link RecordAction} indicated for the {@link #getRecord()}. */
   private final RecordAction recordAction;
+
   /** The beneficiary id for this record event. */
   private final Long beneficiaryId;
+
   /** The actual RIF data that the {@link RifRecordEvent} represents. */
   private final R record;
 

@@ -17,14 +17,19 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
     implements ResourceTypeV2<TResource, TEntity> {
   /** Name used when parsing parameter string to find appropriate instance. */
   protected final String nameForParsing;
+
   /** Value returned by {@link ResourceTypeV2#getTypeLabel()}. */
   protected final String typeLabel;
+
   /** The JPA entity class. */
   protected final Class<TEntity> entityClass;
+
   /** The attribute holding the MBI in the entity class. */
   protected final String entityMbiRecordAttribute;
+
   /** The attribute holding the claim ID in the entity class. */
   protected final String entityIdAttribute;
+
   /** The attribute holding the end date for range queries in the entity class. */
   protected final List<String> entityServiceDateAttributes;
 
