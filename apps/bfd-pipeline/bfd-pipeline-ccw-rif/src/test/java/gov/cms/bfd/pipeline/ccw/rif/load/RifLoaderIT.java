@@ -292,11 +292,8 @@ public final class RifLoaderIT {
   /**
    * Tests that loading a file and then loading more files results in the number of loaded files
    * increasing, and the oldest file remains the first file.
-   *
-   * <p>TODO: Why is this disabled?
    */
   @Test
-  @Disabled
   public void multipleFileLoads() {
     PipelineTestUtils.get()
         .doTestWithDb(
@@ -369,19 +366,15 @@ public final class RifLoaderIT {
             });
   }
 
-  /**
-   * Tests that synthetic data can be loaded.
-   *
-   * <p>TODO: Why is this disabled?
-   */
-  @Disabled
+  /** Tests that synthetic data can be loaded. */
+  @Disabled("https://jira.cms.gov/browse/BFD-3009")
   @Test
   public void buildSyntheticLoadedFiles() {
     PipelineTestUtils.get()
         .doTestWithDb(
             (dataSource, entityManager) -> {
               loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
-              // Verify that a loaded files exsits
+              // Verify that a loaded files exists
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               assertTrue(loadedFiles.size() > 0, "Expected to have at least one file");
@@ -725,12 +718,8 @@ public final class RifLoaderIT {
     }
   }
 
-  /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHETIC_DATA} data.
-   *
-   * <p>This test only works with a PostgreSQL database instance. It 10s or minutes to run.
-   */
-  @Disabled
+  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHETIC_DATA} data. */
+  @Disabled("This test only works with a PostgreSQL database instance. It 10s or minutes to run")
   @Test
   public void loadSyntheticData() {
     /*
