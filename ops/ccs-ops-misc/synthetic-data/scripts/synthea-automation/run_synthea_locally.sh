@@ -14,8 +14,8 @@ help() {
   echo "--synthea_jar, -j       : boolean (true/false) indicating to use Synthea Release jar file (default true)"
   echo "--cleanup, -c           : boolean (true/false) whether to perform 'pre' and 'post' file cleanup (default true)"
   echo "--num_future_months, -f : number of months into the future claims can have their claim dates set to (default 0)"
-  echo "--target_contract, --tc  : indicates a partD contract to tie all generated benes to if --use_target_contract is set to true"
-  echo "--use_target_contract, --utc : If set to true, indicates to tie all generated items to a single partD contract specified by --target_contract, must be 5 characters (default Y9999)"
+  echo "--target_contract, -r  : indicates a partD contract to tie all generated benes to if --use_target_contract is set to true"
+  echo "--use_target_contract, -u : If set to true, indicates to tie all generated items to a single partD contract specified by --target_contract, must be 5 characters (default Y9999)"
 
   exit 1;
 }
@@ -95,11 +95,11 @@ while [ $# -ge 1 ]; do
             fi
             shift
             ;;
-        --tc|--target_contract)
+        -r|--target_contract)
             TARGET_CONTRACT="$2"
             shift
             ;;
-        --utc|--use_target_contract)
+        -u|--use_target_contract)
             USE_TARGET_CONTRACT=$(echo "$2" | tr '[:upper:]' '[:lower:]')
             if [[ "${USE_TARGET_CONTRACT}" != "true" && "${USE_TARGET_CONTRACT}" != "false" ]]; then
               echo "ERROR, Invalid boolean value for using target contract: ${USE_TARGET_CONTRACT}" >&2; exit 1

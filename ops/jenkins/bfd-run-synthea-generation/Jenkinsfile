@@ -133,8 +133,8 @@ spec:
               + "\"${imageName}\" "
               + "-n \"${params.NUM_BENES}\" "
               + "-f \"${params.NUM_FUTURE_MONTHS}\" "
-              + "--utc \"${params.USE_TARGET_CONTRACT}\" "
-              + "--tc \"${params.TARGET_CONTRACT}\"")
+              + "-u \"${params.USE_TARGET_CONTRACT}\" "
+              + "-r \"${params.TARGET_CONTRACT}\"")
       }
     }
 

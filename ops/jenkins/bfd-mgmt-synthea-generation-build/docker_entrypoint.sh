@@ -22,8 +22,8 @@ help() {
   echo
   echo "-n,--num_benes : Specifies the number of beneficiaries to generate. Defaults to 100"
   echo "-f,--future_months : Specifies the number of months in the future to generate claim lines. Defaults to 0"
-  echo "--tc,--target_contract : indicates a partD contract to tie all generated benes to if --use_target_contract is set to true"
-  echo "--utc,--use_target_contract : If set to true, indicates to tie all generated items to a single partD contract specified by --target_contract, must be 5 characters (default Y9999)"
+  echo "-r,--target_contract : indicates a partD contract to tie all generated benes to if --use_target_contract is set to true"
+  echo "-u,--use_target_contract : If set to true, indicates to tie all generated items to a single partD contract specified by --target_contract, must be 5 characters (default Y9999)"
   echo "-v,--verbose : Specifies whether the Synthea executable should log to STDOUT or if its logs should be discarded. Defaults to unset (non-verbose)"
   echo "-h,--help : Shows this help text"
 
@@ -32,7 +32,7 @@ help() {
 
 [ $# -lt 1 ] && help
 
-options=$(getopt -a -n "bfd-mgmt-synthea-generation" -o v,h,n:,f: -l verbose,help,num_benes:,future_months: -- "$@")
+options=$(getopt -a -n "bfd-mgmt-synthea-generation" -o v,h,n:,f:,r:,u: -l verbose,help,num_benes:,future_months:,target_contract:,use_target_contract: -- "$@")
 [ $? -ne 0 ] && help 1
 
 eval set -- "$options"
@@ -66,17 +66,17 @@ while :; do
       
       shift 2
       ;;
-    --tc | --target_contract)
+    -r | --target_contract)
       target_contract="$2"
-      shift
+      shift 2
       ;;
-    --utc | --use_target_contract)
+    -u | --use_target_contract)
       use_target_contract=$(echo "$2" | tr '[:upper:]' '[:lower:]')
       if [[ "${use_target_contract}" != "true" && "${use_target_contract}" != "false" ]]; then
         echo "ERROR, Invalid boolean value for using target contract: ${use_target_contract}" >&2; 
         exit 1
       fi
-      shift
+      shift 2
       ;;
     --)
       shift
