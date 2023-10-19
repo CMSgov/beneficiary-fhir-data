@@ -13,6 +13,8 @@ readonly NUM_REGEX
 num_generated_benes=100
 generate_future="false"
 num_future_months=0
+target_contract="Y9999"
+use_target_contract="false"
 
 help() {
   echo
@@ -20,6 +22,8 @@ help() {
   echo
   echo "-n,--num_benes : Specifies the number of beneficiaries to generate. Defaults to 100"
   echo "-f,--future_months : Specifies the number of months in the future to generate claim lines. Defaults to 0"
+  echo "--tc,--target_contract : indicates a partD contract to tie all generated benes to if --use_target_contract is set to true"
+  echo "--utc,--use_target_contract : If set to true, indicates to tie all generated items to a single partD contract specified by --target_contract, must be 5 characters (default Y9999)"
   echo "-v,--verbose : Specifies whether the Synthea executable should log to STDOUT or if its logs should be discarded. Defaults to unset (non-verbose)"
   echo "-h,--help : Shows this help text"
 
@@ -59,8 +63,20 @@ while :; do
       if [[ "$2" -gt 0 ]]; then
         generate_future="true"
       fi
-
+      
       shift 2
+      ;;
+    --tc | --target_contract)
+      target_contract="$2"
+      shift
+      ;;
+    --utc | --use_target_contract)
+      use_target_contract=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+      if [[ "${use_target_contract}" != "true" && "${use_target_contract}" != "false" ]]; then
+        echo "ERROR, Invalid boolean value for using target contract: ${use_target_contract}" >&2; 
+        exit 1
+      fi
+      shift
       ;;
     --)
       shift
@@ -77,12 +93,17 @@ echo "Preparing to run Synthea generation..."
 starting_datetime=$(date '+%F_%H-%M-%S')
 
 echo "Running Synthea generation with $num_generated_benes benes and $num_future_months future months..."
+if [[ "${use_target_contract}" == "true" ]]; then
+    echo "    ...and adding all generated items to contract ${target_contract}"
+fi
 {
   python3 prepare-and-run-synthea.py \
     "${BFD_END_STATE_PROPERTIES}" \
     "${TARGET_SYNTHEA_DIR}" \
     "${num_generated_benes}" \
-    "${num_future_months}" 2>&1 &&
+    "${num_future_months}" \
+    "${target_contract}" \
+    "${use_target_contract}" 2>&1 &&
     echo "Synthea generation finished, generated synthetic data can be found in the output directory"
 } || {
   echo "Synthea generation failed to complete. View the logs in the logs directory for more information"
