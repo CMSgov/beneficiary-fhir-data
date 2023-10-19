@@ -83,7 +83,7 @@ def validate_and_run(args):
     
     end_state_properties_file = read_file_lines(end_state_file_path)
     
-    ## If contract target is requested via arg5, add a line to replace the synthea properties:
+    ## If contract target is requested via use_contract_target, add a line to replace the synthea properties:
     ## exporter.bfd.partd_contract_start and exporter.bfd.partd_contract_count
     if use_contract_target == "true":
         if len(contract_target) != 5:
