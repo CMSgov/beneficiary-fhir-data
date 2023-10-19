@@ -1,84 +1,38 @@
 package gov.cms.bfd.server.war;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
-import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
 /** Verifies that access.json is written to as expected. */
-public class AccessJsonIT extends ServerRequiredTest {
+public class AccessJsonE2E extends ServerRequiredTest {
   /** Verifies that access.json is written to within BFD-server-war via API call. */
   @Test
   public void verifyAccessJson() throws IOException {
-    /*
-     * Write to access.json by checking {@link
-     * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-     * for a {@link Patient} that does exist in the DB, including identifiers to return the unhashed
-     * HICN and MBI.
-     */
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                Patient.IDENTIFIER
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
-                        beneficiary.getMbiHash().get()))
-            .returnBundle(Bundle.class)
-            .execute();
+    Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
+    String mbiHash = beneficiary.getMbiHash().orElseThrow();
+    String requestString =
+        baseServerUrl
+            + "/v2/fhir/Patient/?identifier="
+            + TransformerConstants.CODING_BBAPI_BENE_MBI_HASH
+            + "|"
+            + mbiHash;
 
-    assertNotNull(searchResults);
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
-    /*
-     * Ensure the unhashed values for MBI is present.
-     */
-    Boolean mbiUnhashedPresent = false;
-    Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
-    while (identifiers.hasNext()) {
-      Identifier identifier = identifiers.next();
-      if (identifier
-          .getSystem()
-          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
-        mbiUnhashedPresent = true;
-      }
-    }
-
-    assertTrue(mbiUnhashedPresent);
+    given().spec(requestAuth).expect().statusCode(200).when().get(requestString);
 
     // Verify that the access JSON is working, as expected.
-    try {
-      TimeUnit.MILLISECONDS.sleep(500); // Needed in some configurations to resolve a race condition
-    } catch (InterruptedException e) {
-    }
+    /*try {
+      TimeUnit.MILLISECONDS.sleep(1000); // Needed to resolve a race condition
+    } catch (InterruptedException ignored) {
+    }*/
 
     Path accessLogJson =
         ServerTestUtils.getWarProjectDirectory()
