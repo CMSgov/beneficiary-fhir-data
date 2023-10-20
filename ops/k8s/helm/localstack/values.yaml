@@ -4,4 +4,4 @@
 
 namespace: dev
 appName: dev-localstack
-image: localstack/localstack:latest
+image: localstack/localstack:2.2.0
