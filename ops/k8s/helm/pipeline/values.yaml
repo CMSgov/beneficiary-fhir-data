@@ -6,7 +6,7 @@
 namespace: dev
 
 # Base name for this application.
-appName: dev-pipeline
+appName: bfd-pipeline
 
 # Should be rif or rda but empty string is fine if not running both pipelines at same time.
 pipelineType: ""

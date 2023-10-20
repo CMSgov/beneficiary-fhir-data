@@ -6,7 +6,7 @@
 namespace: dev
 
 # Base name for this application.
-appName: dev-db-migrator
+appName: bfd-db-migrator
 
 # Used as image tag. Should match release tag when deploying for real.
 bfdVersion: "1.0.0-SNAPSHOT"
