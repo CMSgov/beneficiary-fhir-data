@@ -1,3 +1,4 @@
+{{- $imageSpec := (include "imageSpec" .) -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -8,7 +9,7 @@ spec:
     spec:
       containers:
       - name: {{ .Values.appName }}
-        image: {{ .Values.image }}
+        image: {{ $imageSpec }}
         envFrom:
         - secretRef:
             name: {{ .Values.appName }}-secret

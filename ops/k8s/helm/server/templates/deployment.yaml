@@ -1,3 +1,4 @@
+{{- $imageSpec := (include "imageSpec" .) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +16,7 @@ spec:
     spec:
       containers:
         - name: {{ .Values.appName }}
-          image: {{ .Values.image }}
+          image: {{ $imageSpec }}
           ports:
             - containerPort: 6500
           env:

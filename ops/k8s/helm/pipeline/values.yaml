@@ -1,9 +1,22 @@
-# Default values for postgres.
+# Default values passed to all templates.
+# These defaults assume local development in conjunction with run scripts in apps/utils/scripts.
 # This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 
+# Kubernetes namespace to deploy to.
 namespace: dev
+
+# Base name for this application.
 appName: dev-pipeline
+
+# Should be rif or rda but empty string is fine if not running both pipelines at same time.
 pipelineType: ""
-bfdVersion: "1.0.0-SNAPSHOT"
+
+# Used as image tag. Should match release tag when deploying for real.
+bfdVersion: "latest"
+
+# Name of image built by jib maven plugin.
 imageName: bfd-pipeline-app
+
+# List of hierarchies used by LayeredConfiguration to find parameters in SSM.
+ssmHierarchies:
+  - "/bfd-pipeline"

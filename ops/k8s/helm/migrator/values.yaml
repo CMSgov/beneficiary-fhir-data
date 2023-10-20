@@ -1,7 +1,19 @@
-# Default values for postgres.
+# Default values passed to all templates.
+# These defaults assume local development in conjunction with run scripts in apps/utils/scripts.
 # This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 
+# Kubernetes namespace to deploy to.
 namespace: dev
-appName: dev-migrator
-image: bfd-db-migrator:1.0.0-SNAPSHOT
+
+# Base name for this application.
+appName: dev-db-migrator
+
+# Used as image tag. Should match release tag when deploying for real.
+bfdVersion: "1.0.0-SNAPSHOT"
+
+# Name of image built by jib maven plugin.
+imageName: bfd-db-migrator
+
+# List of hierarchies used by LayeredConfiguration to find parameters in SSM.
+ssmHierarchies:
+  - "/bfd-db-migrator"
