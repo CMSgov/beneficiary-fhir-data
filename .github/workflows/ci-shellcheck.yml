@@ -1,10 +1,16 @@
 name: Shell Script Lint
 
 on:
-  pull_request:
+  push:
+    branches:
+      - origin/cmac/BFD-870-Introduce-CI-Shellcheck
     paths:
       - './**/*.sh'
-
+  pull_request:
+    branches:
+      - origin/cmac/BFD-870-Introduce-CI-Shellcheck
+    paths:
+      - './**/*.sh'
 jobs:
   lint:
     name: Lint Shell Scripts
