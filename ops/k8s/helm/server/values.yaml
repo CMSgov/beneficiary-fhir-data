@@ -1,0 +1,7 @@
+# Default values for BFD FHIR Server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: dev
+appName: dev-server
+image: bfd-server:1.0.0-SNAPSHOT
