@@ -1,31 +1,33 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# BUILD_CONTEXT_ROOT_DIR will return the directory where this script is located, and CONTEXT_DIR will be the
-# directory of the Docker build context. This way, this script can be called from _any_ directory and
-# there will be no issues
-BUILD_CONTEXT_ROOT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
-readonly BUILD_CONTEXT_ROOT_DIR
+# BUILD_ROOT_DIR will return the directory where this script is located, and CONTEXT_DIR will be the
+# directory of the Docker build context. This way, this script can be called from _any_ directory
+# and there will be no issues
+BUILD_ROOT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
+readonly BUILD_ROOT_DIR
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+REPO_ROOT="$(cd "$BUILD_ROOT_DIR" && git rev-parse --show-toplevel)"
+readonly REPO_ROOT
+
 CONTEXT_DIR="${REPO_ROOT}/ops/ccs-ops-misc/synthetic-data/scripts/synthea-automation"
 readonly CONTEXT_DIR
 
-# We want this script to be included in the Docker image while still living inside the build context,
-# so we'll pass the script as an arg into our build command
-DOCKER_ENTRYPOINT_SCRIPT="$(cat "${BUILD_CONTEXT_ROOT_DIR}/docker_entrypoint.sh")"
+# We want this script to be included in the Docker image while still living inside the build dir, so
+# we'll pass the script as an arg into our build command
+DOCKER_ENTRYPOINT_SCRIPT="$(cat "${BUILD_ROOT_DIR}/docker_entrypoint.sh")"
 readonly DOCKER_ENTRYPOINT_SCRIPT
 
 SYNTHEA_PROPERTIES_RAW_URL="https://raw.githubusercontent.com/synthetichealth/synthea/master/src/main/resources/synthea.properties"
 readonly SYNTHEA_PROPERTIES_RAW_URL
 
-SYNTHEA_PROPERTIES_FILE_DIR="$BUILD_CONTEXT_ROOT_DIR/src/main/resources"
+SYNTHEA_PROPERTIES_FILE_DIR="$CONTEXT_DIR/src/main/resources"
 readonly SYNTHEA_PROPERTIES_FILE_DIR
 
-SYNTHEA_MAPPING_FILES_DIR="$BUILD_CONTEXT_ROOT_DIR/src/main/resources/export"
+SYNTHEA_MAPPING_FILES_DIR="$CONTEXT_DIR/src/main/resources/export"
 readonly SYNTHEA_MAPPING_FILES_DIR
 
-DOCKERFILE_PATH="$BUILD_CONTEXT_ROOT_DIR/Dockerfile"
+DOCKERFILE_PATH="$BUILD_ROOT_DIR/Dockerfile"
 readonly DOCKERFILE_PATH
 
 BFD_S3_UTILITIES_SCRIPT="s3_utilities.py"
@@ -99,7 +101,7 @@ build_docker_image() {
     --target "dist" \
     --platform "linux/amd64" \
     --build-arg docker_entrypoint_sh="$DOCKER_ENTRYPOINT_SCRIPT" \
-     "$CONTEXT_DIR"
+    "$CONTEXT_DIR"
 }
 
 push_image_to_ecr() {
@@ -111,9 +113,9 @@ push_image_to_ecr() {
 }
 
 clean_up() {
-  rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/src"
-  rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_JAR_FILE"
-  rm -rf "${BUILD_CONTEXT_ROOT_DIR:?}/$SYNTHEA_NATIONAL_SCRIPT"
+  rm -rf "${CONTEXT_DIR:?}/src"
+  rm -rf "${CONTEXT_DIR:?}/$SYNTHEA_JAR_FILE"
+  rm -rf "${CONTEXT_DIR:?}/$SYNTHEA_NATIONAL_SCRIPT"
 }
 
 clean_up
