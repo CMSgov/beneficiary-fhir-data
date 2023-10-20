@@ -234,7 +234,24 @@ def validate_file_paths(synthea_folder_filepath, synthea_prop_filepath, synthea_
     
     if os.path.exists(synthea_folder_filepath):
         ## Validate we have the export files in place, and the national script
-        export_filenames = ["condition_code_map.json", "dme_code_map.json", "hcpcs_code_map.json", "medication_code_map.json", "drg_code_map.json", "betos_code_map.json", "external_codes.csv"]
+        export_filenames = [
+            'betos_code_map.json',
+            'condition_code_map.json',
+            'dme_code_map.json',
+            'drg_code_map.json',
+            'hcpcs_code_map.json',
+            'hha_rev_cntr_code_map.json',
+            'hha_pps_pdgm_codes.csv',
+            'hha_pps_case_mix_codes.csv',
+            'hospice_rev_cntr_code_map.json',
+            'inpatient_rev_cntr_code_map.json',
+            'medication_code_map.json',
+            'outpatient_rev_cntr_code_map.json',
+            'snf_pdpm_code_map.json',
+            'snf_pps_code_map.json',
+            'snf_rev_cntr_code_map.json',
+            'external_codes.csv',
+            ]
         for filename in export_filenames:
             export_file_loc = synthea_folder_filepath + "src/main/resources/export/" + filename
             if not os.path.exists(export_file_loc):
