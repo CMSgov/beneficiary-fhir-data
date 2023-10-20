@@ -35,7 +35,7 @@ repo_dir=$HOME/.m2/repository
 max_heap=512m
 
 # Location of kubernetes configurations.
-kubernetes_root=$BFD_PATH/ops/k8s
+kubernetes_root=$BFD_PATH/ops/k8s/helm
 
 if [[ ! -d $project_dir ]] ; then
   echo ERROR: $project_dir does not exist. 1>&2
@@ -106,7 +106,7 @@ while getopts "d:i:kl:xzZh" option ; do
      unset h p
      ;;
   i) image_tag=$OPTARG ; install=false ;;
-  k) kubernetes=true ; install=false ; db_host=postgres ;;
+  k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
   l) localstack_ip=$OPTARG ;;
   x) install=false ;;
   z) debug_enabled=true ;;
@@ -236,13 +236,18 @@ mainClass="gov.cms.bfd.migrator.app.MigratorApp"
 
 if [[ x$kubernetes = xtrue ]] ; then
   cd $kubernetes_root
-  if [[ ! -r migrator/overlays/local/kustomization.yaml ]] ; then
+  if [[ ! -r migrator/Chart.yaml ]] ; then
     echo ERROR: unable to find kubernetes resource files in $kubernetes_root 1>&2
     exit 1
   fi
+  if [[ $run_mode = "rif" ]] ; then
+    pipeline_type="rif"
+  else
+    pipeline_type="rda"
+  fi
   echo running kubernetes job
-  kubectl delete -k migrator/overlays/local || true
-  kubectl apply -k migrator/overlays/local
+  helm uninstall migrator migrator || true
+  helm install migrator migrator
 elif [[ x$image_tag = x ]] ; then
   export CLASSPATH="$classpath"
   exec $java $ARGS $mainClass

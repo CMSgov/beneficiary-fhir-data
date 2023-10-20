@@ -1,0 +1,7 @@
+# Default values for postgres.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: dev
+appName: dev-migrator
+image: bfd-db-migrator:1.0.0-SNAPSHOT

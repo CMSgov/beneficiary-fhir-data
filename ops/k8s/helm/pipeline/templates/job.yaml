@@ -1,0 +1,19 @@
+{{- $imageSpec := (include "imageSpec" .) -}}
+{{- $pipelineName := (include "pipelineName" .) -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $pipelineName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ $pipelineName }}
+        image: {{ $imageSpec }}
+        envFrom:
+        - secretRef:
+            name: {{ $pipelineName }}-secret
+      restartPolicy: Never
+  backoffLimit: 4
+  

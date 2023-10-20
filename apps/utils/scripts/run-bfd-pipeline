@@ -36,7 +36,7 @@ repo_dir=$HOME/.m2/repository
 max_heap=4g
 
 # Location of kubernetes configurations.
-kubernetes_root=$BFD_PATH/ops/k8s
+kubernetes_root=$BFD_PATH/ops/k8s/helm
 
 if [[ ! -d $project_dir ]] ; then
   echo ERROR: $project_dir does not exist. 1>&2
@@ -154,7 +154,7 @@ while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
      ;;
   i) image_tag=$OPTARG ; install=false ;;
   I) idempotency_mode=true ;;
-  k) kubernetes=true ; install=false ; db_host=postgres ;;
+  k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
   l) localstack_ip=$OPTARG ;;
   r) interval_seconds=$OPTARG ;;
   R) IFS=':' read h p t <<<"$OPTARG"
@@ -412,13 +412,18 @@ mainClass="gov.cms.bfd.pipeline.app.PipelineApplication"
 
 if [[ x$kubernetes = xtrue ]] ; then
   cd $kubernetes_root
-  if [[ ! -r pipeline/overlays/local/kustomization.yaml ]] ; then
+  if [[ ! -r pipeline/Chart.yaml ]] ; then
     echo ERROR: unable to find kubernetes resource files in $kubernetes_root 1>&2
     exit 1
   fi
+  if [[ $run_mode = "rif" ]] ; then
+    pipeline_type="rif"
+  else
+    pipeline_type="rda"
+  fi
   echo running kubernetes job
-  kubectl delete -k pipeline/overlays/local || true
-  kubectl apply -k pipeline/overlays/local
+  helm uninstall pipeline-$pipeline_type || true
+  helm install pipeline-$pipeline_type pipeline --set pipelineType=$pipeline_type
 elif [[ x$image_tag = x ]] ; then
   echo running application directly
   export CLASSPATH="$classpath"
