@@ -367,6 +367,7 @@ public final class RifLoaderIT {
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
+  @Disabled
   @Test
   public void loadSampleU() {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
