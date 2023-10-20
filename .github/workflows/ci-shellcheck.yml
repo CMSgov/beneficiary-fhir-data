@@ -1,0 +1,25 @@
+name: Shell Script Lint
+
+on:
+  pull_request:
+    paths:
+      - './**/*.sh'
+
+jobs:
+  lint:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up ShellCheck
+        run: |
+          sudo apt-get install shellcheck
+        shell: bash
+
+      - name: Run ShellCheck
+        run: |
+          find ./ -name "*.sh" | xargs shellcheck
+        shell: bash
