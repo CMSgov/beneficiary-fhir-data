@@ -49,7 +49,6 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -1322,11 +1321,9 @@ public final class DMEClaimTransformerV2Test {
    *
    * @throws FHIRException if there is an issue with transforming the claim
    */
-  @Disabled
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob = dmeClaimTransformer.transform(generateClaim(), false);
-
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

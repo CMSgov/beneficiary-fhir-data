@@ -91,7 +91,7 @@ public final class CoverageTransformerV2Test {
     transformCoverage(MedicareSegment.PART_A, true);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
-    assertEquals(coverage.getIdPart(), partA);
+    assertEquals(partA, coverage.getIdPart());
   }
 
   /** Standalone wrapper to output PART_B. */
@@ -101,7 +101,7 @@ public final class CoverageTransformerV2Test {
     transformCoverage(MedicareSegment.PART_B, true);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
-    assertEquals(coverage.getIdPart(), partB);
+    assertEquals(partB, coverage.getIdPart());
   }
 
   /** Standalone wrapper to output PART_C. */
@@ -111,7 +111,7 @@ public final class CoverageTransformerV2Test {
     transformCoverage(MedicareSegment.PART_C, true);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
-    assertEquals(coverage.getIdPart(), partC);
+    assertEquals(partC, coverage.getIdPart());
   }
 
   /** Standalone wrapper to output PART_D. */
@@ -121,7 +121,7 @@ public final class CoverageTransformerV2Test {
     transformCoverage(MedicareSegment.PART_D, true);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
-    assertEquals(coverage.getIdPart(), partD);
+    assertEquals(partD, coverage.getIdPart());
   }
 
   // ==================

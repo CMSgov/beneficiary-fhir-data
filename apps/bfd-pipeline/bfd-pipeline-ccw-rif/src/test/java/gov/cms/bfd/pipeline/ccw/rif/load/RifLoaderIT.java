@@ -366,27 +366,8 @@ public final class RifLoaderIT {
             });
   }
 
-  /** Tests that synthetic data can be loaded. */
-  @Disabled("https://jira.cms.gov/browse/BFD-3009")
-  @Test
-  public void buildSyntheticLoadedFiles() {
-    PipelineTestUtils.get()
-        .doTestWithDb(
-            (dataSource, entityManager) -> {
-              loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
-              // Verify that a loaded files exists
-              final List<LoadedFile> loadedFiles =
-                  PipelineTestUtils.get().findLoadedFiles(entityManager);
-              assertTrue(loadedFiles.size() > 0, "Expected to have at least one file");
-              final LoadedFile file = loadedFiles.get(0);
-              final List<LoadedBatch> batches = loadBatches(entityManager, file.getLoadedFileId());
-              assertTrue(batches.size() > 0);
-            });
-  }
-
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
   @Test
-  @Disabled
   public void loadSampleU() {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
