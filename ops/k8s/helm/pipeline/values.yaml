@@ -30,3 +30,10 @@ useLocalstack: true
 
 # AWS region to use.
 awsRegion: "us-east-1"
+
+# Properties of the volume used for temp space
+tempVolume:
+  # Either emptyDir, local-path, or ebs
+  type: emptyDir
+  # Maximum size string
+  size: 8Gi

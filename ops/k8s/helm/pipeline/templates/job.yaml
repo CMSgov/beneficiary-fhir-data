@@ -11,9 +11,24 @@ spec:
       containers:
       - name: {{ $pipelineName }}
         image: {{ $imageSpec }}
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: -Djava.io.tmpdir=/app/tmp
         envFrom:
         - secretRef:
             name: {{ $pipelineName }}-secret
+        volumeMounts:
+          - name: {{ $pipelineName }}-temp-volume
+            mountPath: "/app/tmp"
+      volumes:
+        - name: {{ $pipelineName }}-temp-volume
+        {{- if .Values.tempVolume.type | eq "emptyDir" }}
+          emptyDir:
+            sizeLimit: {{ .Values.tempVolume.size }}
+        {{- else }}
+          persistentVolumeClaim:
+            claimName: {{ $pipelineName }}-temp-claim
+        {{- end }}
       restartPolicy: Never
   backoffLimit: 4
   
