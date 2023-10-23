@@ -14,3 +14,8 @@ variable "kms_key_alias" {
   description = "Key alias of environment's KMS key"
   type        = string
 }
+
+variable "kms_config_key_alias" {
+  description = "Key alias of environment's configuration KMS key"
+  type        = string
+}
