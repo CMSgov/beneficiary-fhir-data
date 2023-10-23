@@ -24,7 +24,7 @@ EOF
 
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${local.service}-kms"
-  description = "Permissions to decrypt master and insights S3 bucket KMS key for ${local.env}"
+  description = "Permissions to decrypt master, config, and insights S3 bucket KMS key for ${local.env}"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -36,6 +36,7 @@ resource "aws_iam_policy" "kms" {
             ],
             "Resource": [
                 "${local.kms_key_arn}",
+                "${local.kms_config_key_arn}",
                 "${data.aws_kms_key.insights_s3.arn}"
             ]
         }

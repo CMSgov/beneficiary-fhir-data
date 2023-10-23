@@ -24,8 +24,18 @@ locals {
   insights_database     = "${local.insights_db_prefix}-${local.env}"
   insights_table        = "${local.insights_table_prefix}_${replace(local.env, "-", "_")}_${replace(local.service, "-", "_")}"
 
-  # TODO: This should be done by a dynamic lookup to SSM instead...
-  vpc_name                   = "bfd-${local.seed_env}-vpc"
+  nonsensitive_common_config = zipmap(
+    [
+      for name in data.aws_ssm_parameters_by_path.nonsensitive_common.names :
+      element(split("/", name), length(split("/", name)) - 1)
+    ],
+    nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values)
+  )
+
+  vpc_name             = local.nonsensitive_common_config["vpc_name"]
+  kms_master_key_alias = local.nonsensitive_common_config["kms_key_alias"]
+  kms_config_key_alias = local.nonsensitive_common_config["kms_config_key_alias"]
+
   queue_name                 = "bfd-${local.env}-${local.service}"
   pipeline_signal_queue_name = "bfd-${local.env}-${local.service}-signal"
 
@@ -36,8 +46,9 @@ locals {
   lambda_timeout_seconds              = 600
   glue_trigger_lambda_timeout_seconds = 600
 
-  kms_key_arn = data.aws_kms_key.cmk.arn
-  kms_key_id  = data.aws_kms_key.cmk.key_id
+  kms_key_arn        = data.aws_kms_key.cmk.arn
+  kms_config_key_arn = data.aws_kms_key.config_cmk.arn
+  kms_key_id         = data.aws_kms_key.cmk.key_id
 }
 
 resource "aws_lambda_function" "this" {
