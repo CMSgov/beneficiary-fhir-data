@@ -8,7 +8,7 @@
 import com.amazonaws.encryptionsdk.AwsCrypto
 import com.amazonaws.encryptionsdk.CryptoResult
 import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKey
-import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKeyProvider
+import com.amazonaws.encryptionsdk.kmssdkv2.AwsKmsMrkAwareMasterKeyProvider
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf
 import okio.Buffer
@@ -168,7 +168,7 @@ class KmsCipher(private val endpoint: String?, region: String, keyArn: String) {
     private val crypto = AwsCrypto.standard()
 
     // Used to look up keys in KMS.
-    private val keyProvider = KmsMasterKeyProvider.builder()
+    private val keyProvider = AwsKmsMrkAwareMasterKeyProvider.builder()
         .customRegionalClientSupplier(::createKmsClient)
         .defaultRegion(Region.of(region))
         .buildStrict(keyArn)
@@ -187,8 +187,7 @@ class KmsCipher(private val endpoint: String?, region: String, keyArn: String) {
 
     // Encrypts the provided plain text and returns the base 64 encoded cipher text.
     fun encrypt(plainText: ByteString): ByteString {
-        val encryptResult: CryptoResult<ByteArray, KmsMasterKey> =
-            crypto.encryptData(keyProvider, plainText.toByteArray(), context)
+        val encryptResult = crypto.encryptData(keyProvider, plainText.toByteArray(), context)
         return Base64.getUrlEncoder().encodeToString(encryptResult.result).encodeUtf8()
     }
 
