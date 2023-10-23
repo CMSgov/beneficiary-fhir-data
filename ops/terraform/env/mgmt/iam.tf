@@ -97,7 +97,11 @@ resource "aws_iam_policy" "packer_kms" {
         "${local.kms_key_id}",
         "${local.test_kms_key_id}",
         "${local.prod_sbx_kms_key_id}",
-        "${local.prod_kms_key_id}"
+        "${local.prod_kms_key_id}",
+        "${local.kms_config_key_id}",
+        "${local.test_config_kms_key_id}",
+        "${local.prod_sbx_config_kms_key_id}",
+        "${local.prod_config_kms_key_id}"
       ]
     }
   ],
