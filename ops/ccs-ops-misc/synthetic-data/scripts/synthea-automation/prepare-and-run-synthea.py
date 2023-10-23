@@ -83,18 +83,20 @@ def validate_and_run(args):
     
     end_state_properties_file = read_file_lines(end_state_file_path)
     
+    
     ## If contract target is requested via use_contract_target, add a line to replace the synthea properties:
     ## exporter.bfd.partd_contract_start and exporter.bfd.partd_contract_count
+    synthea_properties = end_state_properties_file.copy()
     if use_contract_target == "true":
         if len(contract_target) != 5:
             print(f"Given contract number must be 5 characters, received '{contract_target}'")
             print("Returning with exit code 1")
             sys.exit(1)
         print("Generating using partD contract: " + contract_target)
-        end_state_properties_file.append("exporter.bfd.partd_contract_start=" + contract_target)
-        end_state_properties_file.append("exporter.bfd.partd_contract_count=1")
+        synthea_properties.append("exporter.bfd.partd_contract_start=" + contract_target)
+        synthea_properties.append("exporter.bfd.partd_contract_count=1")
     
-    update_property_file(end_state_properties_file, synthea_prop_filepath)
+    update_property_file(synthea_properties, synthea_prop_filepath)
     print("Updated synthea properties")
     
     clean_synthea_output(synthea_folder_filepath)
