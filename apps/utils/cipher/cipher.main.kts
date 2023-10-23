@@ -6,23 +6,13 @@
 @file:DependsOn("com.squareup.okio:okio:3.5.0")
 
 import com.amazonaws.encryptionsdk.AwsCrypto
-import com.amazonaws.encryptionsdk.CryptoResult
-import com.amazonaws.encryptionsdk.kmssdkv2.KmsMasterKey
 import com.amazonaws.encryptionsdk.kmssdkv2.AwsKmsMrkAwareMasterKeyProvider
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf
-import okio.Buffer
-import okio.BufferedSource
-import okio.ByteString
+import okio.*
 import okio.ByteString.Companion.EMPTY
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
-import okio.Sink
-import okio.Source
-import okio.buffer
-import okio.sink
-import okio.source
-import okio.use
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.kms.KmsClient
 import java.io.ByteArrayInputStream
