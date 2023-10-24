@@ -91,6 +91,7 @@ spec:
                         " -DskipTests" +
                         " -Dsonar.exclusions='*.java'" +
                         " -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml"
+			" -Dsonar.sources=/home/jenkins/agent/workspace/bfd-jenkins-sonarqube_master/apps/bfd-ops/pom.xml,/home/jenkins/agent/workspace/bfd-jenkins-sonarqube_master/apps/bfd-ops/ccs-ops-misc/**/*"
                     }
                 }
             }
