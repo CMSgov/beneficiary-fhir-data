@@ -6,9 +6,18 @@ data "aws_kms_key" "mgmt_cmk" {
   key_id = "alias/bfd-mgmt-cmk"
 }
 
+data "aws_kms_key" "mgmt_config_cmk" {
+  key_id = "alias/bfd-mgmt-config-cmk"
+}
+
 data "aws_kms_key" "cmk" {
   key_id = local.nonsensitive_common_config["kms_key_alias"]
 }
+
+data "aws_kms_key" "config_cmk" {
+  key_id = local.nonsensitive_common_config["kms_config_key_alias"]
+}
+
 
 # The following logic produces a map of ami filters to their filter values:
 # `{"image-id" => "ami-?????????????????"}` when the var.ami_id_override is provided

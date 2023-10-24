@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 data "aws_kms_key" "mgmt_cmk" {
-  key_id = "alias/bfd-mgmt-cmk"
+  key_id = "alias/bfd-mgmt-config-cmk"
 }
 
 data "aws_sns_topic" "cloudwatch_alarms_slack_bfd_notices" {

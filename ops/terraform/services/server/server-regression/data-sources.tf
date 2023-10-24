@@ -5,7 +5,11 @@ data "aws_caller_identity" "current" {}
 data "aws_ecr_authorization_token" "token" {}
 
 data "aws_kms_key" "cmk" {
-  key_id = "alias/bfd-${local.seed_env}-cmk" # TODO: Consider replacing with ssm lookup
+  key_id = local.kms_master_key_alias
+}
+
+data "aws_kms_key" "config_cmk" {
+  key_id = local.kms_config_key_alias
 }
 
 data "aws_vpc" "main" {
@@ -64,4 +68,8 @@ data "archive_file" "glue_trigger" {
   type        = "zip"
   source_file = "${path.module}/lambda-src/glue-trigger/glue-trigger.py"
   output_path = "${path.module}/lambda-src/glue-trigger/out/glue-trigger.zip"
+}
+
+data "aws_ssm_parameters_by_path" "nonsensitive_common" {
+  path = "/bfd/${local.env}/common/nonsensitive"
 }

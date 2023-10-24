@@ -46,7 +46,7 @@ locals {
 }
 
 data "aws_kms_key" "mgmt_cmk" {
-  key_id = "alias/bfd-mgmt-cmk"
+  key_id = "alias/bfd-mgmt-config-cmk"
 }
 
 data "archive_file" "bfd_insights_error_slack" {

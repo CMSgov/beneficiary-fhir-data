@@ -57,7 +57,7 @@ EOF
 
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${local.service}-kms"
-  description = "Permissions to decrypt master KMS key for ${local.env}, and the mgmt KMS key"
+  description = "Permissions to decrypt using master and config KMS keys for ${local.env} and mgmt"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -69,7 +69,9 @@ resource "aws_iam_policy" "kms" {
             ],
             "Resource": [
                 "${local.kms_key_arn}",
-                "${local.mgmt_kms_key_arn}"
+                "${local.mgmt_kms_key_arn}",
+                "${local.config_kms_key_arn}",
+                "${local.mgmt_config_kms_key_arn}"
             ]
         }
     ]

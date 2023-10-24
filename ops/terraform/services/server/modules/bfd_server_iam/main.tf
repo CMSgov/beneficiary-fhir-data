@@ -43,7 +43,38 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
   policy_arn = data.aws_iam_policy.cloudwatch_xray_policy.arn
 }
 
-# TODO: Separate SSM and KMS statements
+resource "aws_iam_policy" "kms" {
+  name        = "bfd-${local.env}-${var.service}-kms"
+  description = "Permissions to use the default environment KMS key"
+  policy      = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt",
+        "kms:GenerateDataKey",
+        "kms:ReEncrypt",
+        "kms:DescribeKey",
+        "kms:CreateGrant",
+        "kms:ListGrants",
+        "kms:RevokeGrant"
+      ],
+      "Resource": [
+        "${data.aws_kms_key.master_key.arn}"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "kms" {
+  role       = aws_iam_role.instance.id
+  policy_arn = aws_iam_policy.kms.arn
+}
+
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${var.service}-ssm-parameters"
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${var.service} SSM hierarchies"
@@ -67,16 +98,10 @@ resource "aws_iam_policy" "ssm" {
     {
       "Effect": "Allow",
       "Action": [
-        "kms:Decrypt",
-        "kms:GenerateDataKey",
-        "kms:ReEncrypt",
-        "kms:DescribeKey",
-        "kms:CreateGrant",
-        "kms:ListGrants",
-        "kms:RevokeGrant"
+        "kms:Decrypt"
       ],
       "Resource": [
-        "${data.aws_kms_key.master_key.arn}"
+        "${data.aws_kms_key.config_key.arn}"
       ]
     }
   ]
@@ -122,7 +147,7 @@ resource "aws_iam_role_policy_attachment" "ssm_mgmt" {
 }
 
 resource "aws_iam_policy" "kms_mgmt" {
-  description = "Policy granting BFD Server in ${local.env} environment access to decrypt using the mgmt KMS key"
+  description = "Policy granting BFD Server in ${local.env} environment access to decrypt using the mgmt KMS keys"
   name        = "bfd-${local.env}-${var.service}-kms-mgmt"
   path        = "/"
   policy      = <<-POLICY
@@ -132,7 +157,8 @@ resource "aws_iam_policy" "kms_mgmt" {
       "Action": ["kms:Decrypt"],
       "Effect": "Allow",
       "Resource": [
-        "${data.aws_kms_key.mgmt_key.arn}"
+        "${data.aws_kms_key.mgmt_key.arn}",
+        "${data.aws_kms_key.mgmt_config_key.arn}"
       ]
     }
   ],

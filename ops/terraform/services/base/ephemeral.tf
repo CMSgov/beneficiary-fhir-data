@@ -33,7 +33,7 @@ locals {
     prod = {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"          = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_prod_client"            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_prod_client"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"           = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests" 
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"           = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_client"             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_client"            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"
@@ -67,22 +67,22 @@ locals {
 
   # Targeted SERVER hierarchy paths to be "copied" from the (merged) seed environment into requested ephemeral environment
   server_seed_paths = local.is_ephemeral_env ? merge({
-    "/bfd/${local.env}/server/nonsensitive/asg_desired_instance_count"               = "/bfd/${local.seed_env}/server/nonsensitive/asg_desired_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/asg_instance_warmup_time"                 = "/bfd/${local.seed_env}/server/nonsensitive/asg_instance_warmup_time"
-    "/bfd/${local.env}/server/nonsensitive/asg_max_instance_count"                   = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/asg_max_warm_instance_count"              = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_warm_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/asg_min_instance_count"                   = "/bfd/${local.seed_env}/server/nonsensitive/asg_min_instance_count"
-    "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"            = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
-    "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb"           = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
-    "/bfd/${local.env}/server/sensitive/server_keystore_base64"                      = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
-    "/bfd/${local.env}/server/sensitive/data_server_appserver_https_port"            = "/bfd/${local.seed_env}/server/sensitive/data_server_appserver_https_port"
-    "/bfd/${local.env}/server/sensitive/data_server_db_password"                     = "/bfd/${local.seed_env}/server/sensitive/data_server_db_password"
-    "/bfd/${local.env}/server/sensitive/data_server_db_username"                     = "/bfd/${local.seed_env}/server/sensitive/data_server_db_username"
-    "/bfd/${local.env}/server/sensitive/data_server_new_relic_license_key"           = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_license_key"
-    "/bfd/${local.env}/server/sensitive/data_server_new_relic_metric_key"            = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_metric_key"
-    "/bfd/${local.env}/server/sensitive/test_client_cert"                            = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
-    "/bfd/${local.env}/server/sensitive/test_client_key"                             = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
-    }, local.seed_env_certs[local.seed_env]) : {}
+    "/bfd/${local.env}/server/nonsensitive/asg_desired_instance_count"     = "/bfd/${local.seed_env}/server/nonsensitive/asg_desired_instance_count"
+    "/bfd/${local.env}/server/nonsensitive/asg_instance_warmup_time"       = "/bfd/${local.seed_env}/server/nonsensitive/asg_instance_warmup_time"
+    "/bfd/${local.env}/server/nonsensitive/asg_max_instance_count"         = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_instance_count"
+    "/bfd/${local.env}/server/nonsensitive/asg_max_warm_instance_count"    = "/bfd/${local.seed_env}/server/nonsensitive/asg_max_warm_instance_count"
+    "/bfd/${local.env}/server/nonsensitive/asg_min_instance_count"         = "/bfd/${local.seed_env}/server/nonsensitive/asg_min_instance_count"
+    "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"  = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
+    "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb" = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
+    "/bfd/${local.env}/server/sensitive/server_keystore_base64"            = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
+    "/bfd/${local.env}/server/sensitive/data_server_appserver_https_port"  = "/bfd/${local.seed_env}/server/sensitive/data_server_appserver_https_port"
+    "/bfd/${local.env}/server/sensitive/data_server_db_password"           = "/bfd/${local.seed_env}/server/sensitive/data_server_db_password"
+    "/bfd/${local.env}/server/sensitive/data_server_db_username"           = "/bfd/${local.seed_env}/server/sensitive/data_server_db_username"
+    "/bfd/${local.env}/server/sensitive/data_server_new_relic_license_key" = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_license_key"
+    "/bfd/${local.env}/server/sensitive/data_server_new_relic_metric_key"  = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_metric_key"
+    "/bfd/${local.env}/server/sensitive/test_client_cert"                  = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
+    "/bfd/${local.env}/server/sensitive/test_client_key"                   = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
+  }, local.seed_env_certs[local.seed_env]) : {}
 }
 
 data "aws_db_cluster_snapshot" "seed" {
@@ -109,7 +109,7 @@ data "aws_ssm_parameters_by_path" "seed" {
 # Copy targeted COMMON hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_common" {
   for_each  = local.common_seed_paths
-  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
   overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
@@ -119,7 +119,7 @@ resource "aws_ssm_parameter" "ephemeral_common" {
 # Copy targeted MIGRATOR hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_migrator" {
   for_each  = local.migrator_seed_paths
-  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
   overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
@@ -129,7 +129,7 @@ resource "aws_ssm_parameter" "ephemeral_migrator" {
 # Copy targeted PIPELINE hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_pipeline" {
   for_each  = local.pipeline_seed_paths
-  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
   overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
@@ -139,7 +139,7 @@ resource "aws_ssm_parameter" "ephemeral_pipeline" {
 # Copy targeted SERVER hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_server" {
   for_each  = local.server_seed_paths
-  key_id    = contains(split("/", each.key), "sensitive") ? data.aws_kms_key.cmk.arn : null
+  key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
   overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"

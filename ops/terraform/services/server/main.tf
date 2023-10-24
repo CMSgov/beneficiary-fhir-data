@@ -37,6 +37,7 @@ locals {
   management_security_group       = local.nonsensitive_common_config["management_security_group"]
   vpn_security_group              = local.nonsensitive_common_config["vpn_security_group"]
   kms_key_alias                   = local.nonsensitive_common_config["kms_key_alias"]
+  kms_config_key_alias            = local.nonsensitive_common_config["kms_config_key_alias"]
   ssh_key_pair                    = local.nonsensitive_common_config["key_pair"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
@@ -76,9 +77,10 @@ locals {
 module "fhir_iam" {
   source = "./modules/bfd_server_iam"
 
-  kms_key_alias  = local.kms_key_alias
-  service        = local.service
-  legacy_service = local.legacy_service
+  kms_key_alias        = local.kms_key_alias
+  kms_config_key_alias = local.kms_config_key_alias
+  service              = local.service
+  legacy_service       = local.legacy_service
 }
 
 resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
