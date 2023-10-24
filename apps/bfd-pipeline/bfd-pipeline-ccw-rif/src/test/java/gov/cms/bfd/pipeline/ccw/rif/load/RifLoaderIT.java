@@ -367,7 +367,7 @@ public final class RifLoaderIT {
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
-  @Disabled
+  @Disabled("https://jira.cms.gov/browse/BFD-3018")
   @Test
   public void loadSampleU() {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));

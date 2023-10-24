@@ -124,17 +124,6 @@ public final class HospiceClaimTransformerV2Test {
   }
 
   /**
-   * Serializes the EOB and prints to the command line.
-   *
-   * @throws FHIRException if there is a parsing exception with the eob json
-   */
-  @Test
-  public void shouldOutputJSON() throws FHIRException {
-    assertNotNull(eob);
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
-  }
-
-  /**
    * Verifies that {@link SNFClaimTransformerV2#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
    *

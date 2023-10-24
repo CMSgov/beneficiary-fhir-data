@@ -55,7 +55,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -1168,18 +1167,5 @@ public class HHAClaimTransformerV2Test {
             .findFirst();
     assertEquals(NPIOrgLookup.FAKE_NPI_NUMBER, identifier.get().getValue());
     assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, org.getName());
-  }
-
-  /**
-   * Serializes the EOB and prints to the command line.
-   *
-   * @throws FHIRException if there is an issue with transforming the claim
-   */
-  @Disabled("Disabling to prevent potential noise from print statement")
-  @Test
-  public void serializeSampleARecord() throws FHIRException {
-    ExplanationOfBenefit eob = hhaClaimTransformer.transform(generateClaim(), false);
-
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }
