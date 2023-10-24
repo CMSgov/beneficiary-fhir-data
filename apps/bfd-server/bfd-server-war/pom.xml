@@ -458,7 +458,7 @@
                             </arguments>
                         </configuration>
                         <id>create-openapi-artifacts</id>
-                        <phase>install</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>

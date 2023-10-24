@@ -1223,7 +1223,7 @@
                             </arguments>
                         </configuration>
                         <id>create-dd-artifacts</id>
-                        <phase>install</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
