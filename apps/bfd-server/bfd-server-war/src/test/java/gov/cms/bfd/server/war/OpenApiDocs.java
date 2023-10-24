@@ -1,20 +1,37 @@
 package gov.cms.bfd.server.war;
 
+import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_PASSWORD;
+import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_USERNAME;
+import static io.restassured.RestAssured.certificate;
 import static io.restassured.RestAssured.given;
 
+import gov.cms.bfd.DatabaseTestUtils;
+import io.restassured.authentication.AuthenticationScheme;
+import io.restassured.authentication.CertificateAuthSettings;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Set;
+import org.hsqldb.jdbc.JDBCDataSource;
 
 /** Program to gather the OpenAPI yaml content for V1 and V2 and store. */
-public class OpenApiDocs extends ServerRequiredTest {
+public class OpenApiDocs {
+
+  private static final String INMEM_HSQL_DATABASE_URL = "jdbc:bfd-test:hsqldb:mem";
 
   /** The version from the project pom. */
   private final String projectVersion;
 
   /** The destination directory for the output of the OpenAPI yaml file documents. */
   private final String destinationDir;
+
+  /** The base server url. */
+  private static String baseServerUrl;
+
+  /** The request specification to use with the api-docs requests. */
+  private static RequestSpecification requestAuth;
 
   /**
    * Constructs an instance of OpenApiDocs for a given project version and destination directory.
@@ -77,10 +94,13 @@ public class OpenApiDocs extends ServerRequiredTest {
     // Update working directory so E2E test server instance can find properties.
     System.setProperty("user.dir", args[1]);
 
+    // Set database url for in memory HSQL database
+    System.setProperty("its.db.url", INMEM_HSQL_DATABASE_URL);
+
     var openApiDocs = new OpenApiDocs(args[0], args[2]);
     try {
       // Start E2E test server instance.
-      setup();
+      openApiDocs.setup();
 
       // Download and save OpenAPI yaml for V1 and V2.
       for (var apiVersion : Set.of("V1", "V2")) {
@@ -116,5 +136,47 @@ public class OpenApiDocs extends ServerRequiredTest {
       throw new RuntimeException(
           String.format("Destination directory (%s) is not valid.", args[2]));
     }
+  }
+
+  /**
+   * Initializes and starts a test database and bfd server.
+   *
+   * @throws IOException when an error occurs starting the bfd server.
+   */
+  private void setup() throws IOException {
+    var dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
+    var resolvedDbUrl = ((JDBCDataSource) dataSource).getUrl();
+
+    boolean startedServer =
+        ServerExecutor.startServer(resolvedDbUrl, HSQL_SERVER_USERNAME, HSQL_SERVER_PASSWORD);
+    if (startedServer) {
+      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
+      setRequestAuth();
+      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
+    } else {
+      throw new RuntimeException("Could not start server instance.");
+    }
+  }
+
+  /** Initializes the request authorization. @see ServerRequiredTest#setRequestAuth. */
+  private static void setRequestAuth() {
+    // Get the certs for the test
+    String trustStorePath = "src/test/resources/certs/test-truststore.jks";
+    String keyStorePath = "src/test/resources/certs/test-keystore.p12";
+    String testPassword = "changeit";
+    String keystoreType = "pkcs12";
+    // Set up the cert for the calls
+    AuthenticationScheme testCertificate =
+        certificate(
+            trustStorePath,
+            testPassword,
+            keyStorePath,
+            testPassword,
+            CertificateAuthSettings.certAuthSettings()
+                .keyStoreType(keystoreType)
+                .trustStoreType(keystoreType)
+                .allowAllHostnames());
+    requestAuth =
+        new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
   }
 }
