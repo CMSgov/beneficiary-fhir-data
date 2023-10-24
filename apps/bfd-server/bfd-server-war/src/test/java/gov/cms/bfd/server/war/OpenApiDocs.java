@@ -19,6 +19,7 @@ import org.hsqldb.jdbc.JDBCDataSource;
 /** Program to gather the OpenAPI yaml content for V1 and V2 and store. */
 public class OpenApiDocs {
 
+  /** The HSQL database url. */
   private static final String INMEM_HSQL_DATABASE_URL = "jdbc:bfd-test:hsqldb:mem";
 
   /** The version from the project pom. */
