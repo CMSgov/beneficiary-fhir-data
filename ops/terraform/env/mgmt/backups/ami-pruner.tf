@@ -134,7 +134,6 @@ resource "aws_iam_role_policy" "ami_pruner" {
         }, {
         Effect = "Allow"
         Action = [
-          "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents",
         ]
