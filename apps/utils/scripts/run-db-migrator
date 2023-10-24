@@ -214,7 +214,7 @@ if [[ $install = "true" ]] ; then
     echo "ERROR: Missing jar file or lib directory.  Was zip file valid? (${zip_file})" 1>&2
     exit 1
   fi
-else
+elif [[ x$image_tag = x ]] && [[ x$kubernetes = xfalse ]] ; then
   # Just check to be sure we can run without installing and fail if we can't.
   jar_file=`echo ${exec_dir}/${target_name}-${project_version}.jar`
   if [[ ! -r $jar_file ]] || [[ ! -d $lib_dir ]] ; then
@@ -246,8 +246,9 @@ if [[ x$kubernetes = xtrue ]] ; then
     pipeline_type="rda"
   fi
   echo running kubernetes job
-  helm uninstall migrator migrator || true
-  helm install migrator migrator
+  echo Ignore \"release: not found\" message if this is first time running in cluster.
+  helm -n dev uninstall migrator migrator || true
+  helm -n dev install migrator migrator
 elif [[ x$image_tag = x ]] ; then
   export CLASSPATH="$classpath"
   exec $java $ARGS $mainClass

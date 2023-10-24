@@ -31,7 +31,7 @@ There are known issues with running testcontainers inside of RD.  You may need t
 
 In a real cluster the database and AWS services would be external to the cluster.  For local development we use local versions so that we can test without being connected to the internet or using external resources.
 
-All commands in this document assume that your current working directory is `ops/k8s/helm`.
+All commands in this document assume that your current working directory is `ops/k8s`.
 
 First you need to create the namespace used to run all of the applications.
 
@@ -42,8 +42,17 @@ kubectl create namespace dev
 Next you need to start the database and AWS services.
 
 ```sh
-helm install postgres
-helm install localstack
+helm -n dev install postgres helm/postgres
+helm -n dev install localstack helm/localstack
+```
+
+At this point you should see both charts have been installed.
+
+```sh
+$ helm -n dev list
+NAME      	NAMESPACE	REVISION	UPDATED                             	STATUS  	CHART           	APP VERSION
+localstack	default  	1       	2023-10-23 09:12:25.892621 -0400 EDT	deployed	localstack-0.1.0	2.2.0      
+postgres  	default  	1       	2023-10-23 09:12:06.429432 -0400 EDT	deployed	postgres-0.1.0  	14         
 ```
 
 ## Running the Migrator
@@ -64,8 +73,6 @@ NAME                          READY   STATUS      RESTARTS       AGE
 dev-migrator-ldmjr            0/1     Completed   0              3h2m
 localstack-5646cbfd57-d7pqq   1/1     Running     1 (169m ago)   3h3m
 postgres-5c8d8457dc-sl6nh     1/1     Running     1 (169m ago)   3h4m
-dev-server-797db8dcd4-6f95f   1/1     Running     0              165m
-dev-pipeline-6b98t            1/1     Running     0              30m
 $ kubectl -n dev logs dev-migrator-ldmjr
 ```
 
@@ -79,22 +86,22 @@ Now you can run the pipeline app to copy data into the database.  The easiest wa
 bash ../../apps/utils/scripts/run-bfd-pipeline -k random
 ```
 
-The pipeline does not exit.  You can check from the logs to see if it succeeded and then kill it or remove it if you no longer want it to be running.  The easiest way to remove it from kubernetes is using `helm uninstall`.  Bear in mind this deletes the pipeline app entirely so its logs will be removed.  Of course this won't affect the data written to the database.  
+The pipeline does not exit.  You can check from the logs to see if it succeeded and then kill it or remove it if you no longer want it to be running.  The easiest way to remove it from kubernetes is using `helm -n dev uninstall`.  Bear in mind this deletes the pipeline app entirely so its logs will be removed.  Of course this won't affect the data written to the database.  
 
 ```sh
-helm uninstall pipeline-rda
+helm -n dev uninstall pipeline-rda
 ```
 
 This same deletion trick can be used for the migrator and server as well.
 
-NOTE: The `run-bfd-pipeline` script adds `-rif` or `-rda` to the pipeline chart name depending on which pipeline you tell it to run.  You can always see which charts are currently running using `helm list`.
+NOTE: The `run-bfd-pipeline` script adds `-rif` or `-rda` to the pipeline chart name depending on which pipeline you tell it to run.  You can always see which charts are currently running using `helm -n dev list`.
 
 ```sh
-$ helm list
-NAME        	NAMESPACE	REVISION	UPDATED                             	STATUS  	CHART             	APP VERSION   
-localstack  	dev      	1       	2023-10-20 16:53:55.792075 -0400 EDT	deployed	localstack-0.1.0  	2.2.0         
-pipeline-rda	dev      	1       	2023-10-22 13:27:40.47958 -0400 EDT 	deployed	bfd-pipeline-0.1.0	1.0.0-SNAPSHOT
-postgres    	dev      	1       	2023-10-20 16:55:16.773791 -0400 EDT	deployed	postgres-0.1.0    	14            
+$ helm -n dev list
+NAME      	NAMESPACE	REVISION	UPDATED                             	STATUS  	CHART                	APP VERSION   
+localstack	dev      	1       	2023-10-23 10:26:56.282636 -0400 EDT	deployed	localstack-0.1.0     	2.2.0         
+migrator  	dev      	1       	2023-10-23 10:30:35.171116 -0400 EDT	deployed	bfd-db-migrator-0.1.0	1.0.0-SNAPSHOT
+postgres  	dev      	1       	2023-10-23 10:27:21.341919 -0400 EDT	deployed	postgres-0.1.0       	14            
 ```
 
 ## Running the FHIR Server

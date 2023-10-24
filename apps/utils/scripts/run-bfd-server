@@ -232,15 +232,15 @@ if [[ $install = "true" ]] ; then
   cp $ssl_dir/* $bin_dir/ssl
   cp $war_file $bin_dir
   rmdir $unzip_dir
-fi
-
-lib_dir=${bin_dir}/lib
-launcher_jar="${bin_dir}/bfd-server-launcher-${project_version}.jar"
-if [[ ! -r $launcher_jar ]] || [[ ! -d $lib_dir ]] ; then
-  # Just check to be sure we can run without installing and fail if we can't.
-  echo "ERROR: Missing $launcher_jar or lib directory." 1>&2
-  echo "Run again without -x option to install binaries." 1>&2
-  exit 1
+elif [[ x$image_tag = x ]] && [[ x$kubernetes = xfalse ]] ; then
+  lib_dir=${bin_dir}/lib
+  launcher_jar="${bin_dir}/bfd-server-launcher-${project_version}.jar"
+  if [[ ! -r $launcher_jar ]] || [[ ! -d $lib_dir ]] ; then
+    # Just check to be sure we can run without installing and fail if we can't.
+    echo "ERROR: Missing $launcher_jar or lib directory." 1>&2
+    echo "Run again without -x option to install binaries." 1>&2
+    exit 1
+  fi
 fi
 
 war_file_name=bfd-server-war-${project_version}.war
@@ -270,8 +270,9 @@ if [[ x$kubernetes = xtrue ]] ; then
   fi
   echo running kubernetes service
   ssl_dir=$project_dir/bfd-server/dev/ssl-stores
-  kubectl -n dev delete secret dev-server-ssl-files || true
-  kubectl -n dev create secret generic dev-server-ssl-files\
+  echo Ignore \"secrets dev-server-ssl-files not found\" message if this is first time running in cluster.
+  kubectl -n dev delete secret bfd-server-ssl-files || true
+  kubectl -n dev create secret generic bfd-server-ssl-files\
      --from-file $ssl_dir/${truststore_file}\
      --from-file $ssl_dir/${keystore_file}
   app_root=/app
@@ -280,8 +281,9 @@ if [[ x$kubernetes = xtrue ]] ; then
   setvar BFD_TRUSTSTORE "$ssl_mount/${truststore_file}"
   setvar BFD_KEYSTORE "$ssl_mount/${keystore_file}"
   setvar BFD_WAR "$app_root/$war_file_name"
-  helm uninstall server || true
-  helm install server server
+  echo Ignore \"release: not found\" message if this is first time running in cluster.
+  helm -n dev uninstall server || true
+  helm -n dev install server server
 elif [[ x$image_tag = x ]] ; then
   echo running application directly
   export CLASSPATH="$classpath"
