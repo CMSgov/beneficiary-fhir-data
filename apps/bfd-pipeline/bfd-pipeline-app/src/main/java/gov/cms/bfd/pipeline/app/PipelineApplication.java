@@ -17,8 +17,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.DataSetProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
@@ -504,27 +504,21 @@ public final class PipelineApplication {
             appState.getMetrics(),
             loadOptions.getExtractionOptions(),
             new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig()));
-    RifFilesProcessor rifProcessor = new RifFilesProcessor();
+    RifFileParsers rifProcessor = new RifFileParsers();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
     /*
      * Create the DataSetMonitorListener that will glue those stages together and run them all for
      * each data set that is found.
      */
-    DataSetMonitorListener dataSetMonitorListener =
-        new DefaultDataSetMonitorListener(
-            appState.getMetrics(),
-            t -> {
-              throw new RuntimeException(t);
-            },
-            rifProcessor,
-            rifLoader);
+    DataSetProcessor dataSetProcessor =
+        new DefaultDataSetProcessor(appState.getMetrics(), rifProcessor, rifLoader);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState,
             loadOptions.getExtractionOptions(),
             s3TaskManager,
-            dataSetMonitorListener,
+            dataSetProcessor,
             loadOptions.getLoadOptions().isIdempotencyRequired(),
             loadOptions.getRunInterval());
 

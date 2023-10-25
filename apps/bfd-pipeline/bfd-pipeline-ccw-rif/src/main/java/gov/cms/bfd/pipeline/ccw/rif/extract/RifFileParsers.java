@@ -40,9 +40,20 @@ import reactor.core.publisher.Flux;
 
 public class RifFileParsers {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifFileParsers.class);
-  public static final String RECORD_ACTION_COLUMN = "DML_IND";
+  private static final String RECORD_ACTION_COLUMN = "DML_IND";
 
-  public static Flux<RifRecordEvent<?>> parseFile(RifFileEvent fileEvent) {
+  /**
+   * Produces a {@link RifFileRecords} with the {@link RifRecordEvent}s produced from the specified
+   * {@link RifFileEvent}.
+   *
+   * @param rifFileEvent the {@link RifFileEvent} that is being processed
+   * @return the record from the rif file
+   */
+  public RifFileRecords produceRecords(RifFileEvent rifFileEvent) {
+    return new RifFileRecords(rifFileEvent, parseFile(rifFileEvent));
+  }
+
+  public Flux<RifRecordEvent<?>> parseFile(RifFileEvent fileEvent) {
     return Flux.using(
         // creates a CSVParser for new subscriber
         () -> RifParsingUtils.createCsvParser(fileEvent.getFile()),
@@ -64,7 +75,7 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser parserForFile(RifFileEvent fileEvent) {
+  public RifFileParser parserForFile(RifFileEvent fileEvent) {
     return switch (fileEvent.getFile().getFileType()) {
       case BENEFICIARY -> beneficiaryEventParser(fileEvent);
       case BENEFICIARY_HISTORY -> beneficiaryHistoryEventParser(fileEvent);

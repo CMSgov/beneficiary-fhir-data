@@ -1,18 +1,25 @@
-package gov.cms.bfd.model.rif;
+package gov.cms.bfd.pipeline.ccw.rif.extract;
 
+import gov.cms.bfd.model.rif.RifFile;
+import gov.cms.bfd.model.rif.RifFileEvent;
+import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.RifRecordEvent;
 import java.util.Objects;
 import java.util.stream.Stream;
+import lombok.Getter;
+import reactor.core.publisher.Flux;
 
 /**
  * Models a {@link Stream} of {@link RifFileRecords}, produced from a single {@link RifFile} in a
  * {@link RifFilesEvent}.
  */
+@Getter
 public final class RifFileRecords {
   /** The {@link RifFileEvent} that the {@link #getRecords()} {@link Stream} was produced from. */
   private final RifFileEvent sourceEvent;
 
   /** The {@link Stream} of {@link RifRecordEvent}s that was produced from the {@link RifFile}. */
-  private final Stream<RifRecordEvent<?>> records;
+  private final Flux<RifRecordEvent<?>> records;
 
   /**
    * Constructs a new {@link RifFileRecords} instance.
@@ -20,7 +27,7 @@ public final class RifFileRecords {
    * @param sourceEvent the value to use for {@link #getSourceEvent()}
    * @param records the value to use for {@link #getRecords()}
    */
-  public RifFileRecords(RifFileEvent sourceEvent, Stream<RifRecordEvent<?>> records) {
+  public RifFileRecords(RifFileEvent sourceEvent, Flux<RifRecordEvent<?>> records) {
     Objects.requireNonNull(sourceEvent);
     Objects.requireNonNull(records);
 
@@ -28,27 +35,6 @@ public final class RifFileRecords {
     this.records = records;
   }
 
-  /**
-   * Gets the {@link #sourceEvent}.
-   *
-   * @return the {@link RifFileEvent} that the {@link #getRecords()} {@link Stream} was produced
-   *     from
-   */
-  public RifFileEvent getSourceEvent() {
-    return sourceEvent;
-  }
-
-  /**
-   * Gets the {@link #records}.
-   *
-   * @return the {@link Stream} of {@link RifRecordEvent}s that was produced from the {@link
-   *     RifFile}
-   */
-  public Stream<RifRecordEvent<?>> getRecords() {
-    return records;
-  }
-
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

@@ -4,61 +4,53 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.DataSetProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This {@link DataSetMonitorListener} implementation "glues together" the {@link CcwRifLoadJob}
- * with the {@link RifFilesProcessor} and the {@link RifLoader}: pulling all of the data sets out of
- * S3, parsing them, and then loading them into the BFD database.
+ * This {@link DataSetProcessor} implementation "glues together" the {@link CcwRifLoadJob} with the
+ * {@link RifFileParsers} and the {@link RifLoader}: pulling all of the data sets out of S3, parsing
+ * them, and then loading them into the BFD database.
  */
-public final class DefaultDataSetMonitorListener implements DataSetMonitorListener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetMonitorListener.class);
+public final class DefaultDataSetProcessor implements DataSetProcessor {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetProcessor.class);
 
   /** Metrics for this class. */
   private final MetricRegistry appMetrics;
 
-  /** The application's error handler. */
-  private final Consumer<Throwable> errorHandler;
-
   /** Handles processing of new RIF files. */
-  private final RifFilesProcessor rifProcessor;
+  private final RifFileParsers rifProcessor;
 
   /** Loads RIF files into the database. */
   private final RifLoader rifLoader;
 
   /**
-   * Constructs a new {@link DataSetMonitorListener} instance.
+   * Constructs a new {@link DataSetProcessor} instance.
    *
    * @param appMetrics the {@link MetricRegistry} for the application
-   * @param errorHandler the application's error handler
-   * @param rifProcessor the {@link RifFilesProcessor} for the application
+   * @param rifProcessor the {@link RifFileParsers} for the application
    * @param rifLoader the {@link RifLoader} for the application
    */
-  DefaultDataSetMonitorListener(
-      MetricRegistry appMetrics,
-      Consumer<Throwable> errorHandler,
-      RifFilesProcessor rifProcessor,
-      RifLoader rifLoader) {
+  DefaultDataSetProcessor(
+      MetricRegistry appMetrics, RifFileParsers rifProcessor, RifLoader rifLoader) {
     this.appMetrics = appMetrics;
-    this.errorHandler = errorHandler;
     this.rifProcessor = rifProcessor;
     this.rifLoader = rifLoader;
   }
 
   /** {@inheritDoc} */
   @Override
-  public void dataAvailable(RifFilesEvent rifFilesEvent) {
+  public void processDataSet(RifFilesEvent rifFilesEvent) throws Exception {
     Timer.Context timerDataSet =
         appMetrics
             .timer(
@@ -66,8 +58,8 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
                     PipelineApplication.class.getSimpleName(), "dataSet", "processed"))
             .time();
 
-    final var failed = new AtomicBoolean(false);
-    Consumer<Throwable> errorHandler =
+    final var failure = new AtomicReference<Exception>();
+    Consumer<Exception> errorHandler =
         error -> {
           /*
            * This will be called on the same thread used to run each
@@ -79,8 +71,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
            * we stop that way for _any_ failure, but we probably want
            * to be more discriminating than that.
            */
-          failed.set(true);
-          errorOccurred(error);
+          failure.set(error);
         };
 
     Consumer<RifRecordLoadResult> resultHandler =
@@ -96,7 +87,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
      * and processed by the next stage.
      */
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
-      if (failed.get()) {
+      if (failure.get() != null) {
         LOGGER.info("Stopping due to error.");
         break;
       }
@@ -119,17 +110,14 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
       dataSetFileMetricsReporter.report();
     }
     timerDataSet.stop();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void errorOccurred(Throwable error) {
-    errorHandler.accept(error);
+    if (failure.get() != null) {
+      throw failure.get();
+    }
   }
 
   /** Called when no RIF files are available to process. */
   @Override
-  public void noDataAvailable() {
+  public void noDataToProcess() {
     // Nothing to do here.
   }
 }

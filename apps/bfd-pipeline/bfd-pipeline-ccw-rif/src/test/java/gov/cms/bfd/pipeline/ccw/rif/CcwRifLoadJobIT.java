@@ -13,7 +13,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import java.net.URL;
 import java.time.Instant;
@@ -45,7 +45,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      MockDataSetProcessor listener = new MockDataSetProcessor();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -66,7 +66,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify that no data sets were generated.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -158,7 +157,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               StaticRifResource.SAMPLE_A_INPATIENT.getResourceUrl()));
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      MockDataSetProcessor listener = new MockDataSetProcessor();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -181,7 +180,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(2, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -318,7 +316,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      MockDataSetProcessor listener = new MockDataSetProcessor();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -342,7 +340,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
       assertEquals(
           manifestA.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -411,7 +408,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      MockDataSetProcessor listener = new MockDataSetProcessor();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -432,7 +429,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -497,7 +493,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      MockDataSetProcessor listener = new MockDataSetProcessor();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -518,7 +514,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -578,7 +573,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       putSampleFilesInTestBucket(bucket, inputLocation, manifest, fileList);
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      MockDataSetProcessor listener = new MockDataSetProcessor();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -602,7 +597,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(manifest.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
       assertEquals(
           manifest.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();

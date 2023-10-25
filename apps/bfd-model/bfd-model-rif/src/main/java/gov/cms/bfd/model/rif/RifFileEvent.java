@@ -37,7 +37,7 @@ public final class RifFileEvent {
    * Gets the {@link #eventMetrics}.
    *
    * @return the {@link MetricRegistry} that should be used to record the work done to process this
-   *     {@link RifFileRecords}
+   *     {@link RifFilesEvent} and its {@link RifRecordEvent}s
    */
   public MetricRegistry getEventMetrics() {
     return eventMetrics;

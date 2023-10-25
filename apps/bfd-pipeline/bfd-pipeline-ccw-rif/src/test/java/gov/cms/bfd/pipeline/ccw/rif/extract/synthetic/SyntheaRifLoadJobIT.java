@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -14,12 +13,13 @@ import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
@@ -134,7 +134,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      MockDataSetProcessor listener = new MockDataSetProcessor();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
@@ -155,7 +155,6 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       // be no events since the pre-validation failure short-circuits everything.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // Verify that the datasets were moved to their respective 'failed' locations.
       DataSetTestUtilities.waitForBucketObjectCount(
@@ -268,7 +267,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      MockDataSetProcessor listener = new MockDataSetProcessor();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
@@ -290,7 +289,6 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       // means it is acceptable to have a bene_id overlaps.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(1, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // Verify that the datasets were moved to their respective 'completed'
       // locations.
@@ -373,7 +371,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
     LOGGER.info("Loading RIF files: '{}'...", sampleName);
 
     // Create the processors that will handle each stage of the pipeline.
-    RifFilesProcessor processor = new RifFilesProcessor();
+    RifFileParsers processor = new RifFileParsers();
     RifLoader loader =
         new RifLoader(options, PipelineTestUtils.get().getPipelineApplicationState());
 

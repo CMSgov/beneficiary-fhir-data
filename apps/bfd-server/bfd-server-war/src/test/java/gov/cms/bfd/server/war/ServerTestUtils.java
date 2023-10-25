@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -30,7 +29,8 @@ import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
@@ -396,7 +396,7 @@ public final class ServerTestUtils {
             Instant.now(),
             false,
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
-    RifFilesProcessor processor = new RifFilesProcessor();
+    RifFileParsers processor = new RifFileParsers();
     List<Object> recordsParsed = new ArrayList<>();
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
@@ -675,7 +675,7 @@ public final class ServerTestUtils {
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 
     // Create the processors that will handle each stage of the pipeline.
-    RifFilesProcessor processor = new RifFilesProcessor();
+    RifFileParsers processor = new RifFileParsers();
 
     // Link up the pipeline and run it.
     RifLoader loader =

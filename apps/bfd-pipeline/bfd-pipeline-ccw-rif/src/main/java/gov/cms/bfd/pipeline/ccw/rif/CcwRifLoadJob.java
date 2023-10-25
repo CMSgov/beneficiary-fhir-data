@@ -6,7 +6,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.DataSetMoveTask;
@@ -144,7 +143,7 @@ public final class CcwRifLoadJob implements PipelineJob {
   private final ExtractionOptions options;
 
   /** The data set listener for finding new files to load. */
-  private final DataSetMonitorListener listener;
+  private final DataSetProcessor listener;
 
   /** The manager for taking actions with S3. */
   private final S3TaskManager s3TaskManager;
@@ -168,7 +167,7 @@ public final class CcwRifLoadJob implements PipelineJob {
    * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
-   * @param listener the {@link DataSetMonitorListener} to send events to
+   * @param listener the {@link DataSetProcessor} to send events to
    * @param isIdempotentMode the {@link boolean} TRUE if running in idempotent mode
    * @param runInterval used to construct the job schedule
    */
@@ -176,7 +175,7 @@ public final class CcwRifLoadJob implements PipelineJob {
       PipelineApplicationState appState,
       ExtractionOptions options,
       S3TaskManager s3TaskManager,
-      DataSetMonitorListener listener,
+      DataSetProcessor listener,
       boolean isIdempotentMode,
       Optional<Duration> runInterval) {
     this.appState = appState;
@@ -216,7 +215,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     // If no manifest was found, we're done (until next time).
     if (dataSetQueue.isEmpty()) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
-      listener.noDataAvailable();
+      listener.noDataToProcess();
       return PipelineJobOutcome.NOTHING_TO_DO;
     }
 
@@ -339,7 +338,7 @@ public final class CcwRifLoadJob implements PipelineJob {
        * processing multiple data sets in parallel (which would lead to data
        * consistency problems).
        */
-      listener.dataAvailable(rifFilesEvent);
+      listener.processDataSet(rifFilesEvent);
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
