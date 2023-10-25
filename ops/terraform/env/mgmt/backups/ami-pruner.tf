@@ -147,7 +147,7 @@ resource "aws_iam_role_policy" "ami_pruner" {
           "kms:Decrypt",
         ]
         Resource = [
-          local.mgmt_cmk.arn,
+          local.config_cmk.arn,
         ]
         Sid = "AllowKmsDecryption"
       }
