@@ -280,6 +280,7 @@ def app_candidates() -> list:
     Returns a list of app amis eligible for pruning.
     """
     candidates = []
+    retention_count = ami_retention_policies()['app_ami_retention_count'] + 1
 
     # build a map of all app amis not referenced by a launch template and group by name (minus trailing suffix)
     app_pool = {}
@@ -309,7 +310,6 @@ def app_candidates() -> list:
     logger.debug(f"Added {len(candidates)} App AMIs to the initial candidate pool")
 
     # for each non-template pool, remove the most recent n from the candidates
-    retention_count = ami_retention_policies()['app_ami_retention_count'] + 1
     for app in app_pool.keys():
         logger.info(f"Checking {app} amis...")
         app_pool[app] = sorted(app_pool[app], key=lambda x: x['CreationDate'], reverse=True)
