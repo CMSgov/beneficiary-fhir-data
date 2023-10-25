@@ -29,6 +29,9 @@ NON_LAUNCH_TEMPLATE_AMI_FILTERS = [
     [{'Name': 'tag:Function','Values': ['SERVER LOAD']}],
 ]
 
+# do not touch anything with these tags
+KEEP_TAGS = ['do_not_delete', 'do-not-delete', 'DONOTDELETE', 'donotdelete', 'do not delete', 'DO NOT DELETE']
+
 # logger and boto3 clients ('mode: standard' automatically applies exponential backoff and retries)
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=(logging.DEBUG if DEBUG else logging.INFO))
 logger = logging.getLogger(__name__)
@@ -167,19 +170,19 @@ def deregister_ami(ami_id: str, ami_name="") -> bool:
 
 def delete_associated_snapshot(ami_id:str, snapshot_id: str) -> bool:
     """
-    Deletes an EC2 snapshot. Ignores snapshots tagged with "keep" or "do_not_delete" or those referenced by an existing
+    Deletes an EC2 snapshot. Ignores snapshots tagged with any of the KEEP_TAGS, or those referenced by an existing
     EC2 Volume. Returns True if successful.
     """
     volumes = existing_volumes()
     try:
         snapshot = ec2_client.describe_snapshots(SnapshotIds=[snapshot_id])['Snapshots'][0]
+        # skip if tagged with with a KEEP tag
         tags = [tag['Key'] for tag in snapshot['Tags']]
-        if 'keep' in tags:
-            logger.info(f"Ignoring {ami_id} {snapshot_id}: tagged with 'keep'")
-            return False
-        if 'do_not_delete' in tags:
-            logger.info(f"Ignoring {ami_id} {snapshot_id}: tagged with 'do_not_delete'")
-            return False
+        for tag in KEEP_TAGS:
+            if tag in tags:
+                logger.info(f"Ignoring {ami_id} {snapshot_id}: tagged with '{tag}'")
+                return False
+        # skip if referenced by an existing volume
         for volume in volumes:
             if volume['SnapshotId'] == snapshot_id:
                 logger.info(f"Ignoring {ami_id} {snapshot_id}: referenced by Volume {volume['VolumeId']}")
@@ -200,7 +203,7 @@ def delete_associated_snapshot(ami_id:str, snapshot_id: str) -> bool:
 def find_candidates(filter, default_filter=DEFAULT_AMI_FILTER) -> list:
     """
     Returns a list of candidate AMIs in the region. Images referenced by an active ec2 (non-terminated) instance,
-    associated with the most recent version of a launch template, or those tagged with "keep" or "do_not_delete" are
+    associated with the most recent version of a launch template, or those tagged with any of the KEEP_TAGS, are
     excluded from the returned list.
     """
     filters = filter+default_filter if filter else default_filter
@@ -215,13 +218,11 @@ def find_candidates(filter, default_filter=DEFAULT_AMI_FILTER) -> list:
                     logger.warning(f"Ignoring candidate ami {image['Name']} because it has no tags.. prune manually")
                     continue
                 tags = [tag['Key'] for tag in image['Tags']]
-                # skip if tagged with 'keep' or 'do_not_delete'
-                if 'keep' in tags:
-                    logger.info(f"Ignoring ami {image['Name']}: tagged with 'keep'")
-                    continue
-                if 'do_not_delete' in tags:
-                    logger.info(f"Ignoring ami {image['Name']}: tagged with 'do_not_delete'")
-                    continue
+                # skip if tagged with with a KEEP tag
+                for tag in KEEP_TAGS:
+                    if tag in tags:
+                        logger.info(f"Ignoring ami {image['Name']}: tagged with '{tag}'")
+                        continue
                 # skip if referenced by an active instance
                 for instance in active_instances():
                     if instance['ImageId'] == image['ImageId']:
@@ -252,7 +253,6 @@ def prune_candidates(candidates) -> (int, int):
     deregistered = []
     deleted = []
 
-    # scream, aim, and fire
     for ami in candidates:
         # get the Name from the ami tags
         tag_name = [tag['Value'] for tag in ami['Tags'] if tag['Key'] == 'Name'].pop()
@@ -319,7 +319,6 @@ def app_candidates() -> list:
             logger.debug(f"Ignoring {image['Name']} (in retention)")
 
     # for each launch template, filter out the most recent n (along with the $Latest and $Default)
-    num_keep = ami_retention_policies()['app_ami_retention_count'] + 1
     templates = launch_templates()
     for template in templates:
         logger.info(f"Checking launch template {template['LaunchTemplateName']} amis...")
@@ -332,7 +331,7 @@ def app_candidates() -> list:
 
         # most recent n
         versions = launch_template_versions(template['LaunchTemplateId'], "")
-        versions = sorted(versions, key=lambda x: x['VersionNumber'], reverse=True)[:num_keep]
+        versions = sorted(versions, key=lambda x: x['VersionNumber'], reverse=True)[:retention_count]
         for i in range(len(versions)):
             logger.debug(f"Ignoring {versions[i]['LaunchTemplateData']['ImageId']} (still in retention)")
             candidates = [ami for ami in candidates if ami['ImageId'] != versions[i]['LaunchTemplateData']['ImageId']]

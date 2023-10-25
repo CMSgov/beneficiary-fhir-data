@@ -12,7 +12,7 @@ The lambda starts by building pools of candidate AMI's based on a set of resourc
 script. It then iterates through the pools and removes any candidates we wish to retain according to our retention
 policies. However, we **always** retain:
 
-- Any AMI or EC2 Snapshot tagged with `keep` or `do-not-delete`
+- Any AMI or EC2 Snapshot tagged with any of the defined KEEP_TAGS ('do-not-delete', 'DONOTDELETE', etc.)
 - Any EC2 Snapshot associated with an existing EC2 Volume
 - Any AMI referenced by the $Latest or $Default version of an existing Launch Template
 
