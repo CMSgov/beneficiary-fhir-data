@@ -207,7 +207,8 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
    * @param endpointId the endpoint id
    * @param endpointOperation the endpoint operation
    */
-  @Disabled
+  @Disabled(
+      "This should not be a test, Should be handled in another location as part of build flow")
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
   public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {

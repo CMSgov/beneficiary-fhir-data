@@ -95,13 +95,11 @@ public final class OutpatientClaimTransformerTest {
    * when run against the {@link StaticRifResource#SYNTHETIC_OUTPATIENT_1999_1999} {@link
    * OutpatientClaim}.
    *
-   * <p>Note: This test is normally disabled like other synthetic data tests
-   *
    * @throws FHIRException (indicates test failure)
    */
-  @Disabled
+  @Disabled("This test is normally disabled like other synthetic data tests")
   @Test
-  public void transformSyntheticRecord() throws FHIRException, IOException {
+  public void transformSyntheticRecord() throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResource.SYNTHETIC_OUTPATIENT_1999_1999));
     OutpatientClaim claim =
@@ -119,16 +117,14 @@ public final class OutpatientClaimTransformerTest {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform} works as expected
-   * when run against all synthetic data outpatient claims
-   *
-   * <p>Note: This test is normally disabled like other synthetic data tests. It will take 20
-   * minutes or more to run.
+   * when run against all synthetic data outpatient claims.
    *
    * @throws FHIRException (indicates test failure)
    */
-  @Disabled
+  @Disabled(
+      "This test is normally disabled like other synthetic data tests. Takes 20+ minutes to run")
   @Test
-  public void transformAllSyntheticRecords() throws FHIRException, IOException {
+  public void transformAllSyntheticRecords() throws FHIRException {
     List<StaticRifResource> outpatientSyntheticFiles =
         Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()).stream()
             .filter(r -> r.getRifFileType().equals(RifFileType.OUTPATIENT))

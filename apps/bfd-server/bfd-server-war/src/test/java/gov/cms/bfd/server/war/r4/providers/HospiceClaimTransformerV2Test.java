@@ -55,7 +55,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -122,18 +121,6 @@ public final class HospiceClaimTransformerV2Test {
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
-  }
-
-  /**
-   * Serializes the EOB and prints to the command line.
-   *
-   * @throws FHIRException if there is a parsing exception with the eob json
-   */
-  @Disabled
-  @Test
-  public void shouldOutputJSON() throws FHIRException {
-    assertNotNull(eob);
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
   /**

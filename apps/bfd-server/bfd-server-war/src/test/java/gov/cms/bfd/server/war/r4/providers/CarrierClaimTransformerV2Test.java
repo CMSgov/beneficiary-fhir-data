@@ -52,7 +52,6 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -141,19 +140,6 @@ public class CarrierClaimTransformerV2Test {
     CarrierClaim claim = generateClaim();
 
     assertMatches(claim, carrierClaimTransformer.transform(claim, false));
-  }
-
-  /**
-   * Serializes the EOB and prints to the command line.
-   *
-   * @throws FHIRException if there is an issue with transforming the claim
-   * @throws IOException if there is an issue with reading the test file
-   */
-  @Disabled
-  @Test
-  public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = carrierClaimTransformer.transform(generateClaim(), false);
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
   /** Tests that the transformer sets the provider (CARR_CLM_BLG_NPI_NUM). */
