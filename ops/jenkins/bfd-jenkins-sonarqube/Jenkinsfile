@@ -78,6 +78,15 @@ spec:
                 }
             }
         }
+        stage ('SonarQube Check Sources') {
+            steps {
+                script {
+                    dir ('apps') {
+                        sh "ls -al"
+                    }
+                }
+            }          
+        }
         stage ('SonarQube Analysis') {
             steps {
                 script {
