@@ -42,37 +42,34 @@ resource "aws_iam_policy" "sqs" {
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service}, /bfd/mgmt/common/sensitive/user SSM hierarchies"
-  policy      = <<-EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
         {
-            "Effect": "Allow",
-            "Action": [
-                "ssm:GetParametersByPath",
-                "ssm:GetParameters",
-                "ssm:GetParameter"
-            ],
-            "Resource": [
-                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/user/*",
-                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
-                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
-                "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/${local.service}/*"
-            ]
+          "Effect" : "Allow",
+          "Action" : [
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter"
+          ],
+          "Resource" : [
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/user/*",
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/${local.service}/*"
+          ]
         },
         {
-            "Effect": "Allow",
-            "Action": [
-                "kms:Decrypt"
-            ],
-            "Resource": [
-                "${local.kms_key_arn}",
-                "${local.mgmt_kms_key_arn}"
-            ]
+          "Effect" : "Allow",
+          "Action" : [
+            "kms:Decrypt"
+          ],
+          "Resource" : concat(local.mgmt_kms_config_key_arns, local.kms_config_key_arns)
         }
-    ]
-}
-EOF
+      ]
+    }
+  )
 }
 
 resource "aws_iam_role" "this" {
