@@ -82,7 +82,9 @@ spec:
             steps {
                 script {
                     dir ('apps') {
+                      sh "pwd"
                       sh "find . -name *.sh -print"
+                      sh "ls -al ${PWD}/bfd-ops/target/ops-copy"
                     }
                 }
             }          
