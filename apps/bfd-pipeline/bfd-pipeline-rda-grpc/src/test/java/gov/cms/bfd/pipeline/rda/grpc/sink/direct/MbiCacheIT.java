@@ -26,23 +26,31 @@ public class MbiCacheIT {
           .hashPepperString("just-a-test")
           .cacheSize(3)
           .build();
+
   /** Used for hashing in tests. */
   private final IdHasher normalHasher = new IdHasher(hashConfig);
 
   /** Test mbi 1. */
   private final String mbi1 = "1";
+
   /** Test mbi hash 1. */
   private final String hash1 = normalHasher.computeIdentifierHash(mbi1);
+
   /** Test mbi 2. */
   private final String mbi2 = "2";
+
   /** Test mbi hash 2. */
   private final String hash2 = normalHasher.computeIdentifierHash(mbi2);
+
   /** Test mbi 3. */
   private final String mbi3 = "3";
+
   /** Test mbi hash 3. */
   private final String hash3 = normalHasher.computeIdentifierHash(mbi3);
+
   /** Test mbi 4. */
   private final String mbi4 = "4";
+
   /** Test mbi hash 4. */
   private final String hash4 = normalHasher.computeIdentifierHash(mbi4);
 

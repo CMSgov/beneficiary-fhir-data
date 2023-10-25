@@ -139,18 +139,25 @@ public final class CcwRifLoadJob implements PipelineJob {
 
   /** The application metrics. */
   private final MetricRegistry appMetrics;
+
   /** The extraction options. */
   private final ExtractionOptions options;
+
   /** The data set listener for finding new files to load. */
   private final DataSetMonitorListener listener;
+
   /** The manager for taking actions with S3. */
   private final S3TaskManager s3TaskManager;
+
   /** The application state. */
   private final PipelineApplicationState appState;
+
   /** If the application is in idempotent mode. */
   private final boolean isIdempotentMode;
+
   /** Time between runs of the {@link CcwRifLoadJob}. Empty means to run exactly once. */
   private final Optional<Duration> runInterval;
+
   /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 

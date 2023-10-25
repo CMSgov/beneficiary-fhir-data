@@ -55,10 +55,13 @@ public final class BeneficiaryTransformerV2Test {
 
   /** Fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** Beneficiary under test. */
   private static Beneficiary beneficiary = null;
+
   /** Patient under test. */
   private static Patient patient = null;
+
   /** The class under test. */
   private static BeneficiaryTransformerV2 beneficiaryTransformerV2;
 
@@ -112,7 +115,7 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /** 'Test' to output the json value of the test patient to the console for debugging. */
-  @Disabled
+  @Disabled("https://jira.cms.gov/browse/BFD-3011")
   @Test
   public void shouldOutputJSON() {
     assertNotNull(patient);
@@ -123,7 +126,7 @@ public final class BeneficiaryTransformerV2Test {
    * 'Test' to output the json value of the test patient (with mbi data) to the console for
    * debugging.
    */
-  @Disabled
+  @Disabled("https://jira.cms.gov/browse/BFD-3011")
   @Test
   public void shouldOutputMbiHistory() {
     assertNotNull(patient);
@@ -590,7 +593,7 @@ public final class BeneficiaryTransformerV2Test {
    * Verifies that {@link BeneficiaryTransformerV2#transform(Beneficiary, RequestHeaders)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
-  @Disabled
+  @Disabled("https://jira.cms.gov/browse/BFD-3011")
   @Test
   public void transformSampleARecord() {
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));

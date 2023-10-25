@@ -356,10 +356,13 @@ public enum StaticRifResource {
 
   /** The Resource URL Supplier for the different RIF files. */
   private final Supplier<URL> resourceUrlSupplier;
+
   /** The Rif File Type of the beneficiary files (EX: Beneficiary, Carrier, etc). */
   private final RifFileType rifFileType;
+
   /** The Record Count of the beneficiaries/claims/drug events in the RIF file. */
   private final int recordCount;
+
   /** The Resource URL of the resource's contents. */
   private URL resourceUrl;
 

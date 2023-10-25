@@ -44,23 +44,28 @@ public class FissTransformerIT {
   private static class TransformerArguments {
     /** Map of mbis. */
     private final Map<String, BeneficiaryData> mbiMap;
+
     /**
      * Helper class for carrying claims between processing iterations so additional line items can
      * be added to the claim if any are found.
      */
     private final WrappedMessage wrappedMessage;
+
     /** Wrapped long value used for keeping a counter between method scopes. */
     private final WrappedCounter wrappedCounter;
+
     /**
      * The {@link Parser} creates {@link Data} objects that are then used to retrieve the data in a
      * common manner.
      */
     private final Parser.Data<String> data;
+
     /**
      * Used to create a sample of data from various sources, enforcing sampling proportions per
      * source.
      */
     private final DataSampler<String> mbiSampler;
+
     /** Sample Id. */
     private final int sampleId;
   }
@@ -70,10 +75,13 @@ public class FissTransformerIT {
   private static class ExpectedValues {
     /** Expected wrapped message. */
     private final WrappedMessage wrappedMessage;
+
     /** Expected wrapped counter. */
     private final WrappedCounter wrappedCounter;
+
     /** Expected response. */
     private final Optional<MessageOrBuilder> response;
+
     /** Expected sample mbis. */
     private final Set<String> sampledMbis;
   }
@@ -431,69 +439,100 @@ public class FissTransformerIT {
   private static class TestData {
     /** Beneficiary Id. */
     private static final String BENE_ID = "beneid";
+
     /** Beneficiary First Name. */
     private static final String BENE_FIRST_NAME = "Firstname";
+
     /** Beneficiary Last Name. */
     private static final String BENE_LAST_NAME = "Lastname";
+
     /** Beneficiary Middle Initial. */
     private static final String BENE_MID_INIT = "M";
+
     /** Beneficiary Date of Birth. */
     private static final String BENE_DOB = "2020-01-01";
+
     /** Beneficiary Gender. */
     private static final String BENE_GENDER = "1";
+
     /** Fi Document Claim Control Number. */
     private static final String FI_DOC_CLM_CNTL_NUM = "dcn12345678";
+
     /** HICN Number. */
     private static final String HIC_NO = "hicno123";
+
     /** MBI Number. */
     private static final String MBI = "mbimbimbimbi";
+
     /** Admitting Diagnosis Code. */
     private static final String ADMTG_DGNS_CD = "admitcd";
+
     /** Claim Frequency Code. */
     private static final String CLM_FREQ_CD = "freqCode";
+
     /** Claim From Date. */
     private static final String CLM_FROM_DT = "01-Jan-2001";
 
     /** Claim Type Code. */
     private static final int CLM_SRVC_CLSFCTN_TYPE_CD = 1;
+
     /** Claim Thru Date. */
     private static final String CLM_THRU_DT = "03-Mar-2001";
+
     /** Claim Tot Charge Amount. */
     private static final String CLM_TOT_CHRG_AMT = "3218.33";
+
     /** Claim Fac Type Code. */
     private static final int CLM_FAC_TYPE_CD = 8;
+
     /** Orginial NPI Number. */
     private static final String ORG_NPI_NUM = "8888888888";
+
     /** Principal Diagnosis Code. */
     private static final String PRNCPAL_DGNS_CD = "princode";
+
     /** Provider Number. */
     private static final String PRVDR_NUM = "222222";
+
     /** Claim ID. */
     private static final String CLM_ID = "-999999999";
+
     /** ICD Diagnosis Code. */
     private static final String ICD_DGNS_CD1 = "JJJJ";
+
     /** Claim POA. */
     private static final int CLM_POA_IND_SW1 = 1;
+
     /** Icd Procedure code. */
     private static final String ICD_PRCDR_CD1 = "pc1";
+
     /** Procedure Date. */
     private static final String PRCDR_DT1 = "10-Jan-2011";
+
     /** Claim Line Number. */
     private static final String CLM_LINE_NUM = "1";
+
     /** Hardcoded IntermediaryNb. */
     private static final String HARDCODED_INTERMEDIARY_NB = "?";
+
     /** Hardcoded Location1. */
     private static final String HARDCODED_LOC1 = "?";
+
     /** Hardcoded Location2. */
     private static final String HARDCODED_LOC2 = "?";
+
     /** Hardcoded Transaction Date. */
     private static final String HARDCODED_TRAN_DATE_CYMD = "1970-01-01";
+
     /** Hardcoded Federal Tax Number. */
     private static final String HARDCODED_FED_TAX_NUMBER = "XX-XXXXXXX";
+
     /** Hardcoded Received Date. */
     private static final String HARDCODED_RECEIVED_DATE_CYMD = "1970-01-01";
+
     /** Fiss Sample ID. */
     private static final int FISS_SAMPLE_ID = 0;
+
     /** Mcs Sample ID. */
     private static final int MCS_SAMPLE_ID = 1;
 

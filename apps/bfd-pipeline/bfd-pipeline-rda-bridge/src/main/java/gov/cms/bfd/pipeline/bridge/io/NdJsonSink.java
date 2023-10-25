@@ -18,8 +18,10 @@ public class NdJsonSink implements Sink<MessageOrBuilder> {
 
   /** Output path for file. */
   private final Path outputPath;
+
   /** Sequence Counter. */
   private final WrappedCounter sequenceCounter;
+
   /** The Seqeunce Start Number. */
   private final long startSequenceNumber;
 

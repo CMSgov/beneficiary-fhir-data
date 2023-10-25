@@ -47,19 +47,24 @@ public class RdaLoadJobIT {
   /** Arbitrary RDA API version to use for testing. */
   private static final RdaService.Version ARBITRARY_RDA_VERSION =
       RdaService.Version.builder().version("0.0.1").build();
+
   /** Clock for making timestamps. using a fixed Clock ensures our timestamp is predictable. */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+
   /** The test fiss claim source. */
   private static final CharSource fissClaimsSource =
       Resources.asCharSource(Resources.getResource("FISS.ndjson"), StandardCharsets.UTF_8);
+
   /** The test MCS claim source. */
   private static final CharSource mcsClaimsSource =
       Resources.asCharSource(Resources.getResource("MCS.ndjson"), StandardCharsets.UTF_8);
+
   /** The batch size to use for testing. */
   private static final int BATCH_SIZE = 17;
 
   /** List of json fiss claims to load. */
   private ImmutableList<String> fissClaimJson;
+
   /** List of json MCS claims to load. */
   private ImmutableList<String> mcsClaimJson;
 

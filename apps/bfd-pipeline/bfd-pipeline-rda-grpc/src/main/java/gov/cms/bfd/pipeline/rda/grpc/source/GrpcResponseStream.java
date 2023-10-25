@@ -27,10 +27,13 @@ public class GrpcResponseStream<TResponse> implements AutoCloseable {
 
   /** The ClientCall used to invoke the RPC associated with the iterator. */
   private final ClientCall<?, ?> clientCall;
+
   /** An Iterator over the response stream. */
   private final Iterator<TResponse> resultsIterator;
+
   /** True if we have consumed entire stream. */
   private final AtomicBoolean complete;
+
   /** True if client has cancelled the stream. */
   private final AtomicBoolean cancelled;
 

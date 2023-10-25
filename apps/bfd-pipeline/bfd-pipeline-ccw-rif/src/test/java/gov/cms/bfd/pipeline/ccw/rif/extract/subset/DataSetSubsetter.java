@@ -154,8 +154,10 @@ public final class DataSetSubsetter {
   private static final class LocalDataSetWriter implements IDataSetWriter {
     /** The output directory to write files to. */
     private final Path outputDirectory;
+
     /** The timestamp to mark the file's write time with. */
     private final Instant timestamp;
+
     /** The map of file types and their csv writers. */
     private final Map<RifFileType, CSVPrinter> printers;
 

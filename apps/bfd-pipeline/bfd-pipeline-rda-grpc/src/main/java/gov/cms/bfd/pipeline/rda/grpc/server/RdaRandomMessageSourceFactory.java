@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 public class RdaRandomMessageSourceFactory implements RdaMessageSourceFactory {
   /** The version returned by {@link RdaService#getVersion}. */
   private final RdaService.Version version;
+
   /** Source of records for {@link RdaService#getFissClaims} and {@link RdaService#getMcsClaims}. */
   private final RandomClaimGeneratorConfig config;
 

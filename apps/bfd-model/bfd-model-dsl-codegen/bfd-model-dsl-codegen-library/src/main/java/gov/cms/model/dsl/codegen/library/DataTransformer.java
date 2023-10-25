@@ -981,6 +981,7 @@ public class DataTransformer {
   public static class ErrorMessage {
     /** The name of the field the error is associated with. */
     private final String fieldName;
+
     /** The message that describes the error that was found. */
     private final String errorMessage;
 

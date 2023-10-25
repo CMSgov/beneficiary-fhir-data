@@ -35,8 +35,10 @@ public final class S3RifFile implements RifFile {
 
   /** The metric registry. */
   private final MetricRegistry appMetrics;
+
   /** The manifest data. */
   private final DataSetManifestEntry manifestEntry;
+
   /** The manifest download result. */
   private final Future<ManifestEntryDownloadResult> manifestEntryDownload;
 

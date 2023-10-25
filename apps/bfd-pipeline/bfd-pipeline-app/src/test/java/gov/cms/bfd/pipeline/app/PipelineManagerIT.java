@@ -226,8 +226,10 @@ public final class PipelineManagerIT {
 
     /** The pipeline job schedule for the mock job. */
     private final Optional<PipelineJobSchedule> schedule;
+
     /** Represents if this job can be interrupted. */
     private final boolean interruptible;
+
     /** The {@link Callable} that will create the values to use for {@link #call()}. */
     private final Callable<Object> jobResultProducer;
 

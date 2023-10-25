@@ -156,8 +156,10 @@ public final class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
   private static class BlockThenRunPolicy implements RejectedExecutionHandler {
     /** The max blocking time. */
     private long maxBlockingTime;
+
     /** The max blocking time {@link TimeUnit}. */
     private TimeUnit maxBlockingTimeUnit;
+
     /** The blocking time callback. */
     private Callable<Boolean> blockingTimeCallback;
 

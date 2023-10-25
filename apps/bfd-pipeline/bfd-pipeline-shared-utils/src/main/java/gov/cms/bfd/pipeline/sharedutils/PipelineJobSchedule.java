@@ -13,6 +13,7 @@ public final class PipelineJobSchedule {
    * that this delay does not apply to the first run).
    */
   private final long repeatDelay;
+
   /** The {@link TemporalUnit} to use for {@link #repeatDelay}. */
   private final TemporalUnit repeatDelayUnit;
 

@@ -22,17 +22,22 @@ import org.hibernate.tool.schema.Action;
 public final class PipelineApplicationState implements AutoCloseable {
   /** The persistence unit name for the adjudicated pipeline. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+
   /** The persistence unit name for the RDA (pre-adjudicated) pipeline. */
   public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   /** Registry for metering. */
   private final MeterRegistry meters;
+
   /** Registry for metrics. */
   private final MetricRegistry metrics;
+
   /** The pooled data source for communicating with the database. */
   private final HikariDataSource pooledDataSource;
+
   /** Factory for the entity manager, used in persistence. */
   private final EntityManagerFactory entityManagerFactory;
+
   /** Clock instance for timekeeping. */
   private final Clock clock;
 

@@ -774,6 +774,7 @@ final class CoverageTransformerV2 {
     addCoverageExtension(
         coverage, CcwCodebookVariable.PTDCNTRCT12, beneficiary.getPartDContractNumberDecId());
   }
+
   /**
    * Sets the Coverage.status Looks up or adds a contained {@link Identifier} object to the current
    * {@link Patient}. This is used to store Identifier slices related to the Provider organization.

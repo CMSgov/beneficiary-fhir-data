@@ -11,8 +11,10 @@ import java.util.function.Supplier;
 public class ExceptionMessageSource<T> implements MessageSource<T> {
   /** The message source being wrapped. */
   private final MessageSource<T> source;
+
   /** Factory for the exception(s) to be thrown. */
   private final Supplier<Exception> exceptionFactory;
+
   /** The maximum number of messages to deliver before throwing an exception. */
   private int remainingBeforeThrow;
 

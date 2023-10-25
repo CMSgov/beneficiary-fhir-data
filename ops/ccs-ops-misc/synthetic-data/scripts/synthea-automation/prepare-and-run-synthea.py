@@ -61,6 +61,10 @@ def validate_and_run(args):
 
     generated_benes = args[2]
     future_months = int(args[3])
+    
+    contract_target = args[4]
+    use_contract_target = args[5]
+    
     synthea_prop_filepath = synthea_folder_filepath + "src/main/resources/synthea.properties"
     synthea_output_filepath = synthea_folder_filepath + "output/"
     
@@ -78,7 +82,21 @@ def validate_and_run(args):
         sys.exit(1)
     
     end_state_properties_file = read_file_lines(end_state_file_path)
-    update_property_file(end_state_properties_file, synthea_prop_filepath)
+    
+    
+    ## If contract target is requested via use_contract_target, add a line to replace the synthea properties:
+    ## exporter.bfd.partd_contract_start and exporter.bfd.partd_contract_count
+    synthea_properties = end_state_properties_file.copy()
+    if use_contract_target == "true":
+        if len(contract_target) != 5:
+            print(f"Given contract number must be 5 characters, received '{contract_target}'")
+            print("Returning with exit code 1")
+            sys.exit(1)
+        print("Generating using partD contract: " + contract_target)
+        synthea_properties.append("exporter.bfd.partd_contract_start=" + contract_target)
+        synthea_properties.append("exporter.bfd.partd_contract_count=1")
+    
+    update_property_file(synthea_properties, synthea_prop_filepath)
     print("Updated synthea properties")
     
     clean_synthea_output(synthea_folder_filepath)
@@ -150,9 +168,6 @@ def update_manifest(synthea_output_filepath, end_state_properties_file, new_end_
     lines_to_add.append(f"<clm_id_end>{clm_id_end}</clm_id_end>")
     lines_to_add.append(f"<pde_id_end>{pde_id_end}</pde_id_end>")
     lines_to_add.append(f"<generated>{timestamp}</generated>")
-    
-    ## TODO: grab the NEW end state and list out the ends of fields in here, replace _start with _end in the prop name
-    
     lines_to_add.append("</preValidationProperties>")
     lines_to_add.append("</dataSetManifest>")
     write_string = '\n'.join(lines_to_add)
@@ -221,7 +236,24 @@ def validate_file_paths(synthea_folder_filepath, synthea_prop_filepath, synthea_
     
     if os.path.exists(synthea_folder_filepath):
         ## Validate we have the export files in place, and the national script
-        export_filenames = ["condition_code_map.json", "dme_code_map.json", "hcpcs_code_map.json", "medication_code_map.json", "drg_code_map.json", "betos_code_map.json", "external_codes.csv"]
+        export_filenames = [
+            'betos_code_map.json',
+            'condition_code_map.json',
+            'dme_code_map.json',
+            'drg_code_map.json',
+            'hcpcs_code_map.json',
+            'hha_rev_cntr_code_map.json',
+            'hha_pps_pdgm_codes.csv',
+            'hha_pps_case_mix_codes.csv',
+            'hospice_rev_cntr_code_map.json',
+            'inpatient_rev_cntr_code_map.json',
+            'medication_code_map.json',
+            'outpatient_rev_cntr_code_map.json',
+            'snf_pdpm_code_map.json',
+            'snf_pps_code_map.json',
+            'snf_rev_cntr_code_map.json',
+            'external_codes.csv',
+            ]
         for filename in export_filenames:
             export_file_loc = synthea_folder_filepath + "src/main/resources/export/" + filename
             if not os.path.exists(export_file_loc):

@@ -34,10 +34,13 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 
   /** The task manager for S3. */
   private final S3TaskManager s3TaskManager;
+
   /** The metrics registry. */
   private final MetricRegistry appMetrics;
+
   /** The extraction options. */
   private final ExtractionOptions options;
+
   /** The manifest data. */
   private final DataSetManifestEntry manifestEntry;
 
@@ -146,6 +149,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
   public static final class ManifestEntryDownloadResult {
     /** The {@link DataSetManifestEntry} whose file was downloaded. */
     private final DataSetManifestEntry manifestEntry;
+
     /**
      * The {@link Path} to the local copy of the {@link DataSetManifestEntry}'s contents, which
      * should be deleted once it is no longer needed, to prevent disk space usage leaks.

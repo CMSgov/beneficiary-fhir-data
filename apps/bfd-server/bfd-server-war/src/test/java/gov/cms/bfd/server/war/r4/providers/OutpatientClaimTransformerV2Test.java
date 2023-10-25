@@ -49,7 +49,6 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -63,16 +62,22 @@ import org.mockito.quality.Strictness;
 public final class OutpatientClaimTransformerV2Test {
   /** The parsed claim used to generate the EOB and for validating with. */
   OutpatientClaim claim;
+
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
+
   /** The transformer under test. */
   OutpatientClaimTransformerV2 outpatientClaimTransformer;
+
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** The mock metric registry. */
   @Mock MetricRegistry mockMetricRegistry;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 
@@ -1471,18 +1476,5 @@ public final class OutpatientClaimTransformerV2Test {
             new DateType("2011-02-18"));
 
     assertTrue(compare.equalsDeep(ex));
-  }
-
-  /**
-   * Serializes the EOB and prints to the command line.
-   *
-   * @throws FHIRException if there is an issue with transforming the claim
-   * @throws IOException if there is an issue with reading the test file
-   */
-  @Disabled
-  @Test
-  public void serializeSampleARecord() throws FHIRException, IOException {
-    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(generateClaim(), false);
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

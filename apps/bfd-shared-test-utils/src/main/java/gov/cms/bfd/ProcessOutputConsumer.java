@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 public final class ProcessOutputConsumer implements Runnable {
   /** The reader that consumes output from stdout. */
   private final BufferedReader stdoutReader;
+
   /** Holds the contents of stdout. */
   private final List<String> stdoutContents;
 

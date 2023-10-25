@@ -13,8 +13,10 @@ import lombok.AllArgsConstructor;
 public class RdaJsonMessageSourceFactory implements RdaMessageSourceFactory {
   /** The version returned by {@link RdaService#getVersion}. */
   private final RdaService.Version version;
+
   /** JSON data containing FISS claims. */
   private final CharSource fissJson;
+
   /** JSON data containing MCS claims. */
   private final CharSource mcsJson;
 

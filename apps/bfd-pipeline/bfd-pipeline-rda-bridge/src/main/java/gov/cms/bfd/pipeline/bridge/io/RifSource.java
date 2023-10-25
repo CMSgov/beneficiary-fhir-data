@@ -11,6 +11,7 @@ public class RifSource implements Source<String> {
 
   /** Buffered Reader for inputPath. */
   private final BufferedReader reader;
+
   /** Next Line to keep track of reader. */
   private String nextLine;
 

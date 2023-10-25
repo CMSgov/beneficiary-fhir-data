@@ -14,8 +14,10 @@ public final class MockDataSetMonitorListener implements DataSetMonitorListener 
 
   /** Counter for how many times the {@link #noDataAvailable()} has fired. */
   private int noDataAvailableEvents = 0;
+
   /** A list of data events that have fired. */
   private final List<RifFilesEvent> dataEvents = new LinkedList<>();
+
   /** A list of error events that have fired. */
   final List<Throwable> errorEvents = new LinkedList<>();
 

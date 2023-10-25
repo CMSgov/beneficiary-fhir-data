@@ -28,6 +28,7 @@ public class SequenceNumberTracker {
    * so that values are sorted in ascending order.
    */
   private final Set<Long> activeSequenceNumbers = new TreeSet<>();
+
   /** Keeps track of the current highest sequence number. */
   private long maxSequenceNumber;
 

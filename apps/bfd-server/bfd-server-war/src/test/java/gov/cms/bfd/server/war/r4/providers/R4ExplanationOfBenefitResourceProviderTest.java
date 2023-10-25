@@ -89,22 +89,28 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** The class under test. */
   R4ExplanationOfBenefitResourceProvider eobProvider;
+
   /** ExecutorService for threading. */
   ExecutorService mockExecutorService = spy(Executors.newFixedThreadPool(2));
 
   /** The mocked request details. */
   @Mock ServletRequestDetails requestDetails;
+
   /** The mocked input id value. */
   @Mock IdType eobId;
 
   /** The mock spring application context. */
   @Mock ApplicationContext appContext;
+
   /** The mocked reference param used for search by patient. */
   @Mock ReferenceParam patientParam;
+
   /** The mock metric registry. */
   @Mock MetricRegistry metricRegistry;
+
   /** The mock loaded filter manager. */
   @Mock LoadedFilterManager loadedFilterManager;
+
   /** The mock executor service. */
   @Mock ExecutorService executorService;
 
@@ -113,11 +119,13 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** The mock EOB returned from a transformer. */
   @Mock ExplanationOfBenefit testEob;
+
   /** The mock Bundle returned from a transformer. */
   Bundle testBundle;
 
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 
@@ -126,10 +134,13 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** The test data bene. */
   Beneficiary testBene;
+
   /** The carrier claim returned in tests. */
   CarrierClaim testCarrierClaim;
+
   /** The carrier claim returned in tests. */
   DMEClaim testDmeClaim;
+
   /** The carrier claim returned in tests. */
   PartDEvent testPdeClaim;
 
@@ -138,21 +149,25 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** The transformer for carrier claims. */
   @Mock CarrierClaimTransformerV2 mockCarrierClaimTransformer;
+
   /** The mock entity manager for CarrierClaim claims. */
   @Mock EntityManager carrierEntityManager;
 
   /** The transformer for dme claims. */
   @Mock DMEClaimTransformerV2 mockDmeClaimTransformer;
+
   /** The mock entity manager for DMEClaim claims. */
   @Mock EntityManager dmeEntityManager;
 
   /** The transformer for Part D events. */
   @Mock PartDEventTransformerV2 mockPdeTransformer;
+
   /** The mock entity manager for Part D events. */
   @Mock EntityManager pdeEntityManager;
 
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
+
   /** The FDA drug display lookup. */
   @Mock FdaDrugCodeDisplayLookup mockDrugDisplayLookup;
 

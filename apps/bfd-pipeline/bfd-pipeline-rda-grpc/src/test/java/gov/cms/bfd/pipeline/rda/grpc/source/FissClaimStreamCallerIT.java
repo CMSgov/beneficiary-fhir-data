@@ -51,6 +51,7 @@ public class FissClaimStreamCallerIT {
       }
       """
           .replaceAll("\n", "");
+
   /** Example rejected claim. */
   private static final String CLAIM_2 =
       """
@@ -85,8 +86,10 @@ public class FissClaimStreamCallerIT {
 
   /** Clock for creating for consistent values in JSON (2021-06-03T18:02:37Z). */
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+
   /** The test hasher. */
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
+
   /** The transformer to create results for correctness verification. */
   private final FissClaimTransformer transformer =
       new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));

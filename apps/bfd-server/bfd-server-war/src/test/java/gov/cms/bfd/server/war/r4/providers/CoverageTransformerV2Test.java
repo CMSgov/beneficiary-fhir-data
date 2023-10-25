@@ -38,13 +38,16 @@ public final class CoverageTransformerV2Test {
 
   /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** The beneficiary parsed from SAMPLE_A data. */
   private static Beneficiary beneficiary = null;
+
   /**
    * The current medicare segment. TODO: Should likely be moved to a local var and passed around as
    * needed.
    */
   private static MedicareSegment currSegment = null;
+
   /**
    * Coverage being tested. TODO: Should likely be moved to a local var and passed around as needed
    * to avoid cross-pollution between tests.
@@ -82,35 +85,43 @@ public final class CoverageTransformerV2Test {
   }
 
   /** Standalone wrapper to output PART_A. */
-  @Disabled
   @Test
   public void outputTransformCoveragePartA() throws FHIRException {
+    String partA = "part-a-567834";
     transformCoverage(MedicareSegment.PART_A, true);
     assertNotNull(coverage);
+    assertEquals("Coverage", coverage.getIdElement().getResourceType());
+    assertEquals(partA, coverage.getIdPart());
   }
 
   /** Standalone wrapper to output PART_B. */
-  @Disabled
   @Test
   public void outputTransformCoveragePartB() throws FHIRException {
+    String partB = "part-b-567834";
     transformCoverage(MedicareSegment.PART_B, true);
     assertNotNull(coverage);
+    assertEquals("Coverage", coverage.getIdElement().getResourceType());
+    assertEquals(partB, coverage.getIdPart());
   }
 
   /** Standalone wrapper to output PART_C. */
-  @Disabled
   @Test
   public void outputTransformCoveragePartC() throws FHIRException {
+    String partC = "part-c-567834";
     transformCoverage(MedicareSegment.PART_C, true);
     assertNotNull(coverage);
+    assertEquals("Coverage", coverage.getIdElement().getResourceType());
+    assertEquals(partC, coverage.getIdPart());
   }
 
   /** Standalone wrapper to output PART_D. */
-  @Disabled
   @Test
   public void outputTransformCoveragePartD() throws FHIRException {
+    String partD = "part-d-567834";
     transformCoverage(MedicareSegment.PART_D, true);
     assertNotNull(coverage);
+    assertEquals("Coverage", coverage.getIdElement().getResourceType());
+    assertEquals(partD, coverage.getIdPart());
   }
 
   // ==================
@@ -795,7 +806,7 @@ public final class CoverageTransformerV2Test {
    * Verifies that the specified {@link MedicareSegment#PART_A} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    */
-  @Disabled // test only used to verify support for IT (intgration Test)
+  @Disabled("Test only used to verify support for Integration Test")
   @Test
   public void verifyIntegrationPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
@@ -806,7 +817,7 @@ public final class CoverageTransformerV2Test {
    * Verifies that the specified {@link MedicareSegment#PART_B} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    */
-  @Disabled // test only used to verify support for IT (intgration Test)
+  @Disabled("Test only used to verify support for Integration Test")
   @Test
   public void verifyIntegrationPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
@@ -817,7 +828,7 @@ public final class CoverageTransformerV2Test {
    * Verifies that the specified {@link MedicareSegment#PART_C} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    */
-  @Disabled // test only used to verify support for IT (intgration Test)
+  @Disabled("Test only used to verify support for Integration Test")
   @Test
   public void verifyIntegrationPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
@@ -828,7 +839,7 @@ public final class CoverageTransformerV2Test {
    * Verifies that the specified {@link MedicareSegment#PART_D} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    */
-  @Disabled // test only used to verify support for IT (intgration Test)
+  @Disabled("Test only used to verify support for Integration Test")
   @Test
   public void verifyIntegrationPartD() {
     transformCoverage(MedicareSegment.PART_D, false);

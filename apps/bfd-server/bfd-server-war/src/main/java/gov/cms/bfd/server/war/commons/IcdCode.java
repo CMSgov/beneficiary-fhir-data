@@ -27,6 +27,7 @@ public abstract class IcdCode {
 
   /** The ICD code. */
   private final String icdCode;
+
   /**
    * The CCW encoding (per <a href=
    * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">

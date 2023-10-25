@@ -31,21 +31,28 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum>
     implements gov.cms.model.dsl.codegen.library.EnumStringExtractor<TRecord, TEnum> {
   /** Single Result instance for any missing value. */
   private static final Result NO_VALUE_RESULT = new Result(Status.NoValue);
+
   /** Single Result instance for any invalid value. */
   private static final Result INVALID_VALUE_RESULT = new Result(Status.InvalidValue);
 
   /** Lambda used to determine if the enum has a value. */
   private final Predicate<TRecord> hasEnumValue;
+
   /** Lambda used to get the enum's value. */
   private final Function<TRecord, ProtocolMessageEnum> getEnumValue;
+
   /** Lambda used to determine if the field has an unrecognized value. */
   private final Predicate<TRecord> hasUnrecognizedValue;
+
   /** Lambda used to get the unrecognized value. */
   private final Function<TRecord, String> getUnrecognizedValue;
+
   /** enum value (usually TEnum.UNRECOGNIZED) for protobuf's bad enum value. */
   private final TEnum invalidValue;
+
   /** Set of enum values that should generate an UnsupportedValue result. */
   private final Set<ProtocolMessageEnum> unsupportedEnumValues;
+
   /** The (usually empty) set of options to be used while processing. */
   private final Set<Options> options;
 

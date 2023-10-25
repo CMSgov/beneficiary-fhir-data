@@ -69,20 +69,28 @@ public class R4CoverageResourceProviderTest {
 
   /** The Metric registry. */
   @Mock private MetricRegistry metricRegistry;
+
   /** The Loaded filter manager. */
   @Mock private LoadedFilterManager loadedFilterManager;
+
   /** The mock coverage transformer. */
   @Mock private CoverageTransformerV2 coverageTransformer;
+
   /** The mock entity manager for mocking database calls. */
   @Mock private EntityManager entityManager;
+
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
+
   /** Used to mock bene data for a bene search. */
   @Mock ReferenceParam beneficiary;
+
   /** The mocked request details. */
   @Mock ServletRequestDetails requestDetails;
 

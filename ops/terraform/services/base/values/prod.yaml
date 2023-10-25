@@ -5,6 +5,7 @@
 /bfd/prod/common/nonsensitive/env_name_std: prod
 /bfd/prod/common/nonsensitive/key_pair: bfd-prod
 /bfd/prod/common/nonsensitive/kms_key_alias: alias/bfd-prod-cmk
+/bfd/prod/common/nonsensitive/kms_config_key_alias: alias/bfd-prod-config-cmk
 /bfd/prod/common/nonsensitive/management_security_group: bfd-prod-remote-management
 /bfd/prod/common/nonsensitive/new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
 /bfd/prod/common/nonsensitive/new_relic_metric_path: &newRelicMetricPath /metric/v1

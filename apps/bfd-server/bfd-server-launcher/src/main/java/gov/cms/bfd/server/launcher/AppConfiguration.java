@@ -41,18 +41,22 @@ public final class AppConfiguration {
 
   /** The host/address that the server will bind to and listen for HTTPS connections on. * */
   private final String host;
+
   /** The port that the server will listen for HTTPS connections on. * */
   private final int port;
+
   /**
    * The {@link Path} of the Java keystore ({@code .pfx} file) containing the private key and
    * certificate to use for this server. *
    */
   private final String keystore;
+
   /**
    * The {@link Path} of the Java trust store ({@code .pfx} file) containing the client certificates
    * to use (i.e. trust/authenticate) for this server. *
    */
   private final String truststore;
+
   /** The {@link Path} of the WAR file to run. * */
   private final String war;
 

@@ -27,6 +27,7 @@ import org.hibernate.exception.ConstraintViolationException;
 public class TransactionManager implements AutoCloseable {
   /** Used to create new {@link EntityManager}s as needed. */
   private final EntityManagerFactory entityManagerFactory;
+
   /**
    * The current {@link EntityManager}. May be null if we have not yet created one or if it was
    * closed after a failed transaction.
@@ -281,8 +282,10 @@ public class TransactionManager implements AutoCloseable {
   public static class RetryResult<T> {
     /** Value returned by the last call to the function. */
     private final T value;
+
     /** Number of retries needed to get function. */
     private final int numRetries;
+
     /** Original exception thrown by the function. Will be null if numRetries is 0. */
     @Nullable private final Exception firstException;
 

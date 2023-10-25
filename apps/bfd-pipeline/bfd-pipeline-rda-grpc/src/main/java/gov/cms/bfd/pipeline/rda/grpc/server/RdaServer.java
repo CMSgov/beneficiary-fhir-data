@@ -291,6 +291,7 @@ public class RdaServer {
   public static class ServerState implements AutoCloseable {
     /** The server that has been started. */
     @Getter private final Server server;
+
     /** The state that needs to be closed once server has terminated. */
     private final AutoCloseable state;
 

@@ -8,8 +8,10 @@ public enum CommonCodings {
 
   /** The coding's system. */
   private final String system;
+
   /** The coding's code. */
   private final String code;
+
   /** The coding's display. */
   private final String display;
 

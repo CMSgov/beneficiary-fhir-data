@@ -49,7 +49,6 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -63,16 +62,22 @@ import org.mockito.quality.Strictness;
 public final class DMEClaimTransformerV2Test {
   /** The parsed claim used to generate the EOB and for validating with. */
   DMEClaim claim;
+
   /** The EOB under test created from the {@link #claim}. */
   ExplanationOfBenefit eob;
+
   /** The transformer under test. */
   DMEClaimTransformerV2 dmeClaimTransformer;
+
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
   /** The mock metric registry. */
   @Mock MetricRegistry mockMetricRegistry;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 
@@ -1309,18 +1314,5 @@ public final class DMEClaimTransformerV2Test {
                 new Money().setValue(754.79).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     assertTrue(compare.equalsDeep(benefit));
-  }
-
-  /**
-   * Serializes the EOB and prints to the command line.
-   *
-   * @throws FHIRException if there is an issue with transforming the claim
-   */
-  @Disabled
-  @Test
-  public void serializeSampleARecord() throws FHIRException {
-    ExplanationOfBenefit eob = dmeClaimTransformer.transform(generateClaim(), false);
-
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

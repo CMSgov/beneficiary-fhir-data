@@ -30,23 +30,31 @@ public class RdaSourceConfig {
 
   /** The type of RDA API server to connect to. */
   private final ServerType serverType;
+
   /** The hostname or IP address of the host running the RDA API. */
   private final String host;
+
   /** The port on which the RDA API listens for connections. */
   private final int port;
+
   /** The name used to connect to an in-process mock RDA API server. */
   private final String inProcessServerName;
+
   /** The maximum time the stream is allowed to remain idle before being automatically closed. */
   private final Duration maxIdle;
+
   /**
    * Minimum amount of idle time before a dropped connection is considered to be normal behavior by
    * the RDA API server and thus not requiring an ERROR log entry.
    */
   private final Duration minIdleTimeBeforeConnectionDrop;
+
   /** Authorization token expiration date, in epoch seconds. */
   private final Long expirationDate;
+
   /** The token to pass to the RDA API server to authenticate the client. */
   @Nullable private final String authenticationToken;
+
   /** Maximum number of days to retain processed {@link MessageError} records in the database. */
   @Nullable private final Integer messageErrorExpirationDays;
 

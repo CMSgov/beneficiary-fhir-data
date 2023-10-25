@@ -28,6 +28,7 @@ import lombok.Data;
 public interface EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
   /** Single Result instance for any missing value. */
   Result NO_VALUE_RESULT = new Result(Status.NoValue);
+
   /** Single Result instance for any invalid value. */
   Result INVALID_VALUE_RESULT = new Result(Status.InvalidValue);
 
@@ -60,6 +61,7 @@ public interface EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum>
   class Result {
     /** Outcome of the extraction. */
     private final Status status;
+
     /** Extracted value (if any - depends on status). */
     @Nullable private final String value;
 

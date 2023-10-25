@@ -26,6 +26,7 @@ import lombok.With;
 public class TestDatabase {
   /** List of all of the {@link TestDatabase.Sink} instances that have been created. */
   private final List<Sink> sinks = new ArrayList<>();
+
   /** Map of all of the claims that have been written. Key is the claim id. */
   private final Map<String, Claim> claims = new TreeMap<>();
 
@@ -95,12 +96,16 @@ public class TestDatabase {
   public static class Message {
     /** Unique key for the claim. */
     String claimId;
+
     /** The claim. */
     String claimData;
+
     /** The message sequence number. */
     long sequenceNumber;
+
     /** When true attempts to transform the message into a claim should throw an exception. */
     @With public boolean failOnTransform;
+
     /** When true attempts to write the claim to the database should throw an exception. */
     @With public boolean failOnWrite;
 
@@ -132,12 +137,16 @@ public class TestDatabase {
   public static class Claim {
     /** Unique key for the claim. */
     String claimId;
+
     /** The claim. */
     String claimData;
+
     /** The message sequence number. */
     long sequenceNumber;
+
     /** RDA API version number string. */
     String apiVersion;
+
     /** When true attempts to write the claim to the database should throw an exception. */
     boolean failOnWrite;
 

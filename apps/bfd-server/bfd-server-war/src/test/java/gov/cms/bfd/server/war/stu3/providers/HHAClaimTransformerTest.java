@@ -38,12 +38,16 @@ import org.mockito.quality.Strictness;
 public final class HHAClaimTransformerTest {
   /** The transformer under test. */
   HHAClaimTransformer hhaClaimTransformer;
+
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
+
   /** The NPI org lookup to use for the test. */
   @Mock NPIOrgLookup npiOrgLookup;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
 

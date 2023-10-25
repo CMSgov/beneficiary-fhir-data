@@ -20,14 +20,19 @@ public class AbstractClaimTransformerTest {
 
   /** Repeated value representing phase 1. */
   private static final short PHASE_ONE = 1;
+
   /** Repeated value representing phase 2. */
   private static final short PHASE_TWO = 2;
+
   /** Repeated value representing phase 3. */
   private static final short PHASE_THREE = 3;
+
   /** Repeated value representing phase sequence 0. */
   private static final short PHASE_SEQ_ZERO = 0;
+
   /** Repeated value representing phase sequence 1. */
   private static final short PHASE_SEQ_ONE = 1;
+
   /** Repeated value representing phase sequence 2. */
   private static final short PHASE_SEQ_TWO = 2;
 

@@ -193,8 +193,10 @@ public abstract class MbiCache {
   static class DatabaseBacked extends MbiCache {
     /** Used to compute hash values for raw MBI strings. */
     protected final IdHasher hasher;
+
     /** The {@link TransactionManager} used to execute transactions. */
     private final TransactionManager transactionManager;
+
     /** Creates random values. */
     private final Random random;
 
@@ -331,6 +333,7 @@ public abstract class MbiCache {
   static class ReadResult {
     /** The record from the database or null if we don't have a record. */
     private final Mbi record;
+
     /** Flag indicating if the record is one that we have inserted during the call. */
     private final boolean inserted;
 
@@ -349,11 +352,13 @@ public abstract class MbiCache {
   static class Metrics {
     /** Tracks number of calls to {@link MbiCache#lookupMbi(String)}. */
     private final Meter lookups;
+
     /**
      * Tracks number of calls to {@link MbiCache#lookupMbi(String)} in which MBI was not present in
      * the cache.
      */
     private final Meter misses;
+
     /** Tracks number of times database read/write had to be reattempted to arrive at a result. */
     private final Histogram retries;
 

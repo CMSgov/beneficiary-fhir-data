@@ -63,33 +63,46 @@ import org.mockito.quality.Strictness;
 class PatientClaimsEobTaskTransformerTest {
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
+
   /** The mock metric registry. */
   @Mock MetricRegistry metricRegistry;
+
   /** The mock metric timer. */
   @Mock Timer mockTimer;
+
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context mockTimerContext;
+
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
+
   /** The FDA drug display lookup. */
   @Mock FdaDrugCodeDisplayLookup mockDrugDisplayLookup;
+
   /** The mock samhsa matcher. */
   @Mock Stu3EobSamhsaMatcher mockSamhsaMatcher;
 
   /** The carrier claim returned in tests. */
   CarrierClaim testCarrierClaim;
+
   /** The DME claim returned in tests. */
   DMEClaim testDmeClaim;
+
   /** The HHA claim returned in tests. */
   HHAClaim testHhaClaim;
+
   /** The Hospice claim returned in tests. */
   HospiceClaim testHospiceClaim;
+
   /** The Inpatient claim returned in tests. */
   InpatientClaim testInpatientClaim;
+
   /** The Outpatient claim returned in tests. */
   OutpatientClaim testOutpatientClaim;
+
   /** The Part D Event returned in tests. */
   PartDEvent testPdeClaim;
+
   /** The SNF claim returned in tests. */
   SNFClaim testSnfClaim;
 

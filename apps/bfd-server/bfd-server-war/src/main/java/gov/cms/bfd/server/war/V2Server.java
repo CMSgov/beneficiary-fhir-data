@@ -37,6 +37,7 @@ public class V2Server extends RestfulServer {
 
   /** Represents the capabilities publisher value. */
   static final String CAPABILITIES_PUBLISHER = "Centers for Medicare & Medicaid Services";
+
   /** Represents the capabilities server name. */
   static final String CAPABILITIES_SERVER_NAME = "Blue Button API: Direct";
 

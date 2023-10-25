@@ -28,13 +28,16 @@ public class ClaimDao {
 
   /** Query name for logging MDC. */
   static final String CLAIM_BY_MBI_QUERY = "claim_by_mbi";
+
   /** Query name for logging MDC. */
   static final String CLAIM_BY_ID_QUERY = "claim_by_id";
 
   /** {@link EntityManager} used for database access. */
   private final EntityManager entityManager;
+
   /** {@link MetricRegistry} for metrics. */
   private final MetricRegistry metricRegistry;
+
   /** Whether or not to use old MBI hash functionality. */
   private final boolean isOldMbiHashEnabled;
 

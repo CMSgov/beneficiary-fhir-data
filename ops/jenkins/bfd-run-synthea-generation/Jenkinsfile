@@ -51,6 +51,17 @@ spec:
            description: 'The number of months into the future that claim lines should be '
                         + 'generated. If specified, future claims will be split in the '
                         + 'generated output to allow for proper loading')
+                        
+    booleanParam(
+        name: 'USE_TARGET_CONTRACT',
+        description: 'If checked, use the below contract partD contract number for all generated items.',
+        defaultValue: false
+    )
+                        
+    string(name: 'TARGET_CONTRACT',
+           defaultValue: 'Y9999',
+           description: 'If USE_TARGET_CONTRACT is checked, indicates a single part D contract that all generated claims'
+                        + ' will be associated with.')
 
     booleanParam(name: 'UPDATE_END_STATE_S3',
            defaultValue: true,
@@ -121,7 +132,9 @@ spec:
               + "-v \"\$(pwd)\"/out:/usr/local/synthea/out "
               + "\"${imageName}\" "
               + "-n \"${params.NUM_BENES}\" "
-              + "-f \"${params.NUM_FUTURE_MONTHS}\"")
+              + "-f \"${params.NUM_FUTURE_MONTHS}\" "
+              + "-u \"${params.USE_TARGET_CONTRACT}\" "
+              + "-r \"${params.TARGET_CONTRACT}\"")
       }
     }
 

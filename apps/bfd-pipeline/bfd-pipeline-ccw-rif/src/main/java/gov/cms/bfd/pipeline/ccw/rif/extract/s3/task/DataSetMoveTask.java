@@ -14,8 +14,10 @@ public final class DataSetMoveTask implements Callable<Void> {
 
   /** Handle by which to invoke s3 tasks. */
   private final S3TaskManager s3TaskManager;
+
   /** The extraction options which contain metadata such as the bucket the files are in. */
   private final ExtractionOptions options;
+
   /** The Manifest for the files being moved. */
   private final DataSetManifest manifest;
 

@@ -18,6 +18,7 @@ import java.util.stream.StreamSupport;
 public final class BatchSpliterator<T> implements Spliterator<List<T>> {
   /** The base spliterator. */
   private final Spliterator<T> base;
+
   /** The batch size per split. */
   private final int batchSize;
 

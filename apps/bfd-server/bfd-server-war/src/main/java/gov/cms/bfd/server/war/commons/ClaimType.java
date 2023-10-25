@@ -93,12 +93,16 @@ public enum ClaimType {
 
   /** The entity class. */
   private final Class<?> entityClass;
+
   /** The entity id attribute. */
   private final SingularAttribute<?, Long> entityIdAttribute;
+
   /** The entity beneficiary id attribute. */
   private final SingularAttribute<?, Long> entityBeneficiaryIdAttribute;
+
   /** The service end attribute function. */
   private final Function<Object, LocalDate> serviceEndAttributeFunction;
+
   /** The entity lazy attributes. */
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 

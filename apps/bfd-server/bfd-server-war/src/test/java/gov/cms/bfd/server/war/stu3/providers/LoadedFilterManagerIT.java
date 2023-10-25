@@ -35,6 +35,7 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
 
   /** The bene id to use for testing. */
   private static final long SAMPLE_BENE = 567834L;
+
   /** An invalid bene id. */
   private static final long INVALID_BENE = 1L;
 

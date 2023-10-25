@@ -20,6 +20,7 @@ public final class Value {
    * great-grandparent {@link Variable}.
    */
   private String code;
+
   /** A brief English human-readable description of this {@link Value}. */
   private String description;
 
