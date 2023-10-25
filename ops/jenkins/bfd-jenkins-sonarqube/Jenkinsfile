@@ -82,7 +82,8 @@ spec:
             steps {
                 script {
                     dir ('apps') {
-                        sh "ls -al"
+                      sh "ls -al target"
+                      sh "ls -al target/**/*.sh"
                     }
                 }
             }          
