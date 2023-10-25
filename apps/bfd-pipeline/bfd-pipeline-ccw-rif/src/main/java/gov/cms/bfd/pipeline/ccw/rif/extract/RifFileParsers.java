@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
-import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,21 +43,24 @@ public class RifFileParsers {
   public static final String RECORD_ACTION_COLUMN = "DML_IND";
 
   public static Flux<RifRecordEvent<?>> parseFile(RifFileEvent fileEvent) {
-    return Flux.defer(
-        () -> {
+    return Flux.using(
+        // creates a CSVParser for new subscriber
+        () -> RifParsingUtils.createCsvParser(fileEvent.getFile()),
+        // creates flux for subscriber to receive parsed events
+        csvParser -> {
           RifFileParser rifParser = parserForFile(fileEvent);
-          CSVParser csvParser = RifParsingUtils.createCsvParser(fileEvent.getFile());
           return Flux.fromIterable(csvParser)
               .flatMap(rifParser::next)
-              .concatWith(Flux.defer(rifParser::finish))
-              .doFinally(
-                  ignored -> {
-                    try {
-                      csvParser.close();
-                    } catch (IOException ex) {
-                      LOGGER.error("unable to close RIF file {}", fileEvent.getFile(), ex);
-                    }
-                  });
+              .concatWith(Flux.defer(rifParser::finish));
+        },
+        // closes the CSVParser when flux is unsubscribed for any reason
+        // we can't do anything with the exception if one is thrown so we just log it
+        csvParser -> {
+          try {
+            csvParser.close();
+          } catch (IOException ex) {
+            LOGGER.error("unable to close RIF file {}", fileEvent.getFile(), ex);
+          }
         });
   }
 
