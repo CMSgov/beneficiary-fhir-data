@@ -131,10 +131,6 @@ public class BfdMDC {
   public static final String HTTP_ACCESS_REQUEST_HEADER_ACCEPT =
       computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "Accept");
 
-  /** MDC key for the http request header accept charset. */
-  public static final String HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET =
-      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "Accept-Charset");
-
   /** MDC key for the http request header accept encoding. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING =
       computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "Accept-Encoding");
