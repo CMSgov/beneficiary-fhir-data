@@ -26,23 +26,23 @@ public class OpenApiDocs {
   private final String projectVersion;
 
   /** The destination directory for the output of the OpenAPI yaml file documents. */
-  private final String destinationDir;
+  private final String destinationDirectory;
 
   /** The base server url. */
-  private static String baseServerUrl;
+  private String baseServerUrl;
 
   /** The request specification to use with the api-docs requests. */
-  private static RequestSpecification requestAuth;
+  private RequestSpecification requestAuth;
 
   /**
    * Constructs an instance of OpenApiDocs for a given project version and destination directory.
    *
    * @param projectVersion @see #projectVersion
-   * @param destinationDir @see #destinationDir
+   * @param destinationDirectory @see #destinationDirectory
    */
-  private OpenApiDocs(String projectVersion, String destinationDir) {
+  private OpenApiDocs(String projectVersion, String destinationDirectory) {
     this.projectVersion = projectVersion;
-    this.destinationDir = destinationDir;
+    this.destinationDirectory = destinationDirectory;
   }
 
   /**
@@ -76,7 +76,7 @@ public class OpenApiDocs {
    */
   private void writeFile(String apiVersion, String contents) throws IOException {
     var fileName =
-        String.format("%s/%s-OpenAPI-%s.yaml", destinationDir, apiVersion, projectVersion);
+        String.format("%s/%s-OpenAPI-%s.yaml", destinationDirectory, apiVersion, projectVersion);
     try (var fileWriter = new FileWriter(fileName)) {
       fileWriter.write(contents);
     }
@@ -92,13 +92,17 @@ public class OpenApiDocs {
     // Validate arguments.
     validateArgs(args);
 
+    var projectVersion = args[0];
+    var workingDirectory = args[1];
+    var destinationDirectory = args[2];
+
     // Update working directory so E2E test server instance can find properties.
-    System.setProperty("user.dir", args[1]);
+    System.setProperty("user.dir", workingDirectory);
 
     // Set database url for in memory HSQL database
     System.setProperty("its.db.url", INMEM_HSQL_DATABASE_URL);
 
-    var openApiDocs = new OpenApiDocs(args[0], args[2]);
+    var openApiDocs = new OpenApiDocs(projectVersion, destinationDirectory);
     try {
       // Start E2E test server instance.
       openApiDocs.setup();
@@ -160,7 +164,7 @@ public class OpenApiDocs {
   }
 
   /** Initializes the request authorization. @see ServerRequiredTest#setRequestAuth. */
-  private static void setRequestAuth() {
+  private void setRequestAuth() {
     // Get the certs for the test
     String trustStorePath = "src/test/resources/certs/test-truststore.jks";
     String keyStorePath = "src/test/resources/certs/test-keystore.p12";
