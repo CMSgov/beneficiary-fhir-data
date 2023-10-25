@@ -82,8 +82,7 @@ spec:
             steps {
                 script {
                     dir ('apps') {
-                      sh "ls -al target"
-                      sh "ls -al target/**/*.sh"
+                      sh "find . -name *.sh -print"
                     }
                 }
             }          
