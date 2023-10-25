@@ -126,7 +126,7 @@ resource "aws_iam_access_key" "jenkins_user_key" {
 }
 
 resource "aws_ssm_parameter" "jenkins_user_key_secret" {
-  key_id    = local.kms_key_id
+  key_id    = data.aws_kms_key.config_cmk.arn
   name      = "/bfd/mgmt/common/sensitive/user/bfd-mgmt-jenkins/aws_secret_key"
   overwrite = true
   type      = "SecureString"
@@ -134,7 +134,7 @@ resource "aws_ssm_parameter" "jenkins_user_key_secret" {
 }
 
 resource "aws_ssm_parameter" "jenkins_user_key_id" {
-  key_id    = local.kms_key_id
+  key_id    = data.aws_kms_key.config_cmk.arn
   name      = "/bfd/mgmt/common/sensitive/user/bfd-mgmt-jenkins/aws_access_id"
   overwrite = true
   type      = "SecureString"
