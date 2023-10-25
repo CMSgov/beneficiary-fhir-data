@@ -1201,6 +1201,11 @@
                 <configuration>
                     <!-- Sets the VM argument line used when unit tests are run. -->
                     <argLine>${surefire.jacoco.args}</argLine>
+                    <includes>
+                        <include>**/EndpointJsonResponseComparatorIT.java</include>
+                        <include>**/EndpointJsonResponseComparatorV2IT.java</include>
+                        <include></include>
+                    </includes>
                     <!-- Excludes integration tests when unit tests are run. -->
                     <excludes>
                         <exclude>**/IT.java</exclude>

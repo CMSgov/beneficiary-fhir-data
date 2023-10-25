@@ -61,7 +61,6 @@ import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -208,14 +207,11 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
   }
 
   /**
-   * Generates the "golden" files, i.e. the approved responses to compare to. Run by commenting out
-   * the <code>@Disabled</code> annotation and running this method as JUnit.
+   * Generates the "golden" files, i.e. the approved responses to compare to.
    *
    * @param endpointId the endpoint id
    * @param endpointOperation the endpoint operation
    */
-  @Disabled(
-      "This should not be a test, Should be handled in another location as part of build flow")
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
   public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {
