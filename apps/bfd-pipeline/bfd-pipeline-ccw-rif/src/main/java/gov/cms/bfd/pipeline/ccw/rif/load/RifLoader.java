@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.LoadedBatch;
@@ -35,9 +34,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.Entity;
@@ -49,9 +45,11 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-import org.postgresql.copy.CopyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Pushes CCW beneficiary and claims data from {@link RifRecordEvent}s into the Blue Button API's
@@ -81,9 +79,6 @@ public final class RifLoader {
   /** The shared application state. */
   private final PipelineApplicationState appState;
 
-  /** The maximum amount of time in hours we will wait for a job to complete loading its batches. */
-  private final int MAX_BATCH_WAIT_TIME_HOURS = 72;
-
   /**
    * Constructs a new {@link RifLoader} instance.
    *
@@ -103,8 +98,7 @@ public final class RifLoader {
    * @param settings the {@link LoadAppOptions.PerformanceSettings} to use
    * @return the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
    */
-  private static BlockingThreadPoolExecutor createLoadExecutor(
-      LoadAppOptions.PerformanceSettings settings) {
+  private static Scheduler createScheduler(LoadAppOptions.PerformanceSettings settings) {
     final int threadPoolSize = settings.getLoaderThreads();
     final int taskQueueSize = settings.getLoaderThreads() * settings.getTaskQueueSizeMultiple();
 
@@ -114,15 +108,10 @@ public final class RifLoader {
         taskQueueSize,
         taskQueueSize);
 
-    /*
-     * I feel like a hipster using "found" code like
-     * BlockingThreadPoolExecutor: this really cool (and old) class supports
-     * our use case beautifully. It hands out tasks to multiple consumers,
-     * and allows a single producer to feed it, blocking that producer when
-     * the task queue is full.
-     */
-    return new BlockingThreadPoolExecutor(
-        threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
+    Scheduler scheduler =
+        Schedulers.newBoundedElastic(threadPoolSize, taskQueueSize, RifLoader.class.getName(), 300);
+    scheduler.init();
+    return scheduler;
   }
 
   /**
@@ -150,24 +139,14 @@ public final class RifLoader {
    * terminal operation</a>.
    *
    * @param dataToLoad the FHIR {@link RifRecordEvent}s to be loaded
-   * @param errorHandler the {@link Consumer} to pass each error that occurs to (possibly one error
-   *     per {@link RifRecordEvent}, if every input element fails to load), which will be run on the
-   *     caller's thread
-   * @param resultHandler the {@link Consumer} to pass each the {@link RifRecordLoadResult} for each
-   *     of the successfully-processed input {@link RifRecordEvent}s, which will be run on the
-   *     caller's thread
    */
-  public void process(
-      RifFileRecords dataToLoad,
-      Consumer<Throwable> errorHandler,
-      Consumer<RifRecordLoadResult> resultHandler) {
+  public Flux<RifRecordLoadResult> process(RifFileRecords dataToLoad) {
 
     final RifFileType fileType = dataToLoad.getSourceEvent().getFile().getFileType();
     final LoadAppOptions.PerformanceSettings performanceSettings =
         options.selectPerformanceSettingsForFileType(fileType);
-    final BlockingThreadPoolExecutor loadExecutor = createLoadExecutor(performanceSettings);
+    final Scheduler scheduler = createScheduler(performanceSettings);
 
-    final MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
     final Timer.Context timerDataSetFile =
         appState
             .getMetrics()
@@ -175,127 +154,41 @@ public final class RifLoader {
             .time();
     LOGGER.info("Processing '{}'...", dataToLoad);
 
-    fileEventMetrics.register(
-        MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "queueSize"),
-        (Gauge<Integer>) () -> loadExecutor.getQueue().size());
-    fileEventMetrics.register(
-        MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "activeBatches"),
-        (Gauge<Integer>) () -> loadExecutor.getActiveCount());
-
-    // Trim the LoadedFiles & LoadedBatches table
-    trimLoadedFiles(errorHandler);
-
-    // Insert a LoadedFiles entry
-    final long loadedFileId = insertLoadedFile(dataToLoad.getSourceEvent(), errorHandler);
-    if (loadedFileId < 0) {
-      return; // Something went wrong, the error handler was called.
-    }
-
-    /*
-     * Design history note: Initially, this function just returned a stream
-     * of CompleteableFutures, which seems like the obvious choice.
-     * Unfortunately, that ends up being rather hard to use correctly. Had
-     * some tests that were misusing it and ended up unintentionally forcing
-     * the processing back to being serial. Also, it leads to a ton of
-     * copy-pasted code. Thus, we just return void, and instead accept
-     * handlers that folks can do whatever they want with. It makes things
-     * harder for the tests to inspect, but also ensures that the loading is
-     * always run in a consistent manner.
-     */
-
-    final var error = new AtomicReference<Exception>();
-
-    // Define the Consumer that will handle each batch.
-    final Consumer<List<RifRecordEvent<?>>> batchProcessor =
-        recordsBatch -> {
-          /*
-           * Submit the RifRecordEvent for asynchronous processing. Note
-           * that, due to the ExecutorService's configuration (see in
-           * constructor), this will block if too many tasks are already
-           * pending. That's desirable behavior, as it prevents
-           * OutOfMemoryErrors.
-           *
-           * The error handler will store the first exception encountered in
-           * the AtomicReference and discard any others.  We only need one to
-           * terminate the pipeline.
-           */
-          processAsync(
-              loadExecutor,
-              recordsBatch,
-              loadedFileId,
-              resultHandler,
-              e -> error.compareAndSet(null, e));
-        };
-
-    // Collect records into batches and submit each to batchProcessor.
-    // Any exception will trigger a clean shutdown of the stream.
+    long loadedFileId;
     try {
-      if (performanceSettings.getRecordBatchSize() > 1) {
-        BatchSpliterator.batches(dataToLoad.getRecords(), performanceSettings.getRecordBatchSize())
-            .takeWhile(rifRecord -> error.get() == null) // stop if an exception is thrown
-            .forEach(batchProcessor);
-      } else {
-        dataToLoad
-            .getRecords()
-            .takeWhile(rifRecord -> error.get() == null) // stop if an exception is thrown
-            .map(List::<RifRecordEvent<?>>of)
-            .forEach(batchProcessor);
-      }
-    } catch (Exception e) {
-      LOGGER.error(
-          "Encountered an issue while parsing file batches (RifLoader), load failed. {}",
-          e.getMessage());
-      timerDataSetFile.stop();
-      error.compareAndSet(null, e);
+      // Trim the LoadedFiles & LoadedBatches table
+      trimLoadedFiles();
+
+      // Insert a LoadedFiles entry
+      loadedFileId = insertLoadedFile(dataToLoad.getSourceEvent());
+    } catch (Exception ex) {
+      return Flux.error(ex);
     }
 
-    // Wait for all submitted batches to complete.
-    try {
-      loadExecutor.shutdown();
-      boolean terminatedSuccessfully =
-          loadExecutor.awaitTermination(MAX_BATCH_WAIT_TIME_HOURS, TimeUnit.HOURS);
-      if (!terminatedSuccessfully)
-        throw new IllegalStateException(
-            String.format(
-                "%s failed to complete processing the records in time: '%s'.",
-                this.getClass().getSimpleName(), dataToLoad));
-    } catch (InterruptedException e) {
-      LOGGER.error("Encountered an unexpected InterruptedException, load failed.");
-      error.compareAndSet(null, e);
-    }
-
-    /*
-     * If any batch load tripped a fatal error, we call the error handler.
-     * The stream will have already cleanly halted processing.
-     */
-    final Exception ex = error.get();
-    if (ex != null) {
-      LOGGER.error("terminated by exception: message={}", ex.getMessage(), ex);
-      errorHandler.accept(ex);
-    }
-
-    LOGGER.info("Processed '{}'.", dataToLoad);
-    timerDataSetFile.stop();
-
-    logRecordCounts();
+    return dataToLoad
+        .getRecords()
+        .buffer(performanceSettings.getRecordBatchSize())
+        .publishOn(scheduler)
+        .flatMap(batch -> processBatch(batch, loadedFileId), performanceSettings.getLoaderThreads())
+        .doFinally(
+            ignored -> {
+              timerDataSetFile.stop();
+              logRecordCounts();
+              scheduler.dispose();
+            })
+        .doOnComplete(() -> LOGGER.info("Processed '{}'.", dataToLoad))
+        .doOnError(ex -> LOGGER.error("terminated by exception: message={}", ex.getMessage(), ex));
   }
 
   /**
    * Submits a file to be loaded asynchronously by the load executor.
    *
-   * @param loadExecutor the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
    * @param recordsBatch the {@link RifRecordEvent}s to process
    * @param loadedFileId the loaded file id
-   * @param resultHandler the {@link Consumer} to notify when the batch completes successfully
-   * @param errorHandler used to pass through exceptions encountered during processing
    */
-  private void processAsync(
-      BlockingThreadPoolExecutor loadExecutor,
-      List<RifRecordEvent<?>> recordsBatch,
-      long loadedFileId,
-      Consumer<RifRecordLoadResult> resultHandler,
-      Consumer<Exception> errorHandler) {
-    loadExecutor.submit(
+  private Flux<RifRecordLoadResult> processBatch(
+      List<RifRecordEvent<?>> recordsBatch, long loadedFileId) {
+    return Flux.defer(
         () -> {
           RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
           MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
@@ -326,8 +219,8 @@ public final class RifLoader {
               new TransactionManager(appState.getEntityManagerFactory())) {
             processResults =
                 transactionManager.executeFunction(
-                    entityManager -> process(recordsBatch, loadedFileId, entityManager));
-          } catch (Throwable e) {
+                    entityManager -> processBatchImpl(recordsBatch, loadedFileId, entityManager));
+          } catch (Exception e) {
             LOGGER.warn("Failed to load '{}' record.", rifFileType, e);
             failure = new RifLoadFailure(recordsBatch, e);
           }
@@ -336,7 +229,7 @@ public final class RifLoader {
             // Update the metrics now that things have been pushed.
             timerBatchSuccess.stop();
             timerBatchTypeSuccess.stop();
-            processResults.forEach(resultHandler::accept);
+            return Flux.fromIterable(processResults);
           } else {
             // Update metrics for a failure and halt the pipeline.
             timerBundleFailure.stop();
@@ -345,7 +238,7 @@ public final class RifLoader {
                 .mark(1);
 
             LOGGER.error("Error caught when processing async batch!", failure);
-            errorHandler.accept(failure);
+            return Flux.error(failure);
           }
         });
   }
@@ -359,7 +252,7 @@ public final class RifLoader {
    * @return the {@link RifRecordLoadResult}s that model the results of the operation
    * @throws IOException can be thrown by {@link org.apache.commons.csv.CSVPrinter}
    */
-  private List<RifRecordLoadResult> process(
+  private List<RifRecordLoadResult> processBatchImpl(
       List<RifRecordEvent<?>> recordsBatch, long loadedFileId, EntityManager entityManager)
       throws IOException {
     RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
@@ -1077,10 +970,9 @@ public final class RifLoader {
    * Insert the LoadedFile into the database.
    *
    * @param fileEvent to base this new LoadedFile
-   * @param errorHandler to call if something bad happens
    * @return the loadedFileId of the new LoadedFile record
    */
-  private long insertLoadedFile(RifFileEvent fileEvent, Consumer<Throwable> errorHandler) {
+  private long insertLoadedFile(RifFileEvent fileEvent) throws Exception {
     if (fileEvent == null || fileEvent.getFile().getFileType() == null) {
       throw new IllegalArgumentException();
     }
@@ -1089,10 +981,9 @@ public final class RifLoader {
     loadedFile.setRifType(fileEvent.getFile().getFileType().toString());
     loadedFile.setCreated(Instant.now());
 
-    long loadedFileId;
     try (TransactionManager transactionManager =
         new TransactionManager(appState.getEntityManagerFactory())) {
-      loadedFileId =
+      long loadedFileId =
           transactionManager.executeFunction(
               entityManager -> {
                 // Insert the passed in loaded file
@@ -1105,57 +996,46 @@ public final class RifLoader {
 
                 return loadedFile.getLoadedFileId();
               });
-    } catch (Exception ex) {
-      errorHandler.accept(ex);
-      loadedFileId = -1;
+      return loadedFileId;
     }
-    return loadedFileId;
   }
 
-  /**
-   * Trim the LoadedFiles and LoadedBatches tables if necessary.
-   *
-   * @param errorHandler is called on exceptions
-   */
-  private void trimLoadedFiles(Consumer<Throwable> errorHandler) {
+  /** Trim the LoadedFiles and LoadedBatches tables if necessary. */
+  private void trimLoadedFiles() throws Exception {
+    EntityManager em = appState.getEntityManagerFactory().createEntityManager();
+    EntityTransaction txn = null;
     try {
-      EntityManager em = appState.getEntityManagerFactory().createEntityManager();
-      EntityTransaction txn = null;
-      try {
-        txn = em.getTransaction();
-        txn.begin();
-        final Instant oldDate = Instant.now().minus(MAX_FILE_AGE_DAYS);
+      txn = em.getTransaction();
+      txn.begin();
+      final Instant oldDate = Instant.now().minus(MAX_FILE_AGE_DAYS);
 
-        em.clear(); // Must be done before JPQL statements
-        em.flush();
-        List<Long> oldIds =
-            em.createQuery(
-                    "select f.loadedFileId from LoadedFile f where created < :oldDate", Long.class)
-                .setParameter("oldDate", oldDate)
-                .getResultList();
+      em.clear(); // Must be done before JPQL statements
+      em.flush();
+      List<Long> oldIds =
+          em.createQuery(
+                  "select f.loadedFileId from LoadedFile f where created < :oldDate", Long.class)
+              .setParameter("oldDate", oldDate)
+              .getResultList();
 
-        if (oldIds.size() > 0) {
-          LOGGER.info("Deleting old files: {}", oldIds.size());
-          em.createQuery("delete from LoadedBatch where loadedFileId in :ids")
-              .setParameter("ids", oldIds)
-              .executeUpdate();
-          em.createQuery("delete from LoadedFile where loadedFileId in :ids")
-              .setParameter("ids", oldIds)
-              .executeUpdate();
-          txn.commit();
-        } else {
+      if (oldIds.size() > 0) {
+        LOGGER.info("Deleting old files: {}", oldIds.size());
+        em.createQuery("delete from LoadedBatch where loadedFileId in :ids")
+            .setParameter("ids", oldIds)
+            .executeUpdate();
+        em.createQuery("delete from LoadedFile where loadedFileId in :ids")
+            .setParameter("ids", oldIds)
+            .executeUpdate();
+        txn.commit();
+      } else {
+        txn.rollback();
+      }
+    } finally {
+      if (em != null && em.isOpen()) {
+        if (txn != null && txn.isActive()) {
           txn.rollback();
         }
-      } finally {
-        if (em != null && em.isOpen()) {
-          if (txn != null && txn.isActive()) {
-            txn.rollback();
-          }
-          em.close();
-        }
+        em.close();
       }
-    } catch (Exception ex) {
-      errorHandler.accept(ex);
     }
   }
 
@@ -1362,7 +1242,7 @@ public final class RifLoader {
   }
 
   /** Enumerates the {@link RifLoader} record handling strategies. */
-  private static enum LoadStrategy {
+  private enum LoadStrategy {
     /** Represents if the inserts should be treated as updates if the unique keys already exist. */
     INSERT_IDEMPOTENT,
     /**
@@ -1370,45 +1250,5 @@ public final class RifLoader {
      * up if the unique constraints are violated).
      */
     INSERT_UPDATE_NON_IDEMPOTENT;
-  }
-
-  /** Encapsulates the {@link RifLoader} record handling preferences. */
-  private static final class LoadFeatures {
-    /** If idempotency mode should be enabled (inserts treated as updates if the data exists). */
-    private final boolean idempotencyRequired;
-
-    /** If PostgreSQL's {@link CopyManager} APIs should be used to load data when possible. */
-    private final boolean copyDesired;
-
-    /**
-     * Constructs a new {@link LoadFeatures} instance.
-     *
-     * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
-     * @param copyDesired the value to use for {@link #isCopyDesired()}
-     */
-    public LoadFeatures(boolean idempotencyRequired, boolean copyDesired) {
-      this.idempotencyRequired = idempotencyRequired;
-      this.copyDesired = copyDesired;
-    }
-
-    /**
-     * Gets {@link #idempotencyRequired}.
-     *
-     * @return <code>true</code> if record inserts must be idempotent, <code>false</code> if that's
-     *     not required
-     */
-    public boolean isIdempotencyRequired() {
-      return idempotencyRequired;
-    }
-
-    /**
-     * Gets {@link #copyDesired}.
-     *
-     * @return <code>true</code> if PostgreSQL's {@link CopyManager} APIs should be used to load
-     *     data when possible, <code>false</code> if not
-     */
-    public boolean isCopyDesired() {
-      return copyDesired;
-    }
   }
 }

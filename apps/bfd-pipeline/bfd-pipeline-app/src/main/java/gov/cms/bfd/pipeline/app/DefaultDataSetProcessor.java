@@ -10,10 +10,11 @@ import gov.cms.bfd.pipeline.ccw.rif.DataSetProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult;
+
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,9 @@ import org.slf4j.LoggerFactory;
 public final class DefaultDataSetProcessor implements DataSetProcessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetProcessor.class);
 
+  /** The maximum amount of time we will wait for a job to complete loading its batches. */
+  public static final Duration MAX_FILE_WAIT_TIME = Duration.ofHours(72);
+
   /** Metrics for this class. */
   private final MetricRegistry appMetrics;
 
@@ -35,7 +39,7 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
   private final RifLoader rifLoader;
 
   /**
-   * Constructs a new {@link DataSetProcessor} instance.
+   * Initializes the instance.
    *
    * @param appMetrics the {@link MetricRegistry} for the application
    * @param rifProcessor the {@link RifFileParsers} for the application
@@ -48,7 +52,6 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
     this.rifLoader = rifLoader;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void processDataSet(RifFilesEvent rifFilesEvent) throws Exception {
     Timer.Context timerDataSet =
@@ -59,55 +62,30 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
             .time();
 
     final var failure = new AtomicReference<Exception>();
-    Consumer<Exception> errorHandler =
-        error -> {
-          /*
-           * This will be called on the same thread used to run each
-           * RifLoader task (probably a background one). This is not
-           * the right place to do any error _recovery_ (that'd have
-           * to be inside RifLoader itself), but it is likely the
-           * right place to decide when/if a failure is "bad enough"
-           * that the rest of processing should be stopped. Right now
-           * we stop that way for _any_ failure, but we probably want
-           * to be more discriminating than that.
-           */
-          failure.set(error);
-        };
-
-    Consumer<RifRecordLoadResult> resultHandler =
-        result -> {
-          /*
-           * Don't really *need* to do anything here. The RifLoader
-           * already records metrics for each data set.
-           */
-        };
-
-    /*
-     * Each ETL stage produces a stream that will be handed off to
-     * and processed by the next stage.
-     */
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
-      if (failure.get() != null) {
-        LOGGER.info("Stopping due to error.");
-        break;
-      }
       Slf4jReporter dataSetFileMetricsReporter =
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
       dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
-      RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
       try {
-        rifLoader.process(rifFileRecords, errorHandler, resultHandler);
+        RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
+        Long processedCount = rifLoader.process(rifFileRecords).count().block(MAX_FILE_WAIT_TIME);
+        LOGGER.info(
+            "Successfully processed {} records in file {}",
+            processedCount,
+            rifFileEvent.getFile().getDisplayName());
       } catch (Exception e) {
-        LOGGER.error("Exception while processing RIF file");
-        // Stop the metrics to help avoid zombie threads
-        dataSetFileMetricsReporter.stop();
-        timerDataSet.stop();
-        throw e;
+        LOGGER.error("Exception while processing file {}", rifFileEvent.getFile().getDisplayName());
+        failure.set(e);
       }
 
       dataSetFileMetricsReporter.stop();
       dataSetFileMetricsReporter.report();
+
+      if (failure.get() != null) {
+        LOGGER.info("Stopping due to error.");
+        break;
+      }
     }
     timerDataSet.stop();
     if (failure.get() != null) {
@@ -115,7 +93,6 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
     }
   }
 
-  /** Called when no RIF files are available to process. */
   @Override
   public void noDataToProcess() {
     // Nothing to do here.
