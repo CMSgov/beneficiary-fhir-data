@@ -3,6 +3,12 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   env        = terraform.workspace
 
+  kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.config_key.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
   mgmt_kms_config_key_arns = flatten(
     [
       for v in data.aws_kms_key.mgmt_config_key.multi_region_configuration :
@@ -85,35 +91,33 @@ resource "aws_iam_role_policy_attachment" "kms" {
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${var.service}-ssm-parameters"
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${var.service} SSM hierarchies"
-  policy      = <<-EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  policy = jsonencode(
     {
-      "Effect": "Allow",
-      "Action": [
-        "ssm:GetParametersByPath",
-        "ssm:GetParameters",
-        "ssm:GetParameter"
-      ],
-      "Resource": [
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
-        "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${var.service}/*"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "kms:Decrypt"
-      ],
-      "Resource": [
-        "${data.aws_kms_key.config_key.arn}"
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter"
+          ],
+          "Resource" : [
+            "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
+            "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
+            "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${var.service}/*"
+          ]
+        },
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "kms:Decrypt"
+          ],
+          "Resource" : local.kms_config_key_arns
+        }
       ]
     }
-  ]
-}
-EOF
+  )
 }
 
 # attach AWS managed SSM parameters to all EC2 instances
