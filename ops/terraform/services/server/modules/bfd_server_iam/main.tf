@@ -2,6 +2,13 @@ locals {
   region     = data.aws_region.current.name
   account_id = data.aws_caller_identity.current.account_id
   env        = terraform.workspace
+
+  mgmt_kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.mgmt_config_key.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 }
 
 resource "aws_iam_instance_profile" "instance" {
@@ -150,21 +157,21 @@ resource "aws_iam_policy" "kms_mgmt" {
   description = "Policy granting BFD Server in ${local.env} environment access to decrypt using the mgmt KMS keys"
   name        = "bfd-${local.env}-${var.service}-kms-mgmt"
   path        = "/"
-  policy      = <<-POLICY
-{
-  "Statement": [
+  policy = jsonencode(
     {
-      "Action": ["kms:Decrypt"],
-      "Effect": "Allow",
-      "Resource": [
-        "${data.aws_kms_key.mgmt_key.arn}",
-        "${data.aws_kms_key.mgmt_config_key.arn}"
-      ]
+      "Statement" : [
+        {
+          "Action" : ["kms:Decrypt"],
+          "Effect" : "Allow",
+          "Resource" : concat(
+            ["${data.aws_kms_key.mgmt_key.arn}"],
+            local.mgmt_kms_config_key_arns
+          )
+        }
+      ],
+      "Version" : "2012-10-17"
     }
-  ],
-  "Version": "2012-10-17"
-}
-POLICY
+  )
 }
 
 # attach policy allowing BFD Server to decrypt using mgmt KMS to all EC2 instances
