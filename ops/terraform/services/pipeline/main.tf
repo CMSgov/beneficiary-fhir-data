@@ -94,7 +94,6 @@ locals {
   max_claim_latency_alarm_actions = local.is_ephemeral_env ? [] : [data.aws_sns_topic.bfd_notices_slack_alarm[0].arn]
 
   # data-source resolution
-  mgmt_kms_key_arn      = data.aws_kms_key.mgmt_cmk.arn
   ami_id                = data.aws_ami.main.image_id
   availability_zone     = data.external.rds.result["WriterAZ"]
   kms_key_id            = data.aws_kms_key.cmk.arn
@@ -104,6 +103,18 @@ locals {
   vpn_security_group_id = data.aws_security_group.vpn.id
   ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
   subnet_id             = data.aws_subnet.main.id
+  mgmt_kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.mgmt_config_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
+  kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.config_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 
   # pipeline specific configrations
   pipeline_variant_configs = {
@@ -211,8 +222,8 @@ resource "aws_launch_template" "this" {
       tags = merge(
         local.default_tags,
         {
-          Layer    = local.layer
-          role     = local.legacy_service
+          Layer = local.layer
+          role  = local.legacy_service
         },
         each.value.tags
       )
@@ -312,8 +323,8 @@ resource "aws_instance" "pipeline" {
   subnet_id                            = local.subnet_id
   tags = merge(
     {
-      Layer    = local.layer
-      role     = local.legacy_service
+      Layer = local.layer
+      role  = local.legacy_service
     },
     each.value.tags
   )
@@ -332,8 +343,8 @@ resource "aws_instance" "pipeline" {
   volume_tags = merge(
     local.default_tags,
     {
-      Layer    = local.layer
-      role     = local.legacy_service
+      Layer = local.layer
+      role  = local.legacy_service
     },
     each.value.tags
   )

@@ -47,12 +47,16 @@ data "aws_ami" "main" {
   }
 }
 
-data "aws_kms_key" "mgmt_cmk" {
-  key_id = "alias/bfd-mgmt-cmk"
+data "aws_kms_key" "mgmt_config_cmk" {
+  key_id = "alias/bfd-mgmt-config-cmk"
 }
 
 data "aws_kms_key" "cmk" {
   key_id = local.nonsensitive_common_config["kms_key_alias"]
+}
+
+data "aws_kms_key" "config_cmk" {
+  key_id = local.nonsensitive_common_config["kms_config_key_alias"]
 }
 
 data "aws_vpc" "main" {
