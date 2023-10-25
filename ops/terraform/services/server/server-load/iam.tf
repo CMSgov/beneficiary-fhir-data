@@ -170,45 +170,25 @@ resource "aws_iam_policy" "ecr" {
         {
             "Effect": "Allow",
             "Action": [
-                "ecr:ListImages"
+                "ecr:*"
             ],
             "Resource": [
-              "arn:aws:ecr:us-east-1:577373831711:repository/bfd-mgmt-server-load-node"
+              "arn:aws:ecr:us-east-1:577373831711:repository/bfd-mgmt-server-load-controller"
             ]
         },
         {
-             "Sid":"GetAuthorizationToken",
-             "Effect":"Allow",
-             "Action":[
-                "ecr:GetAuthorizationToken",
-                "ecr:DescribeRegistry"
-             ],
-             "Resource":"*"
-          },
-          {
-             "Sid":"ManageRepositoryContents",
-             "Effect":"Allow",
-             "Action":[
-                    "ecr:BatchCheckLayerAvailability",
-                    "ecr:GetDownloadUrlForLayer",
-                    "ecr:GetRepositoryPolicy",
-                    "ecr:DescribeRepositories",
-                    "ecr:ListImages",
-                    "ecr:DescribeImages",
-                    "ecr:BatchGetImage",
-                    "ecr:InitiateLayerUpload",
-                    "ecr:UploadLayerPart",
-                    "ecr:CompleteLayerUpload",
-                    "ecr:PutImage",
-                    "ecr:DescribeRegistry"
-             ],
-             "Resource":"arn:aws:ecr:us-east-1:577373831711:repository/bfd-mgmt-server-load-node"
-          }
+            "Sid":"GetAuthorizationToken",
+            "Effect":"Allow",
+            "Action":[
+               "ecr:GetAuthorizationToken",
+               "ecr:DescribeRegistry"
+            ],
+            "Resource":"*"
+        }
     ]
 }
 EOF
 }
-
 
 resource "aws_iam_role" "lambda" {
   name        = "bfd-${local.env}-${local.service}-lambda"

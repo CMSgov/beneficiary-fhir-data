@@ -88,7 +88,7 @@ resource "aws_instance" "this" {
 
   metadata_options {
     http_endpoint               = "enabled"
-    http_put_response_hop_limit = 1
+    http_put_response_hop_limit = 2
     http_tokens                 = "required"
   }
 
@@ -108,22 +108,25 @@ resource "aws_instance" "this" {
     aws_current_region = data.aws_region.current.name
     asg_name           = data.aws_autoscaling_group.asg.name
 
-    sqs_queue_name       = var.sqs_queue_name
-    node_lambda_name     = var.node_lambda_name
-    test_host            = var.test_host
-    locust_tags          = var.locust_tags
-    locust_exclude_tags  = var.locust_exclude_tags
-    initial_worker_nodes = var.initial_worker_nodes
-    node_spawn_time      = var.node_spawn_time
-    max_spawned_nodes    = var.max_spawned_nodes
-    max_spawned_users    = var.max_spawned_users
-    user_spawn_rate      = var.user_spawn_rate
-    test_runtime_limit   = var.test_runtime_limit
-    coasting_time        = var.coasting_time
-    warm_instance_target = var.warm_instance_target
-    stop_on_scaling      = var.stop_on_scaling
-    stop_on_node_limit   = var.stop_on_node_limit
-    server_load_dir      = var.server_load_dir
+    sqs_queue_name                   = var.sqs_queue_name
+    node_lambda_name                 = var.node_lambda_name
+    test_host                        = var.test_host
+    locust_tags                      = var.locust_tags
+    locust_exclude_tags              = var.locust_exclude_tags
+    initial_worker_nodes             = var.initial_worker_nodes
+    node_spawn_time                  = var.node_spawn_time
+    max_spawned_nodes                = var.max_spawned_nodes
+    max_spawned_users                = var.max_spawned_users
+    user_spawn_rate                  = var.user_spawn_rate
+    test_runtime_limit               = var.test_runtime_limit
+    coasting_time                    = var.coasting_time
+    warm_instance_target             = var.warm_instance_target
+    stop_on_scaling                  = var.stop_on_scaling
+    stop_on_node_limit               = var.stop_on_node_limit
+    server_load_dir                  = var.server_load_dir
+    ecr_registry_url                 = "${data.aws_ecr_repository.ecr_controller.repository_url}"
+    ecr_tagged_controller_uri        = "${data.aws_ssm_parameter.container_image_tag_controller.value}"
+    ecr_tagged_controller_image_name = "${data.aws_ecr_repository.ecr_controller.name}:${data.aws_ssm_parameter.container_image_tag_controller.value}"
   })
 }
 
