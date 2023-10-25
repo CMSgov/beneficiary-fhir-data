@@ -28,13 +28,25 @@ locals {
   instance_type                   = local.nonsensitive_config["instance_type"]
   key_pair                        = local.nonsensitive_common_config["key_pair"]
   kms_key_alias                   = local.nonsensitive_common_config["kms_key_alias"]
+  kms_config_key_alias            = local.nonsensitive_common_config["kms_config_key_alias"]
   queue_name                      = local.nonsensitive_config["sqs_queue_name"]
   rds_cluster_identifier          = local.nonsensitive_common_config["rds_cluster_identifier"]
   volume_size                     = local.nonsensitive_config["volume_size"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
   # Data source lookups
-  mgmt_kms_key_arn      = data.aws_kms_key.mgmt_cmk.arn
+  mgmt_kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.mgmt_config_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
+  kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.config_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
   kms_key_arn           = data.aws_kms_key.cmk.arn
   kms_key_id            = data.aws_kms_key.cmk.key_id
   vpn_security_group_id = data.aws_security_group.vpn.id
