@@ -131,15 +131,18 @@ public class OpenApiDocs {
           "Project version, working directory, and destination directory are required.");
     }
 
-    var workingDirectory = new File(args[1]);
-    if (!workingDirectory.isDirectory()) {
-      throw new RuntimeException(String.format("Working directory (%s) is not valid.", args[1]));
+    var workingDirectory = args[1];
+    var destinationDirectory = args[2];
+
+    var workingDirectoryFile = new File(workingDirectory);
+    if (!workingDirectoryFile.isDirectory()) {
+      throw new RuntimeException(String.format("Working directory (%s) is not valid.", workingDirectory));
     }
 
-    var destinationDirectory = new File(args[2]);
-    if (!destinationDirectory.isDirectory()) {
+    var destinationDirectoryFile = new File(destinationDirectory);
+    if (!destinationDirectoryFile.isDirectory()) {
       throw new RuntimeException(
-          String.format("Destination directory (%s) is not valid.", args[2]));
+          String.format("Destination directory (%s) is not valid.", destinationDirectory));
     }
   }
 
