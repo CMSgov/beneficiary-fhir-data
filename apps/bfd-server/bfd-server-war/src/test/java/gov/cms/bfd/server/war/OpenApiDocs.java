@@ -136,7 +136,8 @@ public class OpenApiDocs {
 
     var workingDirectoryFile = new File(workingDirectory);
     if (!workingDirectoryFile.isDirectory()) {
-      throw new RuntimeException(String.format("Working directory (%s) is not valid.", workingDirectory));
+      throw new RuntimeException(
+          String.format("Working directory (%s) is not valid.", workingDirectory));
     }
 
     var destinationDirectoryFile = new File(destinationDirectory);
