@@ -83,7 +83,6 @@ spec:
                 script {
                     dir ('apps') {
                       sh "pwd"
-                      sh "find ${PWD} -name *.sh -print"
                     }
                 }
             }          
@@ -100,8 +99,8 @@ spec:
                         " -DskipITs" +
                         " -DskipTests" +
                         " -Dsonar.exclusions='*.java'" +
-                        " -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml"
-			" -Dsonar.sources=/home/jenkins/agent/workspace/bfd-jenkins-sonarqube_master/ops/ccs-ops-misc/**/*,/home/jenkins/agent/workspace/bfd-jenkins-sonarqube_master/apps/bfd-ops/pom.xml"
+                        " -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml" +
+			                  " -Dsonar.sources=/home/jenkins/agent/workspace/bfd-jenkins-sonarqube_master/ops/ccs-ops-misc/cert-checker,/home/jenkins/agent/workspace/bfd-jenkins-sonarqube_master/apps/bfd-ops/pom.xml"
                     }
                 }
             }
