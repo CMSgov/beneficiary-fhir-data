@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +43,7 @@ public class AccessJsonE2E extends ServerRequiredTest {
 
     // Empty the access json to avoid pollution from other tests
     try (BufferedWriter writer = Files.newBufferedWriter(accessLogJson)) {
-      writer.write("");
-      writer.flush();
+      Files.writeString(accessLogJson, "");
     }
 
     given()
@@ -55,12 +53,6 @@ public class AccessJsonE2E extends ServerRequiredTest {
         .statusCode(200)
         .when()
         .get(requestString);
-
-    // Verify that the access JSON is working, as expected.
-    try {
-      TimeUnit.MILLISECONDS.sleep(1000); // Needed to resolve a race condition
-    } catch (InterruptedException ignored) {
-    }
 
     assertTrue(Files.isReadable(accessLogJson));
     assertTrue(Files.size(accessLogJson) > 0);
