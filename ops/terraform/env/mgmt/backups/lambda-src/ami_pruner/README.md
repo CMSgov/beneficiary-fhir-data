@@ -30,6 +30,7 @@ python3 -m venv .venv
 pip3 install -r requirements.txt
 export DRY_RUN=True # for testing
 export LOG_LEVEL=10 # for more verbose output
+export AWS_PRUNE_REGION="us-east-1"
 export AMI_RETENTION_POLICIES_SSM_PATH="/bfd/mgmt/common/sensitive/backups/ami"
 python3 ami_pruner.py
 ```

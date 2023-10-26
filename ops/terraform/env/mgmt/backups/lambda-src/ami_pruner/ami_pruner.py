@@ -7,7 +7,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
-AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+AWS_PRUNE_REGION = os.environ.get('AWS_PRUNE_REGION', 'us-east-1')
 DRY_RUN = os.environ.get('DRY_RUN', 'False').lower() in ['true', '1', 'yes']
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ['true', '1', 'yes']
 LOG_LEVEL = int(os.environ.get('LOG_LEVEL', 20)) # 0=NOTSET, 10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR, 50=CRITICAL
@@ -37,7 +37,7 @@ logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=(loggi
 logger = logging.getLogger(__name__)
 logger.level = LOG_LEVEL
 config = Config(
-    region_name = AWS_REGION,
+    region_name = AWS_PRUNE_REGION,
     retries = {
         'max_attempts': 10,
         'mode': 'standard'

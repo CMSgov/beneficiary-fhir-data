@@ -27,7 +27,7 @@ resource "aws_lambda_function" "ami_pruner" {
 
   environment {
     variables = {
-      AWS_REGION                      = local.region
+      AWS_PRUNE_REGION                = local.region
       LOG_LEVEL                       = local.ami_pruner_cfg.log_level
       AMI_RETENTION_POLICIES_SSM_PATH = local.ami_pruner_cfg.retention_policy_ssm_path
     }
