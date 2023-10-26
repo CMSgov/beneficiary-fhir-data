@@ -46,9 +46,14 @@ locals {
   lambda_timeout_seconds              = 600
   glue_trigger_lambda_timeout_seconds = 600
 
-  kms_key_arn        = data.aws_kms_key.cmk.arn
-  kms_config_key_arn = data.aws_kms_key.config_cmk.arn
-  kms_key_id         = data.aws_kms_key.cmk.key_id
+  kms_key_arn = data.aws_kms_key.cmk.arn
+  kms_key_id  = data.aws_kms_key.cmk.key_id
+  kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.config_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 }
 
 resource "aws_lambda_function" "this" {

@@ -47,12 +47,16 @@ data "aws_ami" "main" {
   }
 }
 
-data "aws_kms_key" "mgmt_cmk" {
-  key_id = "alias/bfd-mgmt-cmk"
+data "aws_kms_key" "mgmt_config_cmk" {
+  key_id = "alias/bfd-mgmt-config-cmk"
 }
 
 data "aws_kms_key" "cmk" {
   key_id = local.nonsensitive_common_config["kms_key_alias"]
+}
+
+data "aws_kms_key" "config_cmk" {
+  key_id = local.nonsensitive_common_config["kms_config_key_alias"]
 }
 
 data "aws_vpc" "main" {
@@ -89,6 +93,11 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 
 data "aws_ssm_parameters_by_path" "nonsensitive_shared" {
   path = "/bfd/${local.env}/${local.service}/shared/nonsensitive"
+}
+
+data "aws_ssm_parameters_by_path" "sensitive_ccw" {
+  path = "/bfd/${local.env}/${local.service}/ccw/sensitive"
+  with_decryption = true
 }
 
 data "aws_ssm_parameters_by_path" "nonsensitive_ccw" {
