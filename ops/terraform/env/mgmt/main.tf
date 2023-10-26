@@ -33,11 +33,6 @@ locals {
     ],
     nonsensitive(data.aws_ssm_parameters_by_path.common_sensitive.values)
   )
-
-  retention_policies = {
-    for param in data.aws_ssm_parameters_by_path.retention_policies :
-    element(split("/", param.name), length(split("/", param.name)) - 1) => param.value
-  }
 }
 
 data "aws_caller_identity" "current" {}
