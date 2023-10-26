@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.LoadedBatch;
@@ -36,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -97,12 +99,14 @@ public final class RifLoader {
   }
 
   /**
-   * Creates the load executor.
+   * Creates the load executor and add metrics to track its queue and batch sizes.
    *
    * @param settings the {@link LoadAppOptions.PerformanceSettings} to use
+   * @param fileEventMetrics used to create metrics for queue and batch sizes
    * @return the {@link Scheduler} to use for asynchronous load tasks
    */
-  private static Scheduler createScheduler(LoadAppOptions.PerformanceSettings settings) {
+  private Scheduler createScheduler(
+      LoadAppOptions.PerformanceSettings settings, MetricRegistry fileEventMetrics) {
     final int threadPoolSize = settings.getLoaderThreads();
     final int taskQueueSize = settings.getLoaderThreads() * settings.getTaskQueueSizeMultiple();
 
@@ -112,9 +116,23 @@ public final class RifLoader {
         taskQueueSize,
         taskQueueSize);
 
-    Scheduler scheduler =
-        Schedulers.newBoundedElastic(threadPoolSize, taskQueueSize, RifLoader.class.getName(), 60);
+    // Strictly speaking the Scheduler should manage the number of threads but we'll limit them
+    // here as well just to be safe.
+    final var executor =
+        new BlockingThreadPoolExecutor(threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
+
+    // Using fromExecutor so that we have access to the metrics we need.  Normal Schedulers
+    // do not expose these values.
+    final Scheduler scheduler = Schedulers.fromExecutor(executor);
     scheduler.init();
+
+    fileEventMetrics.register(
+        MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "queueSize"),
+        (Gauge<Integer>) () -> executor.getQueue().size());
+    fileEventMetrics.register(
+        MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "activeBatches"),
+        (Gauge<Integer>) () -> executor.getActiveCount());
+
     return scheduler;
   }
 
@@ -165,6 +183,7 @@ public final class RifLoader {
           final LoadAppOptions.PerformanceSettings performanceSettings =
               options.selectPerformanceSettingsForFileType(fileType);
 
+          final MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
           final Timer.Context timerDataSetFile =
               appState
                   .getMetrics()
@@ -180,7 +199,9 @@ public final class RifLoader {
           // Insert a LoadedFiles entry
           final long loadedFileId = insertLoadedFile(dataToLoad.getSourceEvent());
 
-          final Scheduler scheduler = createScheduler(performanceSettings);
+          // Create and return a flux that asynchronously loads records in batches using a custom
+          // scheduler.
+          final Scheduler scheduler = createScheduler(performanceSettings, fileEventMetrics);
           return dataToLoad
               .getRecords()
               // collect records into batches
