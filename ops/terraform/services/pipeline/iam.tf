@@ -1,35 +1,42 @@
-resource "aws_iam_user" "this" {
-  count         = local.create_etl_user ? 1 : 0
-  force_destroy = false
-  name          = "bfd-${local.env}-${local.legacy_service}"
-  path          = "/"
-  tags = {
-    Note    = "NoRotate"
-    Purpose = "ETL PUT"
-    UsedBy  = "CCW"
-  }
+locals {
+  ccw_rif_role_principal_arns = [
+    for arn in split(" ", local.sensitive_ccw_service_config["ccw_rif_role_principal_arns"]) : trimspace(arn)
+  ]
+  ccw_rif_role_external_id = local.sensitive_ccw_service_config["ccw_rif_role_external_id"]
 }
 
-resource "aws_iam_access_key" "this" {
-  count = local.create_etl_user ? 1 : 0
-  user  = aws_iam_user.this[0].name
+resource "aws_iam_role" "ccw_rif" {
+  count = local.is_prod ? 1 : 0
+  name = "bfd-${local.env}-ccw-rif"
+  description = "Role assumed by CCW to read and write to the ${local.env} production and verification ETL buckets."
+  max_session_duration = 43200 # max session duration is 12 hours (43200 seconds)- going big for long data-loads
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          AWS = local.ccw_rif_role_principal_arns
+        }
+        Condition = {
+          StringEquals = {
+            "sts:ExternalId": local.ccw_rif_role_external_id
+          }
+        }
+      }
+    ]
+  })
 }
 
-resource "aws_iam_group" "this" {
-  count = local.create_etl_user ? 1 : 0
-  name  = "bfd-${local.env}-${local.legacy_service}"
-  path  = "/"
-}
-
-resource "aws_iam_group_membership" "this" {
-  count = local.create_etl_user ? 1 : 0
-  group = aws_iam_group.this[0].name
-  name  = "bfd-${local.env}-${local.legacy_service}"
-  users = [aws_iam_user.this[0].name]
+resource "aws_iam_role_policy_attachment" "ccw_rif" {
+  count = local.is_prod ? 1 : 0
+  role       = aws_iam_role.ccw_rif[0].name
+  policy_arn = aws_iam_policy.etl-rw-s3[0].arn
 }
 
 resource "aws_iam_policy" "etl-rw-s3" {
-  count       = local.create_etl_user ? 1 : 0
+  count       = local.is_prod ? 1 : 0
   description = "ETL read-write S3 policy"
   policy = jsonencode(
     {
@@ -53,9 +60,7 @@ resource "aws_iam_policy" "etl-rw-s3" {
           "Effect" : "Allow",
           "Resource" : [
             aws_s3_bucket.this.arn,
-            # NOTE: Only included in the prod environment for CCW verification
-            # TODO: Remove after CCW Verification is complete, ca Q1 2023.
-            "%{if local.is_prod}${aws_s3_bucket.ccw-verification[0].arn}%{endif}"
+            aws_s3_bucket.ccw-verification[0].arn
           ]
         },
         {
@@ -67,19 +72,11 @@ resource "aws_iam_policy" "etl-rw-s3" {
           "Effect" : "Allow",
           "Resource" : [
             "${aws_s3_bucket.this.arn}/*",
-            # NOTE: Only included in the prod environment for CCW verification
-            # TODO: Remove after CCW Verification is complete, ca Q1 2023.
-            "%{if local.is_prod}${aws_s3_bucket.ccw-verification[0].arn}/*%{endif}"
+            "${aws_s3_bucket.ccw-verification[0].arn}/*"
           ]
         }
       ]
   })
-}
-
-resource "aws_iam_group_policy_attachment" "etl-rw-s3" {
-  count      = local.create_etl_user ? 1 : 0
-  group      = aws_iam_group.this[0].id
-  policy_arn = aws_iam_policy.etl-rw-s3[0].arn
 }
 
 resource "aws_iam_policy" "aws_cli" {

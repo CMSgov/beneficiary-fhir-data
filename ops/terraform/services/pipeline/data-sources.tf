@@ -95,6 +95,11 @@ data "aws_ssm_parameters_by_path" "nonsensitive_shared" {
   path = "/bfd/${local.env}/${local.service}/shared/nonsensitive"
 }
 
+data "aws_ssm_parameters_by_path" "sensitive_ccw" {
+  path = "/bfd/${local.env}/${local.service}/ccw/sensitive"
+  with_decryption = true
+}
+
 data "aws_ssm_parameters_by_path" "nonsensitive_ccw" {
   path = "/bfd/${local.env}/${local.service}/ccw/nonsensitive"
 }
