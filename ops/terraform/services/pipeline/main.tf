@@ -155,11 +155,12 @@ locals {
 resource "aws_launch_template" "this" {
   for_each = local.ccw_pipeline_config
 
-  name          = each.value.name
-  description   = "Template for the ${local.env} environment ${each.key} ${local.service} servers"
-  key_name      = local.nonsensitive_common_config["key_pair"]
-  image_id      = local.ami_id
-  instance_type = each.value.instance_type
+  name                   = each.value.name
+  description            = "Template for the ${local.env} environment ${each.key} ${local.service} servers"
+  key_name               = local.nonsensitive_common_config["key_pair"]
+  image_id               = local.ami_id
+  instance_type          = each.value.instance_type
+  update_default_version = true
 
   user_data = base64encode(templatefile("${path.module}/user-data.sh.tftpl", {
     account_id        = local.account_id
