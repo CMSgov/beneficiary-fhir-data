@@ -31,8 +31,10 @@ if test -f "${YAML_FILE}"; then
   #   ...
   # }
   # if the configuration parameter's value includes a <<CIPHER>> token, indicating that the value is
-  # sensitive and should be encrypted
-  params_sensitivity="$(
+  # sensitive and should be encrypted. Note that some keys may be sensitive themselves, and so will
+  # be encrypted, so the JSON string returned will need to be decrypted by cipher to restore the
+  # actual keys
+  encrypted_params_sensitivity="$(
     yq eval -o=j <"$YAML_FILE" |
       jq 'tostream 
         | select(length==2) 
@@ -52,6 +54,12 @@ if test -f "${YAML_FILE}"; then
           }
         }' |
       jq -s 'add'
+  )"
+  # This will decrypt any encrypted keys allowing this script to merge the sensitivity of all keys
+  # with their decrypted values, even if the key is encrypted
+  decrypted_params_sensitivity="$(
+    kotlin "$REPO_ROOT/apps/utils/cipher/cipher.main.kts" \
+      --key "$CMK_ARN" cat <(echo "$encrypted_params_sensitivity")
   )"
   sensitivity_with_value="$(
     kotlin "$REPO_ROOT/apps/utils/cipher/cipher.main.kts" \
@@ -76,12 +84,12 @@ if test -f "${YAML_FILE}"; then
             "value": (.[1] | tostring)
           }
         }' |
-      jq -s --argjson sensitivity "$params_sensitivity" 'add * $sensitivity'
+      jq -s --argjson sensitivity "$decrypted_params_sensitivity" 'add * $sensitivity'
   )"
 
   # FUTURE: This is awful, but done so that compatability can be had with existing Terraform state
   # and so that these changes are not as significant for services that consume configuration from
-  # SSM.
+  # SSM. Clean this up in the future when parameters are standardized.
   # Given an object like:
   # {
   #   "/bfd/...": {
