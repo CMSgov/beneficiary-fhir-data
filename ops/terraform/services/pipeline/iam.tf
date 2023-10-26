@@ -1,10 +1,3 @@
-locals {
-  ccw_rif_role_principal_arns = [
-    for arn in split(" ", local.sensitive_ccw_service_config["ccw_rif_role_principal_arns"]) : trimspace(arn)
-  ]
-  ccw_rif_role_external_id = local.sensitive_ccw_service_config["ccw_rif_role_external_id"]
-}
-
 resource "aws_iam_role" "ccw_rif" {
   count = local.is_prod ? 1 : 0
   name = "bfd-${local.env}-ccw-rif"
@@ -17,11 +10,13 @@ resource "aws_iam_role" "ccw_rif" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          AWS = local.ccw_rif_role_principal_arns
+          AWS = [
+            for arn in split(" ", local.sensitive_ccw_service_config["ccw_rif_role_principal_arns"]) : trimspace(arn)
+          ]
         }
         Condition = {
           StringEquals = {
-            "sts:ExternalId": local.ccw_rif_role_external_id
+            "sts:ExternalId": local.sensitive_ccw_service_config["ccw_rif_role_external_id"]
           }
         }
       }
