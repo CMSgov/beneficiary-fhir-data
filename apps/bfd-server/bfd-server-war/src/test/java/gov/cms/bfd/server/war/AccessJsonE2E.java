@@ -59,8 +59,6 @@ public class AccessJsonE2E extends ServerRequiredTest {
 
     String content = Files.readString(accessLogJson);
 
-    LOGGER.info(content);
-
     List<String> headersToCheck =
         List.of(
             BfdMDC.BENE_ID,
@@ -73,7 +71,6 @@ public class AccessJsonE2E extends ServerRequiredTest {
             BfdMDC.DATABASE_QUERY_SOURCE_NAME,
             BfdMDC.HAPI_RESPONSE_TIMESTAMP_MILLI,
             BfdMDC.HAPI_POST_PROCESS_TIMESTAMP_MILLI,
-            BfdMDC.HAPI_PRE_HANDLE_TIMESTAMP_MILLI,
             BfdMDC.HAPI_PRE_HANDLE_TIMESTAMP_MILLI,
             BfdMDC.HAPI_PRE_PROCESS_TIMESTAMP_MILLI,
             BfdMDC.HAPI_PROCESSING_COMPLETED_TIMESTAMP_MILLI,
@@ -91,7 +88,6 @@ public class AccessJsonE2E extends ServerRequiredTest {
             BfdMDC.HTTP_ACCESS_REQUEST_URI,
             BfdMDC.HTTP_ACCESS_REQUEST_URL,
             BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
-            BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS,
             BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS,
             BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_ENCODING,
             BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_TYPE,
