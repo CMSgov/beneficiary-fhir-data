@@ -37,6 +37,12 @@ locals {
   )
 
   kms_key_id = aws_kms_key.primary.arn
+
+  yaml = data.external.yaml.result
+  common_sensitive = {
+    for key, value in local.yaml
+    : key => value if contains(split("/", key), "common") && value != "UNDEFINED"
+  }
 }
 
 resource "aws_kms_key" "primary" {
@@ -66,4 +72,14 @@ resource "aws_kms_alias" "secondary" {
 
   name          = local.kms_key_alias
   target_key_id = aws_kms_replica_key.secondary.arn
+}
+
+resource "aws_ssm_parameter" "common_sensitive" {
+  for_each = local.common_sensitive
+
+  key_id    = local.kms_key_id
+  name      = each.key
+  overwrite = true
+  type      = "SecureString"
+  value     = each.value
 }
