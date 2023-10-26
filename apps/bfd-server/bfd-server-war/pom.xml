@@ -417,30 +417,6 @@
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>${build.helper.maven.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <!-- Reserve random available ports for the server to use. -->
-                        <id>reserve-server-ports</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <outputFile>${project.build.directory}/server-work/server-ports.properties</outputFile>
-                            <minPortNumber>8000</minPortNumber>
-                            <maxPortNumber>9999</maxPortNumber>
-                            <randomPort>true</randomPort>
-                            <portNames>
-                                <portName>server.port.https</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>${exec.maven.plugin.version}</version>
                 <executions>
@@ -462,6 +438,71 @@
                         <goals>
                             <goal>exec</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build.helper.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <!-- Reserve random available ports for the server to use. -->
+                        <id>reserve-server-ports</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <outputFile>${project.build.directory}/server-work/server-ports.properties</outputFile>
+                            <minPortNumber>8000</minPortNumber>
+                            <maxPortNumber>9999</maxPortNumber>
+                            <randomPort>true</randomPort>
+                            <portNames>
+                                <portName>server.port.https</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>attach-dd-openapi-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/V1-data-dictionary-${project.version}.csv</file>
+                                    <type>csv</type>
+                                    <classifier>v1-data-dictionary</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/V1-data-dictionary-${project.version}.json</file>
+                                    <type>json</type>
+                                    <classifier>v1-data-dictionary</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/V1-OpenAPI-${project.version}.yaml</file>
+                                    <type>yaml</type>
+                                    <classifier>v1-openapi</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/V2-data-dictionary-${project.version}.csv</file>
+                                    <type>csv</type>
+                                    <classifier>v2-data-dictionary</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/V2-data-dictionary-${project.version}.json</file>
+                                    <type>json</type>
+                                    <classifier>v2-data-dictionary</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/V2-OpenAPI-${project.version}.yaml</file>
+                                    <type>yaml</type>
+                                    <classifier>v2-openapi</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
