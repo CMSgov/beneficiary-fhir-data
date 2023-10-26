@@ -90,30 +90,29 @@ if [[ \$- == *i* ]]; then
 fi
 EOF
 
-cat <<EOF > /tmp/env-vars.txt
-BFD_ENVIRONMENT=${env}
-SQS_QUEUE_NAME=${sqs_queue_name}
-NODE_LAMBDA_NAME=${node_lambda_name}
-ASG_NAME=${asg_name}
-TEST_HOST=${test_host}
-AWS_CURRENT_REGION=${aws_current_region}
-INITIAL_WORKER_NODES=${initial_worker_nodes}
-NODE_SPAWN_TIME=${node_spawn_time}
-MAX_SPAWNED_NODES=${max_spawned_nodes}
-MAX_SPAWNED_USERS=${max_spawned_users}
-USER_SPAWN_RATE=${user_spawn_rate}
-TEST_RUNTIME_LIMIT=${test_runtime_limit}
-COASTING_TIME=${coasting_time}
-WARM_INSTANCE_TARGET=${warm_instance_target}
-STOP_ON_SCALING=${stop_on_scaling}
-STOP_ON_NODE_LIMIT=${stop_on_node_limit}
-LOCUST_TAGS=${locust_tags}
-LOCUST_EXCLUDE_TAGS=${locust_exclude_tags}
-EOF
-
-yum -y update --security
 service docker start
-aws ecr get-login-password --region "${aws_current_region}" | docker login --username AWS --password-stdin "${ecr_registry_url}"
+aws ecr get-login-password --region "${aws_current_region}" | \
+docker login --username AWS --password-stdin "${ecr_registry_url}"
 docker pull "${ecr_tagged_controller_uri}"
-mkdir /opt/server-load
-docker logs --follow $(docker run --detach --env-file "/tmp/env-vars.txt" "${ecr_tagged_controller_uri}") >& /opt/server-load/server-load-controller.log &
+mkdir "${server_load_dir}"
+docker logs --follow $(docker run --detach \
+  -e BFD_ENVIRONMENT=${env} \
+  -e  SQS_QUEUE_NAME=${sqs_queue_name} \
+  -e  NODE_LAMBDA_NAME=${node_lambda_name} \
+  -e  ASG_NAME=${asg_name} \
+  -e  TEST_HOST=${test_host} \
+  -e  AWS_CURRENT_REGION=${aws_current_region} \
+  -e  INITIAL_WORKER_NODES=${initial_worker_nodes} \
+  -e  NODE_SPAWN_TIME=${node_spawn_time} \
+  -e  MAX_SPAWNED_NODES=${max_spawned_nodes} \
+  -e  MAX_SPAWNED_USERS=${max_spawned_users} \
+  -e  USER_SPAWN_RATE=${user_spawn_rate} \
+  -e  TEST_RUNTIME_LIMIT=${test_runtime_limit} \
+  -e  COASTING_TIME=${coasting_time} \
+  -e  WARM_INSTANCE_TARGET=${warm_instance_target} \
+  -e  STOP_ON_SCALING=${stop_on_scaling} \
+  -e  STOP_ON_NODE_LIMIT=${stop_on_node_limit} \
+  -e  LOCUST_TAGS=${locust_tags} \
+  -e  LOCUST_EXCLUDE_TAGS=${locust_exclude_tags} \
+  "${ecr_tagged_controller_uri}"
+) >& "${server_load_dir}/server-load-controller.log" &
