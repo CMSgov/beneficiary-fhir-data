@@ -8,7 +8,7 @@ locals {
 resource "aws_iam_role" "ccw_rif" {
   count = local.is_prod ? 1 : 0
   name = "bfd-${local.env}-ccw-rif"
-  description = "Role assumed by CCW to read and write to the ${local.env} ETL bucket."
+  description = "Role assumed by CCW to read and write to the ${local.env} production and verification ETL buckets."
   max_session_duration = 43200 # max session duration is 12 hours (43200 seconds)- going big for long data-loads
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -60,9 +60,7 @@ resource "aws_iam_policy" "etl-rw-s3" {
           "Effect" : "Allow",
           "Resource" : [
             aws_s3_bucket.this.arn,
-            # NOTE: Only included in the prod environment for CCW verification
-            # TODO: Remove after CCW Verification is complete, ca Q1 2023.
-            "%{if local.is_prod}${aws_s3_bucket.ccw-verification[0].arn}%{endif}"
+            aws_s3_bucket.ccw-verification[0].arn
           ]
         },
         {

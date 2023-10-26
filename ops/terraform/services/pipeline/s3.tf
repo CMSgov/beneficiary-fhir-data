@@ -78,11 +78,10 @@ resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
 resource "aws_s3_bucket" "ccw-verification" {
   count  = local.is_prod ? 1 : 0
   bucket = "bfd-prod-ccw-verification"
-  # similar tags to the sole production etl user
   tags = {
     Layer   = local.layer,
     role    = local.legacy_service
-    Note    = "Temporary resource to be removed ca Q1 2023"
+    Note    = "Pre-production sensitive data used for CCW and BFD process verification"
     Purpose = "ETL PUT"
     UsedBy  = "CCW"
   }
