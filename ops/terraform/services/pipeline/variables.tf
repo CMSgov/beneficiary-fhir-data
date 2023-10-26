@@ -4,12 +4,6 @@ variable "ami_id_override" {
   type        = string
 }
 
-variable "force_etl_user_creation" {
-  default     = false
-  description = "Force an etl service account creation; only `prod` typically creates an etl service account."
-  type        = string
-}
-
 variable "force_dashboard_creation" {
   default     = false
   description = "Forces the creation of BFD Pipeline CloudWatch Dashboards; note dashboards are created by-default for established environments"

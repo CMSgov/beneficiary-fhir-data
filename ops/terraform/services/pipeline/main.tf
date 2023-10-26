@@ -14,7 +14,6 @@ locals {
 
   account_id        = data.aws_caller_identity.current.account_id
   layer             = "data"
-  create_etl_user   = local.is_prod || var.force_etl_user_creation
   create_slis       = !local.is_ephemeral_env || var.force_sli_creation
   create_dashboard  = !local.is_ephemeral_env || var.force_dashboard_creation
   create_slo_alarms = (!local.is_ephemeral_env || var.force_slo_alarms_creation) && local.create_slis
@@ -28,6 +27,9 @@ locals {
   # NOTE: nonsensitive service-oriented and common config
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
   nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
+
+  sensitive_ccw_service_map       = zipmap(data.aws_ssm_parameters_by_path.sensitive_ccw.names, data.aws_ssm_parameters_by_path.sensitive_ccw.values)
+  sensitive_ccw_service_config    = { for key, value in local.sensitive_ccw_service_map : split("/", key)[6] => value }
 
   nonsensitive_ccw_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_ccw.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_ccw.values))
   nonsensitive_ccw_service_config = { for key, value in local.nonsensitive_ccw_service_map : split("/", key)[6] => value }
@@ -153,11 +155,12 @@ locals {
 resource "aws_launch_template" "this" {
   for_each = local.ccw_pipeline_config
 
-  name          = each.value.name
-  description   = "Template for the ${local.env} environment ${each.key} ${local.service} servers"
-  key_name      = local.nonsensitive_common_config["key_pair"]
-  image_id      = local.ami_id
-  instance_type = each.value.instance_type
+  name                   = each.value.name
+  description            = "Template for the ${local.env} environment ${each.key} ${local.service} servers"
+  key_name               = local.nonsensitive_common_config["key_pair"]
+  image_id               = local.ami_id
+  instance_type          = each.value.instance_type
+  update_default_version = true
 
   user_data = base64encode(templatefile("${path.module}/user-data.sh.tftpl", {
     account_id        = local.account_id

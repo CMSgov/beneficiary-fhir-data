@@ -107,6 +107,7 @@ resource "aws_launch_template" "main" {
   image_id               = var.launch_config.ami_id
   instance_type          = var.launch_config.instance_type
   ebs_optimized          = true
+  update_default_version = true
 
   iam_instance_profile {
     name = var.launch_config.profile
