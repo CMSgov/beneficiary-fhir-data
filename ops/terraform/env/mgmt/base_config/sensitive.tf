@@ -8,7 +8,7 @@ locals {
 }
 
 data "external" "eyaml" {
-  program = ["${path.module}/scripts/read-and-decrypt-eyaml.sh", local.env, local.kms_key_id]
+  program = ["${path.module}/scripts/read-and-decrypt-yaml.sh", local.env, local.kms_key_id]
 }
 
 resource "aws_ssm_parameter" "common_sensitive" {

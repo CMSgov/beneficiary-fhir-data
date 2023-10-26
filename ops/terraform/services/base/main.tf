@@ -55,6 +55,10 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_key_alias
 }
 
+data "external" "yaml" {
+  program = ["${path.module}/scripts/read-and-decrypt-yaml.sh", local.yaml_env, local.kms_key_id]
+}
+
 resource "aws_kms_key" "primary" {
   count = !local.is_ephemeral_env ? 1 : 0
 

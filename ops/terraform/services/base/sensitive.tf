@@ -6,10 +6,6 @@ locals {
   eft_sensitive      = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "eft") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
 }
 
-data "external" "yaml" {
-  program = ["${path.module}/scripts/read-and-decrypt-eyaml.sh", local.yaml_env, local.kms_key_id]
-}
-
 resource "aws_ssm_parameter" "common_sensitive" {
   for_each = local.common_sensitive
 
