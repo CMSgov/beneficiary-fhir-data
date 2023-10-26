@@ -87,27 +87,28 @@ resource "aws_iam_policy" "packer_kms" {
   description = "Policy granting permission for bfd-packer profiled instances to decrypt using mgmt and established environment KMS keys"
   name        = "bfd-${local.env}-packer-kms"
   path        = "/"
-  policy      = <<-POLICY
-{
-  "Statement": [
+  policy = jsonencode(
     {
-      "Action": ["kms:Decrypt"],
-      "Effect": "Allow",
-      "Resource": [
-        "${local.kms_key_id}",
-        "${local.test_kms_key_id}",
-        "${local.prod_sbx_kms_key_id}",
-        "${local.prod_kms_key_id}",
-        "${local.kms_config_key_id}",
-        "${local.test_config_kms_key_id}",
-        "${local.prod_sbx_config_kms_key_id}",
-        "${local.prod_config_kms_key_id}"
-      ]
+      "Statement" : [
+        {
+          "Action" : ["kms:Decrypt"],
+          "Effect" : "Allow",
+          "Resource" : concat(
+            [
+              "${local.bfd_insights_kms_key_id}",
+              "${local.kms_key_id}",
+              "${local.tf_state_kms_key_id}",
+              "${local.test_kms_key_id}",
+              "${local.prod_sbx_kms_key_id}",
+              "${local.prod_kms_key_id}"
+            ],
+            local.all_kms_config_key_arns
+          )
+        }
+      ],
+      "Version" : "2012-10-17"
     }
-  ],
-  "Version": "2012-10-17"
-}
-POLICY
+  )
 }
 
 resource "aws_iam_policy" "code_artifact_rw" {
@@ -366,49 +367,43 @@ resource "aws_iam_policy" "bfd_ssm_ro" {
   description = "Permissions to /bfd SSM hierarchies"
   name        = "bfd-ssm-parameters-ro"
   path        = "/"
-  policy      = <<-POLICY
-{
-  "Statement": [
+  policy = jsonencode(
     {
-      "Sid": "ListParameters",
-      "Action": [
-        "ssm:DescribeParameters"
+      "Statement" : [
+        {
+          "Sid" : "ListParameters",
+          "Action" : [
+            "ssm:DescribeParameters"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            "arn:aws:ssm:us-east-1:${local.account_id}:*"
+          ]
+        },
+        {
+          "Sid" : "AllowReadBFDParams",
+          "Action" : [
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/*"
+          ]
+        },
+        {
+          "Sid" : "AllowKeyUsage",
+          "Action" : [
+            "kms:Decrypt"
+          ],
+          "Effect" : "Allow",
+          "Resource" : local.all_kms_config_key_arns
+        }
       ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:ssm:us-east-1:${local.account_id}:*"
-      ]
-    },
-    {
-      "Sid": "AllowReadBFDParams",
-      "Action": [
-        "ssm:GetParametersByPath",
-        "ssm:GetParameters",
-        "ssm:GetParameter"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/*"
-      ]
-    },
-    {
-      "Sid": "AllowKeyUsage",
-      "Action": [
-        "kms:Decrypt"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "${local.kms_key_id}",
-        "${local.test_kms_key_id}",
-        "${local.prod_sbx_kms_key_id}",
-        "${local.prod_kms_key_id}"
-      ]
+      "Version" : "2012-10-17"
     }
-  ],
-  "Version": "2012-10-17"
-}
-POLICY
-
+  )
 }
 
 resource "aws_iam_group_policy_attachment" "app_engineers_bfd_ssm_ro" {
@@ -446,36 +441,31 @@ resource "aws_iam_policy" "rda_ssm_ro" {
   description = "Allow reading RDA pipeline SSM hierarchies"
   name        = "bfd-rda-pipeline-ssm-parameters-ro"
   path        = "/"
-  policy      = <<-POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  policy = jsonencode(
     {
-      "Sid": "ReadRDAPipelineSSMParameters",
-      "Action": [
-        "ssm:GetParametersByPath",
-        "ssm:GetParameters",
-        "ssm:GetParameter"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/*/pipeline/rda/*"
-      ]
-    },
-    {
-      "Sid": "AllowKeyUsage",
-      "Action": [
-        "kms:Decrypt"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "${local.kms_key_id}",
-        "${local.test_kms_key_id}",
-        "${local.prod_sbx_kms_key_id}",
-        "${local.prod_kms_key_id}"
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Sid" : "ReadRDAPipelineSSMParameters",
+          "Action" : [
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/*/pipeline/rda/*"
+          ]
+        },
+        {
+          "Sid" : "AllowKeyUsage",
+          "Action" : [
+            "kms:Decrypt"
+          ],
+          "Effect" : "Allow",
+          "Resource" : local.all_kms_config_key_arns
+        }
       ]
     }
-  ]
-}
-POLICY
+  )
 }

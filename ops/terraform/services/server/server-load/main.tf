@@ -31,11 +31,21 @@ locals {
   # to cleanup properly
   lambda_timeout_seconds = min(900, var.test_runtime_limit + 15)
 
-  mgmt_kms_key_arn        = data.aws_kms_key.mgmt_cmk.arn
-  kms_key_arn             = data.aws_kms_key.cmk.arn
-  mgmt_config_kms_key_arn = data.aws_kms_key.mgmt_config_cmk.arn
-  config_kms_key_arn      = data.aws_kms_key.config_cmk.arn
-  kms_key_id              = data.aws_kms_key.cmk.key_id
+  mgmt_kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
+  kms_key_arn      = data.aws_kms_key.cmk.arn
+  kms_key_id       = data.aws_kms_key.cmk.key_id
+  mgmt_kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.mgmt_config_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
+  kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.config_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 
   ami_id                     = data.aws_ami.main.id
   instance_type              = "m6i.large"
