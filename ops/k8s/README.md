@@ -2,14 +2,11 @@
 
 ## Overview
 
-This directory contains resources for deploying the three primary applications in a local kubernetes environment using Rancher Desktop.  In a future release this will be expanded to support deployment to an EKS environment.  For local development all resources are deployed into a namespace named `dev`.
+This directory contains resources for deploying the three primary applications in a local kubernetes environment using Rancher Desktop or Docker Desktop.  In a future release this will be expanded to support deployment to an EKS environment.  For local development all resources are deployed into a namespace named `dev`.
 
-The directory is intended for use with Kustomize.  There are five applications that can be deployed to kubernetes.  Two of these are required only for local deployment:
+The `ops/k8s` directory is intended for use with Helm.  There are five applications that can be deployed to kubernetes.  Each has a corresponding helm chart in its own subdirectory.
 
-* postgres: A simple postgresql 14 service using a small persistent volume.
-* localstack: A simulator for S3, SSM, and SQS.
-
-The other three are BFD applications that can be deployed for testing:
+These three BFD applications can be installed for testing:
 
 * migrator: The bfd-db-migrator program running inside kubernetes as a batch job.
 * pipeline: The bfd-pipeline-app program running inside kubernetes as a batch job.
@@ -17,13 +14,23 @@ The other three are BFD applications that can be deployed for testing:
 
 All three of these programs are intended to be deployed using their corresponding run script in `/apps/utils/scripts`.  These scripts have been modified to include a `-k` command line option that directs the script to configure the program using the simulated SSM in the cluster and then deploy the app using resources in this directory.
 
+The other two are required only for local deployment:
+
+* postgres: A simple postgresql 14 service using a small persistent volume.
+* localstack: A simulator for S3, SSM, and SQS.
+
+These are installed using normal `helm install` commands as described later in this document.
+
 ## Getting Started
 
-For local development you need to have either Rancher Desktop or Docker Desktop installed and kubernetes enabled.  You also must have `kubectl` and `docker` commands installed and in your PATH.  It is possible that other kubernetes distributions will work as well but only Rancher Desktop has been tested so far.
+For local development you need to have either Rancher Desktop or Docker Desktop installed and kubernetes enabled.  You also must have `helm`, `kubectl` and `docker` commands installed and in your PATH.  It is possible that other kubernetes distributions will work as well but only Rancher Desktop and Docker Desktop have been tested so far.
+
+Docker Desktop has Kubernetes support built in but you need to enable it.
+To do so go to: `Options > Kubernetes` then check the `Enable Kubernetes` box and restart.
 
 ### Special Notes for Rancher Desktop
 
-Be sure to use the versions of `kubectl` and `docker` installed by Rancher Desktop.  These are installed in `$HOME/.rd/bin` on Mac when using `brew install rancher` to install RD.  Also be sure to set your docker context to point to Rancher Desktop rather than the default.  Unset the `DOCKER_HOST` environment variable if you have it set since it overrides the docker context setting.
+Be sure to use the versions of `helm`, `kubectl` and `docker` installed by Rancher Desktop.  These are installed in `$HOME/.rd/bin` on Mac when using `brew install rancher` to install RD.  Also be sure to set your docker context to point to Rancher Desktop rather than the default.  Unset the `DOCKER_HOST` environment variable if you have it set since it overrides the docker context setting.
 
 There are known issues with running testcontainers inside of RD.  You may need to run normal builds in a shell using colima directly and limit your use of the shell using Rancher Desktop to running the applications and interacting with kubernetes.
 
@@ -55,6 +62,20 @@ localstack	default  	1       	2023-10-23 09:12:25.892621 -0400 EDT	deployed	loca
 postgres  	default  	1       	2023-10-23 09:12:06.429432 -0400 EDT	deployed	postgres-0.1.0  	14         
 ```
 
+## Building Docker Images
+
+The local docker daemon needs to have the BFD docker images installed before any apps can be loaded.  The easiest way to build these is to perform a clean build using `build-bfd` with the `-J` option:
+
+```sh
+$ build-bfd -x -J
+```
+
+The equivalent maven command line is:
+
+```sh
+$ mvn -e clean install -DskipTests=true -DskipITs -Dmaven.javadoc.skip=true -Dcheckstyle.skip -Djib.skip=false -Dmaven.build.cache.skipCache=true
+```
+
 ## Running the Migrator
 
 The postgres chart always starts with an empty database.  None of the schemas or tables will be present when the service starts.  To populate the database you need to run the migrator at least once.
@@ -63,7 +84,7 @@ The postgres chart always starts with an empty database.  None of the schemas or
 bash ../../apps/utils/scripts/run-db-migrator -k
 ```
 
-This sends all of the migrator's configuration settings to the SSM inside the cluster.  They are added to a folder names `/bfd-db-migrator` in SSM.
+This sends all of the migrator's configuration settings to the SSM inside the cluster.  They are added to a folder named `/bfd-db-migrator` in SSM.
 
 The migrator should run once and exit.  You can view its logs using the command `kubectl -n dev logs --follow jobs/dev-migrator` or, if the job has already exited, by finding its pods and requesting the logs for them directly.
 
@@ -76,7 +97,7 @@ postgres-5c8d8457dc-sl6nh     1/1     Running     1 (169m ago)   3h4m
 $ kubectl -n dev logs dev-migrator-ldmjr
 ```
 
-Or you can install a kubernetes GUI of your choice that makes this process easy!  The kubernetes extension for vscode, for example, supports browsing resources and searching logs.
+Or you can use a kubernetes GUI of your choice that makes this process easy!  Both Rancher Desktop and Docker Desktop have GUI dashboards built in.  Alternatively, Visual Studio Code has a kubernetes extension that supports browsing resources and searching logs.
 
 ## Running the RDA Pipeline
 
