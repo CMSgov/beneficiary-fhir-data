@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -347,7 +346,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
             false,
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 
-    int loadCount =
+    long loadCount =
         loadSample(
             sampleResources.get(0).getResourceUrl().toString(), loadAppOptions, rifFilesEvent);
 
@@ -367,7 +366,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
    * @param rifFilesEvent the {@link RifFilesEvent} to load
    * @return the number of RIF records that were loaded (as reported by the {@link RifLoader})
    */
-  private int loadSample(String sampleName, LoadAppOptions options, RifFilesEvent rifFilesEvent) {
+  private long loadSample(String sampleName, LoadAppOptions options, RifFilesEvent rifFilesEvent) {
     LOGGER.info("Loading RIF files: '{}'...", sampleName);
 
     // Create the processors that will handle each stage of the pipeline.
@@ -377,31 +376,28 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
     // Link up the pipeline and run it.
     LOGGER.info("Loading RIF records...");
-    AtomicInteger failureCount = new AtomicInteger(0);
-    AtomicInteger loadCount = new AtomicInteger(0);
+    int failureCount = 0;
+    long loadCount = 0;
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      loader.process(
-          rifFileRecords,
-          error -> {
-            failureCount.incrementAndGet();
-            LOGGER.warn("Record(s) failed to load.", error);
-          },
-          result -> {
-            loadCount.incrementAndGet();
-          });
+      try {
+        loadCount += loader.processBlocking(rifFileRecords);
+      } catch (Exception error) {
+        failureCount += 1;
+        LOGGER.warn("Record(s) failed to load.", error);
+      }
       Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build().report();
     }
-    LOGGER.info("Loaded RIF files: '{}', record count: '{}'.", sampleName, loadCount.get());
+    LOGGER.info("Loaded RIF files: '{}', record count: '{}'.", sampleName, loadCount);
     Slf4jReporter.forRegistry(PipelineTestUtils.get().getPipelineApplicationState().getMetrics())
         .outputTo(LOGGER)
         .build()
         .report();
 
     // Verify that the expected number of records were run successfully.
-    assertEquals(0, failureCount.get(), "Load errors encountered.");
+    assertEquals(0, failureCount, "Load errors encountered.");
 
-    return loadCount.get();
+    return loadCount;
   }
 
   /**

@@ -19,12 +19,14 @@ import gov.cms.bfd.model.rif.entities.Beneficiary_;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
+import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
@@ -35,7 +37,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -79,6 +80,9 @@ public final class RifLoader {
   /** The shared application state. */
   private final PipelineApplicationState appState;
 
+  /** The maximum amount of time we will wait for a job to complete loading its batches. */
+  private static final Duration MAX_FILE_WAIT_TIME = Duration.ofHours(72);
+
   /**
    * Constructs a new {@link RifLoader} instance.
    *
@@ -96,7 +100,7 @@ public final class RifLoader {
    * Creates the load executor.
    *
    * @param settings the {@link LoadAppOptions.PerformanceSettings} to use
-   * @return the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
+   * @return the {@link Scheduler} to use for asynchronous load tasks
    */
   private static Scheduler createScheduler(LoadAppOptions.PerformanceSettings settings) {
     final int threadPoolSize = settings.getLoaderThreads();
@@ -109,7 +113,7 @@ public final class RifLoader {
         taskQueueSize);
 
     Scheduler scheduler =
-        Schedulers.newBoundedElastic(threadPoolSize, taskQueueSize, RifLoader.class.getName(), 300);
+        Schedulers.newBoundedElastic(threadPoolSize, taskQueueSize, RifLoader.class.getName(), 60);
     scheduler.init();
     return scheduler;
   }
@@ -130,89 +134,114 @@ public final class RifLoader {
   }
 
   /**
-   * Consumes the input {@link Stream} of {@link RifRecordEvent}s, pushing each {@link
-   * RifRecordEvent}'s record to the database, and passing the result for each of those bundles to
-   * the specified error handler and result handler, as appropriate.
+   * Consumes the {@link RifRecordEvent}s from the file, pushing each {@link RifRecordEvent}'s
+   * entity objects to the database. Blocks for up to {@link #MAX_FILE_WAIT_TIME} to allow
+   * processing to be completed. All {@link RifRecordLoadResult}s are discarded but a count of the
+   * number of them is returned. If the flux terminates with an exception that is passed through to
+   * the caller instead.
    *
-   * <p>This is a <a href=
-   * "https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps">
-   * terminal operation</a>.
-   *
-   * @param dataToLoad the FHIR {@link RifRecordEvent}s to be loaded
+   * @param dataToLoad the {@link RifFileRecords} containing FHIR {@link RifRecordEvent}s to be
+   *     loaded
+   * @return count of {@link RifRecordLoadResult}s encountered during processing
+   * @throws Exception passed through from processing
    */
-  public Flux<RifRecordLoadResult> process(RifFileRecords dataToLoad) {
-
-    final RifFileType fileType = dataToLoad.getSourceEvent().getFile().getFileType();
-    final LoadAppOptions.PerformanceSettings performanceSettings =
-        options.selectPerformanceSettingsForFileType(fileType);
-    final Scheduler scheduler = createScheduler(performanceSettings);
-
-    final Timer.Context timerDataSetFile =
-        appState
-            .getMetrics()
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "dataSet", "file", "processed"))
-            .time();
-    LOGGER.info("Processing '{}'...", dataToLoad);
-
-    long loadedFileId;
-    try {
-      // Trim the LoadedFiles & LoadedBatches table
-      trimLoadedFiles();
-
-      // Insert a LoadedFiles entry
-      loadedFileId = insertLoadedFile(dataToLoad.getSourceEvent());
-    } catch (Exception ex) {
-      return Flux.error(ex);
-    }
-
-    return dataToLoad
-        .getRecords()
-        .buffer(performanceSettings.getRecordBatchSize())
-        .publishOn(scheduler)
-        .flatMap(batch -> processBatch(batch, loadedFileId), performanceSettings.getLoaderThreads())
-        .doFinally(
-            ignored -> {
-              timerDataSetFile.stop();
-              logRecordCounts();
-              scheduler.dispose();
-            })
-        .doOnComplete(() -> LOGGER.info("Processed '{}'.", dataToLoad))
-        .doOnError(ex -> LOGGER.error("terminated by exception: message={}", ex.getMessage(), ex));
+  public long processBlocking(RifFileRecords dataToLoad) throws Exception {
+    return FluxUtils.waitForCompletion(processAsync(dataToLoad), MAX_FILE_WAIT_TIME);
   }
 
   /**
-   * Submits a file to be loaded asynchronously by the load executor.
+   * Produces a {@link Flux} that, when subscribed to, consumes the {@link RifRecordEvent}s from the
+   * file, pushing each {@link RifRecordEvent}'s record to the database, and publishing the result
+   * for each record. Any exception thrown during processing terminates the flux with an error.
+   *
+   * @param dataToLoad the {@link RifFileRecords} containing FHIR {@link RifRecordEvent}s to be
+   *     loaded
+   * @return a {@link Flux} that processes all records asynchronously
+   */
+  public Flux<RifRecordLoadResult> processAsync(RifFileRecords dataToLoad) {
+    return FluxUtils.fromFluxFunction(
+        () -> {
+          final RifFileType fileType = dataToLoad.getSourceEvent().getFile().getFileType();
+          final LoadAppOptions.PerformanceSettings performanceSettings =
+              options.selectPerformanceSettingsForFileType(fileType);
+
+          final Timer.Context timerDataSetFile =
+              appState
+                  .getMetrics()
+                  .timer(
+                      MetricRegistry.name(
+                          getClass().getSimpleName(), "dataSet", "file", "processed"))
+                  .time();
+          LOGGER.info("Processing '{}'...", dataToLoad);
+
+          // Trim the LoadedFiles & LoadedBatches table
+          trimLoadedFiles();
+
+          // Insert a LoadedFiles entry
+          final long loadedFileId = insertLoadedFile(dataToLoad.getSourceEvent());
+
+          final Scheduler scheduler = createScheduler(performanceSettings);
+          return dataToLoad
+              .getRecords()
+              // collect records into batches
+              .buffer(performanceSettings.getRecordBatchSize())
+              // process batches in parallel
+              .flatMap(
+                  batch ->
+                      processBatch(batch, loadedFileId)
+                          // process each batch on a thread from our scheduler
+                          .subscribeOn(scheduler),
+                  performanceSettings.getLoaderThreads())
+              // clean up when the flux terminates (either by error or completion)
+              .doFinally(
+                  ignored -> {
+                    timerDataSetFile.stop();
+                    logRecordCounts();
+                    scheduler.dispose();
+                  })
+              // log success or failure events before they are published to subscriber
+              .doOnComplete(() -> LOGGER.info("Processed '{}'.", dataToLoad))
+              .doOnError(
+                  ex -> LOGGER.error("terminated by exception: message={}", ex.getMessage(), ex));
+        });
+  }
+
+  /**
+   * Creates a {@link Flux} that, when subscribed to in a scheduler, processes a batch of records
+   * and publishes the result for each record.
    *
    * @param recordsBatch the {@link RifRecordEvent}s to process
    * @param loadedFileId the loaded file id
    */
   private Flux<RifRecordLoadResult> processBatch(
       List<RifRecordEvent<?>> recordsBatch, long loadedFileId) {
-    return Flux.defer(
+    return FluxUtils.fromIterableFunction(
         () -> {
-          RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
-          MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
-          RifFileType rifFileType = fileEvent.getFile().getFileType();
+          final RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
+          final MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
+          final RifFileType rifFileType = fileEvent.getFile().getFileType();
 
           // Only one of each failure/success Timer.Contexts will be applied.
-          Timer.Context timerBatchSuccess =
+          final Timer.Context timerBatchSuccess =
               appState
                   .getMetrics()
                   .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches"))
                   .time();
-          Timer.Context timerBatchTypeSuccess =
+          final Timer.Context timerBatchTypeSuccess =
               fileEventMetrics
                   .timer(
                       MetricRegistry.name(
                           getClass().getSimpleName(), "recordBatches", rifFileType.name()))
                   .time();
-          Timer.Context timerBundleFailure =
+          final Timer.Context timerBundleFailure =
               appState
                   .getMetrics()
                   .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
                   .time();
 
-          // Execute the transaction and capture any exception it might throw as a RifLoadFailure
+          // Execute the transaction and capture any exception it might throw as a RifLoadFailure.
+          // Catching it here lets us rethrow it after cleaning up our state farther down in the
+          // method.
           RifLoadFailure failure = null;
           List<RifRecordLoadResult> processResults = List.of();
           try (TransactionManager transactionManager =
@@ -221,7 +250,7 @@ public final class RifLoader {
                 transactionManager.executeFunction(
                     entityManager -> processBatchImpl(recordsBatch, loadedFileId, entityManager));
           } catch (Exception e) {
-            LOGGER.warn("Failed to load '{}' record.", rifFileType, e);
+            LOGGER.warn("Failed to load '{}' batch.", rifFileType, e);
             failure = new RifLoadFailure(recordsBatch, e);
           }
 
@@ -229,7 +258,7 @@ public final class RifLoader {
             // Update the metrics now that things have been pushed.
             timerBatchSuccess.stop();
             timerBatchTypeSuccess.stop();
-            return Flux.fromIterable(processResults);
+            return processResults;
           } else {
             // Update metrics for a failure and halt the pipeline.
             timerBundleFailure.stop();
@@ -238,13 +267,13 @@ public final class RifLoader {
                 .mark(1);
 
             LOGGER.error("Error caught when processing async batch!", failure);
-            return Flux.error(failure);
+            throw failure;
           }
         });
   }
 
   /**
-   * Processes (loads) a record into the database and returns the load result.
+   * Loads a batch of records into the database and returns the load result for each record.
    *
    * @param recordsBatch the {@link RifRecordEvent}s to process
    * @param loadedFileId the loaded file id
@@ -390,8 +419,7 @@ public final class RifLoader {
    *
    * @param rifRecordEvent the {@link RifRecordEvent} to check
    * @return {@code true} if the record is a beneficiary and has an enrollment year that is non-
-   *     <code>null</code> and not 2023, and the flag to filter such beneficiaries is set to {@code
-   *     true}
+   *     {@code null} and not 2023, and the flag to filter such beneficiaries is set to {@code true}
    */
   private boolean isBackdatedBene(RifRecordEvent<?> rifRecordEvent) {
     // If this is a beneficiary record, apply the beneficiary filtering rules
@@ -1001,7 +1029,7 @@ public final class RifLoader {
   }
 
   /** Trim the LoadedFiles and LoadedBatches tables if necessary. */
-  private void trimLoadedFiles() throws Exception {
+  private void trimLoadedFiles() {
     EntityManager em = appState.getEntityManagerFactory().createEntityManager();
     EntityTransaction txn = null;
     try {

@@ -10,11 +10,7 @@ import gov.cms.bfd.pipeline.ccw.rif.DataSetProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class DefaultDataSetProcessor implements DataSetProcessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetProcessor.class);
-
-  /** The maximum amount of time we will wait for a job to complete loading its batches. */
-  public static final Duration MAX_FILE_WAIT_TIME = Duration.ofHours(72);
 
   /** Metrics for this class. */
   private final MetricRegistry appMetrics;
@@ -61,35 +54,35 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
                     PipelineApplication.class.getSimpleName(), "dataSet", "processed"))
             .time();
 
-    final var failure = new AtomicReference<Exception>();
+    Exception failure = null;
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       Slf4jReporter dataSetFileMetricsReporter =
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
       dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
       try {
-        RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
-        Long processedCount = rifLoader.process(rifFileRecords).count().block(MAX_FILE_WAIT_TIME);
+        final RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
+        final long processedCount = rifLoader.processBlocking(rifFileRecords);
         LOGGER.info(
             "Successfully processed {} records in file {}",
             processedCount,
             rifFileEvent.getFile().getDisplayName());
       } catch (Exception e) {
         LOGGER.error("Exception while processing file {}", rifFileEvent.getFile().getDisplayName());
-        failure.set(e);
+        failure = e;
       }
 
       dataSetFileMetricsReporter.stop();
       dataSetFileMetricsReporter.report();
 
-      if (failure.get() != null) {
+      if (failure != null) {
         LOGGER.info("Stopping due to error.");
         break;
       }
     }
     timerDataSet.stop();
-    if (failure.get() != null) {
-      throw failure.get();
+    if (failure != null) {
+      throw failure;
     }
   }
 

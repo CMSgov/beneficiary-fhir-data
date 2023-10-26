@@ -400,7 +400,11 @@ public final class ServerTestUtils {
     List<Object> recordsParsed = new ArrayList<>();
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      rifFileRecords.getRecords().map(r -> r.getRecord()).forEach(r -> recordsParsed.add(r));
+      rifFileRecords
+          .getRecords()
+          .map(r -> r.getRecord())
+          .toIterable()
+          .forEach(r -> recordsParsed.add(r));
     }
 
     return recordsParsed;
@@ -684,14 +688,11 @@ public final class ServerTestUtils {
     List<Object> recordsLoaded = new ArrayList<>();
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      loader.process(
-          rifFileRecords,
-          error -> {
-            LOGGER.warn("Record(s) failed to load.", error);
-          },
-          result -> {
-            recordsLoaded.add(result.getRifRecordEvent().getRecord());
-          });
+      loader
+          .processAsync(rifFileRecords)
+          .doOnError(error -> LOGGER.warn("Record(s) failed to load.", error))
+          .doOnNext(result -> recordsLoaded.add(result.getRifRecordEvent().getRecord()))
+          .blockLast();
     }
     LOGGER.info("Loaded RIF records: '{}'.", recordsLoaded.size());
     return recordsLoaded;

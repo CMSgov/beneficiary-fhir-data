@@ -35,11 +35,11 @@ public abstract class RifFileParser {
    */
   public abstract Flux<RifRecordEvent<?>> finish();
 
-  /** Implementation that parses each individual record into a {@link RifRecordEvent<?>}. */
+  /** Implementation that parses each individual record into a {@link RifRecordEvent}. */
   @ThreadSafe
   @AllArgsConstructor
   public static class Simple extends RifFileParser {
-    /** Lambda used to parse a single {@link CSVRecord} into a {@link RifRecordEvent<?>}. */
+    /** Lambda used to parse a single {@link CSVRecord} into a {@link RifRecordEvent}. */
     private final ThrowingFunction<RifRecordEvent<?>, CSVRecord, Exception> parser;
 
     @Override
@@ -59,15 +59,15 @@ public abstract class RifFileParser {
 
   /**
    * Implementation that parses groups of consecutive records that have the same value in a given
-   * column into a {@link RifRecordEvent<?>} using a lambda function.
+   * column into a {@link RifRecordEvent} using a lambda function.
    */
   @ThreadSafe
   @RequiredArgsConstructor
   public static class Grouping extends RifFileParser {
     /** The name of the column to group by. */
-    private final Enum<?> groupingColumn;
+    private final String groupingColumn;
 
-    /** Lambda used to parse one or more {@link CSVRecord}s into a {@link RifRecordEvent<?>}. */
+    /** Lambda used to parse one or more {@link CSVRecord}s into a {@link RifRecordEvent}. */
     private final ThrowingFunction<RifRecordEvent<?>, List<CSVRecord>, Exception> parser;
 
     /** Accumulates lines between calls to {@link #next}. */
@@ -85,13 +85,11 @@ public abstract class RifFileParser {
       Flux<RifRecordEvent<?>> result = Flux.empty();
       if (currentColumn == null) {
         currentColumn = newColumn;
-        addRecord(record);
-      } else if (currentColumn.equals(newColumn)) {
-        addRecord(record);
-      } else {
+      } else if (!currentColumn.equals(newColumn)) {
         currentColumn = newColumn;
         result = parse(takeRecords());
       }
+      addRecord(record);
       return result;
     }
 
@@ -102,7 +100,7 @@ public abstract class RifFileParser {
     }
 
     /**
-     * Calls the lambda to produce a new {@link RifRecordEvent<?>}.
+     * Calls the lambda to produce a new {@link RifRecordEvent}.
      *
      * @param records non-empty group of records to parse
      * @return flux containing the resulting object

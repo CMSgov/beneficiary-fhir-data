@@ -248,7 +248,7 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
     // Link up the pipeline and run it.
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      loader.process(rifFileRecords, error -> {}, result -> {});
+      loader.processAsync(rifFileRecords).blockLast();
     }
   }
 }

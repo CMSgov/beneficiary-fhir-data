@@ -145,7 +145,7 @@ public class RifFileParsers {
   public static RifFileParser inpatientClaimParser(RifFileEvent fileEvent) {
     final var parser = new InpatientClaimParser();
     return new RifFileParser.Grouping(
-        RifFileType.INPATIENT.getIdColumn(),
+        RifFileType.INPATIENT.getIdColumn().name(),
         csvRecords -> {
           trace(csvRecords);
           final RecordAction recordAction = parseRecordAction(csvRecords);
@@ -158,7 +158,7 @@ public class RifFileParsers {
   public static RifFileParser outpatientClaimParser(RifFileEvent fileEvent) {
     final var parser = new OutpatientClaimParser();
     return new RifFileParser.Grouping(
-        RifFileType.OUTPATIENT.getIdColumn(),
+        RifFileType.OUTPATIENT.getIdColumn().name(),
         csvRecords -> {
           trace(csvRecords);
           final RecordAction recordAction = parseRecordAction(csvRecords);
@@ -171,7 +171,7 @@ public class RifFileParsers {
   public static RifFileParser carrierClaimParser(RifFileEvent fileEvent) {
     final var parser = new CarrierClaimParser();
     return new RifFileParser.Grouping(
-        RifFileType.CARRIER.getIdColumn(),
+        RifFileType.CARRIER.getIdColumn().name(),
         csvRecords -> {
           trace(csvRecords);
           final RecordAction recordAction = parseRecordAction(csvRecords);
@@ -184,7 +184,7 @@ public class RifFileParsers {
   public static RifFileParser snfClaimParser(RifFileEvent fileEvent) {
     final var parser = new SNFClaimParser();
     return new RifFileParser.Grouping(
-        RifFileType.SNF.getIdColumn(),
+        RifFileType.SNF.getIdColumn().name(),
         csvRecords -> {
           trace(csvRecords);
           final RecordAction recordAction = parseRecordAction(csvRecords);
@@ -197,7 +197,7 @@ public class RifFileParsers {
   public static RifFileParser hospiceClaimParser(RifFileEvent fileEvent) {
     final var parser = new HospiceClaimParser();
     return new RifFileParser.Grouping(
-        RifFileType.HOSPICE.getIdColumn(),
+        RifFileType.HOSPICE.getIdColumn().name(),
         csvRecords -> {
           trace(csvRecords);
           final RecordAction recordAction = parseRecordAction(csvRecords);
@@ -210,7 +210,7 @@ public class RifFileParsers {
   public static RifFileParser hhaClaimParser(RifFileEvent fileEvent) {
     final var parser = new HHAClaimParser();
     return new RifFileParser.Grouping(
-        RifFileType.HHA.getIdColumn(),
+        RifFileType.HHA.getIdColumn().name(),
         csvRecords -> {
           trace(csvRecords);
           final RecordAction recordAction = parseRecordAction(csvRecords);
@@ -223,7 +223,7 @@ public class RifFileParsers {
   public static RifFileParser dmeClaimParser(RifFileEvent fileEvent) {
     final var parser = new DMEClaimParser();
     return new RifFileParser.Grouping(
-        RifFileType.DME.getIdColumn(),
+        RifFileType.DME.getIdColumn().name(),
         csvRecords -> {
           trace(csvRecords);
           final RecordAction recordAction = parseRecordAction(csvRecords);
