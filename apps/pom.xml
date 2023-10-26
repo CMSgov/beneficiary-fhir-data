@@ -168,6 +168,7 @@
         <hapi-fhir.version>6.8.3</hapi-fhir.version>
         <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
         <jersey.version>2.25.1</jersey.version>
+        <exec.maven.plugin.version>3.1.0</exec.maven.plugin.version>
 
         <!--  Dependencies required for org.apache.commons -->
         <commons.lang3.version>3.13.0</commons.lang3.version>
@@ -1207,6 +1208,27 @@
                         <exclude>**/E2E.java</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec.maven.plugin.version}</version>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <executable>${project.basedir}/bfd-server/dev/bfd-data-dictionary/generate_dd.sh</executable>
+                            <arguments>
+                                <argument>${project.version}</argument>
+                            </arguments>
+                        </configuration>
+                        <id>create-dd-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <extensions>
