@@ -7,16 +7,24 @@ locals {
     "prod"
   ]
 
-  bfd_insights_kms_key_id    = data.aws_kms_key.insights.arn
-  kms_key_id                 = data.aws_kms_key.cmk.arn
-  tf_state_kms_key_id        = data.aws_kms_key.tf_state.arn
-  test_kms_key_id            = data.aws_kms_key.test_cmk.arn
-  prod_sbx_kms_key_id        = data.aws_kms_key.prod_sbx_cmk.arn
-  prod_kms_key_id            = data.aws_kms_key.prod_cmk.arn
-  kms_config_key_id          = data.aws_kms_key.config_cmk.arn
-  test_config_kms_key_id     = data.aws_kms_key.test_config_cmk.arn
-  prod_sbx_config_kms_key_id = data.aws_kms_key.prod_sbx_config_cmk.arn
-  prod_config_kms_key_id     = data.aws_kms_key.prod_config_cmk.arn
+  bfd_insights_kms_key_id = data.aws_kms_key.insights.arn
+  kms_key_id              = data.aws_kms_key.cmk.arn
+  tf_state_kms_key_id     = data.aws_kms_key.tf_state.arn
+  test_kms_key_id         = data.aws_kms_key.test_cmk.arn
+  prod_sbx_kms_key_id     = data.aws_kms_key.prod_sbx_cmk.arn
+  prod_kms_key_id         = data.aws_kms_key.prod_cmk.arn
+
+  all_kms_config_key_arns = flatten(
+    [
+      for v in concat(
+        data.aws_kms_key.config_cmk.multi_region_configuration,
+        data.aws_kms_key.test_config_cmk.multi_region_configuration,
+        data.aws_kms_key.prod_sbx_config_cmk.multi_region_configuration,
+        data.aws_kms_key.prod_config_cmk.multi_region_configuration
+      ) :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 
   sensitive_common_config = zipmap(
     [

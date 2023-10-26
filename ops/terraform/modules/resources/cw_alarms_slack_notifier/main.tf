@@ -4,8 +4,12 @@ locals {
   lambda_timeout_seconds = 30
   lambda_name            = "cloudwatch-alarms-slack-notifier"
 
-  kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
-  kms_key_id  = data.aws_kms_key.mgmt_cmk.key_id
+  mgmt_config_kms_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.mgmt_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 
   lambda_configs_by_channel = {
     bfd_notices = {
@@ -66,22 +70,20 @@ resource "aws_iam_policy" "kms" {
 
   name        = "bfd-${var.env}-${each.value.full_name}-kms"
   description = "Permissions to decrypt mgmt KMS key"
-  policy      = <<-EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
         {
-            "Effect": "Allow",
-            "Action": [
-                "kms:Decrypt"
-            ],
-            "Resource": [
-                "${local.kms_key_arn}"
-            ]
+          "Effect" : "Allow",
+          "Action" : [
+            "kms:Decrypt"
+          ],
+          "Resource" : local.mgmt_config_kms_key_arns
         }
-    ]
-}
-EOF
+      ]
+    }
+  )
 }
 
 resource "aws_iam_policy" "ssm" {

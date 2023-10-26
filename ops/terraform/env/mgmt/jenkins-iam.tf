@@ -83,18 +83,32 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
             "kms:Encrypt*",
             "kms:GenerateDataKey",
             "kms:GenerateDataKeyWithoutPlaintext",
-            "kms:ReEncrypt*"
+            "kms:ReEncrypt*",
+            "kms:GetKeyPolicy",
+            "kms:GetKeyRotationStatus",
+            "kms:ListResourceTags",
           ]
           "Effect" : "Allow",
-          "Resource" : [
-            "${local.bfd_insights_kms_key_id}",
-            "${local.kms_key_id}",
-            "${local.tf_state_kms_key_id}",
-            "${local.test_kms_key_id}",
-            "${local.prod_sbx_kms_key_id}",
-            "${local.prod_kms_key_id}"
-          ],
+          "Resource" : concat(
+            [
+              "${local.bfd_insights_kms_key_id}",
+              "${local.kms_key_id}",
+              "${local.tf_state_kms_key_id}",
+              "${local.test_kms_key_id}",
+              "${local.prod_sbx_kms_key_id}",
+              "${local.prod_kms_key_id}"
+            ],
+            local.all_kms_config_key_arns
+          ),
           "Sid" : "AllowRoutineKeyAccess"
+        },
+        {
+          "Action" : [
+            "kms:ListAliases"
+          ],
+          "Effect" : "Allow",
+          "Resource" : "*",
+          "Sid" : "AllowAliasListingKms"
         }
       ],
       "Version" : "2012-10-17"
@@ -112,7 +126,7 @@ resource "aws_iam_access_key" "jenkins_user_key" {
 }
 
 resource "aws_ssm_parameter" "jenkins_user_key_secret" {
-  key_id    = local.kms_key_id
+  key_id    = data.aws_kms_key.config_cmk.arn
   name      = "/bfd/mgmt/common/sensitive/user/bfd-mgmt-jenkins/aws_secret_key"
   overwrite = true
   type      = "SecureString"
@@ -120,7 +134,7 @@ resource "aws_ssm_parameter" "jenkins_user_key_secret" {
 }
 
 resource "aws_ssm_parameter" "jenkins_user_key_id" {
-  key_id    = local.kms_key_id
+  key_id    = data.aws_kms_key.config_cmk.arn
   name      = "/bfd/mgmt/common/sensitive/user/bfd-mgmt-jenkins/aws_access_id"
   overwrite = true
   type      = "SecureString"

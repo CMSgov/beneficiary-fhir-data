@@ -160,37 +160,34 @@ resource "aws_iam_policy" "ssm" {
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service}, /bfd/mgmt/common/sensitive/user SSM hierarchies"
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
   path        = "/"
-  policy      = <<-EOF
-{
-  "Statement": [
+  policy = jsonencode(
     {
-      "Action": [
-        "ssm:GetParametersByPath",
-        "ssm:GetParameters",
-        "ssm:GetParameter"
+      "Statement" : [
+        {
+          "Action" : [
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/user/*",
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/${local.service}/*"
+          ]
+        },
+        {
+          "Action" : [
+            "kms:Decrypt"
+          ],
+          "Effect" : "Allow",
+          "Resource" : concat(local.mgmt_kms_config_key_arns, local.kms_config_key_arns)
+        }
       ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/user/*",
-        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
-        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
-        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/${local.service}/*"
-      ]
-    },
-    {
-      "Action": [
-        "kms:Decrypt"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "${local.kms_key_id}",
-        "${local.mgmt_kms_key_arn}"
-      ]
+      "Version" : "2012-10-17"
     }
-  ],
-  "Version": "2012-10-17"
-}
-EOF
+  )
 }
 
 resource "aws_iam_role" "this" {
