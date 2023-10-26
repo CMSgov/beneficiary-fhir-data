@@ -56,14 +56,14 @@ Between storing JSON strings in the yaml context here and being fetching those v
 As of mid-May 2023, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
 - All workspaces must end in one of the three path-to-production established environments of `test`, `prod-sbx`, or `prod`
 - Ephemeral environment workspace should generally be of a pattern similar to `<jira-id>-<env>`, e.g. `2544-test`, `2544-prod-sbx`, `2554-prod`.
-- hierarchies or paths generally conform to a 4 or 5 tuple prefix and leaf format, e.g.
-  - `/bfd/${env}/${group}/${sensitivity}/${leaf}`
-  - `/bfd/${env}/${group}/${subgroup}/${sensitivity}/${leaf}`
+- nested hierarchies must conform to one of the following (nested keys within YAML transformed into paths):
+  - `/bfd/${env}/${group}/${leaf}/...`
+  - `/bfd/${env}/${group}/${subgroup}/${leaf}/...`
 - `${env}` is typically one of `test`, `prod-sbx`, `prod` or ephemeral format `<jira-id>-<env>`, e.g. `2544-test`
 - `${group}` must be one of the supported groups: `common`, `migrator`, `pipeline`, `server`
 - `${subgroup}` is optional, as of January 2023, examples include `ccw`, `rda`, `shared`
-- `${sensitivity}` must be one of `sensitive` when encrypted or `nonsensitive` when in plain text
 - `${leaf}` _should_ be lower_snake_case formatted
+- `...` represents additional hierarchies that are user-defined
 - if the hierarchy should match the _regex_ `/ami.id/`, the value [**must** point to an existing Amazon Machine Image](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-ec2-aliases.html#parameter-ami-validation)
 - only string-formatted values are accepted
 - empty strings, i.e '' are not supported
@@ -99,8 +99,7 @@ To edit the encrypted values under e.g. `./values/prod-sbx.eyaml` use the follow
 ### Prerequisites
 In addition to the [Requirements (below)](#requirements), you (or the automation) will need:
 - software packages supporting awscli, yq, and jq
-- sufficient access to the `/bfd/mgmt/jenkins/sensitive` hierarchy for ansible-vault password access
-- `ansible` installed with `ansible-vault` available along your path (as of this writing, `ansible ~> 2.9`)
+- sufficient access to the various Multi-Region KMS Keys used for encrypting configuration
 - sufficient AWS IAM privileges for the AWS provider [Resources and Date Sources (below)](#resources)
 - access outlined for the remote [AWS S3 Backend](https://www.terraform.io/language/settings/backends/s3#s3-bucket-permissions)
 - read/write privileges to the state-locking [AWS DynamoDB Table](https://www.terraform.io/language/settings/backends/s3#dynamodb-table-permissions)
@@ -157,6 +156,10 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Type |
 |------|------|
+| [aws_kms_alias.primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_alias.secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_kms_replica_key.secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_replica_key) | resource |
 | [aws_ssm_parameter.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.common_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.eft_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -170,9 +173,10 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_ssm_parameter.pipeline_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.server_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.server_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_db_cluster_snapshot.seed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_cluster_snapshot) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_ssm_parameters_by_path.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_ssm_parameters_by_path.seed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
-| [external_external.eyaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
+| [external_external.yaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 <!-- END_TF_DOCS -->
