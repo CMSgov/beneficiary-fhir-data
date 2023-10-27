@@ -18,7 +18,6 @@ public final class MockDataSetProcessor implements DataSetProcessor {
   /** The list of data available events. */
   private final List<RifFilesEvent> dataEvents = new LinkedList<>();
 
-  /** {@inheritDoc} */
   @Override
   public void noDataToProcess() {
     noDataAvailableEvents++;
@@ -33,7 +32,6 @@ public final class MockDataSetProcessor implements DataSetProcessor {
     return noDataAvailableEvents;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void processDataSet(RifFilesEvent rifFilesEvent) {
     dataEvents.add(rifFilesEvent);

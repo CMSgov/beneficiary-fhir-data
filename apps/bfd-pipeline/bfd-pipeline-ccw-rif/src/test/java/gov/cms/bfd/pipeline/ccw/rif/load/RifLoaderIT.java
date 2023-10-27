@@ -1318,7 +1318,7 @@ public final class RifLoaderIT {
        * e.g. multiple claims or beneficiaries.
        */
       List<List<List<String>>> editedRifRecords =
-          records.getRecords().map(editor).collect(Collectors.toList()).block();
+          records.getRecords().map(editor).collectList().block();
 
       // Build a CSVFormat with the specific header needed for the RIF file type.
       String[] csvHeader =

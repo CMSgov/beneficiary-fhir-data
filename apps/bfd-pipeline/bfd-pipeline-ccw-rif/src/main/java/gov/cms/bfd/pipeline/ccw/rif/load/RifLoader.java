@@ -116,7 +116,7 @@ public final class RifLoader {
         taskQueueSize,
         taskQueueSize);
 
-    // Strictly speaking the Scheduler should manage the number of threads but we'll limit them
+    // Strictly speaking the Scheduler will manage the number of threads but we'll limit them
     // here as well just to be safe.
     final var executor =
         new BlockingThreadPoolExecutor(threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
@@ -1021,7 +1021,7 @@ public final class RifLoader {
    * @param fileEvent to base this new LoadedFile
    * @return the loadedFileId of the new LoadedFile record
    */
-  private long insertLoadedFile(RifFileEvent fileEvent) throws Exception {
+  private long insertLoadedFile(RifFileEvent fileEvent) {
     if (fileEvent == null || fileEvent.getFile().getFileType() == null) {
       throw new IllegalArgumentException();
     }

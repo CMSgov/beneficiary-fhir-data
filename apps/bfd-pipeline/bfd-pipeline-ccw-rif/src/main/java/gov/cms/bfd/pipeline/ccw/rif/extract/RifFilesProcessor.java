@@ -32,15 +32,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
 /** Contains services responsible for handling new RIF files. */
+@Slf4j
 public class RifFilesProcessor {
-  private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
-
   /** Column ID for the column that contains the action value in each CSV record. */
   private static final String RECORD_ACTION_COLUMN = "DML_IND";
 
@@ -291,7 +289,7 @@ public class RifFilesProcessor {
           String.format(
               "Parse error: lineNumber: %d message: %s errors: %s",
               csvRecords.get(0).getRecordNumber(), error.getMessage(), error.getErrors());
-      LOGGER.warn(
+      log.warn(
           "Parse error encountered near line number '{}'.", csvRecords.get(0).getRecordNumber());
       throw new InvalidRifValueException(message, error);
     }
@@ -325,8 +323,8 @@ public class RifFilesProcessor {
    * @param csvRecords the records
    */
   private static void trace(List<CSVRecord> csvRecords) {
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace(csvRecords.toString());
+    if (log.isTraceEnabled()) {
+      log.trace(csvRecords.toString());
     }
   }
 
@@ -336,8 +334,8 @@ public class RifFilesProcessor {
    * @param csvRecord the record
    */
   private static void trace(CSVRecord csvRecord) {
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace(csvRecord.toString());
+    if (log.isTraceEnabled()) {
+      log.trace(csvRecord.toString());
     }
   }
 }
