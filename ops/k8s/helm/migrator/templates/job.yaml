@@ -1,0 +1,17 @@
+{{- $imageSpec := (include "imageSpec" .) -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ .Values.appName }}
+        image: {{ $imageSpec }}
+        envFrom:
+        - secretRef:
+            name: {{ .Values.appName }}-secret
+      restartPolicy: Never
+  backoffLimit: 4

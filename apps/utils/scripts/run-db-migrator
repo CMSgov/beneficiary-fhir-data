@@ -34,6 +34,9 @@ repo_dir=$HOME/.m2/repository
 # Maximum heap size to use when running
 max_heap=512m
 
+# Location of kubernetes configurations.
+kubernetes_root=$BFD_PATH/ops/k8s/helm
+
 if [[ ! -d $project_dir ]] ; then
   echo ERROR: $project_dir does not exist. 1>&2
   echo Please set BFD_PATH to the root of the BFD source tree. 1>&2
@@ -73,6 +76,7 @@ install=true
 image_tag=
 image_name=bfd-db-migrator
 localstack_ip=localhost
+kubernetes=false
 
 usage() {
   script_name=`basename $0`
@@ -82,6 +86,7 @@ Runs BFD database migrator.  Use command line options to change behaviors.
 $script_name [options]
 -d db_host[:db_port]  Name of database host.  Optional :n uses port n.
 -i image_tag          Runs the migrator as a containing using the image with given tag.
+-k                    Run using kubernetes (using ops/k8s).
 -l localstack_ip      Localstack IP address (for bridge networking).
 -x                    Do not install latest version before running.
 -z                    Enable debugger support but start immediately.
@@ -93,7 +98,7 @@ Option defaults:
 EOF
 }
 
-while getopts "d:i:l:xzZh" option ; do
+while getopts "d:i:kl:xzZh" option ; do
   case $option in
   d) IFS=':' read h p <<<"$OPTARG"
      db_host=${h:=$db_host}
@@ -101,6 +106,7 @@ while getopts "d:i:l:xzZh" option ; do
      unset h p
      ;;
   i) image_tag=$OPTARG ; install=false ;;
+  k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
   l) localstack_ip=$OPTARG ;;
   x) install=false ;;
   z) debug_enabled=true ;;
@@ -131,7 +137,8 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
 {
   "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
 }
-EOF)
+EOF
+)
   export DB_MIGRATOR_SQS_QUEUE=migrator-status
   echo "ensuring migrator progress queue exists in SQS"
   aws --endpoint-url=$AWS_ENDPOINT sqs create-queue --queue-name=$DB_MIGRATOR_SQS_QUEUE
@@ -207,7 +214,7 @@ if [[ $install = "true" ]] ; then
     echo "ERROR: Missing jar file or lib directory.  Was zip file valid? (${zip_file})" 1>&2
     exit 1
   fi
-else
+elif [[ x$image_tag = x ]] && [[ x$kubernetes = xfalse ]] ; then
   # Just check to be sure we can run without installing and fail if we can't.
   jar_file=`echo ${exec_dir}/${target_name}-${project_version}.jar`
   if [[ ! -r $jar_file ]] || [[ ! -d $lib_dir ]] ; then
@@ -227,7 +234,22 @@ classpath="${jar_file}:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.migrator.app.MigratorApp"
 [ -n "${JAVA_HOME}" ] && java=${JAVA_HOME}/bin/java || java=java
 
-if [[ x$image_tag = x ]] ; then
+if [[ x$kubernetes = xtrue ]] ; then
+  cd $kubernetes_root
+  if [[ ! -r migrator/Chart.yaml ]] ; then
+    echo ERROR: unable to find kubernetes resource files in $kubernetes_root 1>&2
+    exit 1
+  fi
+  if [[ $run_mode = "rif" ]] ; then
+    pipeline_type="rif"
+  else
+    pipeline_type="rda"
+  fi
+  echo running kubernetes job
+  echo Ignore \"release: not found\" message if this is first time running in cluster.
+  helm -n dev uninstall migrator migrator || true
+  helm -n dev install migrator migrator
+elif [[ x$image_tag = x ]] ; then
   export CLASSPATH="$classpath"
   exec $java $ARGS $mainClass
 else

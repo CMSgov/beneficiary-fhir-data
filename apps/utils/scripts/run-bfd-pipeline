@@ -35,6 +35,9 @@ repo_dir=$HOME/.m2/repository
 # Maximum heap size to use when running
 max_heap=4g
 
+# Location of kubernetes configurations.
+kubernetes_root=$BFD_PATH/ops/k8s/helm
+
 if [[ ! -d $project_dir ]] ; then
   echo ERROR: $project_dir does not exist. 1>&2
   echo Please set BFD_PATH to the root of the BFD source tree. 1>&2
@@ -91,6 +94,7 @@ bene_queue_multiple=
 claim_threads=
 claim_batch_size=
 claim_queue_multiple=
+kubernetes=false
 
 usage() {
   cat 1>&2 <<EOF
@@ -102,6 +106,7 @@ $(basename $0) [options] run_mode
 -d db_host[:db_port]      Name of database host.  Optional :n uses port n.
 -i image_tag              Runs the pipeline as a container using the image with given tag.
 -I                        Enable RIF idempotency mode.
+-k                        Run using kubernetes (using ops/k8s).
 -l localstack_ip          Localstack IP address (for bridge networking).
 -r run_interval           Job execution interval in seconds.
 -R host:port:token        Host name, port, and token to call RDA API remote server.
@@ -138,7 +143,7 @@ Option defaults:
 EOF
 }
 
-while getopts "b:c:d:i:Il:r:R:s:t:xzZh-:" option ; do
+while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
   case $option in
   b) batch_size=$OPTARG ;;
   c) cache_size=$OPTARG ;;
@@ -149,6 +154,7 @@ while getopts "b:c:d:i:Il:r:R:s:t:xzZh-:" option ; do
      ;;
   i) image_tag=$OPTARG ; install=false ;;
   I) idempotency_mode=true ;;
+  k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
   l) localstack_ip=$OPTARG ;;
   r) interval_seconds=$OPTARG ;;
   R) IFS=':' read h p t <<<"$OPTARG"
@@ -215,7 +221,8 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
 {
   "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
 }
-EOF)
+EOF
+)
 fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
@@ -254,9 +261,6 @@ local)
     usage
     exit 1
   fi
-  # S3 prepends bucket name to override hostname and needs this special value to work.
-  # https://stackoverflow.com/questions/68034637/unknown-host-when-using-localstack-with-spring-cloud-aws-2-3
-  setvar S3_ENDPOINT_URI "http://s3.localhost.localstack.cloud:4566"
   ;;
 aws) ;;
 *) echo error: s3 mode must be '"local" or "aws"' 1>&2 ; usage ; exit 1 ;;
@@ -310,7 +314,7 @@ if [[ $install = "true" ]] ; then
     echo "ERROR: Missing jar file or lib directory.  Was zip file valid? (${zip_file})" 1>&2
     exit 1
   fi
-else
+elif [[ x$image_tag = x ]] && [[ x$kubernetes = xfalse ]] ; then
   # Just check to be sure we can run without installing and fail if we can't.
   jar_file=`echo ${exec_dir}/${target_name}-${project_version}.jar`
   if [[ ! -r $jar_file ]] || [[ ! -d $lib_dir ]] ; then
@@ -380,7 +384,7 @@ case $run_mode in
     setvar RDA_GRPC_SERVER_TYPE "InProcess"
     setvar RDA_GRPC_INPROC_SERVER_MODE "Random"
     setvar RDA_GRPC_INPROC_SERVER_RANDOM_SEED "42"
-    setvar RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS "25000"
+    setvar RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS "2500"
     ;;
   rda)
     setvar RDA_JOB_ENABLED "true"
@@ -406,7 +410,22 @@ classpath="${jar_file}:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.pipeline.app.PipelineApplication"
 [ -n "${JAVA_HOME}" ] && java=${JAVA_HOME}/bin/java || java=java
 
-if [[ x$image_tag = x ]] ; then
+if [[ x$kubernetes = xtrue ]] ; then
+  cd $kubernetes_root
+  if [[ ! -r pipeline/Chart.yaml ]] ; then
+    echo ERROR: unable to find kubernetes resource files in $kubernetes_root 1>&2
+    exit 1
+  fi
+  if [[ $run_mode = "rif" ]] ; then
+    pipeline_type="rif"
+  else
+    pipeline_type="rda"
+  fi
+  echo running kubernetes job
+  echo Ignore \"release: not found\" message if this is first time running in cluster.
+  helm -n dev uninstall pipeline-$pipeline_type || true
+  helm -n dev install pipeline-$pipeline_type pipeline --set pipelineType=$pipeline_type
+elif [[ x$image_tag = x ]] ; then
   echo running application directly
   export CLASSPATH="$classpath"
   exec $java $ARGS $mainClass
