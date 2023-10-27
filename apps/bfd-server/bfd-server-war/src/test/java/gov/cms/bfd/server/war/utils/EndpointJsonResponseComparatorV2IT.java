@@ -208,7 +208,10 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
   }
 
   /**
-   * Generates the "golden" files, i.e. the approved responses to compare to.
+   * Generates the "golden" files, i.e. the approved responses to compare to. Purpose of this
+   * testing is to perform regression testing against the "Golden Beneficiary Data" at a specific
+   * point in time. It is important to note that this testing focuses on checking for regressions
+   * against the data at that particular moment, and not necessarily against data artifacts.
    *
    * @param endpointId the endpoint id
    * @param endpointOperation the endpoint operation
