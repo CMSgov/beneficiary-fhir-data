@@ -1,18 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
-readonly SCRIPT_DIR
-
-REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel)"
-readonly REPO_ROOT
-
 checkSecretFilesForPlainText() {
   echo 'Verifying secret files are not in plaintext...'
-  cd "$REPO_ROOT"
   set +e
   # read list of files containing secrets
-  IFS=$'\n' read -d '' -r -a secrets <"$REPO_ROOT/.github/resources/.sensitive-files"
+  IFS=$'\n' read -d '' -r -a secrets <".github/resources/.sensitive-files"
 
   # make list of files to be committed by printing out a newline
   # separated list of files staged for commit to a temporary file
