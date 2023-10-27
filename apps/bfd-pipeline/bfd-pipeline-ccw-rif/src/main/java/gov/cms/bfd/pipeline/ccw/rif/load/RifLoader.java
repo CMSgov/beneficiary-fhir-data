@@ -182,6 +182,9 @@ public final class RifLoader {
           final RifFileType fileType = dataToLoad.getSourceEvent().getFile().getFileType();
           final LoadAppOptions.PerformanceSettings performanceSettings =
               options.selectPerformanceSettingsForFileType(fileType);
+          final int batchPrefetch =
+              performanceSettings.getLoaderThreads()
+                  * performanceSettings.getTaskQueueSizeMultiple();
 
           final MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
           final Timer.Context timerDataSetFile =
@@ -212,7 +215,8 @@ public final class RifLoader {
                       processBatch(batch, loadedFileId)
                           // process each batch on a thread from our scheduler
                           .subscribeOn(scheduler),
-                  performanceSettings.getLoaderThreads())
+                  performanceSettings.getLoaderThreads(),
+                  batchPrefetch)
               // clean up when the flux terminates (either by error or completion)
               .doFinally(
                   ignored -> {

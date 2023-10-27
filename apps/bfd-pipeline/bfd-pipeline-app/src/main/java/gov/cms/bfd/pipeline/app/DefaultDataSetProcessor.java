@@ -58,7 +58,7 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       Slf4jReporter dataSetFileMetricsReporter =
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
-      dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
+      dataSetFileMetricsReporter.start(15, TimeUnit.SECONDS);
 
       try {
         final RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
