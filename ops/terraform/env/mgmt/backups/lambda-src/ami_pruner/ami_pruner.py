@@ -215,7 +215,7 @@ def find_candidates(filter, default_filter=DEFAULT_AMI_FILTER) -> list:
             for image in page['Images']:
                 # skip if no tags
                 if 'Tags' not in image:
-                    logger.warning(f"Ignoring candidate ami {image['Name']} because it has no tags.. prune manually")
+                    logger.warning(f"Ignoring {image['Name']} due to anomoly (ami has no tags).. please review manually")
                     continue
                 tags = [tag['Key'] for tag in image['Tags']]
                 # skip if tagged with with a KEEP tag
@@ -252,16 +252,22 @@ def prune_candidates(candidates) -> (int, int):
     """
     deregistered = []
     deleted = []
+    if len(candidates) == 0:
+        return 0, 0
 
     for ami in candidates:
-        # get the Name from the ami tags
-        tag_name = [tag['Value'] for tag in ami['Tags'] if tag['Key'] == 'Name'].pop()
-        if deregister_ami(ami['ImageId'], tag_name or ''):
+        # deregister the ami
+        tag_name = [tag['Value'] for tag in ami['Tags'] if tag['Key'] == 'Name']
+        tag_name = tag_name[0] if len(tag_name) > 0 else ''
+        if deregister_ami(ami['ImageId'], tag_name):
             deregistered.append(ami)
-            for block_device in ami['BlockDeviceMappings']:
-                if 'Ebs' in block_device:
-                    if delete_associated_snapshot(ami['ImageId'], block_device['Ebs']['SnapshotId']):
-                        deleted.append(block_device['Ebs']['SnapshotId'])
+        else:
+            continue
+        # delete associated snapshots
+        for block_device in ami['BlockDeviceMappings']:
+            if 'Ebs' in block_device:
+                if delete_associated_snapshot(ami['ImageId'], block_device['Ebs']['SnapshotId']):
+                    deleted.append(block_device['Ebs']['SnapshotId'])
 
     return len(deregistered), len(deleted)
 
@@ -293,7 +299,7 @@ def app_candidates() -> list:
                     app_pool[name] = []
                 app_pool[name].append(ami)
             else:
-                logger.warning(f"Not including {ami['ImageId']} in an app pool because it has no name.. prune manually")
+                logger.warning(f"Ignoring {ami['ImageId']} due to anomoly (ami has no name).. prune manually")
                 continue
 
     # add them to the candidate pool
@@ -324,8 +330,13 @@ def app_candidates() -> list:
         logger.info(f"Checking launch template {template['LaunchTemplateName']} amis...")
 
         # $Latest and $Default
-        latest = launch_template_versions(template['LaunchTemplateId'], '$Latest').pop()['LaunchTemplateData']
-        default = launch_template_versions(template['LaunchTemplateId'], '$Default').pop()['LaunchTemplateData']
+        tmpl_id = template['LaunchTemplateId']
+        latest_ver = f"{template['LatestVersionNumber']}"
+        default_ver = f"{template['DefaultVersionNumber']}"
+        latest = launch_template_versions(tmpl_id, latest_ver)[0]['LaunchTemplateData']
+        default = launch_template_versions(tmpl_id, default_ver)[0]['LaunchTemplateData']
+        logger.info(f"Ignoring {tmpl_id} launch template ami: {latest['ImageId']} (latest version)")
+        logger.info(f"Ignoring {tmpl_id} launch tempalte ami: {default['ImageId']} (default version)")
         candidates = [ami for ami in candidates if ami['ImageId'] != latest['ImageId']]
         candidates = [ami for ami in candidates if ami['ImageId'] != default['ImageId']]
 
