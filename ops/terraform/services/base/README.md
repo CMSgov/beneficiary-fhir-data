@@ -21,11 +21,11 @@ Each environment is configured in a terraform workspace, named for the environme
 Environments can generally be classified as _established_ or _ephemeral_.
 
 ### Established Environments
-There are four, known _established environments_ (`local.established_envs`) with their respective configuration coming from appropriately named, environment-specific yaml and eyaml files found in the aforementioned values directory.
+There are four, known _established environments_ (`local.established_envs`) with their respective configuration coming from appropriately named, environment-specific yaml files found in the aforementioned values directory.
 Practically speaking, this module configures the path-to-production established environments of `test`, `prod-sbx`, and `prod`.
 These environments are not only established but they endure: they are **not** ephemeral nor temporary.
 
-Each of the established environments has specific yaml and eyaml files in the values directory specific to their configuration.
+Each of the established environments has specific yaml files in the values directory specific to their configuration.
 These environments may act as a _seed_ or source environment for ephemeral environment creation described below.
 
 ### Ephemeral Environments
@@ -72,25 +72,27 @@ As of mid-May 2023, technical controls for standards enforcement are still forth
 
 ### Usage and User Additions
 
-If the below [prerequisites](#prerequisites) are met, users will _generally_ interact with the environment-specific configuration by using one or more scripts in the [scripts](./scripts) directory for those encrypted values (stored in `.eyaml`), otherwise a text-editor of their choosing when adjusting plain text values (stored in `.yaml`).
+If the below [prerequisites](#prerequisites) are met, users will _generally_ interact with the environment-specific configuration by using one or more scripts in the [scripts](./scripts) directory for those encrypted values, otherwise a text-editor of their choosing when adjusting plain text values.
 
-#### Viewing with read-and-decrypt-eyaml.sh
+#### Viewing with read-and-decrypt-yaml.sh
 
 **WARNING:** This will present unencrypted, sensitive data to stdout. Do not execute this while sharing your screen during presentations or pairing opportunities.
 
-To see the raw, _untemplated_ configuration as terraform does through via external data source for e.g. `./values/prod-sbx.eyaml`, execute the following from the module root directory:
+To see the raw, _untemplated_ configuration as terraform does through via external data source for e.g. `./values/prod-sbx.yaml`, execute the following from the module root directory:
 
 ```sh
-scripts/read-and-decrypt-eyaml.sh prod-sbx
+scripts/read-and-decrypt-yaml.sh prod-sbx
 ```
 
-#### Editing with edit-eyaml.sh and Updating with terraform
-To edit the encrypted values under e.g. `./values/prod-sbx.eyaml` use the following steps:
+#### Editing with edit-yaml.sh and Updating with terraform
+
+To edit the encrypted values under e.g. `./values/prod-sbx.yaml` use the following steps:
+
 1. Select the appropriate workspace: `terraform workspace select prod-sbx`
 2. Ensure a familiar editor is defined in your environment, e.g. `export EDITOR=vim`
-3. Run the edit script from the module root directory: `scripts/edit-eyaml.sh prod-sbx`
+3. Run the edit script from the module root directory: `scripts/edit-yaml.sh prod-sbx`
 4. Save and quit after making any desired changes
-5. Review updates using the read script module root directory: `scripts/read-and-decrypt-eyaml.sh prod-sbx`
+5. Review updates using the read script module root directory: `scripts/read-and-decrypt-yaml.sh prod-sbx`
 6. Ensure terraform can successfully plan by running `terraform plan`
 7. Commit your changes to an appropriate feature branch
 8. Solicit feedback by pull request
