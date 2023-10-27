@@ -27,3 +27,9 @@ output "default_tags" {
   })
   sensitive = false
 }
+
+output "latest_bfd_release" {
+  description = "This is the latest CMSgov/beneficiary-fhir-data release. Excludes Pre-Releases."
+  sensitive   = false
+  value       = try(jsondecode(data.http.latest_bfd_release.response_body).tag_name, null)
+}

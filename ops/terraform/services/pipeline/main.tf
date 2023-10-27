@@ -6,11 +6,12 @@ module "terraservice" {
 }
 
 locals {
-  default_tags     = module.terraservice.default_tags
-  env              = module.terraservice.env
-  seed_env         = module.terraservice.seed_env
-  is_ephemeral_env = module.terraservice.is_ephemeral_env
-  is_prod          = local.env == "prod"
+  default_tags       = module.terraservice.default_tags
+  env                = module.terraservice.env
+  seed_env           = module.terraservice.seed_env
+  is_ephemeral_env   = module.terraservice.is_ephemeral_env
+  is_prod            = local.env == "prod"
+  latest_bfd_release = module.terraservice.latest_bfd_release
 
   account_id        = data.aws_caller_identity.current.account_id
   layer             = "data"
