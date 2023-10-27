@@ -98,27 +98,36 @@ resource "aws_iam_role_policy" "ami_pruner" {
         Effect = "Allow"
         Action = [
           "ec2:DescribeImages",
-          "ec2:DeregisterImage",
           "ec2:DescribeSnapshots",
-          "ec2:DeleteSnapshot",
           "ec2:DescribeInstances",
           "ec2:DescribeVolumes",
           "ec2:DescribeTags",
+          "ec2:DescribeLaunchTemplate*",
         ]
         Resource = [
-          "arn:aws:ec2:${local.region}:${local.account_id}:*",
+          "*",
         ]
-        Sid = "AllowAmiPruning"
+        Sid = "AllowDescribe"
       },
       {
         Effect = "Allow"
         Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters",
-          "ssm:GetParameterByPath",
+          "ec2:DeregisterImage",
+          "ec2:DeleteSnapshot",
         ]
         Resource = [
-          "arn:aws:ssm:${local.region}:${local.account_id}:parameter${local.ami_pruner_cfg.retention_policy_ssm_path}/*",
+          "arn:aws:ec2:${local.region}::snapshot/*",
+          "arn:aws:ec2:${local.region}::image/*"
+        ]
+        Sid = "AllowDeregAndDelete"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParametersByPath",
+        ]
+        Resource = [
+          "arn:aws:ssm:${local.region}:${local.account_id}:parameter${local.ami_pruner_cfg.retention_policy_ssm_path}",
         ]
         Sid = "AllowRetentionPolicyLookup"
       },
