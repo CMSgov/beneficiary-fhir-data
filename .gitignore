@@ -8,6 +8,9 @@
 !.sensitive-files
 !.terraform-docs.yml
 
+# Ignore everything within top-level dist directory
+/dist/**/*
+
 # OSX system files
 .DS_Store
 
