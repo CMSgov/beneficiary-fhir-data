@@ -41,6 +41,10 @@ locals {
   # environment, otherwise, if the env is established, this Terraservice will encrypt all sensitive
   # SSM configuration with the primary key defined within this Terraservice
   kms_key_id = local.is_ephemeral_env ? one(data.aws_kms_key.cmk[*].arn) : one(aws_kms_key.primary[*].arn)
+
+  # Normal precedence. Values stored in YAML files.
+  yaml_env = local.is_ephemeral_env ? "ephemeral" : local.env
+  yaml     = data.external.yaml.result
 }
 
 data "aws_caller_identity" "current" {}
@@ -49,6 +53,10 @@ data "aws_kms_key" "cmk" {
   count = local.is_ephemeral_env ? 1 : 0
 
   key_id = local.kms_key_alias
+}
+
+data "external" "yaml" {
+  program = ["${path.module}/scripts/read-and-decrypt-yaml.sh", local.yaml_env, local.kms_key_id]
 }
 
 resource "aws_kms_key" "primary" {

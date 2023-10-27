@@ -21,11 +21,11 @@ Each environment is configured in a terraform workspace, named for the environme
 Environments can generally be classified as _established_ or _ephemeral_.
 
 ### Established Environments
-There are four, known _established environments_ (`local.established_envs`) with their respective configuration coming from appropriately named, environment-specific yaml and eyaml files found in the aforementioned values directory.
+There are four, known _established environments_ (`local.established_envs`) with their respective configuration coming from appropriately named, environment-specific yaml files found in the aforementioned values directory.
 Practically speaking, this module configures the path-to-production established environments of `test`, `prod-sbx`, and `prod`.
 These environments are not only established but they endure: they are **not** ephemeral nor temporary.
 
-Each of the established environments has specific yaml and eyaml files in the values directory specific to their configuration.
+Each of the established environments has specific yaml files in the values directory specific to their configuration.
 These environments may act as a _seed_ or source environment for ephemeral environment creation described below.
 
 ### Ephemeral Environments
@@ -56,14 +56,14 @@ Between storing JSON strings in the yaml context here and being fetching those v
 As of mid-May 2023, technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
 - All workspaces must end in one of the three path-to-production established environments of `test`, `prod-sbx`, or `prod`
 - Ephemeral environment workspace should generally be of a pattern similar to `<jira-id>-<env>`, e.g. `2544-test`, `2544-prod-sbx`, `2554-prod`.
-- hierarchies or paths generally conform to a 4 or 5 tuple prefix and leaf format, e.g.
-  - `/bfd/${env}/${group}/${sensitivity}/${leaf}`
-  - `/bfd/${env}/${group}/${subgroup}/${sensitivity}/${leaf}`
+- nested hierarchies must conform to one of the following (nested keys within YAML transformed into paths):
+  - `/bfd/${env}/${group}/${leaf}/...`
+  - `/bfd/${env}/${group}/${subgroup}/${leaf}/...`
 - `${env}` is typically one of `test`, `prod-sbx`, `prod` or ephemeral format `<jira-id>-<env>`, e.g. `2544-test`
 - `${group}` must be one of the supported groups: `common`, `migrator`, `pipeline`, `server`
 - `${subgroup}` is optional, as of January 2023, examples include `ccw`, `rda`, `shared`
-- `${sensitivity}` must be one of `sensitive` when encrypted or `nonsensitive` when in plain text
 - `${leaf}` _should_ be lower_snake_case formatted
+- `...` represents additional hierarchies that are user-defined
 - if the hierarchy should match the _regex_ `/ami.id/`, the value [**must** point to an existing Amazon Machine Image](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-ec2-aliases.html#parameter-ami-validation)
 - only string-formatted values are accepted
 - empty strings, i.e '' are not supported
@@ -72,25 +72,27 @@ As of mid-May 2023, technical controls for standards enforcement are still forth
 
 ### Usage and User Additions
 
-If the below [prerequisites](#prerequisites) are met, users will _generally_ interact with the environment-specific configuration by using one or more scripts in the [scripts](./scripts) directory for those encrypted values (stored in `.eyaml`), otherwise a text-editor of their choosing when adjusting plain text values (stored in `.yaml`).
+If the below [prerequisites](#prerequisites) are met, users will _generally_ interact with the environment-specific configuration by using one or more scripts in the [scripts](./scripts) directory for those encrypted values, otherwise a text-editor of their choosing when adjusting plain text values.
 
-#### Viewing with read-and-decrypt-eyaml.sh
+#### Viewing with read-and-decrypt-yaml.sh
 
 **WARNING:** This will present unencrypted, sensitive data to stdout. Do not execute this while sharing your screen during presentations or pairing opportunities.
 
-To see the raw, _untemplated_ configuration as terraform does through via external data source for e.g. `./values/prod-sbx.eyaml`, execute the following from the module root directory:
+To see the raw, _untemplated_ configuration as terraform does through via external data source for e.g. `./values/prod-sbx.yaml`, execute the following from the module root directory:
 
 ```sh
-scripts/read-and-decrypt-eyaml.sh prod-sbx
+scripts/read-and-decrypt-yaml.sh prod-sbx
 ```
 
-#### Editing with edit-eyaml.sh and Updating with terraform
-To edit the encrypted values under e.g. `./values/prod-sbx.eyaml` use the following steps:
+#### Editing with edit-yaml.sh and Updating with terraform
+
+To edit the encrypted values under e.g. `./values/prod-sbx.yaml` use the following steps:
+
 1. Select the appropriate workspace: `terraform workspace select prod-sbx`
 2. Ensure a familiar editor is defined in your environment, e.g. `export EDITOR=vim`
-3. Run the edit script from the module root directory: `scripts/edit-eyaml.sh prod-sbx`
+3. Run the edit script from the module root directory: `scripts/edit-yaml.sh prod-sbx`
 4. Save and quit after making any desired changes
-5. Review updates using the read script module root directory: `scripts/read-and-decrypt-eyaml.sh prod-sbx`
+5. Review updates using the read script module root directory: `scripts/read-and-decrypt-yaml.sh prod-sbx`
 6. Ensure terraform can successfully plan by running `terraform plan`
 7. Commit your changes to an appropriate feature branch
 8. Solicit feedback by pull request
@@ -99,8 +101,7 @@ To edit the encrypted values under e.g. `./values/prod-sbx.eyaml` use the follow
 ### Prerequisites
 In addition to the [Requirements (below)](#requirements), you (or the automation) will need:
 - software packages supporting awscli, yq, and jq
-- sufficient access to the `/bfd/mgmt/jenkins/sensitive` hierarchy for ansible-vault password access
-- `ansible` installed with `ansible-vault` available along your path (as of this writing, `ansible ~> 2.9`)
+- sufficient access to the various Multi-Region KMS Keys used for encrypting configuration
 - sufficient AWS IAM privileges for the AWS provider [Resources and Date Sources (below)](#resources)
 - access outlined for the remote [AWS S3 Backend](https://www.terraform.io/language/settings/backends/s3#s3-bucket-permissions)
 - read/write privileges to the state-locking [AWS DynamoDB Table](https://www.terraform.io/language/settings/backends/s3#dynamodb-table-permissions)
@@ -157,6 +158,10 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Type |
 |------|------|
+| [aws_kms_alias.primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_alias.secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_kms_replica_key.secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_replica_key) | resource |
 | [aws_ssm_parameter.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.common_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.eft_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -170,9 +175,10 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_ssm_parameter.pipeline_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.server_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.server_sensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_db_cluster_snapshot.seed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_cluster_snapshot) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_ssm_parameters_by_path.common_nonsensitive](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_ssm_parameters_by_path.seed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
-| [external_external.eyaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
+| [external_external.yaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 <!-- END_TF_DOCS -->
