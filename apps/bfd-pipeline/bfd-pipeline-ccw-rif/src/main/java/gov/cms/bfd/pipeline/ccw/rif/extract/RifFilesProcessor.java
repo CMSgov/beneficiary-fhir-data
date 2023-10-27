@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RecordAction;
+import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
@@ -25,10 +26,8 @@ import gov.cms.bfd.model.rif.entities.PartDEventParser;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimParser;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.model.rif.parse.RifParsingUtils;
-import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.model.dsl.codegen.library.DataTransformer.TransformationException;
 import gov.cms.model.dsl.codegen.library.RifObjectWrapper;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -38,8 +37,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
-public class RifFileParsers {
-  private static final Logger LOGGER = LoggerFactory.getLogger(RifFileParsers.class);
+/** Contains services responsible for handling new RIF files. */
+public class RifFilesProcessor {
+  private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
+
+  /** Column ID for the column that contains the action value in each CSV record. */
   private static final String RECORD_ACTION_COLUMN = "DML_IND";
 
   /**
@@ -50,47 +52,31 @@ public class RifFileParsers {
    * @return the record from the rif file
    */
   public RifFileRecords produceRecords(RifFileEvent rifFileEvent) {
-    return new RifFileRecords(rifFileEvent, parseFile(rifFileEvent));
+    RifFile rifFile = rifFileEvent.getFile();
+    RifFileParser rifFileParser =
+        switch (rifFile.getFileType()) {
+          case BENEFICIARY -> beneficiaryEventParser(rifFileEvent);
+          case BENEFICIARY_HISTORY -> beneficiaryHistoryEventParser(rifFileEvent);
+          case CARRIER -> carrierClaimParser(rifFileEvent);
+          case DME -> dmeClaimParser(rifFileEvent);
+          case HHA -> hhaClaimParser(rifFileEvent);
+          case HOSPICE -> hospiceClaimParser(rifFileEvent);
+          case INPATIENT -> inpatientClaimParser(rifFileEvent);
+          case OUTPATIENT -> outpatientClaimParser(rifFileEvent);
+          case PDE -> partDEventParser(rifFileEvent);
+          case SNF -> snfClaimParser(rifFileEvent);
+        };
+    Flux<RifRecordEvent<?>> records = rifFileParser.parseRifFile(rifFile);
+    return new RifFileRecords(rifFileEvent, records);
   }
 
-  public Flux<RifRecordEvent<?>> parseFile(RifFileEvent fileEvent) {
-    return Flux.using(
-        // creates a CSVParser for new subscriber
-        () -> RifParsingUtils.createCsvParser(fileEvent.getFile()),
-        // creates flux for subscriber to receive parsed events
-        csvParser -> {
-          RifFileParser rifParser = parserForFile(fileEvent);
-          return Flux.fromIterable(csvParser)
-              .flatMap(rifParser::next)
-              .concatWith(Flux.defer(rifParser::finish));
-        },
-        // closes the CSVParser when flux is unsubscribed for any reason
-        // we can't do anything with the exception if one is thrown so we just log it
-        csvParser -> {
-          try {
-            csvParser.close();
-          } catch (IOException ex) {
-            LOGGER.error("unable to close RIF file {}", fileEvent.getFile(), ex);
-          }
-        });
-  }
-
-  public RifFileParser parserForFile(RifFileEvent fileEvent) {
-    return switch (fileEvent.getFile().getFileType()) {
-      case BENEFICIARY -> beneficiaryEventParser(fileEvent);
-      case BENEFICIARY_HISTORY -> beneficiaryHistoryEventParser(fileEvent);
-      case CARRIER -> carrierClaimParser(fileEvent);
-      case DME -> dmeClaimParser(fileEvent);
-      case HHA -> hhaClaimParser(fileEvent);
-      case HOSPICE -> hospiceClaimParser(fileEvent);
-      case INPATIENT -> inpatientClaimParser(fileEvent);
-      case OUTPATIENT -> outpatientClaimParser(fileEvent);
-      case PDE -> partDEventParser(fileEvent);
-      case SNF -> snfClaimParser(fileEvent);
-    };
-  }
-
-  public static RifFileParser beneficiaryEventParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link Beneficiary}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser beneficiaryEventParser(RifFileEvent fileEvent) {
     final var parser = new BeneficiaryParser();
     return new RifFileParser.Simple(
         csvRecord -> {
@@ -112,7 +98,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser beneficiaryHistoryEventParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link BeneficiaryHistory}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser beneficiaryHistoryEventParser(RifFileEvent fileEvent) {
     final var parser = new BeneficiaryHistoryParser();
     return new RifFileParser.Simple(
         csvRecord -> {
@@ -129,7 +121,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser partDEventParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link PartDEvent}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser partDEventParser(RifFileEvent fileEvent) {
     final var parser = new PartDEventParser();
     return new RifFileParser.Simple(
         csvRecord -> {
@@ -142,7 +140,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser inpatientClaimParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link InpatientClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser inpatientClaimParser(RifFileEvent fileEvent) {
     final var parser = new InpatientClaimParser();
     return new RifFileParser.Grouping(
         RifFileType.INPATIENT.getIdColumn().name(),
@@ -155,7 +159,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser outpatientClaimParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link OutpatientClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser outpatientClaimParser(RifFileEvent fileEvent) {
     final var parser = new OutpatientClaimParser();
     return new RifFileParser.Grouping(
         RifFileType.OUTPATIENT.getIdColumn().name(),
@@ -168,7 +178,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser carrierClaimParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link CarrierClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser carrierClaimParser(RifFileEvent fileEvent) {
     final var parser = new CarrierClaimParser();
     return new RifFileParser.Grouping(
         RifFileType.CARRIER.getIdColumn().name(),
@@ -181,7 +197,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser snfClaimParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link SNFClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser snfClaimParser(RifFileEvent fileEvent) {
     final var parser = new SNFClaimParser();
     return new RifFileParser.Grouping(
         RifFileType.SNF.getIdColumn().name(),
@@ -194,7 +216,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser hospiceClaimParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link HospiceClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser hospiceClaimParser(RifFileEvent fileEvent) {
     final var parser = new HospiceClaimParser();
     return new RifFileParser.Grouping(
         RifFileType.HOSPICE.getIdColumn().name(),
@@ -207,7 +235,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser hhaClaimParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link HHAClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser hhaClaimParser(RifFileEvent fileEvent) {
     final var parser = new HHAClaimParser();
     return new RifFileParser.Grouping(
         RifFileType.HHA.getIdColumn().name(),
@@ -220,7 +254,13 @@ public class RifFileParsers {
         });
   }
 
-  public static RifFileParser dmeClaimParser(RifFileEvent fileEvent) {
+  /**
+   * Creates a {@link RifFileParser} that creates {@link DMEClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser dmeClaimParser(RifFileEvent fileEvent) {
     final var parser = new DMEClaimParser();
     return new RifFileParser.Grouping(
         RifFileType.DME.getIdColumn().name(),
@@ -233,10 +273,20 @@ public class RifFileParsers {
         });
   }
 
+  /**
+   * Calls the provided parser lambda function with the given list of {@link CSVRecord}s to produce
+   * an object. {@link TransformationException}s are converted into {@link
+   * InvalidRifValueException}s.
+   *
+   * @param csvRecords records to pass to the lambda function
+   * @param parser the lambda function that does the parsing
+   * @return the object returned by the lambda function
+   * @param <T> the type of object returned by the lambda function
+   */
   private static <T> T parse(List<CSVRecord> csvRecords, Function<RifObjectWrapper, T> parser) {
     try {
       return parser.apply(new RifObjectWrapper(csvRecords));
-    } catch (DataTransformer.TransformationException error) {
+    } catch (TransformationException error) {
       String message =
           String.format(
               "Parse error: lineNumber: %d message: %s errors: %s",
@@ -247,23 +297,47 @@ public class RifFileParsers {
     }
   }
 
+  /**
+   * Extracts the appropriate {@link RecordAction} from the given record.
+   *
+   * @param csvRecord the record
+   * @return the action
+   */
   @Nonnull
   private static RecordAction parseRecordAction(CSVRecord csvRecord) {
     return RecordAction.match(csvRecord.get(RECORD_ACTION_COLUMN));
   }
 
+  /**
+   * Extracts the appropriate {@link RecordAction} from the first record.
+   *
+   * @param csvRecords the records
+   * @return the action
+   */
   @Nonnull
   private static RecordAction parseRecordAction(List<CSVRecord> csvRecords) {
     return parseRecordAction(csvRecords.get(0));
   }
 
+  /**
+   * Logs all of the records if trace logging is enabled.
+   *
+   * @param csvRecords the records
+   */
   private static void trace(List<CSVRecord> csvRecords) {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace(csvRecords.toString());
     }
   }
 
+  /**
+   * Logs the record if trace logging is enabled.
+   *
+   * @param csvRecord the record
+   */
   private static void trace(CSVRecord csvRecord) {
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecord.toString());
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace(csvRecord.toString());
+    }
   }
 }

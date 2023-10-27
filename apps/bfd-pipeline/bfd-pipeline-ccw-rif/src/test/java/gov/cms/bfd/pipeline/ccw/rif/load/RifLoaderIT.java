@@ -30,7 +30,7 @@ import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadPreValidateInterface;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadPreValidateSynthea;
 import gov.cms.bfd.pipeline.ccw.rif.extract.LocalRifFile;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -1303,7 +1303,7 @@ public final class RifLoaderIT {
       RifFile inputFile, Function<RifRecordEvent<?>, List<List<String>>> editor) {
     try {
       Path editedTempFile = Files.createTempFile("edited-sample-rif", ".rif");
-      RifFileParsers rifProcessor = new RifFileParsers();
+      RifFilesProcessor rifProcessor = new RifFilesProcessor();
       RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), false, inputFile);
       RifFileEvent rifFileEvent = rifFilesEvent.getFileEvents().get(0);
       RifFileRecords records = rifProcessor.produceRecords(rifFileEvent);
@@ -1431,7 +1431,7 @@ public final class RifLoaderIT {
     LOGGER.info("Loading RIF files: '{}'...", sampleName);
 
     // Create the processors that will handle each stage of the pipeline.
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifLoader loader =
         new RifLoader(options, PipelineTestUtils.get().getPipelineApplicationState());
 
@@ -1462,7 +1462,7 @@ public final class RifLoaderIT {
   }
 
   /**
-   * Runs the {@link RifFileParsers} to extract RIF records from the specified {@link
+   * Runs the {@link RifFilesProcessor} to extract RIF records from the specified {@link
    * StaticRifResource}s, and then calls {@link #assertAreInDatabase(LoadAppOptions,
    * EntityManagerFactory, Flux)} on each record to verify that it's present in the database.
    * Basically: this is a decent smoke test to verify that {@link RifLoader} did what it should have
@@ -1473,7 +1473,7 @@ public final class RifLoaderIT {
   private void verifyRecordPrimaryKeysPresent(List<StaticRifResource> sampleResources) {
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
 
     /*

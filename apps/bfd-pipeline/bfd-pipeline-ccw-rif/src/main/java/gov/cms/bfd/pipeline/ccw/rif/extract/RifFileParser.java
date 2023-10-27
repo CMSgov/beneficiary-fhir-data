@@ -1,6 +1,10 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
+import gov.cms.bfd.model.rif.RifFile;
+import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.model.rif.parse.RifParsingUtils;
+import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,40 +24,32 @@ import reactor.core.publisher.Flux;
 @ThreadSafe
 public abstract class RifFileParser {
   /**
-   * Accepts the next record and returns a (possibly empty) {@link Flux} or parsed records.
+   * Creates a new {@link Flux} that, when subscribed to, opens the file, parses RIF data, and
+   * publishes the resulting {@link RifRecordEvent} objects.
    *
-   * @param record next CSV record
-   * @return resulting parsed records
+   * @param rifFile the file to parse
+   * @return flux that publishes parsed objects
    */
-  public abstract Flux<RifRecordEvent<?>> next(CSVRecord record);
+  public abstract Flux<RifRecordEvent<?>> parseRifFile(RifFile rifFile);
 
   /**
-   * Called after all records have been processed to return a (possibly empty) {@link Flux} of
-   * parsed records. Allows any previously buffered records to be combined into a final result.
-   *
-   * @return resulting parsed records
+   * Implementation that parses each individual record into a {@link RifRecordEvent} using a lambda
+   * function.
    */
-  public abstract Flux<RifRecordEvent<?>> finish();
-
-  /** Implementation that parses each individual record into a {@link RifRecordEvent}. */
-  @ThreadSafe
   @AllArgsConstructor
   public static class Simple extends RifFileParser {
     /** Lambda used to parse a single {@link CSVRecord} into a {@link RifRecordEvent}. */
     private final ThrowingFunction<RifRecordEvent<?>, CSVRecord, Exception> parser;
 
     @Override
-    public synchronized Flux<RifRecordEvent<?>> next(CSVRecord record) {
-      try {
-        return Flux.just(parser.apply(record));
-      } catch (Exception ex) {
-        return Flux.error(ex);
-      }
-    }
-
-    @Override
-    public synchronized Flux<RifRecordEvent<?>> finish() {
-      return Flux.empty();
+    public Flux<RifRecordEvent<?>> parseRifFile(RifFile rifFile) {
+      return FluxUtils.fromAutoCloseable(
+          // creates a CSVParser for new subscriber
+          () -> RifParsingUtils.createCsvParser(rifFile),
+          // creates flux for subscriber to receive parsed events
+          csvParser -> Flux.fromIterable(csvParser).map(FluxUtils.wrapFunction(parser)),
+          // used in log message if closing the CSVParser fails
+          rifFile.getDisplayName());
     }
   }
 
@@ -61,7 +57,6 @@ public abstract class RifFileParser {
    * Implementation that parses groups of consecutive records that have the same value in a given
    * column into a {@link RifRecordEvent} using a lambda function.
    */
-  @ThreadSafe
   @RequiredArgsConstructor
   public static class Grouping extends RifFileParser {
     /** The name of the column to group by. */
@@ -70,68 +65,34 @@ public abstract class RifFileParser {
     /** Lambda used to parse one or more {@link CSVRecord}s into a {@link RifRecordEvent}. */
     private final ThrowingFunction<RifRecordEvent<?>, List<CSVRecord>, Exception> parser;
 
-    /** Accumulates lines between calls to {@link #next}. */
-    @GuardedBy("synchronized")
-    private final List<CSVRecord> recordBuffer = new ArrayList<>();
-
-    /** Value of the grouping column for the current group or null if we have no group. */
-    @GuardedBy("synchronized")
-    @Nullable
-    private String currentColumn;
-
     @Override
-    public synchronized Flux<RifRecordEvent<?>> next(CSVRecord record) {
-      final String newColumn = record.get(groupingColumn);
-      Flux<RifRecordEvent<?>> result = Flux.empty();
-      if (currentColumn == null) {
-        currentColumn = newColumn;
-      } else if (!currentColumn.equals(newColumn)) {
-        currentColumn = newColumn;
-        result = parse(takeRecords());
-      }
-      addRecord(record);
-      return result;
-    }
-
-    @Override
-    public synchronized Flux<RifRecordEvent<?>> finish() {
-      currentColumn = null;
-      return parse(takeRecords());
+    public Flux<RifRecordEvent<?>> parseRifFile(RifFile rifFile) {
+      return FluxUtils.fromAutoCloseable(
+          // creates a CSVParser for new subscriber
+          () -> RifParsingUtils.createCsvParser(rifFile),
+          // creates flux for subscriber to receive parsed events
+          csvParser ->
+              Flux.fromIterable(csvParser)
+                  // joins consecutive records with same grouping column value
+                  .bufferUntilChanged(csvRecord -> csvRecord.get(groupingColumn))
+                  // parses the list of records
+                  .flatMap(this::parse),
+          // used in log message if closing the CSVParser fails
+          rifFile.getDisplayName());
     }
 
     /**
-     * Calls the lambda to produce a new {@link RifRecordEvent}.
+     * Calls the lambda to produce a new {@link RifRecordEvent} form a list of {@link CSVRecord}s.
      *
-     * @param records non-empty group of records to parse
-     * @return flux containing the resulting object
+     * @param records group of records to parse (may be empty)
+     * @return flux containing the resulting object or an empty flux if the list was empty
      */
-    @Nonnull
     private Flux<RifRecordEvent<?>> parse(List<CSVRecord> records) {
       try {
         return records.isEmpty() ? Flux.empty() : Flux.just(parser.apply(records));
       } catch (Exception ex) {
         return Flux.error(ex);
       }
-    }
-
-    /**
-     * Helper method to add a record to the buffer.
-     *
-     * @param record the record to add
-     */
-    private void addRecord(CSVRecord record) {
-      recordBuffer.add(record);
-    }
-
-    /**
-     * Helper method to remove all records from the buffer and return them.
-     *
-     * @return immutable list of all records in buffer
-     */
-    private List<CSVRecord> takeRecords() {
-      List<CSVRecord> lines = List.copyOf(recordBuffer);
-      recordBuffer.clear();
-      return lines;
     }
   }
 }

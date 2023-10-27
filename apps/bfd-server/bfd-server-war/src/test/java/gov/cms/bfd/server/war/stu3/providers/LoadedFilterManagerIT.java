@@ -10,7 +10,7 @@ import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
@@ -241,7 +241,7 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
                 .collect(Collectors.toList()));
 
     // Create the processors that will handle each stage of the pipeline.
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifLoader loader =
         new RifLoader(loadOptions, PipelineTestUtils.get().getPipelineApplicationState());
 

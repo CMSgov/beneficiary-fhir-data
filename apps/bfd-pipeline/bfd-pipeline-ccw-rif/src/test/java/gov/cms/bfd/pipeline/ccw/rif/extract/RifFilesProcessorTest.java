@@ -35,18 +35,19 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link RifFileParsers}. */
-public final class RifFileParsersTest {
+/** Unit tests for {@link RifFilesProcessor}. */
+public final class RifFilesProcessorTest
+{
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_BENES}.
    */
   @Test
   public void process1BeneRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_BENES.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -102,7 +103,7 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_BENES}.
    */
   @Test
@@ -110,7 +111,7 @@ public final class RifFileParsersTest {
     RifFilesEvent filesEvent =
         new RifFilesEvent(
             Instant.now(), false, StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -131,7 +132,7 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_BENEFICIARY_HISTORY}.
    */
   @Test
@@ -139,7 +140,7 @@ public final class RifFileParsersTest {
     RifFilesEvent filesEvent =
         new RifFilesEvent(
             Instant.now(), false, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -190,14 +191,14 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_PDE}.
    */
   @Test
   public void process1PDERecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_PDE.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -255,14 +256,14 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_CARRIER}.
    */
   @Test
   public void process1CarrierClaimRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -401,14 +402,14 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_INPATIENT}.
    */
   @Test
   public void process1InpatientClaimRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_INPATIENT.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -581,7 +582,7 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE}.
    */
   @Test
@@ -591,7 +592,7 @@ public final class RifFileParsersTest {
             Instant.now(),
             false,
             StaticRifResource.SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -764,14 +765,14 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_OUTPATIENT}.
    */
   @Test
   public void process1OutpatientClaimRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_OUTPATIENT.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -923,14 +924,14 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_SNF}.
    */
   @Test
   public void process1SNFClaimRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_SNF.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -1092,7 +1093,7 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE}.
    */
   @Test
@@ -1102,7 +1103,7 @@ public final class RifFileParsersTest {
             Instant.now(),
             false,
             StaticRifResource.SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -1270,14 +1271,14 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_HOSPICE}.
    */
   @Test
   public void process1HospiceClaimRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_HOSPICE.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -1385,14 +1386,14 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_HHA}.
    */
   @Test
   public void process1HHAClaimRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_HHA.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
@@ -1497,14 +1498,14 @@ public final class RifFileParsersTest {
   }
 
   /**
-   * Ensures that {@link RifFileParsers} can correctly handle {@link
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_DME}.
    */
   @Test
   public void process1DMEClaimRecord() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_DME.toRifFile());
-    RifFileParsers processor = new RifFileParsers();
+    RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
     List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 

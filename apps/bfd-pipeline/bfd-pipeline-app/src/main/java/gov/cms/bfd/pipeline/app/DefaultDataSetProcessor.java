@@ -7,7 +7,7 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetProcessor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This {@link DataSetProcessor} implementation "glues together" the {@link CcwRifLoadJob} with the
- * {@link RifFileParsers} and the {@link RifLoader}: pulling all of the data sets out of S3, parsing
+ * {@link RifFilesProcessor} and the {@link RifLoader}: pulling all of the data sets out of S3, parsing
  * them, and then loading them into the BFD database.
  */
 public final class DefaultDataSetProcessor implements DataSetProcessor {
@@ -26,7 +26,7 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
   private final MetricRegistry appMetrics;
 
   /** Handles processing of new RIF files. */
-  private final RifFileParsers rifProcessor;
+  private final RifFilesProcessor rifProcessor;
 
   /** Loads RIF files into the database. */
   private final RifLoader rifLoader;
@@ -35,11 +35,11 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
    * Initializes the instance.
    *
    * @param appMetrics the {@link MetricRegistry} for the application
-   * @param rifProcessor the {@link RifFileParsers} for the application
+   * @param rifProcessor the {@link RifFilesProcessor} for the application
    * @param rifLoader the {@link RifLoader} for the application
    */
   DefaultDataSetProcessor(
-      MetricRegistry appMetrics, RifFileParsers rifProcessor, RifLoader rifLoader) {
+      MetricRegistry appMetrics, RifFilesProcessor rifProcessor, RifLoader rifLoader) {
     this.appMetrics = appMetrics;
     this.rifProcessor = rifProcessor;
     this.rifLoader = rifLoader;

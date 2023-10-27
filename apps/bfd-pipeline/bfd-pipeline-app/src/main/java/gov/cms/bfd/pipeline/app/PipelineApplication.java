@@ -18,7 +18,7 @@ import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetProcessor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileParsers;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
@@ -504,7 +504,7 @@ public final class PipelineApplication {
             appState.getMetrics(),
             loadOptions.getExtractionOptions(),
             new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig()));
-    RifFileParsers rifProcessor = new RifFileParsers();
+    RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
     /*

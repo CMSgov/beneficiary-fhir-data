@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
+import gov.cms.bfd.model.rif.RifFileType;
+import org.junit.jupiter.api.AfterAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import gov.cms.bfd.model.rif.RecordAction;
@@ -7,30 +9,117 @@ import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
-import gov.cms.bfd.model.rif.parse.RifParsingUtils;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
 
+/** Unit tests for {@link RifFileParser}. */
 @ExtendWith(MockitoExtension.class)
 public class RifFileParserTest {
-  @Mock private RifFileEvent rifFileEventMock;
-  @Mock private RifFile rifFileMock;
+  /** Temp file for rif data, created and deleted once per instance. */
+  private static Path tempFile;
 
+  /**
+   * The file to be parsed. The event type doesn't really matter since we are only testing with
+   * trivial records to verify grouping behavior.
+   */
+  private final RifFile rifFile = new LocalRifFile(tempFile, RifFileType.BENEFICIARY);
+
+  /** We need this when we create a {@link RifRecordEvent} but we never call any of its methods. */
+  @Mock private RifFileEvent rifFileEventMock;
+
+  /**
+   * Creates the temp file before any tests have run.,
+   *
+   * @throws IOException pass through
+   */
+  @BeforeAll
+  static void beforeAll() throws IOException {
+    tempFile = Files.createTempFile(RifFileParser.class.getName(), ".csv");
+  }
+
+  /**
+   * Deletes the temp file after all tests have run.,
+   *
+   * @throws IOException pass through
+   */
+  @AfterAll
+  static void afterAll() throws IOException {
+    if (tempFile != null) {
+      Files.deleteIfExists(tempFile);
+    }
+  }
+
+  /**
+   * Verifies edge conditions for {@link RifFileParser.Simple}.
+   *
+   * @throws IOException pass through from writing string to temp file
+   */
   @Test
-  void groupingHonorsIdColumn() {
-    final var parser = new RifFileParser.Grouping("id", this::parseRecord);
+  void simpleAlwaysUsesOneRecordPerEvent() throws IOException {
+    final var parser = new RifFileParser.Simple(this::parseSingle);
+    // empty file should produce no records
+    assertEquals(List.of(), parseString("", parser));
+
+    // single record in file should work
+    assertEquals(List.of("1-a"), parseString("id|data\n1|a\n", parser));
+
+    // several single records should work
+    assertEquals(List.of("1-a", "2-a", "3-a"), parseString("id|data\n1|a\n2|a\n3|a\n", parser));
+
+    // several with mixed number of records should work
+    assertEquals(
+        List.of("1-a", "2-a", "2-b", "3-a", "3-b", "3-c"),
+        parseString("id|data\n1|a\n2|a\n2|b\n3|a\n3|b\n3|c\n", parser));
+  }
+
+  /**
+   * Verifies edge conditions for {@link RifFileParser.Grouping}.
+   *
+   * @throws IOException pass through from writing string to temp file
+   */
+  @Test
+  void groupingHonorsIdColumn() throws IOException {
+    final var parser = new RifFileParser.Grouping("id", this::parseGroup);
+    // empty file should produce no records
+    assertEquals(List.of(), parseString("", parser));
+
+    // single record in file should work
+    assertEquals(List.of("1-a"), parseString("id|data\n1|a\n", parser));
+
+    // several single records should work
+    assertEquals(List.of("1-a", "2-a", "3-a"), parseString("id|data\n1|a\n2|a\n3|a\n", parser));
+
+    // several with mixed number of records should work
     assertEquals(
         List.of("1-a", "2-a;2-b", "3-a;3-b;3-c"),
         parseString("id|data\n1|a\n2|a\n2|b\n3|a\n3|b\n3|c\n", parser));
+
+    // missing grouping column should throw an exception
+    assertThrows(RuntimeException.class, () -> parseString("noid|data\n1|a\n2|a\n3|a\n", parser));
+  }
+
+  /**
+   * Used as a lambda for the {@link RifFileParser.Simple} tests. Simply passes through the record
+   * passed to it so it can be checked for correctness.
+   *
+   * @param csvRecord record selected by the parser for this event
+   * @return a {@link RifRecordEvent} holding the provided {@link CSVRecord}
+   */
+  private RifRecordEvent<Beneficiary> parseSingle(CSVRecord csvRecord) {
+    return new RifRecordEvent<>(
+        rifFileEventMock, List.of(csvRecord), RecordAction.INSERT, 1L, new Beneficiary());
   }
 
   /**
@@ -40,7 +129,7 @@ public class RifFileParserTest {
    * @param csvRecords records selected by the parser for this event
    * @return a {@link RifRecordEvent} holding the provided {@link CSVRecord}s
    */
-  private RifRecordEvent<Beneficiary> parseRecord(List<CSVRecord> csvRecords) {
+  private RifRecordEvent<Beneficiary> parseGroup(List<CSVRecord> csvRecords) {
     return new RifRecordEvent<>(
         rifFileEventMock, csvRecords, RecordAction.INSERT, 1L, new Beneficiary());
   }
@@ -56,15 +145,10 @@ public class RifFileParserTest {
    * @param parser used to parse the csv
    * @return list with one string for each {@link RifRecordEvent} produced by the parser
    */
-  private List<String> parseString(String csvString, RifFileParser parser) {
-    CSVParser csvParser =
-        RifParsingUtils.createCsvParser(
-            RifParsingUtils.CSV_FORMAT,
-            new ByteArrayInputStream(csvString.getBytes(StandardCharsets.UTF_8)),
-            StandardCharsets.UTF_8);
-    return Flux.fromIterable(csvParser)
-        .flatMap(parser::next)
-        .concatWith(Flux.defer(parser::finish))
+  private List<String> parseString(String csvString, RifFileParser parser) throws IOException {
+    Files.writeString(tempFile, csvString);
+    return parser
+        .parseRifFile(rifFile)
         .map(rifRecordEvent -> convertRecordsIntoStrings(rifRecordEvent.getRawCsvRecords()))
         .collectList()
         .block();
@@ -78,10 +162,10 @@ public class RifFileParserTest {
    * @return the resulting string
    */
   private String convertRecordsIntoStrings(List<CSVRecord> csvRecords) {
-    return csvRecords.stream()
-        .map(csvRecord -> csvRecord.stream().collect(Collectors.joining("-")))
-        .toList()
-        .stream()
-        .collect(Collectors.joining(";"));
+    List<String> recordStrings =
+        csvRecords.stream()
+            .map(csvRecord -> csvRecord.stream().collect(Collectors.joining("-")))
+            .toList();
+    return String.join(";", recordStrings);
   }
 }
