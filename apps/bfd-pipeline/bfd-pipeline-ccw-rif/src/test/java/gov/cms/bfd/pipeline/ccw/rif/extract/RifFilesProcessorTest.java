@@ -36,8 +36,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link RifFilesProcessor}. */
-public final class RifFilesProcessorTest
-{
+public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link RifFilesProcessor} can correctly handle {@link

@@ -1,15 +1,14 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
-import gov.cms.bfd.model.rif.RifFileType;
-import org.junit.jupiter.api.AfterAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import gov.cms.bfd.model.rif.RecordAction;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
+import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

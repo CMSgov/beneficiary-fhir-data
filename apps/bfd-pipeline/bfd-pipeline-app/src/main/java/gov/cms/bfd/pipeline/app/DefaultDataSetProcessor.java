@@ -7,8 +7,8 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetProcessor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This {@link DataSetProcessor} implementation "glues together" the {@link CcwRifLoadJob} with the
- * {@link RifFilesProcessor} and the {@link RifLoader}: pulling all of the data sets out of S3, parsing
- * them, and then loading them into the BFD database.
+ * {@link RifFilesProcessor} and the {@link RifLoader}: pulling all of the data sets out of S3,
+ * parsing them, and then loading them into the BFD database.
  */
 public final class DefaultDataSetProcessor implements DataSetProcessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetProcessor.class);

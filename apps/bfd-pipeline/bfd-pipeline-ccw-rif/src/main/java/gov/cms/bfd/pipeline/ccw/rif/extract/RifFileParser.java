@@ -1,16 +1,11 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RifFile;
-import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
-import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
