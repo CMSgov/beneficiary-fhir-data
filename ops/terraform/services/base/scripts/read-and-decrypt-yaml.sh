@@ -4,8 +4,9 @@
 # https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/data_source
 #
 # Arguments:
-#   $1 is the environment corresponding to the .yaml file to edit
-#   $2 is the CMK of the corresponding key used to encrypt the target .yaml file
+#   $1 - the environment corresponding to the .yaml file to decrypt
+#   $2 (Optional) - the ARN of the CMK of the corresponding key used to encrypt the target .yaml
+#                   file, if unspecified the CMK is looked up based upon the environment
 
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 readonly SCRIPT_DIR
@@ -16,10 +17,26 @@ readonly MODULE_DIR
 REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel)"
 readonly REPO_ROOT
 
-YAML_FILE="$MODULE_DIR/values/$1.yaml"
+BFD_SEED_ENV="$1"
+readonly BFD_SEED_ENV
+
+YAML_FILE="${MODULE_DIR}/values/${BFD_SEED_ENV}.yaml"
 readonly YAML_FILE
 
-CMK_ARN="$2"
+CMK_ARN_OVERRIDE="$2"
+readonly CMK_ARN_OVERRIDE
+
+CMK_LOOKUP="$(
+  # Only attempt to lookup the CMK if the override is undefined
+  [[ -z "$CMK_ARN_OVERRIDE" ]] &&
+    aws kms describe-key \
+      --key-id "alias/bfd-${BFD_SEED_ENV}-config-cmk" \
+      --query KeyMetadata.Arn \
+      --output text
+)"
+readonly CMK_LOOKUP
+
+CMK_ARN="${CMK_ARN_OVERRIDE:-"$CMK_LOOKUP"}"
 readonly CMK_ARN
 
 if test -f "${YAML_FILE}"; then
@@ -121,4 +138,3 @@ if test -f "${YAML_FILE}"; then
 else
   echo '{}'
 fi
-
