@@ -104,16 +104,18 @@ public final class RifLoader {
    */
   private Scheduler createScheduler(LoadAppOptions.PerformanceSettings settings) {
     final int threadPoolSize = settings.getLoaderThreads();
+    final int batchSize = settings.getRecordBatchSize();
     final int taskQueueSize = settings.getLoaderThreads() * settings.getTaskQueueSizeMultiple();
 
     LOGGER.info(
-        "Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
+        "Configured to load with '{}' threads, a queue of '{}' batches, and a batch size of '{}'.",
         threadPoolSize,
         taskQueueSize,
-        taskQueueSize);
+        batchSize);
 
-    final Scheduler scheduler =
-        Schedulers.newBoundedElastic(threadPoolSize, taskQueueSize, "RifLoader", 60);
+    // We allow a little extra capacity in the pool since we require a thread from the scheduler to
+    // parse records in addition to the ones used to write batches to the database.
+    final Scheduler scheduler = Schedulers.newParallel("RifLoader", 2 + threadPoolSize);
     scheduler.init();
 
     return scheduler;
@@ -189,15 +191,18 @@ public final class RifLoader {
           final Scheduler scheduler = createScheduler(performanceSettings);
           return dataToLoad
               .getRecords()
+              // Parse records on a thread from our scheduler.
+              .subscribeOn(scheduler)
               // collect records into batches
               .buffer(performanceSettings.getRecordBatchSize())
-              .limitRate(batchPrefetch, batchPrefetch - Math.max(1, batchPrefetch / 4))
-              // process batches in parallel
+              // .doOnNext(buffer -> LOGGER.info("Parsed buffer of {} records", buffer.size()))
+              // Set the number of batches we want to keep ready for processing.  The actual amount
+              // will vary between 75% and 100% of the requested value as the flux manages the
+              // queue.
+              .limitRate(batchPrefetch)
+              // process batches in parallel using threads from our scheduler
               .flatMap(
-                  batch ->
-                      processBatch(batch, loadedFileId)
-                          // process each batch on a thread from our scheduler
-                          .subscribeOn(scheduler),
+                  batch -> processBatch(batch, loadedFileId).subscribeOn(scheduler),
                   performanceSettings.getLoaderThreads())
               // clean up when the flux terminates (either by error or completion)
               .doFinally(
@@ -245,6 +250,7 @@ public final class RifLoader {
                   .getMetrics()
                   .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
                   .time();
+          // LOGGER.info("Starting batch of {} records", recordsBatch.size());
 
           // Execute the transaction and capture any exception it might throw as a RifLoadFailure.
           // Catching it here lets us rethrow it after cleaning up our state farther down in the
@@ -265,6 +271,7 @@ public final class RifLoader {
             // Update the metrics now that things have been pushed.
             timerBatchSuccess.stop();
             timerBatchTypeSuccess.stop();
+            // LOGGER.info("Processed batch of {} records successfully", processResults.size());
             return processResults;
           } else {
             // Update metrics for a failure and halt the pipeline.

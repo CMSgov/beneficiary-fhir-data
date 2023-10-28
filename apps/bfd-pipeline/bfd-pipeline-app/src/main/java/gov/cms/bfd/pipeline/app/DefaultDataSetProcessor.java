@@ -62,7 +62,13 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
 
       try {
         final RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
+        LOGGER.info(">>>>>>>> ----------");
+        LOGGER.info(">>>>>>>> STARTING TO LOAD RECORDS");
+        LOGGER.info(">>>>>>>> ----------");
         final long processedCount = rifLoader.processBlocking(rifFileRecords);
+        LOGGER.info(">>>>>>>> **********");
+        LOGGER.info(">>>>>>>> FINISHED LOADING RECORDS");
+        LOGGER.info(">>>>>>>> **********");
         LOGGER.info(
             "Successfully processed {} records in file {}",
             processedCount,

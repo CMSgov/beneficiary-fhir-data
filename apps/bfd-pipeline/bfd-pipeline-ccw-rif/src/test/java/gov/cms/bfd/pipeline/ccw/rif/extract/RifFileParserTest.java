@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.AfterAll;
@@ -22,9 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 /** Unit tests for {@link RifFileParser}. */
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class RifFileParserTest {
   /** Temp file for rif data, created and deleted once per instance. */
   private static Path tempFile;
@@ -58,6 +63,40 @@ public class RifFileParserTest {
     if (tempFile != null) {
       Files.deleteIfExists(tempFile);
     }
+  }
+
+  @Test
+  void flowControl() {
+    var scheduler = Schedulers.newBoundedElastic(4, 6, "test");
+    Flux.range(1, 250)
+        .doOnNext(
+            x -> {
+              try {
+                Thread.sleep(10);
+              } catch (Exception ex) {
+                throw Exceptions.propagate(ex);
+              }
+            })
+        .log()
+        .buffer(8)
+        .limitRate(9, 1)
+        .flatMap(
+            buffer ->
+                Flux.defer(
+                        () -> {
+                          log.info("starting " + buffer);
+                          try {
+                            Thread.sleep(1000);
+                          } catch (Exception ex) {
+                            throw Exceptions.propagate(ex);
+                          }
+                          log.info("finished " + buffer);
+                          return Flux.just(buffer);
+                        })
+                    .subscribeOn(scheduler),
+            3)
+        .subscribeOn(scheduler)
+        .blockLast();
   }
 
   /**
