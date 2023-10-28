@@ -45,6 +45,9 @@ import io.micrometer.core.instrument.dropwizard.DropwizardMeterRegistry;
 import io.micrometer.core.instrument.util.HierarchicalNameMapper;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.time.Clock;
@@ -148,11 +151,13 @@ public final class PipelineApplication {
    * Runs the actual pipeline logic and throws an exception if any problems are encountered.
    *
    * @throws FatalAppException if app shutdown required
+   * @throws IOException for I/O errors
    * @throws SQLException for database errors
    */
-  private void runPipeline() throws FatalAppException, SQLException {
+  private void runPipeline() throws FatalAppException, SQLException, IOException {
 
     LOGGER.info("Application starting up!");
+    logTempDirectory();
 
     final AppConfiguration appConfig;
     final ConfigLoader configLoader;
@@ -590,5 +595,16 @@ public final class PipelineApplication {
                   LoggerContext logbackContext = (LoggerContext) LoggerFactory.getILoggerFactory();
                   logbackContext.stop();
                 }));
+  }
+
+  /**
+   * Log the temporary directory path.
+   *
+   * @throws IOException pass through
+   */
+  private void logTempDirectory() throws IOException {
+    Path tempFile = Files.createTempFile("a", "x");
+    LOGGER.info("Temp dir is {}", tempFile.getParent().toFile().getAbsoluteFile());
+    Files.deleteIfExists(tempFile);
   }
 }

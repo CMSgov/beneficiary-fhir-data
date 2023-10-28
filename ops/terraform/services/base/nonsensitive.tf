@@ -7,15 +7,10 @@ locals {
   # NOTE: null values are illegal, so we must strip them out if they should exist
   common_nonsensitive_override = { for key, value in local.common_nonsensitive_override_raw : key => value if value != null }
 
-  # Normal precedence. Values stored in YAML files.
-  yaml_file = local.is_ephemeral_env ? "ephemeral.yaml" : "${local.env}.yaml"
-  yaml = yamldecode(templatefile("${path.module}/values/${local.yaml_file}", {
-    env = local.env
-  }))
-  common_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "common") && value != "UNDEFINED" }
-  migrator_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "migrator") && value != "UNDEFINED" }
-  pipeline_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "pipeline") && value != "UNDEFINED" }
-  server_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "server") && value != "UNDEFINED" }
+  common_yaml   = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "common") && strcontains(key, "nonsensitive") && value != "UNDEFINED" }
+  migrator_yaml = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "migrator") && strcontains(key, "nonsensitive") && value != "UNDEFINED" }
+  pipeline_yaml = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "pipeline") && strcontains(key, "nonsensitive") && value != "UNDEFINED" }
+  server_yaml   = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "server") && strcontains(key, "nonsensitive") && value != "UNDEFINED" }
 
   # Low precedence. These values are already present in SSM but aren't (yet) part of the encoded YAML configuration.
   common_nonsensitive_ssm = zipmap(

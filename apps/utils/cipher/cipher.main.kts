@@ -461,7 +461,7 @@ fun main(args: Array<String>) {
                 val cipherCache = original.extractCipherCache(cipher)
                 val rewound = original.rewind(cipher)
                 rewound.store(tempFile.sink())
-                ProcessBuilder(listOf(editor, tempFile.path))
+                ProcessBuilder(editor.split(" ") + listOf(tempFile.path))
                     .redirectInput(ProcessBuilder.Redirect.INHERIT)
                     .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                     .redirectError(ProcessBuilder.Redirect.INHERIT)
