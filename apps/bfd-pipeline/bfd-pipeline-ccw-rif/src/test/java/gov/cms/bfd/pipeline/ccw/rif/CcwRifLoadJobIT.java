@@ -13,7 +13,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import java.net.URL;
 import java.time.Instant;
@@ -45,7 +45,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       // Run the job.
-      MockDataSetProcessor listener = new MockDataSetProcessor();
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -157,7 +157,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               StaticRifResource.SAMPLE_A_INPATIENT.getResourceUrl()));
 
       // Run the job.
-      MockDataSetProcessor listener = new MockDataSetProcessor();
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -316,7 +316,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetProcessor listener = new MockDataSetProcessor();
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -408,7 +408,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetProcessor listener = new MockDataSetProcessor();
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -493,7 +493,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetProcessor listener = new MockDataSetProcessor();
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(
@@ -573,7 +573,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       putSampleFilesInTestBucket(bucket, inputLocation, manifest, fileList);
 
       // Run the job.
-      MockDataSetProcessor listener = new MockDataSetProcessor();
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           spy(
               new S3TaskManager(

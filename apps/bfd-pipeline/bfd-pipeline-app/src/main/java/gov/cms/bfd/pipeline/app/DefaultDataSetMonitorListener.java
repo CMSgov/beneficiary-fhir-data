@@ -6,21 +6,21 @@ import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.ccw.rif.DataSetProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This {@link DataSetProcessor} implementation "glues together" the {@link CcwRifLoadJob} with the
- * {@link RifFilesProcessor} and the {@link RifLoader}: pulling all of the data sets out of S3,
- * parsing them, and then loading them into the BFD database.
+ * This {@link DataSetMonitorListener} implementation "glues together" the {@link CcwRifLoadJob}
+ * with the {@link RifFilesProcessor} and the {@link RifLoader}: pulling all of the data sets out of
+ * S3, parsing them, and then loading them into the BFD database.
  */
-public final class DefaultDataSetProcessor implements DataSetProcessor {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetProcessor.class);
+public final class DefaultDataSetMonitorListener implements DataSetMonitorListener {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetMonitorListener.class);
 
   /** Metrics for this class. */
   private final MetricRegistry appMetrics;
@@ -38,7 +38,7 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
    * @param rifProcessor the {@link RifFilesProcessor} for the application
    * @param rifLoader the {@link RifLoader} for the application
    */
-  DefaultDataSetProcessor(
+  DefaultDataSetMonitorListener(
       MetricRegistry appMetrics, RifFilesProcessor rifProcessor, RifLoader rifLoader) {
     this.appMetrics = appMetrics;
     this.rifProcessor = rifProcessor;
@@ -46,7 +46,7 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
   }
 
   @Override
-  public void processDataSet(RifFilesEvent rifFilesEvent) throws Exception {
+  public void dataAvailable(RifFilesEvent rifFilesEvent) throws Exception {
     Timer.Context timerDataSet =
         appMetrics
             .timer(
@@ -97,7 +97,7 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
   }
 
   @Override
-  public void noDataToProcess() {
+  public void noDataAvailable() {
     // Nothing to do here.
   }
 }

@@ -19,7 +19,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
@@ -133,7 +133,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
 
       // Run the job.
-      MockDataSetProcessor listener = new MockDataSetProcessor();
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
@@ -266,7 +266,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
 
       // Run the job.
-      MockDataSetProcessor listener = new MockDataSetProcessor();
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager =
           new S3TaskManager(
               PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),

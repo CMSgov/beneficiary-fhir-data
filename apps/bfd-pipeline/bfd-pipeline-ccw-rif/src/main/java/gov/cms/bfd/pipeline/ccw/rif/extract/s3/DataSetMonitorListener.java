@@ -1,14 +1,18 @@
-package gov.cms.bfd.pipeline.ccw.rif;
+package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 
-/** Implementations of this interface process data sets produced by {@link CcwRifLoadJob}. */
-public interface DataSetProcessor {
+/**
+ * Implementations of this event/callback interface can receive the events fired by a {@link
+ * CcwRifLoadJob}.
+ */
+public interface DataSetMonitorListener {
   /**
    * Called when the {@link CcwRifLoadJob} has checked the S3 bucket for a new data set, and not
    * found one.
    */
-  void noDataToProcess();
+  void noDataAvailable();
 
   /**
    * Called when a new {@link RifFilesEvent} data set is available for processing. It's this
@@ -23,5 +27,5 @@ public interface DataSetProcessor {
    * @param rifFilesEvent the new {@link RifFilesEvent} data set to be processed
    * @throws Exception any exception indicates that processing failed
    */
-  void processDataSet(RifFilesEvent rifFilesEvent) throws Exception;
+  void dataAvailable(RifFilesEvent rifFilesEvent) throws Exception;
 }
