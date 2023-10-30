@@ -107,7 +107,7 @@ public class JoinBean implements ModelBean {
    * Optional list of properties to generate for single-value joins to simplify access to fields in
    * the joined entity.
    */
-  @Singular private final List<@Valid Property> properties = new ArrayList<>();
+  @Singular private List<@Valid Property> properties = new ArrayList<>();
 
   /**
    * Called by validator to confirm that either {@link #entityClass} or {@link #entityMapping} was

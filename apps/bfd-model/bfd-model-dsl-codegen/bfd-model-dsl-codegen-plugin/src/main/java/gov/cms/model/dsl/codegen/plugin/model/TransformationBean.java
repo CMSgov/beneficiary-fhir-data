@@ -66,7 +66,7 @@ public class TransformationBean implements ModelBean {
    * Map of configuration option key/value pairs that can modify the default behavior of the
    * transformer. Which key/value pairs are appropriate depend on the transformer.
    */
-  @Singular final Map<String, String> transformerOptions = new HashMap<>();
+  @Singular Map<String, String> transformerOptions = new HashMap<>();
 
   /**
    * Used to quickly determine if a transformation is used to indicate an array transformation.
