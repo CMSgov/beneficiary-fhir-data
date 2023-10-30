@@ -12,13 +12,16 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -65,6 +68,11 @@ public class RifFileParserTest {
     }
   }
 
+  /**
+   * This is just code for experimenting with the project reactor back pressure operators to see
+   * what calls to request and onNext are made and by which threads.
+   */
+  @Disabled("experimental code to get feel for how flow control operators work")
   @Test
   void flowControl() {
     var scheduler = Schedulers.newBoundedElastic(4, 6, "test");
@@ -146,6 +154,41 @@ public class RifFileParserTest {
 
     // missing grouping column should throw an exception
     assertThrows(RuntimeException.class, () -> parseString("noid|data\n1|a\n2|a\n3|a\n", parser));
+  }
+
+  /**
+   * Similar to {@link #groupingHonorsIdColumn} but uses randomly generated rif data to test wider
+   * variety of scenarios {@link RifFileParser.Grouping}.
+   *
+   * @throws IOException pass through from writing string to temp file
+   */
+  @Test
+  void groupingHonorsIdColumnRandomScenarios() throws IOException {
+    final var parser = new RifFileParser.Grouping("id", this::parseGroup);
+    final var random = new Random(42);
+    for (int trial = 1; trial <= 100; ++trial) {
+      // This will contain the unparsed RIF data
+      final var rifFileData = new StringBuilder("id|data\n");
+      // This will contain the expected output of the parsing code.
+      final var expectedFileParsingResults = new ArrayList<String>();
+
+      //
+      for (int record = 1; record <= 50; ++record) {
+        final int lineCount = 1 + random.nextInt(5);
+        final var expectedRecordParsingResult = new StringBuilder();
+        final int recordId = random.nextInt(1_000_000);
+        for (int line = 1; line <= lineCount; ++line) {
+          final int recordData = random.nextInt(1_000_000);
+          rifFileData.append(String.format("%s|%s\n", recordId, recordData));
+          if (line > 1) {
+            expectedRecordParsingResult.append(";");
+          }
+          expectedRecordParsingResult.append(String.format("%s-%s", recordId, recordData));
+        }
+        expectedFileParsingResults.add(expectedRecordParsingResult.toString());
+      }
+      assertEquals(expectedFileParsingResults, parseString(rifFileData.toString(), parser));
+    }
   }
 
   /**
