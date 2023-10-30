@@ -1,9 +1,9 @@
 locals {
-  common_sensitive   = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "common") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
-  migrator_sensitive = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "migrator") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
-  pipeline_sensitive = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "pipeline") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
-  server_sensitive   = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "server") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
-  eft_sensitive      = { for key, value in local.yaml : replace(key, "$${env}", local.env) => value if contains(split("/", key), "eft") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
+  common_sensitive   = { for key, value in local.yaml : key => value if contains(split("/", key), "common") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
+  migrator_sensitive = { for key, value in local.yaml : key => value if contains(split("/", key), "migrator") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
+  pipeline_sensitive = { for key, value in local.yaml : key => value if contains(split("/", key), "pipeline") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
+  server_sensitive   = { for key, value in local.yaml : key => value if contains(split("/", key), "server") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
+  eft_sensitive      = { for key, value in local.yaml : key => value if contains(split("/", key), "eft") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
 }
 
 resource "aws_ssm_parameter" "common_sensitive" {

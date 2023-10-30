@@ -1,5 +1,10 @@
 data "aws_caller_identity" "current" {}
 
 data "external" "yaml" {
-  program = ["${path.module}/scripts/read-and-decrypt-yaml.sh", local.env, local.kms_key_id]
+  program = ["${path.module}/scripts/tf-decrypt-shim.sh"]
+  query = {
+    seed_env    = local.env
+    env         = local.env
+    kms_key_arn = local.kms_key_id
+  }
 }
