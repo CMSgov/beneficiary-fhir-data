@@ -25,5 +25,6 @@ https://terraform-docs.io/user-guide/configuration/
 | <a name="output_default_tags"></a> [default_tags](#output_default_tags) | n/a |
 | <a name="output_env"></a> [env](#output_env) | The solution's environment name. Generally, `terraform.workspace` |
 | <a name="output_is_ephemeral_env"></a> [is_ephemeral_env](#output_is_ephemeral_env) | Returns true when environment is _ephemeral_, false when _established_ |
+| <a name="output_latest_bfd_release"></a> [latest_bfd_release](#output_latest_bfd_release) | This is the latest CMSgov/beneficiary-fhir-data release. Excludes Pre-Releases. |
 | <a name="output_seed_env"></a> [seed_env](#output_seed_env) | The solution's source environment. For established environments this is equal to the environment's name |
 <!-- END_TF_DOCS -->

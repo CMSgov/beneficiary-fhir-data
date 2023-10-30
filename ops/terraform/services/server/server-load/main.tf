@@ -14,9 +14,10 @@ locals {
   account_id             = data.aws_caller_identity.current.account_id
   availability_zone_name = var.create_locust_instance ? data.aws_availability_zones.this.names[random_integer.this[0].result] : ""
 
-  default_tags = module.terraservice.default_tags
-  env          = module.terraservice.env
-  seed_env     = module.terraservice.seed_env
+  default_tags       = module.terraservice.default_tags
+  env                = module.terraservice.env
+  seed_env           = module.terraservice.seed_env
+  latest_bfd_release = module.terraservice.latest_bfd_release
 
   layer   = "app"
   service = "server-load"
