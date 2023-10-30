@@ -48,12 +48,11 @@ public class MappingBean implements ModelBean {
   private String transformerClassName;
 
   /** Defines the type of objects being transformed (either GRPC or CSV). */
-  @NotNull private final SourceType sourceType = SourceType.Grpc;
+  @NotNull private SourceType sourceType = SourceType.Grpc;
 
   /** Defines how nullable values are passed to and from field accessor methods. */
   @NotNull
-  private final NullableFieldAccessorType nullableFieldAccessorType =
-      NullableFieldAccessorType.Standard;
+  private NullableFieldAccessorType nullableFieldAccessorType = NullableFieldAccessorType.Standard;
 
   /** Meta data for the database table. */
   @NotNull @Valid private TableBean table;
