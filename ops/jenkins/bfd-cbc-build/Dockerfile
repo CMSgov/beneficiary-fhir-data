@@ -36,6 +36,14 @@ RUN /usr/bin/python3 -m pip install --upgrade pip
 
 RUN rm -rf $(basename $PYTHON3_TAR_SOURCE .tgz) python3.tgz
 
+FROM prereqs as kotlin
+ARG KOTLINC_ZIP_SOURCE
+
+WORKDIR /root
+RUN curl -L $KOTLINC_ZIP_SOURCE -o kotlinc.zip && \
+    unzip kotlinc.zip && \
+    rm -f kotlinc/bin/*.bat
+
 FROM prereqs as tfenv
 ARG TFENV_REPO_HASH
 # NOTE: versions represented as space-delimited string; Dockerfile's RUN contexts don't use arrays
@@ -49,10 +57,17 @@ FROM hashicorp/packer:${PACKER_VERSION} as packer
 FROM mikefarah/yq:${YQ_VERSION} as yq
 
 FROM prereqs as dist
-ENV PATH="/root/.tfenv/bin:${PATH}"
+ARG CIPHER_SCRIPT
+ENV PATH="/root/.tfenv/bin:/usr/local/bin/kotlinc/bin:${PATH}"
 # COPY yq binary
 COPY --from=yq /usr/bin/yq /usr/bin/yq
 # COPY tfenv files
 COPY --from=tfenv /root/.tfenv /root/.tfenv
+COPY --from=kotlin /root/kotlinc /usr/local/bin/kotlinc
 # Copy packer files
 COPY --from=packer /bin/packer /usr/local/bin/packer
+
+# Run the cipher script to build and cache its dependencies for much faster subsequent runs
+RUN echo "${CIPHER_SCRIPT}" > ./cipher.main.kts && \
+    (kotlin ./cipher.main.kts help || true) && \
+    rm -f ./cipher.main.kts

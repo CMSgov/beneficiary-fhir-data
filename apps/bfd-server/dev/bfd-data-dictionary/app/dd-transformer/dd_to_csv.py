@@ -15,20 +15,19 @@ def build_csv_header():
 # TODO: refactor this func to address hardcoded field names
 def field_val(element_json, field):
     # handling varies by field
-    match field:
-        case "appliesTo" | "ccwMapping" | "cclfMapping":   # convert array to csv with ; as delimiter
-            return ";".join(element_json[field])
-        case "resource" | "element" | "derived" | "note" | "fhirPath" | "example":   # pull from fhirMapping object
-            return element_json["fhirMapping"][0][field]
-        case "discriminator" | "additional":  # pull from fhir mapping object and convert from array to csv with ; as delim
-            return ";".join(element_json["fhirMapping"][0][field])
-        case "AB2D" | "BB2" | "BCDA" | "BFD" | "DPC" | "SyntheticData": # convert from array to individual columns
-            if field in element_json["suppliedIn"]:
-                return "X"
-            else:
-                return ""
-        case _:  # default just return the value from the top level key
-            return element_json[field]
+    if field in {"appliesTo", "ccwMapping", "cclfMapping"}:  # convert array to csv with ; as delimiter
+        return ";".join(element_json[field])
+    elif field in {"resource", "element", "derived", "note", "fhirPath", "example"}:  # pull from fhirMapping object
+        return element_json["fhirMapping"][0][field]
+    elif field in {"discriminator", "additional"}:  # pull from fhir mapping object and convert from array to csv with ; as delim
+        return ";".join(element_json["fhirMapping"][0][field])
+    elif field in {"AB2D", "BB2", "BCDA", "BFD", "DPC", "SyntheticData"}:  # convert from array to individual columns
+        if field in element_json["suppliedIn"]:
+            return "X"
+        else:
+            return ""
+    else:
+        return element_json[field]
 
 # func to build a csv of the element
 def build_csv_row(element):

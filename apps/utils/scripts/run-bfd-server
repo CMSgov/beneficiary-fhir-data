@@ -47,6 +47,9 @@ max_heap=4g
 bfd_port=6500
 debug_port=5005
 
+# Location of kubernetes configurations.
+kubernetes_root=$BFD_PATH/ops/k8s/helm
+
 if [[ ! -d $project_dir ]] ; then
   echo ERROR: $project_dir does not exist. 1>&2
   echo Please set BFD_PATH to the root of the BFD source tree. 1>&2
@@ -86,6 +89,7 @@ install=true
 image_tag=
 image_name=bfd-server-image
 localstack_ip=localhost
+kubernetes=false
 
 function usage() {
   script_name=`basename $0`
@@ -95,6 +99,7 @@ Runs a BFD server.  Use command line options to change behaviors.
 $script_name [options]
 -d db_host[:db_port]      Name of database host.  Optional :n uses port n.
 -i image_tag              Runs the server as a containing using the image with given tag.
+-k                       Run using kubernetes (using ops/k8s).
 -l localstack_ip          Localstack IP address (for bridge networking).
 -x                        Do not install latest version before running.
 -z                        Enable debugger support but start immediately.
@@ -106,7 +111,7 @@ Option defaults:
 EOF
 }
 
-while getopts "d:i:l:xzZh" option ; do
+while getopts "d:i:kl:xzZh" option ; do
   case $option in
   d) IFS=':' read h p <<<"$OPTARG"
      db_host=${h:=$db_host}
@@ -114,6 +119,7 @@ while getopts "d:i:l:xzZh" option ; do
      unset h p
      ;;
   i) image_tag=$OPTARG ; install=false ;;
+  k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
   l) localstack_ip=$OPTARG ;;
   x) install=false ;;
   z) debug_enabled=true ;;
@@ -144,7 +150,8 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
 {
   "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
 }
-EOF)
+EOF
+)
 fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
@@ -153,7 +160,7 @@ fi
 function setvar() {
   name="$1"
   value="$2"
-  if [[ -z "$SSM_REGION" ]] ; then
+  if [[ -z "$AWS_REGION" ]] ; then
     eval "export ${name}=\"${value}\""
   else
     echo put-parameter $name
@@ -225,15 +232,15 @@ if [[ $install = "true" ]] ; then
   cp $ssl_dir/* $bin_dir/ssl
   cp $war_file $bin_dir
   rmdir $unzip_dir
-fi
-
-lib_dir=${bin_dir}/lib
-launcher_jar="${bin_dir}/bfd-server-launcher-${project_version}.jar"
-if [[ ! -r $launcher_jar ]] || [[ ! -d $lib_dir ]] ; then
-  # Just check to be sure we can run without installing and fail if we can't.
-  echo "ERROR: Missing $launcher_jar or lib directory." 1>&2
-  echo "Run again without -x option to install binaries." 1>&2
-  exit 1
+elif [[ x$image_tag = x ]] && [[ x$kubernetes = xfalse ]] ; then
+  lib_dir=${bin_dir}/lib
+  launcher_jar="${bin_dir}/bfd-server-launcher-${project_version}.jar"
+  if [[ ! -r $launcher_jar ]] || [[ ! -d $lib_dir ]] ; then
+    # Just check to be sure we can run without installing and fail if we can't.
+    echo "ERROR: Missing $launcher_jar or lib directory." 1>&2
+    echo "Run again without -x option to install binaries." 1>&2
+    exit 1
+  fi
 fi
 
 war_file_name=bfd-server-war-${project_version}.war
@@ -255,7 +262,29 @@ classpath="${launcher_jar}:${bin_dir}/lib/*:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.server.launcher.DataServerLauncherApp"
 [ -n "${JAVA_HOME}" ] && java=${JAVA_HOME}/bin/java || java=java
 
-if [[ x$image_tag = x ]] ; then
+if [[ x$kubernetes = xtrue ]] ; then
+  cd $kubernetes_root
+  if [[ ! -r server/Chart.yaml ]] ; then
+    echo ERROR: unable to find kubernetes resource files in $kubernetes_root 1>&2
+    exit 1
+  fi
+  echo running kubernetes service
+  ssl_dir=$project_dir/bfd-server/dev/ssl-stores
+  echo Ignore \"secrets dev-server-ssl-files not found\" message if this is first time running in cluster.
+  kubectl -n dev delete secret bfd-server-ssl-files || true
+  kubectl -n dev create secret generic bfd-server-ssl-files\
+     --from-file $ssl_dir/${truststore_file}\
+     --from-file $ssl_dir/${keystore_file}
+  app_root=/app
+  ssl_mount=${app_root}/ssl
+  war_file=${app_root}/$war_file_name
+  setvar BFD_TRUSTSTORE "$ssl_mount/${truststore_file}"
+  setvar BFD_KEYSTORE "$ssl_mount/${keystore_file}"
+  setvar BFD_WAR "$app_root/$war_file_name"
+  echo Ignore \"release: not found\" message if this is first time running in cluster.
+  helm -n dev uninstall server || true
+  helm -n dev install server server
+elif [[ x$image_tag = x ]] ; then
   echo running application directly
   export CLASSPATH="$classpath"
   exec $java $properties $ARGS $mainClass
