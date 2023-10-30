@@ -187,6 +187,7 @@ spec:
       script {
         container('bfd-cbc-build') {
           dir('apps/utils/locust_tests') {
+            sh 'pip3 install --upgrade pip'
             sh 'pip3 install -r requirements.txt'
             availableLocustTags = sh script: '''
 python3 - <<EOF
