@@ -115,10 +115,7 @@ public final class RifLoader {
 
     // We allow a little extra capacity in the pool since we require a thread from the scheduler to
     // parse records in addition to the ones used to write batches to the database.
-    final Scheduler scheduler = Schedulers.newParallel("RifLoader", 2 + threadPoolSize);
-    scheduler.init();
-
-    return scheduler;
+    return Schedulers.newParallel("RifLoader", 2 + threadPoolSize);
   }
 
   /**
@@ -180,10 +177,10 @@ public final class RifLoader {
                   .time();
           LOGGER.info("Processing '{}'...", dataToLoad);
 
-          // Trim the LoadedFiles & LoadedBatches table
+          // Trim the LoadedFiles & LoadedBatches table (throws on failure)
           trimLoadedFiles();
 
-          // Insert a LoadedFiles entry
+          // Insert a LoadedFiles entry (throws on failure)
           final long loadedFileId = insertLoadedFile(dataToLoad.getSourceEvent());
 
           // Create and return a flux that asynchronously loads records in batches using a custom
@@ -224,6 +221,7 @@ public final class RifLoader {
    *
    * @param recordsBatch the {@link RifRecordEvent}s to process
    * @param loadedFileId the loaded file id
+   * @return the flux
    */
   private Flux<RifRecordLoadResult> processBatch(
       List<RifRecordEvent<?>> recordsBatch, long loadedFileId) {

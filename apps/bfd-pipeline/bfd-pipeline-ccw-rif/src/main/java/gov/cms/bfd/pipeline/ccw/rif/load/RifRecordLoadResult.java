@@ -18,8 +18,8 @@ public final class RifRecordLoadResult {
   /**
    * Constructs a new {@link RifRecordLoadResult}.
    *
-   * @param rifRecordEvent the value to use for {@link #getRifRecordEvent()}
-   * @param loadAction the value to use for {@link #getLoadAction()}
+   * @param rifRecordEvent the value to use for {@link #rifRecordEvent}
+   * @param loadAction the value to use for {@link #loadAction}
    */
   public RifRecordLoadResult(RifRecordEvent<?> rifRecordEvent, LoadAction loadAction) {
     if (rifRecordEvent == null) throw new IllegalArgumentException();

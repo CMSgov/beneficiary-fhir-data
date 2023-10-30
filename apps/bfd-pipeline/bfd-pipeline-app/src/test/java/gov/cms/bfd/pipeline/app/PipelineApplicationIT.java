@@ -304,8 +304,8 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   }
 
   /**
-   * Verifies that when a failing smoke test causes the application to terminate with appropriate
-   * exist code and log message.
+   * Verifies that a failing smoke test causes the application to terminate with appropriate exist
+   * code and log message.
    *
    * @throws Exception indicates a test failure
    */

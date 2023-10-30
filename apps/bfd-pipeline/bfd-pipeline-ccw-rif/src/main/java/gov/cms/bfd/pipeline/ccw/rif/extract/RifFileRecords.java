@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -10,8 +9,7 @@ import lombok.Getter;
 import reactor.core.publisher.Flux;
 
 /**
- * Models a {@link Stream} of {@link RifFileRecords}, produced from a single {@link RifFile} in a
- * {@link RifFilesEvent}.
+ * Models a {@link Flux} of {@link RifRecordEvent}s, produced from a single {@link RifFileEvent}.
  */
 @Getter
 public final class RifFileRecords {
@@ -24,8 +22,8 @@ public final class RifFileRecords {
   /**
    * Constructs a new {@link RifFileRecords} instance.
    *
-   * @param sourceEvent the value to use for {@link #getSourceEvent()}
-   * @param records the value to use for {@link #getRecords()}
+   * @param sourceEvent the value to use for {@link #sourceEvent}
+   * @param records the value to use for {@link #records}
    */
   public RifFileRecords(RifFileEvent sourceEvent, Flux<RifRecordEvent<?>> records) {
     Objects.requireNonNull(sourceEvent);

@@ -47,7 +47,7 @@ public class RifFileParserTest {
   @Mock private RifFileEvent rifFileEventMock;
 
   /**
-   * Creates the temp file before any tests have run.,
+   * Creates the temp file before any tests have run.
    *
    * @throws IOException pass through
    */
@@ -57,7 +57,7 @@ public class RifFileParserTest {
   }
 
   /**
-   * Deletes the temp file after all tests have run.,
+   * Deletes the temp file after all tests have run.
    *
    * @throws IOException pass through
    */

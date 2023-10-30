@@ -13,8 +13,8 @@ import org.apache.commons.csv.CSVRecord;
 import reactor.core.publisher.Flux;
 
 /**
- * Accepts a stream of {@link CSVRecord}s, one at a time, and returns a stream of {@link
- * RifRecordEvent}s. These objects are stateful and can receive records one at a time.
+ * Instances of this interface provide a method that takes a {@link RifFile} and returns a {@link
+ * Flux} of {@link RifRecordEvent}s.
  */
 @ThreadSafe
 public abstract class RifFileParser {
@@ -77,7 +77,7 @@ public abstract class RifFileParser {
     }
 
     /**
-     * Calls the lambda to produce a new {@link RifRecordEvent} form a list of {@link CSVRecord}s.
+     * Calls the lambda to produce a new {@link RifRecordEvent} from a list of {@link CSVRecord}s.
      *
      * @param records group of records to parse (may be empty)
      * @return flux containing the resulting object or an empty flux if the list was empty
