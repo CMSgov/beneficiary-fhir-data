@@ -8,7 +8,7 @@
 #   $2 (Optional) - the ARN of the CMK of the corresponding key used to encrypt the target .yaml
 #                   file, if unspecified the CMK is looked up based upon the environment
 
-set -Eeuo pipefail
+set -Eeo pipefail
 
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 readonly SCRIPT_DIR
