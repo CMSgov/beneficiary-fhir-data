@@ -11,9 +11,10 @@ module "terraservice" {
 }
 
 locals {
-  default_tags = module.terraservice.default_tags
-  env          = module.terraservice.env
-  seed_env     = module.terraservice.seed_env
+  default_tags       = module.terraservice.default_tags
+  env                = module.terraservice.env
+  latest_bfd_release = module.terraservice.latest_bfd_release
+  seed_env           = module.terraservice.seed_env
 
   service = "migrator"
   layer   = "data"

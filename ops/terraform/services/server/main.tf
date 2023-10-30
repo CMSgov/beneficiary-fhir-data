@@ -6,10 +6,11 @@ module "terraservice" {
 }
 
 locals {
-  default_tags     = module.terraservice.default_tags
-  env              = module.terraservice.env
-  seed_env         = module.terraservice.seed_env
-  is_ephemeral_env = module.terraservice.is_ephemeral_env
+  default_tags       = module.terraservice.default_tags
+  env                = module.terraservice.env
+  seed_env           = module.terraservice.seed_env
+  is_ephemeral_env   = module.terraservice.is_ephemeral_env
+  latest_bfd_release = module.terraservice.latest_bfd_release
 
   azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
   legacy_service = "fhir"
