@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.sharedutils;
 
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
-import gov.cms.bfd.sharedutils.interfaces.ThrowingRunnable;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -12,48 +11,9 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/** Utility class containing static methods to create and wait for fluxes. */
 @Slf4j
 public class FluxUtils {
-  /**
-   * Creates a {@link Mono} that, when subscribed to, calls the specified function and publishes its
-   * result. Function is allowed to throw checked exceptions and they are reported by the {@link
-   * Mono} unwrapped.
-   *
-   * @param function the function to call
-   * @return mono that calls the function
-   * @param <T> type returned by the function
-   */
-  public static <T> Mono<T> fromValueFunction(Callable<T> function) {
-    return Mono.defer(
-        () -> {
-          try {
-            return Mono.just(function.call());
-          } catch (Exception ex) {
-            return Mono.error(ex);
-          }
-        });
-  }
-
-  /**
-   * Creates a {@link Mono} that, when subscribed to, calls the specified procedure. Function is
-   * allowed to throw checked exceptions and they are reported by the {@link Mono} unwrapped. The
-   * returned mono will always either be empty or have an error.
-   *
-   * @param procedure the procedure to call
-   * @return mono that calls the procedure
-   */
-  public static Mono<Void> fromProcedure(ThrowingRunnable<? extends Exception> procedure) {
-    return Mono.defer(
-        () -> {
-          try {
-            procedure.run();
-            return Mono.empty();
-          } catch (Exception ex) {
-            return Mono.error(ex);
-          }
-        });
-  }
-
   /**
    * Creates a {@link Flux} that, when subscribed to, calls the specified function and processes the
    * flux it returns. Function is allowed to throw checked exceptions and they are reported by the
@@ -177,7 +137,7 @@ public class FluxUtils {
    *
    * @param mono the mono to wait for
    * @param maxWaitTime the maximum amount of time to wait
-   * @return any value published by the mono
+   * @return any value published by the mono (if any)
    * @throws Exception any error reported by the flux
    * @param <T> type published by the mono
    */

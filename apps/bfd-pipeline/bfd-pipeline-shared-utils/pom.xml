@@ -121,6 +121,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Library for writing tests of project reactor based code. -->
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <!-- Delegates all JCL logging (typically from dependencies) to SLF4J. -->
             <!-- Required during testing because S3 SDK uses JCL. -->
             <groupId>org.slf4j</groupId>
