@@ -163,7 +163,7 @@ public class ClaimE2E extends ServerRequiredTest {
         claimEndpoint
             + "?mbi="
             + RDATestUtils.MBI_HASH
-            + "&service-date=gt1970-07-18&service-date=lt1970-07-25"
+            + "&service-date=ge1970-07-10&service-date=le1970-07-18"
             + "&_count=5&startIndex=1";
 
     String response =
