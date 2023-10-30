@@ -26,7 +26,7 @@ public class EnumTypeBean implements ModelBean {
   private String packageName;
 
   /** List of names for the values of the enum. */
-  @NotNull @Singular private List<@JavaName String> values = new ArrayList<>();
+  @NotNull @Singular private final List<@JavaName String> values = new ArrayList<>();
 
   /**
    * Looks up a value with the given name and returns the value if it is present. Otherwise throws

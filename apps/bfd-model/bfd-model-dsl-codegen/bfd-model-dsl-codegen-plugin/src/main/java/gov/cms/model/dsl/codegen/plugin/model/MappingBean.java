@@ -48,11 +48,12 @@ public class MappingBean implements ModelBean {
   private String transformerClassName;
 
   /** Defines the type of objects being transformed (either GRPC or CSV). */
-  @NotNull private SourceType sourceType = SourceType.Grpc;
+  @NotNull private final SourceType sourceType = SourceType.Grpc;
 
   /** Defines how nullable values are passed to and from field accessor methods. */
   @NotNull
-  private NullableFieldAccessorType nullableFieldAccessorType = NullableFieldAccessorType.Standard;
+  private final NullableFieldAccessorType nullableFieldAccessorType =
+      NullableFieldAccessorType.Standard;
 
   /** Meta data for the database table. */
   @NotNull @Valid private TableBean table;
@@ -61,18 +62,20 @@ public class MappingBean implements ModelBean {
   @Builder.Default private int minStringLength = 1;
 
   /** Meta data for enum types. */
-  @NotNull @Singular private List<@Valid EnumTypeBean> enumTypes = new ArrayList<>();
+  @NotNull @Singular private final List<@Valid EnumTypeBean> enumTypes = new ArrayList<>();
 
   /** Meta data for transformations used to copy data from message to entity. */
-  @NotNull @Singular private List<@Valid TransformationBean> transformations = new ArrayList<>();
+  @NotNull @Singular
+  private final List<@Valid TransformationBean> transformations = new ArrayList<>();
 
   /** Meta data for any external transformations used in transformer. */
   @NotNull @Singular
-  private List<@Valid ExternalTransformationBean> externalTransformations = new ArrayList<>();
+  private final List<@Valid ExternalTransformationBean> externalTransformations = new ArrayList<>();
 
   /** List of extra interfaces to add to the entity class. */
   @NotNull @Singular
-  private List<@JavaName(type = JavaNameType.Compound) String> entityInterfaces = new ArrayList<>();
+  private final List<@JavaName(type = JavaNameType.Compound) String> entityInterfaces =
+      new ArrayList<>();
 
   /**
    * Finds the {@link EnumTypeBean} in this mapping with the given name and returns it.
