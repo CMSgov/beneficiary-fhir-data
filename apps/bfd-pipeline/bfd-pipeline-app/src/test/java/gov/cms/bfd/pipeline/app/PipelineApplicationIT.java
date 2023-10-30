@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import com.google.common.collect.ImmutableSet;
@@ -25,6 +26,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaMcsClaimLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.nio.file.Path;
@@ -302,6 +304,45 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   }
 
   /**
+   * Verifies that when a failing smoke test causes the application to terminate with appropriate
+   * exist code and log message.
+   *
+   * @throws Exception indicates a test failure
+   */
+  @Test
+  public void smokeTestFailure() throws Exception {
+    // Create a mock job that has a guaranteed smoke test failure.
+    PipelineJob smokeTestFailureJob = mock(PipelineJob.class);
+    doReturn(true).when(smokeTestFailureJob).isInterruptible();
+    doReturn(false).when(smokeTestFailureJob).isSmokeTestSuccessful();
+
+    String bucket = null;
+    try {
+      // Create the (empty) bucket to run against.
+      bucket = s3Dao.createTestBucket();
+
+      // Configure the app with the temporary bucket name.
+      ConfigLoader configLoader = createCcwRifJobConfig(bucket);
+      PipelineApplication app = createApplicationForTest(configLoader);
+
+      // Override normal job creation to ensure our mock job is created instead of real one.
+      doReturn(List.of(smokeTestFailureJob)).when(app).createAllJobs(any(), any(), any(), any());
+
+      // Run the app and collect its output.
+      final int exitCode = app.runPipelineAndHandleExceptions();
+      final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
+
+      // Verify the results match expectations
+      assertEquals(PipelineApplication.EXIT_CODE_SMOKE_TEST_FAILURE, exitCode);
+      assertASmokeTestFailureWasLogged(logLines);
+    } finally {
+      if (StringUtils.isNotBlank(bucket)) {
+        s3Dao.deleteTestBucket(bucket);
+      }
+    }
+  }
+
+  /**
    * Verifies that the CCW RIF load job has completed by checking the job records.
    *
    * @param logLines list containing every line in the log file
@@ -378,6 +419,19 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     assertThat(logLines)
         .describedAs("All data sets processed")
         .anyMatch(line -> line.contains(CcwRifLoadJob.LOG_MESSAGE_DATA_SET_COMPLETE));
+  }
+
+  /**
+   * Verifies that a smoke test failure has been logged.
+   *
+   * @param logLines list containing every line in the log file
+   */
+  private static void assertASmokeTestFailureWasLogged(List<String> logLines) {
+    assertJobRecordMatching(
+        logLines,
+        line -> line.contains("Pipeline terminating due to smoke test failure"),
+        PipelineApplication.class,
+        "Smoke test failure.");
   }
 
   /**

@@ -82,7 +82,11 @@ public final class DefaultDataSetProcessor implements DataSetProcessor {
       dataSetFileMetricsReporter.report();
 
       if (failure != null) {
-        LOGGER.info("Stopping due to error.");
+        if (failure instanceof InterruptedException) {
+          LOGGER.info("Stopping due to interrupt.");
+        } else {
+          LOGGER.info("Stopping due to error.");
+        }
         break;
       }
     }
