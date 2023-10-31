@@ -8,7 +8,6 @@ import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
-import java.util.HashSet;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
 import org.junit.jupiter.api.AfterAll;
@@ -24,9 +23,18 @@ public class ClaimE2E extends ServerRequiredTest {
   /** The base claim endpoint. */
   private static String claimEndpoint;
 
-  /** An ignore pattern for testing. */
-  private static final Set<String> IGNORE_PATTERNS =
+  /** A base ignore pattern for testing the read endpoint responses against an expected file. */
+  private static final Set<String> READ_IGNORE_PATTERNS =
       Set.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
+
+  /** A base ignore pattern for testing the search by mbi responses against an expected file. */
+  private static final Set<String> MBI_IGNORE_PATTERNS =
+      Set.of(
+          "\"/link/[0-9]+/url\"",
+          "\"/created\"",
+          "\"/meta/lastUpdated\"",
+          "\"/id\"",
+          "\"/entry/[0-9]+/resource/created\"");
 
   /** Sets up the test resources. */
   @BeforeEach
@@ -52,7 +60,9 @@ public class ClaimE2E extends ServerRequiredTest {
    */
   @Test
   public void shouldGetCorrectFissClaimResourceById() {
-    verifyReadResponseMatchesFor("f-123456", false, "claimFissRead");
+    String requestString = claimEndpoint + "f-123456";
+
+    verifyResponseMatchesFor(requestString, false, "claimFissRead", READ_IGNORE_PATTERNS);
   }
 
   /**
@@ -61,7 +71,10 @@ public class ClaimE2E extends ServerRequiredTest {
    */
   @Test
   public void shouldGetCorrectFissClaimResourceByIdWithTaxNumbers() {
-    verifyReadResponseMatchesFor("f-123456", true, "claimFissReadWithTaxNumbers");
+    String requestString = claimEndpoint + "f-123456";
+
+    verifyResponseMatchesFor(
+        requestString, true, "claimFissReadWithTaxNumbers", READ_IGNORE_PATTERNS);
   }
 
   /**
@@ -70,7 +83,9 @@ public class ClaimE2E extends ServerRequiredTest {
    */
   @Test
   public void shouldGetCorrectMcsClaimResourceById() {
-    verifyReadResponseMatchesFor("m-654321", false, "claimMcsRead");
+    String requestString = claimEndpoint + "m-654321";
+
+    verifyResponseMatchesFor(requestString, false, "claimMcsRead", READ_IGNORE_PATTERNS);
   }
 
   /**
@@ -79,7 +94,10 @@ public class ClaimE2E extends ServerRequiredTest {
    */
   @Test
   public void shouldGetCorrectMcsClaimResourceByIdWithTaxNumbers() {
-    verifyReadResponseMatchesFor("m-654321", true, "claimMcsReadWithTaxNumbers");
+    String requestString = claimEndpoint + "m-654321";
+
+    verifyResponseMatchesFor(
+        requestString, true, "claimMcsReadWithTaxNumbers", READ_IGNORE_PATTERNS);
   }
 
   /**
@@ -95,25 +113,7 @@ public class ClaimE2E extends ServerRequiredTest {
             + RDATestUtils.MBI_HASH
             + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
 
-    String response =
-        given()
-            .spec(requestAuth)
-            .expect()
-            .statusCode(200)
-            .when()
-            .get(requestString)
-            .then()
-            .extract()
-            .response()
-            .asString();
-
-    String expected = rdaTestUtils.expectedResponseFor("claimSearch");
-
-    Set<String> ignorePatterns = new HashSet<>(IGNORE_PATTERNS);
-    ignorePatterns.add("\"/id\"");
-    ignorePatterns.add("\"/entry/[0-9]+/resource/created\"");
-
-    AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
+    verifyResponseMatchesFor(requestString, false, "claimSearch", MBI_IGNORE_PATTERNS);
   }
 
   /**
@@ -130,26 +130,7 @@ public class ClaimE2E extends ServerRequiredTest {
             + RDATestUtils.MBI_HASH
             + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
 
-    String response =
-        given()
-            .spec(requestAuth)
-            .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true")
-            .expect()
-            .statusCode(200)
-            .when()
-            .get(requestString)
-            .then()
-            .extract()
-            .response()
-            .asString();
-
-    String expected = rdaTestUtils.expectedResponseFor("claimSearchWithTaxNumbers");
-
-    Set<String> ignorePatterns = new HashSet<>(IGNORE_PATTERNS);
-    ignorePatterns.add("\"/id\"");
-    ignorePatterns.add("\"/entry/[0-9]+/resource/created\"");
-
-    AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
+    verifyResponseMatchesFor(requestString, true, "claimSearchWithTaxNumbers", MBI_IGNORE_PATTERNS);
   }
 
   /**
@@ -166,25 +147,7 @@ public class ClaimE2E extends ServerRequiredTest {
             + "&service-date=ge1970-07-10&service-date=le1970-07-18"
             + "&_count=5&startIndex=1";
 
-    String response =
-        given()
-            .spec(requestAuth)
-            .expect()
-            .statusCode(200)
-            .when()
-            .get(requestString)
-            .then()
-            .extract()
-            .response()
-            .asString();
-
-    String expected = rdaTestUtils.expectedResponseFor("claimSearchPaginated");
-
-    Set<String> ignorePatterns = new HashSet<>(IGNORE_PATTERNS);
-    ignorePatterns.add("\"/id\"");
-    ignorePatterns.add("\"/entry/[0-9]+/resource/created\"");
-
-    AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
+    verifyResponseMatchesFor(requestString, false, "claimSearchPaginated", MBI_IGNORE_PATTERNS);
   }
 
   /**
@@ -283,17 +246,19 @@ public class ClaimE2E extends ServerRequiredTest {
   }
 
   /**
-   * Verifies the Claim read response returns a 200 and the json response matches the given response
-   * file's json.
+   * Verifies the Claim response for the given requestString returns a 200 and the json response
+   * matches the expected response file.
    *
-   * @param id the id to pass to the read endpoint
+   * @param requestString the request string to search with
    * @param includeTaxNumbers the value to use for IncludeTaxNumbers header
    * @param expectedResponseFileName the name of the response file to compare against
+   * @param ignorePatterns the ignore patterns to use when comparing the result file to the response
    */
-  private void verifyReadResponseMatchesFor(
-      String id, boolean includeTaxNumbers, String expectedResponseFileName) {
-
-    String requestString = claimEndpoint + id;
+  private void verifyResponseMatchesFor(
+      String requestString,
+      boolean includeTaxNumbers,
+      String expectedResponseFileName,
+      Set<String> ignorePatterns) {
 
     String response =
         given()
@@ -310,6 +275,6 @@ public class ClaimE2E extends ServerRequiredTest {
 
     String expected = rdaTestUtils.expectedResponseFor(expectedResponseFileName);
 
-    AssertUtils.assertJsonEquals(expected, response, IGNORE_PATTERNS);
+    AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
   }
 }
