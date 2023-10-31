@@ -1028,7 +1028,11 @@
                     <excludePackageNames>
                         gov.cms.bfd.pipeline.rda.grpc.*;
                         gov.cms.mpsm.rda.v1.*;
-                        gov.cms.bfd.model.*;
+                        gov.cms.mpsm.rda.v1;
+                        gov.cms.bfd.model.rda;
+                        gov.cms.bfd.model.rda.*;
+                        gov.cms.bfd.model.rif;
+                        gov.cms.bfd.model.rif.*;
                     </excludePackageNames>
                     <quiet>true</quiet>
                     <!-- This notimestamp option does not make our *-javadoc.jar files completely
