@@ -1027,8 +1027,6 @@
                     <!-- Exclude javadocs on certain generated files, reduces build warnings -->
                     <excludePackageNames>
                         gov.cms.bfd.pipeline.rda.grpc.*;
-                        gov.cms.model.dsl.codegen.plugin.model;
-                        gov.cms.model.dsl.codegen.plugin.*;
                         gov.cms.mpsm.rda.v1;
                         gov.cms.mpsm.rda.v1.*;
                         gov.cms.bfd.model.rif.entities;

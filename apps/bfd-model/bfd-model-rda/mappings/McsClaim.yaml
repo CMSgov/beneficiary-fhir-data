@@ -2,7 +2,7 @@ mappings:
 - id: McsClaim
   messageClassName: gov.cms.mpsm.rda.v1.mcs.McsClaim
   entityClassName: gov.cms.bfd.model.rda.entities.RdaMcsClaim
-  transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.McsClaimParser
+  transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.entities.McsClaimParser
   table:
     name: mcs_claims
     schema: rda
