@@ -144,7 +144,7 @@ if test -f "${YAML_FILE}"; then
   # This enables ephemeral configuration support.
   eval "cat <<EOF
 $untemplated_json
-EOF" 2>/dev/null | jq
+EOF" 2>/dev/null
 else
   echo '{}'
 fi
