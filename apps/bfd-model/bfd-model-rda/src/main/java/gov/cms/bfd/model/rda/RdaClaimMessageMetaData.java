@@ -75,7 +75,6 @@ public class RdaClaimMessageMetaData {
    * For FISS claims the values are from the {@code curr_loc_1} and {@code curr_loc_2}. For MCS
    * claims they are all {@code idr_loc_code} values from the {@code rda_mcs_location} table.
    */
-  @Builder.Default
   @Column(name = "claim_location", columnDefinition = "json")
   @Convert(converter = StringListConverter.class)
   private StringList locations = new StringList();
