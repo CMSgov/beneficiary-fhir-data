@@ -22,7 +22,7 @@ resource "aws_s3_bucket_logging" "this" {
   count = local.is_ephemeral_env ? 0 : 1
 
   bucket = aws_s3_bucket.this.id
-  
+
   expected_bucket_owner = local.account_id
 
   target_bucket = local.logging_bucket
