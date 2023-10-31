@@ -5,7 +5,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
 import gov.cms.bfd.server.war.ServerRequiredTest;
+import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
+import java.util.Set;
+import org.hl7.fhir.r4.model.ClaimResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +21,19 @@ public class ClaimResponseE2E extends ServerRequiredTest {
 
   /** The base claim response endpoint. */
   private static String claimResponseEndpoint;
+
+  /** A base ignore pattern for testing the read endpoint responses against an expected file. */
+  private static final Set<String> READ_IGNORE_PATTERNS =
+      Set.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
+
+  /** A base ignore pattern for testing the search by mbi responses against an expected file. */
+  private static final Set<String> MBI_IGNORE_PATTERNS =
+      Set.of(
+          "\"/link/[0-9]+/url\"",
+          "\"/created\"",
+          "\"/meta/lastUpdated\"",
+          "\"/id\"",
+          "\"/entry/[0-9]+/resource/created\"");
 
   /** Sets up the test resources. */
   @BeforeEach
@@ -35,6 +51,85 @@ public class ClaimResponseE2E extends ServerRequiredTest {
   public static void tearDown() {
     rdaTestUtils.truncateTables();
     rdaTestUtils.destroy();
+  }
+
+  /**
+   * Tests to see if the correct response is given when a FISS {@link ClaimResponse} is looked up by
+   * a specific ID.
+   */
+  @Test
+  void shouldGetCorrectFissClaimResponseResourceById() {
+    String requestString = claimResponseEndpoint + "f-123456";
+
+    verifyResponseMatchesFor(requestString, "claimResponseFissRead", READ_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct response is given when an MCS {@link ClaimResponse} is looked up by
+   * a specific ID.
+   */
+  @Test
+  void shouldGetCorrectMcsClaimResponseResourceById() {
+    String requestString = claimResponseEndpoint + "m-654321";
+
+    verifyResponseMatchesFor(requestString, "claimResponseMcsRead", READ_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct response is given when a search is done for {@link ClaimResponse}s
+   * using given mbi and service-date range. In this test case the query finds the matched claims
+   * because their to dates are within the date range even though their from dates are not.
+   */
+  @Test
+  void shouldGetCorrectClaimResponseResourcesByMbiHash() {
+    String requestString =
+        claimResponseEndpoint
+            + "?mbi="
+            + RDATestUtils.MBI_OLD_HASH
+            + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
+
+    verifyResponseMatchesFor(requestString, "claimResponseSearch", MBI_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if a valid response is given when a search is done for {@link ClaimResponse}s
+   * using given mbi and excludeSAMHSA=true, since this does an extra check for samhsa data.
+   */
+  @Test
+  void shouldGetClaimResponseResourcesByMbiHashWithExcludeSamhsaTrue() {
+    String requestString =
+        claimResponseEndpoint
+            + "?mbi="
+            + RDATestUtils.MBI_OLD_HASH
+            + "&service-date=gt1970-07-18&service-date=lt1970-07-25"
+            + "&excludeSAMHSA=true";
+
+    // Test passes as long as we get a 200 with an entry and not an error
+    given()
+        .spec(requestAuth)
+        .expect()
+        .statusCode(200)
+        .body("entry.size()", equalTo(1))
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Tests to see if the correct paginated response is given when a search is done for {@link
+   * ClaimResponse}s using given mbi and service-date range. In this test case the query finds the
+   * matched claims because their from dates are within the date range even though their to dates
+   * are not.
+   */
+  @Test
+  void shouldGetCorrectClaimResponseResourcesByMbiHashWithPagination() {
+    String requestString =
+        claimResponseEndpoint
+            + "?mbi="
+            + RDATestUtils.MBI_OLD_HASH
+            + "&service-date=ge1970-07-10&service-date=le1970-07-18"
+            + "&_count=5&startIndex=1";
+
+    verifyResponseMatchesFor(requestString, "claimResponseSearchPaginated", MBI_IGNORE_PATTERNS);
   }
 
   /**
@@ -136,5 +231,33 @@ public class ClaimResponseE2E extends ServerRequiredTest {
         .statusCode(200)
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verifies the ClaimResponse response for the given requestString returns a 200 and the json
+   * response matches the expected response file.
+   *
+   * @param requestString the request string to search with
+   * @param expectedResponseFileName the name of the response file to compare against
+   * @param ignorePatterns the ignore patterns to use when comparing the result file to the response
+   */
+  private void verifyResponseMatchesFor(
+      String requestString, String expectedResponseFileName, Set<String> ignorePatterns) {
+
+    String response =
+        given()
+            .spec(requestAuth)
+            .expect()
+            .statusCode(200)
+            .when()
+            .get(requestString)
+            .then()
+            .extract()
+            .response()
+            .asString();
+
+    String expected = rdaTestUtils.expectedResponseFor(expectedResponseFileName);
+
+    AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
   }
 }
