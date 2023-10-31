@@ -56,7 +56,12 @@ data "aws_kms_key" "cmk" {
 }
 
 data "external" "yaml" {
-  program = ["${path.module}/scripts/read-and-decrypt-yaml.sh", local.yaml_env, local.kms_key_id]
+  program = ["${path.module}/scripts/tf-decrypt-shim.sh"]
+  query = {
+    seed_env    = local.yaml_env
+    env         = local.env
+    kms_key_arn = local.kms_key_id
+  }
 }
 
 resource "aws_kms_key" "primary" {

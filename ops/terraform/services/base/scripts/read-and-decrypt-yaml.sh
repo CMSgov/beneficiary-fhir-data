@@ -8,6 +8,8 @@
 #   $2 (Optional) - the ARN of the CMK of the corresponding key used to encrypt the target .yaml
 #                   file, if unspecified the CMK is looked up based upon the environment
 
+set -Eeo pipefail
+
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 readonly SCRIPT_DIR
 
@@ -28,11 +30,12 @@ readonly CMK_ARN_OVERRIDE
 
 CMK_LOOKUP="$(
   # Only attempt to lookup the CMK if the override is undefined
-  [[ -z "$CMK_ARN_OVERRIDE" ]] &&
+  if [[ -z "$CMK_ARN_OVERRIDE" ]]; then
     aws kms describe-key \
       --key-id "alias/bfd-${BFD_SEED_ENV}-config-cmk" \
       --query KeyMetadata.Arn \
       --output text
+  fi
 )"
 readonly CMK_LOOKUP
 
@@ -121,7 +124,7 @@ if test -f "${YAML_FILE}"; then
   #   "/bfd/...": "...",
   #   ...
   # }
-  jq 'with_entries(
+  untemplated_json="$(jq 'with_entries(
     .value as $value 
     | .key |= (
       split("/") 
@@ -134,7 +137,14 @@ if test -f "${YAML_FILE}"; then
       )
     ) 
     | .value |= .value
-  )' <<<"$sensitivity_with_value"
+  )' <<<"$sensitivity_with_value")"
+
+  # Using eval we can exploit heredoc to template any values (like ${env}) within the final JSON,
+  # provided that the templated variable is defined within the environment or within this script.
+  # This enables ephemeral configuration support.
+  eval "cat <<EOF
+$untemplated_json
+EOF" 2>/dev/null | jq
 else
   echo '{}'
 fi
