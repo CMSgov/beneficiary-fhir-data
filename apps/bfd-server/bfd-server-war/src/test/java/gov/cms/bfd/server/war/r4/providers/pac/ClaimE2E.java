@@ -5,7 +5,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
 import gov.cms.bfd.server.war.ServerRequiredTest;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
+import java.util.Set;
+import org.hl7.fhir.r4.model.Claim;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +22,19 @@ public class ClaimE2E extends ServerRequiredTest {
 
   /** The base claim endpoint. */
   private static String claimEndpoint;
+
+  /** A base ignore pattern for testing the read endpoint responses against an expected file. */
+  private static final Set<String> READ_IGNORE_PATTERNS =
+      Set.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
+
+  /** A base ignore pattern for testing the search by mbi responses against an expected file. */
+  private static final Set<String> MBI_IGNORE_PATTERNS =
+      Set.of(
+          "\"/link/[0-9]+/url\"",
+          "\"/created\"",
+          "\"/meta/lastUpdated\"",
+          "\"/id\"",
+          "\"/entry/[0-9]+/resource/created\"");
 
   /** Sets up the test resources. */
   @BeforeEach
@@ -35,6 +52,102 @@ public class ClaimE2E extends ServerRequiredTest {
   public static void tearDown() {
     rdaTestUtils.truncateTables();
     rdaTestUtils.destroy();
+  }
+
+  /**
+   * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
+   * specific ID.
+   */
+  @Test
+  public void shouldGetCorrectFissClaimResourceById() {
+    String requestString = claimEndpoint + "f-123456";
+
+    verifyResponseMatchesFor(requestString, false, "claimFissRead", READ_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
+   * specific ID with tax numbers included.
+   */
+  @Test
+  public void shouldGetCorrectFissClaimResourceByIdWithTaxNumbers() {
+    String requestString = claimEndpoint + "f-123456";
+
+    verifyResponseMatchesFor(
+        requestString, true, "claimFissReadWithTaxNumbers", READ_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
+   * specific ID.
+   */
+  @Test
+  public void shouldGetCorrectMcsClaimResourceById() {
+    String requestString = claimEndpoint + "m-654321";
+
+    verifyResponseMatchesFor(requestString, false, "claimMcsRead", READ_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
+   * specific ID with tax numbers included.
+   */
+  @Test
+  public void shouldGetCorrectMcsClaimResourceByIdWithTaxNumbers() {
+    String requestString = claimEndpoint + "m-654321";
+
+    verifyResponseMatchesFor(
+        requestString, true, "claimMcsReadWithTaxNumbers", READ_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct response is given when a search is done for {@link Claim}s using
+   * given mbi and service-date range. In this test case the query finds the matched claims because
+   * their to dates are within the date range even though their from dates are not.
+   */
+  @Test
+  public void shouldGetCorrectClaimResourcesByMbiHash() {
+    String requestString =
+        claimEndpoint
+            + "?mbi="
+            + RDATestUtils.MBI_HASH
+            + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
+
+    verifyResponseMatchesFor(requestString, false, "claimSearch", MBI_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct response is given when a search is done for {@link Claim}s using
+   * given mbi and service-date range with tax numbers included. In this test case the query finds
+   * the matched claims because their to dates are within the date range even though their from
+   * dates are not.
+   */
+  @Test
+  public void shouldGetCorrectClaimResourcesByMbiHashWithTaxNumbers() {
+    String requestString =
+        claimEndpoint
+            + "?mbi="
+            + RDATestUtils.MBI_HASH
+            + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
+
+    verifyResponseMatchesFor(requestString, true, "claimSearchWithTaxNumbers", MBI_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if the correct paginated response is given when a search is done for {@link
+   * Claim}s using given mbi and service-date range. In this test case the query finds the matched
+   * claims because their from dates are within the date range even though their to dates are not.
+   */
+  @Test
+  public void shouldGetCorrectClaimResourcesByMbiHashWithPagination() {
+    String requestString =
+        claimEndpoint
+            + "?mbi="
+            + RDATestUtils.MBI_HASH
+            + "&service-date=ge1970-07-10&service-date=le1970-07-18"
+            + "&_count=5&startIndex=1";
+
+    verifyResponseMatchesFor(requestString, false, "claimSearchPaginated", MBI_IGNORE_PATTERNS);
   }
 
   /**
@@ -92,10 +205,8 @@ public class ClaimE2E extends ServerRequiredTest {
     given()
         .spec(requestAuth)
         .expect()
-        .log()
-        .body()
         .body("resourceType", equalTo("Bundle"))
-        // sine we start on the last item's index with 2 items per page, 1 item returned
+        // since we start on the last item's index with 2 items per page, 1 item returned
         .body("entry.size()", equalTo(1))
         // 4 items total reported on all pages
         .body("total", equalTo(4))
@@ -117,8 +228,6 @@ public class ClaimE2E extends ServerRequiredTest {
     given()
         .spec(requestAuth)
         .expect()
-        .log()
-        .ifError()
         .body("total", equalTo(0))
         .statusCode(200)
         .when()
@@ -130,11 +239,42 @@ public class ClaimE2E extends ServerRequiredTest {
     given()
         .spec(requestAuth)
         .expect()
-        .log()
-        .ifError()
         .body("total", equalTo(0))
         .statusCode(200)
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verifies the Claim response for the given requestString returns a 200 and the json response
+   * matches the expected response file.
+   *
+   * @param requestString the request string to search with
+   * @param includeTaxNumbers the value to use for IncludeTaxNumbers header
+   * @param expectedResponseFileName the name of the response file to compare against
+   * @param ignorePatterns the ignore patterns to use when comparing the result file to the response
+   */
+  private void verifyResponseMatchesFor(
+      String requestString,
+      boolean includeTaxNumbers,
+      String expectedResponseFileName,
+      Set<String> ignorePatterns) {
+
+    String response =
+        given()
+            .spec(requestAuth)
+            .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, includeTaxNumbers)
+            .expect()
+            .statusCode(200)
+            .when()
+            .get(requestString)
+            .then()
+            .extract()
+            .response()
+            .asString();
+
+    String expected = rdaTestUtils.expectedResponseFor(expectedResponseFileName);
+
+    AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
   }
 }
