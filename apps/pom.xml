@@ -1029,7 +1029,7 @@
                         gov.cms.bfd.pipeline.rda.grpc.*;
                         gov.cms.mpsm.rda.v1.*;
                         gov.cms.bfd.model.*;
-                        *</excludePackageNames>
+                    </excludePackageNames>
                     <quiet>true</quiet>
                     <!-- This notimestamp option does not make our *-javadoc.jar files completely
                         reproducible, but the option is recommended by Maven for a reproducible
