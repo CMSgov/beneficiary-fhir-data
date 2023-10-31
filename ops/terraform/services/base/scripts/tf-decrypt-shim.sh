@@ -22,7 +22,7 @@ export TF_QUERY
 # kms_key_arn=...
 # env=...
 TF_QUERY_AS_VARS=$(jq -r 'to_entries[] | "\(.key)=\(.value)"' <<<"$TF_QUERY")
-readonly TF_QUERY
+readonly TF_QUERY_AS_VARS
 
 SEED_ENV="$(jq -r '"\(.seed_env)"' <<<"$TF_QUERY")"
 readonly SEED_ENV
