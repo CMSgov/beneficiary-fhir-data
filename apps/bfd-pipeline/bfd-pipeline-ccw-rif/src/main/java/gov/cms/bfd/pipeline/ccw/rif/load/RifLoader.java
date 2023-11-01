@@ -20,6 +20,7 @@ import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
+import gov.cms.bfd.pipeline.sharedutils.FluxWaiter;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
@@ -36,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -80,6 +82,9 @@ public final class RifLoader {
   /** The shared application state. */
   private final PipelineApplicationState appState;
 
+  /** Used to wait for flux completion. */
+  private final FluxWaiter fluxWaiter;
+
   /** The maximum amount of time we will wait for a job to complete loading its batches. */
   private static final Duration MAX_FILE_WAIT_TIME = Duration.ofHours(72);
 
@@ -94,6 +99,7 @@ public final class RifLoader {
     this.appState = appState;
 
     idHasher = new IdHasher(options.getIdHasherConfig());
+    fluxWaiter = new FluxWaiter(MAX_FILE_WAIT_TIME, Duration.ofMinutes(5));
   }
 
   /**
@@ -146,7 +152,8 @@ public final class RifLoader {
    * @throws Exception passed through from processing
    */
   public long processBlocking(RifFileRecords dataToLoad) throws Exception {
-    return FluxUtils.waitForCompletion(processAsync(dataToLoad), MAX_FILE_WAIT_TIME);
+    final var interrupted = new AtomicBoolean();
+    return fluxWaiter.waitForCompletion(processAsync(dataToLoad, interrupted), interrupted);
   }
 
   /**
@@ -158,7 +165,8 @@ public final class RifLoader {
    *     loaded
    * @return a {@link Flux} that processes all records asynchronously
    */
-  public Flux<RifRecordLoadResult> processAsync(RifFileRecords dataToLoad) {
+  public Flux<RifRecordLoadResult> processAsync(
+      RifFileRecords dataToLoad, AtomicBoolean interrupted) {
     return FluxUtils.fromFluxFunction(
         () -> {
           final RifFileType fileType = dataToLoad.getSourceEvent().getFile().getFileType();
@@ -197,9 +205,15 @@ public final class RifLoader {
               // will vary between 75% and 100% of the requested value as the flux manages the
               // queue.
               .limitRate(batchPrefetch)
+              // Stop processing if we have received an interrupt
+              .takeUntil(ignored -> interrupted.get())
               // process batches in parallel using threads from our scheduler
               .flatMap(
-                  batch -> processBatch(batch, loadedFileId).subscribeOn(scheduler),
+                  batch ->
+                      processBatch(batch, loadedFileId)
+                          .subscribeOn(scheduler)
+                          // Stop processing if we have received an interrupt
+                          .takeUntil(ignored -> interrupted.get()),
                   performanceSettings.getLoaderThreads())
               // clean up when the flux terminates (either by error or completion)
               .doFinally(

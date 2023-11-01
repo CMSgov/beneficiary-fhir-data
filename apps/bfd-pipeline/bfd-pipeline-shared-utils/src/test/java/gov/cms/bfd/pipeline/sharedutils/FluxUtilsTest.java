@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
@@ -12,13 +11,11 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.StringReader;
-import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 /** Unit tests for {@link FluxUtils}. */
@@ -144,63 +141,6 @@ public class FluxUtilsTest {
             "close failed");
     StepVerifier.create(flux).expectNext("hello").expectNext("world!").expectComplete().verify();
     verify(theResource).close();
-  }
-
-  /**
-   * Verifies that {@link FluxUtils#waitForCompletion} returns the number of values published by the
-   * flux while it was waiting for the flux to terminate.
-   *
-   * @throws Exception potential pass through
-   */
-  @Test
-  void verifyWaitForCompletionCountsResults() throws Exception {
-    final Flux<Integer> quickFlux =
-        Flux.just(1, 2, 3, 4, 5).subscribeOn(Schedulers.boundedElastic());
-    assertEquals(5, FluxUtils.waitForCompletion(quickFlux, Duration.ofMinutes(5)));
-
-    final Flux<Integer> emptyFlux = Flux.<Integer>empty().subscribeOn(Schedulers.boundedElastic());
-    assertEquals(0, FluxUtils.waitForCompletion(emptyFlux, Duration.ofMinutes(5)));
-  }
-
-  /**
-   * Verifies that {@link FluxUtils#waitForCompletion} unwraps and rethrows any checked exception
-   * reported by the flux while waiting for it to terminate.
-   */
-  @Test
-  void verifyWaitForCompletionUnwrapsCheckedExceptionFromFlux() {
-    final IOException error = new IOException();
-    final Flux<Integer> badFlux =
-        Flux.<Integer>error(error).subscribeOn(Schedulers.boundedElastic());
-    assertThatThrownBy(() -> FluxUtils.waitForCompletion(badFlux, Duration.ofMinutes(5)))
-        .isSameAs(error);
-  }
-
-  /**
-   * Verifies that {@link FluxUtils#waitForCompletion} rethrows any unchecked exception reported by
-   * the flux while waiting for it to terminate.
-   */
-  @Test
-  void verifyWaitForCompletionRethrowsRuntimeExceptionFromFlux() {
-    final RuntimeException error = new RuntimeException();
-    final Flux<Integer> badFlux =
-        Flux.<Integer>error(error).subscribeOn(Schedulers.boundedElastic());
-    assertThatThrownBy(() -> FluxUtils.waitForCompletion(badFlux, Duration.ofMinutes(5)))
-        .isSameAs(error);
-  }
-
-  /**
-   * Verifies that {@link FluxUtils#waitForCompletion} throws an {@link IllegalStateException} if
-   * the flux fails to terminate before the wait time expires.
-   */
-  @Test
-  void verifyWaitForCompletionThrowsIfTimeoutExpires() {
-    // the flux won't emit anything until 5 minutes have elapsed.
-    final Flux<Long> slowFlux =
-        Flux.interval(Duration.ofMinutes(5)).subscribeOn(Schedulers.boundedElastic());
-    // Time out after waiting 10 ms and ensure the expected exception was thrown.
-    assertThatThrownBy(() -> FluxUtils.waitForCompletion(slowFlux, Duration.ofMillis(10)))
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("Timeout");
   }
 
   /** Verifies that function wrappers returned by {@link FluxUtils#wrapFunction} work correctly. */

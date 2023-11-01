@@ -2,14 +2,11 @@ package gov.cms.bfd.pipeline.sharedutils;
 
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
-import java.time.Duration;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /** Utility class containing static methods to create and wait for fluxes. */
 @Slf4j
@@ -108,57 +105,6 @@ public class FluxUtils {
   public static <T, R extends AutoCloseable> Flux<T> fromAutoCloseable(
       Callable<R> open, ThrowingFunction<Flux<T>, R, Exception> read, String failedCloseMessage) {
     return fromResource(open, read, AutoCloseable::close, failedCloseMessage);
-  }
-
-  /**
-   * Waits for the provided {@link Flux} to terminate and returns the number of values that it
-   * published. Any error reported by the flux is unwrapped and rethrown from this method.
-   *
-   * <p>Wrapped exceptions are unwrapped if possible. This involves undoing the wrapping that might
-   * have been done internally by project reactor to expose original exceptions. The unwrapping
-   * makes error handling in our caller more meaningful.
-   *
-   * @param flux the flux to wait for
-   * @param maxWaitTime the maximum amount of time to wait
-   * @return number of values published by the flux while we waited
-   * @throws Exception any error reported by the flux
-   */
-  public static long waitForCompletion(Flux<?> flux, Duration maxWaitTime) throws Exception {
-    return waitForCompletion(flux.count(), maxWaitTime).orElse(0L);
-  }
-
-  /**
-   * Waits for the provided {@link Mono} to terminate and returns the value that it published (if
-   * any). Any error reported by the mono is unwrapped and rethrown from this method.
-   *
-   * <p>Wrapped exceptions are unwrapped if possible. This involves undoing the wrapping that might
-   * have been done internally by project reactor to expose original exceptions. The unwrapping
-   * makes error handling in our caller more meaningful.
-   *
-   * @param mono the mono to wait for
-   * @param maxWaitTime the maximum amount of time to wait
-   * @return any value published by the mono (if any)
-   * @throws Exception any error reported by the flux
-   * @param <T> type published by the mono
-   */
-  public static <T> Optional<T> waitForCompletion(Mono<T> mono, Duration maxWaitTime)
-      throws Exception {
-    try {
-      return mono.blockOptional(maxWaitTime);
-    } catch (RuntimeException wrapped) {
-      final Throwable unwrapped = Exceptions.unwrap(wrapped);
-      if (unwrapped instanceof RuntimeException re) {
-        // might be the original or another unchecked exception that had been wrapped
-        throw re;
-      } else if (unwrapped instanceof Exception e) {
-        // extracted an original checked exception, throw that since it's more meaningful than the
-        // wrapper
-        throw e;
-      } else {
-        // must have been a wrapped Throwable and we don't want to throw a raw Throwable
-        throw wrapped;
-      }
-    }
   }
 
   /**
