@@ -1030,7 +1030,7 @@
                         <exclude>**/gov/cms/bfd/model/rda/entities/**.java</exclude>
                         <exclude>**/gov/cms/bfd/model/rif/entities/**.java</exclude>
                         <exclude>**/gov/cms/bfd/pipeline/rda/grpc/source/parsers/**.java</exclude>
-                        <exclude>**/gov/cms/bfd/pipeline/rda/grpc/server/service/**.java</exclude>
+                        <exclude>**/gov/cms/bfd/pipeline/rda/grpc/server/RdaService.java</exclude>
                         <exclude>**/gov/cms/mpsm/rda/**</exclude>
                     </sourceFileExcludes>
                     <quiet>false</quiet>

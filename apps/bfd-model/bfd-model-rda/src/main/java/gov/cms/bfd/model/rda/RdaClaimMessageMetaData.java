@@ -109,7 +109,7 @@ public class RdaClaimMessageMetaData {
     private Character claimType;
 
     /**
-     * R
+     * RdaClaimMessageMetaDataBuilder
      *
      * @param value RdaApiProgress.ClaimType.
      * @return RdaClaimMessageMetaDataBuilder claimType.

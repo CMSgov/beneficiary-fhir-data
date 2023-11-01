@@ -1,12 +1,11 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static gov.cms.bfd.pipeline.rda.grpc.server.service.RdaService.RDA_PROTO_VERSION;
+import static gov.cms.bfd.pipeline.rda.grpc.server.RdaService.RDA_PROTO_VERSION;
 import static java.lang.String.format;
 
 import com.google.common.base.Strings;
 import com.google.common.io.CharSource;
 import com.google.common.io.Files;
-import gov.cms.bfd.pipeline.rda.grpc.server.service.RdaService;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
