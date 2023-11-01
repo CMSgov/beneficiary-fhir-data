@@ -113,7 +113,10 @@ public class MessageError {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class PK implements Serializable {
+    /** sequenceNumber. */
     private Long sequenceNumber;
+
+    /** claimType. */
     private ClaimType claimType;
   }
 }

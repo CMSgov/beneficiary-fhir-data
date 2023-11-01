@@ -2,7 +2,7 @@ mappings:
 - id: FissClaim
   messageClassName: gov.cms.mpsm.rda.v1.fiss.FissClaim
   entityClassName: gov.cms.bfd.model.rda.entities.RdaFissClaim
-  transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.entities.FissClaimParser
+  transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.parsers.FissClaimParser
   table:
     name: fiss_claims
     schema: rda

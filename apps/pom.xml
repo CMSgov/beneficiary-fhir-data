@@ -1025,16 +1025,15 @@
                     <failOnWarnings>false</failOnWarnings>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <!-- Exclude javadocs on certain generated files, reduces build warnings -->
-                    <excludePackageNames>
-                        gov.cms.bfd.pipeline.rda.grpc.*;
-                        gov.cms.mpsm.rda.v1.*;
-                        gov.cms.mpsm.rda.v1;
-                        gov.cms.bfd.model.rda;
-                        gov.cms.bfd.model.rda.*;
-                        gov.cms.bfd.model.rif;
-                        gov.cms.bfd.model.rif.*;
-                    </excludePackageNames>
-                    <quiet>true</quiet>
+                    <sourceFileExcludes>
+                        <exclude>**/**_.java</exclude>
+                        <exclude>**/gov/cms/bfd/model/rda/entities/**.java</exclude>
+                        <exclude>**/gov/cms/bfd/model/rif/entities/**.java</exclude>
+                        <exclude>**/gov/cms/bfd/pipeline/rda/grpc/source/parsers/**.java</exclude>
+                        <exclude>**/gov/cms/bfd/pipeline/rda/grpc/server/service/**.java</exclude>
+                        <exclude>**/gov/cms/mpsm/rda/**</exclude>
+                    </sourceFileExcludes>
+                    <quiet>false</quiet>
                     <!-- This notimestamp option does not make our *-javadoc.jar files completely
                         reproducible, but the option is recommended by Maven for a reproducible
                         build in general. However, we are not using the javadocs in any of the war

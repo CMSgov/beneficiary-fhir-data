@@ -5,7 +5,7 @@ import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.FissClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
-import gov.cms.bfd.pipeline.rda.grpc.source.entities.FissClaimParser;
+import gov.cms.bfd.pipeline.rda.grpc.source.parsers.FissClaimParser;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
