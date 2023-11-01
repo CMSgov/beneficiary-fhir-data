@@ -7,6 +7,7 @@ locals {
     "/bfd/${local.env}/common/nonsensitive/enterprise_tools_security_group" = "/bfd/${local.seed_env}/common/nonsensitive/enterprise_tools_security_group"
     "/bfd/${local.env}/common/nonsensitive/key_pair"                        = "/bfd/${local.seed_env}/common/nonsensitive/key_pair"
     "/bfd/${local.env}/common/nonsensitive/kms_key_alias"                   = "/bfd/${local.seed_env}/common/nonsensitive/kms_key_alias"
+    "/bfd/${local.env}/common/nonsensitive/kms_config_key_alias"            = "/bfd/${local.seed_env}/common/nonsensitive/kms_config_key_alias"
     "/bfd/${local.env}/common/nonsensitive/management_security_group"       = "/bfd/${local.seed_env}/common/nonsensitive/management_security_group"
     "/bfd/${local.env}/common/nonsensitive/rds_aurora_family"               = "/bfd/${local.seed_env}/common/nonsensitive/rds_aurora_family"
     "/bfd/${local.env}/common/nonsensitive/rds_instance_class"              = "/bfd/${local.seed_env}/common/nonsensitive/rds_instance_class"
