@@ -54,6 +54,7 @@ coasting_time = int(os.environ.get("COASTING_TIME", 0))
 warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
 stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
+controller_ip_env = os.environ.get("CONTROLLER_IP", "")
 
 boto_config = Config(region_name=region)
 
@@ -140,8 +141,6 @@ def _main():
     queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
     queue.purge()
 
-    ip_address = socket.gethostbyname(socket.gethostname())
-
     if locust_tags:
         print(f"Running tasks with an annotated @tag including any of the following: {locust_tags}")
 
@@ -151,7 +150,7 @@ def _main():
     spawn_count = 0
     for _ in range(0, initial_worker_nodes):
         print(f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-        _start_node(controller_ip=ip_address, host=test_host)
+        _start_node(controller_ip=controller_ip_env, host=test_host)
         spawn_count += 1
         print(f"Spawned initial worker node #{spawn_count} successfully")
 
@@ -195,7 +194,7 @@ def _main():
         if spawn_count < max_spawned_nodes:
             if datetime.now() >= next_node_spawn:
                 print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-                _start_node(controller_ip=ip_address, host=test_host)
+                _start_node(controller_ip=controller_ip_env, host=test_host)
                 spawn_count += 1
                 print(f"Worker node #{spawn_count} spawned successfully")
 

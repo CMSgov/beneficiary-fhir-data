@@ -90,6 +90,7 @@ if [[ \$- == *i* ]]; then
 fi
 EOF
 
+CONTROLLER_IP=$(ec2-metadata --local-ipv4 | cut -d " " -f 2)
 service docker start
 aws ecr get-login-password --region "${aws_current_region}" | \
 docker login --username AWS --password-stdin "${ecr_registry_url}"
@@ -114,5 +115,7 @@ docker logs --follow $(docker run --detach \
   -e  STOP_ON_NODE_LIMIT=${stop_on_node_limit} \
   -e  LOCUST_TAGS=${locust_tags} \
   -e  LOCUST_EXCLUDE_TAGS=${locust_exclude_tags} \
+  -e  CONTROLLER_IP="$CONTROLLER_IP" \
+  --net=host \
   "${ecr_tagged_controller_uri}"
 ) >& "${server_load_dir}/server-load-controller.log" &
