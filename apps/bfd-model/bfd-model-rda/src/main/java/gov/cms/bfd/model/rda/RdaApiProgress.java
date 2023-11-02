@@ -28,9 +28,9 @@ import lombok.experimental.FieldNameConstants;
 public class RdaApiProgress {
   /** Represents the enum ClaimType. */
   public enum ClaimType {
-    /** FISS. */
+    /** A FISS claim. */
     FISS,
-    /** MCS. */
+    /** A MCS claim. */
     MCS
   }
 

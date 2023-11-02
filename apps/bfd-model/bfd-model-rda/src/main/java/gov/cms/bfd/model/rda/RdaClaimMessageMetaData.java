@@ -125,10 +125,10 @@ public class RdaClaimMessageMetaData {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class PK implements Serializable {
-    /** claimType. */
+    /** The claim Type for the primary key. */
     private Character claimType;
 
-    /** sequenceNumber. */
+    /** The sequence number for the primary key. */
     private long sequenceNumber;
   }
 }
