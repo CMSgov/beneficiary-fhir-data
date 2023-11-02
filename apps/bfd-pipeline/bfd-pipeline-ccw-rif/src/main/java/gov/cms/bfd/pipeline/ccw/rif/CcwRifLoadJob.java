@@ -198,7 +198,12 @@ public final class CcwRifLoadJob implements PipelineJob {
 
   @Override
   public boolean isInterruptible() {
-    return true;
+    /*
+     * TODO While the RIF pipeline itself is interruptable now.  The S3 transfers are not.
+     *  For now we will leave interrupts disabled and revisit the need for moving files
+     * between S3 buckets in a later PR.
+     */
+    return false;
   }
 
   @Override
