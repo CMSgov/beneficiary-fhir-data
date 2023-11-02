@@ -111,3 +111,9 @@ variable "server_load_dir" {
   description = "BFD Server Load directory."
   type        = string
 }
+
+variable "locust_master_port" {
+  default     = 5557
+  description = "The port to connect to that is used by the locust master for distributed load testing."
+  type        = number
+}

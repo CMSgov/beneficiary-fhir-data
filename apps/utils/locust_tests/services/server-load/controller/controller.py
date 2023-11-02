@@ -54,6 +54,7 @@ warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
 stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
 controller_host_ip = os.environ.get("CONTROLLER_HOST_IP", "")
+controller_host_port = os.environ.get("CONTROLLER_HOST_PORT", "")
 
 boto_config = Config(region_name=region)
 
@@ -63,12 +64,12 @@ sqs = boto3.resource("sqs", config=boto_config)
 lambda_client = boto3.client("lambda", config=boto_config)
 
 
-def _start_node(controller_ip: str, host: str):
+def _start_node(controller_ip: str, host: str, locust_port: number):
     """
     Invokes the lambda function that runs a Locust worker node process.
     """
     print(f"Starting node with host:{host}, controller_ip:{controller_ip}")
-    payload_json = json.dumps({"controller_ip": controller_ip, "host": host})
+    payload_json = json.dumps({"controller_ip": controller_ip, "host": host, "locust_port": locust_port})
 
     response = lambda_client.invoke(
         FunctionName=node_lambda_name,
@@ -122,7 +123,7 @@ def _main():
             f"--spawn-rate={user_spawn_rate}",
             f"--database-connection-string={db_dsn}",
             "--master",
-            "--master-bind-port=5557",
+            f"--master-bind-port={controller_host_port}",
             "--client-cert-path=/tmp/bfd_test_cert.pem",
             "--enable-rebalancing",
             "--loglevel=DEBUG",

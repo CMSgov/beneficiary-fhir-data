@@ -139,6 +139,7 @@ resource "aws_instance" "this" {
     server_load_dir           = var.server_load_dir
     ecr_registry_url          = "${data.aws_ecr_repository.ecr_controller.repository_url}"
     ecr_tagged_controller_uri = "${data.aws_ssm_parameter.container_image_tag_controller.value}"
+    locust_master_port        = var.locust_master_port
   })
 }
 
