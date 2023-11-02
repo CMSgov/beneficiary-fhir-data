@@ -6,7 +6,6 @@ is responsible for managing the Locust master process and orchestrating the many
 import functools
 import json
 import os
-import socket
 import subprocess
 import sys
 import time
@@ -54,7 +53,7 @@ coasting_time = int(os.environ.get("COASTING_TIME", 0))
 warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
 stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
-controller_ip_env = os.environ.get("CONTROLLER_IP", "")
+controller_host_ip = os.environ.get("CONTROLLER_HOST_IP", "")
 
 boto_config = Config(region_name=region)
 
@@ -150,7 +149,7 @@ def _main():
     spawn_count = 0
     for _ in range(0, initial_worker_nodes):
         print(f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-        _start_node(controller_ip=controller_ip_env, host=test_host)
+        _start_node(controller_ip=controller_host_ip, host=test_host)
         spawn_count += 1
         print(f"Spawned initial worker node #{spawn_count} successfully")
 
@@ -194,7 +193,7 @@ def _main():
         if spawn_count < max_spawned_nodes:
             if datetime.now() >= next_node_spawn:
                 print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-                _start_node(controller_ip=controller_ip_env, host=test_host)
+                _start_node(controller_ip=controller_host_ip, host=test_host)
                 spawn_count += 1
                 print(f"Worker node #{spawn_count} spawned successfully")
 

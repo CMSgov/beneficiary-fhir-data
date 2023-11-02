@@ -8,8 +8,6 @@ exec > >(
     done
 )
 
-#bash /usr/local/bin/permit-user-access "${seed_env}"
-
 # Reconfigure and relaunch CloudWatch unified agent
 cat <<EOF > /tmp/cwagent-server-load.json
 {
@@ -72,7 +70,7 @@ cat <<EOF > /tmp/cwagent-server-load.json
 }
 EOF
 
-#/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a append-config -m ec2 -c file:/tmp/cwagent-server-load.json -s
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/cwagent-server-load.json -s
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
@@ -90,7 +88,9 @@ if [[ \$- == *i* ]]; then
 fi
 EOF
 
-CONTROLLER_IP=$(ec2-metadata --local-ipv4 | cut -d " " -f 2)
+bash /usr/local/bin/permit-user-access "${seed_env}"
+
+CONTROLLER_HOST_IP=$(ec2-metadata --local-ipv4 | cut -d " " -f 2)
 service docker start
 aws ecr get-login-password --region "${aws_current_region}" | \
 docker login --username AWS --password-stdin "${ecr_registry_url}"
@@ -115,7 +115,7 @@ docker logs --follow $(docker run --detach \
   -e  STOP_ON_NODE_LIMIT=${stop_on_node_limit} \
   -e  LOCUST_TAGS=${locust_tags} \
   -e  LOCUST_EXCLUDE_TAGS=${locust_exclude_tags} \
-  -e  CONTROLLER_IP="$CONTROLLER_IP" \
+  -e  CONTROLLER_HOST_IP="$CONTROLLER_HOST_IP" \
   --net=host \
   "${ecr_tagged_controller_uri}"
 ) >& "${server_load_dir}/server-load-controller.log" &
