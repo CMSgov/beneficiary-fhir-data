@@ -211,15 +211,13 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
    * Generates the "golden" files, i.e. the approved responses to compare to. Purpose of this
    * testing is to perform regression testing against the "Golden Beneficiary Data" at a specific
    * point in time. It is important to note that this testing focuses on checking for regressions
-   * against the data at that particular moment, and not necessarily against data artifacts.
+   * against the data at that particular moment, and not necessarily against data artifacts. To run
+   * this test, execute the following Maven Command: mvn clean install -DgenerateTestData=true
    *
    * @param endpointId the endpoint id
    * @param endpointOperation the endpoint operation
    */
-  @EnabledIfSystemProperty(
-      // disabled on all but 64bit OS
-      named = "os.arch",
-      matches = ".*64.*")
+  @EnabledIfSystemProperty(named = "generateTestData", matches = "true")
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
   public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {
