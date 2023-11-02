@@ -12,47 +12,45 @@ participant "EC2" #LightGreen
 participant "controller" #LightSkyBlue
 participant "AWS Lambda" #LightGreen
 queue "sqs queue" #LightSkyBlue
-group Image Deployment
+group Controller Image Deployment
   autonumber 1
   operator -> github: Submit change set
   operator <-- github 
+  operator -> "bfd-build-server-load-controller": Trigger Image Build
+  "bfd-build-server-load-controller" -> github: Request change set
+  "bfd-build-server-load-controller" <-- github : Return change set
+  "bfd-build-server-load-controller" -> "bfd-build-server-load-controller": build-push.sh:\nbuild Controller Docker image
+  "bfd-build-server-load-controller" -> "AWS ECR": build-push.sh:\npush Docker image to bfd-mgmt-server-load-controller
+  "bfd-build-server-load-controller" <-- "AWS ECR"
+  "bfd-build-server-load-controller" -> "parameter store": build-push.sh:\nwrite image tag SSM parameter
+  "bfd-build-server-load-controller" <-- "parameter store"
+  operator <-- "bfd-build-server-load-controller"
+end
+group Node (Lambda) Image Deployment
+  autonumber 1
+  operator -> github: Submit change set
+  operator <-- github
   operator -> "bfd-server-load-build": Trigger Image Build
   "bfd-server-load-build" -> github: Request change set
   "bfd-server-load-build" <-- github : Return change set
   "bfd-server-load-build" -> "bfd-server-load-build": build-push.sh:\nbuild lambda Docker image
   "bfd-server-load-build" -> "AWS ECR": build-push.sh:\npush Docker image to bfd-mgmt-server-load
-  "bfd-server-load-build" <-- "AWS ECR" 
+  "bfd-server-load-build" <-- "AWS ECR"
   "bfd-server-load-build" -> "parameter store": build-push.sh:\nwrite image tag SSM parameter
-  "bfd-server-load-build" <-- "parameter store" 
-  operator <-- "bfd-server-load-build" 
-end
-group BFD Deployment Excerpt
-  autonumber 1
-  operator -> github: Submit change set
-  operator <-- github 
-  operator -> "deployment pipeline": Trigger deployment pipeline
-  "deployment pipeline" -> github: Request change set
-  "deployment pipeline" <-- github : Return change set
-  "deployment pipeline" -> "deployment pipeline": Run Prepare, Set Branch Name,\nBuild Platinum AMI, Build Apps
-  group Build App AMIs
-    "deployment pipeline" -> "deployment pipeline": packer:\nBuild all AMIs,\nincluding server-load
-    "deployment pipeline" -> "EC2 AMI Catalog": packer:\nStore AMIs to catalog,\nincluding server-load
-    "deployment pipeline" <-- "EC2 AMI Catalog"
-  end
-  "deployment pipeline" -> "deployment pipeline": Run remaining stages
-  operator <-- "deployment pipeline"
+  "bfd-server-load-build" <-- "parameter store"
+  operator <-- "bfd-server-load-build"
 end
 group bfd-run-server-load
   autonumber 1
   operator -> "bfd-run-server-load": Trigger bfd-run-server-load with parameters
   "bfd-run-server-load" -> "bfd-run-server-load": Collect parameters
   "bfd-run-server-load" -> "bfd-run-server-load": terraform:\nPlan and apply with\nparameters
-  "bfd-run-server-load" -> "parameter store": terraform:\nRequest latest Docker image tag
-  "bfd-run-server-load" <-- "parameter store": Return latest Docker image tag
+  "bfd-run-server-load" -> "parameter store": terraform:\nRequest latest Docker image tag for controller and node
+  "bfd-run-server-load" <-- "parameter store": Return latest Docker image tag for controller and node
   "bfd-run-server-load" -> "AWS Lambda": terraform:\nUpdate/deploy server-load Lambda\nto ENV using tagged Docker image
   "bfd-run-server-load" <-- "AWS Lambda"
-  "bfd-run-server-load" -> "EC2 AMI Catalog": terraform:\nRequest latest server-load AMI
-  "bfd-run-server-load" <-- "EC2 AMI Catalog": Return latest server-load AMI ID
+  "bfd-run-server-load" -> "EC2 AMI Catalog": terraform:\nRequest latest docker-host AMI
+  "bfd-run-server-load" <-- "EC2 AMI Catalog": Return latest docker-host AMI ID
   "bfd-run-server-load" -> "EC2": terraform:\nDeploy server-load controller\nto EC2 using latest AMI
   "bfd-run-server-load" <-- "EC2"
   "AWS Lambda" -> "AWS ECR": Retrieve tagged server-load Docker Image
@@ -62,10 +60,7 @@ group bfd-run-server-load
   "EC2" -> "controller": Start controller instance
   "EC2" <-- "controller"
   "controller" -> "controller": cloud-init:\nRun user-data.sh
-  "controller" -> "controller": user-data.sh:\nRun Ansible launch\nvariant
-  "controller" -> "controller": Ansible:\nSetup bfd-server-load\nsystemd service
-  "controller" -> "controller": systemd:\nStart bfd-server-load\n(controller.py)
-  note right 
+  note right
     See the README for more information
     on load testing execution process
   end note

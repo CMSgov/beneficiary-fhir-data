@@ -41,8 +41,8 @@ spec:
                         + 'replaced with the chosen environment')
 
     string(name: 'AMI_ID_OVERRIDE',
-           description: 'BFD Server Load Controller override ami-id. '
-                        + 'Defaults to latest server-load AMI from `master`')
+           description: 'Docker host override ami-id. '
+                        + 'Defaults to latest docker-host AMI from `master`')
 
     string(name: 'LOCUST_TAGS',
            description: 'Space-delimited. Run only the locust tasks with ANY of the given @tag(s).  '
