@@ -67,6 +67,7 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.management.MBeanServer;
@@ -689,7 +690,7 @@ public final class ServerTestUtils {
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
       loader
-          .processAsync(rifFileRecords)
+          .processAsync(rifFileRecords, new AtomicBoolean())
           .doOnError(error -> LOGGER.warn("Record(s) failed to load.", error))
           .doOnNext(result -> recordsLoaded.add(result.getRifRecordEvent().getRecord()))
           .blockLast();

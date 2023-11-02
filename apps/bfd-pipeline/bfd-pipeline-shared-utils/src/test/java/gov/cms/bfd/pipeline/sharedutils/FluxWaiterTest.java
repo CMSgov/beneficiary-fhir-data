@@ -72,6 +72,11 @@ public class FluxWaiterTest {
     interrupted = new AtomicBoolean();
   }
 
+  /**
+   * Verifies that normal completion passes through the value correctly.
+   *
+   * @throws Exception pass through
+   */
   @Test
   void verifyMonoCompletesImmediately() throws Exception {
     // We can use a normal waiter here because we know the mono will terminate quickly.
@@ -81,6 +86,11 @@ public class FluxWaiterTest {
     assertEquals(false, interrupted.get());
   }
 
+  /**
+   * Verifies that interrupts are handled correctly.
+   *
+   * @throws Exception pass through
+   */
   @Test
   void verifyMonoCompletesAfterInterrupt() throws Exception {
     final var slowMono = Mono.delay(SLOW_TIME);
@@ -90,6 +100,11 @@ public class FluxWaiterTest {
     assertEquals(true, interrupted.get());
   }
 
+  /**
+   * Verifies that correct exception is thrown following a timeout.
+   *
+   * @throws Exception pass through
+   */
   @Test
   void verifyExceptionThrownForTimeOut() throws Exception {
     final var slowFlux = Flux.interval(SLOW_TIME);
@@ -99,8 +114,9 @@ public class FluxWaiterTest {
     assertEquals(true, interrupted.get());
   }
 
+  /** Verifies that checked exceptions reported by a publisher are rethrown directly. */
   @Test
-  void verifyCheckedExceptionIsRethrown() throws Exception {
+  void verifyCheckedExceptionIsRethrown() {
     // We can use a normal waiter here because we know the mono will terminate quickly.
     final var fluxWaiter = new FluxWaiter(NORMAL_WAIT_TIME, INTERRUPTED_WAIT_TIME);
     final var error = new IOException();
@@ -109,8 +125,9 @@ public class FluxWaiterTest {
     assertEquals(false, interrupted.get());
   }
 
+  /** Verifies that unchecked exceptions reported by a publisher are rethrown directly. */
   @Test
-  void verifyUncheckedExceptionIsPassedThrough() throws Exception {
+  void verifyUncheckedExceptionIsPassedThrough() {
     // We can use a normal waiter here because we know the mono will terminate quickly.
     final var fluxWaiter = new FluxWaiter(NORMAL_WAIT_TIME, INTERRUPTED_WAIT_TIME);
     final var error = new IllegalArgumentException();
@@ -119,8 +136,11 @@ public class FluxWaiterTest {
     assertEquals(false, interrupted.get());
   }
 
+  /**
+   * Verifies that wrapped, checked exceptions reported by a publisher are unwrapped and rethrown.
+   */
   @Test
-  void verifyWrappedUncheckedExceptionIsUnwrapped() throws Exception {
+  void verifyWrappedUncheckedExceptionIsUnwrapped() {
     // We can use a normal waiter here because we know the mono will terminate quickly.
     final var fluxWaiter = new FluxWaiter(NORMAL_WAIT_TIME, INTERRUPTED_WAIT_TIME);
     final var error = new IOException();
@@ -129,8 +149,9 @@ public class FluxWaiterTest {
     assertEquals(false, interrupted.get());
   }
 
+  /** Verifies that {@link Error}s reported by a publisher are wrapped before being rethrown. */
   @Test
-  void verifyRawThrowableIsWrapped() throws Exception {
+  void verifyRawThrowableIsWrapped() {
     // We can use a normal waiter here because we know the mono will terminate quickly.
     final var fluxWaiter = new FluxWaiter(NORMAL_WAIT_TIME, INTERRUPTED_WAIT_TIME);
     final var error = new AssertionError();
@@ -141,6 +162,11 @@ public class FluxWaiterTest {
     assertEquals(false, interrupted.get());
   }
 
+  /**
+   * Verifies that values published by a flux while waiting are counted correctly.
+   *
+   * @throws Exception pass through
+   */
   @Test
   void verifyFluxResultsCountedCorrectly() throws Exception {
     // We can use a normal waiter here because we know the flux will terminate quickly.

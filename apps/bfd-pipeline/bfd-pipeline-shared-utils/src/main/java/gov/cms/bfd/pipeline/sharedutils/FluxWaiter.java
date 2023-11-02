@@ -55,6 +55,7 @@ public class FluxWaiter {
    * @param interruptedWaitTime Maximum amount of time to wait for mono to complete following an
    *     interrupt
    * @param clock used to get time values
+   * @param latchFactory used to create {@link CountDownLatch}s.
    */
   @VisibleForTesting
   FluxWaiter(

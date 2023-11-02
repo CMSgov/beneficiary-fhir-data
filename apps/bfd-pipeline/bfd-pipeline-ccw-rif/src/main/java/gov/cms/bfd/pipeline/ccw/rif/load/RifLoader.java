@@ -163,6 +163,8 @@ public final class RifLoader {
    *
    * @param dataToLoad the {@link RifFileRecords} containing FHIR {@link RifRecordEvent}s to be
    *     loaded
+   * @param interrupted flag that will be trigger a clean shutdown if set to true by {@link
+   *     FluxWaiter}
    * @return a {@link Flux} that processes all records asynchronously
    */
   public Flux<RifRecordLoadResult> processAsync(

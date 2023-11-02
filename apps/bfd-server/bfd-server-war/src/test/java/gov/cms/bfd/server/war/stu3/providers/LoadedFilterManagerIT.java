@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.Exceptions;
 
 /** Integration tests for {@link LoadedFilterManager}. */
 public final class LoadedFilterManagerIT extends ServerRequiredTest {
@@ -246,7 +247,11 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
     // Link up the pipeline and run it.
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      loader.processAsync(rifFileRecords).blockLast();
+      try {
+        loader.processBlocking(rifFileRecords);
+      } catch (Exception ex) {
+        throw Exceptions.propagate(ex);
+      }
     }
   }
 }
