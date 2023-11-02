@@ -1,5 +1,0 @@
----
-env: test
-git_repo_root: /beneficiary-fhir-data
-server_load_dir: /opt/server-load
-server_load_user: bb-server-load
