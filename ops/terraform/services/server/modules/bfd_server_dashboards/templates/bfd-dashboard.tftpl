@@ -1,34 +1,35 @@
 {
     "widgets": [
         {
-            "height": 6,
-            "width": 12,
-            "y": 0,
+            "height": 7,
+            "width": 6,
+            "y": 7,
             "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/count/all" ],
-                    [ ".", "http-requests/count/metadata" ],
-                    [ ".", "http-requests/count/coverage-all" ],
-                    [ ".", "http-requests/count/patient-all" ],
-                    [ ".", "http-requests/count/eob-all" ],
-                    [ ".", "http-requests/count/claim-all" ],
-                    [ ".", "http-requests/count/claim-response-all" ]
+                    [ "${namespace}", "http-requests/count/all", { "region": "${region}", "visible": false } ],
+                    [ ".", "http-requests/count/metadata", { "region": "${region}" } ],
+                    [ ".", "http-requests/count/coverage-all", { "region": "${region}" } ],
+                    [ ".", "http-requests/count/patient-all", { "region": "${region}" } ],
+                    [ ".", "http-requests/count/eob-all", { "region": "${region}" } ],
+                    [ ".", "http-requests/count/claim-all", { "region": "${region}" } ],
+                    [ ".", "http-requests/count/claim-response-all", { "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "Aggregated Request Counts per-Endpoint with 1 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
-                "period": 60
+                "period": 60,
+                "liveData": true
             }
         },
         {
-            "height": 6,
-            "width": 8,
-            "y": 18,
-            "x": 0,
+            "height": 5,
+            "width": 6,
+            "y": 19,
+            "x": 18,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -43,40 +44,42 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "BlueButton Request Count per-Endpoint with 1 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
-                "period": 60
+                "period": 60,
+                "liveData": true
             }
         },
         {
-            "height": 6,
-            "width": 8,
-            "y": 18,
-            "x": 8,
+            "height": 5,
+            "width": 12,
+            "y": 14,
+            "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/count/all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA All Requests Count" } ],
-                    [ ".", "http-requests/count/metadata", ".", ".", { "label": "BCDA /v*/fhir/metadata Request Count" } ],
-                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "BCDA /v*/fhir/Coverage Request Count" } ],
-                    [ ".", "http-requests/count/patient-all", ".", ".", { "label": "BCDA /v*/fhir/Patient Request Count" } ],
-                    [ ".", "http-requests/count/eob-all", ".", ".", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Request Count" } ],
-                    [ ".", "http-requests/count/claim-all", ".", ".", { "label": "BCDA /v*/fhir/Claim Request Count" } ],
-                    [ ".", "http-requests/count/claim-response-all", ".", ".", { "label": "BCDA /v*/fhir/ClaimResponse Request Count" } ]
+                    [ "${namespace}", "http-requests/count/all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA All Requests Count", "region": "${region}" } ],
+                    [ "${namespace}", "http-requests/count/metadata", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/metadata Request Count", "region": "${region}" } ],
+                    [ "${namespace}", "http-requests/count/coverage-all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/Coverage Request Count", "region": "${region}" } ],
+                    [ "${namespace}", "http-requests/count/patient-all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/Patient Request Count", "region": "${region}" } ],
+                    [ "${namespace}", "http-requests/count/eob-all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ExplanationOfBenefit Request Count", "region": "${region}" } ],
+                    [ "${namespace}", "http-requests/count/claim-all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/Claim Request Count", "region": "${region}" } ],
+                    [ "${namespace}", "http-requests/count/claim-response-all", "client_ssl", "${bcda_client_ssl}", { "label": "BCDA /v*/fhir/ClaimResponse Request Count", "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "BCDA Request Count per-Endpoint with 1 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
-                "period": 60
+                "period": 60,
+                "liveData": true
             }
         },
         {
-            "height": 6,
+            "height": 5,
             "width": 6,
-            "y": 36,
-            "x": 6,
+            "y": 44,
+            "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -91,16 +94,17 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/EoB 95th Percentile Latency with 5 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p95",
-                "period": 300
+                "period": 300,
+                "liveData": true
             }
         },
         {
-            "height": 6,
-            "width": 12,
-            "y": 42,
-            "x": 12,
+            "height": 7,
+            "width": 6,
+            "y": 0,
+            "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -110,9 +114,10 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Maximum",
                 "period": 300,
+                "liveData": true,
                 "title": "CPU Utilization Across all EC2 Instances in ASG with 1 Minute Period",
                 "yAxis": {
                     "left": {
@@ -128,7 +133,7 @@
         {
             "height": 4,
             "width": 24,
-            "y": 52,
+            "y": 58,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -142,16 +147,17 @@
                     [ ".", ".", { "label": "All 500 Response Count" } ]
                 ],
                 "view": "singleValue",
-                "region": "us-east-1",
+                "region": "${region}",
                 "title": "Total number of HTTP 500s errors in the last 24 hours",
                 "period": 86400,
+                "liveData": true,
                 "stat": "Sum"
             }
         },
         {
             "height": 4,
             "width": 24,
-            "y": 56,
+            "y": 62,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -165,17 +171,18 @@
                     [ ".", ".", { "label": "All non-2xx Response Count" } ]
                 ],
                 "view": "singleValue",
-                "region": "us-east-1",
+                "region": "${region}",
                 "title": "Total number of HTTP non-2XXs errors in the last 24 hours",
                 "period": 86400,
+                "liveData": true,
                 "stat": "Sum"
             }
         },
         {
-            "height": 6,
-            "width": 8,
-            "y": 18,
-            "x": 16,
+            "height": 5,
+            "width": 12,
+            "y": 19,
+            "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -189,16 +196,17 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
                 "period": 60,
+                "liveData": true,
                 "title": "DPC Request Count per-Endpoint with 1 Minute Period"
             }
         },
         {
-            "height": 6,
+            "height": 5,
             "width": 12,
-            "y": 12,
+            "y": 14,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -213,64 +221,39 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "title": "AB2D Request Count per-Endpoint with 1 Minute Period",
                 "period": 60,
+                "liveData": true,
                 "stat": "Sum"
             }
         },
         {
-            "height": 6,
-            "width": 12,
-            "y": 0,
+            "height": 7,
+            "width": 6,
+            "y": 7,
             "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/latency/all", { "stat": "Average", "color": "#2ca02c", "label": "Aggregated" } ],
-                    [ "...", { "color": "#ff7f0e", "stat": "p99", "label": "99th Percentile" } ],
-                    [ "...", { "color": "#d62728", "label": "Maximum" } ]
+                    [ "${namespace}", "http-requests/latency/all", { "stat": "Average", "color": "#2ca02c", "label": "Aggregated", "region": "${region}" } ],
+                    [ "...", { "color": "#ff7f0e", "stat": "p99", "label": "99th Percentile", "region": "${region}" } ],
+                    [ "...", { "color": "#d62728", "label": "Maximum", "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "Aggregated Latency Statistics with 1 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Maximum",
-                "period": 60
+                "period": 60,
+                "liveData": true
             }
         },
         {
-            "height": 6,
-            "width": 12,
-            "y": 42,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupInServiceInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "id": "e2" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 300,
-                "title": "Instance Count in Auto Scaling Groups with 1 Minute Period",
-                "yAxis": {
-                    "left": {
-                        "showUnits": false,
-                        "label": "Instances"
-                    },
-                    "right": {
-                        "showUnits": false
-                    }
-                }
-            }
-        },
-        {
-            "height": 6,
+            "height": 5,
             "width": 6,
-            "y": 36,
-            "x": 0,
+            "y": 44,
+            "x": 18,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -285,16 +268,17 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/EoB 50th Percentile Latency with 5 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p50",
-                "period": 300
+                "period": 300,
+                "liveData": true
             }
         },
         {
-            "height": 6,
+            "height": 5,
             "width": 6,
-            "y": 36,
-            "x": 12,
+            "y": 44,
+            "x": 6,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -309,16 +293,17 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/EoB 99th Percentile Latency with 5 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
-                "period": 300
+                "period": 300,
+                "liveData": true
             }
         },
         {
-            "height": 6,
+            "height": 5,
             "width": 6,
-            "y": 36,
-            "x": 18,
+            "y": 44,
+            "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -333,15 +318,16 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/EoB Maximum Latency with 5 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Maximum",
-                "period": 300
+                "period": 300,
+                "liveData": true
             }
         },
         {
-            "height": 6,
-            "width": 12,
-            "y": 6,
+            "height": 5,
+            "width": 24,
+            "y": 24,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -357,16 +343,17 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "Internal Test Traffic Request Count per-Endpoint with 1 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
-                "period": 60
+                "period": 60,
+                "liveData": true
             }
         },
         {
-            "height": 6,
-            "width": 8,
-            "y": 30,
-            "x": 0,
+            "height": 5,
+            "width": 6,
+            "y": 34,
+            "x": 18,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -381,15 +368,16 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "BlueButton Average Request Latency per-Endpoint with 1 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Average",
-                "period": 60
+                "period": 60,
+                "liveData": true
             }
         },
         {
-            "height": 6,
+            "height": 5,
             "width": 12,
-            "y": 24,
+            "y": 29,
             "x": 0,
             "type": "metric",
             "properties": {
@@ -404,17 +392,18 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "title": "AB2D Average Request Latency per-Endpoint with 1 Minute Period",
                 "period": 60,
+                "liveData": true,
                 "stat": "Average"
             }
         },
         {
-            "height": 6,
-            "width": 8,
-            "y": 30,
-            "x": 8,
+            "height": 5,
+            "width": 12,
+            "y": 29,
+            "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -429,16 +418,17 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "BCDA Average Request Latency per-Endpoint with 1 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Average",
-                "period": 60
+                "period": 60,
+                "liveData": true
             }
         },
         {
-            "height": 6,
-            "width": 8,
-            "y": 30,
-            "x": 16,
+            "height": 5,
+            "width": 12,
+            "y": 34,
+            "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -452,17 +442,18 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Average",
                 "period": 60,
+                "liveData": true,
                 "title": "DPC Average Request Latency per-Endpoint with 1 Minute Period"
             }
         },
         {
-            "height": 6,
-            "width": 12,
-            "y": 6,
-            "x": 12,
+            "height": 5,
+            "width": 24,
+            "y": 39,
+            "x": 0,
             "type": "metric",
             "properties": {
                 "metrics": [
@@ -477,26 +468,27 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "Internal Average Request Latency per-Endpoint with 1 Minute Period",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Average",
-                "period": 60
+                "period": 60,
+                "liveData": true
             }
         },
         {
-            "type": "metric",
-            "x": 0,
-            "y": 48,
-            "width": 24,
             "height": 4,
+            "width": 24,
+            "y": 54,
+            "x": 0,
+            "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1" } ],
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "${region}" } ],
                     [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks" } ],
                     [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks" } ]
                 ],
                 "sparkline": false,
                 "view": "singleValue",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
                 "period": 2592000,
                 "setPeriodToTimeRange": false,
@@ -506,9 +498,9 @@
             }
         },
         {
-            "height": 6,
-            "width": 12,
-            "y": 12,
+            "height": 5,
+            "width": 6,
+            "y": 19,
             "x": 12,
             "type": "metric",
             "properties": {
@@ -523,16 +515,17 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "title": "AB2D Validation Request Count per-Endpoint with 1 Minute Period",
                 "period": 60,
+                "liveData": true,
                 "stat": "Sum"
             }
         },
         {
-            "height": 6,
-            "width": 12,
-            "y": 24,
+            "height": 5,
+            "width": 6,
+            "y": 34,
             "x": 12,
             "type": "metric",
             "properties": {
@@ -547,10 +540,221 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "title": "AB2D Validation Average Request Latency per-Endpoint with 1 Minute Period",
                 "period": 60,
+                "liveData": true,
                 "stat": "Average"
+            }
+        },
+        {
+            "height": 7,
+            "width": 12,
+            "y": 0,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "IF( e3/e2 > 0.01, e2 , 0)", "label": "FilteredNetworkIn", "id": "e1", "region": "${region}", "period": 60, "yAxis": "right" } ],
+                    [ { "expression": "LAST(SEARCH('{AWS/EC2,AutoScalingGroupName} AWS/EC2 NetworkIn AutoScalingGroupName bfd-${env}-fhir', 'Average', 60))", "label": "Expression2", "id": "e2", "visible": false, "region": "${region}" } ],
+                    [ { "expression": "LAST(SEARCH('{AWS/EC2,AutoScalingGroupName} AWS/EC2 NetworkOut AutoScalingGroupName bfd-${env}-fhir', 'Average', 60))", "label": "Expression3", "id": "e3", "visible": false, "region": "${region}" } ],
+                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupInServiceInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "label": "InstanceCount", "id": "e4", "region": "${region}" } ],
+                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupPendingInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "label": "GroupPending", "id": "e5", "region": "${region}", "visible": false } ],
+                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupTerminatingInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "label": "Expression6", "id": "e6", "region": "${region}", "visible": false } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "period": 300,
+                "stat": "Average",
+                "title": "Instance Count w/ FilteredNetworkIn",
+                "legend": {
+                    "position": "hidden"
+                },
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 12
+                    }
+                },
+                "annotations": {
+                    "horizontal": [
+                        {
+                            "color": "#69ae34",
+                            "label": "Minimum InService instances",
+                            "value": 3
+                        },
+                        {
+                            "color": "#b088f5",
+                            "label": "0 - 3 instances",
+                            "value": 100000000,
+                            "yAxis": "right"
+                        },
+                        {
+                            "color": "#b088f5",
+                            "label": "3 - 6 instances",
+                            "value": 200000000,
+                            "yAxis": "right"
+                        },
+                        {
+                            "color": "#b088f5",
+                            "label": "6 - 9 instances",
+                            "value": 400000000,
+                            "yAxis": "right"
+                        }
+                    ]
+                },
+                "liveData": true
+            }
+        },
+        {
+            "height": 5,
+            "width": 12,
+            "y": 49,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "AWS/ELB", "HealthyHostCount", "LoadBalancerName", "bfd-${env}-fhir" ],
+                    [ "AWS/AutoScaling", "GroupDesiredCapacity", "AutoScalingGroupName", "bfd-${env}-fhir-375", { "yAxis": "right", "visible": false } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 1.2
+                    }
+                },
+                "annotations": {
+                    "horizontal": [
+                        {
+                            "label": "Alert Threshold",
+                            "value": 1
+                        }
+                    ]
+                },
+                "title": "Average of Healthy Hosts in bfd-${env}-fhir Elastic Load Balancer"
+            }
+        },
+        {
+            "height": 7,
+            "width": 6,
+            "y": 7,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('http-requests/count/non-2xx-responses ${namespace} client_ssl', 'Sum', 60)", "label": "non-2xx responses", "id": "e1" } ],
+                    [ { "expression": "SEARCH('http-requests/count/500-responses ${namespace} client_ssl', 'Sum', 60)", "label": "500-responses", "id": "e2" } ],
+                    [ "${namespace}", "http-requests/count/500-responses", "client_ssl", "${bb_client_ssl}", { "region": "${region}", "visible": false, "id": "m1" } ],
+                    [ "...", "${ab2d_client_ssl}", { "region": "${region}", "visible": false, "id": "m2" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "showUnits": false,
+                        "label": "Response Count"
+                    }
+                },
+                "title": "Non-2xx and 500 Response Count Per-Partner"
+            }
+        },
+        {
+            "height": 7,
+            "width": 6,
+            "y": 0,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "bfd-${env}-aurora-cluster-node-1", { "period": 60 } ],
+                    [ "...", "bfd-${env}-aurora-cluster-node-2", { "period": 60 } ],
+                    [ "...", "bfd-${env}-aurora-cluster-node-3", { "period": 60 } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Maximum",
+                "period": 300,
+                "title": "RDS Cluster CPUUtilization",
+                "yAxis": {
+                    "left": {
+                        "label": "Percent",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                },
+                "liveData": true
+            }
+        },
+        {
+            "height": 7,
+            "width": 6,
+            "y": 7,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('http-requests/count/all ${namespace} client_ssl', 'Sum', 60)", "id": "e1", "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "All Traffic per-Partner",
+                "region": "${region}",
+                "stat": "SampleCount",
+                "period": 60,
+                "liveData": true,
+                "setPeriodToTimeRange": false,
+                "sparkline": true,
+                "trend": true
+            }
+        },
+        {
+            "height": 5,
+            "width": 12,
+            "y": 49,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "region": "${region}" } ],
+                    [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "region": "${region}", "yAxis": "right" } ]
+                ],
+                "sparkline": false,
+                "view": "timeSeries",
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "setPeriodToTimeRange": false,
+                "trend": true,
+                "singleValueFullPrecision": true,
+                "title": "Availability Metrics with 1-Minute Period",
+                "stacked": false,
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "showUnits": false,
+                        "label": "Success Count",
+                        "min": 0,
+                        "max": 2
+                    },
+                    "right": {
+                        "showUnits": false,
+                        "label": "Failing Count"
+                    }
+                }
             }
         }
     ]
