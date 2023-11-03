@@ -21,14 +21,10 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.Exceptions;
-import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 /** Unit tests for {@link RifFileParser}. */
 @ExtendWith(MockitoExtension.class)
@@ -66,45 +62,6 @@ public class RifFileParserTest {
     if (tempFile != null) {
       Files.deleteIfExists(tempFile);
     }
-  }
-
-  /**
-   * This is just code for experimenting with the project reactor back pressure operators to see
-   * what calls to request and onNext are made and by which threads.
-   */
-  @Disabled("experimental code to get feel for how flow control operators work")
-  @Test
-  void flowControl() {
-    var scheduler = Schedulers.newBoundedElastic(4, 6, "test");
-    Flux.range(1, 250)
-        .doOnNext(
-            x -> {
-              try {
-                Thread.sleep(10);
-              } catch (Exception ex) {
-                throw Exceptions.propagate(ex);
-              }
-            })
-        .log()
-        .buffer(8)
-        .limitRate(9, 1)
-        .flatMap(
-            buffer ->
-                Flux.defer(
-                        () -> {
-                          log.info("starting " + buffer);
-                          try {
-                            Thread.sleep(1000);
-                          } catch (Exception ex) {
-                            throw Exceptions.propagate(ex);
-                          }
-                          log.info("finished " + buffer);
-                          return Flux.just(buffer);
-                        })
-                    .subscribeOn(scheduler),
-            3)
-        .subscribeOn(scheduler)
-        .blockLast();
   }
 
   /**

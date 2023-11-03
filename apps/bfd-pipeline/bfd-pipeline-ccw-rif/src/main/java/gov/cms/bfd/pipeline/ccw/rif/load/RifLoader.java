@@ -89,6 +89,11 @@ public final class RifLoader {
   private static final Duration MAX_FILE_WAIT_TIME = Duration.ofHours(72);
 
   /**
+   * The maximum amount of time we will wait for a job to quit when an interrupt has been triggered.
+   */
+  private static final Duration MAX_INTERRUPTED_WAIT_TIME = Duration.ofMinutes(5);
+
+  /**
    * Constructs a new {@link RifLoader} instance.
    *
    * @param options the {@link LoadAppOptions} to use
@@ -99,7 +104,7 @@ public final class RifLoader {
     this.appState = appState;
 
     idHasher = new IdHasher(options.getIdHasherConfig());
-    fluxWaiter = new FluxWaiter(MAX_FILE_WAIT_TIME, Duration.ofMinutes(5));
+    fluxWaiter = new FluxWaiter(MAX_FILE_WAIT_TIME, MAX_INTERRUPTED_WAIT_TIME);
   }
 
   /**

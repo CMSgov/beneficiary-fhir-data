@@ -58,17 +58,11 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       Slf4jReporter dataSetFileMetricsReporter =
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
-      dataSetFileMetricsReporter.start(15, TimeUnit.SECONDS);
+      dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
       try {
         final RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
-        LOGGER.info(">>>>>>>> ----------");
-        LOGGER.info(">>>>>>>> STARTING TO LOAD RECORDS");
-        LOGGER.info(">>>>>>>> ----------");
         final long processedCount = rifLoader.processBlocking(rifFileRecords);
-        LOGGER.info(">>>>>>>> **********");
-        LOGGER.info(">>>>>>>> FINISHED LOADING RECORDS");
-        LOGGER.info(">>>>>>>> **********");
         LOGGER.info(
             "Successfully processed {} records in file {}",
             processedCount,
