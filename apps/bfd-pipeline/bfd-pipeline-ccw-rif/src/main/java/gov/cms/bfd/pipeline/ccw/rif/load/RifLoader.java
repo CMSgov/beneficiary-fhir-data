@@ -121,7 +121,7 @@ public final class RifLoader {
 
     // We allow a little extra capacity in the pool since we require a thread from the scheduler to
     // parse records in addition to the ones used to write batches to the database.
-    return Schedulers.newParallel("RifLoader", 2 + threadPoolSize);
+    return Schedulers.newBoundedElastic(2 + threadPoolSize, taskQueueSize, "RifLoader", 60);
   }
 
   /**
