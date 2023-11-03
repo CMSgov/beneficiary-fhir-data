@@ -330,7 +330,6 @@ public final class RifLoader {
       }
     }
 
-    // TODO: refactor the following to be less of an indented mess
     List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
 
     /*
