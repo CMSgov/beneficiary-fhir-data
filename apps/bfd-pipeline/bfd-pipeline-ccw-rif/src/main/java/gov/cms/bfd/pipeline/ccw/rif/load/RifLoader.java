@@ -269,8 +269,6 @@ public final class RifLoader {
                   .getMetrics()
                   .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
                   .time();
-          // LOGGER.info("Starting batch of {} records", recordsBatch.size());
-
           // Execute the transaction and capture any exception it might throw as a RifLoadFailure.
           // Catching it here lets us rethrow it after cleaning up our state farther down in the
           // method.
@@ -290,7 +288,6 @@ public final class RifLoader {
             // Update the metrics now that things have been pushed.
             timerBatchSuccess.stop();
             timerBatchTypeSuccess.stop();
-            // LOGGER.info("Processed batch of {} records successfully", processResults.size());
             return processResults;
           } else {
             // Update metrics for a failure and halt the pipeline.
