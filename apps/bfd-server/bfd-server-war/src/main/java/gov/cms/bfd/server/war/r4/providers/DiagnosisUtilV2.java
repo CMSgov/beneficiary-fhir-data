@@ -564,7 +564,7 @@ public class DiagnosisUtilV2 {
    */
   static Optional<Integer> addDiagnosisCode(
       ExplanationOfBenefit eob, Optional<Diagnosis> diagnosis, ClaimType claimType) {
-    return diagnosis.map(d -> new Integer(addDiagnosisCode(eob, d, claimType)));
+    return diagnosis.map(d -> (addDiagnosisCode(eob, d, claimType)));
   }
 
   /**
