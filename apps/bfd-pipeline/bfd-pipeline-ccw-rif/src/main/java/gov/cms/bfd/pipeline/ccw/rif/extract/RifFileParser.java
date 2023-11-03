@@ -13,8 +13,8 @@ import org.apache.commons.csv.CSVRecord;
 import reactor.core.publisher.Flux;
 
 /**
- * Instances of this interface provide a method that takes a {@link RifFile} and returns a {@link
- * Flux} of {@link RifRecordEvent}s.
+ * Instances of this class provide a method that takes a {@link RifFile} and returns a {@link Flux}
+ * of {@link RifRecordEvent}s.
  */
 @ThreadSafe
 public abstract class RifFileParser {

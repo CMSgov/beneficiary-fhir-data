@@ -207,7 +207,6 @@ public final class RifLoader {
               .subscribeOn(scheduler)
               // collect records into batches
               .buffer(performanceSettings.getRecordBatchSize())
-              // .doOnNext(buffer -> LOGGER.info("Parsed buffer of {} records", buffer.size()))
               // Set the number of batches we want to keep ready for processing.  The actual amount
               // will vary between 75% and 100% of the requested value as the flux manages the
               // queue.
