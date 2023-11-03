@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasItem;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.server.war.ExplanationOfBenefitE2EBase;
+import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,8 +40,8 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
     String patientId = testUtils.getPatientId(loadedData);
     // IncludeTaxNumbers is a header, so added below in restAssured API
     String requestString = eobEndpoint + "?patient=" + patientId;
-    CarrierClaim carrierClaim = getClaim(loadedData, CarrierClaim.class);
-    DMEClaim dmeClaim = getClaim(loadedData, DMEClaim.class);
+    CarrierClaim carrierClaim = ServerTestUtils.getClaim(loadedData, CarrierClaim.class);
+    DMEClaim dmeClaim = ServerTestUtils.getClaim(loadedData, DMEClaim.class);
 
     // make sure all 8 entries come back as expected and no 400/500/other errors
     given()
