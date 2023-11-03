@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
-import static gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2.convertToDate;
+import static gov.cms.bfd.server.war.commons.CommonTransformerUtils.convertToDate;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.server.war.commons.IdentifierType;

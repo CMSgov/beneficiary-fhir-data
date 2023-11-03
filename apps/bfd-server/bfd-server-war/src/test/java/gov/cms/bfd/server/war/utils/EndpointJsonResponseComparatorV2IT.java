@@ -27,6 +27,7 @@ import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -783,7 +784,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(Coverage.class)
-        .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .withId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -811,7 +812,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .read()
         .resource(Coverage.class)
-        .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .withId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -841,7 +842,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
         .forResource(Coverage.class)
         .where(
             Coverage.BENEFICIARY.hasId(
-                TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
+                CommonTransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return jsonInterceptor.getResponse();
@@ -873,7 +874,7 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
         .forResource(Coverage.class)
         .where(
             Coverage.BENEFICIARY.hasId(
-                TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
+                CommonTransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return jsonInterceptor.getResponse();
@@ -902,7 +903,8 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .search()
         .forResource(ExplanationOfBenefit.class)
-        .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
+        .where(
+            ExplanationOfBenefit.PATIENT.hasId(CommonTransformerUtils.buildPatientId(beneficiary)))
         .returnBundle(Bundle.class)
         .execute();
     return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/entry/3/resource/diagnosis/7/type");
@@ -931,7 +933,8 @@ public final class EndpointJsonResponseComparatorV2IT extends ServerRequiredTest
     fhirClient
         .search()
         .forResource(ExplanationOfBenefit.class)
-        .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
+        .where(
+            ExplanationOfBenefit.PATIENT.hasId(CommonTransformerUtils.buildPatientId(beneficiary)))
         .count(8)
         .returnBundle(Bundle.class)
         .execute();

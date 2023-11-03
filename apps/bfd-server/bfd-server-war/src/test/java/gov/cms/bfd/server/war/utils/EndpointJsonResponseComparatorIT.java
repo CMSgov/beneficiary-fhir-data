@@ -26,13 +26,13 @@ import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -765,7 +765,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(Coverage.class)
-        .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .withId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -794,7 +794,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(Coverage.class)
-        .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .withId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -824,7 +824,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
         .forResource(Coverage.class)
         .where(
             Coverage.BENEFICIARY.hasId(
-                TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+                CommonTransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return jsonInterceptor.getResponse();
@@ -856,7 +856,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
         .forResource(Coverage.class)
         .where(
             Coverage.BENEFICIARY.hasId(
-                TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+                CommonTransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return jsonInterceptor.getResponse();
@@ -885,7 +885,8 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .search()
         .forResource(ExplanationOfBenefit.class)
-        .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+        .where(
+            ExplanationOfBenefit.PATIENT.hasId(CommonTransformerUtils.buildPatientId(beneficiary)))
         .returnBundle(Bundle.class)
         .execute();
     return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/entry/3/resource/diagnosis/7/type");
@@ -914,7 +915,8 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .search()
         .forResource(ExplanationOfBenefit.class)
-        .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+        .where(
+            ExplanationOfBenefit.PATIENT.hasId(CommonTransformerUtils.buildPatientId(beneficiary)))
         .count(8)
         .returnBundle(Bundle.class)
         .execute();
@@ -950,7 +952,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -989,7 +991,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1017,7 +1019,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1051,7 +1053,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1079,7 +1081,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1107,7 +1109,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1135,7 +1137,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1163,7 +1165,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()))
         .execute();
     return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/diagnosis/7/type");
   }
@@ -1191,7 +1193,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1219,7 +1221,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1247,7 +1249,7 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()))
+        .withId(CommonTransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
