@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +55,12 @@ public class AccessJsonE2E extends ServerRequiredTest {
         .statusCode(200)
         .when()
         .get(requestString);
+
+    // Needed to resolve a race condition
+    try {
+      TimeUnit.MILLISECONDS.sleep(250);
+    } catch (InterruptedException ignored) {
+    }
 
     assertTrue(Files.isReadable(accessLogJson));
     assertTrue(Files.size(accessLogJson) > 0);
