@@ -15,15 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import com.google.common.collect.ImmutableList;
-import gov.cms.bfd.model.rif.RifRecordBase;
-import gov.cms.bfd.model.rif.entities.CarrierClaim;
-import gov.cms.bfd.model.rif.entities.DMEClaim;
-import gov.cms.bfd.model.rif.entities.HHAClaim;
-import gov.cms.bfd.model.rif.entities.HospiceClaim;
-import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
-import gov.cms.bfd.model.rif.entities.PartDEvent;
-import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -215,7 +207,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     List<Object> loadedData = testUtils.loadSampleAData();
     String patientId = testUtils.getPatientId(loadedData);
     String requestString = eobEndpoint + "?patient=" + patientId;
-    OutpatientClaim expectedOutpatientClaim = getClaim(loadedData, OutpatientClaim.class);
+    OutpatientClaim expectedOutpatientClaim = testUtils.getClaim(loadedData, OutpatientClaim.class);
 
     given()
         .spec(requestAuth)
@@ -899,7 +891,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   public void searchEobByPatientIdWhenNullLastUpdatedExpectFallback() {
     List<Object> loadedRecords = testUtils.loadSampleAData();
     String patientId = testUtils.getPatientId(loadedRecords);
-    Long claimId = Long.valueOf(getClaimIdFor(loadedRecords, ClaimType.CARRIER));
+    Long claimId = Long.valueOf(testUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER));
     String requestString = eobEndpoint + "?patient=" + patientId;
     // Do some annoying date formatting since the json response and constant have different
     // precisions/formats
@@ -1060,59 +1052,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   }
 
   /**
-   * Instantiates a new Get claim.
-   *
-   * @param loadedRecords the loaded records
-   * @param clazz the rif record type
-   * @param <T> the rif record type (must match clazz)
-   * @return the claim of the given type from the sample data
-   */
-  protected <T extends RifRecordBase> T getClaim(List<Object> loadedRecords, Class<T> clazz) {
-
-    return loadedRecords.stream()
-        .filter(clazz::isInstance)
-        .map(clazz::cast)
-        .findFirst()
-        .orElseThrow();
-  }
-
-  /**
-   * Gets the claim id for the specified record type in the loaded records.
-   *
-   * @param loadedRecords the loaded records
-   * @param claimType the claim type
-   * @return the claim id for
-   */
-  private String getClaimIdFor(List<Object> loadedRecords, ClaimType claimType) {
-    return switch (claimType) {
-      case CARRIER:
-        CarrierClaim carrier = getClaim(loadedRecords, CarrierClaim.class);
-        yield String.valueOf(carrier.getClaimId());
-      case DME:
-        DMEClaim dme = getClaim(loadedRecords, DMEClaim.class);
-        yield String.valueOf(dme.getClaimId());
-      case HHA:
-        HHAClaim hha = getClaim(loadedRecords, HHAClaim.class);
-        yield String.valueOf(hha.getClaimId());
-      case HOSPICE:
-        HospiceClaim hospiceClaim = getClaim(loadedRecords, HospiceClaim.class);
-        yield String.valueOf(hospiceClaim.getClaimId());
-      case INPATIENT:
-        InpatientClaim inpatientClaim = getClaim(loadedRecords, InpatientClaim.class);
-        yield String.valueOf(inpatientClaim.getClaimId());
-      case OUTPATIENT:
-        OutpatientClaim outpatientClaim = getClaim(loadedRecords, OutpatientClaim.class);
-        yield String.valueOf(outpatientClaim.getClaimId());
-      case PDE:
-        PartDEvent pde = getClaim(loadedRecords, PartDEvent.class);
-        yield String.valueOf(pde.getEventId());
-      case SNF:
-        SNFClaim snfClaim = getClaim(loadedRecords, SNFClaim.class);
-        yield String.valueOf(snfClaim.getClaimId());
-    };
-  }
-
-  /**
    * Verify a successful EOB response returns when searching for the specified claim type's id (as
    * taken from the sample data).
    *
@@ -1120,7 +1059,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    */
   private void verifySuccessfulResponseAndClaimIdFor(ClaimType claimType) {
     List<Object> loadedRecords = testUtils.loadSampleAData();
-    String claimId = getClaimIdFor(loadedRecords, claimType);
+    String claimId = testUtils.getClaimIdFor(loadedRecords, claimType);
     // Code is the same between utils, so can use v2 call for both
     String eobId = TransformerUtilsV2.buildEobId(claimType, claimId);
     String systemId = "https://bluebutton.cms.gov/resources/variables/clm_id";
