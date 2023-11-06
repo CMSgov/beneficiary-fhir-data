@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.EndpointJsonComparatorBase;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import io.restassured.http.Header;
@@ -577,7 +578,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
   public static String coverageRead() {
     Beneficiary beneficiary = getSampleABene();
 
-    IdDt coverageId = TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary);
+    IdDt coverageId = CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary);
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/Coverage/" + coverageId.getIdPart());
   }
 
@@ -656,7 +657,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String carrClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.CARRIER, carrClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaimId);
 
     Headers headers =
         new Headers(
@@ -683,7 +684,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
                     StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
 
     String carrClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.CARRIER, carrClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaimId);
 
     Headers headers =
         new Headers(
@@ -705,7 +706,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String carrClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.CARRIER, carrClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
   }
@@ -722,7 +723,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String dmeClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.DME);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.DME, dmeClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.DME, dmeClaimId);
 
     Headers headers =
         new Headers(
@@ -744,7 +745,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String dmeClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.DME);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.DME, dmeClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.DME, dmeClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
   }
@@ -761,7 +762,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String hhaClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.HHA);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.HHA, hhaClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.HHA, hhaClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
   }
@@ -778,7 +779,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String hospClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.HOSPICE);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.HOSPICE, hospClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.HOSPICE, hospClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
   }
@@ -795,7 +796,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String inpClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.INPATIENT);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.INPATIENT, inpClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
   }
@@ -812,7 +813,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String outClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.OUTPATIENT);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.OUTPATIENT, outClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
   }
@@ -829,7 +830,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String pdeClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.PDE);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.PDE, pdeClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.PDE, pdeClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
   }
@@ -846,7 +847,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String snfClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.SNF);
-    String eobId = TransformerUtilsV2.buildEobId(ClaimType.SNF, snfClaimId);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.SNF, snfClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
   }

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.commons.CommonTransformerUtils.convertToDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,6 +27,7 @@ import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
@@ -190,7 +192,8 @@ public final class TransformerTestUtilsV2 {
     assertEquals(expectedIdentifierSystem, reference.getIdentifier().getSystem());
     assertEquals(expectedIdentifierValue, reference.getIdentifier().getValue());
     assertEquals(
-        TransformerUtilsV2.retrieveNpiCodeDisplay(expectedIdentifierValue), reference.getDisplay());
+        CommonTransformerUtils.retrieveNpiCodeDisplay(expectedIdentifierValue),
+        reference.getDisplay());
   }
 
   /**
@@ -368,7 +371,7 @@ public final class TransformerTestUtilsV2 {
    * @param actual the actual {@link BaseDateTimeType} to verify
    */
   static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
-    assertEquals(TransformerUtilsV2.convertToDate(expected), actual.getValue());
+    assertEquals(convertToDate(expected), actual.getValue());
     assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
   }
 
@@ -1472,7 +1475,7 @@ public final class TransformerTestUtilsV2 {
     return new ProcedureComponent()
         .setSequence(seq)
         .setProcedure(new CodeableConcept().setCoding(codes))
-        .setDate(TransformerUtilsV2.convertToDate(ldate));
+        .setDate(convertToDate(ldate));
   }
 
   /**

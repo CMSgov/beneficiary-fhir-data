@@ -1,8 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
-import static gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2.convertToDate;
-
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
@@ -47,7 +46,7 @@ public class AbstractTransformerV2 {
    * @return The converted {@link Date} object.
    */
   protected static Date localDateToDate(LocalDate localDate) {
-    return localDate == null ? null : convertToDate(localDate);
+    return localDate == null ? null : CommonTransformerUtils.convertToDate(localDate);
   }
 
   /**

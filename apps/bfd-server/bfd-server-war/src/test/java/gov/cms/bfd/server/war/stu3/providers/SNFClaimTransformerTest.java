@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -196,7 +197,7 @@ public final class SNFClaimTransformerTest {
         claim.getProcedure1Code().get(),
         eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
     assertEquals(
-        TransformerUtils.convertToDate(claim.getProcedure1Date().get()),
+        CommonTransformerUtils.convertToDate(claim.getProcedure1Date().get()),
         eob.getProcedure().get(0).getDate());
 
     assertEquals(1, eob.getItem().size());
