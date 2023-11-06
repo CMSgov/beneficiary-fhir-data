@@ -810,6 +810,7 @@
                             <its.db.password>${its.db.password}</its.db.password>
                             <its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
                             <its.testcontainer.aws.image>${its.testcontainer.aws.image}</its.testcontainer.aws.image>
+                            <generateTestData>false</generateTestData>
                         </systemPropertyVariables>
                         <includes>
                             <include>**/*IT.java</include>
