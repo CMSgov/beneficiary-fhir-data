@@ -10,8 +10,7 @@ resource "aws_s3_bucket" "this" {
 
 # block public access to the bucket
 resource "aws_s3_bucket_public_access_block" "this" {
-  bucket = aws_s3_bucket.this.id
-
+  bucket                  = aws_s3_bucket.this.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -29,27 +28,16 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 }
 
 resource "aws_s3_bucket_logging" "this" {
-  # TODO: Make this work better for ephemeral environments, etc
   count = local.is_ephemeral_env ? 0 : 1
 
   bucket = aws_s3_bucket.this.id
 
-  # TODO: consider adding this...
-  # expected_bucket_owner = local.account_id
+  expected_bucket_owner = local.account_id
 
   target_bucket = local.logging_bucket
   target_prefix = "${local.legacy_service}_s3_access_logs/"
 }
 
-resource "aws_s3_bucket_acl" "this" {
-  # After April 2023, new S3 Buckets have public access disabled along with ACLs disabled. This
-  # resource will fail to apply for ephemeral environments (new buckets)
-  # FIXME: Replace/resolve this before accepting BFD-2554
-  count = local.is_ephemeral_env ? 0 : 1
-
-  bucket = aws_s3_bucket.this.id
-  acl    = "private"
-}
 
 resource "aws_s3_bucket" "logging" {
   bucket = local.logging_bucket
@@ -59,6 +47,14 @@ resource "aws_s3_bucket" "logging" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "logging" {
+  bucket                  = aws_s3_bucket.logging.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "logging" {
   bucket = aws_s3_bucket.logging.id
   rule {
@@ -66,25 +62,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logging" {
       sse_algorithm = "AES256"
     }
   }
-}
-
-resource "aws_s3_bucket_public_access_block" "logging" {
-  bucket = aws_s3_bucket.logging.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-resource "aws_s3_bucket_acl" "logging" {
-  # After April 2023, new S3 Buckets have public access disabled along with ACLs disabled. This
-  # resource will fail to apply for ephemeral environments
-  # TODO: Replace/resolve this in BFD-2554
-  count = local.is_ephemeral_env ? 0 : 1
-
-  acl    = "log-delivery-write"
-  bucket = aws_s3_bucket.logging.id
 }
 
 resource "aws_s3_bucket_policy" "logging" {
