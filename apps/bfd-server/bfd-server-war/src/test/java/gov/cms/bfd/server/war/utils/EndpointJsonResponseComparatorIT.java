@@ -61,7 +61,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -201,14 +201,16 @@ public final class EndpointJsonResponseComparatorIT extends ServerRequiredTest {
   }
 
   /**
-   * Generates the "golden" files, i.e. the approved responses to compare to. Run by commenting out
-   * the <code>@Disabled</code> annotation and running this method as JUnit.
+   * Generates the "golden" files, i.e. the approved responses to compare to. Purpose of this
+   * testing is to perform regression testing against the "Golden Beneficiary Data" at a specific
+   * point in time. It is important to note that this testing focuses on checking for regressions
+   * against the data at that particular moment, and not necessarily against data artifacts. To run
+   * this test, execute the following Maven Command: mvn clean install -DgenerateTestData=true
    *
    * @param endpointId the endpoint id
    * @param endpointOperation the endpoint operation
    */
-  @Disabled(
-      "This should not be a test, Should be handled in another location as part of build flow")
+  @EnabledIfSystemProperty(named = "generateTestData", matches = "true")
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
   public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {
