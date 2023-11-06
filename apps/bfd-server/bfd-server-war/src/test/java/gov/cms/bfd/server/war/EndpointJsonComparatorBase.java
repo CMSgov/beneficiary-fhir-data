@@ -56,7 +56,8 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
   public void assertJsonDiffIsEmpty(String endpointId, String endpointResponse) {
     String expectedJson =
         ServerTestUtils.readFile(
-            ServerTestUtils.generateEndpointJsonFileName(getExpectedJsonResponseDir(), endpointId));
+            ServerTestUtils.generatePathForEndpointJsonFile(
+                getExpectedJsonResponseDir(), endpointId));
     AssertUtils.assertJsonEquals(
         expectedJson, endpointResponse, ServerTestUtils.JSON_COMPARE_IGNORED_PATHS);
   }
@@ -121,13 +122,16 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
       if (pattern.isPresent()) {
         Pattern p = pattern.get();
         Matcher m = p.matcher(parent.get(fieldName).toString());
-        if (m.find())
+        if (m.find()) {
           if (fieldName.equals("url")) {
             // Only replace the port numbers (m.group(2)) on urls
             String replacementUrl = m.group(1) + IGNORED_FIELD_TEXT + m.group(3);
             ((ObjectNode) parent)
                 .put(fieldName, replacementUrl.substring(0, replacementUrl.length() - 1));
-          } else ((ObjectNode) parent).put(fieldName, IGNORED_FIELD_TEXT);
+          } else {
+            ((ObjectNode) parent).put(fieldName, IGNORED_FIELD_TEXT);
+          }
+        }
       } else ((ObjectNode) parent).put(fieldName, IGNORED_FIELD_TEXT);
     }
 

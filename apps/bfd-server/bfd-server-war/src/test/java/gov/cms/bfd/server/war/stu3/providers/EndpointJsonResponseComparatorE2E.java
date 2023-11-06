@@ -185,7 +185,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
     }
     ServerTestUtils.writeFile(
         jsonResponse,
-        ServerTestUtils.generateEndpointJsonFileName(approvedResponseDir, endpointId));
+        ServerTestUtils.generatePathForEndpointJsonFile(approvedResponseDir, endpointId));
   }
 
   /**

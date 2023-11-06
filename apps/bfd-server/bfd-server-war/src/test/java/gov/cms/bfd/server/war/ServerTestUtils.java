@@ -44,11 +44,8 @@ import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.restassured.response.Response;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
@@ -982,13 +979,13 @@ public final class ServerTestUtils {
   }
 
   /**
-   * Generates a path to use as a filename.
+   * Generates a path to use to get or store endpoint json files.
    *
    * @param directory the path to where the file should be written
    * @param endpoint the string to identify which endpoint's response the file contents contain
    * @return a path to use as a filename
    */
-  public static Path generateEndpointJsonFileName(Path directory, String endpoint) {
+  public static Path generatePathForEndpointJsonFile(Path directory, String endpoint) {
     return Paths.get(directory.toString(), endpoint + ".json");
   }
 
@@ -999,13 +996,11 @@ public final class ServerTestUtils {
    * @return the contents of the file as a string.
    */
   public static String readFile(Path path) {
-    byte[] encoded;
     try {
-      encoded = Files.readAllBytes(path);
+      return Files.readString(path, StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new UncheckedIOException("Can't read file at " + path, e);
     }
-    return new String(encoded, StandardCharsets.UTF_8);
   }
 
   /**
@@ -1065,15 +1060,13 @@ public final class ServerTestUtils {
    * Writes a file to the specified path.
    *
    * @param contents the string to be written to a file
-   * @param fileName the path to name the file
+   * @param filePath the path+name to save the file as
    */
-  public static void writeFile(String contents, Path fileName) {
-    File jsonFile = new File(fileName.toString());
-    try (OutputStreamWriter streamWriter =
-        new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8); ) {
-      streamWriter.write(contents);
+  public static void writeFile(String contents, Path filePath) {
+    try {
+      Files.writeString(filePath, contents, StandardCharsets.UTF_8);
     } catch (IOException e) {
-      throw new UncheckedIOException("Could not write file at " + fileName, e);
+      throw new UncheckedIOException("Could not write file at " + filePath, e);
     }
   }
 }

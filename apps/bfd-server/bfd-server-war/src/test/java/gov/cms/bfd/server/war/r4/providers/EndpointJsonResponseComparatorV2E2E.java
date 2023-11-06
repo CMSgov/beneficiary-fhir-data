@@ -179,8 +179,9 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
     replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
     replaceIgnoredFieldsWithFillerText(jsonNode, "created", Optional.empty());
 
-    if (endpointId.equals("metadata"))
+    if (endpointId.equals("metadata")) {
       replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
+    }
 
     String jsonResponse;
     try {
@@ -191,7 +192,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
     }
     ServerTestUtils.writeFile(
         jsonResponse,
-        ServerTestUtils.generateEndpointJsonFileName(approvedResponseDir, endpointId));
+        ServerTestUtils.generatePathForEndpointJsonFile(approvedResponseDir, endpointId));
   }
 
   /**
