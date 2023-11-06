@@ -120,16 +120,12 @@ resource "aws_s3_bucket_policy" "logging" {
 POLICY
 }
 
-resource "aws_s3_bucket" "bfd-public-test-data" {
+resource "aws_s3_bucket" "bfd_public_test_data" {
   bucket = "bfd-public-test-data"
-
-  tags = {
-    "cms-cloud-exempt:public-s3-bucket" = "https://confluence.cms.gov/x/VFNBGg"
-  }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "bfd-public-test-data" {
-  bucket = aws_s3_bucket.bfd-public-test-data.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "bfd_public_test_data" {
+  bucket = aws_s3_bucket.bfd_public_test_data.id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -137,15 +133,15 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bfd-public-test-d
   }
 }
 
-resource "aws_s3_bucket_versioning" "bfd-public-test-data" {
-  bucket = aws_s3_bucket.bfd-public-test-data.id
+resource "aws_s3_bucket_versioning" "bfd_public_test_data" {
+  bucket = aws_s3_bucket.bfd_public_test_data.id
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "bfd-public-test-data" {
-  bucket = aws_s3_bucket.bfd-public-test-data.id
+resource "aws_s3_bucket_public_access_block" "bfd_public_test_data" {
+  bucket = aws_s3_bucket.bfd_public_test_data.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -153,25 +149,25 @@ resource "aws_s3_bucket_public_access_block" "bfd-public-test-data" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_ownership_controls" "bfd-public-test-data" {
-  bucket = aws_s3_bucket.bfd-public-test-data.id
+resource "aws_s3_bucket_ownership_controls" "bfd_public_test_data" {
+  bucket = aws_s3_bucket.bfd_public_test_data.id
   rule {
     object_ownership = "BucketOwnerEnforced"
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "bfd-public-test-data" {
-  depends_on = [aws_s3_bucket_versioning.bfd-public-test-data]
-  bucket = aws_s3_bucket.bfd-public-test-data.id
+resource "aws_s3_bucket_lifecycle_configuration" "bfd_public_test_data" {
+  depends_on = [aws_s3_bucket_versioning.bfd_public_test_data]
+  bucket = aws_s3_bucket.bfd_public_test_data.id
 
   rule {
     id = "rule-1"
 
     filter {}
 
-    noncurrent_version_transition {
-      noncurrent_days = 60
-      storage_class   = "GLACIER"
+    transition {
+      days            = 7
+      storage_class   = "GLACIER_IR"
     }
 
     status = "Enabled"
