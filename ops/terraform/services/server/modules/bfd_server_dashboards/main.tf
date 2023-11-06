@@ -1,8 +1,9 @@
 # This module is for defining the BDF CloudWatch dashboard
 #
 locals {
-  env = terraform.workspace
-  app = "bfd-server"
+  region = data.aws_region.current.name
+  env    = terraform.workspace
+  app    = "bfd-server"
 
   dashboard_name = "bfd-${local.env}-server"
   namespace      = "bfd-${local.env}/${local.app}"
@@ -20,7 +21,7 @@ locals {
       prod     = ".*ab2d-prod-client.*"
     }
     ab2d_validation_client_ssl = {
-      prod     = ".*ab2d-prod-validation-client.*"
+      prod = ".*ab2d-prod-validation-client.*"
     }
     bcda_client_ssl = {
       prod_sbx = ".*bcda-sbx-client.*"
@@ -49,7 +50,8 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
     "${path.module}/templates/bfd-dashboard.tftpl",
     merge({
       namespace = local.namespace
-      env       = local.env
+      env       = local.env,
+      region    = local.region
     }, local.client_ssls)
   )
 }

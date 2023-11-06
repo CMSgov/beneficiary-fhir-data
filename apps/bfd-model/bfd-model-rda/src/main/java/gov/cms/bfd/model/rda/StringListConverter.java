@@ -6,6 +6,7 @@ package gov.cms.bfd.model.rda;
  * deserializing value from the database.
  */
 public class StringListConverter extends AbstractJsonConverter<StringList> {
+  /** StringListConverter Constructor. */
   public StringListConverter() {
     super(StringList.class, StringList::new);
   }

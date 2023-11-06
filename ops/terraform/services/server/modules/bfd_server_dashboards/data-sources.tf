@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 data "external" "client_ssls" {
   program = [
     "bash",

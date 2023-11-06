@@ -26,8 +26,11 @@ import lombok.experimental.FieldNameConstants;
 @FieldNameConstants
 @Table(name = "rda_api_progress", schema = "rda")
 public class RdaApiProgress {
+  /** Represents the enum ClaimType. */
   public enum ClaimType {
+    /** A FISS claim. */
     FISS,
+    /** A MCS claim. */
     MCS
   }
 

@@ -105,6 +105,7 @@ public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
   /**
    * Convert an object into a JSON String. If the object is null a null value will be returned.
    *
+   * @param <T> The type of the object to be converted to JSONString.
    * @param object the entity attribute value to be converted
    * @return the String or null of the entity was null
    * @throws JsonProcessingException if the object could not be converted
