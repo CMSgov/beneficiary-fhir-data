@@ -8,7 +8,63 @@ exec > >(
     done
 )
 
+# Set login environment for all users:
+# 1. make BFD_ENV_NAME available to all logins
+# 2. change prompt color based on environment (red for prod and yellow for prod-sbx)
+cat <<EOF > /etc/profile.d/set-bfd-login-env.sh
+# make BFD_ENV_NAME available to all logins
+export BFD_ENV_NAME="${env}"
+
+# set prompt color based on environment (only if we are in an interactive shell)
+if [[ \$- == *i* ]]; then
+    case "\$BFD_ENV_NAME" in
+        "prod") export PS1="[\[\033[1;31m\]\u@\h\[\033[00m\]:\[\033[1;31m\]\w\[\033[00m\]] " ;;
+        "prod-sbx") export PS1="[\[\033[0;33m\]\u@\h\[\033[00m\]:\[\033[0;33m\]\w\[\033[00m\]] " ;;
+    esac
+fi
+EOF
+
+bash /usr/local/bin/permit-user-access "${seed_env}"
+
+CONTROLLER_HOST_IP=$(ec2-metadata --local-ipv4 | cut -d " " -f 2)
+service docker start
+aws ecr get-login-password --region "${aws_current_region}" | \
+docker login --username AWS --password-stdin "${ecr_registry_url}"
+docker pull "${ecr_tagged_controller_uri}"
+
+HOST_VOLUME="server-load"
+docker volume create "$HOST_VOLUME"
+
+mkdir -p "${server_load_dir}"
+docker logs --follow $(docker run --detach \
+  -e BFD_ENVIRONMENT=${env} \
+  -e SQS_QUEUE_NAME=${sqs_queue_name} \
+  -e NODE_LAMBDA_NAME=${node_lambda_name} \
+  -e ASG_NAME=${asg_name} \
+  -e TEST_HOST=${test_host} \
+  -e AWS_CURRENT_REGION=${aws_current_region} \
+  -e INITIAL_WORKER_NODES=${initial_worker_nodes} \
+  -e NODE_SPAWN_TIME=${node_spawn_time} \
+  -e MAX_SPAWNED_NODES=${max_spawned_nodes} \
+  -e MAX_SPAWNED_USERS=${max_spawned_users} \
+  -e USER_SPAWN_RATE=${user_spawn_rate} \
+  -e TEST_RUNTIME_LIMIT=${test_runtime_limit} \
+  -e COASTING_TIME=${coasting_time} \
+  -e WARM_INSTANCE_TARGET=${warm_instance_target} \
+  -e STOP_ON_SCALING=${stop_on_scaling} \
+  -e STOP_ON_NODE_LIMIT=${stop_on_node_limit} \
+  -e LOCUST_TAGS=${locust_tags} \
+  -e LOCUST_EXCLUDE_TAGS=${locust_exclude_tags} \
+  -e CONTROLLER_HOST_IP="$CONTROLLER_HOST_IP" \
+  -e CONTROLLER_HOST_PORT="${locust_master_port}" \
+  -p "0.0.0.0:${locust_master_port}:${locust_master_port}" \
+  -v "server-load:/app/logs" \
+  "${ecr_tagged_controller_uri}"
+) >& "${server_load_dir}/server-load-controller.log" &
+
+
 # Reconfigure and relaunch CloudWatch unified agent
+LOG_PATH=$(docker volume inspect --format '{{ .Mountpoint }}' "$HOST_VOLUME")
 cat <<EOF > /tmp/cwagent-server-load.json
 {
   "metrics": {
@@ -40,25 +96,25 @@ cat <<EOF > /tmp/cwagent-server-load.json
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           },
           {
-            "file_path": "${server_load_dir}/load_exceptions.csv",
+            "file_path": "$LOG_PATH/load_exceptions.csv",
             "log_group_name": "/bfd/${env}/bfd-server-load/load_exceptions.csv",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           },
           {
-            "file_path": "${server_load_dir}/load_failures.csv",
+            "file_path": "$LOG_PATH/load_failures.csv",
             "log_group_name": "/bfd/${env}/bfd-server-load/load_failures.csv",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           },
           {
-            "file_path": "${server_load_dir}/load_stats.csv",
+            "file_path": "$LOG_PATH/load_stats.csv",
             "log_group_name": "/bfd/${env}/bfd-server-load/load_stats.csv",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           },
           {
-            "file_path": "${server_load_dir}/load_stats_history.csv",
+            "file_path": "$LOG_PATH/load_stats_history.csv",
             "log_group_name": "/bfd/${env}/bfd-server-load/load_stats_history.csv",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
@@ -71,51 +127,3 @@ cat <<EOF > /tmp/cwagent-server-load.json
 EOF
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/cwagent-server-load.json -s
-
-# Set login environment for all users:
-# 1. make BFD_ENV_NAME available to all logins
-# 2. change prompt color based on environment (red for prod and yellow for prod-sbx)
-cat <<EOF > /etc/profile.d/set-bfd-login-env.sh
-# make BFD_ENV_NAME available to all logins
-export BFD_ENV_NAME="${env}"
-
-# set prompt color based on environment (only if we are in an interactive shell)
-if [[ \$- == *i* ]]; then
-    case "\$BFD_ENV_NAME" in
-        "prod") export PS1="[\[\033[1;31m\]\u@\h\[\033[00m\]:\[\033[1;31m\]\w\[\033[00m\]] " ;;
-        "prod-sbx") export PS1="[\[\033[0;33m\]\u@\h\[\033[00m\]:\[\033[0;33m\]\w\[\033[00m\]] " ;;
-    esac
-fi
-EOF
-
-bash /usr/local/bin/permit-user-access "${seed_env}"
-
-CONTROLLER_HOST_IP=$(ec2-metadata --local-ipv4 | cut -d " " -f 2)
-service docker start
-aws ecr get-login-password --region "${aws_current_region}" | \
-docker login --username AWS --password-stdin "${ecr_registry_url}"
-docker pull "${ecr_tagged_controller_uri}"
-mkdir "${server_load_dir}"
-docker logs --follow $(docker run --detach \
-  -e BFD_ENVIRONMENT=${env} \
-  -e SQS_QUEUE_NAME=${sqs_queue_name} \
-  -e NODE_LAMBDA_NAME=${node_lambda_name} \
-  -e ASG_NAME=${asg_name} \
-  -e TEST_HOST=${test_host} \
-  -e AWS_CURRENT_REGION=${aws_current_region} \
-  -e INITIAL_WORKER_NODES=${initial_worker_nodes} \
-  -e NODE_SPAWN_TIME=${node_spawn_time} \
-  -e MAX_SPAWNED_NODES=${max_spawned_nodes} \
-  -e MAX_SPAWNED_USERS=${max_spawned_users} \
-  -e USER_SPAWN_RATE=${user_spawn_rate} \
-  -e TEST_RUNTIME_LIMIT=${test_runtime_limit} \
-  -e COASTING_TIME=${coasting_time} \
-  -e WARM_INSTANCE_TARGET=${warm_instance_target} \
-  -e STOP_ON_SCALING=${stop_on_scaling} \
-  -e STOP_ON_NODE_LIMIT=${stop_on_node_limit} \
-  -e LOCUST_TAGS=${locust_tags} \
-  -e LOCUST_EXCLUDE_TAGS=${locust_exclude_tags} \
-  -e CONTROLLER_HOST_IP="$CONTROLLER_HOST_IP" \
-  -p "0.0.0.0:${locust_master_port}:${locust_master_port}" \
-  "${ecr_tagged_controller_uri}"
-) >& "${server_load_dir}/server-load-controller.log" &

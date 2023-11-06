@@ -64,7 +64,7 @@ sqs = boto3.resource("sqs", config=boto_config)
 lambda_client = boto3.client("lambda", config=boto_config)
 
 
-def _start_node(controller_ip: str, host: str, locust_port: number):
+def _start_node(controller_ip: str, host: str, locust_port: str):
     """
     Invokes the lambda function that runs a Locust worker node process.
     """
@@ -127,7 +127,7 @@ def _main():
             "--client-cert-path=/tmp/bfd_test_cert.pem",
             "--enable-rebalancing",
             "--loglevel=DEBUG",
-            "--csv=load",
+            "--csv=logs/load",
             "--headless",
         ]
         + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else [])
@@ -150,7 +150,7 @@ def _main():
     spawn_count = 0
     for _ in range(0, initial_worker_nodes):
         print(f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-        _start_node(controller_ip=controller_host_ip, host=test_host)
+        _start_node(controller_ip=controller_host_ip, host=test_host, locust_port=controller_host_port)
         spawn_count += 1
         print(f"Spawned initial worker node #{spawn_count} successfully")
 
@@ -194,7 +194,7 @@ def _main():
         if spawn_count < max_spawned_nodes:
             if datetime.now() >= next_node_spawn:
                 print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-                _start_node(controller_ip=controller_host_ip, host=test_host)
+                _start_node(controller_ip=controller_host_ip, host=test_host, locust_port=controller_host_port)
                 spawn_count += 1
                 print(f"Worker node #{spawn_count} spawned successfully")
 
