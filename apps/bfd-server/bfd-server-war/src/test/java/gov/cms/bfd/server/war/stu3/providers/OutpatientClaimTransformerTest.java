@@ -9,7 +9,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -23,14 +22,12 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -87,63 +84,6 @@ public final class OutpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob = outpatientClaimTransformer.transform(claim, false);
     assertMatches(claim, eob);
-  }
-
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform} works as expected
-   * when run against the {@link StaticRifResource#SYNTHETIC_OUTPATIENT_1999_1999} {@link
-   * OutpatientClaim}.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Disabled("This test is normally disabled like other synthetic data tests")
-  @Test
-  public void transformSyntheticRecord() throws FHIRException {
-    List<Object> parsedRecords =
-        ServerTestUtils.parseData(Arrays.asList(StaticRifResource.SYNTHETIC_OUTPATIENT_1999_1999));
-    OutpatientClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof OutpatientClaim)
-            .map(r -> (OutpatientClaim) r)
-            .findFirst()
-            .get();
-
-    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(claim, false);
-
-    assertMatches(claim, eob);
-  }
-
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform} works as expected
-   * when run against all synthetic data outpatient claims.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Disabled(
-      "This test is normally disabled like other synthetic data tests. Takes 20+ minutes to run")
-  @Test
-  public void transformAllSyntheticRecords() throws FHIRException {
-    List<StaticRifResource> outpatientSyntheticFiles =
-        Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()).stream()
-            .filter(r -> r.getRifFileType().equals(RifFileType.OUTPATIENT))
-            .collect(Collectors.toList());
-
-    List<Object> parsedRecords = ServerTestUtils.parseData(outpatientSyntheticFiles);
-
-    parsedRecords.stream()
-        .filter(r -> r instanceof OutpatientClaim)
-        .map(r -> (OutpatientClaim) r)
-        .forEach(
-            claim -> {
-              LOGGER.info(
-                  "Running at Bene-Id: {}, Claim-Id: {}",
-                  claim.getBeneficiaryId(),
-                  claim.getClaimId());
-              ExplanationOfBenefit eob = outpatientClaimTransformer.transform(claim, false);
-              assertMatches(claim, eob);
-            });
   }
 
   /**
