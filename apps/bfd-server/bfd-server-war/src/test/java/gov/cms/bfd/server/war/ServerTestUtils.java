@@ -3,10 +3,12 @@ package gov.cms.bfd.server.war;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
@@ -34,6 +36,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
@@ -45,6 +48,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.management.ManagementFactory;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -99,6 +104,24 @@ public final class ServerTestUtils {
 
   /** The server's base url. */
   private final String serverBaseUrl;
+
+  /** A set of ignored paths for json comparison testing. */
+  public static final Set<String> JSON_COMPARE_IGNORED_PATHS =
+      ImmutableSet.of(
+          "\"/id\"",
+          "\"/date\"",
+          "\"/created\"",
+          "\"/link/[0-9]/url\"",
+          "\"/implementation/url\"",
+          "\"/entry/[0-9]/fullUrl\"",
+          "\"/meta\"",
+          "\"/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta\"",
+          "\"/entry/[0-9]/resource/created\"",
+          "\"/procedure/[0-9]/date\"",
+          "\"/entry/[0-9]/resource/procedure/[0-9]/date\"",
+          "\"/software/version\"");
 
   /**
    * Constructs a new {@link ServerTestUtils} instance. Marked <code>private</code>; use {@link
@@ -955,5 +978,97 @@ public final class ServerTestUtils {
     boolean isLocalDb = dbUrl.contains("localhost") || dbUrl.contains("127.0.0.1");
     boolean isHsqlDb = dbUrl.contains("hsql");
     return !dbUrl.isBlank() && (isTestContainer || isLocalDb || isHsqlDb);
+  }
+
+  /**
+   * Generates a path to use to get or store endpoint json files.
+   *
+   * @param directory the path to where the file should be written
+   * @param endpoint the string to identify which endpoint's response the file contents contain
+   * @return a path to use as a filename
+   */
+  public static Path generatePathForEndpointJsonFile(Path directory, String endpoint) {
+    return Paths.get(directory.toString(), endpoint + ".json");
+  }
+
+  /**
+   * Reads a file at the specified location.
+   *
+   * @param path the path to the file
+   * @return the contents of the file as a string.
+   */
+  public static String readFile(Path path) {
+    try {
+      return Files.readString(path, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new UncheckedIOException("Can't read file at " + path, e);
+    }
+  }
+
+  /**
+   * Gets the claim id for the specified record type in the loaded records.
+   *
+   * @param loadedRecords the loaded records
+   * @param claimType the claim type
+   * @return the claim id for
+   */
+  public static String getClaimIdFor(List<Object> loadedRecords, ClaimType claimType) {
+    return switch (claimType) {
+      case CARRIER:
+        CarrierClaim carrier = getClaim(loadedRecords, CarrierClaim.class);
+        yield String.valueOf(carrier.getClaimId());
+      case DME:
+        DMEClaim dme = getClaim(loadedRecords, DMEClaim.class);
+        yield String.valueOf(dme.getClaimId());
+      case HHA:
+        HHAClaim hha = getClaim(loadedRecords, HHAClaim.class);
+        yield String.valueOf(hha.getClaimId());
+      case HOSPICE:
+        HospiceClaim hospiceClaim = getClaim(loadedRecords, HospiceClaim.class);
+        yield String.valueOf(hospiceClaim.getClaimId());
+      case INPATIENT:
+        InpatientClaim inpatientClaim = getClaim(loadedRecords, InpatientClaim.class);
+        yield String.valueOf(inpatientClaim.getClaimId());
+      case OUTPATIENT:
+        OutpatientClaim outpatientClaim = getClaim(loadedRecords, OutpatientClaim.class);
+        yield String.valueOf(outpatientClaim.getClaimId());
+      case PDE:
+        PartDEvent pde = getClaim(loadedRecords, PartDEvent.class);
+        yield String.valueOf(pde.getEventId());
+      case SNF:
+        SNFClaim snfClaim = getClaim(loadedRecords, SNFClaim.class);
+        yield String.valueOf(snfClaim.getClaimId());
+    };
+  }
+
+  /**
+   * Instantiates a new Get claim.
+   *
+   * @param loadedRecords the loaded records
+   * @param clazz the rif record type
+   * @param <T> the rif record type (must match clazz)
+   * @return the claim of the given type from the sample data
+   */
+  public static <T extends RifRecordBase> T getClaim(List<Object> loadedRecords, Class<T> clazz) {
+
+    return loadedRecords.stream()
+        .filter(clazz::isInstance)
+        .map(clazz::cast)
+        .findFirst()
+        .orElseThrow();
+  }
+
+  /**
+   * Writes a file to the specified path.
+   *
+   * @param contents the string to be written to a file
+   * @param filePath the path+name to save the file as
+   */
+  public static void writeFile(String contents, Path filePath) {
+    try {
+      Files.writeString(filePath, contents, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new UncheckedIOException("Could not write file at " + filePath, e);
+    }
   }
 }
