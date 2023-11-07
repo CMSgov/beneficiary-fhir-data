@@ -88,7 +88,6 @@ data "aws_ecr_repository" "ecr_controller" {
   name = "bfd-mgmt-${local.service}-controller"
 }
 
-# TODO: Consider making this more environment-specific, versioning RFC in BFD-1743 may provide us a path forward
 data "aws_ssm_parameter" "container_image_tag_controller" {
   name = "/bfd/mgmt/server/nonsensitive/server_load_controller_latest_image_tag"
 }

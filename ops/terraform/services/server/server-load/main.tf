@@ -99,6 +99,9 @@ resource "aws_instance" "this" {
   subnet_id              = data.aws_subnet.main[0].id
   vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
 
+  # In a container environment, if the hop limit is 1, the IMDSv2 response does not return because
+  # going to the container is considered an additional network hop. To avoid the process of falling back to IMDSv1 and
+  # the resultant delay, in a container environment we set the hop limit to > 1
   metadata_options {
     http_endpoint               = "enabled"
     http_put_response_hop_limit = 2
@@ -137,9 +140,10 @@ resource "aws_instance" "this" {
     stop_on_scaling           = var.stop_on_scaling
     stop_on_node_limit        = var.stop_on_node_limit
     server_load_dir           = var.server_load_dir
+    server_load_user          = var.server_load_user
+    locust_master_port        = var.locust_master_port
     ecr_registry_url          = "${data.aws_ecr_repository.ecr_controller.repository_url}"
     ecr_tagged_controller_uri = "${data.aws_ssm_parameter.container_image_tag_controller.value}"
-    locust_master_port        = var.locust_master_port
   })
 }
 

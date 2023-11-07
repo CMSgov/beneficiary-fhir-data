@@ -112,6 +112,12 @@ variable "server_load_dir" {
   type        = string
 }
 
+variable "server_load_user" {
+  default     = "bb-server-load"
+  description = "BFD Server Load user."
+  type        = string
+}
+
 variable "locust_master_port" {
   default     = 5557
   description = "The port to connect to that is used by the locust master for distributed load testing."

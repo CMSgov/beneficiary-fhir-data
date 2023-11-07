@@ -26,17 +26,26 @@ EOF
 
 bash /usr/local/bin/permit-user-access "${seed_env}"
 
-CONTROLLER_HOST_IP=$(ec2-metadata --local-ipv4 | cut -d " " -f 2)
+# Create the server-load user and group
+adduser --comment '' "${server_load_user}" -d "${server_load_dir}"
+
+# Grant the server-load user access to the eventual container's logs volume
+CONTROLLER_LOG_PATH="${server_load_dir}/logs"
+mkdir "$CONTROLLER_LOG_PATH" && chown "${server_load_user}" "$CONTROLLER_LOG_PATH"
+chmod -R 0700 "$CONTROLLER_LOG_PATH"
+
+# Start docker and pull the server-load controller image
 service docker start
 aws ecr get-login-password --region "${aws_current_region}" | \
 docker login --username AWS --password-stdin "${ecr_registry_url}"
 docker pull "${ecr_tagged_controller_uri}"
 
-HOST_VOLUME="server-load"
-docker volume create "$HOST_VOLUME"
-
-mkdir -p "${server_load_dir}"
+# Start the server-load process, running as the created server-load user.
+# IPv6 is enabled automatically by docker, but disabled by our host's network,
+# so we specify an IPv4 port to work around this and avoid running under --net=host
+CONTROLLER_HOST_IP=$(ec2-metadata --local-ipv4 | cut -d " " -f 2)
 docker logs --follow $(docker run --detach \
+  --user $(id -u ${server_load_user}):$(id -g ${server_load_user}) \
   -e BFD_ENVIRONMENT=${env} \
   -e SQS_QUEUE_NAME=${sqs_queue_name} \
   -e NODE_LAMBDA_NAME=${node_lambda_name} \
@@ -58,13 +67,11 @@ docker logs --follow $(docker run --detach \
   -e CONTROLLER_HOST_IP="$CONTROLLER_HOST_IP" \
   -e CONTROLLER_HOST_PORT="${locust_master_port}" \
   -p "0.0.0.0:${locust_master_port}:${locust_master_port}" \
-  -v "server-load:/app/logs" \
+  -v "$CONTROLLER_LOG_PATH:/app/logs" \
   "${ecr_tagged_controller_uri}"
-) >& "${server_load_dir}/server-load-controller.log" &
-
+) >& "$CONTROLLER_LOG_PATH/server-load-controller.log" &
 
 # Reconfigure and relaunch CloudWatch unified agent
-LOG_PATH=$(docker volume inspect --format '{{ .Mountpoint }}' "$HOST_VOLUME")
 cat <<EOF > /tmp/cwagent-server-load.json
 {
   "metrics": {
@@ -90,31 +97,31 @@ cat <<EOF > /tmp/cwagent-server-load.json
             "timestamp_format": "%b %d %H:%M:%S"
           },
           {
-            "file_path": "${server_load_dir}/server-load-controller.log",
+            "file_path": "$CONTROLLER_LOG_PATH/server-load-controller.log",
             "log_group_name": "/bfd/${env}/bfd-server-load/server-load-controller.log",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           },
           {
-            "file_path": "$LOG_PATH/load_exceptions.csv",
+            "file_path": "$CONTROLLER_LOG_PATH/load_exceptions.csv",
             "log_group_name": "/bfd/${env}/bfd-server-load/load_exceptions.csv",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           },
           {
-            "file_path": "$LOG_PATH/load_failures.csv",
+            "file_path": "$CONTROLLER_LOG_PATH/load_failures.csv",
             "log_group_name": "/bfd/${env}/bfd-server-load/load_failures.csv",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           },
           {
-            "file_path": "$LOG_PATH/load_stats.csv",
+            "file_path": "$CONTROLLER_LOG_PATH/load_stats.csv",
             "log_group_name": "/bfd/${env}/bfd-server-load/load_stats.csv",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
           },
           {
-            "file_path": "$LOG_PATH/load_stats_history.csv",
+            "file_path": "$CONTROLLER_LOG_PATH/load_stats_history.csv",
             "log_group_name": "/bfd/${env}/bfd-server-load/load_stats_history.csv",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
@@ -125,5 +132,4 @@ cat <<EOF > /tmp/cwagent-server-load.json
   }
 }
 EOF
-
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/cwagent-server-load.json -s

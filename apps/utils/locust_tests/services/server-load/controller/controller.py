@@ -54,7 +54,7 @@ warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
 stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
 controller_host_ip = os.environ.get("CONTROLLER_HOST_IP", "")
-controller_host_port = os.environ.get("CONTROLLER_HOST_PORT", "")
+controller_host_port = os.environ.get("CONTROLLER_HOST_PORT", 5557)
 
 boto_config = Config(region_name=region)
 
@@ -64,7 +64,7 @@ sqs = boto3.resource("sqs", config=boto_config)
 lambda_client = boto3.client("lambda", config=boto_config)
 
 
-def _start_node(controller_ip: str, host: str, locust_port: str):
+def _start_node(controller_ip: str, host: str, locust_port: int):
     """
     Invokes the lambda function that runs a Locust worker node process.
     """
