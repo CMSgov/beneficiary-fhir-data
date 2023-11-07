@@ -3,7 +3,7 @@
 ## Overview
 
 The files within this directory consist of the Docker files used to build the node Lambda Docker image, 
-and the Jenkinsfile and related build script for the `bfd-server-load-build` Jenkins pipeline.
+and the Jenkinsfile and related build script for the `bfd-build-server-load-node` Jenkins pipeline.
 
 ## Building the `bfd-mgmt-server-load-node` Docker Image
 
@@ -17,5 +17,5 @@ the root.
 Ensure your current working directory is `/apps/utils/locust_tests` and run:
 
 ```bash
-docker build -f "/ops/jenkins/bfd-server-load-build/Dockerfile" -t "<your-tag>" --platform linux/amd64 .
+docker build -f "/ops/jenkins/bfd-build-server-load-node/Dockerfile" -t "<your-tag>" --platform linux/amd64 .
 ```

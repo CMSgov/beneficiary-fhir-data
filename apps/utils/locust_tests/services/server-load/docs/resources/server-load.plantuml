@@ -2,7 +2,7 @@
 title server-load Service Deployment Diagram
 actor operator
 database "github" #LightGreen
-participant "bfd-server-load-build" #LightSkyBlue
+participant "bfd-build-server-load-node" #LightSkyBlue
 database "AWS ECR" #LightGreen
 database "parameter store" #LightGreen
 participant "deployment pipeline" #LightSkyBlue
@@ -30,15 +30,15 @@ group Node (Lambda) Image Deployment
   autonumber 1
   operator -> github: Submit change set
   operator <-- github
-  operator -> "bfd-server-load-build": Trigger Image Build
-  "bfd-server-load-build" -> github: Request change set
-  "bfd-server-load-build" <-- github : Return change set
-  "bfd-server-load-build" -> "bfd-server-load-build": build-push.sh:\nbuild lambda Docker image
-  "bfd-server-load-build" -> "AWS ECR": build-push.sh:\npush Docker image to bfd-mgmt-server-load
-  "bfd-server-load-build" <-- "AWS ECR"
-  "bfd-server-load-build" -> "parameter store": build-push.sh:\nwrite image tag SSM parameter
-  "bfd-server-load-build" <-- "parameter store"
-  operator <-- "bfd-server-load-build"
+  operator -> "bfd-build-server-load-node": Trigger Image Build
+  "bfd-build-server-load-node" -> github: Request change set
+  "bfd-build-server-load-node" <-- github : Return change set
+  "bfd-build-server-load-node" -> "bfd-build-server-load-node": build-push.sh:\nbuild lambda Docker image
+  "bfd-build-server-load-node" -> "AWS ECR": build-push.sh:\npush Docker image to bfd-mgmt-server-load
+  "bfd-build-server-load-node" <-- "AWS ECR"
+  "bfd-build-server-load-node" -> "parameter store": build-push.sh:\nwrite image tag SSM parameter
+  "bfd-build-server-load-node" <-- "parameter store"
+  operator <-- "bfd-build-server-load-node"
 end
 group bfd-run-server-load
   autonumber 1

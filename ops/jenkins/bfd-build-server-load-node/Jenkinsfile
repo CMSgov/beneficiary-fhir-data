@@ -52,7 +52,7 @@ spec:
                     }
 
                     // Execute the existing build-push script
-                    dir('ops/jenkins/bfd-server-load-build') {
+                    dir('ops/jenkins/bfd-build-server-load-node') {
                         sh 'bash build-push.sh'
                     }
                 }
