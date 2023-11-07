@@ -237,8 +237,6 @@ resource "aws_iam_role" "lambda" {
   ]
 }
 
-
-
 resource "aws_iam_role" "ec2" {
   name        = "bfd-${local.env}-${local.service}-ec2"
   path        = "/"

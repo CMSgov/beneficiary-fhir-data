@@ -31,7 +31,7 @@ adduser --comment '' "${server_load_user}" -d "${server_load_dir}"
 
 # Grant the server-load user access to the eventual container's logs volume
 CONTROLLER_LOG_PATH="${server_load_dir}/logs"
-mkdir "$CONTROLLER_LOG_PATH" && chown "${server_load_user}" "$CONTROLLER_LOG_PATH"
+mkdir "$CONTROLLER_LOG_PATH" && chown "${server_load_user}:${server_load_user}" "$CONTROLLER_LOG_PATH"
 chmod -R 0700 "$CONTROLLER_LOG_PATH"
 
 # Start docker and pull the server-load controller image
