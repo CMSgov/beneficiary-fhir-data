@@ -12,8 +12,7 @@ resource "aws_s3_bucket" "this" {
 
 # block public access to the bucket
 resource "aws_s3_bucket_public_access_block" "this" {
-  bucket = aws_s3_bucket.this.id
-
+  bucket                  = aws_s3_bucket.this.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -31,26 +30,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 }
 
 resource "aws_s3_bucket_logging" "this" {
-  # After April 2023, new S3 Buckets have public access disabled along with ACLs disabled. This
-  # resource will fail to apply for ephemeral environments (new buckets)
-  # FIXME: Replace/resolve this before accepting BFD-2554
   count = local.is_ephemeral_env ? 0 : 1
 
   bucket        = aws_s3_bucket.this.id
   target_bucket = local.logging_bucket
-
-  # TODO: correct the target prefix by adding a trailing '/'
-  target_prefix = "${local.legacy_service}_s3_access_logs"
-}
-
-resource "aws_s3_bucket_acl" "this" {
-  # After April 2023, new S3 Buckets have public access disabled along with ACLs disabled. This
-  # resource will fail to apply for ephemeral environments
-  # FIXME: Replace/resolve this after accepting BFD-2554
-  count = local.is_ephemeral_env ? 0 : 1
-
-  bucket = aws_s3_bucket.this.id
-  acl    = "private"
+  target_prefix = "${local.legacy_service}_s3_access_logs/"
 }
 
 resource "aws_s3_bucket_notification" "etl_bucket_notifications" {

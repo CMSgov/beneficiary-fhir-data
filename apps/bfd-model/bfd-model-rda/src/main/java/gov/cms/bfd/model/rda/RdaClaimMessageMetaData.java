@@ -108,6 +108,12 @@ public class RdaClaimMessageMetaData {
   public static class RdaClaimMessageMetaDataBuilder {
     private Character claimType;
 
+    /**
+     * Creates a RdaClaimMessageMetaDataBuilder from a claim type value.
+     *
+     * @param value RdaApiProgress.ClaimType.
+     * @return RdaClaimMessageMetaDataBuilder claimType.
+     */
     public RdaClaimMessageMetaDataBuilder claimType(RdaApiProgress.ClaimType value) {
       claimType = value.name().charAt(0);
       return this;
@@ -119,7 +125,10 @@ public class RdaClaimMessageMetaData {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class PK implements Serializable {
+    /** The claim Type for the primary key. */
     private Character claimType;
+
+    /** The sequence number for the primary key. */
     private long sequenceNumber;
   }
 }

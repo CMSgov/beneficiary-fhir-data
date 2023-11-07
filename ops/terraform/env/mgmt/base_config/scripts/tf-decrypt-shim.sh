@@ -38,9 +38,9 @@ fi
 # Creates an array from the Terraform query input, where each element in the array is a key value
 # string, i.e. "key=value"
 vars=()
-for item in $TF_QUERY_AS_VARS; do
+while read -r item; do
   vars+=("$item")
-done
+done <<<"$TF_QUERY_AS_VARS"
 
 # Calls the decrypt helper script passing the original Terraform query input as environment
 # variables. All extra variables passed to this script are treated as template values for the
