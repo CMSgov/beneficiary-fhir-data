@@ -199,9 +199,9 @@ public final class CcwRifLoadJob implements PipelineJob {
   @Override
   public boolean isInterruptible() {
     /*
-     * TODO This would be a good enhancement: making this class properly
-     * interruptible. This would
-     * allow us to shut things down quickly when a load is running.
+     * TODO While the RIF pipeline itself is interruptable now, the S3 transfers are not.
+     *  For now we will leave interrupts disabled and revisit the need for moving files
+     *  between S3 buckets in a later PR.
      */
     return false;
   }
@@ -241,21 +241,11 @@ public final class CcwRifLoadJob implements PipelineJob {
        * pause between each iteration. TODO should eventually time out,
        * once we know how long transfers might take
        */
-      try {
-        if (!alreadyLoggedWaitingEvent) {
-          LOGGER.info("Data set not ready. Waiting for it to finish uploading...");
-          alreadyLoggedWaitingEvent = true;
-        }
-        Thread.sleep(1000 * 1);
-      } catch (InterruptedException e) {
-        /*
-         * Many Java applications use InterruptedExceptions to signal
-         * that a thread should stop what it's doing ASAP. This app
-         * doesn't, so this is unexpected, and accordingly, we don't
-         * know what to do. Safest bet is to blow up.
-         */
-        throw new RuntimeException(e);
+      if (!alreadyLoggedWaitingEvent) {
+        LOGGER.info("Data set not ready. Waiting for it to finish uploading...");
+        alreadyLoggedWaitingEvent = true;
       }
+      Thread.sleep(1000 * 1);
     }
 
     /*
