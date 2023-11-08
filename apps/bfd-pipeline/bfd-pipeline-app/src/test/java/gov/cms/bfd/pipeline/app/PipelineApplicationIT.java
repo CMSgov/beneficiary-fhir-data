@@ -480,9 +480,6 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     environment.put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED, "false");
     environment.put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED, "true");
     environment.put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket);
-    environment.put(
-        AppConfiguration.ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES,
-        Boolean.FALSE.toString());
 
     // ensure the job runs only once so the app doesn't loop forever
     environment.put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS, "0");

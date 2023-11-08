@@ -15,7 +15,6 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryColumn;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
@@ -738,9 +737,7 @@ public final class RifLoaderIT {
   @Test
   public void loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
-        "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
+        "2023", CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
@@ -753,9 +750,7 @@ public final class RifLoaderIT {
   public void loadBeneficiaryWhenInsertAndNon2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
 
     loadSampleABeneWithEnrollmentRefYear(
-        "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
+        "2021", CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
@@ -768,9 +763,7 @@ public final class RifLoaderIT {
   public void
       loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
-        "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_IDEMPOTENT_STRATEGY));
+        "2023", CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY));
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
@@ -784,9 +777,7 @@ public final class RifLoaderIT {
       loadBeneficiaryWhenInsertAndNon2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
 
     loadSampleABeneWithEnrollmentRefYear(
-        "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_IDEMPOTENT_STRATEGY));
+        "2021", CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY));
 
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -801,10 +792,7 @@ public final class RifLoaderIT {
       loadBeneficiaryWhenInsertAndNullEnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
 
     loadSampleABeneWithEnrollmentRefYear(
-        null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_IDEMPOTENT_STRATEGY),
-        false);
+        null, CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY), false);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
@@ -820,8 +808,7 @@ public final class RifLoaderIT {
 
     loadSampleABeneWithEnrollmentRefYear(
         "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -846,9 +833,7 @@ public final class RifLoaderIT {
      * that it was skipped.
      */
     loadDefaultSampleABeneData(
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
-        true);
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY), true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 1);
   }
 
@@ -869,10 +854,7 @@ public final class RifLoaderIT {
      * ref year, and verify that it was loaded.
      */
     loadSampleABeneWithEnrollmentRefYear(
-        null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
-        true);
+        null, CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY), true);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
 
@@ -908,8 +890,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_IDEMPOTENT_STRATEGY),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -928,8 +909,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -951,7 +931,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY, FILTER_MODE_DISABLED),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY),
         stream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -974,8 +954,7 @@ public final class RifLoaderIT {
         editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
     loadSample(
         "non-Bene sample update",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         updateStream);
     validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
   }
@@ -1247,13 +1226,6 @@ public final class RifLoaderIT {
       beneCountQuery.select(criteriaBuilder.count(beneCountQuery.from(Beneficiary.class)));
       Long beneCount = entityManager.createQuery(beneCountQuery).getSingleResult();
       assertEquals(expectedBeneCount, beneCount, "Unexpected number of beneficiary records.");
-
-      // Count and verify the number of bene records in the DB.
-      CriteriaQuery<Long> skippedCountQuery = criteriaBuilder.createQuery(Long.class);
-      skippedCountQuery.select(
-          criteriaBuilder.count(skippedCountQuery.from(SkippedRifRecord.class)));
-      Long skippedCount = entityManager.createQuery(skippedCountQuery).getSingleResult();
-      assertEquals(expectedSkippedCount, skippedCount, "Unexpected number of skipped records.");
     } finally {
       if (entityManager != null) {
         entityManager.close();
