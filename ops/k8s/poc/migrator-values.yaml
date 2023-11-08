@@ -29,3 +29,12 @@ podTolerations:
   - key: "eks.amazonaws.com/compute-type"
     operator: "Exists"
     effect: "NoSchedule"
+
+# Extra labels added to meta data.
+# Used in EKS POC to apply a fargate profile.
+labels:
+  - label: job-name
+    value: bfd-db-migrator
+
+# Service Account Name
+serviceAccountName: "2916-test-migrator"
