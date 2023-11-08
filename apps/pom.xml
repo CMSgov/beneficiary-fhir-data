@@ -169,6 +169,7 @@
         <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
         <jersey.version>2.25.1</jersey.version>
         <exec.maven.plugin.version>3.1.0</exec.maven.plugin.version>
+        <org.apache.poi.version>5.2.4</org.apache.poi.version>
 
         <!--  Dependencies required for org.apache.commons -->
         <commons.lang3.version>3.13.0</commons.lang3.version>
@@ -571,6 +572,20 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Used for generating Excel workbooks. -->
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${org.apache.poi.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Used for generating Excel workbooks. -->
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${org.apache.poi.version}</version>
             </dependency>
 
             <dependency>

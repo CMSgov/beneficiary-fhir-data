@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.ss.usermodel.Cell;
@@ -21,7 +22,6 @@ import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -84,15 +84,14 @@ public class CsvToExcelCommand {
   private static void formatSheet(Workbook wb, Sheet sheet, int[] columnsWidths) {
     var maxRowIndex = sheet.getLastRowNum();
     var maxColIndex = columnsWidths.length - 1;
-
+    searchAndReplace(sheet, CellRangeAddress.valueOf("D2:D" + (maxRowIndex + 1)), ";", "\n");
+    searchAndReplace(sheet, CellRangeAddress.valueOf("I2:J" + (maxRowIndex + 1)), ";", "\n");
     setColumnWidths(sheet, columnsWidths);
-    setAlternatingRowStyle(sheet, new CellRangeAddress(1, maxRowIndex, 0, maxColIndex));
-    setStyleForRange(sheet, new CellRangeAddress(0, 0, 0, maxColIndex), getHeaderCellStyle(wb));
-    setStyleForRange(
+    setStyle(sheet, new CellRangeAddress(0, 0, 0, maxColIndex), getHeaderCellStyle(wb));
+    setStyle(
         sheet, new CellRangeAddress(1, maxRowIndex, 1, maxColIndex), getDataCellStyle(wb));
-    searchAndReplace(sheet, new CellRangeAddress(1, maxRowIndex, 3, 3), ";", "\n");
-    searchAndReplace(sheet, new CellRangeAddress(1, maxRowIndex, 8, 9), ";", "\n");
-    sheet.createFreezePane(2, 1);
+    setAlternatingRowStyle(sheet, new CellRangeAddress(1, maxRowIndex, 0, maxColIndex));
+    sheet.createFreezePane(1, 1);
   }
 
   /**
@@ -140,16 +139,12 @@ public class CsvToExcelCommand {
    */
   private static void searchAndReplace(
       Sheet sheet, CellRangeAddress range, String search, String replace) {
-    for (int i = range.getFirstRow(); i <= range.getLastRow(); i++) {
-      var row = sheet.getRow(i);
-      for (int j = range.getFirstColumn(); j <= range.getLastColumn(); j++) {
-        var cell = row.getCell(j);
-        if (cell != null) {
-          var str = cell.getStringCellValue();
-          cell.setCellValue(str.replace(search, replace));
-        }
-      }
-    }
+    applyToRange(
+        sheet,
+        range,
+        (c) -> {
+          c.setCellValue(c.getStringCellValue().replace(search, replace));
+        });
   }
 
   /**
@@ -159,13 +154,31 @@ public class CsvToExcelCommand {
    * @param range the range of cells within the sheet to format
    * @param style the CellStyle to apply to the cells
    */
-  private static void setStyleForRange(Sheet sheet, CellRangeAddress range, CellStyle style) {
+  private static void setStyle(Sheet sheet, CellRangeAddress range, CellStyle style) {
+    applyToRange(
+        sheet,
+        range,
+        (c) -> {
+          c.setCellStyle(style);
+        });
+  }
+
+  /**
+   * Apply a consumer function to a range of cells in a sheet.
+   *
+   * @param sheet the sheet to update
+   * @param range the range of cells to update
+   * @param fn a consumer function that takes a cell and returns void
+   */
+  private static void applyToRange(Sheet sheet, CellRangeAddress range, Consumer<Cell> fn) {
     for (int i = range.getFirstRow(); i <= range.getLastRow(); i++) {
       var row = sheet.getRow(i);
-      for (int j = range.getFirstColumn(); j <= range.getLastColumn(); j++) {
-        var cell = row.getCell(j);
-        if (cell != null) {
-          cell.setCellStyle(style);
+      if (row != null) {
+        for (int j = range.getFirstColumn(); j <= range.getLastColumn(); j++) {
+          var cell = row.getCell(j);
+          if (cell != null) {
+            fn.accept(cell);
+          }
         }
       }
     }
@@ -179,10 +192,9 @@ public class CsvToExcelCommand {
    */
   private static CellStyle getHeaderCellStyle(Workbook wb) {
     var style = wb.createCellStyle();
-    style.setFillBackgroundColor(
-        new XSSFColor(new java.awt.Color(137, 207, 240), new DefaultIndexedColorMap()));
+    style.setFillBackgroundColor(new XSSFColor(new java.awt.Color(137, 207, 240), null));
     style.setFillPattern(FillPatternType.LESS_DOTS);
-    var font = wb.getFontAt(style.getFontIndex());
+    var font = wb.createFont();
     font.setBold(true);
     font.setColor(IndexedColors.WHITE.getIndex());
     style.setFont(font);
@@ -213,8 +225,7 @@ public class CsvToExcelCommand {
     ConditionalFormattingRule rule =
         sheet.getSheetConditionalFormatting().createConditionalFormattingRule("MOD(ROW(), 2) <> 0");
     PatternFormatting formatting = rule.createPatternFormatting();
-    formatting.setFillBackgroundColor(
-        new XSSFColor(new java.awt.Color(221, 221, 221), new DefaultIndexedColorMap()));
+    formatting.setFillBackgroundColor(new XSSFColor(new java.awt.Color(221, 221, 221), null));
     formatting.setFillPattern(FillPatternType.LESS_DOTS.getCode());
     ConditionalFormattingRule[] rules = {rule};
     CellRangeAddress[] regions = {range};
