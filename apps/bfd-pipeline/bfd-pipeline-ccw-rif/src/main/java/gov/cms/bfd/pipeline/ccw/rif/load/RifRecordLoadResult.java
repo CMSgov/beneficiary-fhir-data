@@ -1,23 +1,25 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
 import gov.cms.bfd.model.rif.RifRecordEvent;
+import lombok.Getter;
 
 /**
  * Represents the results of successful {@link RifLoader} operations on individual {@link
  * RifRecordEvent}s.
  */
+@Getter
 public final class RifRecordLoadResult {
-  /** The list of successful load events. */
+  /** The record that this result corresponds to. */
   private final RifRecordEvent<?> rifRecordEvent;
 
-  /** The load action. */
+  /** The action taken with the record. */
   private final LoadAction loadAction;
 
   /**
    * Constructs a new {@link RifRecordLoadResult}.
    *
-   * @param rifRecordEvent the value to use for {@link #getRifRecordEvent()}
-   * @param loadAction the value to use for {@link #getLoadAction()}
+   * @param rifRecordEvent the value to use for {@link #rifRecordEvent}
+   * @param loadAction the value to use for {@link #loadAction}
    */
   public RifRecordLoadResult(RifRecordEvent<?> rifRecordEvent, LoadAction loadAction) {
     if (rifRecordEvent == null) throw new IllegalArgumentException();
@@ -27,25 +29,6 @@ public final class RifRecordLoadResult {
     this.loadAction = loadAction;
   }
 
-  /**
-   * Gets the {@link #rifRecordEvent}.
-   *
-   * @return the {@link RifRecordEvent} that was loaded
-   */
-  public RifRecordEvent<?> getRifRecordEvent() {
-    return rifRecordEvent;
-  }
-
-  /**
-   * Gets the {@link #loadAction}.
-   *
-   * @return the {@link LoadAction} that indicates the outcome of the load
-   */
-  public LoadAction getLoadAction() {
-    return loadAction;
-  }
-
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -58,7 +41,7 @@ public final class RifRecordLoadResult {
   }
 
   /** Enumerates the types of actions that a load operation may have resulted in on the database. */
-  public static enum LoadAction {
+  public enum LoadAction {
     /** Indicates that the record(s) were successfully added to the database. */
     INSERTED,
 

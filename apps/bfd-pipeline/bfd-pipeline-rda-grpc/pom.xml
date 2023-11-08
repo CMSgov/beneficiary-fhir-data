@@ -40,12 +40,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <!-- Functional-reactive programming api for concurrent claim ingestion. -->
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-core</artifactId>
-        </dependency>
-
         <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
         <dependency>
             <groupId>io.grpc</groupId>
