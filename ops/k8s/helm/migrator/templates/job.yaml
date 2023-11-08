@@ -4,14 +4,28 @@ kind: Job
 metadata:
   name: {{ .Values.appName }}
   namespace: {{ .Values.namespace }}
+  labels:
+    job-name: {{ .Values.appName }}
 spec:
   template:
     spec:
+      serviceAccountName: "2916-test-migrator"
       containers:
       - name: {{ .Values.appName }}
         image: {{ $imageSpec }}
         envFrom:
         - secretRef:
             name: {{ .Values.appName }}-secret
+        resources:
+          memory: "1Gi"
+          cpu: "500m"
+{{- if .Values.podTolerations }}
+      tolerations:
+      {{- range .Values.podTolerations }}
+      - key: {{ .key }}
+        operator: {{ .operator }}
+        effect: {{ .effect }}
+      {{- end }}
+{{- end }}
       restartPolicy: Never
   backoffLimit: 4

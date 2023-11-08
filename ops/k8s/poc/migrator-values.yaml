@@ -1,9 +1,5 @@
-# Default values passed to all templates.
-# These defaults assume local development in conjunction with run scripts in apps/utils/scripts.
-# This is a YAML-formatted file.
-
 # Kubernetes namespace to deploy to.
-namespace: dev
+namespace: eks-test
 
 # Base name for this application.
 appName: bfd-db-migrator
@@ -12,24 +8,24 @@ appName: bfd-db-migrator
 bfdVersion: "1.0.0-SNAPSHOT"
 
 # Used to populate BFD_ENV environment variable.
-bfdEnvironment: "laptop"
-
-# Docker registry component of image.
-imageRegistry: ""
+bfdEnvironment: "eks-test"
 
 # Name of image built by jib maven plugin.
 imageName: bfd-db-migrator
 
 # List of hierarchies used by LayeredConfiguration to find parameters in SSM.
-ssmHierarchies:
-  - "/bfd-db-migrator"
+# This must be set from the command line.
+ssmHierarchies: []
 
 # Uses localstack running in kubernetes when this is true.
 # Otherwise calls to AWS will be made.
-useLocalstack: true
+useLocalstack: false
 
 # AWS region to use.
 awsRegion: "us-east-1"
 
 # Tolerations to apply to pods.  Required for EKS but not locally.
-podTolerations: []
+podTolerations:
+  - key: "eks.amazonaws.com/compute-type"
+    operator: "Exists"
+    effect: "NoSchedule"
