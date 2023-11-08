@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
@@ -32,6 +31,7 @@ import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
@@ -72,6 +72,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.management.MBeanServer;
@@ -423,7 +424,11 @@ public final class ServerTestUtils {
     List<Object> recordsParsed = new ArrayList<>();
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      rifFileRecords.getRecords().map(r -> r.getRecord()).forEach(r -> recordsParsed.add(r));
+      rifFileRecords
+          .getRecords()
+          .map(r -> r.getRecord())
+          .toIterable()
+          .forEach(r -> recordsParsed.add(r));
     }
 
     return recordsParsed;
@@ -707,14 +712,11 @@ public final class ServerTestUtils {
     List<Object> recordsLoaded = new ArrayList<>();
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      loader.process(
-          rifFileRecords,
-          error -> {
-            LOGGER.warn("Record(s) failed to load.", error);
-          },
-          result -> {
-            recordsLoaded.add(result.getRifRecordEvent().getRecord());
-          });
+      loader
+          .processAsync(rifFileRecords, new AtomicBoolean())
+          .doOnError(error -> LOGGER.warn("Record(s) failed to load.", error))
+          .doOnNext(result -> recordsLoaded.add(result.getRifRecordEvent().getRecord()))
+          .blockLast();
     }
     LOGGER.info("Loaded RIF records: '{}'.", recordsLoaded.size());
     return recordsLoaded;

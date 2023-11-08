@@ -13,9 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 /** Verifies that access.json is written to as expected. */
 public class AccessJsonE2E extends ServerRequiredTest {
@@ -53,6 +55,9 @@ public class AccessJsonE2E extends ServerRequiredTest {
         .statusCode(200)
         .when()
         .get(requestString);
+
+    // Wait for access log to be written
+    Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> Files.isReadable(accessLogJson));
 
     assertTrue(Files.isReadable(accessLogJson));
     assertTrue(Files.size(accessLogJson) > 0);

@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
@@ -23,10 +23,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.Exceptions;
 
 /** Integration tests for {@link LoadedFilterManager}. */
 public final class LoadedFilterManagerIT extends ServerRequiredTest {
@@ -92,7 +92,7 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
               filterManager.init();
               final Instant initialTransactionTime = filterManager.getTransactionTime();
               assertTrue(initialTransactionTime.isBefore(Instant.now().plusMillis(1)));
-              loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               Date afterLoad = new Date();
 
               // Without a refresh, the manager should have an empty filter list
@@ -132,7 +132,7 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
                   new DateRangeParam().setUpperBoundExclusive(beforeLoad);
               PipelineTestUtils.get().pauseMillis(10);
 
-              loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
               // Establish a time after load but before refresh
               PipelineTestUtils.get().pauseMillis(10);
@@ -178,7 +178,7 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
               final LoadedFilterManager filterManager = new LoadedFilterManager();
               filterManager.setEntityManager(entityManager);
               filterManager.init();
-              loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
               // Establish a couple of times
               PipelineTestUtils.get().pauseMillis(1000);
@@ -208,7 +208,7 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
               assertEquals(after1Count, after2Count);
 
               // Load some more data
-              loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
               PipelineTestUtils.get().pauseMillis(1000);
               final Date afterSampleU = new Date();
               final DateRangeParam aroundSampleU = new DateRangeParam(afterSampleA, afterSampleU);
@@ -227,10 +227,9 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
   /**
    * Loads data for the test.
    *
-   * @param dataSource the data source
    * @param sampleResources the sample RIF resources to load
    */
-  private static void loadData(DataSource dataSource, List<StaticRifResource> sampleResources) {
+  private static void loadData(List<StaticRifResource> sampleResources) {
     LoadAppOptions loadOptions = CcwRifLoadTestUtils.getLoadOptions();
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
@@ -248,7 +247,11 @@ public final class LoadedFilterManagerIT extends ServerRequiredTest {
     // Link up the pipeline and run it.
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      loader.process(rifFileRecords, error -> {}, result -> {});
+      try {
+        loader.processBlocking(rifFileRecords);
+      } catch (Exception ex) {
+        throw Exceptions.propagate(ex);
+      }
     }
   }
 }

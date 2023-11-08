@@ -310,8 +310,7 @@ public final class PipelineApplication {
     final var jobs = createAllJobs(appConfig, appMeters, appMetrics, pooledDataSource);
     if (anySmokeTestFailed(jobs)) {
       LOGGER.info("Pipeline terminating due to smoke test failure.");
-      pooledDataSource.close();
-      System.exit(EXIT_CODE_SMOKE_TEST_FAILURE);
+      throw new FatalAppException("Pipeline smoke test failure", EXIT_CODE_SMOKE_TEST_FAILURE);
     }
 
     final var pipelineManager = new PipelineManager(Thread::sleep, Clock.systemUTC(), jobs);
@@ -425,7 +424,8 @@ public final class PipelineApplication {
    * @param pooledDataSource our {@link javax.sql.DataSource}
    * @return list of {@link PipelineJob}s to be registered
    */
-  private List<PipelineJob> createAllJobs(
+  @VisibleForTesting
+  List<PipelineJob> createAllJobs(
       AppConfiguration appConfig,
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
@@ -512,13 +512,7 @@ public final class PipelineApplication {
      * each data set that is found.
      */
     DataSetMonitorListener dataSetMonitorListener =
-        new DefaultDataSetMonitorListener(
-            appState.getMetrics(),
-            t -> {
-              throw new RuntimeException(t);
-            },
-            rifProcessor,
-            rifLoader);
+        new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState,

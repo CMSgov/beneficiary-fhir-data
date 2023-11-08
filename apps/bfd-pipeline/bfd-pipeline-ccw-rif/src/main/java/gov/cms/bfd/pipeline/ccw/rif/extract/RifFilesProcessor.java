@@ -1,13 +1,9 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.RecordAction;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
@@ -30,31 +26,21 @@ import gov.cms.bfd.model.rif.entities.PartDEventParser;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimParser;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.model.rif.parse.RifParsingUtils;
-import gov.cms.bfd.pipeline.ccw.rif.extract.CsvRecordGroupingIterator.ColumnValueCsvRecordGrouper;
-import gov.cms.bfd.pipeline.ccw.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
-import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.UnsupportedRifFileTypeException;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.model.dsl.codegen.library.DataTransformer.TransformationException;
 import gov.cms.model.dsl.codegen.library.RifObjectWrapper;
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.function.BiFunction;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-import org.apache.commons.csv.CSVParser;
+import java.util.function.Function;
+import javax.annotation.Nonnull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 
 /** Contains services responsible for handling new RIF files. */
-public final class RifFilesProcessor {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
+@Slf4j
+public class RifFilesProcessor {
+  /** Column ID for the column that contains the action value in each CSV record. */
+  private static final String RECORD_ACTION_COLUMN = "DML_IND";
 
   /**
    * Produces a {@link RifFileRecords} with the {@link RifRecordEvent}s produced from the specified
@@ -64,363 +50,292 @@ public final class RifFilesProcessor {
    * @return the record from the rif file
    */
   public RifFileRecords produceRecords(RifFileEvent rifFileEvent) {
-    RifFile file = rifFileEvent.getFile();
-
-    /*
-     * Approach used here to parse CSV as a Java 8 Stream is courtesy of
-     * https://rumianom.pl/rumianom/entry/apache-commons-csv-with-java.
-     */
-
-    CSVParser csvParser = RifParsingUtils.createCsvParser(file);
-
-    boolean isGrouped;
-    BiFunction<RifFileEvent, List<CSVRecord>, RifRecordEvent<?>> recordParser;
-    if (file.getFileType() == RifFileType.BENEFICIARY) {
-      final var rifParser = new BeneficiaryParser();
-      isGrouped = false;
-      recordParser =
-          (fileEvent, csvRecords) -> buildBeneficiaryEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.BENEFICIARY_HISTORY) {
-      final var rifParser = new BeneficiaryHistoryParser();
-      isGrouped = false;
-      recordParser =
-          (fileEvent, csvRecords) -> buildBeneficiaryHistoryEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.PDE) {
-      final var rifParser = new PartDEventParser();
-      isGrouped = false;
-      recordParser = (fileEvent, csvRecords) -> buildPartDEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.CARRIER) {
-      final var rifParser = new CarrierClaimParser();
-      isGrouped = true;
-      recordParser =
-          (fileEvent, csvRecords) -> buildCarrierClaimEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.INPATIENT) {
-      final var rifParser = new InpatientClaimParser();
-      isGrouped = true;
-      recordParser =
-          (fileEvent, csvRecords) -> buildInpatientClaimEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.OUTPATIENT) {
-      final var rifParser = new OutpatientClaimParser();
-      isGrouped = true;
-      recordParser =
-          (fileEvent, csvRecords) -> buildOutpatientClaimEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.SNF) {
-      final var rifParser = new SNFClaimParser();
-      isGrouped = true;
-      recordParser =
-          (fileEvent, csvRecords) -> buildSNFClaimEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.HOSPICE) {
-      final var rifParser = new HospiceClaimParser();
-      isGrouped = true;
-      recordParser =
-          (fileEvent, csvRecords) -> buildHospiceClaimEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.HHA) {
-      final var rifParser = new HHAClaimParser();
-      isGrouped = true;
-      recordParser =
-          (fileEvent, csvRecords) -> buildHHAClaimEvent(fileEvent, csvRecords, rifParser);
-    } else if (file.getFileType() == RifFileType.DME) {
-      final var rifParser = new DMEClaimParser();
-      isGrouped = true;
-      recordParser =
-          (fileEvent, csvRecords) -> buildDMEClaimEvent(fileEvent, csvRecords, rifParser);
-    } else {
-      throw new UnsupportedRifFileTypeException("Unsupported file type:" + file.getFileType());
-    }
-
-    /*
-     * Use the CSVParser to drive a Stream of grouped CSVRecords
-     * (specifically, group by claim ID/lines).
-     */
-    CsvRecordGrouper grouper =
-        new ColumnValueCsvRecordGrouper(isGrouped ? file.getFileType().getIdColumn() : null);
-    Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(csvParser, grouper);
-    Spliterator<List<CSVRecord>> spliterator =
-        Spliterators.spliteratorUnknownSize(csvIterator, Spliterator.ORDERED | Spliterator.NONNULL);
-    Stream<List<CSVRecord>> csvRecordStream =
-        StreamSupport.stream(spliterator, false)
-            .onClose(
-                () -> {
-                  try {
-                    /*
-                     * This will also close the Reader and InputStream that the
-                     * CSVParser was consuming.
-                     */
-                    csvParser.close();
-                  } catch (IOException e) {
-                    LOGGER.warn("Unable to close CSVParser", e);
-                  }
-                });
-
-    /* Map each record group to a single RifRecordEvent. */
-    Stream<RifRecordEvent<?>> rifRecordStream =
-        csvRecordStream.map(
-            csvRecordGroup -> {
-              Timer.Context parsingTimer =
-                  rifFileEvent
-                      .getEventMetrics()
-                      .timer(MetricRegistry.name(getClass().getSimpleName(), "recordParsing"))
-                      .time();
-              RifRecordEvent<?> recordEvent =
-                  parseRifRecord(rifFileEvent, csvRecordGroup, recordParser);
-              // OK if an exception prevents the close because a failed parse is not a valid sample.
-              parsingTimer.close();
-
-              return recordEvent;
-            });
-
-    return new RifFileRecords(rifFileEvent, rifRecordStream);
+    RifFile rifFile = rifFileEvent.getFile();
+    RifFileParser rifFileParser =
+        switch (rifFile.getFileType()) {
+          case BENEFICIARY -> beneficiaryEventParser(rifFileEvent);
+          case BENEFICIARY_HISTORY -> beneficiaryHistoryEventParser(rifFileEvent);
+          case CARRIER -> carrierClaimParser(rifFileEvent);
+          case DME -> dmeClaimParser(rifFileEvent);
+          case HHA -> hhaClaimParser(rifFileEvent);
+          case HOSPICE -> hospiceClaimParser(rifFileEvent);
+          case INPATIENT -> inpatientClaimParser(rifFileEvent);
+          case OUTPATIENT -> outpatientClaimParser(rifFileEvent);
+          case PDE -> partDEventParser(rifFileEvent);
+          case SNF -> snfClaimParser(rifFileEvent);
+        };
+    Flux<RifRecordEvent<?>> records = rifFileParser.parseRifFile(rifFile);
+    return new RifFileRecords(rifFileEvent, records);
   }
 
   /**
-   * Wrapper to parse a CSV record group and transform it into an entity object. Any {@link
-   * DataTransformer.TransformationException} is converted into a {@link InvalidRifValueException}
-   * and rethrown.
+   * Creates a {@link RifFileParser} that creates {@link Beneficiary}s.
    *
    * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord} to be mapped (in a single-element {@link List}), which
-   *     must be from a {@link RifFileType#BENEFICIARY} {@link RifFile}
-   * @param parser {@link BeneficiaryParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
-   * @throws InvalidRifValueException if any values within the CSV data cannot be parsed
+   * @return the parser
    */
-  private RifRecordEvent<?> parseRifRecord(
-      RifFileEvent fileEvent,
-      List<CSVRecord> csvRecords,
-      BiFunction<RifFileEvent, List<CSVRecord>, RifRecordEvent<?>> parser) {
+  private static RifFileParser beneficiaryEventParser(RifFileEvent fileEvent) {
+    final var parser = new BeneficiaryParser();
+    return new RifFileParser.Simple(
+        csvRecord -> {
+          trace(csvRecord);
+          final List<CSVRecord> csvRecords = List.of(csvRecord);
+          final RecordAction recordAction = parseRecordAction(csvRecord);
+          final Beneficiary beneficiaryRow = parse(csvRecords, parser::transformMessage);
+
+          // Swap the unhashed HICN into the correct field.
+          beneficiaryRow.setHicnUnhashed(Optional.ofNullable(beneficiaryRow.getHicn()));
+          beneficiaryRow.setHicn(null);
+
+          return new RifRecordEvent<>(
+              fileEvent,
+              csvRecords,
+              recordAction,
+              beneficiaryRow.getBeneficiaryId(),
+              beneficiaryRow);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link BeneficiaryHistory}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser beneficiaryHistoryEventParser(RifFileEvent fileEvent) {
+    final var parser = new BeneficiaryHistoryParser();
+    return new RifFileParser.Simple(
+        csvRecord -> {
+          trace(csvRecord);
+          final List<CSVRecord> csvRecords = List.of(csvRecord);
+          final RecordAction recordAction = parseRecordAction(csvRecord);
+          final BeneficiaryHistory beneHistoryRow = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent,
+              csvRecords,
+              recordAction,
+              beneHistoryRow.getBeneficiaryId(),
+              beneHistoryRow);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link PartDEvent}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser partDEventParser(RifFileEvent fileEvent) {
+    final var parser = new PartDEventParser();
+    return new RifFileParser.Simple(
+        csvRecord -> {
+          trace(csvRecord);
+          final List<CSVRecord> csvRecords = List.of(csvRecord);
+          final RecordAction recordAction = parseRecordAction(csvRecord);
+          final PartDEvent partDEvent = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent, csvRecords, recordAction, partDEvent.getBeneficiaryId(), partDEvent);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link InpatientClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser inpatientClaimParser(RifFileEvent fileEvent) {
+    final var parser = new InpatientClaimParser();
+    return new RifFileParser.Grouping(
+        RifFileType.INPATIENT.getIdColumn().name(),
+        csvRecords -> {
+          trace(csvRecords);
+          final RecordAction recordAction = parseRecordAction(csvRecords);
+          final InpatientClaim claim = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link OutpatientClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser outpatientClaimParser(RifFileEvent fileEvent) {
+    final var parser = new OutpatientClaimParser();
+    return new RifFileParser.Grouping(
+        RifFileType.OUTPATIENT.getIdColumn().name(),
+        csvRecords -> {
+          trace(csvRecords);
+          final RecordAction recordAction = parseRecordAction(csvRecords);
+          final OutpatientClaim claim = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link CarrierClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser carrierClaimParser(RifFileEvent fileEvent) {
+    final var parser = new CarrierClaimParser();
+    return new RifFileParser.Grouping(
+        RifFileType.CARRIER.getIdColumn().name(),
+        csvRecords -> {
+          trace(csvRecords);
+          final RecordAction recordAction = parseRecordAction(csvRecords);
+          final CarrierClaim claim = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link SNFClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser snfClaimParser(RifFileEvent fileEvent) {
+    final var parser = new SNFClaimParser();
+    return new RifFileParser.Grouping(
+        RifFileType.SNF.getIdColumn().name(),
+        csvRecords -> {
+          trace(csvRecords);
+          final RecordAction recordAction = parseRecordAction(csvRecords);
+          final SNFClaim claim = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link HospiceClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser hospiceClaimParser(RifFileEvent fileEvent) {
+    final var parser = new HospiceClaimParser();
+    return new RifFileParser.Grouping(
+        RifFileType.HOSPICE.getIdColumn().name(),
+        csvRecords -> {
+          trace(csvRecords);
+          final RecordAction recordAction = parseRecordAction(csvRecords);
+          final HospiceClaim claim = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link HHAClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser hhaClaimParser(RifFileEvent fileEvent) {
+    final var parser = new HHAClaimParser();
+    return new RifFileParser.Grouping(
+        RifFileType.HHA.getIdColumn().name(),
+        csvRecords -> {
+          trace(csvRecords);
+          final RecordAction recordAction = parseRecordAction(csvRecords);
+          final HHAClaim claim = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
+        });
+  }
+
+  /**
+   * Creates a {@link RifFileParser} that creates {@link DMEClaim}s.
+   *
+   * @param fileEvent the {@link RifFileEvent} being processed
+   * @return the parser
+   */
+  private static RifFileParser dmeClaimParser(RifFileEvent fileEvent) {
+    final var parser = new DMEClaimParser();
+    return new RifFileParser.Grouping(
+        RifFileType.DME.getIdColumn().name(),
+        csvRecords -> {
+          trace(csvRecords);
+          final RecordAction recordAction = parseRecordAction(csvRecords);
+          final DMEClaim claim = parse(csvRecords, parser::transformMessage);
+          return new RifRecordEvent<>(
+              fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
+        });
+  }
+
+  /**
+   * Calls the provided parser lambda function with the given list of {@link CSVRecord}s to produce
+   * an object. {@link TransformationException}s are converted into {@link
+   * InvalidRifValueException}s.
+   *
+   * @param csvRecords records to pass to the lambda function
+   * @param parser the lambda function that does the parsing
+   * @return the object returned by the lambda function
+   * @param <T> the type of object returned by the lambda function
+   */
+  private static <T> T parse(List<CSVRecord> csvRecords, Function<RifObjectWrapper, T> parser) {
     try {
-      return parser.apply(fileEvent, csvRecords);
-    } catch (DataTransformer.TransformationException error) {
+      return parser.apply(new RifObjectWrapper(csvRecords));
+    } catch (TransformationException error) {
       String message =
           String.format(
               "Parse error: lineNumber: %d message: %s errors: %s",
               csvRecords.get(0).getRecordNumber(), error.getMessage(), error.getErrors());
-      LOGGER.warn(
+      log.warn(
           "Parse error encountered near line number '{}'.", csvRecords.get(0).getRecordNumber());
       throw new InvalidRifValueException(message, error);
     }
   }
 
   /**
-   * Builds a beneficiary event record.
+   * Extracts the appropriate {@link RecordAction} from the given record.
    *
-   * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord} to be mapped (in a single-element {@link List}), which
-   *     must be from a {@link RifFileType#BENEFICIARY} {@link RifFile}
-   * @param parser {@link BeneficiaryParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
+   * @param csvRecord the record
+   * @return the action
    */
-  private static RifRecordEvent<Beneficiary> buildBeneficiaryEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, BeneficiaryParser parser) {
-    if (csvRecords.size() != 1) throw new BadCodeMonkeyException();
-    CSVRecord csvRecord = csvRecords.get(0);
-
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecord.toString());
-
-    RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
-    Beneficiary beneficiaryRow = parser.transformMessage(new RifObjectWrapper(csvRecords));
-
-    // Swap the unhashed HICN into the correct field.
-    beneficiaryRow.setHicnUnhashed(Optional.ofNullable(beneficiaryRow.getHicn()));
-    beneficiaryRow.setHicn(null);
-
-    return new RifRecordEvent<Beneficiary>(
-        fileEvent, csvRecords, recordAction, beneficiaryRow.getBeneficiaryId(), beneficiaryRow);
+  @Nonnull
+  private static RecordAction parseRecordAction(CSVRecord csvRecord) {
+    return RecordAction.match(csvRecord.get(RECORD_ACTION_COLUMN));
   }
 
   /**
-   * Builds a beneficiary history event record.
+   * Extracts the appropriate {@link RecordAction} from the first record.
    *
-   * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord} to be mapped (in a single-element {@link List}), which
-   *     must be from a {@link RifFileType#BENEFICIARY_HISTORY} {@link RifFile}
-   * @param parser {@link BeneficiaryHistoryParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
+   * @param csvRecords the records
+   * @return the action
    */
-  private static RifRecordEvent<BeneficiaryHistory> buildBeneficiaryHistoryEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, BeneficiaryHistoryParser parser) {
-    if (csvRecords.size() != 1) throw new BadCodeMonkeyException();
-    CSVRecord csvRecord = csvRecords.get(0);
-
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecord.toString());
-
-    RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
-    BeneficiaryHistory beneficiaryHistoryRow =
-        parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<BeneficiaryHistory>(
-        fileEvent,
-        csvRecords,
-        recordAction,
-        beneficiaryHistoryRow.getBeneficiaryId(),
-        beneficiaryHistoryRow);
+  @Nonnull
+  private static RecordAction parseRecordAction(List<CSVRecord> csvRecords) {
+    return parseRecordAction(csvRecords.get(0));
   }
 
   /**
-   * Builds a part D event record.
+   * Logs all of the records if trace logging is enabled.
    *
-   * @param fileEvent the {@link RifFilesEvent} being processed
-   * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
-   *     RifFileType#PDE} {@link RifFile}
-   * @param parser {@link PartDEventParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
+   * @param csvRecords the records
    */
-  private static RifRecordEvent<PartDEvent> buildPartDEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, PartDEventParser parser) {
-    if (csvRecords.size() != 1) throw new BadCodeMonkeyException();
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecords.toString());
-
-    CSVRecord csvRecord = csvRecords.get(0);
-
-    RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
-    PartDEvent partDEvent = parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<PartDEvent>(
-        fileEvent, csvRecords, recordAction, partDEvent.getBeneficiaryId(), partDEvent);
+  private static void trace(List<CSVRecord> csvRecords) {
+    if (log.isTraceEnabled()) {
+      log.trace(csvRecords.toString());
+    }
   }
 
   /**
-   * Builds an inpatient claim event record.
+   * Logs the record if trace logging is enabled.
    *
-   * @param fileEvent the {@link RifFileEvent} being processed that is being processed
-   * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
-   *     RifFileType#INPATIENT} {@link RifFile}
-   * @param parser {@link InpatientClaimParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
+   * @param csvRecord the record
    */
-  private static RifRecordEvent<InpatientClaim> buildInpatientClaimEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, InpatientClaimParser parser) {
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecords.toString());
-
-    CSVRecord firstCsvRecord = csvRecords.get(0);
-
-    RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    InpatientClaim claim = parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<InpatientClaim>(
-        fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
-  }
-
-  /**
-   * Builds an outpatient claim event record.
-   *
-   * @param fileEvent the {@link RifFileEvent} being processed that is being processed
-   * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
-   *     RifFileType#OUTPATIENT} {@link RifFile}
-   * @param parser {@link OutpatientClaimParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
-   */
-  private static RifRecordEvent<OutpatientClaim> buildOutpatientClaimEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, OutpatientClaimParser parser) {
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecords.toString());
-
-    CSVRecord firstCsvRecord = csvRecords.get(0);
-
-    RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    OutpatientClaim claim = parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<OutpatientClaim>(
-        fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
-  }
-
-  /**
-   * Builds a carrier claim event record.
-   *
-   * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
-   *     RifFileType#CARRIER} {@link RifFile}
-   * @param parser {@link CarrierClaimParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
-   */
-  private static RifRecordEvent<CarrierClaim> buildCarrierClaimEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, CarrierClaimParser parser) {
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecords.toString());
-
-    CSVRecord firstCsvRecord = csvRecords.get(0);
-
-    RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    CarrierClaim claim = parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<CarrierClaim>(
-        fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
-  }
-
-  /**
-   * Builds an SNF event record.
-   *
-   * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
-   *     RifFileType#SNF} {@link RifFile}
-   * @param parser {@link SNFClaimParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
-   */
-  private static RifRecordEvent<SNFClaim> buildSNFClaimEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, SNFClaimParser parser) {
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecords.toString());
-
-    CSVRecord firstCsvRecord = csvRecords.get(0);
-
-    RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    SNFClaim claim = parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<SNFClaim>(
-        fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
-  }
-
-  /**
-   * Builds a hospice claim event record.
-   *
-   * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
-   *     RifFileType#HOSPICE} {@link RifFile}
-   * @param parser {@link HospiceClaimParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
-   */
-  private static RifRecordEvent<HospiceClaim> buildHospiceClaimEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, HospiceClaimParser parser) {
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecords.toString());
-
-    CSVRecord firstCsvRecord = csvRecords.get(0);
-
-    RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    HospiceClaim claim = parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<HospiceClaim>(
-        fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
-  }
-
-  /**
-   * Builds an HHA event record.
-   *
-   * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
-   *     RifFileType#HHA} {@link RifFile}
-   * @param parser {@link HHAClaimParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
-   */
-  private static RifRecordEvent<HHAClaim> buildHHAClaimEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, HHAClaimParser parser) {
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecords.toString());
-
-    CSVRecord firstCsvRecord = csvRecords.get(0);
-
-    RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    HHAClaim claim = parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<HHAClaim>(
-        fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
-  }
-
-  /**
-   * Builds a DME claim event record.
-   *
-   * @param fileEvent the {@link RifFileEvent} being processed
-   * @param csvRecords the {@link CSVRecord}s to be mapped, which must be from a {@link
-   *     RifFileType#DME} {@link RifFile}
-   * @param parser {@link DMEClaimParser} used to parse the csv records
-   * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
-   */
-  private static RifRecordEvent<DMEClaim> buildDMEClaimEvent(
-      RifFileEvent fileEvent, List<CSVRecord> csvRecords, DMEClaimParser parser) {
-    if (LOGGER.isTraceEnabled()) LOGGER.trace(csvRecords.toString());
-
-    CSVRecord firstCsvRecord = csvRecords.get(0);
-
-    RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-    DMEClaim claim = parser.transformMessage(new RifObjectWrapper(csvRecords));
-    return new RifRecordEvent<DMEClaim>(
-        fileEvent, csvRecords, recordAction, claim.getBeneficiaryId(), claim);
+  private static void trace(CSVRecord csvRecord) {
+    if (log.isTraceEnabled()) {
+      log.trace(csvRecord.toString());
+    }
   }
 }
