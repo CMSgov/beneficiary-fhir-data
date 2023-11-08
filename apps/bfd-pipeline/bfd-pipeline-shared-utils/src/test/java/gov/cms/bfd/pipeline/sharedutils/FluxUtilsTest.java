@@ -21,16 +21,23 @@ import reactor.test.StepVerifier;
 /** Unit tests for {@link FluxUtils}. */
 public class FluxUtilsTest {
   /**
-   * Verifies that creating a flux using {@link FluxUtils#fromFluxFunction} handles both success and
-   * failure cases appropriately.
+   * Verifies that creating a flux using {@link FluxUtils#fromFluxFunction} handles the success case
+   * appropriately.
    */
   @Test
-  void verifyFromFluxFunction() {
+  void verifyFromFluxFunctionHandlesSuccess() {
     Flux<Integer> flux = FluxUtils.fromFluxFunction(() -> Flux.just(1, 2));
     StepVerifier.create(flux).expectNext(1).expectNext(2).expectComplete().verify();
+  }
 
+  /**
+   * Verifies that creating a flux using {@link FluxUtils#fromFluxFunction} handles both the failure
+   * case appropriately.
+   */
+  @Test
+  void verifyFromFluxFunctionHandlesException() {
     final IOException error = new IOException();
-    flux =
+    Flux<Integer> flux =
         FluxUtils.fromFluxFunction(
             () -> {
               throw error;
@@ -39,16 +46,23 @@ public class FluxUtilsTest {
   }
 
   /**
-   * Verifies that creating a flux using {@link FluxUtils#fromIterableFunction} handles both success
-   * and failure cases appropriately.
+   * Verifies that creating a flux using {@link FluxUtils#fromIterableFunction} handles the success
+   * case appropriately.
    */
   @Test
-  void verifyFromIterableFunction() {
+  void verifyFromIterableFunctionHandlesSuccess() {
     Flux<Integer> flux = FluxUtils.fromIterableFunction(() -> List.of(1, 2));
     StepVerifier.create(flux).expectNext(1).expectNext(2).expectComplete().verify();
+  }
 
+  /**
+   * Verifies that creating a flux using {@link FluxUtils#fromIterableFunction} handles the failure
+   * case appropriately.
+   */
+  @Test
+  void verifyFromIterableFunctionHandlesException() {
     final IOException error = new IOException();
-    flux =
+    Flux<Integer> flux =
         FluxUtils.fromIterableFunction(
             () -> {
               throw error;
@@ -143,9 +157,12 @@ public class FluxUtilsTest {
     verify(theResource).close();
   }
 
-  /** Verifies that function wrappers returned by {@link FluxUtils#wrapFunction} work correctly. */
+  /**
+   * Verifies that function wrappers returned by {@link FluxUtils#wrapFunction} work correctly when
+   * the function throws an exception.
+   */
   @Test
-  void verifyWrapFunction() {
+  void verifyWrapFunctionThatThrows() {
     // Wrapping a function that throws an IOException yields a function that
     // throws a wrapped, unchecked, version of that exception.
     final IOException error = new IOException();
@@ -156,7 +173,14 @@ public class FluxUtilsTest {
               throw error;
             });
     assertThrows(wrappedError.getClass(), () -> wrappedThrows.apply(1));
+  }
 
+  /**
+   * Verifies that function wrappers returned by {@link FluxUtils#wrapFunction} work correctly when
+   * the function succeeds.
+   */
+  @Test
+  void verifyWrapFunctionThatSucceeds() {
     // Wrapping a function that doesn't throw yields a function that returns the result of calling
     // the original function.
     final Function<Integer, Integer> wrappedSuccessful = FluxUtils.wrapFunction(x -> x + 1);
