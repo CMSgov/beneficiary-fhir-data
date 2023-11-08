@@ -4,38 +4,10 @@
 
 set -e
 
-cd `dirname $0`
-
-function set_const_param() {
-    value=$1
-    to=$2
-    echo setting $to
-    aws ssm put-parameter --name $to --value "$value" --type String --overwrite
-}
-
-function set_const_secure_param() {
-    value=$1
-    to=$2
-    echo setting $to
-    aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite
-}
-
-function copy_param() {
-    from=$1
-    to=$2
-    value=`aws ssm get-parameter --name $from --output text --query Parameter.Value`
-    echo setting $to
-    aws ssm put-parameter --name $to --value "$value" --type String --overwrite
-}
-
-function copy_secure_param() {
-    from=$1
-    to=$2
-    value=`aws ssm get-parameter --name $from --with-decryption --output text --query Parameter.Value`
-    echo setting $to
-    aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite
-}
-
+if [[ x$EKS_SSM_KEY_ID = x ]] ; then
+  echo "error: Define the SSM path prefix in env var EKS_SSM_KEY_ID" 2>&1
+  exit 1
+fi
 if [[ x$EKS_SSM_PREFIX = x ]] ; then
   echo "error: Define the SSM path prefix in env var EKS_SSM_PREFIX" 2>&1
   exit 1
@@ -54,7 +26,39 @@ if [[ x$EKS_ECR_REGISTRY = x ]] ; then
   exit 1
 fi
 
-config_path="${EKS_SSM_PREFIX}/${EKS_SSM_CONFIG_ROOT}/migrator"
+cd `dirname $0`
+
+function set_const_param() {
+    value=$1
+    to=$2
+    echo setting $to
+    aws ssm put-parameter --name $to --value "$value" --type String --overwrite
+}
+
+function set_const_secure_param() {
+    value=$1
+    to=$2
+    echo setting $to
+    aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
+}
+
+function copy_param() {
+    from=$1
+    to=$2
+    value=`aws ssm get-parameter --name $from --output text --query Parameter.Value`
+    echo setting $to
+    aws ssm put-parameter --name $to --value "$value" --type String --overwrite
+}
+
+function copy_secure_param() {
+    from=$1
+    to=$2
+    value=`aws ssm get-parameter --name $from --with-decryption --output text --query Parameter.Value`
+    echo setting $to
+    aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
+}
+
+config_path="${EKS_SSM_PREFIX}/migrator/${EKS_SSM_CONFIG_ROOT}"
 
 set_const_param \
   "5" \
