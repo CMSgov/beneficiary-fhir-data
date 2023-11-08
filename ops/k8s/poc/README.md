@@ -18,3 +18,26 @@ These are:
 - `EKS_SSM_CONFIG_ROOT`: Name of a new hierarchy node within SSM to add runtime configuration settings to.
 - `EKS_RDS_WRITER_ENDPOINT`: Endpoint name for the RDS database's writer node.
 - `EKS_ECR_REGISTRY`: ECR name that can be added to image names to allow K8S to download images from the registry.
+
+EKS has some special needs that a desktop cluster does not.
+These have been accomodated by adding new values to the helm values file and expanding the template to use those values if they are present.  The special values are:
+
+## Tolerations
+
+EKS/Fargate [assigns taints](https://docs.aws.amazon.com/eks/latest/userguide/node-taints-managed-node-groups.html) to nodes.
+In order for a pod to be scheduled on a tainted node we have to define `tolerations` in the pod spec.
+A new `podTolerations` value was defined as a list of objects with three properties: `key`, `operator`, and `effect`.
+These correspond to the taints that we are willing to accept on the nodes our pods run on.
+When this list is non-empty the template renders a `tolerations` property in the job's pod spec.
+
+## Labels
+
+The EKS infrastructure defines Fargate profiles to assign specific permissions to pods running in the cluster.
+For the POC we associated a label named `job-name` to the profile.
+A new `labels` value was defined as a list of objects with two properties: `label` and `value`.
+When this list is non-empty the template renders a `labels` property in the job's metadata.
+
+## Service Account
+
+A new `serviceAccountName` string value was defined to specify the appropriate service account for the job.
+When this has a non-empty value a `serviceAccountName` property is added to the job's pod spec.
