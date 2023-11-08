@@ -82,6 +82,8 @@ spec:
             steps {
                 script {
                     dir ('apps') {
+                    // Address limitations resulting from CVE-2022-24767
+                        sh 'git config --global --add safe.directory "$WORKSPACE"'
                         sh "mvn sonar:sonar" +
                         " -Dsonar.projectKey=${SONAR_PROJECT_KEY}" +
                         " -Dsonar.host.url=${SONAR_HOST_URL}" +
