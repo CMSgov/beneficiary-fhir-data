@@ -1,5 +1,4 @@
 ---
-# CIPHER FILE HEADER, DO NOT REMOVE (noop preamble to satisfy the pre-commit script)
 bfd: 
   ${env}:
     common:
