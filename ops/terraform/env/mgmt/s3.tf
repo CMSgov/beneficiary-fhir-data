@@ -157,7 +157,6 @@ resource "aws_s3_bucket_ownership_controls" "bfd_public_test_data" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "bfd_public_test_data" {
-  depends_on = [aws_s3_bucket_versioning.bfd_public_test_data]
   bucket = aws_s3_bucket.bfd_public_test_data.id
 
   rule {
