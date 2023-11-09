@@ -60,7 +60,10 @@ spec:
         defaultValue: false)
     }
     environment {
-        SONAR_TOKEN = credentials('svc-sonar-bfd')
+        //Parameter Path in AWS
+        ACCESS_KEY_PATH = '/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key'
+        //Initial Value before Token is retrieved in Build Stage.
+        SONAR_TOKEN = ''
         SONAR_PROJECT_KEY = 'bfd-parent'
         SONAR_HOST_URL = 'https://sonarqube.cloud.cms.gov'
     }
@@ -69,21 +72,30 @@ spec:
             // Build Step
          steps {
                 script {
+                    // Address limitations resulting from CVE-2022-2476
+                    sh "git config --global --add safe.directory $WORKSPACE"
                    // Load the child Jenkinsfiles.
                    scriptForApps = load('apps/build.groovy')
                    //Authentication of AWS to run Build.groovy
                    awsAuth.assumeRole()
                    // Perform Build steps
                    scriptForApps.build(verboseMaven, true)
+
+                   //Retrieve Sonar Token from AWS
+                    def parameterValue = sh(
+                             script: """ aws ssm get-parameter --name "${ACCESS_KEY_PATH}" --region us-east-1 --with-decryption --query 'Parameter.Value' --output text""",
+                             returnStdout: true
+                        ).trim() as String
+                    // Set the token as an environment variable
+                    SONAR_TOKEN = parameterValue
                 }
             }
         }
+
         stage ('SonarQube Analysis') {
             steps {
                 script {
                     dir ('apps') {
-                    // Address limitations resulting from CVE-2022-24767
-                        sh 'git config --global --add safe.directory "$WORKSPACE"'
                         sh "mvn sonar:sonar" +
                         " -Dsonar.projectKey=${SONAR_PROJECT_KEY}" +
                         " -Dsonar.host.url=${SONAR_HOST_URL}" +
