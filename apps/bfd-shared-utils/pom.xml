@@ -45,6 +45,11 @@
             <artifactId>rds</artifactId>
         </dependency>
         <dependency>
+            <!-- Used to interact with AWS' STS service -->
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sts</artifactId>
+        </dependency>
+        <dependency>
             <!-- Provides a sane facade for the giant mess of incompatible logging frameworks in Java. -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

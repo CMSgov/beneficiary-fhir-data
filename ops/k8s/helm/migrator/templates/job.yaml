@@ -4,14 +4,38 @@ kind: Job
 metadata:
   name: {{ .Values.appName }}
   namespace: {{ .Values.namespace }}
+{{- if .Values.labels }}
+  labels:
+  {{- range .Values.labels }}
+    {{ .label }}: {{ .value | quote }}
+  {{- end }}
+{{- end }}
 spec:
   template:
     spec:
+{{- if .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName | quote }}
+{{- end }}
       containers:
       - name: {{ .Values.appName }}
         image: {{ $imageSpec }}
         envFrom:
         - secretRef:
             name: {{ .Values.appName }}-secret
+        resources:
+          requests:
+            memory: {{ .Values.containerResources.memory | quote }}
+            cpu: {{ .Values.containerResources.cpu | quote }}
+          limits:
+            memory: {{ .Values.containerResources.memory | quote }}
+            cpu: {{ .Values.containerResources.cpu | quote }}
+{{- if .Values.podTolerations }}
+      tolerations:
+      {{- range .Values.podTolerations }}
+      - key: {{ .key }}
+        operator: {{ .operator }}
+        effect: {{ .effect }}
+      {{- end }}
+{{- end }}
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: {{ .Values.backoffLimit }}
