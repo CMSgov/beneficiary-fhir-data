@@ -1,3 +1,5 @@
+library 'bfd@brandon-BFD-3012-ssm-deficiencies'
+
 pipeline {
   agent {
     kubernetes {
@@ -30,13 +32,8 @@ spec:
                             parameterName: "/bfd/test/common/nonsensitive/brandon_test",
                             parameterValue: "test",
                             parameterType: "String",
-                            parameterTags: [
-                                "Key=Environment,Value=test}",
-                                "Key=stack,Value=test}",
                                 "Key=Terraform,Value=False",
-                                "Key=application,Value=bfd",
-                                "Key=business,Value=oeda"
-                            ],
+                            parameterTags: "Key=Source,Value=${JOB_NAME}",
                             shouldOverwrite: true
                         )
             }
