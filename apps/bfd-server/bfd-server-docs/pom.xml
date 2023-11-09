@@ -26,17 +26,9 @@
             <artifactId>poi-ooxml</artifactId>
         </dependency>
         <dependency>
-            <!-- The test framework used for unit and integration tests. -->
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
-            <!-- exclude Junit from including its version of hamcrest -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 

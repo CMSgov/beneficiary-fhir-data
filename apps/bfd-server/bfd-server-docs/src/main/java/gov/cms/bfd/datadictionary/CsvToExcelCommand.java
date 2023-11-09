@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.apache.commons.csv.CSVFormat;
@@ -30,18 +31,52 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class CsvToExcelCommand {
 
   /** Excel columns widths in units of 1/256th of a character width for the V1 data dictionary. */
-  private static int[] v1ColumnsWidths =
-      new int[] {
-        2080, 7200, 10400, 2400, 1600, 1600, 5600, 11200, 17600, 17600, 9600, 9600, 6400, 6400,
-        6400, 6400, 6400, 2400, 2400, 2400, 2400, 2400, 2400
-      };
+  private static final List<Integer> v1ColumnsWidths =
+      List.of(
+          2080, 7200, 10400, 2400, 1600, 1600, 5600, 11200, 17600, 17600, 9600, 9600, 6400, 6400,
+          6400, 6400, 6400, 2400, 2400, 2400, 2400, 2400, 2400);
 
   /** Excel columns widths in units of 1/256th of a character width for the V2 data dictionary. */
-  private static int[] v2ColumnsWidths =
-      new int[] {
-        2080, 7200, 10400, 2400, 1600, 1600, 5600, 11200, 14400, 17600, 17600, 17600, 9600, 9600,
-        6400, 6400, 6400, 6400, 6400, 2400, 2400, 2400, 2400, 2400, 2400
-      };
+  private static final List<Integer> v2ColumnsWidths =
+      List.of(
+          2080, 7200, 10400, 2400, 1600, 1600, 5600, 11200, 14400, 17600, 17600, 17600, 9600, 9600,
+          6400, 6400, 6400, 6400, 6400, 2400, 2400, 2400, 2400, 2400, 2400);
+
+  /** Bright blue color used for header row background. */
+  private static final XSSFColor CUSTOM_BLUE =
+      new XSSFColor(new java.awt.Color(67, 133, 244), null);
+
+  /** Light grey color used for cell borders. */
+  private static final XSSFColor CUSTOM_GREY =
+      new XSSFColor(new java.awt.Color(243, 243, 243), null);
+
+  /**
+   * Main method to create and save a new data dictionary Excel workbook.
+   *
+   * @param args the pathnames for the v1, v2 CSV input files, and the Excel workbook output file
+   */
+  public static void main(String[] args) {
+
+    if (args.length != 3) {
+      throw new RuntimeException(
+          "V1 CSV file path, V2 CSV file path, and Excel workbook file path are required.");
+    }
+
+    var v1CsvPathName = args[0];
+    var v2CsvPathName = args[1];
+    var xslPathName = args[2];
+
+    // ensure that the CSV files exist
+    for (String fileName : Set.of(v1CsvPathName, v2CsvPathName)) {
+      var csvFile = new File(fileName);
+      if (!csvFile.isFile()) {
+        throw new RuntimeException(String.format("CSV file (%s) does not exist.", fileName));
+      }
+    }
+
+    // invoke command to create and save a new data dictionary Excel workbook
+    createAndSaveWorkbook(v1CsvPathName, v2CsvPathName, xslPathName);
+  }
 
   /**
    * Creates, formats and saves an Excel workbook (xlsx) file.
@@ -79,9 +114,9 @@ public class CsvToExcelCommand {
    * @param sheet the data dictionary sheet to format
    * @param columnsWidths array of column widths to apply to sheet
    */
-  private static void formatSheet(Workbook wb, Sheet sheet, int[] columnsWidths) {
+  private static void formatSheet(Workbook wb, Sheet sheet, List<Integer> columnsWidths) {
     var maxRowIndex = sheet.getLastRowNum();
-    var maxColIndex = columnsWidths.length - 1;
+    var maxColIndex = columnsWidths.size() - 1;
     searchAndReplace(sheet, CellRangeAddress.valueOf("D2:D" + (maxRowIndex + 1)), ";", "\n");
     searchAndReplace(sheet, CellRangeAddress.valueOf("I2:J" + (maxRowIndex + 1)), ";", "\n");
     setStyle(sheet, new CellRangeAddress(0, 0, 0, maxColIndex), getHeaderCellStyle(wb));
@@ -108,7 +143,7 @@ public class CsvToExcelCommand {
           Cell cell = row.createCell(i);
           cell.setCellValue(record.get(i));
         }
-        rowIndex += 1;
+        rowIndex++;
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -121,9 +156,9 @@ public class CsvToExcelCommand {
    * @param sheet the sheet with columns to set
    * @param widths an array of column widths in characters in column order
    */
-  private static void setColumnWidths(Sheet sheet, int[] widths) {
-    for (int i = 0; i < widths.length; i++) {
-      sheet.setColumnWidth(i, widths[i]);
+  private static void setColumnWidths(Sheet sheet, List<Integer> widths) {
+    for (int i = 0; i < widths.size(); i++) {
+      sheet.setColumnWidth(i, widths.get(i));
     }
   }
 
@@ -249,7 +284,7 @@ public class CsvToExcelCommand {
    */
   private static CellStyle getHeaderCellStyle(Workbook wb) {
     var style = wb.createCellStyle();
-    style.setFillForegroundColor(new XSSFColor(new java.awt.Color(67, 133, 244), null));
+    style.setFillForegroundColor(CUSTOM_BLUE);
     style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
     var font = wb.createFont();
     font.setBold(true);
@@ -283,7 +318,7 @@ public class CsvToExcelCommand {
     var style = wb.createCellStyle();
     style.cloneStyleFrom(getDataCellStyle(wb));
     style.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-    style.setFillForegroundColor(new XSSFColor(new java.awt.Color(243, 243, 243), null));
+    style.setFillForegroundColor(CUSTOM_GREY);
     style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
     style.setBorderTop(BorderStyle.THIN);
     style.setTopBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -294,33 +329,5 @@ public class CsvToExcelCommand {
     style.setBorderRight(BorderStyle.THIN);
     style.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
     return style;
-  }
-
-  /**
-   * Main method to create and save a new data dictionary Excel workbook.
-   *
-   * @param args the pathnames for the v1, v2 CSV input files, and the Excel workbook output file
-   */
-  public static void main(String[] args) {
-
-    if (args.length != 3) {
-      throw new RuntimeException(
-          "V1 CSV file path, V2 CSV file path, and Excel workbook file path are required.");
-    }
-
-    var v1CsvPathName = args[0];
-    var v2CsvPathName = args[1];
-    var xslPathName = args[2];
-
-    // ensure that the CSV files exist
-    for (String fileName : Set.of(v1CsvPathName, v2CsvPathName)) {
-      var csvFile = new File(fileName);
-      if (!csvFile.isFile()) {
-        throw new RuntimeException(String.format("CSV file (%s) does not exist.", fileName));
-      }
-    }
-
-    // invoke command to create and save a new data dictionary Excel workbook
-    CsvToExcelCommand.createAndSaveWorkbook(v1CsvPathName, v2CsvPathName, xslPathName);
   }
 }
