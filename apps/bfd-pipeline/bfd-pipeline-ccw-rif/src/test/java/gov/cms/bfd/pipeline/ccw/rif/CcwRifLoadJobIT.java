@@ -66,7 +66,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify that no data sets were generated.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -181,7 +180,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(2, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -342,7 +340,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
       assertEquals(
           manifestA.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -432,7 +429,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -518,7 +514,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -602,7 +597,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(manifest.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
       assertEquals(
           manifest.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
-      assertEquals(0, listener.getErrorEvents().size());
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();

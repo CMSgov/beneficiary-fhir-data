@@ -74,6 +74,12 @@
             <artifactId>hibernate-core</artifactId>
         </dependency>
 
+        <dependency>
+            <!-- Functional-reactive programming api for concurrent claim ingestion. -->
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+
         <!-- Compile time only -->
         <dependency>
             <!-- this allows the construction of POJOs without a lot of boilerplate code -->
@@ -112,6 +118,12 @@
             <!-- Used to write fluent assertions in unit tests. -->
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Library for writing tests of project reactor based code. -->
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

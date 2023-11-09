@@ -169,6 +169,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
         log.debug("caught interrupt - still waiting for thread pool to terminate");
       }
     }
+    log.info("pool has terminated");
   }
 
   /**

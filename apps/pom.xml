@@ -249,6 +249,13 @@
                 <version>${reactor.version}</version>
             </dependency>
             <dependency>
+                <!-- Library for writing tests of project reactor based code. -->
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-test</artifactId>
+                <version>${reactor.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <!-- The newrelic.jar javaagent dependency -->
                 <groupId>com.newrelic.agent.java</groupId>
                 <artifactId>newrelic-agent</artifactId>

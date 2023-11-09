@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rif.RecordAction;
-import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -34,7 +33,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link RifFilesProcessor}. */
@@ -50,8 +48,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_BENES.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_BENES.getRecordCount(), rifEventsList.size());
 
@@ -115,8 +112,7 @@ public final class RifFilesProcessorTest {
             Instant.now(), false, StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(
         StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.getRecordCount(), rifEventsList.size());
@@ -145,8 +141,7 @@ public final class RifFilesProcessorTest {
             Instant.now(), false, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(
         StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.getRecordCount(), rifEventsList.size());
@@ -204,8 +199,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_PDE.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_PDE.getRecordCount(), rifEventsList.size());
 
@@ -270,8 +264,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRecordCount(), rifEventsList.size());
 
@@ -417,8 +410,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_INPATIENT.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_INPATIENT.getRecordCount(), rifEventsList.size());
 
@@ -601,8 +593,7 @@ public final class RifFilesProcessorTest {
             StaticRifResource.SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(
         StaticRifResource.SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE.getRecordCount(),
@@ -782,8 +773,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_OUTPATIENT.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_OUTPATIENT.getRecordCount(), rifEventsList.size());
 
@@ -942,8 +932,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_SNF.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_SNF.getRecordCount(), rifEventsList.size());
 
@@ -1115,8 +1104,7 @@ public final class RifFilesProcessorTest {
             StaticRifResource.SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(
         StaticRifResource.SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE.getRecordCount(),
@@ -1291,8 +1279,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_HOSPICE.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_HOSPICE.getRecordCount(), rifEventsList.size());
 
@@ -1407,8 +1394,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_HHA.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_HHA.getRecordCount(), rifEventsList.size());
 
@@ -1520,8 +1506,7 @@ public final class RifFilesProcessorTest {
         new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_A_DME.toRifFile());
     RifFilesProcessor processor = new RifFilesProcessor();
     RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
-    List<RifRecordEvent<?>> rifEventsList =
-        rifFileRecords.getRecords().collect(Collectors.toList());
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
 
     assertEquals(StaticRifResource.SAMPLE_A_DME.getRecordCount(), rifEventsList.size());
 

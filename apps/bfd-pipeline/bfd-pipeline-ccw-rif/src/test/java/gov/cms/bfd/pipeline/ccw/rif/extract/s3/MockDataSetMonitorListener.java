@@ -17,10 +17,6 @@ public final class MockDataSetMonitorListener implements DataSetMonitorListener 
   /** The list of data available events. */
   private final List<RifFilesEvent> dataEvents = new LinkedList<>();
 
-  /** The list of load error events. */
-  final List<Throwable> errorEvents = new LinkedList<>();
-
-  /** {@inheritDoc} */
   @Override
   public void noDataAvailable() {
     noDataAvailableEvents++;
@@ -35,7 +31,6 @@ public final class MockDataSetMonitorListener implements DataSetMonitorListener 
     return noDataAvailableEvents;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void dataAvailable(RifFilesEvent rifFilesEvent) {
     dataEvents.add(rifFilesEvent);
@@ -49,22 +44,5 @@ public final class MockDataSetMonitorListener implements DataSetMonitorListener 
    */
   public List<RifFilesEvent> getDataEvents() {
     return Collections.unmodifiableList(dataEvents);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void errorOccurred(Throwable error) {
-    LOGGER.warn("Error received.", error);
-    errorEvents.add(error);
-  }
-
-  /**
-   * Gets the {@link #errorEvents} as an immutable list.
-   *
-   * @return the {@link List} of {@link Throwable}s that have been passed to {@link
-   *     #errorOccurred(Throwable)}
-   */
-  public List<Throwable> getErrorEvents() {
-    return Collections.unmodifiableList(errorEvents);
   }
 }

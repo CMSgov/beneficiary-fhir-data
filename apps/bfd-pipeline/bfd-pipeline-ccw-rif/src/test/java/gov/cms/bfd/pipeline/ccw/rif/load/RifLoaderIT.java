@@ -12,7 +12,6 @@ import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
@@ -31,6 +30,7 @@ import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadPreValidateInterface;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadPreValidateSynthea;
 import gov.cms.bfd.pipeline.ccw.rif.extract.LocalRifFile;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -48,7 +48,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -71,6 +70,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 
 /** Integration tests for {@link RifLoader}. */
 public final class RifLoaderIT {
@@ -413,7 +413,7 @@ public final class RifLoaderIT {
       assertEquals("Johnson", beneficiaryFromDb.getNameSurname());
       // Following fields were NOT changed in update record
       assertEquals("John", beneficiaryFromDb.getNameGiven());
-      assertEquals(new Character('A'), beneficiaryFromDb.getNameMiddleInitial().get());
+      assertEquals(Character.valueOf('A'), beneficiaryFromDb.getNameMiddleInitial().get());
       assertEquals(
           Optional.of("SSSS"), beneficiaryFromDb.getMedicareBeneficiaryId(), "Beneficiary has MBI");
       assertEquals(
@@ -1318,7 +1318,7 @@ public final class RifLoaderIT {
        * e.g. multiple claims or beneficiaries.
        */
       List<List<List<String>>> editedRifRecords =
-          records.getRecords().map(editor).collect(Collectors.toList());
+          records.getRecords().map(editor).collectList().block();
 
       // Build a CSVFormat with the specific header needed for the RIF file type.
       String[] csvHeader =
@@ -1398,7 +1398,7 @@ public final class RifLoaderIT {
             Instant.now(),
             false,
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
-    int loadCount =
+    long loadCount =
         loadSample(
             sampleResources.get(0).getResourceUrl().toString(), loadAppOptions, rifFilesEvent);
 
@@ -1427,7 +1427,7 @@ public final class RifLoaderIT {
    * @param rifFilesEvent the {@link RifFilesEvent} to load
    * @return the number of RIF records that were loaded (as reported by the {@link RifLoader})
    */
-  private int loadSample(String sampleName, LoadAppOptions options, RifFilesEvent rifFilesEvent) {
+  private long loadSample(String sampleName, LoadAppOptions options, RifFilesEvent rifFilesEvent) {
     LOGGER.info("Loading RIF files: '{}'...", sampleName);
 
     // Create the processors that will handle each stage of the pipeline.
@@ -1437,37 +1437,34 @@ public final class RifLoaderIT {
 
     // Link up the pipeline and run it.
     LOGGER.info("Loading RIF records...");
-    AtomicInteger failureCount = new AtomicInteger(0);
-    AtomicInteger loadCount = new AtomicInteger(0);
+    int failureCount = 0;
+    long loadCount = 0;
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      loader.process(
-          rifFileRecords,
-          error -> {
-            failureCount.incrementAndGet();
-            LOGGER.warn("Record(s) failed to load.", error);
-          },
-          result -> {
-            loadCount.incrementAndGet();
-          });
+      try {
+        loadCount += loader.processBlocking(rifFileRecords);
+      } catch (Exception error) {
+        failureCount += 1;
+        LOGGER.warn("Record(s) failed to load.", error);
+      }
       Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build().report();
     }
-    LOGGER.info("Loaded RIF files: '{}', record count: '{}'.", sampleName, loadCount.get());
+    LOGGER.info("Loaded RIF files: '{}', record count: '{}'.", sampleName, loadCount);
     Slf4jReporter.forRegistry(PipelineTestUtils.get().getPipelineApplicationState().getMetrics())
         .outputTo(LOGGER)
         .build()
         .report();
 
     // Verify that the expected number of records were run successfully.
-    assertEquals(0, failureCount.get(), "Load errors encountered.");
+    assertEquals(0, failureCount, "Load errors encountered.");
 
-    return loadCount.get();
+    return loadCount;
   }
 
   /**
    * Runs the {@link RifFilesProcessor} to extract RIF records from the specified {@link
    * StaticRifResource}s, and then calls {@link #assertAreInDatabase(LoadAppOptions,
-   * EntityManagerFactory, Stream)} on each record to verify that it's present in the database.
+   * EntityManagerFactory, Flux)} on each record to verify that it's present in the database.
    * Basically: this is a decent smoke test to verify that {@link RifLoader} did what it should have
    * -- not thorough, but something.
    *
@@ -1528,13 +1525,13 @@ public final class RifLoaderIT {
    * @param records the RIF records to verify
    */
   private static void assertAreInDatabase(
-      LoadAppOptions options, EntityManagerFactory entityManagerFactory, Stream<Object> records) {
+      LoadAppOptions options, EntityManagerFactory entityManagerFactory, Flux<Object> records) {
     IdHasher idHasher = new IdHasher(options.getIdHasherConfig());
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      for (Object record : records.collect(Collectors.toList())) {
+      for (Object record : records.toIterable()) {
         /*
          * We need to handle BeneficiaryHistory separately, as it has a generated ID.
          */
