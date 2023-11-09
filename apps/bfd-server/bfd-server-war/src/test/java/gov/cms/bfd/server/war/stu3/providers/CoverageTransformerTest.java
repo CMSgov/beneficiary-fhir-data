@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
@@ -123,7 +124,7 @@ public final class CoverageTransformerTest {
     assertNotNull(coverage);
 
     assertEquals(
-        TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary).getIdPart(),
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary).getIdPart(),
         coverage.getIdElement().getIdPart());
     assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
     assertEquals(TransformerConstants.COVERAGE_PLAN_PART_A, coverage.getGrouping().getSubPlan());
@@ -177,7 +178,7 @@ public final class CoverageTransformerTest {
     assertNotNull(coverage);
 
     assertEquals(
-        TransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary).getIdPart(),
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary).getIdPart(),
         coverage.getIdElement().getIdPart());
     assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
     assertEquals(TransformerConstants.COVERAGE_PLAN_PART_B, coverage.getGrouping().getSubPlan());
@@ -222,7 +223,7 @@ public final class CoverageTransformerTest {
     assertNotNull(coverage);
 
     assertEquals(
-        TransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary).getIdPart(),
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary).getIdPart(),
         coverage.getIdElement().getIdPart());
     assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
     assertEquals(TransformerConstants.COVERAGE_PLAN_PART_C, coverage.getGrouping().getSubPlan());
@@ -270,7 +271,7 @@ public final class CoverageTransformerTest {
     assertNotNull(coverage);
 
     assertEquals(
-        TransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary).getIdPart(),
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary).getIdPart(),
         coverage.getIdElement().getIdPart());
     assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
     assertEquals(TransformerConstants.COVERAGE_PLAN_PART_D, coverage.getGrouping().getSubPlan());

@@ -5,6 +5,7 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.CoverageClass;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -102,7 +103,7 @@ final class CoverageTransformerV2 {
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
 
-    coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary));
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
 
     setCoverageStatus(coverage, beneficiary.getPartATerminationCode());
     TransformerUtilsV2.setPeriodStart(
@@ -164,7 +165,7 @@ final class CoverageTransformerV2 {
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
-    coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_B, beneficiary));
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
     setCoverageStatus(coverage, beneficiary.getPartBTerminationCode());
 
     TransformerUtilsV2.setPeriodStart(
@@ -221,7 +222,7 @@ final class CoverageTransformerV2 {
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
-    coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_C, beneficiary));
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
     coverage.setStatus(CoverageStatus.ACTIVE);
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
@@ -275,7 +276,7 @@ final class CoverageTransformerV2 {
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
-    coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, beneficiary));
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
 
     TransformerUtilsV2.setPeriodStart(
         coverage.getPeriod(), beneficiary.getPartDCoverageStartDate());

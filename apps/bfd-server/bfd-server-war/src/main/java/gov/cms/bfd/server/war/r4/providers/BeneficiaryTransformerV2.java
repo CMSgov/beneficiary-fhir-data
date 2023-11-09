@@ -9,6 +9,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -184,14 +185,14 @@ public class BeneficiaryTransformerV2 {
     }
 
     if (beneficiary.getBirthDate() != null) {
-      patient.setBirthDate(TransformerUtilsV2.convertToDate(beneficiary.getBirthDate()));
+      patient.setBirthDate(CommonTransformerUtils.convertToDate(beneficiary.getBirthDate()));
     }
 
     // "Patient.deceased[x]": ["boolean", "dateTime"],
     if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
       patient.setDeceased(
           new DateTimeType(
-              TransformerUtilsV2.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              CommonTransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
               TemporalPrecisionEnum.DAY));
     } else {
       patient.setDeceased(new BooleanType(false));

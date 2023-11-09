@@ -1,7 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.commons.CommonTransformerUtils.convertToDate;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -11,7 +12,6 @@ import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
-import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.codebook.model.Variable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -40,6 +40,7 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.IdentifierType;
@@ -51,24 +52,14 @@ import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -130,44 +121,6 @@ public final class TransformerUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
 
   /**
-   * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
-   * missing {@link Value} matches. Why track this? To ensure that we don't spam log events for
-   * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
-   * were flooding our logs and filling up the drive.
-   *
-   * @see TransformerUtils#calculateCodingDisplay(IAnyResource, CcwCodebookInterface, String)
-   */
-  private static final Set<CcwCodebookInterface> codebookLookupMissingFailures = new HashSet<>();
-
-  /**
-   * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
-   * duplicate {@link Value} matches. Why track this? To ensure that we don't spam log events for
-   * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
-   * were flooding our logs and filling up the drive.
-   *
-   * @see TransformerUtils#calculateCodingDisplay(IAnyResource, CcwCodebookInterface, String)
-   */
-  private static final Set<CcwCodebookInterface> codebookLookupDuplicateFailures = new HashSet<>();
-
-  /** Tracks the icd codes that have already had code lookup failures. */
-  private static final Set<String> icdCodeLookupMissingFailures = new HashSet<>();
-
-  /** Stores the diagnosis ICD codes and their display values. */
-  private static Map<String, String> icdMap = null;
-
-  /** Stores the procedure codes and their display values. */
-  private static Map<String, String> procedureMap = null;
-
-  /** Tracks the procedure codes that have already had code lookup failures. */
-  private static final Set<String> procedureLookupMissingFailures = new HashSet<>();
-
-  /** Stores the NPI codes and their display values. */
-  private static Map<String, String> npiMap = null;
-
-  /** Tracks the NPI codes that have already had code lookup failures. */
-  private static final Set<String> npiCodeLookupMissingFailures = new HashSet<>();
-
-  /**
    * Adds an adjudication total to the specified {@link ExplanationOfBenefit}.
    *
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
@@ -215,15 +168,18 @@ public final class TransformerUtils {
    * @return a new {@link Money} instance, with the specified {@link Money#getValue()}
    */
   static Money createMoney(Optional<? extends Number> amountValue) {
-    if (amountValue.isEmpty()) throw new IllegalArgumentException();
-
+    if (amountValue.isEmpty()) {
+      throw new IllegalArgumentException();
+    }
     Money money = new Money();
     money.setSystem(TransformerConstants.CODING_MONEY);
     money.setCode(TransformerConstants.CODED_MONEY_USD);
 
-    if (amountValue.get() instanceof BigDecimal) money.setValue((BigDecimal) amountValue.get());
-    else throw new BadCodeMonkeyException();
-
+    if (amountValue.get() instanceof BigDecimal) {
+      money.setValue((BigDecimal) amountValue.get());
+    } else {
+      throw new BadCodeMonkeyException();
+    }
     return money;
   }
 
@@ -286,8 +242,9 @@ public final class TransformerUtils {
                     isCodeInConcept(
                         bb.getCategory(), benefitCategory.getSystem(), benefitCategory.toCode()))
             .findAny();
-    if (matchingBenefitBalance.isPresent()) return matchingBenefitBalance.get();
-
+    if (matchingBenefitBalance.isPresent()) {
+      return matchingBenefitBalance.get();
+    }
     CodeableConcept benefitCategoryConcept = new CodeableConcept();
     benefitCategoryConcept
         .addCoding()
@@ -380,9 +337,9 @@ public final class TransformerUtils {
             .filter(d -> d.getDiagnosis() instanceof CodeableConcept)
             .filter(d -> diagnosis.isContainedIn((CodeableConcept) d.getDiagnosis()))
             .findAny();
-    if (existingDiagnosis.isPresent())
+    if (existingDiagnosis.isPresent()) {
       return existingDiagnosis.get().getSequenceElement().getValue();
-
+    }
     DiagnosisComponent diagnosisComponent =
         new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
     diagnosisComponent.setDiagnosis(diagnosis.toCodeableConcept());
@@ -442,11 +399,12 @@ public final class TransformerUtils {
       String codingCode) {
     IBaseExtension<?, ?> extension = fhirElement.addExtension();
     extension.setUrl(extensionUrl);
-    if (codingDisplay == null)
+    if (codingDisplay == null) {
       extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
-    else
+    } else {
       extension.setValue(
           new Coding().setSystem(codingSystem).setCode(codingCode).setDisplay(codingDisplay));
+    }
   }
 
   /**
@@ -615,16 +573,16 @@ public final class TransformerUtils {
                         procedure.getFhirSystem(),
                         procedure.getCode()))
             .findAny();
-    if (existingProcedure.isPresent())
+    if (existingProcedure.isPresent()) {
       return existingProcedure.get().getSequenceElement().getValue();
-
+    }
     ProcedureComponent procedureComponent =
         new ProcedureComponent().setSequence(eob.getProcedure().size() + 1);
     procedureComponent.setProcedure(
         createCodeableConcept(
             procedure.getFhirSystem(),
             null,
-            retrieveProcedureCodeDisplay(procedure.getCode()),
+            CommonTransformerUtils.retrieveProcedureCodeDisplay(procedure.getCode()),
             procedure.getCode()));
     if (procedure.getProcedureDate().isPresent()) {
       procedureComponent.setDate(convertToDate(procedure.getProcedureDate().get()));
@@ -632,38 +590,6 @@ public final class TransformerUtils {
 
     eob.getProcedure().add(procedureComponent);
     return procedureComponent.getSequenceElement().getValue();
-  }
-
-  /**
-   * Builds an id for an {@link ExplanationOfBenefit}.
-   *
-   * <p>Internally BFD treats claimId as a Long (db bigint); however, within FHIR, an Identifier has
-   * a data type of StringType that does not constrain itself to numeric. So this convenience method
-   * will continue to exist as a means to create a {@link ExplanationOfBenefit#getId()} whose claim
-   * ID is not numeric. This non-numeric handling may be used in integration tests to trigger {@link
-   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
-   *
-   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
-   * @param claimId the <code>claimId</code> field value (e.g. from {@link
-   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
-   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
-   *     </code> value
-   */
-  public static String buildEobId(ClaimType claimType, String claimId) {
-    return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
-  }
-
-  /**
-   * Builds an id for an {@link ExplanationOfBenefit}.
-   *
-   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
-   * @param claimId the <code>claimId</code> field value (e.g. from {@link
-   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
-   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>
-   *     claimId     </code> value
-   */
-  public static String buildEobId(ClaimType claimType, Long claimId) {
-    return String.format("%s-%d", claimType.name().toLowerCase(), claimId);
   }
 
   /**
@@ -699,86 +625,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * Builds a patient id from a {@link Beneficiary}.
-   *
-   * @param beneficiary the {@link Beneficiary} to calculate the {@link Patient#getId()} value for
-   * @return the {@link Patient#getId()} value that will be used for the specified {@link
-   *     Beneficiary}
-   */
-  public static IdDt buildPatientId(Beneficiary beneficiary) {
-    return buildPatientId(beneficiary.getBeneficiaryId());
-  }
-
-  /**
-   * Builds a patient id from a beneficiary id.
-   *
-   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} to calculate the {@link
-   *     Patient#getId()} value for
-   * @return the {@link Patient#getId()} value that will be used for the specified {@link
-   *     Beneficiary}
-   */
-  public static IdDt buildPatientId(Long beneficiaryId) {
-    return new IdDt(Patient.class.getSimpleName(), String.valueOf(beneficiaryId));
-  }
-
-  /**
-   * Builds a patient id from a {@link Beneficiary} and a {@link MedicareSegment}.
-   *
-   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
-   * @param beneficiary the {@link Beneficiary} to compute a {@link Coverage#getId()} for
-   * @return the {@link Coverage#getId()} value to use for the specified values
-   */
-  public static IdDt buildCoverageId(MedicareSegment medicareSegment, Beneficiary beneficiary) {
-    return buildCoverageId(medicareSegment, beneficiary.getBeneficiaryId());
-  }
-
-  /**
-   * Builds a patient id from a beneficiary id and a {@link MedicareSegment}.
-   *
-   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
-   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
-   *     Coverage#getId()} for
-   * @return the {@link Coverage#getId()} value to use for the specified values
-   */
-  public static IdDt buildCoverageId(MedicareSegment medicareSegment, Long beneficiaryId) {
-    return new IdDt(
-        Coverage.class.getSimpleName(),
-        String.format("%s-%d", medicareSegment.getUrlPrefix(), beneficiaryId));
-  }
-
-  /**
-   * Internally BFD treats beneficiaryId as a Long (db bigint); however, within FHIR, an {@link
-   * ca.uhn.fhir.model.primitive.IdDt} does not constrain itself to numeric. So this convenience
-   * method will continue to exist as a means to create a non-numeric IdDt. This non-numeric
-   * handling may be used in integration tests to trigger {@link
-   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
-   *
-   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
-   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
-   *     Coverage#getId()} for
-   * @return the {@link Coverage#getId()} value to use for the specified values
-   */
-  public static IdDt buildCoverageId(MedicareSegment medicareSegment, String beneficiaryId) {
-    return new IdDt(
-        Coverage.class.getSimpleName(),
-        String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
-  }
-
-  /**
-   * Converts a {@link LocalDate} to a {@link Date} using the system timezone.
-   *
-   * <p>We use the system TZ here to ensure that the date doesn't shift at all, as FHIR will just
-   * use this as an unzoned Date (I think, and if not, it's almost certainly using the same TZ as
-   * this system).
-   *
-   * @param localDate the {@link LocalDate} to convert
-   * @return a {@link Date} version of the specified {@link LocalDate}
-   */
-  static Date convertToDate(LocalDate localDate) {
-    return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-  }
-
-  /**
    * Creates a {@link CodeableConcept} from the specified system and code.
    *
    * @param codingSystem the {@link Coding#getSystem()} to use
@@ -802,8 +648,12 @@ public final class TransformerUtils {
       String codingSystem, String codingVersion, String codingDisplay, String codingCode) {
     CodeableConcept codeableConcept = new CodeableConcept();
     Coding coding = codeableConcept.addCoding().setSystem(codingSystem).setCode(codingCode);
-    if (codingVersion != null) coding.setVersion(codingVersion);
-    if (codingDisplay != null) coding.setDisplay(codingDisplay);
+    if (codingVersion != null) {
+      coding.setVersion(codingVersion);
+    }
+    if (codingDisplay != null) {
+      coding.setDisplay(codingDisplay);
+    }
     return codeableConcept;
   }
 
@@ -820,7 +670,7 @@ public final class TransformerUtils {
 
     return new Reference()
         .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
-        .setDisplay(retrieveNpiCodeDisplay(identifierValue));
+        .setDisplay(CommonTransformerUtils.retrieveNpiCodeDisplay(identifierValue));
   }
 
   /**
@@ -868,7 +718,7 @@ public final class TransformerUtils {
                 .setSystem(identifierType.getSystem())
                 .setValue(identifierValue)
                 .setType(codeableConcept))
-        .setDisplay(retrieveNpiCodeDisplay(identifierValue));
+        .setDisplay(CommonTransformerUtils.retrieveNpiCodeDisplay(identifierValue));
   }
 
   /**
@@ -878,7 +728,9 @@ public final class TransformerUtils {
    *     upsertSharedData has been run
    */
   static Reference createReferenceToCms() {
-    return new Reference("Organization?name=" + urlEncode(TransformerConstants.COVERAGE_ISSUER));
+    return new Reference(
+        "Organization?name="
+            + CommonTransformerUtils.urlEncode(TransformerConstants.COVERAGE_ISSUER));
   }
 
   /**
@@ -928,10 +780,10 @@ public final class TransformerUtils {
    */
   static Extension createExtensionIdentifier(
       CcwCodebookInterface ccwVariable, Optional<String> identifierValue) {
-    if (identifierValue.isEmpty()) throw new IllegalArgumentException();
-
+    if (identifierValue.isEmpty()) {
+      throw new IllegalArgumentException();
+    }
     Identifier identifier = createIdentifier(ccwVariable, identifierValue.get());
-
     String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, identifier);
 
@@ -961,8 +813,9 @@ public final class TransformerUtils {
    * @return the output {@link Identifier}
    */
   static Identifier createIdentifier(CcwCodebookInterface ccwVariable, String identifierValue) {
-    if (identifierValue == null) throw new IllegalArgumentException();
-
+    if (identifierValue == null) {
+      throw new IllegalArgumentException();
+    }
     Identifier identifier =
         new Identifier()
             .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
@@ -979,8 +832,9 @@ public final class TransformerUtils {
    * @return the output {@link Identifier}
    */
   static Identifier createIdentifier(String systemUrl, String identifierValue) {
-    if (identifierValue == null) throw new IllegalArgumentException();
-
+    if (identifierValue == null) {
+      throw new IllegalArgumentException();
+    }
     Identifier identifier = new Identifier().setSystem(systemUrl).setValue(identifierValue);
     return identifier;
   }
@@ -1023,13 +877,15 @@ public final class TransformerUtils {
    */
   static Extension createExtensionQuantity(
       CcwCodebookInterface ccwVariable, Optional<? extends Number> quantityValue) {
-    if (!quantityValue.isPresent()) throw new IllegalArgumentException();
-
+    if (!quantityValue.isPresent()) {
+      throw new IllegalArgumentException();
+    }
     Quantity quantity;
-    if (quantityValue.get() instanceof BigDecimal)
+    if (quantityValue.get() instanceof BigDecimal) {
       quantity = new Quantity().setValue((BigDecimal) quantityValue.get());
-    else throw new BadCodeMonkeyException();
-
+    } else {
+      throw new BadCodeMonkeyException();
+    }
     String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, quantity);
 
@@ -1063,20 +919,26 @@ public final class TransformerUtils {
       Optional<?> unitCode,
       IAnyResource rootResource,
       Quantity quantity) {
-    if (!unitCode.isPresent()) return;
-
+    if (!unitCode.isPresent()) {
+      return;
+    }
     quantity.setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable));
 
     String unitCodeString;
-    if (unitCode.get() instanceof String) unitCodeString = (String) unitCode.get();
-    else if (unitCode.get() instanceof Character)
+    if (unitCode.get() instanceof String) {
+      unitCodeString = (String) unitCode.get();
+    } else if (unitCode.get() instanceof Character) {
       unitCodeString = ((Character) unitCode.get()).toString();
-    else throw new IllegalArgumentException();
-
+    } else {
+      throw new IllegalArgumentException();
+    }
     quantity.setCode(unitCodeString);
 
-    Optional<String> unit = calculateCodingDisplay(rootResource, ccwVariable, unitCodeString);
-    if (unit.isPresent()) quantity.setUnit(unit.get());
+    Optional<String> unit =
+        CommonTransformerUtils.calculateCodingDisplay(rootResource, ccwVariable, unitCodeString);
+    if (unit.isPresent()) {
+      quantity.setUnit(unit.get());
+    }
   }
 
   /**
@@ -1091,10 +953,10 @@ public final class TransformerUtils {
    */
   static Extension createExtensionCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
-    if (code.isEmpty()) throw new IllegalArgumentException();
-
+    if (code.isEmpty()) {
+      throw new IllegalArgumentException();
+    }
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
-
     String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
 
     return new Extension(extensionUrl, coding);
@@ -1116,10 +978,10 @@ public final class TransformerUtils {
       CcwCodebookInterface ccwVariable,
       String yearMonth,
       Optional<?> code) {
-    if (!code.isPresent()) throw new IllegalArgumentException();
-
+    if (!code.isPresent()) {
+      throw new IllegalArgumentException();
+    }
     Coding coding = createCoding(rootResource, ccwVariable, yearMonth, code.get());
-
     String extensionUrl =
         String.format("%s/%s", CCWUtils.calculateVariableReferenceUrl(ccwVariable), yearMonth);
     Extension extension = new Extension(extensionUrl, coding);
@@ -1156,10 +1018,10 @@ public final class TransformerUtils {
    */
   static CodeableConcept createCodeableConcept(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
-    if (!code.isPresent()) throw new IllegalArgumentException();
-
+    if (!code.isPresent()) {
+      throw new IllegalArgumentException();
+    }
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
-
     CodeableConcept concept = new CodeableConcept();
     concept.addCoding(coding);
 
@@ -1220,16 +1082,19 @@ public final class TransformerUtils {
      * This if-else block is the price to be paid for that, though.
      */
     String codeString;
-    if (code instanceof Character) codeString = ((Character) code).toString();
-    else if (code instanceof String) codeString = code.toString().trim();
-    else throw new BadCodeMonkeyException("Unsupported: " + code);
-
+    if (code instanceof Character) {
+      codeString = ((Character) code).toString();
+    } else if (code instanceof String) {
+      codeString = code.toString().trim();
+    } else {
+      throw new BadCodeMonkeyException("Unsupported: " + code);
+    }
     String system = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
-
-    String display;
-    if (ccwVariable.getVariable().getValueGroups().isPresent())
-      display = calculateCodingDisplay(rootResource, ccwVariable, codeString).orElse(null);
-    else display = null;
+    String display =
+        (ccwVariable.getVariable().getValueGroups().isPresent())
+            ? CommonTransformerUtils.calculateCodingDisplay(rootResource, ccwVariable, codeString)
+                .orElse(null)
+            : null;
 
     return new Coding(system, codeString, display);
   }
@@ -1252,16 +1117,20 @@ public final class TransformerUtils {
      * This if-else block is the price to be paid for that, though.
      */
     String codeString;
-    if (code instanceof Character) codeString = ((Character) code).toString();
-    else if (code instanceof String) codeString = code.toString().trim();
-    else throw new BadCodeMonkeyException("Unsupported: " + code);
+    if (code instanceof Character) {
+      codeString = ((Character) code).toString();
+    } else if (code instanceof String) {
+      codeString = code.toString().trim();
+    } else {
+      throw new BadCodeMonkeyException("Unsupported: " + code);
+    }
 
     String system = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
-
-    String display;
-    if (ccwVariable.getVariable().getValueGroups().isPresent())
-      display = calculateCodingDisplay(rootResource, ccwVariable, codeString).orElse(null);
-    else display = null;
+    String display =
+        (ccwVariable.getVariable().getValueGroups().isPresent())
+            ? CommonTransformerUtils.calculateCodingDisplay(rootResource, ccwVariable, codeString)
+                .orElse(null)
+            : null;
 
     return new Coding(system, codeString, display);
   }
@@ -1332,95 +1201,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * Calculates the {@link Coding#getDisplay()} value to use for the specified {@link
-   * CcwCodebookInterface} and {@link Coding#getCode()}, or {@link Optional#empty()} if no matching
-   * display value could be determined.
-   *
-   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
-   *     be contained in
-   * @param ccwVariable the {@link CcwCodebookInterface} being coded
-   * @param code the FHIR {@link Coding#getCode()} value to determine a corresponding {@link
-   *     Coding#getDisplay()} value for
-   * @return the {@link Coding#getDisplay()} value to use for the specified {@link
-   *     CcwCodebookInterface} and {@link Coding#getCode()}, or {@link Optional#empty()} if no
-   *     matching display value could be determined
-   */
-  private static Optional<String> calculateCodingDisplay(
-      IAnyResource rootResource, CcwCodebookInterface ccwVariable, String code) {
-    if (rootResource == null) throw new IllegalArgumentException();
-    if (ccwVariable == null) throw new IllegalArgumentException();
-    if (code == null) throw new IllegalArgumentException();
-    if (!ccwVariable.getVariable().getValueGroups().isPresent())
-      throw new BadCodeMonkeyException("No display values for Variable: " + ccwVariable);
-
-    /*
-     * We know that the specified CCW Variable is coded, but there's no guarantee
-     * that the Coding's
-     * code matches one of the known/allowed Variable values: data is messy. When
-     * that happens, we
-     * log the event and return normally. The log event will at least allow for
-     * further
-     * investigation, if warranted. Also, there's a chance that the CCW Variable
-     * data itself is
-     * messy, and that the Coding's code matches more than one value -- we just log
-     * those events,
-     * too.
-     */
-    List<Value> matchingVariableValues =
-        ccwVariable.getVariable().getValueGroups().get().stream()
-            .flatMap(g -> g.getValues().stream())
-            .filter(v -> v.getCode().equals(code))
-            .collect(Collectors.toList());
-    if (matchingVariableValues.size() == 1) {
-      return Optional.of(matchingVariableValues.get(0).getDescription());
-    } else if (matchingVariableValues.isEmpty()) {
-      if (!codebookLookupMissingFailures.contains(ccwVariable)) {
-        // Note: The race condition here (from concurrent requests) is harmless.
-        codebookLookupMissingFailures.add(ccwVariable);
-        if (ccwVariable instanceof CcwCodebookVariable) {
-          LOGGER.info(
-              "No display value match found for {}.{} in resource '{}/{}'.",
-              CcwCodebookVariable.class.getSimpleName(),
-              ccwVariable.name(),
-              rootResource.getClass().getSimpleName(),
-              rootResource.getId());
-        } else {
-          LOGGER.info(
-              "No display value match found for {}.{} in resource '{}/{}'.",
-              CcwCodebookMissingVariable.class.getSimpleName(),
-              ccwVariable.name(),
-              rootResource.getClass().getSimpleName(),
-              rootResource.getId());
-        }
-      }
-      return Optional.empty();
-    } else if (matchingVariableValues.size() > 1) {
-      if (!codebookLookupDuplicateFailures.contains(ccwVariable)) {
-        // Note: The race condition here (from concurrent requests) is harmless.
-        codebookLookupDuplicateFailures.add(ccwVariable);
-        if (ccwVariable instanceof CcwCodebookVariable) {
-          LOGGER.info(
-              "Multiple display value matches found for {}.{} in resource '{}/{}'.",
-              CcwCodebookVariable.class.getSimpleName(),
-              ccwVariable.name(),
-              rootResource.getClass().getSimpleName(),
-              rootResource.getId());
-        } else {
-          LOGGER.info(
-              "Multiple display value matches found for {}.{} in resource '{}/{}'.",
-              CcwCodebookMissingVariable.class.getSimpleName(),
-              ccwVariable.name(),
-              rootResource.getClass().getSimpleName(),
-              rootResource.getId());
-        }
-      }
-      return Optional.empty();
-    } else {
-      throw new BadCodeMonkeyException();
-    }
-  }
-
-  /**
    * Creates a {@link Reference} to a coverage resource.
    *
    * @param beneficiaryPatientId the bene ID value for the {@link Coverage#getBeneficiary()} value
@@ -1429,7 +1209,8 @@ public final class TransformerUtils {
    * @return a {@link Reference} to the {@link Coverage} resource
    */
   static Reference referenceCoverage(Long beneficiaryPatientId, MedicareSegment coverageType) {
-    return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
+    return new Reference(
+        CommonTransformerUtils.buildCoverageId(coverageType, beneficiaryPatientId));
   }
 
   /**
@@ -1484,51 +1265,6 @@ public final class TransformerUtils {
    */
   static void setPeriodStart(Period period, LocalDate date) {
     period.setStart(convertToDate(date), TemporalPrecisionEnum.DAY);
-  }
-
-  /**
-   * Creates a url-encoded version of the specified text.
-   *
-   * @param urlText the URL or URL portion to be encoded
-   * @return a URL-encoded version of the specified text
-   */
-  static String urlEncode(String urlText) {
-    try {
-      return URLEncoder.encode(urlText, StandardCharsets.UTF_8.name());
-    } catch (UnsupportedEncodingException e) {
-      throw new BadCodeMonkeyException(e);
-    }
-  }
-
-  /**
-   * Validate the from/thru dates to ensure the from date is before or the same as the thru date.
-   *
-   * @param dateFrom start date {@link LocalDate}
-   * @param dateThrough through date {@link LocalDate} to verify
-   */
-  static void validatePeriodDates(LocalDate dateFrom, LocalDate dateThrough) {
-    if (dateFrom == null) return;
-    if (dateThrough == null) return;
-    // FIXME see CBBD-236 (ETL service fails on some Hospice claims "From
-    // date is after the Through Date")
-    // We are seeing this scenario in production where the from date is
-    // after the through date so we are just logging the error for now.
-    if (dateFrom.isAfter(dateThrough))
-      LOGGER.debug(
-          String.format(
-              "Error - From Date '%s' is after the Through Date '%s'", dateFrom, dateThrough));
-  }
-
-  /**
-   * Validate the from/thru dates to ensure the from date is before or the same as the thru date.
-   *
-   * @param dateFrom the date from
-   * @param dateThrough the date through
-   */
-  static void validatePeriodDates(Optional<LocalDate> dateFrom, Optional<LocalDate> dateThrough) {
-    if (!dateFrom.isPresent()) return;
-    if (!dateThrough.isPresent()) return;
-    validatePeriodDates(dateFrom.get(), dateThrough.get());
   }
 
   /**
@@ -1692,18 +1428,18 @@ public final class TransformerUtils {
 
     // noncoveredStayFromDate & noncoveredStayThroughDate
     if (noncoveredStayFromDate.isPresent() || noncoveredStayThroughDate.isPresent()) {
-      TransformerUtils.validatePeriodDates(noncoveredStayFromDate, noncoveredStayThroughDate);
+      CommonTransformerUtils.validatePeriodDates(noncoveredStayFromDate, noncoveredStayThroughDate);
       SupportingInformationComponent nchVrfdNcvrdStayInfo =
           TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT);
       Period nchVrfdNcvrdStayPeriod = new Period();
-      if (noncoveredStayFromDate.isPresent())
+      if (noncoveredStayFromDate.isPresent()) {
         nchVrfdNcvrdStayPeriod.setStart(
-            TransformerUtils.convertToDate((noncoveredStayFromDate.get())),
-            TemporalPrecisionEnum.DAY);
-      if (noncoveredStayThroughDate.isPresent())
+            convertToDate((noncoveredStayFromDate.get())), TemporalPrecisionEnum.DAY);
+      }
+      if (noncoveredStayThroughDate.isPresent()) {
         nchVrfdNcvrdStayPeriod.setEnd(
-            TransformerUtils.convertToDate((noncoveredStayThroughDate.get())),
-            TemporalPrecisionEnum.DAY);
+            convertToDate((noncoveredStayThroughDate.get())), TemporalPrecisionEnum.DAY);
+      }
       nchVrfdNcvrdStayInfo.setTiming(nchVrfdNcvrdStayPeriod);
     }
 
@@ -1712,7 +1448,7 @@ public final class TransformerUtils {
       SupportingInformationComponent nchActvOrCvrdLvlCareThruInfo =
           TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_ACTV_OR_CVRD_LVL_CARE_THRU);
       nchActvOrCvrdLvlCareThruInfo.setTiming(
-          new DateType(TransformerUtils.convertToDate(coveredCareThroughDate.get())));
+          new DateType(convertToDate(coveredCareThroughDate.get())));
     }
 
     // medicareBenefitsExhaustedDate
@@ -1720,7 +1456,7 @@ public final class TransformerUtils {
       SupportingInformationComponent nchBeneMdcrBnftsExhtdDtIInfo =
           TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I);
       nchBeneMdcrBnftsExhtdDtIInfo.setTiming(
-          new DateType(TransformerUtils.convertToDate(medicareBenefitsExhaustedDate.get())));
+          new DateType(convertToDate(medicareBenefitsExhaustedDate.get())));
     }
 
     // diagnosisRelatedGroupCd
@@ -1839,12 +1575,13 @@ public final class TransformerUtils {
       Optional<BigDecimal> paymentAmount,
       char finalAction) {
 
-    eob.setId(buildEobId(claimType, claimId));
+    eob.setId(CommonTransformerUtils.buildEobId(claimType, claimId));
 
-    if (claimType.equals(ClaimType.PDE))
+    if (claimType.equals(ClaimType.PDE)) {
       eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
-    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
-
+    } else {
+      eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
+    }
     eob.addIdentifier()
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
         .setValue(claimGroupId);
@@ -1864,7 +1601,7 @@ public final class TransformerUtils {
     }
 
     if (dateFrom.isPresent()) {
-      validatePeriodDates(dateFrom, dateThrough);
+      CommonTransformerUtils.validatePeriodDates(dateFrom, dateThrough);
       setPeriodStart(eob.getBillablePeriod(), dateFrom.get());
       setPeriodEnd(eob.getBillablePeriod(), dateThrough.get());
     }
@@ -1882,7 +1619,7 @@ public final class TransformerUtils {
    */
   static void mapEobWeeklyProcessDate(ExplanationOfBenefit eob, LocalDate weeklyProcessLocalDate) {
     TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_WKLY_PROC_DT)
-        .setTiming(new DateType(TransformerUtils.convertToDate(weeklyProcessLocalDate)));
+        .setTiming(new DateType(convertToDate(weeklyProcessLocalDate)));
   }
 
   /**
@@ -2052,7 +1789,7 @@ public final class TransformerUtils {
     }
 
     if (firstExpenseDate.isPresent() && lastExpenseDate.isPresent()) {
-      validatePeriodDates(firstExpenseDate, lastExpenseDate);
+      CommonTransformerUtils.validatePeriodDates(firstExpenseDate, lastExpenseDate);
       item.setServiced(
           new Period()
               .setStart((convertToDate(firstExpenseDate.get())), TemporalPrecisionEnum.DAY)
@@ -2063,10 +1800,10 @@ public final class TransformerUtils {
     adjudicationForPayment
         .setCategory(createAdjudicationCategory(CcwCodebookVariable.LINE_NCH_PMT_AMT))
         .setAmount(createMoney(paymentAmount));
-    if (paymentCode.isPresent())
+    if (paymentCode.isPresent()) {
       adjudicationForPayment.addExtension(
           createExtensionCoding(eob, CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode));
-
+    }
     item.addAdjudication()
         .setCategory(createAdjudicationCategory(CcwCodebookVariable.LINE_BENE_PMT_AMT))
         .setAmount(createMoney(beneficiaryPaymentAmount));
@@ -2103,19 +1840,20 @@ public final class TransformerUtils {
             TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_ALOWD_CHRG_AMT))
         .setAmount(createMoney(allowedChargeAmount));
 
-    if (processingIndicatorCode.isPresent())
+    if (processingIndicatorCode.isPresent()) {
       item.addAdjudication(
           createAdjudicationWithReason(
               eob, CcwCodebookVariable.LINE_PRCSG_IND_CD, processingIndicatorCode));
-
-    if (serviceDeductibleCode.isPresent())
+    }
+    if (serviceDeductibleCode.isPresent()) {
       item.addExtension(
           createExtensionCoding(
               eob, CcwCodebookVariable.LINE_SERVICE_DEDUCTIBLE, serviceDeductibleCode));
-
+    }
     Optional<Diagnosis> lineDiagnosis = Diagnosis.from(diagnosisCode, diagnosisCodeVersion);
-    if (lineDiagnosis.isPresent()) addDiagnosisLink(eob, item, lineDiagnosis.get());
-
+    if (lineDiagnosis.isPresent()) {
+      addDiagnosisLink(eob, item, lineDiagnosis.get());
+    }
     if (hctHgbTestTypeCode.isPresent()) {
       Observation hctHgbObservation = new Observation();
       hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
@@ -2445,16 +2183,13 @@ public final class TransformerUtils {
       Optional<BigDecimal> utilizedDays) {
 
     if (claimAdmissionDate.isPresent() || beneficiaryDischargeDate.isPresent()) {
-      TransformerUtils.validatePeriodDates(claimAdmissionDate, beneficiaryDischargeDate);
+      CommonTransformerUtils.validatePeriodDates(claimAdmissionDate, beneficiaryDischargeDate);
       Period period = new Period();
       if (claimAdmissionDate.isPresent()) {
-        period.setStart(
-            TransformerUtils.convertToDate(claimAdmissionDate.get()), TemporalPrecisionEnum.DAY);
+        period.setStart(convertToDate(claimAdmissionDate.get()), TemporalPrecisionEnum.DAY);
       }
       if (beneficiaryDischargeDate.isPresent()) {
-        period.setEnd(
-            TransformerUtils.convertToDate(beneficiaryDischargeDate.get()),
-            TemporalPrecisionEnum.DAY);
+        period.setEnd(convertToDate(beneficiaryDischargeDate.get()), TemporalPrecisionEnum.DAY);
       }
 
       eob.setHospitalization(period);
@@ -2527,10 +2262,12 @@ public final class TransformerUtils {
             ? Optional.empty()
             : presentOnAdms.getOrDefault(
                 String.format("diagnosis%sPresentOnAdmissionCode", substitution), Optional.empty());
-    if (presentOnAdm.isEmpty() && ccw.isEmpty() && label.isEmpty())
+    if (presentOnAdm.isEmpty() && ccw.isEmpty() && label.isEmpty()) {
       return Diagnosis.from(code, codeVersion);
-    if (presentOnAdm.isEmpty() && ccw.isEmpty())
+    }
+    if (presentOnAdm.isEmpty() && ccw.isEmpty()) {
       return Diagnosis.from(code, codeVersion, label.get());
+    }
     return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, label.get());
   }
 
@@ -2746,11 +2483,14 @@ public final class TransformerUtils {
         hcpcs.isPresent()
             ? createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcs.get())
             : null;
-    if (hcpcsConcept != null) item.setService(hcpcsConcept);
+    if (hcpcsConcept != null) {
+      item.setService(hcpcsConcept);
+    }
     List<CodeableConcept> hcpcsModifierConcepts = new ArrayList<>(4);
     for (Optional<String> hcpcsModifier : hcpcsModifiers) {
-      if (!hcpcsModifier.isPresent()) continue;
-
+      if (!hcpcsModifier.isPresent()) {
+        continue;
+      }
       CodeableConcept hcpcsModifierConcept =
           createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsModifier.get());
       hcpcsModifierConcepts.add(hcpcsModifierConcept);
@@ -2767,112 +2507,6 @@ public final class TransformerUtils {
               // Note: Only CARRIER and DME claims have the year/version field.
               concept.getCodingFirstRep().setVersion(hcpcsYear.get().toString());
             });
-  }
-
-  /**
-   * Retrieves the Diagnosis display value from a Diagnosis code look up file.
-   *
-   * @param icdCode Diagnosis code
-   * @return the icd code display
-   */
-  public static String retrieveIcdCodeDisplay(String icdCode) {
-
-    if (icdCode.isEmpty()) return null;
-
-    /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the
-     * race and
-     * reinitialization is harmless other than maybe wasting a bit of time.
-     */
-    // read the entire ICD file the first time and put in a Map
-    if (icdMap == null) {
-      icdMap = readIcdCodeFile();
-    }
-
-    if (icdMap.containsKey(icdCode.toUpperCase())) {
-      String icdCodeDisplay = icdMap.get(icdCode);
-      return icdCodeDisplay;
-    }
-
-    // log which ICD codes we couldn't find a match for in our downloaded ICD file
-    if (!icdCodeLookupMissingFailures.contains(icdCode)) {
-      icdCodeLookupMissingFailures.add(icdCode);
-      LOGGER.info(
-          "No ICD code display value match found for ICD code {} in resource {}.",
-          icdCode,
-          "DGNS_CD.txt");
-    }
-
-    return null;
-  }
-
-  /**
-   * Reads ALL the ICD codes and display values from the DGNS_CD.txt file. Refer to the README file
-   * in the src/main/resources directory.
-   *
-   * @return the map of idc codes
-   */
-  private static Map<String, String> readIcdCodeFile() {
-    Map<String, String> icdDiagnosisMap = new HashMap<String, String>();
-
-    try (final InputStream icdCodeDisplayStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream("DGNS_CD.txt");
-        final BufferedReader icdCodesIn =
-            new BufferedReader(new InputStreamReader(icdCodeDisplayStream))) {
-      /*
-       * We want to extract the ICD Diagnosis codes and display values and put in a
-       * map for easy
-       * retrieval to get the display value icdColumns[1] is DGNS_DESC(i.e. 7840 code
-       * is HEADACHE
-       * description)
-       */
-      String line = "";
-      icdCodesIn.readLine();
-      while ((line = icdCodesIn.readLine()) != null) {
-        String[] icdColumns = line.split("\t");
-        icdDiagnosisMap.put(icdColumns[0], icdColumns[1]);
-      }
-      icdCodesIn.close();
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read ICD code data.", e);
-    }
-
-    return icdDiagnosisMap;
-  }
-
-  /**
-   * Retrieves the NPI display value from an NPI code look up file.
-   *
-   * @param npiCode NPI code
-   * @return the npi code display
-   */
-  public static String retrieveNpiCodeDisplay(String npiCode) {
-
-    if (npiCode.isEmpty()) return null;
-
-    /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the
-     * race and
-     * reinitialization is harmless other than maybe wasting a bit of time.
-     */
-    // read the entire NPI file the first time and put in a Map
-    if (npiMap == null) {
-      npiMap = readNpiCodeFile();
-    }
-
-    if (npiMap.containsKey(npiCode.toUpperCase())) {
-      String npiCodeDisplay = npiMap.get(npiCode);
-      return npiCodeDisplay;
-    }
-
-    // log which NPI codes we couldn't find a match for in our downloaded NPI file
-    npiCodeLookupMissingFailures.add(npiCode);
-
-    return null;
   }
 
   /**
@@ -3022,141 +2656,10 @@ public final class TransformerUtils {
     }
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
-
     CodeableConcept concept = new CodeableConcept();
     concept.addCoding(coding);
 
     careTeam.setQualification(concept);
-  }
-
-  /**
-   * Reads ALL the NPI codes and display values from the NPI_Coded_Display_Values_Tab.txt file.
-   * Refer to the README file in the src/main/resources directory.
-   *
-   * @return the map of npi codes
-   */
-  private static Map<String, String> readNpiCodeFile() {
-
-    Map<String, String> npiCodeMap = new HashMap<String, String>();
-    try (final InputStream npiCodeDisplayStream =
-            Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream("NPI_Coded_Display_Values_Tab.txt");
-        final BufferedReader npiCodesIn =
-            new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
-      /*
-       * We want to extract the NPI codes and display values and put in a map for easy
-       * retrieval to
-       * get the display value-- npiColumns[0] is the NPI Code, npiColumns[4] is the
-       * NPI
-       * Organization Code, npiColumns[8] is the NPI provider name prefix,
-       * npiColumns[6] is the NPI
-       * provider first name, npiColumns[7] is the NPI provider middle name,
-       * npiColumns[5] is the
-       * NPI provider last name, npiColumns[9] is the NPI provider suffix name,
-       * npiColumns[10] is
-       * the NPI provider credential.
-       */
-      String line = "";
-      npiCodesIn.readLine();
-      while ((line = npiCodesIn.readLine()) != null) {
-        String[] npiColumns = line.split("\t");
-        if (npiColumns[4].isEmpty()) {
-          String npiDisplayName =
-              npiColumns[8].trim()
-                  + " "
-                  + npiColumns[6].trim()
-                  + " "
-                  + npiColumns[7].trim()
-                  + " "
-                  + npiColumns[5].trim()
-                  + " "
-                  + npiColumns[9].trim()
-                  + " "
-                  + npiColumns[10].trim();
-          npiCodeMap.put(npiColumns[0], npiDisplayName.replace("  ", " ").trim());
-        } else {
-          npiCodeMap.put(npiColumns[0], npiColumns[4].replace("\"", "").trim());
-        }
-      }
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read NPI code data.", e);
-    }
-    return npiCodeMap;
-  }
-
-  /**
-   * Retrieves the Procedure code and display value from a Procedure code look up file.
-   *
-   * @param procedureCode procedure code
-   * @return the procedure code display
-   */
-  public static String retrieveProcedureCodeDisplay(String procedureCode) {
-
-    if (procedureCode.isEmpty()) return null;
-
-    /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the
-     * race and
-     * reinitialization is harmless other than maybe wasting a bit of time.
-     */
-    // read the entire Procedure code file the first time and put in a Map
-    if (procedureMap == null) {
-      procedureMap = readProcedureCodeFile();
-    }
-
-    if (procedureMap.containsKey(procedureCode.toUpperCase())) {
-      String procedureCodeDisplay = procedureMap.get(procedureCode);
-      return procedureCodeDisplay;
-    }
-
-    // log which Procedure codes we couldn't find a match for in our procedure codes
-    // file
-    if (!procedureLookupMissingFailures.contains(procedureCode)) {
-      procedureLookupMissingFailures.add(procedureCode);
-      LOGGER.info(
-          "No procedure code display value match found for procedure code {} in resource {}.",
-          procedureCode,
-          "PRCDR_CD.txt");
-    }
-
-    return null;
-  }
-
-  /**
-   * Reads all the procedure codes and display values from the PRCDR_CD.txt file Refer to the README
-   * file in the src/main/resources directory.
-   *
-   * @return the map of procedure codes
-   */
-  private static Map<String, String> readProcedureCodeFile() {
-
-    Map<String, String> procedureCodeMap = new HashMap<String, String>();
-    try (final InputStream procedureCodeDisplayStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream("PRCDR_CD.txt");
-        final BufferedReader procedureCodesIn =
-            new BufferedReader(new InputStreamReader(procedureCodeDisplayStream))) {
-      /*
-       * We want to extract the procedure codes and display values and put in a map
-       * for easy
-       * retrieval to get the display value icdColumns[0] is PRCDR_CD; icdColumns[1]
-       * is
-       * PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
-       */
-      String line = "";
-      procedureCodesIn.readLine();
-      while ((line = procedureCodesIn.readLine()) != null) {
-        String[] icdColumns = line.split("\t");
-        procedureCodeMap.put(icdColumns[0], icdColumns[1]);
-      }
-      procedureCodesIn.close();
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read Procedure code data.", e);
-    }
-
-    return procedureCodeMap;
   }
 
   /**

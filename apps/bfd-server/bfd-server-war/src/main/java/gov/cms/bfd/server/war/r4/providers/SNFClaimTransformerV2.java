@@ -12,6 +12,7 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
@@ -193,13 +194,17 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
       claimGroup
           .getQualifiedStayFromDate()
           .ifPresent(
-              c -> period.setStart(TransformerUtilsV2.convertToDate(c), TemporalPrecisionEnum.DAY));
+              c ->
+                  period.setStart(
+                      CommonTransformerUtils.convertToDate(c), TemporalPrecisionEnum.DAY));
 
       // NCH_QLFYD_STAY_THRU_DT
       claimGroup
           .getQualifiedStayThroughDate()
           .ifPresent(
-              c -> period.setEnd(TransformerUtilsV2.convertToDate(c), TemporalPrecisionEnum.DAY));
+              c ->
+                  period.setEnd(
+                      CommonTransformerUtils.convertToDate(c), TemporalPrecisionEnum.DAY));
 
       // Add to EOB
       TransformerUtilsV2.addInformation(eob, CcwCodebookVariable.NCH_QLFYD_STAY_FROM_DT)
