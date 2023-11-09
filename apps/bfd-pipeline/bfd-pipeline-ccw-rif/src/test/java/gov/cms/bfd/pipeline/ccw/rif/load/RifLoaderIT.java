@@ -15,7 +15,6 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryColumn;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
@@ -109,7 +108,7 @@ public final class RifLoaderIT {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Ensure no records were skipped
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
   }
 
   /**
@@ -131,7 +130,7 @@ public final class RifLoaderIT {
         Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE.getResources()),
         options);
 
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
     // Validate bene monthly
 
     EntityManagerFactory entityManagerFactory =
@@ -189,7 +188,7 @@ public final class RifLoaderIT {
         Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_ENTRIES_SAME_BENE.getResources()),
         options);
 
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
     // Validate bene monthly
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
@@ -374,7 +373,7 @@ public final class RifLoaderIT {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
     verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
     // Ensure no records were skipped
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
@@ -700,23 +699,6 @@ public final class RifLoaderIT {
     }
   }
 
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHETIC_DATA} data. */
-  @Disabled("This test only works with a PostgreSQL database instance. It 10s or minutes to run")
-  @Test
-  public void loadSyntheticData() {
-    /*
-     * Assume.assumeTrue(
-     * String.format(
-     * "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
-     * Runtime.getRuntime().maxMemory()),
-     * Runtime.getRuntime().maxMemory() >= 4500000000L);
-     */
-    List<StaticRifResource> samples =
-        Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources());
-    loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
-    verifyRecordPrimaryKeysPresent(samples);
-  }
-
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHEA_DATA} data.
    *
@@ -736,160 +718,23 @@ public final class RifLoaderIT {
    * 2023 enrollment date and filter on expect the data is loaded to the regular database tables.
    */
   @Test
-  public void loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
+  public void loadBeneficiaryWhenInsertAnd2023EnrollmentDateExpectRecordLoaded() {
     loadSampleABeneWithEnrollmentRefYear(
-        "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT and
-   * non-2023 enrollment date and filter on expect the record is successfully loaded. A log message
-   * will be printed in this case.
-   */
-  @Test
-  public void loadBeneficiaryWhenInsertAndNon2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
-
-    loadSampleABeneWithEnrollmentRefYear(
-        "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
-   * LoadStrategy.INSERT_IDEMPOTENT is used and 2023 enrollment date and filter on expect the data
-   * is loaded to the regular database tables.
-   */
-  @Test
-  public void
-      loadBeneficiaryWhenInsertAnd2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
-    loadSampleABeneWithEnrollmentRefYear(
-        "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_IDEMPOTENT_STRATEGY));
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
-   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-2023 enrollment date and filter on expect the
-   * data is loaded to the regular database tables. A log message will be printed.
-   */
-  @Test
-  public void
-      loadBeneficiaryWhenInsertAndNon2023EnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
-
-    loadSampleABeneWithEnrollmentRefYear(
-        "2021",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_IDEMPOTENT_STRATEGY));
-
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
-   * LoadStrategy.INSERT_IDEMPOTENT is used with a {@code null} enrollment date and filter on expect
-   * the data is loaded to the regular database tables. A log message will be printed.
-   */
-  @Test
-  public void
-      loadBeneficiaryWhenInsertAndNullEnrollmentDateAndFilterOnAndIdempotentInsertStrategyExpectRecordLoaded() {
-
-    loadSampleABeneWithEnrollmentRefYear(
-        null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_IDEMPOTENT_STRATEGY),
-        false);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when UPDATE and
-   * 2023 enrollment date and filter on expect the data is loaded to the regular database tables.
-   */
-  @Test
-  public void loadBeneficiaryWhenUpdateAnd2023EnrollmentDateAndFilterOnExpectRecordLoaded() {
-
-    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-
-    loadSampleABeneWithEnrollmentRefYear(
-        "2023",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
-        true);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Verifies that {@link RifLoader} skips {@link Beneficiary} records, as expected, for <code>
-   *  UPDATE</code>s of a non-2023 {@link Beneficiary}, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is enabled.
-   */
-  @Test
-  public void loadBeneficiaryWhenUpdateAndNon2023EnrollmentDateAndFilterOnExpectRecordSkipped() {
-
-    /*
-     * First, load a bene that SHOULD be filtered out (when filtering is turned on)
-     * normally.
-     */
-    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-
-    /*
-     * Re-load that bene again as an UPDATE with filtering turned on, and verify
-     * that it was skipped.
-     */
-    loadDefaultSampleABeneData(
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
-        true);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 1);
+        "2023", CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY));
+    validateBeneficiaryCountsInDatabase(1);
   }
 
   /**
    * Verifies that {@link RifLoader} loads {@link Beneficiary} records, as expected, for <code>
-   *  UPDATE</code>s of a {@code null} {@link Beneficiary} enrollment year, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is enabled.
+   *  UPDATE</code>s of a {@link Beneficiary}.
    */
   @Test
-  public void loadBeneficiaryWhenUpdateAndNullEnrollmentDateAndFilterOnExpectRecordLoaded() {
-
-    /* First, load a bene normally. */
+  public void loadBeneficiaryWhenUpdateExpectRecordLoaded() {
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-
-    /*
-     * Re-load that bene again as an UPDATE with filtering turned on, with a null
-     * ref year, and verify that it was loaded.
-     */
-    loadSampleABeneWithEnrollmentRefYear(
-        null,
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
-        true);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
-  }
-
-  /**
-   * Verifies that {@link RifLoader} loads {@link Beneficiary} records, as expected, for <code>
-   *  UPDATE</code>s of a 2023 {@link Beneficiary}, when {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} is disabled.
-   *
-   * <p>If the filter is off, we take no special action to filter records.
-   */
-  @Test
-  public void loadBeneficiaryWhenUpdateAnd2023EnrollmentDateAndFilterOffExpectRecordLoaded() {
-    loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
 
     loadSampleABeneWithEnrollmentRefYear("2023", CcwRifLoadTestUtils.getLoadOptions(), true);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
   }
 
   /**
@@ -908,10 +753,9 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_IDEMPOTENT_STRATEGY),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY),
         stream);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
   }
 
   /**
@@ -928,22 +772,19 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         stream);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
   }
 
   /**
-   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when INSERT,
-   * filter is off, and the LoadStrategy.INSERT_IDEMPOTENT is used with a non-Beneficiary type,
-   * expect the data is loaded normally.
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data when the
+   * LoadStrategy.INSERT_IDEMPOTENT is used with a non-Beneficiary type; expect the data is loaded
+   * normally.
    */
   @Test
-  public void
-      loadNonBeneficiaryWhenInsertAndFilterOffAndIdempotentInsertStrategyExpectRecordLoaded() {
+  public void loadNonBeneficiaryWhenInsertAndIdempotentInsertStrategyExpectRecordLoaded() {
 
-    boolean FILTER_MODE_DISABLED = false;
     loadDefaultSampleABeneData(CcwRifLoadTestUtils.getLoadOptions());
     Stream<RifFile> stream =
         filterSamples(
@@ -951,9 +792,9 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     loadSample(
         "non-Bene sample",
-        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY, FILTER_MODE_DISABLED),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_IDEMPOTENT_STRATEGY),
         stream);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
   }
 
   /**
@@ -967,17 +808,16 @@ public final class RifLoaderIT {
         "non-Bene sample",
         CcwRifLoadTestUtils.getLoadOptions(),
         getStreamForFileType(RifFileType.INPATIENT));
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
 
     // Load again to test UPDATE
     Stream<RifFile> updateStream =
         editStreamToBeUpdate(getStreamForFileType(RifFileType.INPATIENT));
     loadSample(
         "non-Bene sample update",
-        CcwRifLoadTestUtils.getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-            USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
+        CcwRifLoadTestUtils.getLoadOptions(USE_INSERT_UPDATE_NON_IDEMPOTENT_STRATEGY),
         updateStream);
-    validateBeneficiaryAndSkippedCountsInDatabase(1, 0);
+    validateBeneficiaryCountsInDatabase(1);
   }
 
   /**
@@ -1231,10 +1071,8 @@ public final class RifLoaderIT {
    * Validates the database load went as expected for the normal data table and the skipped table.
    *
    * @param expectedBeneCount the expected records in normal table
-   * @param expectedSkippedCount the expected records in skipped table
    */
-  private void validateBeneficiaryAndSkippedCountsInDatabase(
-      int expectedBeneCount, int expectedSkippedCount) {
+  private void validateBeneficiaryCountsInDatabase(int expectedBeneCount) {
     EntityManagerFactory entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
@@ -1247,13 +1085,6 @@ public final class RifLoaderIT {
       beneCountQuery.select(criteriaBuilder.count(beneCountQuery.from(Beneficiary.class)));
       Long beneCount = entityManager.createQuery(beneCountQuery).getSingleResult();
       assertEquals(expectedBeneCount, beneCount, "Unexpected number of beneficiary records.");
-
-      // Count and verify the number of bene records in the DB.
-      CriteriaQuery<Long> skippedCountQuery = criteriaBuilder.createQuery(Long.class);
-      skippedCountQuery.select(
-          criteriaBuilder.count(skippedCountQuery.from(SkippedRifRecord.class)));
-      Long skippedCount = entityManager.createQuery(skippedCountQuery).getSingleResult();
-      assertEquals(expectedSkippedCount, skippedCount, "Unexpected number of skipped records.");
     } finally {
       if (entityManager != null) {
         entityManager.close();

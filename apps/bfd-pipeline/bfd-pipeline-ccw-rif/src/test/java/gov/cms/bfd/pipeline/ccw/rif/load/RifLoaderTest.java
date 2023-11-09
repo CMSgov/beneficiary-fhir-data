@@ -29,7 +29,6 @@ public final class RifLoaderTest {
         new LoadAppOptions(
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
             options.isIdempotencyRequired(),
-            false,
             new LoadAppOptions.PerformanceSettings(
                 options.getBeneficiaryPerformanceSettings().getLoaderThreads(), 100, 3),
             new LoadAppOptions.PerformanceSettings(
@@ -61,7 +60,6 @@ public final class RifLoaderTest {
         new LoadAppOptions(
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
             options.isIdempotencyRequired(),
-            false,
             new LoadAppOptions.PerformanceSettings(
                 options.getBeneficiaryPerformanceSettings().getLoaderThreads(), 100, 3),
             new LoadAppOptions.PerformanceSettings(

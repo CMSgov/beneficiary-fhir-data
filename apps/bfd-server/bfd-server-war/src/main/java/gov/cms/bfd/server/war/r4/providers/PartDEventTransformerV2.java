@@ -10,6 +10,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -146,7 +147,8 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     // PD_DT => ExplanationOfBenefit.payment.date
     if (claimGroup.getPaymentDate().isPresent()) {
-      eob.getPayment().setDate(TransformerUtilsV2.convertToDate(claimGroup.getPaymentDate().get()));
+      eob.getPayment()
+          .setDate(CommonTransformerUtils.convertToDate(claimGroup.getPaymentDate().get()));
     }
 
     ItemComponent rxItem = eob.addItem();
@@ -205,7 +207,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
     // SRVC_DT => ExplanationOfBenefit.item.servicedDate
     rxItem.setServiced(
         new DateType()
-            .setValue(TransformerUtilsV2.convertToDate(claimGroup.getPrescriptionFillDate())));
+            .setValue(CommonTransformerUtils.convertToDate(claimGroup.getPrescriptionFillDate())));
 
     /*
      * Create an adjudication for either CVRD_D_PLAN_PD_AMT or NCVRD_PLAN_PD_AMT,
