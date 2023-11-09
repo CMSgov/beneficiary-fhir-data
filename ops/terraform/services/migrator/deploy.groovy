@@ -74,7 +74,7 @@ boolean deployMigrator(Map args = [:]) {
                 "Key=Terraform,Value=False",
                 "Key=application,Value=bfd",
                 "Key=business,Value=oeda"
-            ]
+            ],
             shouldOverwrite: true
         )
 
