@@ -8,14 +8,12 @@ String getParameter(Map args = [:]) {
     awsRegion = args.awsRegion ?: 'us-east-1'
     isSensitive = args.isSensitive ?: false
 
-    echo """Sensitive Flag: ${isSensitive}"""
-
     // Construct the AWS CLI command dynamically based on isSensitive
     def awsCmd = isSensitive
             ? "aws ssm get-parameter --name ${name} --region ${awsRegion} --with-decryption --query 'Parameter.Value' --output text"
             : "aws ssm get-parameter --name ${name} --region ${awsRegion} --query 'Parameter.Value' --output text"
 
-    // Execute the AWS CLI command using a single sh step
+    // Execute the AWS CLI command
     return sh(returnStdout: true, script: awsCmd).trim()
 }
 

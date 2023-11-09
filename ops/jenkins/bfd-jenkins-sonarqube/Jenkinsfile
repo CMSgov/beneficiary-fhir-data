@@ -84,7 +84,6 @@ spec:
                 script {
                     //Retrieve Sonar Token from AWS
                    def SONAR_TOKEN = awsSsm.getParameter(parameterName: "/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key", isSensitive: true)
-                   echo """Sonar Token: ${SONAR_TOKEN}"""
                     dir ('apps') {
                         sh "mvn sonar:sonar" +
                         " -Dsonar.projectKey=${SONAR_PROJECT_KEY}" +
