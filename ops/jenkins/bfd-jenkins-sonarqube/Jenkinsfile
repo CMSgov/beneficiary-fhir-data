@@ -60,10 +60,6 @@ spec:
         defaultValue: false)
     }
     environment {
-        //Parameter Path in AWS
-        ACCESS_KEY_PATH = '/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key'
-        //Initial Value before Token is retrieved in Build Stage.
-        SONAR_TOKEN = ''
         SONAR_PROJECT_KEY = 'bfd-parent'
         SONAR_HOST_URL = 'https://sonarqube.cloud.cms.gov'
     }
@@ -82,12 +78,7 @@ spec:
                    scriptForApps.build(verboseMaven, true)
 
                    //Retrieve Sonar Token from AWS
-                    def parameterValue = sh(
-                             script: """ aws ssm get-parameter --name "${ACCESS_KEY_PATH}" --region us-east-1 --with-decryption --query 'Parameter.Value' --output text""",
-                             returnStdout: true
-                        ).trim() as String
-                    // Set the token as an environment variable
-                    SONAR_TOKEN = parameterValue
+                   env.SONAR_TOKEN = awsSsm.getParameter(parameterName: "/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key", isSensitive: true)
                 }
             }
         }
@@ -99,7 +90,7 @@ spec:
                         sh "mvn sonar:sonar" +
                         " -Dsonar.projectKey=${SONAR_PROJECT_KEY}" +
                         " -Dsonar.host.url=${SONAR_HOST_URL}" +
-                        " -Dsonar.login=${SONAR_TOKEN}" +
+                        " -Dsonar.login=${env.SONAR_TOKEN}" +
                         " -Dmaven.build.cache.enabled=false" +
                         " -DskipITs" +
                         " -DskipTests" +

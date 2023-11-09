@@ -6,7 +6,11 @@
 String getParameter(Map args = [:]) {
     name = args.parameterName
     awsRegion = args.awsRegion ?: 'us-east-1'
+    isSensitive = args.isSensitive ?: false
 
+    if(isSensitive) {
+        return sh(returnStdout: true, script: "aws ssm get-parameter --name ${name} --region ${awsRegion} --with-decryption --query 'Parameter.Value' --output text").trim()
+    }
     return sh(returnStdout: true, script: "aws ssm get-parameter --name ${name} --region ${awsRegion} --query 'Parameter.Value' --output text").trim()
 }
 
