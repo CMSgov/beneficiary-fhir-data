@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.ccw.rif.load;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import lombok.Data;
 import lombok.Getter;
@@ -23,26 +22,6 @@ public final class LoadAppOptions {
   /** If idempotency mode should be used. */
   @Getter private final boolean idempotencyRequired;
 
-  /**
-   * Special property used to filter non-2023 beneficiaries from loading, as sometimes our upstream
-   * partners have historically sent us previous years mixed with the current year, which causes
-   * issues with the database overwriting newer year data with older.
-   *
-   * <p>As part of <a href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a> and <a
-   * href="https://jira.cms.gov/browse/BFD-2265">BFD-2265</a>, we want a filtering mechanism in our
-   * loads such some {@link Beneficiary}s are temporarily skipped: only those with a {@link
-   * Beneficiary#getBeneEnrollmentReferenceYear()} of "2023" or where the reference year is {@code
-   * null} will be processed. As part of this filtering, we are implementing an assumption that no
-   * non-2023 {@code INSERT} {@link Beneficiary} records will be received, as skipping those would
-   * also require skipping their associated claims, which is additional complexity that we want to
-   * avoid. If any such records are encountered, the load will go boom. This filtering is an
-   * inelegant hack to workaround upstream data issues, and was ideally only in place very
-   * temporarily, although it's now been in place for at least a year. See the code that uses this
-   * field in {@link RifLoader} for details. This filtering is being made configurable so as not to
-   * invalidate all of our existing test coverage.
-   */
-  @Getter private final boolean filteringNonNullAndNon2023Benes;
-
   /** Settings used for loading beneficiary data. */
   @Getter private final PerformanceSettings beneficiaryPerformanceSettings;
 
@@ -54,20 +33,17 @@ public final class LoadAppOptions {
    *
    * @param idHasherConfig the value to use for {@link #idHasherConfig}
    * @param idempotencyRequired the value to use for {@link #idempotencyRequired}
-   * @param filterNon2023Benes the filter non 2023 benes
    * @param beneficiaryPerformanceSettings performance settings used for beneficiary records
    * @param claimPerformanceSettings performance settings used for claim records
    */
   public LoadAppOptions(
       IdHasher.Config idHasherConfig,
       boolean idempotencyRequired,
-      boolean filterNon2023Benes,
       PerformanceSettings beneficiaryPerformanceSettings,
       PerformanceSettings claimPerformanceSettings) {
 
     this.idHasherConfig = idHasherConfig;
     this.idempotencyRequired = idempotencyRequired;
-    this.filteringNonNullAndNon2023Benes = filterNon2023Benes;
     this.beneficiaryPerformanceSettings = beneficiaryPerformanceSettings;
     this.claimPerformanceSettings = claimPerformanceSettings;
   }
@@ -81,8 +57,6 @@ public final class LoadAppOptions {
     builder.append("***");
     builder.append(", idempotencyRequired=");
     builder.append(idempotencyRequired);
-    builder.append(", filteringNonNullAndNon2023Benes=");
-    builder.append(filteringNonNullAndNon2023Benes);
     builder.append(", beneficiaryPerformanceSettings=");
     builder.append(beneficiaryPerformanceSettings);
     builder.append(", claimPerformanceSettings=");

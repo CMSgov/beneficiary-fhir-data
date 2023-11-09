@@ -93,7 +93,6 @@ bfd:
       ccw:
         data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
         data_pipeline_ccw_rif_job_enabled: true
-        data_pipeline_filtering_non_null_and_non_2023_benes: true
         data_pipeline_idempotency_required: true
         instance_type: c6i.4xlarge
         rif_job_batch_size: 7

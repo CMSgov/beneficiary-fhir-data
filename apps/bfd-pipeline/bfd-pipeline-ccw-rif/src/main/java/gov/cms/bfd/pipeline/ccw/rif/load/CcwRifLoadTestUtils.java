@@ -35,7 +35,6 @@ public final class CcwRifLoadTestUtils {
     return new LoadAppOptions(
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         IDEMPOTENCY_REQUIRED,
-        false,
         new LoadAppOptions.PerformanceSettings(
             LoadAppOptions.DEFAULT_LOADER_THREADS,
             DEFAULT_LOAD_BATCH_SIZE,
@@ -47,34 +46,17 @@ public final class CcwRifLoadTestUtils {
   }
 
   /**
-   * Gets the load options with filtering of non 2023 benes enabled.
-   *
-   * @param idempotencyRequired if idempotency is required; affects the LoadStrategy that gets used
-   *     when loading
-   * @return Same as {@link #getLoadOptions()}, but with {@link
-   *     LoadAppOptions#filteringNonNullAndNon2023Benes} set to {@code true}. Should only be used in
-   *     those test cases looking to test that filtering capability.
-   */
-  public static LoadAppOptions getLoadOptionsWithFilteringOfNon2023BenesEnabled(
-      boolean idempotencyRequired) {
-    return getLoadOptions(idempotencyRequired, true);
-  }
-
-  /**
    * Gets the load options with filtering of non 2023 benes and idempotency strategy as input.
    *
    * @param idempotencyRequired if idempotency is required; affects the LoadStrategy that gets used
    *     when loading
-   * @param filterNon2023benes the filter non 2023 benes turned on if {@code true}
    * @return the {@link LoadAppOptions} that should be used in tests, which specifies how to connect
    *     to the database server that tests should be run against
    */
-  public static LoadAppOptions getLoadOptions(
-      boolean idempotencyRequired, boolean filterNon2023benes) {
+  public static LoadAppOptions getLoadOptions(boolean idempotencyRequired) {
     return new LoadAppOptions(
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         idempotencyRequired,
-        filterNon2023benes,
         new LoadAppOptions.PerformanceSettings(
             LoadAppOptions.DEFAULT_LOADER_THREADS,
             DEFAULT_LOAD_BATCH_SIZE,
@@ -95,7 +77,6 @@ public final class CcwRifLoadTestUtils {
     return new LoadAppOptions(
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         IDEMPOTENCY_REQUIRED,
-        false,
         new LoadAppOptions.PerformanceSettings(
             LoadAppOptions.DEFAULT_LOADER_THREADS, batchSize, DEFAULT_QUEUE_SIZE_MULTIPLE),
         new LoadAppOptions.PerformanceSettings(

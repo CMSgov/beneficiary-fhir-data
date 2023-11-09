@@ -10,7 +10,6 @@ import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
-import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
@@ -165,8 +164,7 @@ public final class PipelineTestUtils {
             LoadedBatch.class,
             LoadedFile.class,
             RdaFissClaim.class,
-            RdaFissProcCode.class,
-            SkippedRifRecord.class);
+            RdaFissProcCode.class);
 
     try (Connection connection = pipelineApplicationState.getPooledDataSource().getConnection(); ) {
       // Disable auto-commit and remember the default schema name.
