@@ -32,7 +32,6 @@ spec:
                             parameterName: "/bfd/test/common/nonsensitive/brandon_test",
                             parameterValue: "test",
                             parameterType: "String",
-                                "Key=Terraform,Value=False",
                             parameterTags: "Key=Source,Value=${JOB_NAME}",
                             shouldOverwrite: true
                         )
