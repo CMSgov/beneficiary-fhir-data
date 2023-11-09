@@ -149,13 +149,6 @@ resource "aws_s3_bucket_public_access_block" "bfd_public_test_data" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_ownership_controls" "bfd_public_test_data" {
-  bucket = aws_s3_bucket.bfd_public_test_data.id
-  rule {
-    object_ownership = "BucketOwnerEnforced"
-  }
-}
-
 resource "aws_s3_bucket_lifecycle_configuration" "bfd_public_test_data" {
   bucket = aws_s3_bucket.bfd_public_test_data.id
 
