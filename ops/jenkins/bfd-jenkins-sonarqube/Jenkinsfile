@@ -76,21 +76,20 @@ spec:
                    awsAuth.assumeRole()
                    // Perform Build steps
                    scriptForApps.build(verboseMaven, true)
-
-                   //Retrieve Sonar Token from AWS
-                   env.SONAR_TOKEN = awsSsm.getParameter(parameterName: "/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key", isSensitive: true)
                 }
             }
         }
-
         stage ('SonarQube Analysis') {
             steps {
                 script {
+                    //Retrieve Sonar Token from AWS
+                   def SONAR_TOKEN = awsSsm.getParameter(parameterName: "/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key", isSensitive: true)
+                   echo """Sonar Token: ${SONAR_TOKEN}"""
                     dir ('apps') {
                         sh "mvn sonar:sonar" +
                         " -Dsonar.projectKey=${SONAR_PROJECT_KEY}" +
                         " -Dsonar.host.url=${SONAR_HOST_URL}" +
-                        " -Dsonar.login=${env.SONAR_TOKEN}" +
+                        " -Dsonar.login=${SONAR_TOKEN}" +
                         " -Dmaven.build.cache.enabled=false" +
                         " -DskipITs" +
                         " -DskipTests" +

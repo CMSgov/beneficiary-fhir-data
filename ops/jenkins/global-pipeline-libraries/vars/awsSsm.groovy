@@ -8,11 +8,17 @@ String getParameter(Map args = [:]) {
     awsRegion = args.awsRegion ?: 'us-east-1'
     isSensitive = args.isSensitive ?: false
 
-    if(isSensitive) {
-        return sh(returnStdout: true, script: "aws ssm get-parameter --name ${name} --region ${awsRegion} --with-decryption --query 'Parameter.Value' --output text").trim()
-    }
-    return sh(returnStdout: true, script: "aws ssm get-parameter --name ${name} --region ${awsRegion} --query 'Parameter.Value' --output text").trim()
+    echo """Sensitive Flag: ${isSensitive}"""
+
+    // Construct the AWS CLI command dynamically based on isSensitive
+    def awsCmd = isSensitive
+            ? "aws ssm get-parameter --name ${name} --region ${awsRegion} --with-decryption --query 'Parameter.Value' --output text"
+            : "aws ssm get-parameter --name ${name} --region ${awsRegion} --query 'Parameter.Value' --output text"
+
+    // Execute the AWS CLI command using a single sh step
+    return sh(returnStdout: true, script: awsCmd).trim()
 }
+
 
 // Stores a value in SSM parameter store based on the parameter name.  If a parameter doesn't exist in
 // parameter store, this function will store the value under the parameter name passed in and will
