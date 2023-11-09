@@ -10,15 +10,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.PatternFormatting;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -31,18 +29,18 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class CsvToExcelCommand {
 
-  /** Excel columns widths in characters for the V1 data dictionary. */
+  /** Excel columns widths in units of 1/256th of a character width for the V1 data dictionary. */
   private static int[] v1ColumnsWidths =
       new int[] {
-        65, 225, 255, 75, 50, 50, 175, 255, 255, 255, 255, 255, 200, 200, 200, 200, 200, 75, 75, 75,
-        75, 75, 75
+        2080, 7200, 10400, 2400, 1600, 1600, 5600, 11200, 17600, 17600, 9600, 9600, 6400, 6400,
+        6400, 6400, 6400, 2400, 2400, 2400, 2400, 2400, 2400
       };
 
-  /** Excel columns widths in characters for the V2 data dictionary. */
+  /** Excel columns widths in units of 1/256th of a character width for the V2 data dictionary. */
   private static int[] v2ColumnsWidths =
       new int[] {
-        65, 225, 255, 75, 50, 50, 175, 255, 255, 255, 255, 255, 255, 255, 200, 200, 200, 200, 200,
-        75, 75, 75, 75, 75, 75
+        2080, 7200, 10400, 2400, 1600, 1600, 5600, 11200, 14400, 17600, 17600, 17600, 9600, 9600,
+        6400, 6400, 6400, 6400, 6400, 2400, 2400, 2400, 2400, 2400, 2400
       };
 
   /**
@@ -86,12 +84,12 @@ public class CsvToExcelCommand {
     var maxColIndex = columnsWidths.length - 1;
     searchAndReplace(sheet, CellRangeAddress.valueOf("D2:D" + (maxRowIndex + 1)), ";", "\n");
     searchAndReplace(sheet, CellRangeAddress.valueOf("I2:J" + (maxRowIndex + 1)), ";", "\n");
-    setColumnWidths(sheet, columnsWidths);
     setStyle(sheet, new CellRangeAddress(0, 0, 0, maxColIndex), getHeaderCellStyle(wb));
-    setStyle(
-        sheet, new CellRangeAddress(1, maxRowIndex, 1, maxColIndex), getDataCellStyle(wb));
-    setAlternatingRowStyle(sheet, new CellRangeAddress(1, maxRowIndex, 0, maxColIndex));
-    sheet.createFreezePane(1, 1);
+    setStyle(sheet, new CellRangeAddress(1, maxRowIndex, 0, maxColIndex), getDataCellStyle(wb));
+    rowShading(sheet, new CellRangeAddress(1, maxRowIndex, 0, maxColIndex), getRowShadingStyle(wb));
+    setColumnWidths(sheet, columnsWidths);
+    setRowHeights(sheet, new CellRangeAddress(0, maxRowIndex, 0, maxColIndex));
+    sheet.createFreezePane(2, 1);
   }
 
   /**
@@ -125,8 +123,49 @@ public class CsvToExcelCommand {
    */
   private static void setColumnWidths(Sheet sheet, int[] widths) {
     for (int i = 0; i < widths.length; i++) {
-      sheet.setColumnWidth(i, widths[i] * 256);
+      sheet.setColumnWidth(i, widths[i]);
     }
+  }
+
+  /**
+   * Optimally set the row heights for a workbook sheet.
+   *
+   * @param sheet the sheet with rows to set
+   * @param range the sheet range to set
+   */
+  private static void setRowHeights(Sheet sheet, CellRangeAddress range) {
+    var defaultHeight = sheet.getDefaultRowHeight();
+    for (int i = range.getFirstRow(); i <= range.getLastRow(); i++) {
+      var row = sheet.getRow(i);
+      if (row != null) {
+        var max = maxLinesInRow(row, range.getLastColumn());
+        if (row.getRowNum() == 0) {
+          max = 2;
+        }
+        row.setHeight((short) (max * defaultHeight));
+      }
+    }
+  }
+
+  /**
+   * Determines the maximum number of lines in a row.
+   *
+   * @param row the row to inspect
+   * @param lastCol the last column in the row to inspect
+   * @return the maximum number of lines for any cell in a row (min:1)
+   */
+  private static short maxLinesInRow(Row row, int lastCol) {
+    short maxLines = 1;
+    for (int i = 0; i <= lastCol; i++) {
+      var cell = row.getCell(i);
+      if (cell != null) {
+        var lines = cell.getStringCellValue().split("\r\n|\n|\r").length;
+        if (maxLines < lines) {
+          maxLines = (short) lines;
+        }
+      }
+    }
+    return maxLines;
   }
 
   /**
@@ -164,6 +203,24 @@ public class CsvToExcelCommand {
   }
 
   /**
+   * Implement alternate row shading.
+   *
+   * @param sheet the sheet to format
+   * @param range the range of cells with the sheet to format
+   * @param style the CellStyle to apply to alternate rows (odd numbered)
+   */
+  private static void rowShading(Sheet sheet, CellRangeAddress range, CellStyle style) {
+    applyToRange(
+        sheet,
+        range,
+        (c) -> {
+          if (c.getRowIndex() % 2 == 1) {
+            c.setCellStyle(style);
+          }
+        });
+  }
+
+  /**
    * Apply a consumer function to a range of cells in a sheet.
    *
    * @param sheet the sheet to update
@@ -192,12 +249,14 @@ public class CsvToExcelCommand {
    */
   private static CellStyle getHeaderCellStyle(Workbook wb) {
     var style = wb.createCellStyle();
-    style.setFillBackgroundColor(new XSSFColor(new java.awt.Color(137, 207, 240), null));
-    style.setFillPattern(FillPatternType.LESS_DOTS);
+    style.setFillForegroundColor(new XSSFColor(new java.awt.Color(67, 133, 244), null));
+    style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
     var font = wb.createFont();
     font.setBold(true);
     font.setColor(IndexedColors.WHITE.getIndex());
     style.setFont(font);
+    style.setVerticalAlignment(VerticalAlignment.TOP);
+    style.setWrapText(true);
     return style;
   }
 
@@ -215,21 +274,26 @@ public class CsvToExcelCommand {
   }
 
   /**
-   * Applies alternate row shading to a range of cells.
+   * Create the style for shadded rows.
    *
-   * @param sheet the sheet to apply the shading to
-   * @param range the range of cells to apply the shading to
+   * @param wb the workbook
+   * @return a CellStyle
    */
-  private static void setAlternatingRowStyle(Sheet sheet, CellRangeAddress range) {
-    SheetConditionalFormatting cf = sheet.getSheetConditionalFormatting();
-    ConditionalFormattingRule rule =
-        sheet.getSheetConditionalFormatting().createConditionalFormattingRule("MOD(ROW(), 2) <> 0");
-    PatternFormatting formatting = rule.createPatternFormatting();
-    formatting.setFillBackgroundColor(new XSSFColor(new java.awt.Color(221, 221, 221), null));
-    formatting.setFillPattern(FillPatternType.LESS_DOTS.getCode());
-    ConditionalFormattingRule[] rules = {rule};
-    CellRangeAddress[] regions = {range};
-    cf.addConditionalFormatting(regions, rules);
+  private static CellStyle getRowShadingStyle(Workbook wb) {
+    var style = wb.createCellStyle();
+    style.cloneStyleFrom(getDataCellStyle(wb));
+    style.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+    style.setFillForegroundColor(new XSSFColor(new java.awt.Color(243, 243, 243), null));
+    style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    style.setBorderTop(BorderStyle.THIN);
+    style.setTopBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+    style.setBorderBottom(BorderStyle.THIN);
+    style.setBottomBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+    style.setBorderLeft(BorderStyle.THIN);
+    style.setLeftBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+    style.setBorderRight(BorderStyle.THIN);
+    style.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+    return style;
   }
 
   /**
