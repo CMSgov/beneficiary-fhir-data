@@ -699,23 +699,6 @@ public final class RifLoaderIT {
     }
   }
 
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHETIC_DATA} data. */
-  @Disabled("This test only works with a PostgreSQL database instance. It 10s or minutes to run")
-  @Test
-  public void loadSyntheticData() {
-    /*
-     * Assume.assumeTrue(
-     * String.format(
-     * "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
-     * Runtime.getRuntime().maxMemory()),
-     * Runtime.getRuntime().maxMemory() >= 4500000000L);
-     */
-    List<StaticRifResource> samples =
-        Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources());
-    loadSample(Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
-    verifyRecordPrimaryKeysPresent(samples);
-  }
-
   /**
    * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SYNTHEA_DATA} data.
    *
