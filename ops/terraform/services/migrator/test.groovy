@@ -36,7 +36,7 @@ spec:
             awsSsm.tagResource(
                 resourceType: "Parameter",
                 resourceId: "/bfd/test/common/nonsensitive/brandon_test",
-                resourceTags: "Key=Source,Value=${JOB_NAME}"
+                resourceTags: "Key=Source,Value=${JOB_NAME}",
             )
         }
       }
