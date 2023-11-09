@@ -23,7 +23,7 @@ spec:
   }
 
   stages {
-    stage('Run Pipeline Job from Queue') {
+    stage('Test create & tag parameter') {
       steps {
         script {
             awsAuth.assumeRole()
