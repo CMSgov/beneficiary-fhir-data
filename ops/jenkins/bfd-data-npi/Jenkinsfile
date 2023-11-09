@@ -151,11 +151,17 @@ mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mg
 '''
                                 }
                                 awsAuth.assumeRole()
-                                sh """
-aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha256 \
---type String --tags Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False \
-Key=application,Value=bfd Key=business,Value=oeda --region us-east-1  --overwrite --value "${npiOrgNameSha256}"
-"""
+                                awsSsm.putParameter(
+                                    parameterName: "/bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha256",
+                                    parameterValue: "${npiOrgNameSha256}",
+                                    parameterType: "String",
+                                    shouldOverwrite: true
+                                )
+                                awsSsm.tagResource(
+                                    resourceType: "Parameter",
+                                    resourceId: "/bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha256",
+                                    resourceTags: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda",
+                                )
                             }
                         } else {
                             echo "NPI Org file already up-to-date. Nothing to do!"

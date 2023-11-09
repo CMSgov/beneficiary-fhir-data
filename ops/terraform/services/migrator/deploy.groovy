@@ -68,14 +68,12 @@ boolean deployMigrator(Map args = [:]) {
             parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
             parameterValue: finalMigratorStatus[1],
             parameterType: "String",
-            parameterTags: [
-                "Key=Environment,Value=${bfdEnv}",
-                "Key=stack,Value=${bfdEnv}",
-                "Key=Terraform,Value=False",
-                "Key=application,Value=bfd",
-                "Key=business,Value=oeda"
-            ],
             shouldOverwrite: true
+        )
+        awsSsm.tagResource(
+            resourceType: "Parameter",
+            resourceId: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
+            resourceTags: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=${bfdEnv} Key=stack,Value=${bfdEnv} Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda",
         )
 
         // Teardown when there is a healthy exit status
