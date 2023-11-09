@@ -1,4 +1,5 @@
-library 'bfd@brandon-BFD-3012-ssm-deficiencies'
+#!/usr/bin/env groovy
+@Library("bfd@brandon-BFD-3012-ssm-deficiencies") _
 
 pipeline {
   agent {
@@ -12,7 +13,7 @@ spec:
   restartPolicy: Never
   containers:
     - name: bfd-cbc-build
-      image: "public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk17-mvn3-tfenv3-kt1.9-latest" # TODO: consider a smarter solution for resolving this image
+      image: "public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tfenv-aeaa61fa6"
       command:
         - cat
       tty: true
@@ -21,22 +22,20 @@ spec:
     }
   }
 
- stages {
-    stage('Create Parameter') {
-        steps {
-            script {
-                // authenticate
-                awsAuth.assumeRole()
-
-                awsSsm.putParameter(
-                            parameterName: "/bfd/test/common/nonsensitive/brandon_test",
-                            parameterValue: "test",
-                            parameterType: "String",
-                            parameterTags: "Key=Source,Value=${JOB_NAME}",
-                            shouldOverwrite: true
-                        )
-            }
+  stages {
+    stage('Run Pipeline Job from Queue') {
+      steps {
+        script {
+            awsAuth.assumeRole()
+            awsSsm.putParameter(
+                parameterName: "/bfd/test/common/nonsensitive/brandon_test",
+                parameterValue: "test",
+                parameterType: "String",
+                parameterTags: "Key=Source,Value=${JOB_NAME}",
+                shouldOverwrite: true
+            )
         }
+      }
     }
- }
+  }
 }
