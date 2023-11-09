@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.io.IOException;
@@ -206,7 +207,7 @@ public final class InpatientClaimTransformerTest {
     TransformerTestUtils.assertHasCoding(
         diagnosis.get().getFhirSystem(),
         null,
-        TransformerUtils.retrieveIcdCodeDisplay(diagnosis.get().getCode()),
+        CommonTransformerUtils.retrieveIcdCodeDisplay(diagnosis.get().getCode()),
         diagnosis.get().getCode(),
         eob.getDiagnosis().get(6).getDiagnosisCodeableConcept().getCoding());
 
@@ -218,7 +219,7 @@ public final class InpatientClaimTransformerTest {
         claim.getProcedure1Code().get(),
         eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
     assertEquals(
-        TransformerUtils.convertToDate(claim.getProcedure1Date().get()),
+        CommonTransformerUtils.convertToDate(claim.getProcedure1Date().get()),
         eob.getProcedure().get(0).getDate());
 
     // test to ensure the procedure code display lookup table process works
@@ -228,7 +229,7 @@ public final class InpatientClaimTransformerTest {
     TransformerTestUtils.assertHasCoding(
         ccwProcedureDisplay.getFhirSystem(),
         null,
-        TransformerUtils.retrieveProcedureCodeDisplay(claim.getProcedure6Code().get()),
+        CommonTransformerUtils.retrieveProcedureCodeDisplay(claim.getProcedure6Code().get()),
         claim.getProcedure6Code().get(),
         eob.getProcedure().get(5).getProcedureCodeableConcept().getCoding());
 

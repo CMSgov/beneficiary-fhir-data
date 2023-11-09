@@ -163,6 +163,49 @@ resource "aws_iam_policy" "sqs" {
 EOF
 }
 
+resource "aws_iam_policy" "ecr" {
+  name        = "bfd-${local.env}-${local.service}-ecr"
+  description = "Allow ECR permissions to ${data.aws_ecr_repository.ecr_controller.name}"
+  policy      = <<-EOF
+{
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Sid":"ListImagesInRepository",
+         "Effect":"Allow",
+         "Action":[
+            "ecr:ListImages"
+         ],
+         "Resource":"arn:aws:ecr:us-east-1:${local.account_id}:repository/${data.aws_ecr_repository.ecr_controller.name}"
+      },
+      {
+         "Sid":"GetAuthorizationToken",
+         "Effect":"Allow",
+         "Action":[
+            "ecr:GetAuthorizationToken",
+            "ecr:DescribeRegistry"
+         ],
+         "Resource":"*"
+      },
+      {
+         "Sid":"ReadRepositoryContents",
+         "Effect":"Allow",
+         "Action":[
+            "ecr:BatchCheckLayerAvailability",
+            "ecr:GetDownloadUrlForLayer",
+            "ecr:GetRepositoryPolicy",
+            "ecr:DescribeRepositories",
+            "ecr:ListImages",
+            "ecr:DescribeImages",
+            "ecr:BatchGetImage"
+         ],
+         "Resource":"arn:aws:ecr:us-east-1:${local.account_id}:repository/${data.aws_ecr_repository.ecr_controller.name}"
+      }
+   ]
+}
+EOF
+}
+
 resource "aws_iam_role" "lambda" {
   name        = "bfd-${local.env}-${local.service}-lambda"
   path        = "/"
@@ -221,7 +264,8 @@ resource "aws_iam_role" "ec2" {
     aws_iam_policy.kms.arn,
     aws_iam_policy.rds.arn,
     aws_iam_policy.sqs.arn,
-    aws_iam_policy.lambda.arn
+    aws_iam_policy.lambda.arn,
+    aws_iam_policy.ecr.arn
   ]
 }
 

@@ -43,6 +43,14 @@ locals {
     for key, value in local.yaml
     : key => value if contains(split("/", key), "common") && value != "UNDEFINED"
   }
+  cpm_sensitive ={
+    for key, value in local.yaml
+    : key => value if contains(split("/", key), "cpm") && value != "UNDEFINED"
+  }
+  jenkins_sensitive = {
+    for key, value in local.yaml
+    : key => value if contains(split("/", key), "jenkins") && value != "UNDEFINED"
+  }
 }
 
 resource "aws_kms_key" "primary" {
@@ -76,6 +84,26 @@ resource "aws_kms_alias" "secondary" {
 
 resource "aws_ssm_parameter" "common_sensitive" {
   for_each = local.common_sensitive
+
+  key_id    = local.kms_key_id
+  name      = each.key
+  overwrite = true
+  type      = "SecureString"
+  value     = each.value
+}
+
+resource "aws_ssm_parameter" "cpm_sensitive" {
+  for_each = local.cpm_sensitive
+
+  key_id    = local.kms_key_id
+  name      = each.key
+  overwrite = true
+  type      = "SecureString"
+  value     = each.value
+}
+
+resource "aws_ssm_parameter" "jenkins_sensitive" {
+  for_each = local.jenkins_sensitive
 
   key_id    = local.kms_key_id
   name      = each.key

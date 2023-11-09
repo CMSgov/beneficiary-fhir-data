@@ -8,6 +8,7 @@ import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -188,14 +189,14 @@ final class BeneficiaryTransformer {
     }
 
     if (beneficiary.getBirthDate() != null) {
-      patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));
+      patient.setBirthDate(CommonTransformerUtils.convertToDate(beneficiary.getBirthDate()));
     }
 
     // Death Date
     if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
       patient.setDeceased(
           new DateTimeType(
-              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              CommonTransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
               TemporalPrecisionEnum.DAY));
     }
 

@@ -32,7 +32,7 @@ locals {
 data "aws_ami" "main" {
   most_recent = true
   owners      = ["self"]
-  name_regex  = ".*server-load.*"
+  name_regex  = ".*docker-host.*"
 
   dynamic "filter" {
     for_each = local.filters
@@ -82,6 +82,14 @@ data "aws_ecr_image" "image_node" {
 # TODO: Consider making this more environment-specific, versioning RFC in BFD-1743 may provide us a path forward
 data "aws_ssm_parameter" "container_image_tag_node" {
   name = "/bfd/mgmt/server/nonsensitive/server_load_node_latest_image_tag"
+}
+
+data "aws_ecr_repository" "ecr_controller" {
+  name = "bfd-mgmt-${local.service}-controller"
+}
+
+data "aws_ssm_parameter" "container_image_tag_controller" {
+  name = "/bfd/mgmt/server/nonsensitive/server_load_controller_latest_image_tag"
 }
 
 data "aws_security_group" "rds" {

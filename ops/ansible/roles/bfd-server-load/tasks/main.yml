@@ -1,3 +1,0 @@
----
-- name: Configure bfd-server-load Service
-  import_tasks: server-load.yml

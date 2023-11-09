@@ -123,17 +123,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final String ENV_VAR_KEY_IDEMPOTENCY_REQUIRED = "IDEMPOTENCY_REQUIRED";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * LoadAppOptions#isFilteringNonNullAndNon2023Benes()} value, which is a bit complex; please see
-   * its description for details.
-   *
-   * <p>Note: This filtering option (and implementation) is an inelegant workaround, which should be
-   * removed as soon as is reasonable.
-   */
-  public static final String ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES =
-      "FILTERING_NON_NULL_AND_NON_2023_BENES";
-
-  /**
    * The name of the environment variable that should be used to provide the number of {@link
    * RifRecordEvent}s that will be included in each processing batch. Note that larger batch sizes
    * mean that more {@link RifRecordEvent}s will be held in memory simultaneously.
@@ -391,7 +380,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
   private static final Map<String, String> DEFAULT_CONFIG_VALUES =
       ImmutableMap.<String, String>builder()
           .put(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE, "100")
-          .put(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES, "true")
           .put(ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "25")
           .put(ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "2")
           .put(ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS, "30")
@@ -504,8 +492,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
     int hicnHashCacheSize = config.intValue(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE);
 
     final boolean idempotencyRequired = config.booleanValue(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
-    final boolean filteringNonNullAndNon2023Benes =
-        config.booleanValue(ENV_VAR_KEY_RIF_FILTERING_NON_NULL_AND_NON_2023_BENES);
 
     final var benePerformanceSettings = loadBeneficiaryPerformanceSettings(config);
     final var claimPerformanceSettings =
@@ -526,7 +512,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
                 .cacheSize(hicnHashCacheSize)
                 .build(),
             idempotencyRequired,
-            filteringNonNullAndNon2023Benes,
             benePerformanceSettings,
             claimPerformanceSettings);
 

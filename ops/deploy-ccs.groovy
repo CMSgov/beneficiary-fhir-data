@@ -41,11 +41,6 @@ class AmiIds implements Serializable {
 	String bfdMigratorAmiId
 
 	/**
-	 * The ID of the AMI that will run the bfd-server-load service's controller, or <code>null</code> if such an AMI does not yet exist.
-	 */
-	String bfdServerLoadAmiId
-
-	/**
 	 * The ID of the AMI that will run the docker host service, or <code>null</code> if such an AMI does not yet exist.
 	 */
 	String bfdDockerHostAmiId
@@ -64,7 +59,6 @@ def findAmis(String branchName) {
 		bfdPipelineAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-etl-??????????????"),
 		bfdServerAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-fhir-??????????????"),
 		bfdMigratorAmiId: awsEc2.getAmiId(branchName, "bfd-amzn2-jdk17-db-migrator-??????????????"),
-		bfdServerLoadAmiId:awsEc2.getAmiId(branchName, "server-load-??????????????"),
 		bfdDockerHostAmiId: awsEc2.getAmiId(branchName, "docker-host-??????????????")
 	)
 }
@@ -100,8 +94,6 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json"))
 			amiIdsWrapper.bfdMigratorAmiId = extractAmiIdFromPackerManifest(readFile(
 						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json"))
-			amiIdsWrapper.bfdServerLoadAmiId = extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_server-load.json"))
 	}
 
 	return amiIdsWrapper

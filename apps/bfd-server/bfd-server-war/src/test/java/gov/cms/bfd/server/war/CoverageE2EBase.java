@@ -9,9 +9,9 @@ import static org.hamcrest.Matchers.hasItems;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import io.restassured.response.Response;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -32,7 +32,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
   @Test
   public void testReadWhenExistingPartACoverageIdExpect200() {
     Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
-    IdDt coverageId = TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary);
+    IdDt coverageId = CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary);
 
     verifyReadIs200ForId(coverageId.getIdPart());
   }
@@ -44,7 +44,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
   @Test
   public void testReadWhenExistingPartBCoverageIdExpect200() {
     Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
-    IdDt coverageId = TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_B, beneficiary);
+    IdDt coverageId = CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary);
 
     verifyReadIs200ForId(coverageId.getIdPart());
   }
@@ -56,7 +56,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
   @Test
   public void testReadWhenExistingPartCCoverageIdExpect200() {
     Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
-    IdDt coverageId = TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_C, beneficiary);
+    IdDt coverageId = CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary);
 
     verifyReadIs200ForId(coverageId.getIdPart());
   }
@@ -68,7 +68,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
   @Test
   public void testReadWhenExistingPartDCoverageIdExpect200() {
     Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
-    IdDt coverageId = TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, beneficiary);
+    IdDt coverageId = CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary);
 
     verifyReadIs200ForId(coverageId.getIdPart());
   }

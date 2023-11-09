@@ -99,9 +99,12 @@ resource "aws_instance" "this" {
   subnet_id              = data.aws_subnet.main[0].id
   vpc_security_group_ids = [data.aws_security_group.vpn.id, aws_security_group.this.id]
 
+  # In a container environment, if the hop limit is 1, the IMDSv2 response does not return because
+  # going to the container is considered an additional network hop. To avoid the process of falling back to IMDSv1 and
+  # the resultant delay, in a container environment we set the hop limit to > 1
   metadata_options {
     http_endpoint               = "enabled"
-    http_put_response_hop_limit = 1
+    http_put_response_hop_limit = 2
     http_tokens                 = "required"
   }
 
@@ -121,21 +124,26 @@ resource "aws_instance" "this" {
     aws_current_region = data.aws_region.current.name
     asg_name           = data.aws_autoscaling_group.asg.name
 
-    sqs_queue_name       = var.sqs_queue_name
-    node_lambda_name     = var.node_lambda_name
-    test_host            = var.test_host
-    locust_tags          = var.locust_tags
-    locust_exclude_tags  = var.locust_exclude_tags
-    initial_worker_nodes = var.initial_worker_nodes
-    node_spawn_time      = var.node_spawn_time
-    max_spawned_nodes    = var.max_spawned_nodes
-    max_spawned_users    = var.max_spawned_users
-    user_spawn_rate      = var.user_spawn_rate
-    test_runtime_limit   = var.test_runtime_limit
-    coasting_time        = var.coasting_time
-    warm_instance_target = var.warm_instance_target
-    stop_on_scaling      = var.stop_on_scaling
-    stop_on_node_limit   = var.stop_on_node_limit
+    sqs_queue_name            = var.sqs_queue_name
+    node_lambda_name          = var.node_lambda_name
+    test_host                 = var.test_host
+    locust_tags               = var.locust_tags
+    locust_exclude_tags       = var.locust_exclude_tags
+    initial_worker_nodes      = var.initial_worker_nodes
+    node_spawn_time           = var.node_spawn_time
+    max_spawned_nodes         = var.max_spawned_nodes
+    max_spawned_users         = var.max_spawned_users
+    user_spawn_rate           = var.user_spawn_rate
+    test_runtime_limit        = var.test_runtime_limit
+    coasting_time             = var.coasting_time
+    warm_instance_target      = var.warm_instance_target
+    stop_on_scaling           = var.stop_on_scaling
+    stop_on_node_limit        = var.stop_on_node_limit
+    server_load_dir           = var.server_load_dir
+    server_load_user          = var.server_load_user
+    locust_master_port        = var.locust_master_port
+    ecr_registry_url          = "${data.aws_ecr_repository.ecr_controller.repository_url}"
+    ecr_tagged_controller_uri = "${data.aws_ssm_parameter.container_image_tag_controller.value}"
   })
 }
 
