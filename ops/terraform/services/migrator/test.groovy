@@ -31,8 +31,12 @@ spec:
                 parameterName: "/bfd/test/common/nonsensitive/brandon_test",
                 parameterValue: "test",
                 parameterType: "String",
-                parameterTags: "Key=Source,Value=${JOB_NAME}",
                 shouldOverwrite: true
+            )
+            awsSsm.tagResource(
+                resourceType: "Parameter",
+                resourceId: "/bfd/test/common/nonsensitive/brandon_test",
+                resourceTags: "Key=Source,Value=${JOB_NAME}"
             )
         }
       }

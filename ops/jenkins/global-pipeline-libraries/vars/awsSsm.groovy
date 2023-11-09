@@ -16,7 +16,6 @@ String getParameter(Map args = [:]) {
 String putParameter(Map args = [:]) {
     name = args.parameterName
     value = args.parameterValue
-    tags = args.parameterTags
     type = args.parameterType ?: 'String'
     overwrite = args.shouldOverwrite ? '--overwrite' : ''
     awsRegion = args.awsRegion ?: 'us-east-1'
@@ -24,5 +23,15 @@ String putParameter(Map args = [:]) {
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
     output = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${includeType} --tags ${tags} --region ${awsRegion} ${overwrite}").trim()
+    return output
+}
+
+// Adds or overwrites one or more tags for the specified resource
+String tagResource(Map args = [:]) {
+    type = args.resourceType ?: 'Parameter'
+    id = args.resourceId
+    tags = args.resourceTags
+
+    output = sh(returnStdout: true, script: "aws ssm add-tags-to-resource --resource-type ${type} --resource-id ${id} --tags ${tags}").trim()
     return output
 }
