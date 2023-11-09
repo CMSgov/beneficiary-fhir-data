@@ -58,7 +58,7 @@ class InvokeEvent:
 
     host: str
     controller_ip: str
-    locust_port: int = 5557
+    locust_port: int
 
 
 def handler(event, context):

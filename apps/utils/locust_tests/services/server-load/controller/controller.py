@@ -6,7 +6,6 @@ is responsible for managing the Locust master process and orchestrating the many
 import functools
 import json
 import os
-import socket
 import subprocess
 import sys
 import time
@@ -54,6 +53,8 @@ coasting_time = int(os.environ.get("COASTING_TIME", 0))
 warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
 stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
 stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
+controller_host_ip = os.environ.get("CONTROLLER_HOST_IP", "")
+controller_host_port = os.environ.get("CONTROLLER_HOST_PORT", 5557)
 
 boto_config = Config(region_name=region)
 
@@ -63,12 +64,12 @@ sqs = boto3.resource("sqs", config=boto_config)
 lambda_client = boto3.client("lambda", config=boto_config)
 
 
-def _start_node(controller_ip: str, host: str):
+def _start_node(controller_ip: str, host: str, locust_port: int):
     """
     Invokes the lambda function that runs a Locust worker node process.
     """
     print(f"Starting node with host:{host}, controller_ip:{controller_ip}")
-    payload_json = json.dumps({"controller_ip": controller_ip, "host": host})
+    payload_json = json.dumps({"controller_ip": controller_ip, "host": host, "locust_port": locust_port})
 
     response = lambda_client.invoke(
         FunctionName=node_lambda_name,
@@ -122,11 +123,11 @@ def _main():
             f"--spawn-rate={user_spawn_rate}",
             f"--database-connection-string={db_dsn}",
             "--master",
-            "--master-bind-port=5557",
+            f"--master-bind-port={controller_host_port}",
             "--client-cert-path=/tmp/bfd_test_cert.pem",
             "--enable-rebalancing",
             "--loglevel=DEBUG",
-            "--csv=load",
+            "--csv=logs/load",
             "--headless",
         ]
         + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else [])
@@ -140,8 +141,6 @@ def _main():
     queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
     queue.purge()
 
-    ip_address = socket.gethostbyname(socket.gethostname())
-
     if locust_tags:
         print(f"Running tasks with an annotated @tag including any of the following: {locust_tags}")
 
@@ -151,7 +150,7 @@ def _main():
     spawn_count = 0
     for _ in range(0, initial_worker_nodes):
         print(f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-        _start_node(controller_ip=ip_address, host=test_host)
+        _start_node(controller_ip=controller_host_ip, host=test_host, locust_port=controller_host_port)
         spawn_count += 1
         print(f"Spawned initial worker node #{spawn_count} successfully")
 
@@ -195,7 +194,7 @@ def _main():
         if spawn_count < max_spawned_nodes:
             if datetime.now() >= next_node_spawn:
                 print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-                _start_node(controller_ip=ip_address, host=test_host)
+                _start_node(controller_ip=controller_host_ip, host=test_host, locust_port=controller_host_port)
                 spawn_count += 1
                 print(f"Worker node #{spawn_count} spawned successfully")
 

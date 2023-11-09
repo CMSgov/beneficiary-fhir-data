@@ -28,11 +28,14 @@ https://terraform-docs.io/user-guide/configuration/
 | <a name="input_create_locust_instance"></a> [create\_locust\_instance](#input\_create\_locust\_instance) | When true, create the locust instance | `bool` | `false` | no |
 | <a name="input_initial_worker_nodes"></a> [initial\_worker\_nodes](#input\_initial\_worker\_nodes) | The number of initial Locust worker nodes to spawn before checking for stop signals. Useful for static load tests | `number` | `0` | no |
 | <a name="input_locust_exclude_tags"></a> [locust\_exclude\_tags](#input\_locust\_exclude\_tags) | Space-delimited. The locust tasks with ANY of the given tags will be excluded from execution | `string` | `""` | no |
+| <a name="input_locust_master_port"></a> [locust\_master\_port](#input\_locust\_master\_port) | The port to connect to that is used by the locust master for distributed load testing. | `number` | `5557` | no |
 | <a name="input_locust_tags"></a> [locust\_tags](#input\_locust\_tags) | Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided | `string` | `""` | no |
 | <a name="input_max_spawned_nodes"></a> [max\_spawned\_nodes](#input\_max\_spawned\_nodes) | The maximum number of Lambda worker nodes to spawn over the lifetime of a given test run. Does not account for failed nodes or nodes that reach their Lambda timeout | `number` | `0` | no |
 | <a name="input_max_spawned_users"></a> [max\_spawned\_users](#input\_max\_spawned\_users) | The maximum number of simulated Locust users (not worker nodes) to spawn. Use this and spawn rate to constrain the load during a test run | `number` | `0` | no |
 | <a name="input_node_lambda_name"></a> [node\_lambda\_name](#input\_node\_lambda\_name) | The name of the Locust worker node Lambda function that will be executed to spawn a Locust worker instance | `string` | `"bfd-test-server-load-node"` | no |
 | <a name="input_node_spawn_time"></a> [node\_spawn\_time](#input\_node\_spawn\_time) | The amount of time to wait between spawning more Lambda Locust worker nodes. Does not affect initial spawned nodes | `number` | `10` | no |
+| <a name="input_server_load_dir"></a> [server\_load\_dir](#input\_server\_load\_dir) | BFD Server Load directory. | `string` | `"/opt/server-load"` | no |
+| <a name="input_server_load_user"></a> [server\_load\_user](#input\_server\_load\_user) | BFD Server Load user. | `string` | `"bb-server-load"` | no |
 | <a name="input_sqs_queue_name"></a> [sqs\_queue\_name](#input\_sqs\_queue\_name) | The name of the SQS queue that will be polled for scaling notifications or stop signals | `string` | `"bfd-test-server-load"` | no |
 | <a name="input_stop_on_node_limit"></a> [stop\_on\_node\_limit](#input\_stop\_on\_node\_limit) | Whether the load test run should end once the maximum Lambda worker node limit is reached. Set to false for scenarios where a static load test is desired | `bool` | `true` | no |
 | <a name="input_stop_on_scaling"></a> [stop\_on\_scaling](#input\_stop\_on\_scaling) | Whether the load test run should end, if coasting\_time is zero, or start coasting once receiving a scaling notification. Set to false for scenarios where a static load test is desired | `bool` | `true` | no |
@@ -53,6 +56,7 @@ https://terraform-docs.io/user-guide/configuration/
 |------|------|
 | [aws_autoscaling_notification.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_notification) | resource |
 | [aws_iam_instance_profile.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
+| [aws_iam_policy.ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -75,6 +79,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_availability_zones.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_ecr_image.image_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
+| [aws_ecr_repository.ecr_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
 | [aws_ecr_repository.ecr_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
 | [aws_iam_policy.cloudwatch_agent_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy.cloudwatch_agent_xray_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
@@ -86,6 +91,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_security_group.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_ssm_parameter.container_image_tag_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [aws_ssm_parameter.container_image_tag_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [aws_ssm_parameters_by_path.nonsensitive_common](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_subnet.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
