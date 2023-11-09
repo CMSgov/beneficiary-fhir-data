@@ -309,7 +309,7 @@ public class CsvToExcelCommand {
   }
 
   /**
-   * Create the style for shadded rows.
+   * Create the style for shaded rows.
    *
    * @param wb the workbook
    * @return a CellStyle
