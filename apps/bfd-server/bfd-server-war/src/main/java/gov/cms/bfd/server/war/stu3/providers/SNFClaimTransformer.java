@@ -11,6 +11,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
@@ -156,18 +157,18 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
 
     if (claimGroup.getQualifiedStayFromDate().isPresent()
         || claimGroup.getQualifiedStayThroughDate().isPresent()) {
-      TransformerUtils.validatePeriodDates(
+      CommonTransformerUtils.validatePeriodDates(
           claimGroup.getQualifiedStayFromDate(), claimGroup.getQualifiedStayThroughDate());
       SupportingInformationComponent nchQlfydStayInfo =
           TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_QLFYD_STAY_FROM_DT);
       Period nchQlfydStayPeriod = new Period();
       if (claimGroup.getQualifiedStayFromDate().isPresent())
         nchQlfydStayPeriod.setStart(
-            TransformerUtils.convertToDate((claimGroup.getQualifiedStayFromDate().get())),
+            CommonTransformerUtils.convertToDate((claimGroup.getQualifiedStayFromDate().get())),
             TemporalPrecisionEnum.DAY);
       if (claimGroup.getQualifiedStayThroughDate().isPresent())
         nchQlfydStayPeriod.setEnd(
-            TransformerUtils.convertToDate((claimGroup.getQualifiedStayThroughDate().get())),
+            CommonTransformerUtils.convertToDate((claimGroup.getQualifiedStayThroughDate().get())),
             TemporalPrecisionEnum.DAY);
       nchQlfydStayInfo.setTiming(nchQlfydStayPeriod);
     }

@@ -10,6 +10,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -119,7 +120,8 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
                 CcwCodebookVariable.PLAN_PBP_REC_NUM, claimGroup.getPlanBenefitPackageId()));
 
     if (claimGroup.getPaymentDate().isPresent()) {
-      eob.getPayment().setDate(TransformerUtils.convertToDate(claimGroup.getPaymentDate().get()));
+      eob.getPayment()
+          .setDate(CommonTransformerUtils.convertToDate(claimGroup.getPaymentDate().get()));
     }
 
     ItemComponent rxItem = eob.addItem();
@@ -171,7 +173,7 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
 
     rxItem.setServiced(
         new DateType()
-            .setValue(TransformerUtils.convertToDate(claimGroup.getPrescriptionFillDate())));
+            .setValue(CommonTransformerUtils.convertToDate(claimGroup.getPrescriptionFillDate())));
 
     /*
      * Create an adjudication for either CVRD_D_PLAN_PD_AMT or NCVRD_PLAN_PD_AMT,

@@ -5,6 +5,7 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -91,7 +92,7 @@ final class CoverageTransformer {
     Objects.requireNonNull(beneficiary);
 
     Coverage coverage = new Coverage();
-    coverage.setId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
     if (beneficiary.getPartATerminationCode().isPresent()
         && beneficiary.getPartATerminationCode().get().equals('0'))
       coverage.setStatus(CoverageStatus.ACTIVE);
@@ -172,7 +173,7 @@ final class CoverageTransformer {
     Objects.requireNonNull(beneficiary);
 
     Coverage coverage = new Coverage();
-    coverage.setId(TransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
     if (beneficiary.getPartBTerminationCode().isPresent()
         && beneficiary.getPartBTerminationCode().get().equals('0'))
       coverage.setStatus(CoverageStatus.ACTIVE);
@@ -237,7 +238,7 @@ final class CoverageTransformer {
     Objects.requireNonNull(beneficiary);
 
     Coverage coverage = new Coverage();
-    coverage.setId(TransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
     coverage.setStatus(CoverageStatus.ACTIVE);
 
     coverage
@@ -290,7 +291,7 @@ final class CoverageTransformer {
     Objects.requireNonNull(beneficiary);
 
     Coverage coverage = new Coverage();
-    coverage.setId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
     coverage
         .getGrouping()
         .setSubGroup(TransformerConstants.COVERAGE_PLAN)

@@ -10,13 +10,10 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.SkippedRifRecord;
-import gov.cms.bfd.model.rif.SkippedRifRecord.SkipReasonCode;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
-import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
@@ -26,7 +23,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -46,8 +42,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -362,13 +356,6 @@ public final class RifLoader {
         Object recordInDb = entityManager.find(record.getClass(), recordId);
         timerIdempotencyQuery.close();
 
-        // Log if we have a non-2023 enrollment year INSERT
-        if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
-          LOGGER.info(
-              "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
-              ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
-        }
-
         if (recordInDb == null) {
           loadAction = LoadAction.INSERTED;
           tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
@@ -380,45 +367,12 @@ public final class RifLoader {
       } else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
         if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
           loadAction = LoadAction.INSERTED;
-
-          // Log if we have a non-2023 enrollment year INSERT
-          if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
-            LOGGER.info(
-                "Inserted beneficiary with non-2023 enrollment year (beneficiaryId={})",
-                ((Beneficiary) rifRecordEvent.getRecord()).getBeneficiaryId());
-          }
           tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
           entityManager.persist(record);
         } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
           loadAction = LoadAction.UPDATED;
-          // Skip this record if the year is not 2023 and its an update.
-          if (!isSyntheticData && isBackdatedBene(rifRecordEvent)) {
-            /*
-             * Serialize the record's CSV data back to actual RIF/CSV, as that's how we'll store
-             * it in the DB.
-             */
-            StringBuffer rifData = new StringBuffer();
-            try (CSVPrinter csvPrinter = new CSVPrinter(rifData, RifParsingUtils.CSV_FORMAT)) {
-              for (CSVRecord csvRow : rifRecordEvent.getRawCsvRecords()) {
-                csvPrinter.printRecord(csvRow);
-              }
-            }
-
-            // Save the skipped record to the DB.
-            SkippedRifRecord skippedRifRecord =
-                new SkippedRifRecord(
-                    rifRecordEvent.getFileEvent().getParentFilesEvent().getTimestamp(),
-                    SkipReasonCode.DELAYED_BACKDATED_ENROLLMENT_BFD_1566,
-                    rifRecordEvent.getFileEvent().getFile().getFileType().name(),
-                    rifRecordEvent.getRecordAction(),
-                    ((Beneficiary) record).getBeneficiaryId(),
-                    rifData.toString());
-            entityManager.persist(skippedRifRecord);
-            LOGGER.info("Skipped RIF record, due to '{}'.", skippedRifRecord.getSkipReason());
-          } else {
-            tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
-            entityManager.merge(record);
-          }
+          tweakIfBeneficiary(entityManager, loadedBatchBuilder, rifRecordEvent);
+          entityManager.merge(record);
         } else {
           throw new BadCodeMonkeyException(
               String.format(
@@ -438,49 +392,6 @@ public final class RifLoader {
     entityManager.persist(loadedBatch);
 
     return loadResults;
-  }
-
-  /**
-   * Checks if the record is a beneficiary with a non-2023 year, the flag to filter items is on, and
-   * has a non-{@code null} enrollment reference year. This is to handle special filtering while CCW
-   * fixes an issue and should be temporary.
-   *
-   * @param rifRecordEvent the {@link RifRecordEvent} to check
-   * @return {@code true} if the record is a beneficiary and has an enrollment year that is non-
-   *     {@code null} and not 2023, and the flag to filter such beneficiaries is set to {@code true}
-   */
-  private boolean isBackdatedBene(RifRecordEvent<?> rifRecordEvent) {
-    // If this is a beneficiary record, apply the beneficiary filtering rules
-    if (rifRecordEvent.getRecord() instanceof Beneficiary) {
-      Beneficiary bene = (Beneficiary) rifRecordEvent.getRecord();
-      return isBackdatedBene(bene);
-    }
-    // Not currently worried about other types of records
-    return false;
-  }
-
-  /**
-   * Checks if the beneficiary should be skipped on the load (filtered).
-   *
-   * @param bene the bene to check
-   * @return {@code true} if the bene should be filtered/skipped
-   */
-  private boolean isBackdatedBene(Beneficiary bene) {
-    // No filtering should take place unless filtering is turned on in the configuration
-    if (!options.isFilteringNonNullAndNon2023Benes()) {
-      return false;
-    }
-
-    // If the reference year is not present we do not want to filter it
-    if (bene.getBeneEnrollmentReferenceYear().isEmpty()) {
-      return false;
-    }
-
-    // If the reference year is 2023 we do not want to filter it
-    if (BigDecimal.valueOf(2023).equals(bene.getBeneEnrollmentReferenceYear().get())) {
-      return false;
-    }
-    return true;
   }
 
   /**

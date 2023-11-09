@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.commons;
 
-import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.util.Objects;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -82,7 +81,7 @@ public abstract class IcdCode {
     coding.setSystem(system);
 
     coding.setCode(icdCode);
-    coding.setDisplay(TransformerUtils.retrieveIcdCodeDisplay(icdCode));
+    coding.setDisplay(CommonTransformerUtils.retrieveIcdCodeDisplay(icdCode));
 
     return codeableConcept;
   }

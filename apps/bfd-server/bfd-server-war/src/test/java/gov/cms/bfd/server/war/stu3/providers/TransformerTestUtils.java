@@ -36,6 +36,7 @@ import gov.cms.bfd.model.rif.entities.SNFClaimColumn;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -438,7 +439,7 @@ final class TransformerTestUtils {
    * @param actual the actual {@link BaseDateTimeType} to verify
    */
   static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
-    assertEquals(TransformerUtils.convertToDate(expected), actual.getValue());
+    assertEquals(CommonTransformerUtils.convertToDate(expected), actual.getValue());
     assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
   }
 
@@ -1055,7 +1056,8 @@ final class TransformerTestUtils {
     assertEquals(expectedIdentifierSystem, reference.getIdentifier().getSystem());
     assertEquals(expectedIdentifierValue, reference.getIdentifier().getValue());
     assertEquals(
-        TransformerUtils.retrieveNpiCodeDisplay(expectedIdentifierValue), reference.getDisplay());
+        CommonTransformerUtils.retrieveNpiCodeDisplay(expectedIdentifierValue),
+        reference.getDisplay());
   }
 
   /**
@@ -1609,7 +1611,8 @@ final class TransformerTestUtils {
 
     assertNoEncodedOptionals(eob);
 
-    assertEquals(TransformerUtils.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
+    assertEquals(
+        CommonTransformerUtils.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
     assertHasIdentifier(
         claimType.equals(ClaimType.PDE) ? CcwCodebookVariable.PDE_ID : CcwCodebookVariable.CLM_ID,
@@ -2193,7 +2196,7 @@ final class TransformerTestUtils {
    */
   static void assertNPICodeDisplayEquals(String npiCode, String npiCodeDisplayValue)
       throws IOException {
-    assertEquals(TransformerUtils.retrieveNpiCodeDisplay(npiCode), npiCodeDisplayValue);
+    assertEquals(CommonTransformerUtils.retrieveNpiCodeDisplay(npiCode), npiCodeDisplayValue);
   }
 
   /**

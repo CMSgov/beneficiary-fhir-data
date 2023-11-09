@@ -37,8 +37,8 @@ import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
-import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
@@ -743,7 +743,7 @@ public final class ServerTestUtils {
    * @return the patient id from the first beneficiary
    */
   public String getPatientId(List<Object> loadedRecords) {
-    return TransformerUtilsV2.buildPatientId(getFirstBeneficiary(loadedRecords)).getIdPart();
+    return CommonTransformerUtils.buildPatientId(getFirstBeneficiary(loadedRecords)).getIdPart();
   }
 
   /**
