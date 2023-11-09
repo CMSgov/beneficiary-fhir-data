@@ -16,12 +16,13 @@ String getParameter(Map args = [:]) {
 String putParameter(Map args = [:]) {
     name = args.parameterName
     value = args.parameterValue
+    tags = args.parameterTags
     type = args.parameterType ?: 'String'
     overwrite = args.shouldOverwrite ? '--overwrite' : ''
     awsRegion = args.awsRegion ?: 'us-east-1'
     includeType = "--type ${type}"
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
-    output = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${includeType} --region ${awsRegion} ${overwrite}").trim()
+    output = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${includeType} --tags ${tags} --region ${awsRegion} ${overwrite}").trim()
     return output
 }

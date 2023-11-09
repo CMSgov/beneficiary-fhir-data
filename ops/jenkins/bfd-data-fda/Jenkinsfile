@@ -129,7 +129,8 @@ mvn ${quietFlags} clean deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::def
                                 awsAuth.assumeRole()
                                 sh """
 aws ssm put-parameter --name /bfd/mgmt/versioning/nonsensitive/bfd-data-fda-sha256 \
---type String --region us-east-1  --overwrite --value "${fdaDrugCodeSha256}"
+--type String --tags Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False \
+Key=application,Value=bfd Key=business,Value=oeda --region us-east-1  --overwrite --value "${fdaDrugCodeSha256}"
 """
                             }
                         } else {
