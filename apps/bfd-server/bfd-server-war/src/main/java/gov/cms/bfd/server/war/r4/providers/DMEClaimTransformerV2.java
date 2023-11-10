@@ -18,7 +18,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -26,8 +25,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.springframework.stereotype.Component;
 
@@ -71,7 +68,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -184,7 +181,6 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // ICD_DGNS_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.DME));
 
     // CARR_CLM_ENTRY_CD => ExplanationOfBenefit.extension
@@ -435,57 +431,6 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
               CcwCodebookVariable.LINE_DME_PRCHS_PRICE_AMT,
               C4BBAdjudication.SUBMITTED,
               line.getPurchasePriceAmount()));
-    }
-  }
-
-  /**
-   * Sets the Coverage.relationship Looks up or adds a contained {@link Identifier} object to the
-   * current {@link Patient}. This is used to store Identifier slices related to the Provider
-   * organization.
-   *
-   * @param eob The {@link ExplanationOfBenefit} to ExplanationOfBenefit details
-   * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the
-   *     ExplanationOfBenefit
-   * @param optVal The {@link String} value associated with the ExplanationOfBenefit
-   */
-  void addExtension(
-      ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<String> optVal) {
-    optVal.ifPresent(
-        value ->
-            eob.addExtension(TransformerUtilsV2.createExtensionCoding(eob, ccwVariable, value)));
-  }
-
-  /**
-   * Sets the ExplanationOfBenefit.relationship Looks up or adds a contained {@link Identifier}
-   * object to the current {@link Patient}. This is used to store Identifier slices related to the
-   * Provider organization.
-   *
-   * @param eob The {@link ExplanationOfBenefit} to ExplanationOfBenefit details
-   * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the
-   *     ExplanationOfBenefit
-   * @param optVal The {@link Character} value associated with the ExplanationOfBenefit
-   */
-  void addCodeExtension(
-      ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<Character> optVal) {
-    optVal.ifPresent(
-        value ->
-            eob.addExtension(TransformerUtilsV2.createExtensionCoding(eob, ccwVariable, value)));
-  }
-
-  /**
-   * Sets the Coverage.relationship Looks up or adds a contained {@link Identifier} object to the
-   * current {@link Patient}. This is used to store Identifier slices related to the Provider
-   * organization.
-   *
-   * @param eob The {@link ExplanationOfBenefit} to ExplanationOfBenefit details
-   * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the
-   *     ExplanationOfBenefit
-   * @param optVal The {@link BigDecimal} value associated with the ExplanationOfBenefit
-   */
-  void addDecimalExtension(
-      ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
-    if (optVal.isPresent()) {
-      eob.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal.get()));
     }
   }
 }

@@ -71,7 +71,7 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
@@ -136,7 +136,6 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
 
     TransformerUtils.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     for (CarrierClaimLine claimLine : claimGroup.getLines()) {

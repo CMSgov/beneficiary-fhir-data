@@ -72,7 +72,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof PartDEvent)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
@@ -359,26 +359,15 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
     C4BBOrganizationIdentifierType identifierType;
 
     if (!claimGroup.getServiceProviderId().isEmpty()) {
-      switch (claimGroup.getServiceProviderIdQualiferCode()) {
-        case "01":
-          identifierType = C4BBOrganizationIdentifierType.NPI;
-          break;
-        case "06":
-          identifierType = C4BBOrganizationIdentifierType.UPIN;
-          break;
-        case "07":
-          identifierType = C4BBOrganizationIdentifierType.NCPDP;
-          break;
-        case "08":
-          identifierType = C4BBOrganizationIdentifierType.SL;
-          break;
-        case "11":
-          identifierType = C4BBOrganizationIdentifierType.TAX;
-          break;
-        default:
-          identifierType = null;
-          break;
-      }
+      identifierType =
+          switch (claimGroup.getServiceProviderIdQualiferCode()) {
+            case "01" -> C4BBOrganizationIdentifierType.NPI;
+            case "06" -> C4BBOrganizationIdentifierType.UPIN;
+            case "07" -> C4BBOrganizationIdentifierType.NCPDP;
+            case "08" -> C4BBOrganizationIdentifierType.SL;
+            case "11" -> C4BBOrganizationIdentifierType.TAX;
+            default -> null;
+          };
 
       // SRVC_PRVDR_ID => ExplanationOfBenefit.facility
       if (identifierType != null) {

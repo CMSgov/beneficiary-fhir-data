@@ -63,7 +63,7 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
@@ -131,7 +131,6 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
 
     TransformerUtils.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     for (DMEClaimLine claimLine : claimGroup.getLines()) {

@@ -77,7 +77,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(
@@ -194,7 +194,6 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // ICD_DGNS_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.CARRIER));
 
     // CARR_CLM_RFRNG_PIN_NUM => ExplanationOfBenefit.careteam.provider
