@@ -61,7 +61,7 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform"))
@@ -126,7 +126,6 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
 
     TransformerUtils.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     if (claimGroup.getClaimLUPACode().isPresent()) {

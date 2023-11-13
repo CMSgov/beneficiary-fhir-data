@@ -68,7 +68,7 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof InpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(
@@ -326,7 +326,6 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             claimGroup.getDiagnosisCodes(),
             claimGroup.getDiagnosisCodeVersions(),
             claimGroup.getDiagnosisPresentOnAdmissionCodes())
-        .stream()
         .forEach(
             diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.INPATIENT));
 
@@ -335,7 +334,6 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             claimGroup.getProcedureCodes(),
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
-        .stream()
         .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate

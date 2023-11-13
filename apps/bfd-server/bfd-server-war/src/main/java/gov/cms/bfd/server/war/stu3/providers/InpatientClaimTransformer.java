@@ -58,7 +58,7 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof InpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(
@@ -197,7 +197,7 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
         claimGroup.getClaimPPSOldCapitalHoldHarmlessAmount());
 
     // TODO If this is actually nullable, should be Optional.
-    if (claimGroup.getDrgOutlierApprovedPaymentAmount() != null) {
+    if (claimGroup.getDrgOutlierApprovedPaymentAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob,
           CcwCodebookVariable.NCH_DRG_OUTLIER_APRVD_PMT_AMT,
@@ -242,14 +242,12 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
             claimGroup.getDiagnosisCodes(),
             claimGroup.getDiagnosisCodeVersions(),
             claimGroup.getDiagnosisPresentOnAdmissionCodes())
-        .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     TransformerUtils.extractCCWProcedures(
             claimGroup.getProcedureCodes(),
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
-        .stream()
         .forEach(p -> TransformerUtils.addProcedureCode(eob, p));
 
     for (InpatientClaimLine claimLine : claimGroup.getLines()) {

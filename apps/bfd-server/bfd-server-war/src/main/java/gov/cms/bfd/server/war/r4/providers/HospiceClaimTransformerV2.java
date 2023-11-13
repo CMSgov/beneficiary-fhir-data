@@ -65,7 +65,7 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(
@@ -203,7 +203,6 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // CLM_E_POA_IND_SW(1-12) => diagnosis.type
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.HOSPICE));
 
     // Map care team

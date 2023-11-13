@@ -67,7 +67,7 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (!(claim instanceof SNFClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -323,7 +323,6 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.SNF));
 
     // Handle Procedures
@@ -331,7 +330,6 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             claimGroup.getProcedureCodes(),
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
-        .stream()
         .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     for (SNFClaimLine line : claimGroup.getLines()) {

@@ -63,7 +63,7 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof SNFClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform"))
@@ -202,7 +202,6 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
 
     TransformerUtils.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     // Handle Procedures
@@ -210,7 +209,6 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
             claimGroup.getProcedureCodes(),
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
-        .stream()
         .forEach(p -> TransformerUtils.addProcedureCode(eob, p));
 
     for (SNFClaimLine claimLine : claimGroup.getLines()) {

@@ -61,18 +61,13 @@ final class CoverageTransformerV2 {
     Objects.requireNonNull(medicareSegment);
     Objects.requireNonNull(beneficiary);
 
-    switch (medicareSegment) {
-      case PART_A:
-        return transformPartA(beneficiary);
-      case PART_B:
-        return transformPartB(beneficiary);
-      case PART_C:
-        return transformPartC(beneficiary);
-      case PART_D:
-        return transformPartD(beneficiary);
-      default:
-        throw new BadCodeMonkeyException();
-    }
+    return switch (medicareSegment) {
+      case PART_A -> transformPartA(beneficiary);
+      case PART_B -> transformPartB(beneficiary);
+      case PART_C -> transformPartC(beneficiary);
+      case PART_D -> transformPartD(beneficiary);
+      default -> throw new BadCodeMonkeyException();
+    };
   }
 
   /**
@@ -336,7 +331,7 @@ final class CoverageTransformerV2 {
                     };
 
                 if (mapOfMonth.containsKey(month)) {
-                  if (!beneMonthly.getPartDContractNumberId().isPresent()
+                  if (beneMonthly.getPartDContractNumberId().isEmpty()
                       || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
                     beneMonthly.setPartDContractNumberId(Optional.of("0"));
                   }

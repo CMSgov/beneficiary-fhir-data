@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -127,22 +126,24 @@ final class BeneficiaryTransformer {
     if (requestHeader.isHICNinIncludeIdentifiers()) {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
 
-      if (hicnUnhashedCurrent.isPresent())
+      if (hicnUnhashedCurrent.isPresent()) {
         addUnhashedIdentifier(
             patient,
             hicnUnhashedCurrent.get(),
             TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
             currentIdentifier);
+      }
 
-      List<String> unhashedHicns = new ArrayList<String>();
+      List<String> unhashedHicns = new ArrayList<>();
       for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
         Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
-        if (hicnUnhashedHistoric.isPresent()) unhashedHicns.add(hicnUnhashedHistoric.get());
+        if (hicnUnhashedHistoric.isPresent()) {
+          unhashedHicns.add(hicnUnhashedHistoric.get());
+        }
         TransformerUtils.updateMaxLastUpdated(patient, beneHistory.getLastUpdated());
       }
 
-      List<String> unhashedHicnsNoDupes =
-          unhashedHicns.stream().distinct().collect(Collectors.toList());
+      List<String> unhashedHicnsNoDupes = unhashedHicns.stream().distinct().toList();
       for (String hicn : unhashedHicnsNoDupes) {
         addUnhashedIdentifier(
             patient,
@@ -201,9 +202,13 @@ final class BeneficiaryTransformer {
     }
 
     char sex = beneficiary.getSex();
-    if (sex == Sex.MALE.getCode()) patient.setGender((AdministrativeGender.MALE));
-    else if (sex == Sex.FEMALE.getCode()) patient.setGender((AdministrativeGender.FEMALE));
-    else patient.setGender((AdministrativeGender.UNKNOWN));
+    if (sex == Sex.MALE.getCode()) {
+      patient.setGender((AdministrativeGender.MALE));
+    } else if (sex == Sex.FEMALE.getCode()) {
+      patient.setGender((AdministrativeGender.FEMALE));
+    } else {
+      patient.setGender((AdministrativeGender.UNKNOWN));
+    }
 
     if (beneficiary.getRace().isPresent()) {
       patient.addExtension(
@@ -217,8 +222,9 @@ final class BeneficiaryTransformer {
             .addGiven(beneficiary.getNameGiven())
             .setFamily(beneficiary.getNameSurname())
             .setUse(HumanName.NameUse.USUAL);
-    if (beneficiary.getNameMiddleInitial().isPresent())
+    if (beneficiary.getNameMiddleInitial().isPresent()) {
       name.addGiven(String.valueOf(beneficiary.getNameMiddleInitial().get()));
+    }
 
     // The reference year of the enrollment data
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
