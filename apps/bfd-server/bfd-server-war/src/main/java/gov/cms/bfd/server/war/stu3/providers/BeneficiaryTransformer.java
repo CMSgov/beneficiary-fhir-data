@@ -12,6 +12,7 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerConstants.CurrencyIdentifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -384,13 +385,5 @@ final class BeneficiaryTransformer {
             historicalIdentifier);
       }
     }
-  }
-
-  /** Enumerates the options for the currency of an {@link Identifier}. */
-  public enum CurrencyIdentifier {
-    /** Represents a current identifier. */
-    CURRENT,
-    /** Represents a historic identifier. */
-    HISTORIC;
   }
 }
