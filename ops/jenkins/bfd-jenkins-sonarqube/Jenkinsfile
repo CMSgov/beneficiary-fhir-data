@@ -78,6 +78,15 @@ spec:
                 }
             }
         }
+        stage ('SonarQube Check Sources') {
+            steps {
+                script {
+                    dir ('apps') {
+                      sh "pwd"
+                    }
+                }
+            }          
+        }
         stage ('SonarQube Analysis') {
             steps {
                 script {
@@ -92,7 +101,8 @@ spec:
                         " -DskipITs" +
                         " -DskipTests" +
                         " -Dsonar.exclusions='*.java'" +
-                        " -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml"
+                        " -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml" +
+			                  " -Dsonar.sources=/home/jenkins/agent/workspace/bfd-jenkins-sonarqube_master/ops/ccs-ops-misc/cert-checker,/home/jenkins/agent/workspace/bfd-jenkins-sonarqube_master/apps/bfd-ops/pom.xml"
                     }
                 }
             }
