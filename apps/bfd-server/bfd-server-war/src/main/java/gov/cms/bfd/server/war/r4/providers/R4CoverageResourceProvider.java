@@ -45,8 +45,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -276,8 +274,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     Beneficiary beneficiary = null;
     long beneByIdQueryNanoSeconds;
     Timer.Context timerBeneQuery =
-            CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
-                                                      "query", "bene_by_id");
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
     } finally {

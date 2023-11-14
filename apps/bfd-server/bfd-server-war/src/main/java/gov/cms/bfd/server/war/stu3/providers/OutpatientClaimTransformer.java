@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
@@ -37,7 +36,7 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform");
+      MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.

@@ -81,8 +81,8 @@ public class BeneficiaryTransformerV2 {
   public Patient transform(
       Beneficiary beneficiary, RequestHeaders requestHeader, boolean addHistoricalMbiExtensions) {
     Timer.Context timer =
-            CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
-                                                      "transform");
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "transform");
 
     requireNonNull(beneficiary);
 

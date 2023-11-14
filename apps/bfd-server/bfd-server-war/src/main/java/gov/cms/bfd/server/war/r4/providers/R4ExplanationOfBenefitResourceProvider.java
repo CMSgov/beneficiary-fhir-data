@@ -238,8 +238,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     Object claimEntity = null;
     long eobByIdQueryNanoSeconds;
     Timer.Context timerEobQuery =
-            CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
-                                                      "query", "eob_by_id");
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "query", "eob_by_id");
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
 

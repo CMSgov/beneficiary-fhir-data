@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
@@ -36,7 +35,7 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform");
+      MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.

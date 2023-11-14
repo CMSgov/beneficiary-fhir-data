@@ -3,9 +3,14 @@ package gov.cms.bfd.server.war.r4.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -32,9 +37,25 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link CoverageTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class CoverageTransformerV2Test {
+
+  /** The metrics registry. */
+  @Mock MetricRegistry metricRegistry;
+
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
+
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** The fhir context for parsing the file data. */
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -67,7 +88,9 @@ public final class CoverageTransformerV2Test {
   /** Sets up the test dependencies shared across each test. */
   @BeforeEach
   public void setup() {
-    coverageTransformer = new CoverageTransformerV2(new MetricRegistry());
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    coverageTransformer = new CoverageTransformerV2(metricRegistry);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -92,6 +115,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(partA, coverage.getIdPart());
+    verifyMetrics("part_a");
   }
 
   /** Standalone wrapper to output PART_B. */
@@ -102,6 +126,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(partB, coverage.getIdPart());
+    verifyMetrics("part_b");
   }
 
   /** Standalone wrapper to output PART_C. */
@@ -112,6 +137,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(partC, coverage.getIdPart());
+    verifyMetrics("part_c");
   }
 
   /** Standalone wrapper to output PART_D. */
@@ -122,6 +148,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(partD, coverage.getIdPart());
+    verifyMetrics("part_d");
   }
 
   // ==================
@@ -1021,5 +1048,19 @@ public final class CoverageTransformerV2Test {
     } catch (Exception e) {
       return Optional.empty();
     }
+  }
+
+  /**
+   * Verify metrics were called with the specified part as part of the metric name.
+   *
+   * @param partSubstring the part substring
+   */
+  private void verifyMetrics(String partSubstring) {
+    String expectedTimerName =
+        coverageTransformer.getClass().getSimpleName() + ".transform." + partSubstring;
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).stop();
   }
 }

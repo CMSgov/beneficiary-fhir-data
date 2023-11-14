@@ -13,7 +13,6 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
@@ -46,7 +45,7 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(OutpatientClaimTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(OutpatientClaimTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.

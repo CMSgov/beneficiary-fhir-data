@@ -40,7 +40,7 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform");
+      MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.

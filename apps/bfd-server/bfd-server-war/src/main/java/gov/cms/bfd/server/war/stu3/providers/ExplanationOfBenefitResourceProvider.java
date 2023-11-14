@@ -238,8 +238,9 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
 
     Object claimEntity = null;
     long eobByIdQueryNanoSeconds;
-    Timer.Context timerEobQuery = CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
-                                                                            "query", "eob_by_id");
+    Timer.Context timerEobQuery =
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "query", "eob_by_id");
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
       // Add number of resources to MDC logs

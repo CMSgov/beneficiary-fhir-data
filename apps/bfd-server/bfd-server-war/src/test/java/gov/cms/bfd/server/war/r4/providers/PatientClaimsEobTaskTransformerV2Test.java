@@ -11,6 +11,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
@@ -30,7 +32,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,11 +68,11 @@ class PatientClaimsEobTaskTransformerV2Test {
   /** The mock metric registry. */
   @Mock MetricRegistry metricRegistry;
 
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
 
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
@@ -115,8 +116,8 @@ class PatientClaimsEobTaskTransformerV2Test {
     setupEntities();
 
     // metrics mocking
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
     // NPI and FDA drug mocking
     when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
     when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
@@ -196,13 +197,15 @@ class PatientClaimsEobTaskTransformerV2Test {
    * EOB filtering.
    */
   @Test
-  void testTaskTransformerUsingCarrierClaimNoSamhsaFilter() throws IOException {
+  void testTaskTransformerUsingCarrierClaimNoSamhsaFilter() {
     CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.CARRIER, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new CarrierClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
+        new CarrierClaimTransformerV2(
+            new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -219,6 +222,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertFalse(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(-1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.CARRIER);
   }
 
   /**
@@ -227,13 +231,15 @@ class PatientClaimsEobTaskTransformerV2Test {
    * filtering.
    */
   @Test
-  void testTaskTransformerUsingCarrierClaimWithSamhsa() throws IOException {
+  void testTaskTransformerUsingCarrierClaimWithSamhsa() {
     CriteriaQuery<CarrierClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<CarrierClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.CARRIER, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new CarrierClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
+        new CarrierClaimTransformerV2(
+            new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -250,6 +256,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.CARRIER);
   }
 
   /**
@@ -258,13 +265,14 @@ class PatientClaimsEobTaskTransformerV2Test {
    * filtering.
    */
   @Test
-  void testTaskTransformerUsingDmeClaimNoSamhsaFilter() throws IOException {
+  void testTaskTransformerUsingDmeClaimNoSamhsaFilter() {
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new DMEClaimTransformerV2(metricRegistry, mockDrugDisplayLookup);
+        new DMEClaimTransformerV2(new MetricRegistry(), mockDrugDisplayLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -281,6 +289,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertFalse(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(-1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.DME);
   }
 
   /**
@@ -289,13 +298,14 @@ class PatientClaimsEobTaskTransformerV2Test {
    * filtering.
    */
   @Test
-  void testTaskTransformerUsingDmeClaimWithSamhsa() throws IOException {
+  void testTaskTransformerUsingDmeClaimWithSamhsa() {
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new DMEClaimTransformerV2(metricRegistry, mockDrugDisplayLookup);
+        new DMEClaimTransformerV2(new MetricRegistry(), mockDrugDisplayLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -312,6 +322,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.DME);
   }
 
   /**
@@ -320,13 +331,14 @@ class PatientClaimsEobTaskTransformerV2Test {
    * flag when set to true.
    */
   @Test
-  void testTaskTransformerUsingHhaClaimWithSamhsa() throws IOException {
+  void testTaskTransformerUsingHhaClaimWithSamhsa() {
     CriteriaQuery<HHAClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<HHAClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.HHA, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new HHAClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
+        new HHAClaimTransformerV2(new MetricRegistry(), mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -344,6 +356,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.HHA);
   }
 
   /**
@@ -352,13 +365,14 @@ class PatientClaimsEobTaskTransformerV2Test {
    * filtering flag when set to true.
    */
   @Test
-  void testTaskTransformerUsingHospiceClaimWithSamhsa() throws IOException {
+  void testTaskTransformerUsingHospiceClaimWithSamhsa() {
     CriteriaQuery<HospiceClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<HospiceClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.HOSPICE, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new HospiceClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
+        new HospiceClaimTransformerV2(new MetricRegistry(), mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -376,6 +390,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.HOSPICE);
   }
 
   /**
@@ -384,13 +399,14 @@ class PatientClaimsEobTaskTransformerV2Test {
    * filtering flag when set to true.
    */
   @Test
-  void testTaskTransformerUsingInpatientClaimWithSamhsa() throws IOException {
+  void testTaskTransformerUsingInpatientClaimWithSamhsa() {
     CriteriaQuery<InpatientClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<InpatientClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.INPATIENT, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new InpatientClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
+        new InpatientClaimTransformerV2(new MetricRegistry(), mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -408,6 +424,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.INPATIENT);
   }
 
   /**
@@ -416,13 +433,15 @@ class PatientClaimsEobTaskTransformerV2Test {
    * filtering flag when set to true.
    */
   @Test
-  void testTaskTransformerUsingOutpatientClaimWithSamhsa() throws IOException {
+  void testTaskTransformerUsingOutpatientClaimWithSamhsa() {
     CriteriaQuery<OutpatientClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<OutpatientClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.OUTPATIENT, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new OutpatientClaimTransformerV2(metricRegistry, mockDrugDisplayLookup, mockNpiOrgLookup);
+        new OutpatientClaimTransformerV2(
+            new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -440,6 +459,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.OUTPATIENT);
   }
 
   /**
@@ -448,13 +468,14 @@ class PatientClaimsEobTaskTransformerV2Test {
    * flag when set to true.
    */
   @Test
-  void testTaskTransformerUsingPartDEventWithSamhsa() throws IOException {
+  void testTaskTransformerUsingPartDEventWithSamhsa() {
     CriteriaQuery<PartDEvent> clmMockCriteria = mock(CriteriaQuery.class);
     Root<PartDEvent> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.PDE, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new PartDEventTransformerV2(metricRegistry, mockDrugDisplayLookup);
+        new PartDEventTransformerV2(new MetricRegistry(), mockDrugDisplayLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -472,6 +493,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.PDE);
   }
 
   /**
@@ -480,13 +502,14 @@ class PatientClaimsEobTaskTransformerV2Test {
    * flag when set to true.
    */
   @Test
-  void testTaskTransformerUsingSnfClaimWithSamhsa() throws IOException {
+  void testTaskTransformerUsingSnfClaimWithSamhsa() {
     CriteriaQuery<SNFClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<SNFClaim> clmRoot = mock(Root.class);
     setupClaimEntity(mockEntityManager, ClaimType.SNF, clmMockCriteria, clmRoot);
 
+    // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new SNFClaimTransformerV2(metricRegistry, mockNpiOrgLookup);
+        new SNFClaimTransformerV2(new MetricRegistry(), mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -504,17 +527,18 @@ class PatientClaimsEobTaskTransformerV2Test {
     assertTrue(taskTransformer.wasSamhsaFilteringPerformed());
     assertEquals(0, taskTransformer.eobsRemovedBySamhsaFilter());
     assertEquals(1, taskTransformer.eobsIgnoredBySamhsaFilter());
+    verifyMetrics(ClaimType.SNF);
   }
 
   /**
    * Verify that the {@link PatientClaimsEobTaskTransformerV2} can handle internal processing {@link
    * Exception} and can return it to the caller via its {@link
-   * PatientClaimsEobTaskTransformer#getFailure()} method. The test sets up a {@link DMEClaim}
-   * entity but invokes the task setup to process the entity using a {@link SNFClaimTransformer};
+   * PatientClaimsEobTaskTransformerV2#getFailure()} method. The test sets up a {@link DMEClaim}
+   * entity but invokes the task setup to process the entity using a {@link SNFClaimTransformerV2};
    * this mis-match triggers a {@link BadCodeMonkeyException} which the caller can retrieve.
    */
   @Test
-  void testGetFailureFromTaskTransformer() throws IOException {
+  void testGetFailureFromTaskTransformer() {
     // purposely setup a DME clam
     CriteriaQuery<DMEClaim> clmMockCriteria = mock(CriteriaQuery.class);
     Root<DMEClaim> clmRoot = mock(Root.class);
@@ -535,7 +559,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();
     assertNotNull(rslt);
     assertFalse(taskTransformer.ranSuccessfully());
-    assertTrue(taskTransformer.getFailure().get() instanceof BadCodeMonkeyException);
+    assertTrue(taskTransformer.getFailure().orElseThrow() instanceof BadCodeMonkeyException);
   }
 
   /**
@@ -600,5 +624,21 @@ class PatientClaimsEobTaskTransformerV2Test {
       default -> {}
     }
     when(clmMockQuery.getResultList()).thenReturn(list);
+  }
+
+  /**
+   * Verify that the metric are started and stopped properly.
+   *
+   * @param claimType the claim type expected for this metric
+   */
+  private void verifyMetrics(ClaimType claimType) {
+    /* FUTURE: Not sure if the registered class here _should_ be MetricsRegistry
+    or if that was a mistake in the initial impl. Leaving it as-is, for now... */
+    String expectedTimerName =
+        "MetricRegistry.query.eobs_by_bene_id." + claimType.name().toLowerCase();
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).stop();
   }
 }

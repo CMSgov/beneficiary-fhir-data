@@ -10,7 +10,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
@@ -34,7 +33,7 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(HospiceClaimTransformer.class.getSimpleName(), "transform");
+      MetricRegistry.name(HospiceClaimTransformer.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.

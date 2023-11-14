@@ -605,8 +605,8 @@ public final class CommonTransformerUtils {
    * @param registrySubNames the registry sub names
    * @return the metrics registry timer
    */
-  public static Timer.Context createMetricsTimer(MetricRegistry metricRegistry, String baseRegistryName,
-                                                 String... registrySubNames) {
+  public static Timer.Context createMetricsTimer(
+      MetricRegistry metricRegistry, String baseRegistryName, String... registrySubNames) {
     return metricRegistry.timer(MetricRegistry.name(baseRegistryName, registrySubNames)).time();
   }
 }

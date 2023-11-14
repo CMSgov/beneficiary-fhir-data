@@ -1285,7 +1285,7 @@ final class CoverageTransformer {
    * @return the timer context
    */
   Timer.Context getTimerContext(String partId) {
-    return CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
-                                                     "transform", partId);
+    return CommonTransformerUtils.createMetricsTimer(
+        metricRegistry, getClass().getSimpleName(), "transform", partId);
   }
 }

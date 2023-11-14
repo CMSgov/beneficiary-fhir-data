@@ -326,8 +326,12 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     List<T> claimEntities = null;
     long eobsByBeneIdQueryNanoSeconds;
     Timer.Context timerEobQuery =
-            CommonTransformerUtils.createMetricsTimer(metricRegistry, metricRegistry.getClass().getSimpleName(),
-                                                      "query", "eobs_by_bene_id", claimType.name().toLowerCase());
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            metricRegistry.getClass().getSimpleName(),
+            "query",
+            "eobs_by_bene_id",
+            claimType.name().toLowerCase());
     try {
       claimEntities = entityManager.createQuery(criteria).getResultList();
     } finally {

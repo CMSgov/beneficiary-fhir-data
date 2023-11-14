@@ -40,7 +40,7 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.

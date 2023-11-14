@@ -277,8 +277,9 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
     Beneficiary beneficiary = null;
     long beneByIdQueryNanoSeconds;
-    Timer.Context timerBeneQuery = CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
-                                                                             "query", "bene_by_id");
+    Timer.Context timerBeneQuery =
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
     } finally {

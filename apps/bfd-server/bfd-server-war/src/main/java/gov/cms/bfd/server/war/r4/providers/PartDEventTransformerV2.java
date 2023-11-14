@@ -44,7 +44,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The metric name. */
   private static final String METRIC_NAME =
-          MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.

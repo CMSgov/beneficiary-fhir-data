@@ -15,6 +15,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.Constants;
@@ -123,11 +125,11 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The mock Bundle returned from a transformer. */
   Bundle testBundle;
 
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
 
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** The mock samhsa matcher. */
   @Mock R4EobSamhsaMatcher mockSamhsaMatcher;
@@ -180,8 +182,8 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     setupEntities();
 
     // metrics mocking
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
     // NPI and FDA drug mocking
     when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
     when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
@@ -484,6 +486,23 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
     ExplanationOfBenefit eob = eobProvider.read(eobId, requestDetails);
     assertNotNull(eob);
+  }
+
+  /**
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#read} starts and stops its metrics.
+   */
+  @Test
+  void testReadWhenValidIdExpectMetrics() {
+    when(eobId.getIdPart()).thenReturn("pde-123456789");
+    when(mockQuery.getSingleResult()).thenReturn(testPdeClaim);
+    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    eobProvider.read(eobId, requestDetails);
+
+    String expectedTimerName = eobProvider.getClass().getSimpleName() + ".query.eob_by_id";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).stop();
   }
 
   /**
