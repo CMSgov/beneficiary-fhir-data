@@ -62,7 +62,7 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof OutpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(
@@ -169,7 +169,6 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
 
     TransformerUtils.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     // Handle Procedures
@@ -177,7 +176,6 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
             claimGroup.getProcedureCodes(),
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
-        .stream()
         .forEach(p -> TransformerUtils.addProcedureCode(eob, p));
 
     for (OutpatientClaimLine claimLine : claimGroup.getLines()) {

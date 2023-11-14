@@ -3569,10 +3569,10 @@ public final class TransformerUtilsV2 {
    */
   static Observation findOrCreateContainedObservation(ExplanationOfBenefit eob, String id) {
     Optional<Resource> observation =
-        eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
+        eob.getContained().stream().filter(r -> r.getId().equals(id)).findFirst();
 
     // If it isn't there, add one
-    if (!observation.isPresent()) {
+    if (observation.isEmpty()) {
       observation = Optional.of(new Observation().setId(id));
       eob.getContained().add(observation.get());
     }

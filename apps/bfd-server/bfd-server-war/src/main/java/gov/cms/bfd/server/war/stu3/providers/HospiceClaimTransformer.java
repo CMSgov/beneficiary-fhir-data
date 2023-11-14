@@ -59,7 +59,7 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HospiceClaimTransformer.class.getSimpleName(), "transform"))
@@ -146,7 +146,6 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
 
     TransformerUtils.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(d -> TransformerUtils.addDiagnosisCode(eob, d));
 
     for (HospiceClaimLine claimLine : claimGroup.getLines()) {

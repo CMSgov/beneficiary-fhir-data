@@ -66,7 +66,7 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
     if (!(claim instanceof PartDEvent)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(PartDEventTransformer.class.getSimpleName(), "transform"))
@@ -248,9 +248,10 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
         .setAmount(TransformerUtils.createMoney(claimGroup.getGapDiscountAmount()));
 
     if (claimGroup.getPrescriberIdQualifierCode() == null
-        || !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01"))
+        || !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01")) {
       throw new InvalidRifValueException(
           "Prescriber ID Qualifier Code is invalid: " + claimGroup.getPrescriberIdQualifierCode());
+    }
 
     if (claimGroup.getPrescriberId() != null) {
       TransformerUtils.addCareTeamPractitioner(
@@ -300,26 +301,15 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
     IdentifierType identifierType;
 
     if (!claimGroup.getServiceProviderId().isEmpty()) {
-      switch (claimGroup.getServiceProviderIdQualiferCode()) {
-        case "01":
-          identifierType = IdentifierType.NPI;
-          break;
-        case "06":
-          identifierType = IdentifierType.UPIN;
-          break;
-        case "07":
-          identifierType = IdentifierType.NCPDP;
-          break;
-        case "08":
-          identifierType = IdentifierType.SL;
-          break;
-        case "11":
-          identifierType = IdentifierType.TAX;
-          break;
-        default:
-          identifierType = null;
-          break;
-      }
+      identifierType =
+          switch (claimGroup.getServiceProviderIdQualiferCode()) {
+            case "01" -> IdentifierType.NPI;
+            case "06" -> IdentifierType.UPIN;
+            case "07" -> IdentifierType.NCPDP;
+            case "08" -> IdentifierType.SL;
+            case "11" -> IdentifierType.TAX;
+            default -> null;
+          };
 
       if (identifierType != null) {
         eob.setOrganization(
@@ -346,12 +336,13 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
         CcwCodebookVariable.DAW_PROD_SLCTN_CD,
         claimGroup.getDispenseAsWrittenProductSelectionCode());
 
-    if (claimGroup.getDispensingStatusCode().isPresent())
+    if (claimGroup.getDispensingStatusCode().isPresent()) {
       TransformerUtils.addInformationWithCode(
           eob,
           CcwCodebookVariable.DSPNSNG_STUS_CD,
           CcwCodebookVariable.DSPNSNG_STUS_CD,
           claimGroup.getDispensingStatusCode());
+    }
 
     TransformerUtils.addInformationWithCode(
         eob,
@@ -359,47 +350,53 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
         CcwCodebookVariable.DRUG_CVRG_STUS_CD,
         claimGroup.getDrugCoverageStatusCode());
 
-    if (claimGroup.getAdjustmentDeletionCode().isPresent())
+    if (claimGroup.getAdjustmentDeletionCode().isPresent()) {
       TransformerUtils.addInformationWithCode(
           eob,
           CcwCodebookVariable.ADJSTMT_DLTN_CD,
           CcwCodebookVariable.ADJSTMT_DLTN_CD,
           claimGroup.getAdjustmentDeletionCode());
+    }
 
-    if (claimGroup.getNonstandardFormatCode().isPresent())
+    if (claimGroup.getNonstandardFormatCode().isPresent()) {
       TransformerUtils.addInformationWithCode(
           eob,
           CcwCodebookVariable.NSTD_FRMT_CD,
           CcwCodebookVariable.NSTD_FRMT_CD,
           claimGroup.getNonstandardFormatCode());
+    }
 
-    if (claimGroup.getPricingExceptionCode().isPresent())
+    if (claimGroup.getPricingExceptionCode().isPresent()) {
       TransformerUtils.addInformationWithCode(
           eob,
           CcwCodebookVariable.PRCNG_EXCPTN_CD,
           CcwCodebookVariable.PRCNG_EXCPTN_CD,
           claimGroup.getPricingExceptionCode());
+    }
 
-    if (claimGroup.getCatastrophicCoverageCode().isPresent())
+    if (claimGroup.getCatastrophicCoverageCode().isPresent()) {
       TransformerUtils.addInformationWithCode(
           eob,
           CcwCodebookVariable.CTSTRPHC_CVRG_CD,
           CcwCodebookVariable.CTSTRPHC_CVRG_CD,
           claimGroup.getCatastrophicCoverageCode());
+    }
 
-    if (claimGroup.getPrescriptionOriginationCode().isPresent())
+    if (claimGroup.getPrescriptionOriginationCode().isPresent()) {
       TransformerUtils.addInformationWithCode(
           eob,
           CcwCodebookVariable.RX_ORGN_CD,
           CcwCodebookVariable.RX_ORGN_CD,
           claimGroup.getPrescriptionOriginationCode());
+    }
 
-    if (claimGroup.getBrandGenericCode().isPresent())
+    if (claimGroup.getBrandGenericCode().isPresent()) {
       TransformerUtils.addInformationWithCode(
           eob,
           CcwCodebookVariable.BRND_GNRC_CD,
           CcwCodebookVariable.BRND_GNRC_CD,
           claimGroup.getBrandGenericCode());
+    }
 
     TransformerUtils.addInformationWithCode(
         eob,
@@ -413,12 +410,13 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
         CcwCodebookVariable.PTNT_RSDNC_CD,
         claimGroup.getPatientResidenceCode());
 
-    if (claimGroup.getSubmissionClarificationCode().isPresent())
+    if (claimGroup.getSubmissionClarificationCode().isPresent()) {
       TransformerUtils.addInformationWithCode(
           eob,
           CcwCodebookVariable.SUBMSN_CLR_CD,
           CcwCodebookVariable.SUBMSN_CLR_CD,
           claimGroup.getSubmissionClarificationCode());
+    }
 
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;

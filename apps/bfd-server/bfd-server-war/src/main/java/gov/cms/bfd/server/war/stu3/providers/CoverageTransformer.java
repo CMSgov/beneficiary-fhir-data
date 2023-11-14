@@ -51,12 +51,15 @@ final class CoverageTransformer {
   @Trace
   public Coverage transform(MedicareSegment medicareSegment, Beneficiary beneficiary) {
     Objects.requireNonNull(medicareSegment);
+    Objects.requireNonNull(beneficiary);
 
-    if (medicareSegment == MedicareSegment.PART_A) return transformPartA(beneficiary);
-    else if (medicareSegment == MedicareSegment.PART_B) return transformPartB(beneficiary);
-    else if (medicareSegment == MedicareSegment.PART_C) return transformPartC(beneficiary);
-    else if (medicareSegment == MedicareSegment.PART_D) return transformPartD(beneficiary);
-    else throw new BadCodeMonkeyException();
+    return switch (medicareSegment) {
+      case PART_A -> transformPartA(beneficiary);
+      case PART_B -> transformPartB(beneficiary);
+      case PART_C -> transformPartC(beneficiary);
+      case PART_D -> transformPartD(beneficiary);
+      default -> throw new BadCodeMonkeyException();
+    };
   }
 
   /**
@@ -89,14 +92,14 @@ final class CoverageTransformer {
                     CoverageTransformer.class.getSimpleName(), "transform", "part_a"))
             .time();
 
-    Objects.requireNonNull(beneficiary);
-
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
     if (beneficiary.getPartATerminationCode().isPresent()
-        && beneficiary.getPartATerminationCode().get().equals('0'))
+        && beneficiary.getPartATerminationCode().get().equals('0')) {
       coverage.setStatus(CoverageStatus.ACTIVE);
-    else coverage.setStatus(CoverageStatus.CANCELLED);
+    } else {
+      coverage.setStatus(CoverageStatus.CANCELLED);
+    }
 
     if (beneficiary.getMedicareCoverageStartDate().isPresent()) {
       TransformerUtils.setPeriodStart(
@@ -170,14 +173,14 @@ final class CoverageTransformer {
                     CoverageTransformer.class.getSimpleName(), "transform", "part_b"))
             .time();
 
-    Objects.requireNonNull(beneficiary);
-
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
     if (beneficiary.getPartBTerminationCode().isPresent()
-        && beneficiary.getPartBTerminationCode().get().equals('0'))
+        && beneficiary.getPartBTerminationCode().get().equals('0')) {
       coverage.setStatus(CoverageStatus.ACTIVE);
-    else coverage.setStatus(CoverageStatus.CANCELLED);
+    } else {
+      coverage.setStatus(CoverageStatus.CANCELLED);
+    }
 
     if (beneficiary.getMedicareCoverageStartDate().isPresent()) {
       TransformerUtils.setPeriodStart(
@@ -235,8 +238,6 @@ final class CoverageTransformer {
                     CoverageTransformer.class.getSimpleName(), "transform", "part_c"))
             .time();
 
-    Objects.requireNonNull(beneficiary);
-
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
     coverage.setStatus(CoverageStatus.ACTIVE);
@@ -288,8 +289,6 @@ final class CoverageTransformer {
                     CoverageTransformer.class.getSimpleName(), "transform", "part_d"))
             .time();
 
-    Objects.requireNonNull(beneficiary);
-
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
     coverage
@@ -340,7 +339,7 @@ final class CoverageTransformer {
                     };
 
                 if (mapOfMonth.containsKey(month)) {
-                  if (!beneMonthly.getPartDContractNumberId().isPresent()
+                  if (beneMonthly.getPartDContractNumberId().isEmpty()
                       || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
                     beneMonthly.setPartDContractNumberId(Optional.of("0"));
                   }

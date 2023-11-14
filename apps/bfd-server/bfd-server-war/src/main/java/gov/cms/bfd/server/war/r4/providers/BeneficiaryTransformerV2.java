@@ -199,9 +199,13 @@ public class BeneficiaryTransformerV2 {
     }
 
     char sex = beneficiary.getSex();
-    if (sex == Sex.MALE.getCode()) patient.setGender((AdministrativeGender.MALE));
-    else if (sex == Sex.FEMALE.getCode()) patient.setGender((AdministrativeGender.FEMALE));
-    else patient.setGender((AdministrativeGender.UNKNOWN));
+    if (sex == Sex.MALE.getCode()) {
+      patient.setGender((AdministrativeGender.MALE));
+    } else if (sex == Sex.FEMALE.getCode()) {
+      patient.setGender((AdministrativeGender.FEMALE));
+    } else {
+      patient.setGender((AdministrativeGender.UNKNOWN));
+    }
 
     if (beneficiary.getRace().isPresent()) {
       patient.addExtension(

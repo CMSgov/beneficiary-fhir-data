@@ -60,7 +60,6 @@ spec:
         defaultValue: false)
     }
     environment {
-        SONAR_TOKEN = credentials('svc-sonar-bfd')
         SONAR_PROJECT_KEY = 'bfd-parent'
         SONAR_HOST_URL = 'https://sonarqube.cloud.cms.gov'
     }
@@ -69,6 +68,8 @@ spec:
             // Build Step
          steps {
                 script {
+                    // Address limitations resulting from CVE-2022-2476
+                    sh "git config --global --add safe.directory $WORKSPACE"
                    // Load the child Jenkinsfiles.
                    scriptForApps = load('apps/build.groovy')
                    //Authentication of AWS to run Build.groovy
@@ -81,18 +82,21 @@ spec:
         stage ('SonarQube Analysis') {
             steps {
                 script {
+                    //Retrieve Sonar Token from AWS
+                    env.SONAR_TOKEN = awsSsm.getParameter(parameterName: "/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key")
                     dir ('apps') {
-                    // Address limitations resulting from CVE-2022-24767
-                        sh 'git config --global --add safe.directory "$WORKSPACE"'
-                        sh "mvn sonar:sonar" +
-                        " -Dsonar.projectKey=${SONAR_PROJECT_KEY}" +
-                        " -Dsonar.host.url=${SONAR_HOST_URL}" +
-                        " -Dsonar.login=${SONAR_TOKEN}" +
-                        " -Dmaven.build.cache.enabled=false" +
-                        " -DskipITs" +
-                        " -DskipTests" +
-                        " -Dsonar.exclusions='*.java'" +
-                        " -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml"
+                    sh '''
+                    set +x
+                    mvn sonar:sonar \
+                      -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+                      -Dsonar.host.url="$SONAR_HOST_URL" \
+                      -Dsonar.login="$SONAR_TOKEN" \
+                      -Dmaven.build.cache.enabled=false \
+                      -DskipITs \
+                      -DskipTests \
+                      -Dsonar.exclusions='*.java' \
+                      -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml
+                    '''
                     }
                 }
             }

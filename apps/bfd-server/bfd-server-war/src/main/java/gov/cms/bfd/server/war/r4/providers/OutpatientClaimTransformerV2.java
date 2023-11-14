@@ -77,7 +77,7 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     if (!(claim instanceof OutpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = null;
+    ExplanationOfBenefit eob;
     try (Timer.Context timer =
         metricRegistry
             .timer(
@@ -247,7 +247,6 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     DiagnosisUtilV2.extractDiagnoses(
             claimGroup.getDiagnosisCodes(), claimGroup.getDiagnosisCodeVersions(), Map.of())
-        .stream()
         .forEach(
             diagnosis -> DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimType.OUTPATIENT));
 
@@ -256,7 +255,6 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
             claimGroup.getProcedureCodes(),
             claimGroup.getProcedureCodeVersions(),
             claimGroup.getProcedureDates())
-        .stream()
         .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p));
 
     // ClaimLine => ExplanationOfBenefit.item
