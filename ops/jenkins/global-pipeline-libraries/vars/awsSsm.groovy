@@ -28,5 +28,5 @@ String putParameter(Map args = [:]) {
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
     parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${includeType} --region ${awsRegion} ${overwrite}").trim()
     tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource --resource-type ${rType} --resource-id ${rId} --tags ${tags}").trim()
-    return parameterOutput, tagOutput
+    return parameterOutput tagOutput
 }
