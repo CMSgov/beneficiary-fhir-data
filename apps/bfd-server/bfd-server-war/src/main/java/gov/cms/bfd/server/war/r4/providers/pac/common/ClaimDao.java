@@ -6,6 +6,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import java.time.LocalDate;
@@ -223,7 +224,7 @@ public class ClaimDao {
   void logQueryMetric(
       ResourceTypeV2<?, ?> resourceType, String queryName, long queryTime, int querySize) {
     final String combinedQueryId = String.format("%s_%s", queryName, resourceType.getTypeLabel());
-    TransformerUtilsV2.recordQueryInMdc(combinedQueryId, queryTime, querySize);
+    CommonTransformerUtils.recordQueryInMdc(combinedQueryId, queryTime, querySize);
   }
 
   /**

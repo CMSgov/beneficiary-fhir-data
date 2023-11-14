@@ -1608,25 +1608,6 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Records the JPA query details in {@link BfdMDC}.
-   *
-   * @param queryId an ID that identifies the type of JPA query being run, e.g. "bene_by_id"
-   * @param queryDurationNanoseconds the JPA query's duration, in nanoseconds
-   * @param recordCount the number of top-level records (e.g. JPA entities) returned by the query
-   */
-  public static void recordQueryInMdc(
-      String queryId, long queryDurationNanoseconds, long recordCount) {
-    String keyPrefix = String.format("jpa_query_%s", queryId);
-    BfdMDC.put(
-        String.format("%s_duration_nanoseconds", keyPrefix),
-        Long.toString(queryDurationNanoseconds));
-    BfdMDC.put(
-        String.format("%s_duration_milliseconds", keyPrefix),
-        Long.toString(queryDurationNanoseconds / 1000000));
-    BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
-  }
-
-  /**
    * Sets the lastUpdated value in the resource.
    *
    * @param resource is the FHIR resource to set lastUpdate

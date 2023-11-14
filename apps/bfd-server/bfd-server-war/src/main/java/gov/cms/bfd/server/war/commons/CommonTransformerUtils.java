@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -593,5 +595,18 @@ public final class CommonTransformerUtils {
         String.format("%s_duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
     BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
+  }
+
+  /**
+   * Gets the metrics registry timer.
+   *
+   * @param metricRegistry the metric registry
+   * @param baseRegistryName the base registry name
+   * @param registrySubNames the registry sub names
+   * @return the metrics registry timer
+   */
+  public static Timer.Context createMetricsTimer(MetricRegistry metricRegistry, String baseRegistryName,
+                                                 String... registrySubNames) {
+    return metricRegistry.timer(MetricRegistry.name(baseRegistryName, registrySubNames)).time();
   }
 }

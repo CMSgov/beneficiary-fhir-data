@@ -10,6 +10,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -17,6 +18,7 @@ import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.pac.FissClaimResponseTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Map;
@@ -37,6 +39,10 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
   /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
+  /** The metric name. */
+  private static final String METRIC_NAME =
+          MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.
@@ -69,10 +75,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
-    try (Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time()) {
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       eob = transformClaim((DMEClaim) claim, includeTaxNumber);
     }
     return eob;

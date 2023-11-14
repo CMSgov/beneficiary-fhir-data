@@ -42,6 +42,10 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
+  /** The metric name. */
+  private static final String METRIC_NAME =
+          MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform");
+
   /**
    * Instantiates a new transformer.
    *
@@ -73,10 +77,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
-    try (Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
-            .time()) {
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       eob = transformClaim((PartDEvent) claim);
     }
     return eob;

@@ -85,12 +85,7 @@ final class CoverageTransformer {
    *     Beneficiary}
    */
   private Coverage transformPartA(Beneficiary beneficiary) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    CoverageTransformer.class.getSimpleName(), "transform", "part_a"))
-            .time();
+    Timer.Context timer = getTimerContext("part_a");
 
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
@@ -166,12 +161,7 @@ final class CoverageTransformer {
    *     Beneficiary}
    */
   private Coverage transformPartB(Beneficiary beneficiary) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    CoverageTransformer.class.getSimpleName(), "transform", "part_b"))
-            .time();
+    Timer.Context timer = getTimerContext("part_b");
 
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
@@ -231,12 +221,7 @@ final class CoverageTransformer {
    *     Beneficiary}
    */
   private Coverage transformPartC(Beneficiary beneficiary) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    CoverageTransformer.class.getSimpleName(), "transform", "part_c"))
-            .time();
+    Timer.Context timer = getTimerContext("part_c");
 
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
@@ -282,12 +267,7 @@ final class CoverageTransformer {
    *     Beneficiary}
    */
   private Coverage transformPartD(Beneficiary beneficiary) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    CoverageTransformer.class.getSimpleName(), "transform", "part_d"))
-            .time();
+    Timer.Context timer = getTimerContext("part_d");
 
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
@@ -1296,5 +1276,16 @@ final class CoverageTransformer {
               CcwCodebookVariable.RDSIND12,
               beneficiary.getPartDRetireeDrugSubsidyDecInd()));
     }
+  }
+
+  /**
+   * Constructs a Timer context {@link Timer.Context} suitable for measuring compute duration.
+   *
+   * @param partId The context string {@link String}
+   * @return the timer context
+   */
+  Timer.Context getTimerContext(String partId) {
+    return CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
+                                                     "transform", partId);
   }
 }

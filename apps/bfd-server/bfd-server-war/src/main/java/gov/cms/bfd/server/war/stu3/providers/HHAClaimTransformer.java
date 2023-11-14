@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
@@ -32,6 +33,10 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
 
   /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
   private final NPIOrgLookup npiOrgLookup;
+
+  /** The metric name. */
+  private static final String METRIC_NAME =
+          MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.
@@ -62,10 +67,7 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
-    try (Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform"))
-            .time()) {
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       eob = transformClaim((HHAClaim) claim);
     }
     return eob;

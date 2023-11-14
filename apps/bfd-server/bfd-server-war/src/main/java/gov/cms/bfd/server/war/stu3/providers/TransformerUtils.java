@@ -118,8 +118,6 @@ import org.slf4j.LoggerFactory;
  * resources (e.g. {@link Patient}).
  */
 public final class TransformerUtils {
-  private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
-
   /**
    * Adds an adjudication total to the specified {@link ExplanationOfBenefit}.
    *
@@ -2816,25 +2814,6 @@ public final class TransformerUtils {
         new Extension(TransformerConstants.CODING_SYSTEM_IDENTIFIER_CURRENCY, currentValueCoding);
 
     return currencyIdentifierExtension;
-  }
-
-  /**
-   * Records the JPA query details in {@link BfdMDC}.
-   *
-   * @param queryId an ID that identifies the type of JPA query being run, e.g. "bene_by_id"
-   * @param queryDurationNanoseconds the JPA query's duration, in nanoseconds
-   * @param recordCount the number of top-level records (e.g. JPA entities) returned by the query
-   */
-  public static void recordQueryInMdc(
-      String queryId, long queryDurationNanoseconds, long recordCount) {
-    String keyPrefix = String.format("jpa_query_%s", queryId);
-    BfdMDC.put(
-        String.format("%s_duration_nanoseconds", keyPrefix),
-        Long.toString(queryDurationNanoseconds));
-    BfdMDC.put(
-        String.format("%s_duration_milliseconds", keyPrefix),
-        Long.toString(queryDurationNanoseconds / 1000000));
-    BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
   }
 
   /**

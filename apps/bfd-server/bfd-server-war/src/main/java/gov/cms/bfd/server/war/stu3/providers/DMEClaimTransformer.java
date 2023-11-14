@@ -10,6 +10,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -33,6 +34,10 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
 
   /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
+
+  /** The metric name. */
+  private static final String METRIC_NAME =
+          MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform");
 
   /**
    * Instantiates a new transformer.
@@ -64,10 +69,7 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
-    try (Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
-            .time()) {
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       eob = transformClaim((DMEClaim) claim, includeTaxNumber);
     }
     return eob;

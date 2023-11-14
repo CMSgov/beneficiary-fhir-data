@@ -59,9 +59,8 @@ final class BeneficiaryTransformer {
   public Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
     Objects.requireNonNull(beneficiary);
     Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform"))
-            .time();
+            CommonTransformerUtils.createMetricsTimer(metricRegistry, this.getClass().getSimpleName(),
+                                                      "transform");
 
     Patient patient = new Patient();
 

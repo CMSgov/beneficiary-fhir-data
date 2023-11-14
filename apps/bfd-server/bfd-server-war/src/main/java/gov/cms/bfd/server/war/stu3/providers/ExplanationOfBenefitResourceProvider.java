@@ -26,6 +26,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -236,11 +237,9 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     criteria.where(builder.equal(root.get(claimType.getEntityIdAttribute()), eobIdClaimIdText));
 
     Object claimEntity = null;
-    Long eobByIdQueryNanoSeconds = null;
-    Timer.Context timerEobQuery =
-        metricRegistry
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eob_by_id"))
-            .time();
+    long eobByIdQueryNanoSeconds;
+    Timer.Context timerEobQuery = CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
+                                                                            "query", "eob_by_id");
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
       // Add number of resources to MDC logs
@@ -251,7 +250,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       throw new ResourceNotFoundException(eobId);
     } finally {
       eobByIdQueryNanoSeconds = timerEobQuery.stop();
-      TransformerUtils.recordQueryInMdc(
+      CommonTransformerUtils.recordQueryInMdc(
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
 

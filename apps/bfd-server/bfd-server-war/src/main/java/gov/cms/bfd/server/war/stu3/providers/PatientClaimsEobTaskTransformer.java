@@ -10,6 +10,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.PatientClaimsEobTaskTransformerV2;
 import java.time.Instant;
@@ -320,21 +321,14 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     criteria.where(wherePredicate);
 
     List<T> claimEntities = null;
-    Long eobsByBeneIdQueryNanoSeconds = null;
-    Timer.Context timerEobQuery =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    metricRegistry.getClass().getSimpleName(),
-                    "query",
-                    "eobs_by_bene_id",
-                    claimType.name().toLowerCase()))
-            .time();
+    long eobsByBeneIdQueryNanoSeconds;
+    Timer.Context timerEobQuery = CommonTransformerUtils.createMetricsTimer(metricRegistry, getClass().getSimpleName(),
+                                                                            "query", "eobs_by_bene_id", claimType.name().toLowerCase());
     try {
       claimEntities = entityManager.createQuery(criteria).getResultList();
     } finally {
       eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
-      TransformerUtils.recordQueryInMdc(
+      CommonTransformerUtils.recordQueryInMdc(
           String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
           claimEntities == null ? 0 : claimEntities.size());
