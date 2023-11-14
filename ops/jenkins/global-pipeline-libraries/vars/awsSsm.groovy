@@ -7,8 +7,9 @@ String getParameter(Map args = [:]) {
     name = args.parameterName
     awsRegion = args.awsRegion ?: 'us-east-1'
 
-    return sh(returnStdout: true, script: "aws ssm get-parameter --name ${name} --region ${awsRegion} --query 'Parameter.Value' --output text").trim()
+    return sh(returnStdout: true, script: "aws ssm get-parameter --name ${name} --region ${awsRegion} --with-decryption --query 'Parameter.Value' --output text").trim()
 }
+
 
 // Stores a value in SSM parameter store based on the parameter name.  If a parameter doesn't exist in
 // parameter store, this function will store the value under the parameter name passed in and will
