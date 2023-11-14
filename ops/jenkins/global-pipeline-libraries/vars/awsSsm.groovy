@@ -17,6 +17,7 @@ String putParameter(Map args = [:]) {
     name = args.parameterName
     value = args.parameterValue
     type = args.parameterType ?: 'String'
+    tags = args.parameterTags ?: tagResource(id=name)
     overwrite = args.shouldOverwrite ? '--overwrite' : ''
     awsRegion = args.awsRegion ?: 'us-east-1'
     includeType = "--type ${type}"
@@ -30,7 +31,7 @@ String putParameter(Map args = [:]) {
 String tagResource(Map args = [:]) {
     type = args.resourceType ?: 'Parameter'
     id = args.resourceId
-    tags = args.resourceTags
+    tags = args.resourceTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"
 
     output = sh(returnStdout: true, script: "aws ssm add-tags-to-resource --resource-type ${type} --resource-id ${id} --tags ${tags}").trim()
     return output
