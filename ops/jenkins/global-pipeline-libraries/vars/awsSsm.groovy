@@ -17,22 +17,16 @@ String putParameter(Map args = [:]) {
     name = args.parameterName
     value = args.parameterValue
     type = args.parameterType ?: 'String'
-    tags = args.parameterTags ?: tagResource(id=name)
+    tags = args.parameterTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"
     overwrite = args.shouldOverwrite ? '--overwrite' : ''
     awsRegion = args.awsRegion ?: 'us-east-1'
     includeType = "--type ${type}"
 
+    rType = args.resourceType ?: 'Parameter'
+    rId = args.resourceId ?: name
+
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
-    output = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${includeType} --region ${awsRegion} ${overwrite}").trim()
-    return output
-}
-
-// Adds or overwrites one or more tags for the specified resource
-String tagResource(Map args = [:]) {
-    type = args.resourceType ?: 'Parameter'
-    id = args.resourceId
-    tags = args.resourceTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"
-
-    output = sh(returnStdout: true, script: "aws ssm add-tags-to-resource --resource-type ${type} --resource-id ${id} --tags ${tags}").trim()
-    return output
+    parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${includeType} --region ${awsRegion} ${overwrite}").trim()
+    tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource --resource-type ${rType} --resource-id ${rId} --tags ${tags}").trim()
+    return parameterOutput, tagOutput
 }
