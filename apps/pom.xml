@@ -38,8 +38,8 @@
 
     <scm>
         <!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-        <connection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</connection>
-        <developerConnection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</developerConnection>
+        <connection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</connection>
+        <developerConnection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</developerConnection>
         <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
         <tag>HEAD</tag>
     </scm>
