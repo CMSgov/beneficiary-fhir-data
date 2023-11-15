@@ -299,7 +299,6 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    */
   private boolean isUnexpectedDroppedConnectionException(
       long lastProcessedTime, DroppedConnectionException exception) {
-    Exception e = null;
     final long idleMillis = clock.millis() - lastProcessedTime;
 
     if (idleMillis >= minIdleMillisBeforeConnectionDrop) {

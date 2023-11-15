@@ -294,8 +294,7 @@ public class RdaLoadOptions {
   private static class EmptyRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TClaim> {
 
     @Override
-    public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TMessage, TClaim> sink)
-        throws ProcessingException {
+    public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TMessage, TClaim> sink) {
       return 0;
     }
 

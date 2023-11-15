@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,31 +18,6 @@ public final class RifLoadFailure extends RuntimeException {
   private final List<RifRecordEvent<?>> failedRecordEvents;
 
   /**
-   * Constructs a new {@link RifLoadFailure} instance, for a specific {@link RifRecordEvent}
-   * failure.
-   *
-   * @param failedRecordEvent the value to use for {@link #getFailedRecordEvents()}
-   * @param cause the {@link Throwable} that was encountered, when the {@link RifRecordEvent} failed
-   *     to load
-   */
-  public RifLoadFailure(RifRecordEvent<?> failedRecordEvent, Throwable cause) {
-    super(buildMessage(failedRecordEvent), cause);
-    this.failedRecordEvents = Arrays.asList(failedRecordEvent);
-  }
-
-  /**
-   * Constructs a new {@link RifLoadFailure} instance, for a more general failure to load one of
-   * more {@link RifRecordEvent}s.
-   *
-   * @param cause the {@link Throwable} that was encountered, when the {@link RifRecordEvent}(s)
-   *     failed to load
-   */
-  public RifLoadFailure(Throwable cause) {
-    super(cause);
-    this.failedRecordEvents = null;
-  }
-
-  /**
    * Constructs a new {@link RifLoadFailure} instance, for a failure in processing a group of {@link
    * RifRecordEvent}s.
    *
@@ -54,24 +28,6 @@ public final class RifLoadFailure extends RuntimeException {
   public RifLoadFailure(List<RifRecordEvent<?>> failedRecordEvents, Throwable cause) {
     super(buildMessage(failedRecordEvents), cause);
     this.failedRecordEvents = failedRecordEvents;
-  }
-
-  /**
-   * Builds a message for the records that failed to load.
-   *
-   * @param failedRecordEvent the failed records
-   * @return the value to use for {@link #getMessage()}
-   */
-  private static String buildMessage(RifRecordEvent<?> failedRecordEvent) {
-    if (LOG_SOURCE_DATA)
-      return String.format(
-          "Failed to load a '%s' record: '%s'.",
-          failedRecordEvent.getFileEvent().getFile().getFileType().name(),
-          failedRecordEvent.toString());
-    else
-      return String.format(
-          "Failed to load a '%s' record.",
-          failedRecordEvent.getFileEvent().getFile().getFileType().name());
   }
 
   /**

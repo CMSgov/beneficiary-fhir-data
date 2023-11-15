@@ -67,9 +67,9 @@ public class DataTransformer {
   }
 
   /**
-   * Returns a (possibly empty) list of all of the transformation errors.
+   * Returns a (possibly empty) list of all the transformation errors.
    *
-   * @return A (possibly empty) list of all of the transformation errors.
+   * @return A (possibly empty) list of all the transformation errors.
    */
   public List<ErrorMessage> getErrors() {
     return ImmutableList.copyOf(errors);
@@ -77,7 +77,7 @@ public class DataTransformer {
 
   /**
    * Throws an exception if there are any transformation errors. Makes it easy to generate a
-   * standard exception following all of the transformation steps.
+   * standard exception following all the transformation steps.
    *
    * @throws TransformationException if there are any transformation errors
    * @return this
