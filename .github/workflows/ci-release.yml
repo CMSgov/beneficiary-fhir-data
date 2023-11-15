@@ -80,19 +80,17 @@ jobs:
           EOF
       - name: Set Authorization Token
         #FIXME: Use non-hackathon domain/repository
-        run: >-
-          echo CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token
-          --domain "$CA_DOMAIN" --domain-owner ${{ secrets.AWS_ACCOUNT_ID }}
-          --query authorizationToken
-          --output text
-          --region us-east-1)" >> $GITHUB_ENV
+        run: |
+          CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain "$CA_DOMAIN" --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text --region us-east-1)"
           echo "::add-mask::$CODEARTIFACT_AUTH_TOKEN"
+          echo CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN >> $GITHUB_ENV
 
       - name: Get Repository Endpoint
-        run: >-
-          echo CA_REPOSITORY_ENDPOINT="$(aws codeartifact get-repository-endpoint
-          --domain "$CA_DOMAIN" --repository "$CA_REPOSITORY" --format maven
-          --query repositoryEndpoint --output text)" >> $GITHUB_ENV
+        run: |
+          CA_REPOSITORY_ENDPOINT="$(aws codeartifact get-repository-endpoint --domain "$CA_DOMAIN" --repository "$CA_REPOSITORY" --format maven --query repositoryEndpoint --output text)"
+          echo "::add-mask::$CA_REPOSITORY_ENDPOINT"
+          echo CA_REPOSITORY_ENDPOINT=$CA_REPOSITORY_ENDPOINT >> $GITHUB_ENV
+
       - name: Configure additional maven settings.xml
         run: |-
           cat <<"EOF" > ~/.m2/settings.xml
