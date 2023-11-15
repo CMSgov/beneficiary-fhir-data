@@ -25,6 +25,7 @@ env:
   # AWS Code Artifact Repository
   CA_REPOSITORY: bfd-release-hackathon #FIXME
   CA_DOMAIN: bfd-mgmt
+  AWS_REGION: us-east-1
   BRANCH_REF: ${{ format('refs/heads/{0}', github.event.pull_request.head.ref) }}
 
 jobs:
@@ -78,6 +79,7 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
+
       - name: Set Authorization Token
         #FIXME: Use non-hackathon domain/repository
         run: |
@@ -90,6 +92,12 @@ jobs:
           CA_REPOSITORY_ENDPOINT="$(aws codeartifact get-repository-endpoint --domain "$CA_DOMAIN" --repository "$CA_REPOSITORY" --format maven --query repositoryEndpoint --output text)"
           echo "::add-mask::$CA_REPOSITORY_ENDPOINT"
           echo CA_REPOSITORY_ENDPOINT=$CA_REPOSITORY_ENDPOINT >> $GITHUB_ENV
+
+      - name: Get ECR Registry Namespace
+        run: |
+          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
+          echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
+          echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
 
       - name: Configure additional maven settings.xml
         run: |-
