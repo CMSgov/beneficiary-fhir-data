@@ -86,6 +86,7 @@ jobs:
           --query authorizationToken
           --output text
           --region us-east-1)" >> $GITHUB_ENV
+          echo "::add-mask::$CODEARTIFACT_AUTH_TOKEN"
 
       - name: Get Repository Endpoint
         run: >-
