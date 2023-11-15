@@ -116,7 +116,11 @@ jobs:
       - name: 'Prepare and Perform PULL_REQUEST Release'
         if: github.event_name == 'pull_request'
         run: |-
-          mvn --batch-mode --activate-profiles test-release release:prepare release:perform
+          mvn --batch-mode --activate-profiles test-release \
+              -Dtag="9.9.9" \
+              -DreleaseVersion="9.9.9" \
+              -DdevelopmentVersion="9.9.9-SNAPSHOT" \
+              release:prepare release:perform
         working-directory: ./apps
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
