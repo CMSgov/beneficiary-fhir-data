@@ -68,8 +68,6 @@
             they are reproducible bit-by-bit no matter when/where they are generated.
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
         <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
-        <bfd.data.fda.version>1.0-SNAPSHOT</bfd.data.fda.version>
-        <bfd.data.npi.version>1.0-SNAPSHOT</bfd.data.npi.version>
         <maven.jacoco.plugin.version>0.8.11</maven.jacoco.plugin.version>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
