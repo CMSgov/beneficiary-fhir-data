@@ -49,20 +49,6 @@ public class DataSetManifestFactory {
   }
 
   /**
-   * Parses the input filename {@link String} and returns a new {@link DataSetManifest} instance.
-   *
-   * @param manifestFilename the {@link String} XML filename to read/parse
-   * @return the {@link DataSetManifest}
-   * @throws JAXBException (any errors encountered will be bubbled up).
-   * @throws SAXException (any errors encountered will be bubbled up).
-   */
-  public DataSetManifest parseManifest(String manifestFilename) throws JAXBException, SAXException {
-    InputStream manifestStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(manifestFilename);
-    return parseManifest(manifestStream);
-  }
-
-  /**
    * Parses the input byte stream {@link InputStream} and returns a new {@link DataSetManifest}
    * instance. It validates the XML data stream {@link InputStream} to be both well-formed and
    * valid.

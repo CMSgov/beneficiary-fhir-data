@@ -49,12 +49,6 @@ public final class RifRecordLoadResult {
     UPDATED,
 
     /**
-     * Indicates that the record(s) were queued for insertion into the database as part of a larger
-     * batch. The status of that batch is indeterminate.
-     */
-    QUEUED,
-
-    /**
      * Indicates that the record(s) were skipped, presumably because they were already present in
      * the database.
      */
