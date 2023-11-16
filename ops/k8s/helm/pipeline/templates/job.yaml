@@ -3,23 +3,41 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $pipelineName }}
+  name: {{ .Values.appName }}
   namespace: {{ .Values.namespace }}
+{{- if .Values.labels }}
+  labels:
+  {{- range .Values.labels }}
+    {{ .label }}: {{ .value | quote }}
+  {{- end }}
+{{- end }}
 spec:
   template:
     spec:
+{{- if .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName | quote }}
+{{- end }}
       containers:
-      - name: {{ $pipelineName }}
-        image: {{ $imageSpec }}
-        env:
-        - name: JAVA_TOOL_OPTIONS
-          value: -Djava.io.tmpdir=/app/tmp
-        envFrom:
-        - secretRef:
-            name: {{ $pipelineName }}-secret
-        volumeMounts:
-          - name: {{ $pipelineName }}-temp-volume
-            mountPath: "/app/tmp"
+        - name: {{ $pipelineName }}
+          image: {{ $imageSpec }}
+          securityContext:
+            readOnlyRootFilesystem: true
+          env:
+          - name: JAVA_TOOL_OPTIONS
+            value: -Djava.io.tmpdir=/app/tmp
+          envFrom:
+          - secretRef:
+              name: {{ $pipelineName }}-secret
+          resources:
+            requests:
+              memory: {{ .Values.containerResources.memory | quote }}
+              cpu: {{ .Values.containerResources.cpu | quote }}
+            limits:
+              memory: {{ .Values.containerResources.memory | quote }}
+              cpu: {{ .Values.containerResources.cpu | quote }}
+          volumeMounts:
+            - name: {{ $pipelineName }}-temp-volume
+              mountPath: "/app/tmp"
       volumes:
         - name: {{ $pipelineName }}-temp-volume
         {{- if .Values.tempVolume.type | eq "emptyDir" }}
@@ -29,6 +47,14 @@ spec:
           persistentVolumeClaim:
             claimName: {{ $pipelineName }}-temp-claim
         {{- end }}
+{{- if .Values.podTolerations }}
+      tolerations:
+      {{- range .Values.podTolerations }}
+        - key: {{ .key }}
+          operator: {{ .operator }}
+          effect: {{ .effect }}
+      {{- end }}
+{{- end }}
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: {{ .Values.backoffLimit }}
   

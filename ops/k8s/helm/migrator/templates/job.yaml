@@ -19,6 +19,11 @@ spec:
       containers:
       - name: {{ .Values.appName }}
         image: {{ $imageSpec }}
+        securityContext:
+          readOnlyRootFilesystem: true
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: -Djava.io.tmpdir=/app/tmp
         envFrom:
         - secretRef:
             name: {{ .Values.appName }}-secret
@@ -29,12 +34,19 @@ spec:
           limits:
             memory: {{ .Values.containerResources.memory | quote }}
             cpu: {{ .Values.containerResources.cpu | quote }}
+        volumeMounts:
+          - mountPath: /app/tmp
+            name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            sizeLimit: {{ .Values.tempVolume.size }}
 {{- if .Values.podTolerations }}
       tolerations:
       {{- range .Values.podTolerations }}
-      - key: {{ .key }}
-        operator: {{ .operator }}
-        effect: {{ .effect }}
+        - key: {{ .key }}
+          operator: {{ .operator }}
+          effect: {{ .effect }}
       {{- end }}
 {{- end }}
       restartPolicy: Never
