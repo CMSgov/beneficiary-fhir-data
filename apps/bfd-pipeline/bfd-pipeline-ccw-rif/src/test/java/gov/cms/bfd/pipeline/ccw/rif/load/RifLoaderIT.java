@@ -63,7 +63,6 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.opentest4j.AssertionFailedError;
@@ -366,7 +365,6 @@ public final class RifLoaderIT {
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
-  @Disabled("https://jira.cms.gov/browse/BFD-3018")
   @Test
   public void loadSampleU() {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -405,7 +403,7 @@ public final class RifLoaderIT {
                       "Expected a recent lastUpdated timestamp");
                 });
       }
-      assertEquals(4, beneficiaryHistoryEntries.size());
+      assertEquals(6, beneficiaryHistoryEntries.size());
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, 567834L);
       // Last Name inserted with value of "Johnson"
@@ -430,7 +428,7 @@ public final class RifLoaderIT {
                     "Expected a recent lastUpdated timestamp");
               });
 
-      CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, "9991831999");
+      CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, 9991831999L);
       assertEquals('N', carrierRecordFromDb.getFinalAction());
       // DateThrough inserted with value 10-27-1999
       assertEquals(LocalDate.of(2000, Month.OCTOBER, 27), carrierRecordFromDb.getDateThrough());
