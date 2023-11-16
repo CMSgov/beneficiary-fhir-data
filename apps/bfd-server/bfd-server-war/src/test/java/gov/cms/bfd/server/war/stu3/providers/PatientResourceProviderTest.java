@@ -207,10 +207,10 @@ public class PatientResourceProviderTest {
    */
   @Test
   public void testPatientReadWhereEmptyIdExpectException() {
-    // Dont set up patient id to return anything, so our id value is null
     InvalidRequestException exception =
         assertThrows(
-            InvalidRequestException.class, () -> patientProvider.read(patientId, requestDetails));
+            InvalidRequestException.class,
+            () -> patientProvider.read(new IdType(), requestDetails));
     assertEquals("Missing required patient ID", exception.getLocalizedMessage());
   }
 

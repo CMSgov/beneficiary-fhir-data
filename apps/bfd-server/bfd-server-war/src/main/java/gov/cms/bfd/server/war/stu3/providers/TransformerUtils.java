@@ -69,7 +69,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -2933,23 +2932,22 @@ public final class TransformerUtils {
   }
 
   /**
-   * Adds the revenue center ansi adjudication to the given item, if the revCntr1stAnsiCd is present.
+   * Adds the revenue center ansi adjudication to the given item, if the revCntr1stAnsiCd is
+   * present.
    *
    * @param item the item to add the adjudication to
    * @param eob the eob to get info from needed to create the adjudication
    * @param revCntr1stAnsiCd the revenue center ansi Optional
    */
-  static void addRevCenterAnsiAdjudication(ItemComponent item, ExplanationOfBenefit eob,
-                                           Optional<String> revCntr1stAnsiCd) {
+  static void addRevCenterAnsiAdjudication(
+      ItemComponent item, ExplanationOfBenefit eob, Optional<String> revCntr1stAnsiCd) {
     if (revCntr1stAnsiCd.isPresent()) {
       item.addAdjudication()
           .setCategory(
-                  TransformerUtils.createAdjudicationCategory(
-                          CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD))
+              TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD))
           .setReason(
-                  TransformerUtils.createCodeableConcept(
-                          eob,
-                          CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD, revCntr1stAnsiCd));
+              TransformerUtils.createCodeableConcept(
+                  eob, CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD, revCntr1stAnsiCd));
     }
   }
 }

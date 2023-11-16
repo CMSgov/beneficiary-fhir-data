@@ -232,7 +232,7 @@ public class CoverageResourceProviderTest {
         assertThrows(
             InvalidRequestException.class,
             () -> {
-              coverageProvider.read(coverageId);
+              coverageProvider.read(null);
             });
     assertEquals("Missing required coverage ID", exception.getLocalizedMessage());
   }

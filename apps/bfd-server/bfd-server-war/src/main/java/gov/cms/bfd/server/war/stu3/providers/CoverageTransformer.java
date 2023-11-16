@@ -294,10 +294,10 @@ final class CoverageTransformer {
               beneMonthly -> {
                 int month = beneMonthly.getYearMonth().getMonthValue();
                 String yearMonth =
-                    String.format(
-                        "%s-%s", beneMonthly.getYearMonth().getYear(), month);
+                    String.format("%s-%s", beneMonthly.getYearMonth().getYear(), month);
 
-                Map<Integer, CcwCodebookVariable> mapOfMonth = CommonTransformerUtils.getPartDCcwCodebookMonthMap();
+                Map<Integer, CcwCodebookVariable> mapOfMonth =
+                    CommonTransformerUtils.getPartDCcwCodebookMonthMap();
 
                 if (mapOfMonth.containsKey(month)) {
                   if (beneMonthly.getPartDContractNumberId().isEmpty()
