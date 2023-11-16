@@ -2,6 +2,8 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
@@ -45,19 +47,44 @@ public final class SNFClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
 
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     snfClaimTransformer = new SNFClaimTransformer(metricRegistry, new NPIOrgLookup());
+  }
+
+  /**
+   * Verifies that when transform is called, the metric registry is passed the correct class and
+   * subtype name, is started, and stopped. Note that timer.stop() and timer.close() are equivalent
+   * and one or the other may be called based on how the timer is used in code.
+   */
+  @Test
+  public void testTransformRunsMetricTimer() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    SNFClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof SNFClaim)
+            .map(SNFClaim.class::cast)
+            .findFirst()
+            .orElseThrow();
+
+    snfClaimTransformer.transform(claim, false);
+
+    String expectedTimerName = snfClaimTransformer.getClass().getSimpleName() + ".transform";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).close();
   }
 
   /**

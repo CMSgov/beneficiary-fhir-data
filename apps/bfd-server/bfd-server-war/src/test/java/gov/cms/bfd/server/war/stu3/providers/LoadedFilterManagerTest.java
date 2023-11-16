@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /** Unit tests for the {@link LoadedFilterManager}. */
 public final class LoadedFilterManagerTest {
   @SuppressWarnings("unused")
-  private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerE2E.class);
 
   /** Sample valid bene for the test. */
   private static final long SAMPLE_BENE = 567834L;

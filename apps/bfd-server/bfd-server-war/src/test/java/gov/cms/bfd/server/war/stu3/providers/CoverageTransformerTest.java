@@ -2,8 +2,13 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -21,9 +26,26 @@ import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformer}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class CoverageTransformerTest {
+
+  /** The metrics registry. */
+  @Mock MetricRegistry metricRegistry;
+
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
+
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** The class under test. */
   public CoverageTransformer coverageTransformer;
@@ -31,7 +53,9 @@ public final class CoverageTransformerTest {
   /** Sets the test dependencies up. */
   @BeforeEach
   public void setup() {
-    coverageTransformer = new CoverageTransformer(new MetricRegistry());
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    coverageTransformer = new CoverageTransformer(metricRegistry);
   }
 
   /**
@@ -50,20 +74,24 @@ public final class CoverageTransformerTest {
             .filter(r -> r instanceof Beneficiary)
             .map(r -> (Beneficiary) r)
             .findFirst()
-            .get();
+            .orElseThrow();
     beneficiary.setLastUpdated(Instant.now());
 
     Coverage partACoverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, partACoverage);
+    verifyMetrics("part_a");
 
     Coverage partBCoverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary);
     assertPartBMatches(beneficiary, partBCoverage);
+    verifyMetrics("part_b");
 
     Coverage partCCoverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary);
     assertPartCMatches(beneficiary, partCCoverage);
+    verifyMetrics("part_c");
 
     Coverage partDCoverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary);
     assertPartDMatches(beneficiary, partDCoverage);
+    verifyMetrics("part_d");
 
     // Test with null lastUpdated
     beneficiary.setLastUpdated(Optional.empty());
@@ -572,5 +600,22 @@ public final class CoverageTransformerTest {
         CcwCodebookVariable.DUAL_11, beneficiary.getMedicaidDualEligibilityNovCode(), coverage);
     TransformerTestUtils.assertExtensionCodingDoesNotExist(
         CcwCodebookVariable.DUAL_12, beneficiary.getMedicaidDualEligibilityDecCode(), coverage);
+  }
+
+  /**
+   * Verify metrics were called with the specified part as part of the metric name.
+   *
+   * @param partSubstring the part substring
+   */
+  private void verifyMetrics(String partSubstring) {
+    String expectedTimerName =
+        coverageTransformer.getClass().getSimpleName() + ".transform." + partSubstring;
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).stop();
+    Mockito.clearInvocations(metricRegistry);
+    Mockito.clearInvocations(metricsTimer);
+    Mockito.clearInvocations(metricsTimerContext);
   }
 }

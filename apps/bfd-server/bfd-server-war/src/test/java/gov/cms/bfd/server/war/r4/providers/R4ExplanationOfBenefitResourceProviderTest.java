@@ -83,7 +83,6 @@ import org.springframework.context.ApplicationContext;
 /**
  * Units tests for the {@link R4ExplanationOfBenefitResourceProvider} that do not require a full
  * fhir setup to validate. Anything we want to validate from the fhir client level should go in
- * {@link R4ExplanationOfBenefitResourceProviderE2E}.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -131,9 +130,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The mock samhsa matcher. */
-  @Mock R4EobSamhsaMatcher mockSamhsaMatcher;
-
   /** The test data bene. */
   Beneficiary testBene;
 
@@ -152,20 +148,11 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The transformer for carrier claims. */
   @Mock CarrierClaimTransformerV2 mockCarrierClaimTransformer;
 
-  /** The mock entity manager for CarrierClaim claims. */
-  @Mock EntityManager carrierEntityManager;
-
   /** The transformer for dme claims. */
   @Mock DMEClaimTransformerV2 mockDmeClaimTransformer;
 
-  /** The mock entity manager for DMEClaim claims. */
-  @Mock EntityManager dmeEntityManager;
-
   /** The transformer for Part D events. */
   @Mock PartDEventTransformerV2 mockPdeTransformer;
-
-  /** The mock entity manager for Part D events. */
-  @Mock EntityManager pdeEntityManager;
 
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
@@ -184,6 +171,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     // metrics mocking
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
+
     // NPI and FDA drug mocking
     when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
     when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");

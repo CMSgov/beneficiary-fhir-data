@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 
 /** Integration tests for {@link LoadedFilterManager}. */
-public final class LoadedFilterManagerIT extends ServerRequiredTest {
+public final class LoadedFilterManagerE2E extends ServerRequiredTest {
   @SuppressWarnings("unused")
-  private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerE2E.class);
 
   /** The bene id to use for testing. */
   private static final long SAMPLE_BENE = 567834L;

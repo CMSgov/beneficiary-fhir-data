@@ -134,7 +134,6 @@ public final class OutpatientClaimTransformerV2Test {
   public void testTransformRunsMetricTimer() {
     String expectedTimerName = outpatientClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
-    // time() starts the timer
     verify(metricsTimer, times(1)).time();
     verify(metricsTimerContext, times(1)).close();
   }

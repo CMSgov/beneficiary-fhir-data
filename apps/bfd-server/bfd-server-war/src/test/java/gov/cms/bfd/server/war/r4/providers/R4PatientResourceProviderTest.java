@@ -62,7 +62,7 @@ import org.mockito.quality.Strictness;
 /**
  * Units tests for the {@link R4PatientResourceProvider} that do not require a full fhir setup to
  * validate. Anything we want to validate from the fhir client level should go in {@link
- * R4PatientResourceProviderIT}.
+ * PatientE2E}.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

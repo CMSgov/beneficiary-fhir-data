@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
@@ -59,16 +61,16 @@ public final class CarrierClaimTransformerTest {
   @Mock NPIOrgLookup npiOrgLookup;
 
   /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  @Mock Timer metricsTimer;
 
   /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  @Mock Timer.Context metricsTimerContext;
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
     when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
         .thenReturn(Optional.of("UNKNOWN"));
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
@@ -76,6 +78,34 @@ public final class CarrierClaimTransformerTest {
 
     carrierClaimTransformer =
         new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, npiOrgLookup);
+  }
+
+  /**
+   * Verifies that when transform is called, the metric registry is passed the correct class and
+   * subtype name, is started, and stopped. Note that timer.stop() and timer.close() are equivalent
+   * and one or the other may be called based on how the timer is used in code.
+   */
+  @Test
+  public void testTransformRunsMetricTimer() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(
+            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
+    CarrierClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .orElseThrow();
+
+    claim.setLastUpdated(Instant.now());
+
+    carrierClaimTransformer.transform(claim, true);
+
+    String expectedTimerName = carrierClaimTransformer.getClass().getSimpleName() + ".transform";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).close();
   }
 
   /**
