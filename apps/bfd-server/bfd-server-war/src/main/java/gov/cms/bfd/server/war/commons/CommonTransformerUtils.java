@@ -609,4 +609,28 @@ public final class CommonTransformerUtils {
       MetricRegistry metricRegistry, String baseRegistryName, String... registrySubNames) {
     return metricRegistry.timer(MetricRegistry.name(baseRegistryName, registrySubNames)).time();
   }
+
+  /**
+   * Gets the part D ccw codebook month map.
+   *
+   * @return the ccw codebook month map
+   */
+  public static Map<Integer, CcwCodebookVariable> getPartDCcwCodebookMonthMap() {
+    return new HashMap<>() {
+      {
+        put(1, CcwCodebookVariable.PTDCNTRCT01);
+        put(2, CcwCodebookVariable.PTDCNTRCT02);
+        put(3, CcwCodebookVariable.PTDCNTRCT03);
+        put(4, CcwCodebookVariable.PTDCNTRCT04);
+        put(5, CcwCodebookVariable.PTDCNTRCT05);
+        put(6, CcwCodebookVariable.PTDCNTRCT06);
+        put(7, CcwCodebookVariable.PTDCNTRCT07);
+        put(8, CcwCodebookVariable.PTDCNTRCT08);
+        put(9, CcwCodebookVariable.PTDCNTRCT09);
+        put(10, CcwCodebookVariable.PTDCNTRCT10);
+        put(11, CcwCodebookVariable.PTDCNTRCT11);
+        put(12, CcwCodebookVariable.PTDCNTRCT12);
+      }
+    };
+  }
 }

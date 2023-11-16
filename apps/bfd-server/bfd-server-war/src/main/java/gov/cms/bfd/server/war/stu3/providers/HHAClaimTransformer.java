@@ -157,20 +157,8 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     for (HHAClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
       item.setSequence(claimLine.getLineNumber());
-
       item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
-
-      if (claimLine.getRevCntr1stAnsiCd().isPresent()) {
-        item.addAdjudication()
-            .setCategory(
-                TransformerUtils.createAdjudicationCategory(
-                    CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD))
-            .setReason(
-                TransformerUtils.createCodeableConcept(
-                    eob,
-                    CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD,
-                    claimLine.getRevCntr1stAnsiCd()));
-      }
+      TransformerUtils.addRevCenterAnsiAdjudication(item, eob, claimLine.getRevCntr1stAnsiCd());
 
       TransformerUtils.mapHcpcs(
           eob,

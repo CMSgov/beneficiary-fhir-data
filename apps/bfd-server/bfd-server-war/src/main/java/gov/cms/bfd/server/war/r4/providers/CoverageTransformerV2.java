@@ -14,7 +14,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -308,27 +307,9 @@ final class CoverageTransformerV2 {
                 int month = beneMonthly.getYearMonth().getMonthValue();
                 String yearMonth =
                     String.format(
-                        "%s-%s",
-                        String.valueOf(beneMonthly.getYearMonth().getYear()),
-                        String.valueOf(month));
+                        "%s-%s", beneMonthly.getYearMonth().getYear(), month);
 
-                Map<Integer, CcwCodebookVariable> mapOfMonth =
-                    new HashMap<Integer, CcwCodebookVariable>() {
-                      {
-                        put(1, CcwCodebookVariable.PTDCNTRCT01);
-                        put(2, CcwCodebookVariable.PTDCNTRCT02);
-                        put(3, CcwCodebookVariable.PTDCNTRCT03);
-                        put(4, CcwCodebookVariable.PTDCNTRCT04);
-                        put(5, CcwCodebookVariable.PTDCNTRCT05);
-                        put(6, CcwCodebookVariable.PTDCNTRCT06);
-                        put(7, CcwCodebookVariable.PTDCNTRCT07);
-                        put(8, CcwCodebookVariable.PTDCNTRCT08);
-                        put(9, CcwCodebookVariable.PTDCNTRCT09);
-                        put(10, CcwCodebookVariable.PTDCNTRCT10);
-                        put(11, CcwCodebookVariable.PTDCNTRCT11);
-                        put(12, CcwCodebookVariable.PTDCNTRCT12);
-                      }
-                    };
+                Map<Integer, CcwCodebookVariable> mapOfMonth = CommonTransformerUtils.getPartDCcwCodebookMonthMap();
 
                 if (mapOfMonth.containsKey(month)) {
                   if (beneMonthly.getPartDContractNumberId().isEmpty()
