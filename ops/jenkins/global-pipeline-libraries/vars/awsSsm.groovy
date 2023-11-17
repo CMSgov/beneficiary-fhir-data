@@ -31,7 +31,17 @@ String putParameter(Map args = [:]) {
     return parameterOutput
 }
 
-String tagResource(Map args =[:]) {
+String tagParameter(Map args =[:]) {
+    tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
+    return tagOutput
+}
+
+// Adds or overwrites one or more tags for the specified resource
+String tagResource(Map args = [:]) {
+    rTypeOpt = "--type ${args.resourceType}"
+    rId = "--resource-id ${args.resourceId}"
+    tags = "--tags ${args.resourceTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
+
     tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
     return tagOutput
 }
