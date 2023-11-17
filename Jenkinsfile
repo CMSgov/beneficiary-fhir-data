@@ -27,6 +27,7 @@
 properties([
 	parameters([
 			booleanParam(name: 'test_parameter', defaultValue: false, description: 'This is a test parameter'),
+			booleanParam(name: 'test_param2', defaultValue: false, description: 'This is a new test param'),
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
@@ -189,6 +190,8 @@ try {
 			}
 
 			stage('Build Apps') {
+				println 'In Build Apps'
+				println 'New param: ${test_param2}'
 				if (!params.use_latest_images) {
 					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_apps_start')
