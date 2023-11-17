@@ -27,7 +27,7 @@ String putParameter(Map args = [:]) {
     rId = args.resourceId ?: name
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
-    parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' --type ${typeOpt} --region ${awsRegionOpt} ${overwriteOpt}").trim()
+    parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${typeOpt} --region ${awsRegionOpt} ${overwriteOpt}").trim()
     tagParameter(rId, rTypeOpt, tags)
     return parameterOutput
 }
