@@ -237,7 +237,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     criteria.where(builder.equal(root.get(claimType.getEntityIdAttribute()), eobIdClaimIdText));
 
     Object claimEntity = null;
-    long eobByIdQueryNanoSeconds;
     Timer.Context timerEobQuery =
         CommonTransformerUtils.createMetricsTimer(
             metricRegistry, getClass().getSimpleName(), "query", "eob_by_id");
@@ -250,7 +249,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       LoggingUtils.logResourceCountToMdc(0);
       throw new ResourceNotFoundException(eobId);
     } finally {
-      eobByIdQueryNanoSeconds = timerEobQuery.stop();
+      long eobByIdQueryNanoSeconds = timerEobQuery.stop();
       CommonTransformerUtils.recordQueryInMdc(
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }

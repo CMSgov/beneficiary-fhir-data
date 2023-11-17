@@ -272,14 +272,13 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     criteria.where(wherePredicate);
 
     Beneficiary beneficiary = null;
-    long beneByIdQueryNanoSeconds;
     Timer.Context timerBeneQuery =
         CommonTransformerUtils.createMetricsTimer(
             metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
     } finally {
-      beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+      long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
       CommonTransformerUtils.recordQueryInMdc(
           "bene_by_id_include_", beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
     }

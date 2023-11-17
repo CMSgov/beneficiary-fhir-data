@@ -84,7 +84,7 @@ final class CoverageTransformer {
    *     Beneficiary}
    */
   private Coverage transformPartA(Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext("part_a");
+    Timer.Context timer = createTimerContext("part_a");
 
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
@@ -160,7 +160,7 @@ final class CoverageTransformer {
    *     Beneficiary}
    */
   private Coverage transformPartB(Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext("part_b");
+    Timer.Context timer = createTimerContext("part_b");
 
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
@@ -220,7 +220,7 @@ final class CoverageTransformer {
    *     Beneficiary}
    */
   private Coverage transformPartC(Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext("part_c");
+    Timer.Context timer = createTimerContext("part_c");
 
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
@@ -266,7 +266,7 @@ final class CoverageTransformer {
    *     Beneficiary}
    */
   private Coverage transformPartD(Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext("part_d");
+    Timer.Context timer = createTimerContext("part_d");
 
     Coverage coverage = new Coverage();
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
@@ -1265,7 +1265,7 @@ final class CoverageTransformer {
    * @param partId The context string {@link String}
    * @return the timer context
    */
-  Timer.Context getTimerContext(String partId) {
+  Timer.Context createTimerContext(String partId) {
     return CommonTransformerUtils.createMetricsTimer(
         metricRegistry, getClass().getSimpleName(), "transform", partId);
   }

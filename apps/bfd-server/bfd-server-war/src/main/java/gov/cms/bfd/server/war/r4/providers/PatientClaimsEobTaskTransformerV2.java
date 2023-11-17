@@ -324,7 +324,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     criteria.where(wherePredicate);
 
     List<T> claimEntities = null;
-    long eobsByBeneIdQueryNanoSeconds;
     Timer.Context timerEobQuery =
         CommonTransformerUtils.createMetricsTimer(
             metricRegistry,
@@ -335,7 +334,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     try {
       claimEntities = entityManager.createQuery(criteria).getResultList();
     } finally {
-      eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
+      long eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
       CommonTransformerUtils.recordQueryInMdc(
           String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
