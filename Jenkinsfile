@@ -190,8 +190,6 @@ try {
 			}
 
 			stage('Build Apps') {
-				println 'In Build Apps'
-				println 'New param: ${test_param2}'
 				if (!params.use_latest_images) {
 					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_apps_start')
