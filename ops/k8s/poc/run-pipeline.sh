@@ -202,4 +202,5 @@ helm -n $namespace uninstall "pipeline-${mode}" || true
 helm -n $namespace install "pipeline-${mode}" $chart \
   --set ssmHierarchies="{${shared_config_path},${mode_config_path}}" \
   --set imageRegistry="${EKS_ECR_REGISTRY}/" \
-  --values pipeline-values.yaml
+  --values pipeline-values.yaml \
+  --values "pipeline-values-${mode}.yaml"

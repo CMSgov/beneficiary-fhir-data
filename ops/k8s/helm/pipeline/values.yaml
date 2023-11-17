@@ -46,7 +46,7 @@ serviceAccountName: ""
 # Requested memory and cpu resources.
 containerResources:
   memory: "6Gi"
-  cpu: "2500m"
+  cpu: "1"
 
 # Maximum number of retry attempts if pod cannot be scheduled successfully.
 backoffLimit: 4
