@@ -31,20 +31,18 @@ String putParameter(Map args = [:]) {
     return parameterOutput
 }
 
-String tagParameter(Map args =[:]) {
-    tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
-    return tagOutput
-}
-
 // Adds or overwrites one or more tags for the specified resource
 String tagResource(Map args = [:]) {
-    rTypeOpt = "--type ${args.resourceType}"
-    rId = "--resource-id ${args.resourceId}"
+    //If Parameter, this should be called by putParameter()
+    if (env.rTypeOpt == 'Parameter') {
+        tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
+        return tagOutput
+    }
+
+    type = "--type ${args.resourceType}"
+    id = "--resource-id ${args.resourceId}"
     tags = "--tags ${args.resourceTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
 
-    if (env.rTypeOpt == null) {
-        return
-    }
-    tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
+    tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${type} ${id} ${tags}").trim()
     return tagOutput
 }
