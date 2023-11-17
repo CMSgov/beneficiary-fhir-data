@@ -1,68 +1,75 @@
 ---
-name: 'CI - Release'
+name: "Build Release"
 on:
-  pull_request: #FIXME: remove anything but workflow_dispatch
   workflow_dispatch:
     inputs:
       releaseBranch:
-        description: 'The branch on which a release is based.'
+        description: "The branch on which a release is based"
         required: false
         default: master
       releaseVersion:
-        description: 'Version to be used as tag and release'
+        description: "Version to be used as tag and release"
         required: true
         default: X.Y.Z
       developmentVersion:
-        description: 'Post-release Development version'
+        description: 'Post-release Development version. Should be "(releaseVersion + 1)-SNAPSHOT"'
         required: true
         default: X.Y.Z-SNAPSHOT
+      awsRegion:
+        description: "AWS Region to upload artifacts to"
+        required: true
+        default: us-east-1
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
-  contents: write  # This is required for actions/checkout
+  contents: write # This is required for actions/checkout
 
 env:
   # AWS Code Artifact Repository
   CA_REPOSITORY: bfd-release-hackathon #FIXME
   CA_DOMAIN: bfd-mgmt
-  AWS_REGION: us-east-1
-  BRANCH_REF: ${{ format('refs/heads/{0}', github.event.pull_request.head.ref) }}
+  AWS_REGION: ${{ inputs.awsRegion }}
 
 jobs:
   mvn-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate Inputs
+        run: |
+          echo "Validating inputs to ensure they conform to expected formats..."
+          echo "${{ inputs.releaseVersion }}" | grep -P '^\d+\.\d+\.\d+$'
+          echo "${{ inputs.developmentVersion }}" | grep -P '^\d+\.\d+\.\d+$-SNAPSHOT'
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: ci-release
           aws-region: us-east-1
+
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v1
         with:
-          mask-password: 'true'
-      - name: Dispatched Checkout
+          mask-password: "true"
+
+      - name: Checkout
         if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: ${{ inputs.releaseBranch }}
-      - name: Pull Checkout
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ env.BRANCH_REF}}
+
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: "17"
           distribution: corretto
+
       - name: Configure the git user
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
+
       - name: Generate maven toolchain config
         run: |
           cat << EOF > ~/.m2/toolchains.xml
@@ -118,21 +125,8 @@ jobs:
             </servers>
           </settings>
           EOF
-      - name: Diagnostics
-        run: cat ~/.m2/settings.xml
-      #FIXME: Remove this PULL_REQUEST release
-      - name: 'Prepare and Perform PULL_REQUEST Release'
-        if: github.event_name == 'pull_request'
-        run: |-
-          mvn --batch-mode --activate-profiles test-release \
-              -Dtag="9.9.9" \
-              -DreleaseVersion="9.9.9" \
-              -DdevelopmentVersion="9.9.9-SNAPSHOT" \
-              release:prepare release:perform
-        working-directory: ./apps
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 'Prepare and Perform DISPATCHED Release'
+
+      - name: "Prepare and Perform Release"
         if: github.event_name == 'workflow_dispatch'
         run: |-
           mvn --batch-mode --activate-profiles test-release \
@@ -146,7 +140,7 @@ jobs:
           BFD_DEV_VERSION: ${{ inputs.developmentVersion }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 'Perform Exceptional Rollback'
+      - name: "Perform Exceptional Rollback"
         if: failure()
         run: mvn release:rollback
         working-directory: ./apps
