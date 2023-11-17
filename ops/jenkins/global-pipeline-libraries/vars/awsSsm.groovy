@@ -20,19 +20,19 @@ String putParameter(Map args = [:]) {
     typeOpt = "--type ${args.parameterType ?: 'String'}"
     tags = "--tags" + "${args.parameterTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
     overwriteOpt = args.shouldOverwrite ? '--overwrite' : ''
-    awsRegionOpt = args.awsRegion ?: 'us-east-1'
+    awsRegionOpt = "--region ${args.awsRegion ?: 'us-east-1'}"
     // includeType = "--type ${type}"
 
-    rTypeOpt = args.resourceType ?: 'Parameter'
-    rId = args.resourceId ?: name
+    rTypeOpt = "--resource-type ${args.resourceType ?: 'Parameter'}"
+    rId = "--resource-id ${args.resourceId ?: name}"
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
-    parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${typeOpt} --region ${awsRegionOpt} ${overwriteOpt}").trim()
-    tagParameter(rId, rTypeOpt, tags)
+    parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${typeOpt} ${awsRegionOpt} ${overwriteOpt}").trim()
+    awsSsm.tagParameter(rId, rTypeOpt, tags)
     return parameterOutput
 }
 
 String tagParameter(Map args =[:]) {
-    tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource --resource-type ${rTypeOpt} --resource-id ${rId} ${tags}").trim()
+    tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
     return tagOutput
 }
