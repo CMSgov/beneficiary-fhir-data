@@ -52,6 +52,8 @@ fi
 
 cd `dirname $0`
 
+UNDEFINED="--undefined--"
+
 function set_const_params() {
     value=$1
     to=$2
@@ -80,9 +82,11 @@ function copy_params() {
     from=$1
     to=$2
     while [[ x$1 != x ]] ; do
-      value=`aws ssm get-parameter --name $from --output text --query Parameter.Value`
-      echo setting $to
-      aws ssm put-parameter --name $to --value "$value" --type String --overwrite
+      value=`aws ssm get-parameter --name $from --output text --query Parameter.Value` || value=$UNDEFINED
+      if [[ x$value != x$UNDEFINED ]] ; then
+        echo setting $to
+        aws ssm put-parameter --name $to --value "$value" --type String --overwrite
+      fi
       shift 2
       from=$1
       to=$2
@@ -93,9 +97,11 @@ function copy_secure_params() {
     from=$1
     to=$2
     while [[ x$1 != x ]] ; do
-      value=`aws ssm get-parameter --name $from --with-decryption --output text --query Parameter.Value`
-      echo setting $to
-      aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
+      value=`aws ssm get-parameter --name $from --with-decryption --output text --query Parameter.Value` || value=$UNDEFINED
+      if [[ x$value != x$UNDEFINED ]] ; then
+        echo setting $to
+        aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
+      fi
       shift 2
       from=$1
       to=$2
@@ -118,6 +124,9 @@ copy_params \
   "${ccw_path}/nonsensitive/rif_job_batch_size_claims" "${shared_config_path}/RIF_JOB_BATCH_SIZE_CLAIMS" \
   "${ccw_path}/nonsensitive/rif_job_queue_size_multiple" "${shared_config_path}/RIF_JOB_QUEUE_SIZE_MULTIPLE" \
   "${ccw_path}/nonsensitive/rif_job_queue_size_multiple_claims" "${shared_config_path}/RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS" \
+  "${ccw_path}/nonsensitive/data_pipeline_micrometer_cw_interval" "${shared_config_path}/MICROMETER_CW_INTERVAL" \
+  "${ccw_path}/nonsensitive/data_pipeline_micrometer_cw_namespace" "${shared_config_path}/MICROMETER_CW_NAMESPACE" \
+  "${ccw_path}/nonsensitive/data_pipeline_micrometer_cw_enabled" "${shared_config_path}/MICROMETER_CW_ENABLED" \
 
 
 copy_secure_params \
@@ -142,6 +151,7 @@ set_const_params \
   "20" "${shared_config_path}/RDA_JOB_BATCH_SIZE" \
   "5" "${shared_config_path}/RDA_JOB_WRITE_THREADS" \
   "true" "${shared_config_path}/RDA_JOB_PROCESS_DLQ" \
+  "false" "${shared_config_path}/MICROMETER_CW_ENABLED" \
 
 case $mode in
   rif)
