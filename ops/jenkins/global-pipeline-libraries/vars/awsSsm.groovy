@@ -18,7 +18,7 @@ String putParameter(Map args = [:]) {
     name = args.parameterName
     value = args.parameterValue
     typeOpt = "--type ${args.parameterType ?: 'String'}"
-    tags = "--tags" + "${args.parameterTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
+    tags = "--tags ${args.parameterTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
     overwriteOpt = args.shouldOverwrite ? '--overwrite' : ''
     awsRegionOpt = "--region ${args.awsRegion ?: 'us-east-1'}"
 
