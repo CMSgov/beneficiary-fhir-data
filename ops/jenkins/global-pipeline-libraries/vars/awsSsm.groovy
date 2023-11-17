@@ -28,7 +28,7 @@ String putParameter(Map args = [:]) {
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
     parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${typeOpt} ${awsRegionOpt} ${overwriteOpt}").trim()
-    awsSsm.tagParameter(rId, rTypeOpt, tags)
+    tagParameter(rId, rTypeOpt, tags)
     return parameterOutput
 }
 
