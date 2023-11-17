@@ -37,7 +37,8 @@ String tagResource(Map args = [:]) {
     if (rTypeOpt == '--resource-type Parameter') {
         tagParameter = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
         return tagParameter
-    }
+    } else {
+
 
     type = "--resource-type ${args.resourceType}"
     id = "--resource-id ${args.resourceId}"
@@ -45,4 +46,5 @@ String tagResource(Map args = [:]) {
 
     tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${type} ${id} ${tags}").trim()
     return tagOutput
+    }
 }
