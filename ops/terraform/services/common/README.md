@@ -43,6 +43,7 @@ https://terraform-docs.io/user-guide/configuration/
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_rds_apply_immediately"></a> [rds\_apply\_immediately](#input\_rds\_apply\_immediately) | Apply any changes to an rds cluster immediately. Use caution as this may cause downtime. Defaults to false. | `bool` | `false` | no |
 | <a name="input_rds_cluster_identifier_override"></a> [rds\_cluster\_identifier\_override](#input\_rds\_cluster\_identifier\_override) | RDS Cluster Identifier Override. Defaults to cluster identifier specified in centralized environmental configuration. | `string` | `null` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
@@ -74,8 +75,6 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_rds_cluster_parameter_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_parameter_group) | resource |
 | [aws_s3_bucket.logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
-| [aws_s3_bucket_acl.logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
-| [aws_s3_bucket_acl.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
 | [aws_s3_bucket_logging.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_logging) | resource |
 | [aws_s3_bucket_policy.logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_public_access_block.logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |

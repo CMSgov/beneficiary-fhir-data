@@ -58,6 +58,7 @@ locals {
   rds_master_password                     = lookup(local.sensitive_config, "rds_master_password", null)
   rds_master_username                     = lookup(local.nonsensitive_config, "rds_master_username", null)
   rds_snapshot_identifier                 = lookup(local.nonsensitive_config, "rds_snapshot_identifier", null)
+  rds_apply_immediately                   = var.rds_apply_immediately
 
   # General SSM lookups
   kms_key_alias = local.nonsensitive_config["kms_key_alias"]

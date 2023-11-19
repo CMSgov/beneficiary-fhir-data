@@ -34,6 +34,11 @@ resource "aws_security_group" "aurora_cluster" {
 }
 
 resource "aws_rds_cluster" "aurora_cluster" {
+  engine            = "aurora-postgresql"
+  engine_mode       = "provisioned"
+  engine_version    = "14.7"
+  apply_immediately = local.rds_apply_immediately
+
   backtrack_window                    = 0
   backup_retention_period             = local.rds_backup_retention_period
   cluster_identifier                  = local.rds_cluster_identifier
@@ -42,9 +47,6 @@ resource "aws_rds_cluster" "aurora_cluster" {
   db_instance_parameter_group_name    = aws_db_parameter_group.aurora_cluster.name
   db_subnet_group_name                = aws_db_subnet_group.aurora_cluster.name
   deletion_protection                 = !local.is_ephemeral_env # TODO: consider having this overridable in the future, especially for longer-lasting ephemeral clusters
-  engine                              = "aurora-postgresql"
-  engine_mode                         = "provisioned"
-  engine_version                      = "14.7"
   iam_database_authentication_enabled = local.rds_iam_database_authentication_enabled
   kms_key_id                          = data.aws_kms_key.cmk.arn
   port                                = 5432
