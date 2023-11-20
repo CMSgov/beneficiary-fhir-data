@@ -91,7 +91,7 @@ bfd:
         data_pipeline_rda_grpc_inproc_server_s3_region: <<CIPHER>>AgV4UPcrCDMMnSqSeMeg0WkXrVkmYlpxDVn1PPRW89Iqw9IAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFnQkorK1RRUDN2TGwydnhHdGpPSWFjbjBJVFpLNGFSTEUzYmZHMTlEbWpUWUNER1gyU0EwakpFcmNvQU9QRXVDZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay1jMjg5NTM3ODY2MzY0NTk4OTQ2NWQzMTJmYjcxMGU0NQC4AQIBAHjqKCGUsrfafVye_2mw4SSOkeKVkIdNH7fvxxo_a9cGpQGAH-4SEsePzkcAbW7IGOZpAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMby0yTyddSnTiJL64AgEQgDtF8jCCMwdWMgm6Ks1mO1OSKuBVR3FnCX7ivHU4wf5wlaMMPxCzkPhzC0ohq_JlqFppJhM3n7rHEQ_5HgIAABAAoa6ygKv5Q43YNr4f1tGcV-DcrblUfwNcNdW11Iz_fz5vRmAOhk75Hpla9hXcUSZ6_____wAAAAEAAAAAAAAAAAAAAAEAAAALt52ld5yHy_w9SuPA_whs_GjVHlw7xfuu3HRVAGcwZQIwCyspDUfueHKh88IuZ81cGPuTaBUihsSN6NrSaaLy44Gq3Qp8Vy2hN-sXKl9q3KZDAjEA05pubb-sh_jWIuux6DhmjjhCzBKjnRzqfzZ500YFk-Q8enxdP5y2EbyAS5LQSXAj<</CIPHER>>
       ccw:
         data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
-        data_pipeline_ccw_rif_job_enabled: true
+        data_pipeline_ccw_rif_job_enabled: false
         data_pipeline_idempotency_required: true
         instance_type: c6i.4xlarge
         rif_job_batch_size: 7
@@ -106,7 +106,7 @@ bfd:
         data_pipeline_rda_grpc_max_idle_seconds: 600
         data_pipeline_rda_grpc_server_type: "InProcess"
         data_pipeline_rda_job_batch_size: 20
-        data_pipeline_rda_job_enabled: true
+        data_pipeline_rda_job_enabled: false
         data_pipeline_ccw_rif_job_enabled: false
         data_pipeline_rda_job_interval_seconds: 3600 # 60 minutes
         data_pipeline_rda_job_starting_fiss_seq_num: UNDEFINED
