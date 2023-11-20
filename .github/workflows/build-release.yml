@@ -40,6 +40,13 @@ jobs:
           echo "${{ inputs.releaseVersion }}" | grep -P '^\d+\.\d+\.\d+$'
           echo "${{ inputs.developmentVersion }}" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT$'
 
+      - name: "Generate an App Token"
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
+          private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -58,6 +65,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.releaseBranch }}
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Setup JDK
         uses: actions/setup-java@v3
@@ -138,7 +146,7 @@ jobs:
         env:
           BFD_RELEASE: ${{ inputs.releaseVersion }}
           BFD_DEV_VERSION: ${{ inputs.developmentVersion }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
 
       - name: "Perform Exceptional Rollback"
         if: failure()
