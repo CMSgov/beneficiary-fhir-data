@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
-  contents: read
+  contents: write # This is required to actually generate a release for the repository
 
 env:
   # AWS Code Artifact Repository
