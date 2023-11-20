@@ -60,7 +60,8 @@ jobs:
               --package "$CA_PACKAGE" \
               --namespace "$CA_NAMESPACE" \
               --format maven \
-              "${item/$CA_PACKAGE-/}" 1>/dev/null 2>/dev/null
+              --region "$AWS_REGION" \
+              "${item/$CA_PACKAGE-/}" 1>/dev/null
           done
 
       - name: Release
