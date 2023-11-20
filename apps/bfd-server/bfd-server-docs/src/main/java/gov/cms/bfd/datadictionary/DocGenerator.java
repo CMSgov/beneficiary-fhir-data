@@ -3,9 +3,9 @@ package gov.cms.bfd.datadictionary;
 import static gov.cms.bfd.datadictionary.util.Version.V1;
 import static gov.cms.bfd.datadictionary.util.Version.V2;
 
-import gov.cms.bfd.datadictionary.mappers.CsvMapper;
-import gov.cms.bfd.datadictionary.mappers.ExcelMapper;
-import gov.cms.bfd.datadictionary.mappers.JsonMapper;
+import gov.cms.bfd.datadictionary.mappers.CsvToExcel;
+import gov.cms.bfd.datadictionary.mappers.FhirElementToCsv;
+import gov.cms.bfd.datadictionary.mappers.FhirElementToJson;
 import gov.cms.bfd.datadictionary.util.FhirElementStream;
 import gov.cms.bfd.datadictionary.util.Version;
 import java.io.File;
@@ -91,14 +91,19 @@ public class DocGenerator {
     var jsonPath = basePath + ".json";
     var csvPath = basePath + ".csv";
 
-    // create mappers and stream
-    try (var jsonMapper = JsonMapper.createInstance(new FileWriter(jsonPath));
-        var csvMapper = CsvMapper.createInstance(new FileWriter(csvPath), csvTemplatePath);
-        var excelMapper = ExcelMapper.createInstance(xlsxOutputStream, workbook, version);
+    // create transformers/writers and stream
+    try (var elementToJson = FhirElementToJson.createInstance(new FileWriter(jsonPath));
+        var elementToCsv =
+            FhirElementToCsv.createInstance(new FileWriter(csvPath), csvTemplatePath);
+        var csvToExcel = CsvToExcel.createInstance(xlsxOutputStream, workbook, version);
         var elementStream = new FhirElementStream(resourceDirPath).stream()) {
 
       // stream over elements and write json, csv, excel
-      elementStream.map(jsonMapper).map(csvMapper).flatMap(Collection::stream).forEach(excelMapper);
+      elementStream
+          .map(elementToJson)
+          .map(elementToCsv)
+          .flatMap(Collection::stream)
+          .forEach(csvToExcel);
 
     } catch (IOException e) {
       throw new RuntimeException(e);

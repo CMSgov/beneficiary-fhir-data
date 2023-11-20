@@ -9,7 +9,7 @@ import java.io.Writer;
 import java.util.function.Function;
 
 /** Processor that takes a stream of FhirElements and writes them to a single JSON file. */
-public class JsonMapper implements Function<FhirElement, FhirElement>, Closeable {
+public class FhirElementToJson implements Function<FhirElement, FhirElement>, Closeable {
 
   /** JSON array element separator. */
   private static final String SEPARATOR = ",";
@@ -33,16 +33,16 @@ public class JsonMapper implements Function<FhirElement, FhirElement>, Closeable
   private boolean started;
 
   /**
-   * Creates an instance of a JsonMapper given a Writer.
+   * Creates an instance of a FhirElementToJson given a Writer.
    *
    * @param writer the writer to use to persist the JSON
-   * @return a JsonMapper
+   * @return a FhirElementToJson
    * @throws IOException upon write errors
    */
-  public static JsonMapper createInstance(Writer writer) throws IOException {
-    var jsonMapper = new JsonMapper(writer);
-    jsonMapper.init();
-    return jsonMapper;
+  public static FhirElementToJson createInstance(Writer writer) throws IOException {
+    var FhirElementToJson = new FhirElementToJson(writer);
+    FhirElementToJson.init();
+    return FhirElementToJson;
   }
 
   /**
@@ -82,12 +82,12 @@ public class JsonMapper implements Function<FhirElement, FhirElement>, Closeable
    *
    * @param writer the writer to use to persist the JSON.
    */
-  private JsonMapper(Writer writer) {
+  private FhirElementToJson(Writer writer) {
     this.writer = writer;
   }
 
   /**
-   * Initializes the JsonMapper.
+   * Initializes the FhirElementToJson.
    *
    * @throws IOException upon write errors
    */

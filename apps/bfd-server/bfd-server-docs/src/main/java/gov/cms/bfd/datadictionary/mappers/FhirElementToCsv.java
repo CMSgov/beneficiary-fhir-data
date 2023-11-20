@@ -18,7 +18,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 /** Processor for a stream of FhirElements. Converts FhirElements to CSV format and writes them. */
-public class CsvMapper implements Function<FhirElement, List<String>>, Closeable {
+public class FhirElementToCsv implements Function<FhirElement, List<String>>, Closeable {
 
   /** ObjectMapper for deserializing CSV template JSON. */
   private static final ObjectMapper objectMapper = JsonMapper.builder().build();
@@ -39,17 +39,18 @@ public class CsvMapper implements Function<FhirElement, List<String>>, Closeable
   private boolean started;
 
   /**
-   * Factory method to create instances of CsvMapper.
+   * Factory method to create instances of FhirElementToCsv.
    *
    * @param writer the writer to use to persist the generated CSV content
    * @param templatePath the CSV template file
-   * @return an instance of CSVMapper
+   * @return an instance of FhirElementToCsv
    * @throws IOException on file errors
    */
-  public static CsvMapper createInstance(Writer writer, String templatePath) throws IOException {
-    var csvMapper = new CsvMapper(writer);
-    csvMapper.init(templatePath);
-    return csvMapper;
+  public static FhirElementToCsv createInstance(Writer writer, String templatePath)
+      throws IOException {
+    var FhirElementToCsv = new FhirElementToCsv(writer);
+    FhirElementToCsv.init(templatePath);
+    return FhirElementToCsv;
   }
 
   /**
@@ -92,7 +93,7 @@ public class CsvMapper implements Function<FhirElement, List<String>>, Closeable
    *
    * @param fileWriter the writer to use to persist the generated CSV content.
    */
-  private CsvMapper(Writer fileWriter) {
+  private FhirElementToCsv(Writer fileWriter) {
     this.fileWriter = fileWriter;
     stringWriter = new StringWriter();
   }

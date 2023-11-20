@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-/** Test class for CsvMapper. */
-class CsvMapperTest {
+/** Test class for FhirElementToCsv. */
+class FhirElementToCsvTest {
   /**
    * Test for the createInstance method.
    *
@@ -23,7 +23,7 @@ class CsvMapperTest {
   @Test
   void createInstance() throws IOException {
     var writer = new StringWriter();
-    var mapper = CsvMapper.createInstance(writer, "dd/template/v2-to-csv.json");
+    var mapper = FhirElementToCsv.createInstance(writer, "dd/template/v2-to-csv.json");
     assertNotNull(mapper);
   }
 
@@ -34,7 +34,7 @@ class CsvMapperTest {
         RuntimeException.class,
         () -> {
           var writer = new StringWriter();
-          CsvMapper.createInstance(writer, "blah");
+          FhirElementToCsv.createInstance(writer, "blah");
         });
   }
 
@@ -46,14 +46,15 @@ class CsvMapperTest {
   @Test
   void apply() throws IOException {
     var writer = new StringWriter();
-    var mapper = CsvMapper.createInstance(writer, "dd/template/v2-to-csv.json");
+    var mapper = FhirElementToCsv.createInstance(writer, "dd/template/v2-to-csv.json");
     Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
 
     // apply returns stream of lists which can be flattened
     var csv = stream.map(mapper).flatMap(Collection::stream);
 
-    // 3 rows plus the header
+    // 3 rows plus the header in stream
     assertEquals(4, csv.count());
+    // 4 lines written to output writer
     assertEquals(4, StringUtils.countMatches(writer.getBuffer().toString(), "\n"));
   }
 
@@ -63,7 +64,7 @@ class CsvMapperTest {
     assertThrows(
         RuntimeException.class,
         () -> {
-          var mapper = CsvMapper.createInstance(null, "dd/template/v2-to-csv.json");
+          var mapper = FhirElementToCsv.createInstance(null, "dd/template/v2-to-csv.json");
           Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
           stream.map(mapper).mapToLong(Collection::size).sum();
         });

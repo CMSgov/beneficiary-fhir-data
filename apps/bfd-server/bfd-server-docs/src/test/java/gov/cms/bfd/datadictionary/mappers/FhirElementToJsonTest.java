@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-/** Tests for the JsonMapper class. */
-class JsonMapperTest {
+/** Tests for the FhirElementToJson class. */
+class FhirElementToJsonTest {
 
   /**
    * Test for the createInstance method.
@@ -22,7 +22,7 @@ class JsonMapperTest {
   @Test
   void createInstance() throws IOException {
     var writer = new StringWriter();
-    var mapper = JsonMapper.createInstance(writer);
+    var mapper = FhirElementToJson.createInstance(writer);
     assertNotNull(mapper);
   }
 
@@ -32,7 +32,7 @@ class JsonMapperTest {
     assertThrows(
         RuntimeException.class,
         () -> {
-          JsonMapper.createInstance(null);
+          FhirElementToJson.createInstance(null);
         });
   }
 
@@ -44,7 +44,7 @@ class JsonMapperTest {
   @Test
   void apply() throws IOException {
     var writer = new StringWriter();
-    var mapper = JsonMapper.createInstance(writer);
+    var mapper = FhirElementToJson.createInstance(writer);
     Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
 
     AtomicInteger count = new AtomicInteger();
@@ -55,7 +55,9 @@ class JsonMapperTest {
               count.getAndIncrement();
             });
 
+    // check stream count
     assertEquals(3, count.get());
+    // check count of elements written to the output writer
     assertEquals(3, StringUtils.countMatches(writer.getBuffer().toString(), "\"id\" :"));
   }
 }

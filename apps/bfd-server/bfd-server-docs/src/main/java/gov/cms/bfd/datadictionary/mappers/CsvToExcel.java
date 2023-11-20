@@ -24,7 +24,7 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 /**
  * Processor that loads and formats a stream of CSV formatted Strings into an Excel workbook sheet.
  */
-public class ExcelMapper implements Consumer<String>, Closeable {
+public class CsvToExcel implements Consumer<String>, Closeable {
 
   /** Excel columns widths in units of 1/256th of a character width for the V1 data dictionary. */
   private static final List<Integer> v1ColumnsWidths =
@@ -58,18 +58,18 @@ public class ExcelMapper implements Consumer<String>, Closeable {
   private Version version;
 
   /**
-   * Creates and instance of the ExcelMapper given and OutputStream, workbook and version.
+   * Creates and instance of the CsvToExcel given and OutputStream, workbook and version.
    *
    * @param outputStream the OutputStream to save the Excel workbook to
    * @param workbook the Excel workbook to load and format
    * @param version the BFD API version, e.g. V1, V2
-   * @return an ExcelMapper
+   * @return an CsvToExcel
    */
-  public static ExcelMapper createInstance(
+  public static CsvToExcel createInstance(
       OutputStream outputStream, Workbook workbook, Version version) {
-    var excelMapper = new ExcelMapper(outputStream, workbook, version);
-    excelMapper.init();
-    return excelMapper;
+    var CsvToExcel = new CsvToExcel(outputStream, workbook, version);
+    CsvToExcel.init();
+    return CsvToExcel;
   }
 
   /**
@@ -109,7 +109,7 @@ public class ExcelMapper implements Consumer<String>, Closeable {
    * @param workbook the Excel workbook to load and format
    * @param version the BFD API version, e.g. V1, V2
    */
-  private ExcelMapper(OutputStream outputStream, Workbook workbook, Version version) {
+  private CsvToExcel(OutputStream outputStream, Workbook workbook, Version version) {
     this.outputStream = outputStream;
     this.workbook = workbook;
     this.version = version;

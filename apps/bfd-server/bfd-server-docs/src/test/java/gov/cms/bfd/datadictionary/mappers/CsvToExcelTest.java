@@ -13,16 +13,16 @@ import java.util.stream.Stream;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 
-/** Test cases for the ExcelMapper. */
-class ExcelMapperTest {
+/** Test cases for the CsvToExcel. */
+class CsvToExcelTest {
 
   /** Test for createInstance method. */
   @Test
   void createInstance() {
     var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
-    var excelMapper = ExcelMapper.createInstance(output, workbook, Version.V2);
-    assertNotNull(excelMapper);
+    var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2);
+    assertNotNull(csvToExcel);
   }
 
   /**
@@ -34,12 +34,13 @@ class ExcelMapperTest {
   void apply() throws IOException {
     var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
-    var csvMapper = CsvMapper.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
-    var excelMapper = ExcelMapper.createInstance(output, workbook, Version.V2);
+    var fhirElementToCsv =
+        FhirElementToCsv.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
+    var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2);
     Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
 
-    // first map FhirElement to CSV String then flatten and map with ExcelMapper
-    stream.map(csvMapper).flatMap(Collection::stream).forEach(excelMapper);
+    // first map FhirElement to CSV String then flatten and map with CsvToExcel
+    stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
 
     // assert that 4 rows (including header) were added to V2 sheet (rows/cols start with 0)
     assertEquals("Element ID", workbook.getSheet("V2").getRow(0).getCell(0).toString());
@@ -57,11 +58,11 @@ class ExcelMapperTest {
         RuntimeException.class,
         () -> {
           var output = new ByteArrayOutputStream();
-          var csvMapper =
-              CsvMapper.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
-          var excelMapper = ExcelMapper.createInstance(output, null, Version.V2);
+          var fhirElementToCsv =
+              FhirElementToCsv.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
+          var csvToExcel = CsvToExcel.createInstance(output, null, Version.V2);
           Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
-          stream.map(csvMapper).flatMap(Collection::stream).forEach(excelMapper);
+          stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
         });
   }
 
@@ -74,17 +75,18 @@ class ExcelMapperTest {
   void close() throws IOException {
     var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
-    var csvMapper = CsvMapper.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
-    try (var excelMapper = ExcelMapper.createInstance(output, workbook, Version.V2)) {
+    var fhirElementToCsv =
+        FhirElementToCsv.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
+    try (var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2)) {
       Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
-      stream.map(csvMapper).flatMap(Collection::stream).forEach(excelMapper);
+      stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
     }
 
     // assert that workbook was written to output stream
     assertTrue(output.size() > 0);
     // check that formatting was applied
     assertEquals(
-        ExcelMapper.CUSTOM_BLUE.getIndex(),
+        CsvToExcel.CUSTOM_BLUE.getIndex(),
         workbook.getSheet("V2").getRow(0).getCell(0).getCellStyle().getFillForegroundColor());
   }
 }
