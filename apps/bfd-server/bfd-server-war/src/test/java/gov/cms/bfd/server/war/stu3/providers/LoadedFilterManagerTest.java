@@ -24,13 +24,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Unit tests for the {@link LoadedFilterManager}. */
 public final class LoadedFilterManagerTest {
-  @SuppressWarnings("unused")
-  private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
 
   /** Sample valid bene for the test. */
   private static final long SAMPLE_BENE = 567834L;

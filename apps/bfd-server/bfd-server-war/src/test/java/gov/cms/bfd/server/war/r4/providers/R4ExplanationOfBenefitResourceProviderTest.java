@@ -15,6 +15,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.Constants;
@@ -81,7 +83,6 @@ import org.springframework.context.ApplicationContext;
 /**
  * Units tests for the {@link R4ExplanationOfBenefitResourceProvider} that do not require a full
  * fhir setup to validate. Anything we want to validate from the fhir client level should go in
- * {@link R4ExplanationOfBenefitResourceProviderE2E}.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -123,14 +124,11 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The mock Bundle returned from a transformer. */
   Bundle testBundle;
 
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
 
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
-
-  /** The mock samhsa matcher. */
-  @Mock R4EobSamhsaMatcher mockSamhsaMatcher;
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** The test data bene. */
   Beneficiary testBene;
@@ -150,20 +148,11 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The transformer for carrier claims. */
   @Mock CarrierClaimTransformerV2 mockCarrierClaimTransformer;
 
-  /** The mock entity manager for CarrierClaim claims. */
-  @Mock EntityManager carrierEntityManager;
-
   /** The transformer for dme claims. */
   @Mock DMEClaimTransformerV2 mockDmeClaimTransformer;
 
-  /** The mock entity manager for DMEClaim claims. */
-  @Mock EntityManager dmeEntityManager;
-
   /** The transformer for Part D events. */
   @Mock PartDEventTransformerV2 mockPdeTransformer;
-
-  /** The mock entity manager for Part D events. */
-  @Mock EntityManager pdeEntityManager;
 
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
@@ -180,8 +169,9 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     setupEntities();
 
     // metrics mocking
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
+
     // NPI and FDA drug mocking
     when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
     when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
@@ -484,6 +474,23 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
     ExplanationOfBenefit eob = eobProvider.read(eobId, requestDetails);
     assertNotNull(eob);
+  }
+
+  /**
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#read} starts and stops its metrics.
+   */
+  @Test
+  void testReadWhenValidIdExpectMetrics() {
+    when(eobId.getIdPart()).thenReturn("pde-123456789");
+    when(mockQuery.getSingleResult()).thenReturn(testPdeClaim);
+    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    eobProvider.read(eobId, requestDetails);
+
+    String expectedTimerName = eobProvider.getClass().getSimpleName() + ".query.eob_by_id";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).stop();
   }
 
   /**

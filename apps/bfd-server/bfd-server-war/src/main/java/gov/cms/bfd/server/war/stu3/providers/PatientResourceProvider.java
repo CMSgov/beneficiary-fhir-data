@@ -30,6 +30,7 @@ import gov.cms.bfd.model.rif.entities.Beneficiary_;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -186,11 +187,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
 
     Beneficiary beneficiary = null;
-    Long beneByIdQueryNanoSeconds = null;
     Timer.Context timerBeneQuery =
-        metricRegistry
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
 
@@ -204,9 +203,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
       throw new ResourceNotFoundException(patientId);
     } finally {
-      beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+      long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
-      TransformerUtils.recordQueryInMdc(
+      CommonTransformerUtils.recordQueryInMdc(
           String.format(
               "bene_by_id_include_%s",
               String.join(
@@ -570,15 +569,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     // Run the query and return the results.
     boolean matchingBeneExists = false;
-    Long beneHistoryMatchesTimerQueryNanoSeconds = null;
     Timer.Context matchingBeneExistsTimer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    getClass().getSimpleName(),
-                    "query",
-                    "bene_exists_by_year_month_part_d_contract_id"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            getClass().getSimpleName(),
+            "query",
+            "bene_exists_by_year_month_part_d_contract_id");
     try {
       matchingBeneExists =
           entityManager.createQuery(beneExistsCriteria).setMaxResults(1).getResultList().stream()
@@ -586,8 +582,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
               .isPresent();
       return matchingBeneExists;
     } finally {
-      beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneExistsTimer.stop();
-      TransformerUtils.recordQueryInMdc(
+      long beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneExistsTimer.stop();
+      CommonTransformerUtils.recordQueryInMdc(
           "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneExists ? 1 : 0);
@@ -633,15 +629,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     // Run the query and return the results.
     List<Long> matchingBeneIds = null;
-    Long beneHistoryMatchesTimerQueryNanoSeconds = null;
     Timer.Context beneIdMatchesTimer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    getClass().getSimpleName(),
-                    "query",
-                    "bene_ids_by_year_month_part_d_contract_id"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            getClass().getSimpleName(),
+            "query",
+            "bene_ids_by_year_month_part_d_contract_id");
     try {
       matchingBeneIds =
           entityManager
@@ -650,8 +643,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
               .getResultList();
       return matchingBeneIds;
     } finally {
-      beneHistoryMatchesTimerQueryNanoSeconds = beneIdMatchesTimer.stop();
-      TransformerUtils.recordQueryInMdc(
+      long beneHistoryMatchesTimerQueryNanoSeconds = beneIdMatchesTimer.stop();
+      CommonTransformerUtils.recordQueryInMdc(
           "bene_ids_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneIds == null ? 0 : matchingBeneIds.size());
@@ -677,13 +670,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     // Run the query and return the results.
     List<Beneficiary> matchingBenes = null;
-    Long beneMatchesTimerQueryNanoSeconds = null;
     Timer.Context beneIdTimer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    getClass().getSimpleName(), "query", "benes_by_year_month_part_d_contract_id"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            getClass().getSimpleName(),
+            "query",
+            "benes_by_year_month_part_d_contract_id");
     try {
       matchingBenes =
           entityManager
@@ -692,8 +684,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
               .getResultList();
       return matchingBenes;
     } finally {
-      beneMatchesTimerQueryNanoSeconds = beneIdTimer.stop();
-      TransformerUtils.recordQueryInMdc(
+      long beneMatchesTimerQueryNanoSeconds = beneIdTimer.stop();
+      CommonTransformerUtils.recordQueryInMdc(
           "benes_by_year_month_part_d_contract_id",
           beneMatchesTimerQueryNanoSeconds,
           matchingBenes == null ? 0 : matchingBenes.size());
@@ -883,21 +875,18 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     beneHistoryMatches.where(
         builder.equal(beneHistoryMatchesRoot.get(beneficiaryHistoryHashField), hash));
     List<Long> matchingIdsFromBeneHistory = null;
-    Long hicnsFromHistoryQueryNanoSeconds = null;
     Timer.Context beneHistoryMatchesTimer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    getClass().getSimpleName(),
-                    "query",
-                    "bene_by_" + hashType,
-                    hashType + "s_from_beneficiarieshistory"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            getClass().getSimpleName(),
+            "query",
+            "bene_by_" + hashType,
+            hashType + "s_from_beneficiarieshistory");
     try {
       matchingIdsFromBeneHistory = entityManager.createQuery(beneHistoryMatches).getResultList();
     } finally {
-      hicnsFromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
-      TransformerUtils.recordQueryInMdc(
+      long hicnsFromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
+      CommonTransformerUtils.recordQueryInMdc(
           "bene_by_" + hashType + "_" + hashType + "s_from_beneficiarieshistory",
           hicnsFromHistoryQueryNanoSeconds,
           matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
@@ -921,22 +910,19 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneMatches.where(beneHashMatches);
     }
     List<Beneficiary> matchingBenes = Collections.emptyList();
-    Long benesByHashOrIdQueryNanoSeconds = null;
     Timer.Context timerHicnQuery =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    getClass().getSimpleName(),
-                    "query",
-                    "bene_by_" + hashType,
-                    "bene_by_" + hashType + "_or_id"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            getClass().getSimpleName(),
+            "query",
+            "bene_by_" + hashType,
+            "bene_by_" + hashType + "_or_id");
     try {
       matchingBenes = entityManager.createQuery(beneMatches).getResultList();
     } finally {
-      benesByHashOrIdQueryNanoSeconds = timerHicnQuery.stop();
+      long benesByHashOrIdQueryNanoSeconds = timerHicnQuery.stop();
 
-      TransformerUtils.recordQueryInMdc(
+      CommonTransformerUtils.recordQueryInMdc(
           String.format(
               "bene_by_" + hashType + "_bene_by_" + hashType + "_or_id_include_%s",
               String.join(

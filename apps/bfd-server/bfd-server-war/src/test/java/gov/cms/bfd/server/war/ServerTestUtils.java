@@ -38,8 +38,6 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
-import gov.cms.bfd.server.war.commons.RequestHeaders;
-import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -810,38 +808,6 @@ public final class ServerTestUtils {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     executor.scheduleAtFixedRate(
         collector, period.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS);
-  }
-
-  /**
-   * Creates a FHIR client with the specified header.
-   *
-   * @param requestHeader the request header
-   * @return the client with extra params registered
-   */
-  public IGenericClient createFhirClientWithHeaders(RequestHeaders requestHeader) {
-    IGenericClient fhirClient = createFhirClient();
-    if (requestHeader != null) {
-      ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-      extraParamsInterceptor.setHeaders(requestHeader);
-      fhirClient.registerInterceptor(extraParamsInterceptor);
-    }
-    return fhirClient;
-  }
-
-  /**
-   * Creates a v2 FHIR client with the specified header.
-   *
-   * @param requestHeader the request header
-   * @return the client with extra params registered
-   */
-  public IGenericClient createFhirClientWithHeadersV2(RequestHeaders requestHeader) {
-    IGenericClient fhirClient = createFhirClientV2();
-    if (requestHeader != null) {
-      ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-      extraParamsInterceptor.setHeaders(requestHeader);
-      fhirClient.registerInterceptor(extraParamsInterceptor);
-    }
-    return fhirClient;
   }
 
   /**

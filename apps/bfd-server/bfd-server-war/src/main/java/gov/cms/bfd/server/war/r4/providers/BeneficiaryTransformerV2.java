@@ -15,6 +15,7 @@ import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerConstants.CurrencyIdentifier;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -36,14 +37,6 @@ public class BeneficiaryTransformerV2 {
 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
-
-  /** Enumerates the options for the currency of an {@link Identifier}. */
-  public enum CurrencyIdentifier {
-    /** Represents a current identifier. */
-    CURRENT,
-    /** Represents a historic identifier. */
-    HISTORIC;
-  }
 
   /**
    * Instantiates a new transformer.
@@ -88,9 +81,8 @@ public class BeneficiaryTransformerV2 {
   public Patient transform(
       Beneficiary beneficiary, RequestHeaders requestHeader, boolean addHistoricalMbiExtensions) {
     Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(BeneficiaryTransformerV2.class.getSimpleName(), "transform"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "transform");
 
     requireNonNull(beneficiary);
 

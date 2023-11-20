@@ -3,6 +3,8 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
@@ -34,14 +36,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.slf4j.LoggerFactory;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer}. */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class OutpatientClaimTransformerTest {
-  private static final org.slf4j.Logger LOGGER =
-      LoggerFactory.getLogger(OutpatientClaimTransformerTest.class);
 
   /** The transformer under test. */
   OutpatientClaimTransformer outpatientClaimTransformer;
@@ -49,19 +48,43 @@ public final class OutpatientClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
 
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     outpatientClaimTransformer = new OutpatientClaimTransformer(metricRegistry, new NPIOrgLookup());
+  }
+
+  /**
+   * Verifies that when transform is called, the metric registry is passed the correct class and
+   * subtype name, is started, and stopped. Note that timer.stop() and timer.close() are equivalent
+   * and one or the other may be called based on how the timer is used in code.
+   */
+  @Test
+  public void testTransformRunsMetricTimer() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    OutpatientClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof OutpatientClaim)
+            .map(OutpatientClaim.class::cast)
+            .findFirst()
+            .orElseThrow();
+
+    outpatientClaimTransformer.transform(claim, false);
+
+    String expectedTimerName = outpatientClaimTransformer.getClass().getSimpleName() + ".transform";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).close();
   }
 
   /**

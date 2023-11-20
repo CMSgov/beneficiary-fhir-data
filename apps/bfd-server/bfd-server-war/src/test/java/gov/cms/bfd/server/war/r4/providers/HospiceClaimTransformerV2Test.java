@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -78,14 +80,14 @@ public final class HospiceClaimTransformerV2Test {
   /** The fhir context for parsing the test file. */
   private static final FhirContext fhirContext = FhirContext.forR4();
 
-  /** The mock metric registry. */
-  @Mock MetricRegistry mockMetricRegistry;
+  /** The metrics registry. */
+  @Mock MetricRegistry metricRegistry;
 
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
 
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -94,10 +96,10 @@ public final class HospiceClaimTransformerV2Test {
    */
   @BeforeEach
   public void generateClaim() throws FHIRException, IOException {
-    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    hospiceClaimTransformer = new HospiceClaimTransformerV2(mockMetricRegistry, new NPIOrgLookup());
+    hospiceClaimTransformer = new HospiceClaimTransformerV2(metricRegistry, new NPIOrgLookup());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -111,16 +113,26 @@ public final class HospiceClaimTransformerV2Test {
     createEOB();
   }
 
-  /**
-   * Creates an eob for the test.
-   *
-   * @throws IOException if there is an issue reading the test file
-   */
-  private void createEOB() throws IOException {
+  /** Creates an eob for the test. */
+  private void createEOB() {
     ExplanationOfBenefit genEob = hospiceClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
+  }
+
+  /**
+   * Verifies that when transform is called, the metric registry is passed the correct class and
+   * subtype name, is started, and stopped. Note that timer.stop() and timer.close() are equivalent
+   * and one or the other may be called based on how the timer is used in code.
+   */
+  @Test
+  public void testTransformRunsMetricTimer() {
+    String expectedTimerName = hospiceClaimTransformer.getClass().getSimpleName() + ".transform";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).close();
   }
 
   /**

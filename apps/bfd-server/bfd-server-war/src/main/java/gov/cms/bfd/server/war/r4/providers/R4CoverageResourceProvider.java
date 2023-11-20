@@ -21,6 +21,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -44,8 +45,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -60,8 +59,6 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    */
   private static final Pattern COVERAGE_ID_PATTERN =
       Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Digit}+)");
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(R4CoverageResourceProvider.class);
 
   /** The entity manager. */
   private EntityManager entityManager;
@@ -275,16 +272,14 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     criteria.where(wherePredicate);
 
     Beneficiary beneficiary = null;
-    Long beneByIdQueryNanoSeconds = null;
     Timer.Context timerBeneQuery =
-        metricRegistry
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
     } finally {
-      beneByIdQueryNanoSeconds = timerBeneQuery.stop();
-      TransformerUtilsV2.recordQueryInMdc(
+      long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+      CommonTransformerUtils.recordQueryInMdc(
           "bene_by_id_include_", beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
     }
     return beneficiary;

@@ -11,6 +11,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.Constants;
@@ -55,7 +57,7 @@ import org.mockito.quality.Strictness;
 /**
  * Units tests for the {@link R4CoverageResourceProvider} that do not require a full fhir setup to
  * validate. Anything we want to validate from the fhir client level should go in {@link
- * R4CoverageResourceProviderE2E}.
+ * CoverageE2E}.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -82,11 +84,11 @@ public class R4CoverageResourceProviderTest {
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
 
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
 
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** Used to mock bene data for a bene search. */
   @Mock ReferenceParam beneficiary;
@@ -125,8 +127,8 @@ public class R4CoverageResourceProviderTest {
     mockEntityManager();
 
     // metrics mocking
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     // loaded filter mocking
     when(loadedFilterManager.isResultSetEmpty(any(), any())).thenReturn(false);
@@ -189,6 +191,23 @@ public class R4CoverageResourceProviderTest {
         () -> {
           coverageProvider.read(coverageId);
         });
+  }
+
+  /**
+   * Tests that findBeneficiaryById properly calls the metrics registry start and stop with the
+   * correct metrics name.
+   */
+  @Test
+  public void testCoverageByIdExpectMetrics() {
+    when(coverageId.getIdPart()).thenReturn("part-a-9145");
+
+    coverageProvider.read(coverageId);
+
+    String expectedTimerName = coverageProvider.getClass().getSimpleName() + ".query.bene_by_id";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).stop();
   }
 
   /**

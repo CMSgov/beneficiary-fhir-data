@@ -62,7 +62,7 @@ import org.mockito.quality.Strictness;
 /**
  * Units tests for the {@link R4PatientResourceProvider} that do not require a full fhir setup to
  * validate. Anything we want to validate from the fhir client level should go in {@link
- * R4PatientResourceProviderIT}.
+ * PatientE2E}.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -89,11 +89,11 @@ public class R4PatientResourceProviderTest {
   /** The Beneficiary transformer. */
   @Mock private BeneficiaryTransformerV2 beneficiaryTransformerV2;
 
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
 
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
 
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
@@ -143,8 +143,8 @@ public class R4PatientResourceProviderTest {
     mockEntityManager();
 
     // metrics mocking
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     // transformer mocking
     when(testPatient.getId()).thenReturn("123");
@@ -221,8 +221,10 @@ public class R4PatientResourceProviderTest {
   public void testReadWhenBeneExistsExpectMetricsCalled() {
     patientProvider.read(patientId, requestDetails);
 
-    verify(mockTimer, times(1)).time();
-    verify(mockTimerContext, times(1)).stop();
+    String expectedTimerName = patientProvider.getClass().getSimpleName() + ".query.bene_by_id";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).stop();
   }
 
   /**
@@ -322,6 +324,32 @@ public class R4PatientResourceProviderTest {
         assertThrows(
             InvalidRequestException.class, () -> patientProvider.read(patientId, requestDetails));
     assertEquals("Patient ID must not define a version", exception.getLocalizedMessage());
+  }
+
+  /**
+   * Verifies that {@link R4PatientResourceProvider#searchByCoverageContract} triggers all expected
+   * metrics when a valid request is made.
+   */
+  @Test
+  public void testSearchByCoverageContractWhenValidContractExpectMetrics() {
+    patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+
+    // Three queries are made with metrics here
+    String expectedTimerName =
+        patientProvider.getClass().getSimpleName()
+            + ".query.bene_exists_by_year_month_part_d_contract_id";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    String expectedTimerName2 =
+        patientProvider.getClass().getSimpleName()
+            + ".query.bene_ids_by_year_month_part_d_contract_id";
+    verify(metricRegistry, times(1)).timer(expectedTimerName2);
+    String expectedTimerName3 =
+        patientProvider.getClass().getSimpleName()
+            + ".query.bene_exists_by_year_month_part_d_contract_id";
+    verify(metricRegistry, times(1)).timer(expectedTimerName3);
+
+    verify(metricsTimer, times(3)).time();
+    verify(metricsTimerContext, times(3)).stop();
   }
 
   /**
@@ -558,10 +586,11 @@ public class R4PatientResourceProviderTest {
 
   /**
    * Verifies that {@link R4PatientResourceProvider#searchByIdentifier} returns a Bundle with a
-   * patient result when the db search is successful (mocked) and searching by hashed mbi.
+   * patient result when the db search is successful (mocked) and searching by hashed mbi. Also
+   * check that the expected metrics are called.
    */
   @Test
-  public void testSearchByIdentifierIdWhenMbiHashExpectPatient() {
+  public void testSearchByIdentifierIdWhenMbiHashExpectPatientAndMetrics() {
 
     when(requestDetails.getHeader(any())).thenReturn("");
 
@@ -569,6 +598,17 @@ public class R4PatientResourceProviderTest {
         patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
 
     assertEquals(1, bundle.getTotal());
+
+    String expectedTimerName =
+        patientProvider.getClass().getSimpleName()
+            + ".query.bene_by_mbi.mbis_from_beneficiarieshistory";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    String expectedTimerName2 =
+        patientProvider.getClass().getSimpleName() + ".query.bene_by_mbi.bene_by_mbi_or_id";
+    verify(metricRegistry, times(1)).timer(expectedTimerName2);
+
+    verify(metricsTimer, times(2)).time();
+    verify(metricsTimerContext, times(2)).stop();
   }
 
   /**
