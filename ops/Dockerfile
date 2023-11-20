@@ -51,7 +51,7 @@ RUN yum update -y --security && \
     ansible \
     gcc \
     git \
-    java-17-amazon-corretto-devel \
+    java-21-amazon-corretto-devel \
     libffi-devel \
     openssl-devel \
     selinux-policy \
