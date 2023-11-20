@@ -12,7 +12,7 @@ bfd:
       management_security_group: bfd-test-remote-management
       new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
       new_relic_metric_path: &newRelicMetricPath /metric/v1
-      rds_aurora_family: aurora-postgresql13
+      rds_aurora_family: aurora-postgresql14
       rds_backup_retention_period: 3 # in days
       rds_iam_database_authentication_enabled: true
       rds_master_username: bfduser
