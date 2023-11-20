@@ -144,14 +144,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Configures mockito to use the inline implementation, which allows mocking
-                        of final classes, etc.  Without this, the fallback implementation results in
-                        illegal reflection access (JDK9+) in certain circumstances -->
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <!-- Adds convenience features for working with mocks in tests -->
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
