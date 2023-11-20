@@ -62,7 +62,7 @@
         <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
 
         <!-- The version of Java that we'll use for everything. -->
-        <javaSourceVersion>17</javaSourceVersion>
+        <javaSourceVersion>21</javaSourceVersion>
 
         <!-- Create a standard (but fake) timestamp for use in creating build artifacts so that
             they are reproducible bit-by-bit no matter when/where they are generated.
@@ -128,8 +128,9 @@
 
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logback.json.classic.version>0.1.5</logback.json.classic.version>
-        <mockito.version>5.6.0</mockito.version>
+        <mockito.version>5.7.0</mockito.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
+        <byte-buddy.version>1.14.9</byte-buddy.version>
         <rest-assured.version>5.3.2</rest-assured.version>
         <assertj.version>3.24.2</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
@@ -148,10 +149,10 @@
         <reflections.version>0.10.2</reflections.version>
         <itextpdf.version>5.5.13.3</itextpdf.version>
         <auto-service.version>1.1.1</auto-service.version>
-        <maven-plugin-api.version>3.9.4</maven-plugin-api.version>
+        <maven-plugin-api.version>3.9.5</maven-plugin-api.version>
         <maven-core.version>3.9.4</maven-core.version>
-        <maven-plugin-annotations.version>3.9.0</maven-plugin-annotations.version>
-        <maven.plugin.version>3.7.1</maven.plugin.version>
+        <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
+        <maven.plugin.version>3.10.2</maven.plugin.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.2.4</poi.version>
@@ -159,7 +160,7 @@
         <!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
         <jetty.version>10.0.16</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
-        <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>3.2.2</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
         <datasource-proxy.version>1.9</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
@@ -225,7 +226,7 @@
         <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
         <jib.version>3.4.0</jib.version>
         <!-- The base image (FROM) used to build images with jib. -->
-        <jib.from>amazoncorretto:17.0.7-alpine</jib.from>
+        <jib.from>amazoncorretto:21.0.0-alpine</jib.from>
         <!--
           The goal to use with the jib plugin.   Override on command line to change behavior:
           dockerBuild: build on local docker only
@@ -305,6 +306,12 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-inline</artifactId>
                 <version>${mockito-inline.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${byte-buddy.version}</version>
             </dependency>
             <dependency>
                 <!-- Used to write fluent assertions in unit tests. -->
@@ -727,7 +734,7 @@
                     <configuration>
                         <toolchains>
                             <jdk>
-                                <!-- Use a Java 17 JDK, by default. -->
+                                <!-- Use a Java 21 JDK, by default. -->
                                 <version>${javaSourceVersion}</version>
                             </jdk>
                         </toolchains>

@@ -1,8 +1,8 @@
 ---
 ##
-# Install Java (JKD and JRE)
+# Install Java (JDK and JRE)
 ##
 - name: Install latest version of Java (amazon-corretto)
   yum:
-    name: java-17-amazon-corretto-devel
+    name: java-21-amazon-corretto-devel
     state: latest

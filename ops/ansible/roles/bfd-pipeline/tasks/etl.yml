@@ -4,7 +4,7 @@
     ansible_python_interpreter: /usr/bin/python
   yum:
     pkg:
-      - java-17-amazon-corretto-devel
+      - java-21-amazon-corretto-devel
   become: true
   tags:
     - pre-ami
