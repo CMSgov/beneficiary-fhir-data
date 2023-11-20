@@ -152,3 +152,43 @@ jobs:
         if: failure()
         run: mvn release:rollback
         working-directory: ./apps
+
+      - name: Pull Release Files
+        run: |
+          readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -r -c '.[]')
+          for asset in "${assets[@]}"
+          do
+            aws codeartifact get-package-version-asset \
+              --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} \
+              --domain "$CA_DOMAIN" \
+              --repository "$CA_REPOSITORY" \
+              --asset "$asset" \
+              --package-version "${{ inputs.releaseVersion }}" \
+              --package "$CA_PACKAGE" \
+              --namespace "$CA_NAMESPACE" \
+              --format maven \
+              --region "$AWS_REGION" \
+              "${asset/$CA_PACKAGE-/}" 1>/dev/null
+          done
+        env:
+          CA_NAMESPACE: gov.cms.bfd
+          CA_PACKAGE: bfd-server-war
+          CA_DATA_DICTIONARY_ASSETS: |
+            [
+              "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.csv",
+              "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.csv",
+              "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.json",
+              "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.json"
+            ]
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          tag_name: "${{ inputs.releaseVersion }}"
+          name: "v${{ inputs.releaseVersion }}"
+          files: |
+            *.csv
+            *.json
