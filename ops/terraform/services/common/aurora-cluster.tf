@@ -36,7 +36,7 @@ resource "aws_security_group" "aurora_cluster" {
 resource "aws_rds_cluster" "aurora_cluster" {
   engine            = "aurora-postgresql"
   engine_mode       = "provisioned"
-  engine_version    = "14.7"
+  engine_version    = "14.9"
   apply_immediately = local.rds_apply_immediately
 
   backtrack_window                    = 0
