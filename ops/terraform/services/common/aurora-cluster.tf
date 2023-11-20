@@ -117,7 +117,7 @@ resource "aws_db_parameter_group" "aurora_cluster" {
 
 resource "aws_rds_cluster_instance" "nodes" {
   count                           = local.rds_instance_count
-  auto_minor_version_upgrade      = true
+  auto_minor_version_upgrade      = false # minor cluster upgrades can cause downtime
   ca_cert_identifier              = "rds-ca-rsa4096-g1"
   cluster_identifier              = aws_rds_cluster.aurora_cluster.id
   copy_tags_to_snapshot           = true
