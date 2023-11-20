@@ -49,7 +49,7 @@ jobs:
 
       - name: Pull Release Files
         run: |
-          readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -c '.[]')
+          readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -r -c '.[]')
           for asset in "${assets[@]}"
           do
             aws codeartifact get-package-version-asset \
