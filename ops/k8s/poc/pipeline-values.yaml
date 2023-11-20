@@ -1,24 +1,17 @@
 # Kubernetes namespace to deploy to.
 namespace: eks-test
 
-# Base name for this application.
-appName: bfd-pipeline
-
 # Used as image tag. Should match release tag when deploying for real.
 bfdVersion: "1.0.0-SNAPSHOT"
 
 # Used to populate BFD_ENV environment variable.
 bfdEnvironment: "eks-test"
 
-# Name of image built by jib maven plugin.
-imageName: bfd-db-migrator
-
 # List of hierarchies used by LayeredConfiguration to find parameters in SSM.
 # This must be set from the command line.
 ssmHierarchies: []
 
-# Uses localstack running in kubernetes when this is true.
-# Otherwise calls to AWS will be made.
+# We always want calls to EKS in this context.
 useLocalstack: false
 
 # AWS region to use.
