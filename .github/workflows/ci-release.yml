@@ -10,7 +10,6 @@ permissions:
   contents: write # This is required to actually generate a release for the repository
 
 env:
-  # AWS Code Artifact Repository
   AWS_REGION: us-east-1
   CA_REPOSITORY: bfd-release-hackathon #FIXME
   CA_DOMAIN: bfd-mgmt
