@@ -21,7 +21,7 @@ env:
       "bfd-server-war-${{ github.ref_name }}-v1-data-dictionary.csv",
       "bfd-server-war-${{ github.ref_name }}-v2-data-dictionary.csv",
       "bfd-server-war-${{ github.ref_name }}-v1-data-dictionary.json",
-      "bfd-server-war-${{ github.ref_name }}-v2-data-dictionary.json",
+      "bfd-server-war-${{ github.ref_name }}-v2-data-dictionary.json"
     ]
 
 jobs:
