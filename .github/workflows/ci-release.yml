@@ -16,13 +16,13 @@ env:
   CA_DOMAIN: bfd-mgmt
   CA_NAMESPACE: gov.cms.bfd
   CA_PACKAGE: bfd-server-war
-  CA_DATA_DICTIONARY_FILES: |
-    (
-      "bfd-server-war-${{ github.ref_name }}-v1-data-dictionary.csv"
-      "bfd-server-war-${{ github.ref_name }}-v2-data-dictionary.csv"
-      "bfd-server-war-${{ github.ref_name }}-v1-data-dictionary.json"
-      "bfd-server-war-${{ github.ref_name }}-v2-data-dictionary.json"
-    )
+  CA_DATA_DICTIONARY_ASSETS: |
+    [
+      "bfd-server-war-${{ github.ref_name }}-v1-data-dictionary.csv",
+      "bfd-server-war-${{ github.ref_name }}-v2-data-dictionary.csv",
+      "bfd-server-war-${{ github.ref_name }}-v1-data-dictionary.json",
+      "bfd-server-war-${{ github.ref_name }}-v2-data-dictionary.json",
+    ]
 
 jobs:
   release-to-github:
@@ -49,13 +49,14 @@ jobs:
 
       - name: Pull Release Files
         run: |
-          for item in "${CA_DATA_DICTIONARY_FILES[@]}"
+          readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -c '.[]')
+          for asset in "${assets[@]}"
           do
             aws codeartifact get-package-version-asset \
               --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} \
               --domain "$CA_DOMAIN" \
               --repository "$CA_REPOSITORY" \
-              --asset "$item" \
+              --asset "$asset" \
               --package-version "${{ github.ref_name }}" \
               --package "$CA_PACKAGE" \
               --namespace "$CA_NAMESPACE" \
