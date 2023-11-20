@@ -46,7 +46,6 @@ resource "aws_rds_cluster" "aurora_cluster" {
   db_cluster_parameter_group_name     = aws_rds_cluster_parameter_group.aurora_cluster.name
   db_instance_parameter_group_name    = aws_db_parameter_group.aurora_cluster.name
   db_subnet_group_name                = aws_db_subnet_group.aurora_cluster.name
-  deletion_protection                 = !local.is_ephemeral_env # TODO: consider having this overridable in the future, especially for longer-lasting ephemeral clusters
   iam_database_authentication_enabled = local.rds_iam_database_authentication_enabled
   kms_key_id                          = data.aws_kms_key.cmk.arn
   port                                = 5432
@@ -54,6 +53,10 @@ resource "aws_rds_cluster" "aurora_cluster" {
   preferred_maintenance_window        = "fri:07:00-fri:08:00"
   skip_final_snapshot                 = true
   storage_encrypted                   = true
+
+  # if deletion_protection_override is null, use the default value for the environment, otherwise use the override
+  deletion_protection = local.rds_deletion_protection_override != null ? local.rds_deletion_protection_override : !local.is_ephemeral_env
+
   # TODO: consider implementing conditional inclusion of the 'cpm backup' tag
   tags = { "cpm backup" = "Weekly Monthly", "Layer" = "data" }
 
