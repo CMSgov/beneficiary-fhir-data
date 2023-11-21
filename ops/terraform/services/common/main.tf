@@ -51,7 +51,7 @@ locals {
   # RDS configuration SSM lookups
   rds_aurora_family                       = local.nonsensitive_config["rds_aurora_family"]
   rds_backup_retention_period             = local.nonsensitive_config["rds_backup_retention_period"]
-  rds_cluster_identifier                  = coalesce(var.rds_cluster_identifier_override, local.nonsensitive_config["rds_cluster_identifier"])
+  rds_cluster_identifier                  = "bfd-${local.env}-aurora-cluster"
   rds_iam_database_authentication_enabled = local.nonsensitive_config["rds_iam_database_authentication_enabled"]
   rds_instance_class                      = local.nonsensitive_config["rds_instance_class"]
   rds_instance_count                      = local.nonsensitive_config["rds_instance_count"]
