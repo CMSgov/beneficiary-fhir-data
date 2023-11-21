@@ -25,7 +25,7 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.baselineVersion=0 >> /flyway/conf/flyway.conf \
     && echo flyway.postgresql.transactional.lock=false >> /flyway/conf/flyway.conf
 
-FROM amazonlinux:2 as al2
+FROM amazonlinux:2023 as al2023
 ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz"
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 
@@ -52,7 +52,6 @@ RUN yum update -y --security && \
     ansible \
     gcc \
     git \
-
     libffi-devel \
     openssl-devel \
     selinux-policy \
@@ -87,7 +86,7 @@ STOPSIGNAL SIGRTMIN+3
 VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
 
-FROM al2 as dist
+FROM al2023 as dist
 # inject prebuilt flyway and configuration from flyway/flyway
 COPY --from=flyway /flyway /flyway
 ENV PATH="/flyway:${PATH}"
