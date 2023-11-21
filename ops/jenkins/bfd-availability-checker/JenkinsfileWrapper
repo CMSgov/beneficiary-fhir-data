@@ -1,0 +1,20 @@
+#!/usr/bin/env groovy
+
+properties([
+        parameters([
+                booleanParam(name: 'test_parameter', description: 'This is a test parameter'),
+                string(name: 'test_param_string', description: 'Test parameter string type')
+        ])
+])
+
+pipeline {
+
+    stages {
+        stage('CallMain') {
+            script {
+                def mainJenkinsFile = load('Jenkinsfile')
+                mainJenkinsFile.method()
+            }
+        }
+    }
+}

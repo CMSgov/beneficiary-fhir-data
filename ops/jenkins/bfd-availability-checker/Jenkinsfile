@@ -48,10 +48,6 @@ pipeline {
     ]))
   }
 
-  triggers {
-    cron "*/1 * * * *"
-  }
-
   stages {
     stage('Authenticate with AWS') {
       steps {
@@ -99,10 +95,6 @@ pipeline {
             steps {
               script {
                 echo "test_parameter = \"${params.test_parameter}\""
-                if (test_param_string.isEmpty()) {
-                  echo "Assigning default value"
-                  params.test_param_string = "Default value assigned"
-                }
                 echo "test_param_string = \"${params.test_param_string}\""
 
                 def metricName = "availability/success"
