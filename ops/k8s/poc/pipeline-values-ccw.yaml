@@ -1,8 +1,8 @@
 # Values file containing overrides specific to the CCW/RIF pipeline.
 # This must be specified after the pipeline-values.yaml file on the command line.
 
-# Always want it to be rif here for obvious reasons.
-pipelineType: "rif"
+# Always want it to be ccw here for obvious reasons.
+pipelineType: "ccw"
 
 # Requested memory and cpu resources.
 containerResources:

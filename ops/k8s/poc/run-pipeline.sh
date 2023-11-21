@@ -8,7 +8,7 @@ app_name=`basename $0`
 
 mode=$1
 if [[ x$mode = x ]] ; then
-  echo "error: usage ${app_name} rda|rif|random" 2>&1
+  echo "error: usage ${app_name} rda|ccw|random" 2>&1
   exit 1
 fi
 
@@ -155,13 +155,13 @@ set_const_params \
   "false" "${shared_config_path}/MICROMETER_CW_ENABLED" \
 
 case $mode in
-  rif)
-    # RIF Mode
+  ccw)
+    # CCW Mode
     set_const_params \
       "true" "${ccw_config_path}/CCW_RIF_JOB_ENABLED" \
 
     set_const_secure_params \
-      "${EKS_S3_BUCKET_NAME}" "${rif_config_path}/S3_BUCKET_NAME" \
+      "${EKS_S3_BUCKET_NAME}" "${ccw_config_path}/S3_BUCKET_NAME" \
 
     ;;
   random)
