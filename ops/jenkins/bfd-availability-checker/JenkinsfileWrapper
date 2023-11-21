@@ -11,9 +11,11 @@ pipeline {
 
     stages {
         stage('CallMain') {
-            script {
-                def mainJenkinsFile = load('Jenkinsfile')
-                mainJenkinsFile.method()
+            steps {
+                script {
+                    def mainJenkinsFile = load('Jenkinsfile')
+                    mainJenkinsFile.method()
+                }
             }
         }
     }
