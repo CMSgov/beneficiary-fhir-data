@@ -39,14 +39,14 @@ LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir
 # * <https://github.com/solita/docker-systemd>: For Ubuntu, but works!
 # * <https://github.com/moby/moby/issues/28614>: Also some useful info.
 #
-# NOTE: Packages sepecified below should generally be kept up-to-date
+# NOTE: Packages specified below should generally be kept up-to-date
 #       with the dependencies encoded in the BFD platinum image
 #       instructions.
 RUN yum update -y --security && \
     yum clean metadata && \
     amazon-linux-extras install epel -y && \
     yum -y groupinstall "Development Tools" && \
-    sudo yum install -y \
+    yum install -y \
     java-21-amazon-corretto-devel \
     amazon-cloudwatch-agent \
     ansible \
