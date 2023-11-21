@@ -100,6 +100,7 @@ pipeline {
               script {
                 echo "test_parameter = \"${params.test_parameter}\""
                 if (params.test_param_string == null) {
+                  echo "Assigning default value"
                   params.test_param_string = "Default value assigned"
                 }
                 echo "test_param_string = \"${params.test_param_string}\""
