@@ -3,7 +3,10 @@ package gov.cms.bfd.datadictionary.util;
 import static java.util.Spliterator.NONNULL;
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterator.SIZED;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.Arrays;
@@ -32,7 +35,7 @@ class FhirElementSpliteratorTest {
 
   /** Test the tryAdvance method. */
   @Test
-  void tryAdvance() {
+  void tryAdvanceExpectThreeElements() {
     // assert three elements yielded
     assertTrue(spliterator.tryAdvance(Assertions::assertNotNull));
     assertTrue(spliterator.tryAdvance(Assertions::assertNotNull));
@@ -42,19 +45,19 @@ class FhirElementSpliteratorTest {
 
   /** Verify that the trySplit method returns null. */
   @Test
-  void trySplit() {
+  void trySplitExpectNull() {
     assertNull(spliterator.trySplit());
   }
 
   /** Test that the estimateSize method is correct. */
   @Test
-  void estimateSize() {
+  void estimateSizeExpectCorrectCount() {
     assertEquals(3, spliterator.estimateSize());
   }
 
   /** Test that the proper characteristics are returned. */
   @Test
-  void characteristics() {
+  void characteristicsExpectCorrectAttributes() {
     assertEquals(ORDERED | SIZED | NONNULL, spliterator.characteristics());
   }
 }

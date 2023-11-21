@@ -1,6 +1,8 @@
 package gov.cms.bfd.datadictionary.mappers;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import gov.cms.bfd.datadictionary.model.FhirElement;
 import gov.cms.bfd.datadictionary.util.FhirElementStream;
@@ -15,12 +17,12 @@ import org.junit.jupiter.api.Test;
 class FhirElementToJsonTest {
 
   /**
-   * Test for the createInstance method.
+   * Test for the createInstance method with a valid writer.
    *
    * @throws IOException upon read/write errors
    */
   @Test
-  void createInstance() throws IOException {
+  void createInstanceWithValidWriter() throws IOException {
     var writer = new StringWriter();
     var mapper = FhirElementToJson.createInstance(writer);
     assertNotNull(mapper);
@@ -28,7 +30,7 @@ class FhirElementToJsonTest {
 
   /** Test of createInstance when the writer is null. */
   @Test
-  void createInstanceBadWriter() {
+  void createInstanceWithMissingWriterExpectException() {
     assertThrows(
         RuntimeException.class,
         () -> {
@@ -42,7 +44,7 @@ class FhirElementToJsonTest {
    * @throws IOException upon read/write errors
    */
   @Test
-  void apply() throws IOException {
+  void applyWithValidElementsExpectMappedJSON() throws IOException {
     var writer = new StringWriter();
     var mapper = FhirElementToJson.createInstance(writer);
     Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();

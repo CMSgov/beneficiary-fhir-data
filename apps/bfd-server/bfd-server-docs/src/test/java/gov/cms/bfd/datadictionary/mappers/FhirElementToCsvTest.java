@@ -17,12 +17,12 @@ import org.junit.jupiter.api.Test;
 /** Test class for FhirElementToCsv. */
 class FhirElementToCsvTest {
   /**
-   * Test for the createInstance method.
+   * Test for the createInstance method with valia parameters.
    *
    * @throws IOException upon write errors
    */
   @Test
-  void createInstance() throws IOException {
+  void createInstanceWithValidParameters() throws IOException {
     var writer = new StringWriter();
     var mapper =
         FhirElementToCsv.createInstance(writer, "src/test/resources/dd/template/v2-to-csv.json");
@@ -31,7 +31,7 @@ class FhirElementToCsvTest {
 
   /** Test where the template file does not exist. */
   @Test
-  void createInstanceBadTemplate() {
+  void createInstanceWithMissingTemplateExpectException() {
     assertThrows(
         FileNotFoundException.class,
         () -> {
@@ -46,7 +46,7 @@ class FhirElementToCsvTest {
    * @throws IOException upon read/write errors
    */
   @Test
-  void apply() throws IOException {
+  void applyWithValidElementsExpectMappedCSV() throws IOException {
     var writer = new StringWriter();
     var mapper =
         FhirElementToCsv.createInstance(writer, "src/test/resources/dd/template/v2-to-csv.json");
@@ -63,7 +63,7 @@ class FhirElementToCsvTest {
 
   /** Test apply when the writer is null. */
   @Test
-  void applyBadWriter() {
+  void applyWithInvalidWriterExpectException() {
     assertThrows(
         RuntimeException.class,
         () -> {

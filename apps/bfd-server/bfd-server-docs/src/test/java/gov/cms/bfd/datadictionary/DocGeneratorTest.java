@@ -9,7 +9,7 @@ public class DocGeneratorTest {
 
   /** Test that the command fails with the wrong number of args (0,1,2,3,4). */
   @Test
-  void badArgsNumberTest() {
+  void mainWithBadNumberOfArgumentExpectException() {
     assertThrows(
         RuntimeException.class,
         () -> {
@@ -24,7 +24,7 @@ public class DocGeneratorTest {
 
   /** Test that the command fails if the V1 CSV template file does not exist. */
   @Test
-  void badV1CSVTemplateFilenameTest() {
+  void mainWithMissingV1CSVTemplateFilenameExpectException() {
     assertThrows(
         RuntimeException.class,
         () -> {
@@ -41,7 +41,7 @@ public class DocGeneratorTest {
 
   /** Test that the command fails if the V2 CSV template file does not exist. */
   @Test
-  void badV2CSVTemplateFilenameTest() {
+  void mainWithMissingV2CSVTemplateFilenameExpectException() {
     assertThrows(
         RuntimeException.class,
         () -> {
@@ -56,9 +56,9 @@ public class DocGeneratorTest {
         });
   }
 
-  /** Test that the command fails if the V2 CSV template file does not exist. */
+  /** Test that the command fails if the source directory does not exist. */
   @Test
-  void badSourceDirectoryTest() {
+  void mainWithMissingSourceDirectoryExpectException() {
     assertThrows(
         RuntimeException.class,
         () -> {

@@ -1,6 +1,7 @@
 package gov.cms.bfd.datadictionary.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import gov.cms.bfd.datadictionary.model.FhirElement;
 import java.util.stream.Stream;
@@ -11,7 +12,7 @@ class FhirElementStreamTest {
 
   /** Verify that the stream method operates correctly. */
   @Test
-  void stream() {
+  void createStreamExpectValidElementCount() {
     Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
     assertNotNull(stream);
     assertEquals(3, stream.count());

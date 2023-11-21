@@ -1,6 +1,9 @@
 package gov.cms.bfd.datadictionary.mappers;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.datadictionary.model.FhirElement;
 import gov.cms.bfd.datadictionary.util.FhirElementStream;
@@ -17,9 +20,9 @@ import org.junit.jupiter.api.Test;
 /** Test cases for the CsvToExcel. */
 class CsvToExcelTest {
 
-  /** Test for createInstance method. */
+  /** Test for createInstance method with valid parameters. */
   @Test
-  void createInstance() {
+  void createInstanceWithValidParameters() {
     var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
     var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2);
@@ -27,18 +30,20 @@ class CsvToExcelTest {
   }
 
   /**
-   * Test of the apply, occurs during calls to map.
+   * Test of apply method with valid CSV. Verifies expected rows and headers.
    *
    * @throws IOException upon read/write errors
    */
   @Test
-  void apply() throws IOException {
+  void applyWithValidCsvExpectMappedRowsAndHeaders() throws IOException {
     var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
     var fhirElementToCsv =
         FhirElementToCsv.createInstance(
             new StringWriter(), "src/test/resources/dd/template/v2-to-csv.json");
     var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2);
+
+    // create stream
     Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
 
     // first map FhirElement to CSV String then flatten and map with CsvToExcel
@@ -55,7 +60,7 @@ class CsvToExcelTest {
    * @throws IOException upon read/write errors
    */
   @Test
-  void applyBadWorkbook() throws IOException {
+  void applyWithBadWorkbookExpectException() throws IOException {
     assertThrows(
         FileNotFoundException.class,
         () -> {
@@ -75,7 +80,7 @@ class CsvToExcelTest {
    * @throws IOException upon read/write errors
    */
   @Test
-  void close() throws IOException {
+  void closeWithValidWorkbookVerifySaveAndFormatting() throws IOException {
     var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
     var fhirElementToCsv =
