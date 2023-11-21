@@ -99,7 +99,7 @@ pipeline {
             steps {
               script {
                 echo "test_parameter = \"${params.test_parameter}\""
-                if (params.test_param_string == null) {
+                if (test_param_string.isEmpty()) {
                   echo "Assigning default value"
                   params.test_param_string = "Default value assigned"
                 }
