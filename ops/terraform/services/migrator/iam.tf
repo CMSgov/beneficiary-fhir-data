@@ -28,6 +28,7 @@ resource "aws_iam_policy" "sqs" {
               "Effect": "Allow",
               "Action": [
                   "kms:Encrypt",
+                  "kms:Decrypt",
                   "kms:GenerateDataKey"
               ],
               "Resource": [
