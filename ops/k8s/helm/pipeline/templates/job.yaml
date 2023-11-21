@@ -57,4 +57,3 @@ spec:
 {{- end }}
       restartPolicy: Never
   backoffLimit: {{ .Values.backoffLimit }}
-  
