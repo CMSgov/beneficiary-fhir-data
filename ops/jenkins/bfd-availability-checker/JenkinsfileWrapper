@@ -8,13 +8,14 @@ properties([
 ])
 
 try {
-
+    node(POD_LABEL) {
         stage('CallMain') {
-                script {
-                    def mainJenkinsFile = load('./Jenkinsfile')
-                    mainJenkinsFile.method()
-                }
+            script {
+                def mainJenkinsFile = load('./Jenkinsfile')
+                mainJenkinsFile.method()
+            }
         }
+    }
 } finally {
 
 }
