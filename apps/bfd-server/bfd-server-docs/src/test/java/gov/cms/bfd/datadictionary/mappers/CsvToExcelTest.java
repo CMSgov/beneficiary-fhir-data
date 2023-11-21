@@ -6,6 +6,7 @@ import gov.cms.bfd.datadictionary.model.FhirElement;
 import gov.cms.bfd.datadictionary.util.FhirElementStream;
 import gov.cms.bfd.datadictionary.util.Version;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collection;
@@ -35,9 +36,10 @@ class CsvToExcelTest {
     var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
     var fhirElementToCsv =
-        FhirElementToCsv.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
+        FhirElementToCsv.createInstance(
+            new StringWriter(), "src/test/resources/dd/template/v2-to-csv.json");
     var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2);
-    Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
+    Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
 
     // first map FhirElement to CSV String then flatten and map with CsvToExcel
     stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
@@ -55,13 +57,14 @@ class CsvToExcelTest {
   @Test
   void applyBadWorkbook() throws IOException {
     assertThrows(
-        RuntimeException.class,
+        FileNotFoundException.class,
         () -> {
           var output = new ByteArrayOutputStream();
           var fhirElementToCsv =
-              FhirElementToCsv.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
+              FhirElementToCsv.createInstance(
+                  new StringWriter(), "src/test/resources/dd/v2-to-csv.json");
           var csvToExcel = CsvToExcel.createInstance(output, null, Version.V2);
-          Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
+          Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
           stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
         });
   }
@@ -76,9 +79,10 @@ class CsvToExcelTest {
     var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
     var fhirElementToCsv =
-        FhirElementToCsv.createInstance(new StringWriter(), "dd/template/v2-to-csv.json");
+        FhirElementToCsv.createInstance(
+            new StringWriter(), "src/test/resources/dd/template/v2-to-csv.json");
     try (var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2)) {
-      Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
+      Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
       stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
     }
 

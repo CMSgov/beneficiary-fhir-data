@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import gov.cms.bfd.datadictionary.model.FhirElement;
 import gov.cms.bfd.datadictionary.util.FhirElementStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collection;
@@ -23,7 +24,8 @@ class FhirElementToCsvTest {
   @Test
   void createInstance() throws IOException {
     var writer = new StringWriter();
-    var mapper = FhirElementToCsv.createInstance(writer, "dd/template/v2-to-csv.json");
+    var mapper =
+        FhirElementToCsv.createInstance(writer, "src/test/resources/dd/template/v2-to-csv.json");
     assertNotNull(mapper);
   }
 
@@ -31,7 +33,7 @@ class FhirElementToCsvTest {
   @Test
   void createInstanceBadTemplate() {
     assertThrows(
-        RuntimeException.class,
+        FileNotFoundException.class,
         () -> {
           var writer = new StringWriter();
           FhirElementToCsv.createInstance(writer, "blah");
@@ -46,8 +48,9 @@ class FhirElementToCsvTest {
   @Test
   void apply() throws IOException {
     var writer = new StringWriter();
-    var mapper = FhirElementToCsv.createInstance(writer, "dd/template/v2-to-csv.json");
-    Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
+    var mapper =
+        FhirElementToCsv.createInstance(writer, "src/test/resources/dd/template/v2-to-csv.json");
+    Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
 
     // apply returns stream of lists which can be flattened
     var csv = stream.map(mapper).flatMap(Collection::stream);
@@ -64,8 +67,10 @@ class FhirElementToCsvTest {
     assertThrows(
         RuntimeException.class,
         () -> {
-          var mapper = FhirElementToCsv.createInstance(null, "dd/template/v2-to-csv.json");
-          Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
+          var mapper =
+              FhirElementToCsv.createInstance(
+                  null, "src/test/resources/dd/template/v2-to-csv.json");
+          Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
           stream.map(mapper).mapToLong(Collection::size).sum();
         });
   }

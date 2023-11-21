@@ -12,7 +12,7 @@ class FhirElementStreamTest {
   /** Verify that the stream method operates correctly. */
   @Test
   void stream() {
-    Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
+    Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
     assertNotNull(stream);
     assertEquals(3, stream.count());
   }

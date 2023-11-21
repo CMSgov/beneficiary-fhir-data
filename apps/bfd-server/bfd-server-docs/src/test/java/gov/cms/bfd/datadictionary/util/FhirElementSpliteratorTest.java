@@ -22,10 +22,7 @@ class FhirElementSpliteratorTest {
   /** Test setup for each test case. */
   @BeforeEach
   void setup() {
-    ClassLoader classLoader = FhirElementStream.class.getClassLoader();
-    var url = classLoader.getResource("dd/data");
-    assert url != null;
-    var dir = new File(url.getPath());
+    var dir = new File("src/test/resources/dd/data");
     var files = dir.listFiles();
     assert files != null;
     Arrays.sort(files, Comparator.comparing(File::getName));

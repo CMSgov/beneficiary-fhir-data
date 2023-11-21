@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 /** Test cases for the DocGenerator class. */
 public class DocGeneratorTest {
 
-  /** Test that the command fails with the wrong number of args (0,1,2,3). */
+  /** Test that the command fails with the wrong number of args (0,1,2,3,4). */
   @Test
   void badArgsNumberTest() {
     assertThrows(
@@ -18,17 +18,7 @@ public class DocGeneratorTest {
     assertThrows(
         RuntimeException.class,
         () -> {
-          DocGenerator.main(new String[] {"blah"});
-        });
-    assertThrows(
-        RuntimeException.class,
-        () -> {
-          DocGenerator.main(new String[] {"blah", "blah"});
-        });
-    assertThrows(
-        RuntimeException.class,
-        () -> {
-          DocGenerator.main(new String[] {"blah", "blah", "blah"});
+          DocGenerator.main(new String[] {"blah", "blah", "blah", "blah"});
         });
   }
 
@@ -38,7 +28,14 @@ public class DocGeneratorTest {
     assertThrows(
         RuntimeException.class,
         () -> {
-          DocGenerator.main(new String[] {"0.0.1-SNAPSHOT", "test", "blah", "v2-to-csv.json"});
+          DocGenerator.main(
+              new String[] {
+                "0.0.1-SNAPSHOT",
+                "data-dictionary/data",
+                "dist",
+                "blah",
+                "data-dictionary/template/v2-to-csv.json"
+              });
         });
   }
 
@@ -48,7 +45,31 @@ public class DocGeneratorTest {
     assertThrows(
         RuntimeException.class,
         () -> {
-          DocGenerator.main(new String[] {"0.0.1-SNAPSHOT", "test", "v1-to-csv.json", "blah"});
+          DocGenerator.main(
+              new String[] {
+                "0.0.1-SNAPSHOT",
+                "data-dictionary/data",
+                "dist",
+                "data-dictionary/template/v1-to-csv.json",
+                "blah"
+              });
+        });
+  }
+
+  /** Test that the command fails if the V2 CSV template file does not exist. */
+  @Test
+  void badSourceDirectoryTest() {
+    assertThrows(
+        RuntimeException.class,
+        () -> {
+          DocGenerator.main(
+              new String[] {
+                "0.0.1-SNAPSHOT",
+                "blah",
+                "dist",
+                "data-dictionary/template/v1-to-csv.json",
+                "data-dictionary/template/v2-to-csv.json"
+              });
         });
   }
 }

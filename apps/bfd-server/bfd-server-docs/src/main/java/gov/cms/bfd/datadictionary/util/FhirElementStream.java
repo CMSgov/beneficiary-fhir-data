@@ -8,19 +8,19 @@ import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-/** Stream of FhirElements deserialized from a given resource directory path. */
+/** Stream of FhirElements deserialized from a given directory path. */
 public class FhirElementStream {
 
-  /** Directory path for the data dictionary resource files. */
-  private final String resourcePath;
+  /** Directory path for the data dictionary files. */
+  private final String sourcePath;
 
   /**
    * Constructor.
    *
-   * @param resourcePath the directory path for the data dictionary resource files
+   * @param sourcePath the directory path for the data dictionary json files
    */
-  public FhirElementStream(String resourcePath) {
-    this.resourcePath = resourcePath;
+  public FhirElementStream(String sourcePath) {
+    this.sourcePath = sourcePath;
   }
 
   /**
@@ -30,10 +30,7 @@ public class FhirElementStream {
    */
   public Stream<FhirElement> stream() {
     // get and sort a list of files in the resource directory
-    ClassLoader classLoader = FhirElementStream.class.getClassLoader();
-    var url = classLoader.getResource(resourcePath);
-    assert url != null;
-    var dir = new File(url.getPath());
+    var dir = new File(sourcePath);
     var files = dir.listFiles();
     assert files != null;
     Arrays.sort(files, Comparator.comparing(File::getName));

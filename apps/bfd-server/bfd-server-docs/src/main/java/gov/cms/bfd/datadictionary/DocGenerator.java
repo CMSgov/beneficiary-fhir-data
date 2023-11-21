@@ -23,8 +23,8 @@ public class DocGenerator {
   /**
    * Program entry point which drives the document generation.
    *
-   * @param args an array of Strings specifying the project version, destination directory and the
-   *     V1, V2 CSV template file names.
+   * @param args an array of Strings specifying the project version, source directory, destination
+   *     directory and the V1, V2 CSV template file paths.
    */
   public static void main(String[] args) {
 
@@ -33,11 +33,12 @@ public class DocGenerator {
 
     // name arguments
     var projectVersion = args[0];
-    var destinationDirectory = args[1];
-    var v1TemplateFilename = args[2];
-    var v2TemplateFilename = args[3];
+    var sourceDirectory = args[1];
+    var destinationDirectory = args[2];
+    var v1TemplateFilePath = args[3];
+    var v2TemplateFilePath = args[4];
 
-    var templateFileMap = Map.of(V1, v1TemplateFilename, V2, v2TemplateFilename);
+    var templateFileMap = Map.of(V1, v1TemplateFilePath, V2, v2TemplateFilePath);
 
     var xlsxFilename =
         String.format("%s/data-dictionary-%s.xlsx", destinationDirectory, projectVersion);
@@ -48,8 +49,8 @@ public class DocGenerator {
 
       // Process each data dictionary resource directory in turn
       for (Version version : List.of(V1, V2)) {
-        var resourceDirPath = String.format("dd/data/%s", version.name());
-        var templatePath = String.format("dd/template/%s", templateFileMap.get(version));
+        var resourceDirPath = String.format("%s/%s", sourceDirectory, version.name());
+        var templatePath = templateFileMap.get(version);
 
         processDirectory(
             resourceDirPath,
@@ -113,23 +114,31 @@ public class DocGenerator {
   /**
    * Validates the program arguments.
    *
-   * @param args the project version, destination directory, and V1/V2 CSV template filenames.
+   * @param args the project version, destination directory, and V1/V2 CSV template file paths.
    */
   private static void validateArgs(String[] args) {
 
     // validate number of arguments
-    if (args.length != 4) {
+    if (args.length != 5) {
       throw new RuntimeException(
-          "Project version, destination directory, V1 and V2 CSV template filenames are required.");
+          "Project version, source directory, destination directory, V1 and V2 CSV template file paths are required.");
     }
 
-    var destinationDirectory = args[1];
-    var v1CsvTemplateFilename = args[2];
-    var v2CsvTemplateFilename = args[3];
+    var sourceDirectory = args[1];
+    var destinationDirectory = args[2];
+    var v1CsvTemplateFilePath = args[3];
+    var v2CsvTemplateFilePath = args[4];
 
     // validate CSV template files exist
-    validateTemplateFile(v1CsvTemplateFilename);
-    validateTemplateFile(v2CsvTemplateFilename);
+    validateTemplateFile(v1CsvTemplateFilePath);
+    validateTemplateFile(v2CsvTemplateFilePath);
+
+    // validate source directory
+    var sourceDirectoryFile = new File(sourceDirectory);
+    if (!sourceDirectoryFile.exists()) {
+      throw new RuntimeException(
+          String.format("Source directory (%s) is not valid.", sourceDirectory));
+    }
 
     // validate destination directory, try to create if does not exist
     var destinationDirectoryFile = new File(destinationDirectory);
@@ -144,14 +153,12 @@ public class DocGenerator {
   /**
    * Validates that a given template file exists.
    *
-   * @param templateFileName the path of the file to validate
+   * @param templateFilePath the path of the file to validate
    */
-  private static void validateTemplateFile(String templateFileName) {
-    ClassLoader classLoader = DocGenerator.class.getClassLoader();
-    var url = classLoader.getResource("dd/template/" + templateFileName);
-    if (url == null || !(new File(url.getFile())).exists()) {
+  private static void validateTemplateFile(String templateFilePath) {
+    if (!(new File(templateFilePath)).exists()) {
       throw new RuntimeException(
-          String.format("CSV template filename (%s) is not valid.", templateFileName));
+          String.format("CSV template filename (%s) is not valid.", templateFilePath));
     }
   }
 

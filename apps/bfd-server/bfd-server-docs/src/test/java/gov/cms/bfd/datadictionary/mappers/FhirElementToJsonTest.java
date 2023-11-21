@@ -45,7 +45,7 @@ class FhirElementToJsonTest {
   void apply() throws IOException {
     var writer = new StringWriter();
     var mapper = FhirElementToJson.createInstance(writer);
-    Stream<FhirElement> stream = new FhirElementStream("dd/data").stream();
+    Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
 
     AtomicInteger count = new AtomicInteger();
     stream

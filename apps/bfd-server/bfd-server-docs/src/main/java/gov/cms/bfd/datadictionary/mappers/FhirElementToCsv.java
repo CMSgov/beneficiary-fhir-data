@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import gov.cms.bfd.datadictionary.model.FhirElement;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -140,15 +141,14 @@ public class FhirElementToCsv implements Function<FhirElement, List<String>>, Cl
   /**
    * Reads the CSV template file into a map of field names and descriptions.
    *
-   * @param resourcePath the String file path to the CSV template file
+   * @param templatePath the String file path to the CSV template file
    * @return a Map of field names to descriptions in read order
    * @throws IOException upon file open or read errors
    */
-  private Map<String, String> readTemplate(String resourcePath) throws IOException {
+  private Map<String, String> readTemplate(String templatePath) throws IOException {
     var fields = new LinkedHashMap<String, String>();
-    ClassLoader classLoader = getClass().getClassLoader();
-    var url = classLoader.getResource(resourcePath);
-    JsonNode root = objectMapper.readTree(url);
+    File template = new File(templatePath);
+    JsonNode root = objectMapper.readTree(template);
     JsonNode node = root.get("fields");
     if (node.isArray()) {
       var iter = node.elements();
