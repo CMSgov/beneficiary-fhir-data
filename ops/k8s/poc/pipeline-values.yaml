@@ -30,4 +30,4 @@ labels:
     value: bfd-pipeline
 
 # Service Account Name
-serviceAccountName: "2916-test-migrator"
+serviceAccountName: "2916-test-pipeline"

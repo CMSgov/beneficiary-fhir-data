@@ -57,11 +57,11 @@ UNDEFINED="--undefined--"
 function set_const_params() {
     value=$1
     to=$2
-    while [[ x$1 != x ]] ; do
+    while [[ "x$1" != x ]] ; do
       echo setting $to
       aws ssm put-parameter --name $to --value "$value" --type String --overwrite
       shift 2
-      from=$1
+      value=$1
       to=$2
     done
 }
@@ -69,11 +69,11 @@ function set_const_params() {
 function set_const_secure_params() {
     value=$1
     to=$2
-    while [[ x$1 != x ]] ; do
+    while [[ "x$1" != x ]] ; do
       echo setting $to
       aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
       shift 2
-      from=$1
+      value=$1
       to=$2
     done
 }
@@ -82,8 +82,9 @@ function copy_params() {
     from=$1
     to=$2
     while [[ x$1 != x ]] ; do
+      echo getting $from
       value=`aws ssm get-parameter --name $from --output text --query Parameter.Value` || value=$UNDEFINED
-      if [[ x$value != x$UNDEFINED ]] ; then
+      if [[ "x$value" != x$UNDEFINED ]] ; then
         echo setting $to
         aws ssm put-parameter --name $to --value "$value" --type String --overwrite
       fi
@@ -97,8 +98,9 @@ function copy_secure_params() {
     from=$1
     to=$2
     while [[ x$1 != x ]] ; do
+      echo getting $from
       value=`aws ssm get-parameter --name $from --with-decryption --output text --query Parameter.Value` || value=$UNDEFINED
-      if [[ x$value != x$UNDEFINED ]] ; then
+      if [[ "x$value" != x$UNDEFINED ]] ; then
         echo setting $to
         aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
       fi
@@ -109,13 +111,13 @@ function copy_secure_params() {
 }
 
 base_path="${EKS_SSM_PREFIX}/pipeline"
-shared_path="${base_path}/${shared}"
+shared_path="${base_path}/shared"
 ccw_path="${base_path}/ccw"
 rda_path="${base_path}/rda"
-base_config_path="{shared_path}/${EKS_SSM_CONFIG_ROOT}"
-shared_config_path="{base_config_path}/common"
-ccw_config_path="{base_config_path}/ccw"
-rda_config_path="{base_config_path}/rda"
+base_config_path="${shared_path}/${EKS_SSM_CONFIG_ROOT}"
+shared_config_path="${base_config_path}/common"
+ccw_config_path="${base_config_path}/ccw"
+rda_config_path="${base_config_path}/rda"
 
 copy_params \
   "${ccw_path}/nonsensitive/data_pipeline_filtering_non_null_and_non_2023_benes" "${shared_config_path}/FILTERING_NON_NULL_AND_NON_2023_BENES" \
@@ -128,12 +130,11 @@ copy_params \
   "${ccw_path}/nonsensitive/data_pipeline_micrometer_cw_namespace" "${shared_config_path}/MICROMETER_CW_NAMESPACE" \
   "${ccw_path}/nonsensitive/data_pipeline_micrometer_cw_enabled" "${shared_config_path}/MICROMETER_CW_ENABLED" \
 
-
 copy_secure_params \
   "${shared_path}/sensitive/data_pipeline_hicn_hash_iterations" "${shared_config_path}/HICN_HASH_ITERATIONS" \
   "${shared_path}/sensitive/data_pipeline_hicn_hash_pepper" "${shared_config_path}/HICN_HASH_PEPPER" \
-  "${shared_path}/sensitive/db_migrator_db_username" "${shared_config_path}/DATABASE_USERNAME" \
-  "${shared_path}/sensitive/db_migrator_db_password" "${shared_config_path}/DATABASE_PASSWORD" \
+  "${shared_path}/sensitive/data_pipeline_db_username" "${shared_config_path}/DATABASE_USERNAME" \
+  "${shared_path}/sensitive/data_pipeline_db_password" "${shared_config_path}/DATABASE_PASSWORD" \
 
 
 set_const_secure_params \
@@ -196,7 +197,7 @@ esac
 
 namespace=eks-test
 chart=../helm/pipeline
-mode_config_path="{base_config_path}/${mode}"
+mode_config_path="${base_config_path}/${mode}"
 
 helm -n $namespace uninstall "pipeline-${mode}" || true
 helm -n $namespace install "pipeline-${mode}" $chart \

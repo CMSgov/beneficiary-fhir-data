@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Values.appName }}
+  name: {{ $pipelineName }}
   namespace: {{ .Values.namespace }}
 {{- if .Values.labels }}
   labels:
@@ -23,11 +23,11 @@ spec:
           securityContext:
             readOnlyRootFilesystem: true
           env:
-          - name: JAVA_TOOL_OPTIONS
-            value: -Djava.io.tmpdir=/app/tmp
+            - name: JAVA_TOOL_OPTIONS
+              value: -Djava.io.tmpdir=/app/tmp
           envFrom:
-          - secretRef:
-              name: {{ $pipelineName }}-secret
+            - secretRef:
+                name: {{ $pipelineName }}-secret
           resources:
             requests:
               memory: {{ .Values.containerResources.memory | quote }}
