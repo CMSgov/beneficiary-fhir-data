@@ -12,7 +12,7 @@ try {
         stage('CallMain') {
             script {
                 def mainJenkinsFile = load('./Jenkinsfile')
-                mainJenkinsFile.method()
+                mainJenkinsFile()
             }
         }
     }
