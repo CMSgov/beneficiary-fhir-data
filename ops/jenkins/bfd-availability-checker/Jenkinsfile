@@ -92,17 +92,18 @@ pipeline {
                 file: "${ENV}-cert.pem",
                 text: PEM_KEY + "\n" + PEM_CERT
               )
-              echo "test_parameter = \"${params.test_parameter}\""
-              if (${params.test_param_string} == null) {
-                params.test_param_string = "Default value assigned"
-              }
-              echo "test_param_string = \"${params.test_param_string}\""
             }
           }
 
           stage('Run availability check') {
             steps {
               script {
+                echo "test_parameter = \"${params.test_parameter}\""
+                if (${params.test_param_string} == null) {
+                  params.test_param_string = "Default value assigned"
+                }
+                echo "test_param_string = \"${params.test_param_string}\""
+                
                 def metricName = "availability/success"
                 try {
                   def httpReturnCode = sh(
