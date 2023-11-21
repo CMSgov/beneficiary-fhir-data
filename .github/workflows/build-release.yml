@@ -26,7 +26,7 @@ permissions:
 
 env:
   # AWS Code Artifact Repository
-  CA_REPOSITORY: bfd-release-hackathon #FIXME
+  CA_REPOSITORY: bfd-mgmt
   CA_DOMAIN: bfd-mgmt
   AWS_REGION: ${{ inputs.awsRegion }}
 
@@ -96,7 +96,6 @@ jobs:
           EOF
 
       - name: Set Authorization Token
-        #FIXME: Use non-hackathon domain/repository
         run: |
           CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain "$CA_DOMAIN" --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text --region us-east-1)"
           echo "::add-mask::$CODEARTIFACT_AUTH_TOKEN"
