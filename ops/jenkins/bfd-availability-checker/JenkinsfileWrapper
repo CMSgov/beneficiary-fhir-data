@@ -10,12 +10,10 @@ properties([
 try {
 
         stage('CallMain') {
-            steps {
                 script {
                     def mainJenkinsFile = load('Jenkinsfile')
                     mainJenkinsFile.method()
                 }
-            }
         }
 } finally {
 
