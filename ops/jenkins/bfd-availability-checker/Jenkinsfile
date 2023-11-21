@@ -2,7 +2,8 @@
 
 properties([
         parameters([
-                booleanParam(name: 'test_parameter', description: 'This is a test parameter')
+                booleanParam(name: 'test_parameter', description: 'This is a test parameter', defaultValue: true),
+                string(name: 'test_param_string', description: 'Test parameter string type', defaultValue: null)
         ])
 ])
 
@@ -92,6 +93,7 @@ pipeline {
                 text: PEM_KEY + "\n" + PEM_CERT
               )
               echo "test_parameter = \"${params.test_parameter}\""
+              echo "test_param_string = \"${params.test_param_string}\""
             }
           }
 
