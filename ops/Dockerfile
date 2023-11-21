@@ -46,12 +46,13 @@ RUN yum update -y --security && \
     yum clean metadata && \
     amazon-linux-extras install epel -y && \
     yum -y groupinstall "Development Tools" && \
-    yum install -y \
+    sudo yum install -y \
+    java-21-amazon-corretto-devel \
     amazon-cloudwatch-agent \
     ansible \
     gcc \
     git \
-    java-17-amazon-corretto-devel \
+
     libffi-devel \
     openssl-devel \
     selinux-policy \
