@@ -1,5 +1,11 @@
 #!/usr/bin/env groovy
 
+properties([
+        parameters([
+                booleanParam(name: 'test_parameter', description: 'This is a test parameter')
+        ])
+])
+
 pipeline {
   agent {
     kubernetes {
@@ -85,7 +91,7 @@ pipeline {
                 file: "${ENV}-cert.pem",
                 text: PEM_KEY + "\n" + PEM_CERT
               )
-              // echo "test_parameter = \"${params.test_parameter}\""
+              echo "test_parameter = \"${params.test_parameter}\""
             }
           }
 
