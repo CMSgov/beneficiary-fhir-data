@@ -1,7 +1,7 @@
 name: 'CI - Java'
-# on:
-#   pull_request:
-#   merge_group:
+on:
+  pull_request:
+  merge_group:
 
 env:
   # workflow file matchers - workflow jobs will only run if matching files are found
