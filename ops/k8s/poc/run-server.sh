@@ -6,9 +6,14 @@ set -e
 
 app_name=`basename $0`
 
-mode=$1
-if [[ x$mode = x ]] ; then
-  echo "error: usage ${app_name} rda|rif|random" 2>&1
+data_dir=$1
+if [[ x$data_dir = x ]] ; then
+  echo "error: usage ${app_name} working-directory-path" 2>&1
+  exit 1
+fi
+
+if [[ ! -d $data_dir ]] ; then
+  echo "error: not a directory: $data_dir" 2>&1
   exit 1
 fi
 
@@ -39,11 +44,11 @@ cd `dirname $0`
 function set_const_params() {
     value=$1
     to=$2
-    while [[ x$1 != x ]] ; do
+    while [[ "x$1" != x ]] ; do
       echo setting $to
       aws ssm put-parameter --name $to --value "$value" --type String --overwrite
       shift 2
-      from=$1
+      value=$1
       to=$2
     done
 }
@@ -51,11 +56,11 @@ function set_const_params() {
 function set_const_secure_params() {
     value=$1
     to=$2
-    while [[ x$1 != x ]] ; do
+    while [[ "x$1" != x ]] ; do
       echo setting $to
       aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
       shift 2
-      from=$1
+      value=$1
       to=$2
     done
 }
@@ -64,9 +69,12 @@ function copy_params() {
     from=$1
     to=$2
     while [[ x$1 != x ]] ; do
-      value=`aws ssm get-parameter --name $from --output text --query Parameter.Value`
-      echo setting $to
-      aws ssm put-parameter --name $to --value "$value" --type String --overwrite
+      echo getting $from
+      value=`aws ssm get-parameter --name $from --output text --query Parameter.Value` || value=$UNDEFINED
+      if [[ "x$value" != x$UNDEFINED ]] ; then
+        echo setting $to
+        aws ssm put-parameter --name $to --value "$value" --type String --overwrite
+      fi
       shift 2
       from=$1
       to=$2
@@ -77,9 +85,12 @@ function copy_secure_params() {
     from=$1
     to=$2
     while [[ x$1 != x ]] ; do
-      value=`aws ssm get-parameter --name $from --with-decryption --output text --query Parameter.Value`
-      echo setting $to
-      aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
+      echo getting $from
+      value=`aws ssm get-parameter --name $from --with-decryption --output text --query Parameter.Value` || value=$UNDEFINED
+      if [[ "x$value" != x$UNDEFINED ]] ; then
+        echo setting $to
+        aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
+      fi
       shift 2
       from=$1
       to=$2
@@ -87,7 +98,7 @@ function copy_secure_params() {
 }
 
 base_path="${EKS_SSM_PREFIX}/server"
-base_config_path="{base_path}/${EKS_SSM_CONFIG_ROOT}"
+base_config_path="${base_path}/${EKS_SSM_CONFIG_ROOT}"
 
 copy_params \
   "${base_path}/nonsensitive/data_server_new_relic_metric_path" "${base_config_path}/NEW_RELIC_METRIC_PATH" \
@@ -107,6 +118,8 @@ set_const_secure_params \
 set_const_params \
   "true" "${base_config_path}/bfdServer.v2.enabled" \
   "10" "${base_config_path}/bfdServer.db.connections.max" \
+  "true" "${base_config_path}/bfdServer.pac.enabled" \
+  "fiss,mcs" "${base_config_path}/bfdServer.pac.claimSourceTypes" \
 
 # Our docker image for bfd-server currently does not have support for New Relic agent jar.
 # See ops/ansible/roles/bfd-server/templates/bfd-server.sh.j2
@@ -151,53 +164,43 @@ set_const_params \
 #   java.io.tmpdir
 #   org.jboss.logging.provider
 
-case $mode in
-  rif)
-    # RIF Mode
-    set_const_params \
-      "true" "${ccw_config_path}/CCW_RIF_JOB_ENABLED" \
+truststore_name=truststore.pfx
+truststore_file="${data_dir}/${truststore_name}"
+[[ -f $truststore_file ]] && rm $truststore_file
+keytool -genkeypair -alias fake -dname cn=fake -storetype PKCS12 -keyalg RSA -keypass changeit -keystore $truststore_file -storepass changeit
+for cert_path in `aws ssm get-parameters-by-path --path "${base_path}/nonsensitive/client_certificates" --output text --query 'Parameters[*].Name'` ; do
+  cert_name=`basename $cert_path`
+  cert_file="${data_dir}/${cert_name}.cert"
+  echo downloading $cert_name to $cert_file
+  aws ssm get-parameter --name $cert_path --output text --query Parameter.Value > $cert_file
+  echo importing $cert_file
+  keytool -importcert -file $cert_file -alias $cert_name -keypass changeit -keystore $truststore_file -storepass changeit -noprompt
+  rm $cert_file
+done
+keytool -delete -alias fake -keystore $truststore_file -storepass changeit -keypass changeit
 
-    set_const_secure_params \
-      "${EKS_S3_BUCKET_NAME}" "${rif_config_path}/S3_BUCKET_NAME" \
+keystore_name=keystore.pfx
+keystore_file="${data_dir}/${keystore_name}"
+aws ssm get-parameter --name "${base_path}/sensitive/server_keystore_base64" --with-decryption --output text --query Parameter.Value \
+  | base64 -d \
+  > $keystore_file
 
-    ;;
-  random)
-    # Still an rda pipeline, just ussing random data.
-    mode=rda
-
-    # Random RDA Server Mode
-    set_const_params \
-      "InProcess" "${base_config_path}/RDA_GRPC_SERVER_TYPE" \
-      "Random" "${base_config_path}/RDA_GRPC_INPROC_SERVER_MODE" \
-      "42" "${base_config_path}/RDA_GRPC_INPROC_SERVER_RANDOM_SEED" \
-      "2500" "${base_config_path}/RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS" \
-      "true" "${rda_config_path}/RDA_JOB_ENABLED" \
-
-    ;;
-  rda)
-    # RDA API Call mode
-    set_const_params \
-      "Remote" "${base_config_path}/RDA_GRPC_SERVER_TYPE" \
-      "600" "${base_config_path}/RDA_GRPC_MAX_IDLE_SECONDS" \
-      "true" "${rda_config_path}/RDA_JOB_ENABLED" \
-
-    set_const_secure_params \
-      "${EKS_RDA_GRPC_HOST}" "${rda_config_path}/RDA_GRPC_HOST" \
-      "${EKS_RDA_GRPC_PORT}" "${rda_config_path}/RDA_GRPC_PORT" \
-      "${EKS_RDA_GRPC_AUTH_TOKEN}" "${rda_config_path}/RDA_GRPC_AUTH_TOKEN" \
-
-    ;;
-  *)
-    echo Invalid value for run_mode: $run_mode 1>&2
-    exit 1
-esac
+ssl_volume_path=/app/ssl
+set_const_secure_params \
+  "${ssl_volume_path}/${keystore_name}" "${base_config_path}/BFD_KEYSTORE" \
+  "${ssl_volume_path}/${truststore_name}" "${base_config_path}/BFD_TRUSTSTORE" \
 
 namespace=eks-test
-chart=../helm/pipeline
-mode_config_path="{base_config_path}/${mode}"
+chart=../helm/server
 
-helm -n $namespace uninstall "pipeline-${mode}" || true
-helm -n $namespace install "pipeline-${mode}" $chart \
-  --set ssmHierarchies="{${base_config_path},${mode_config_path}}" \
+kubectl -n $namespace delete secret bfd-server-ssl-files || true
+kubectl -n $namespace create secret generic bfd-server-ssl-files \
+    --from-file ${truststore_file} \
+    --from-file ${keystore_file}
+rm ${truststore_file} ${keystore_file}
+
+helm -n $namespace uninstall "server" || true
+helm -n $namespace install "server" $chart \
+  --set ssmHierarchies="{${base_config_path}}" \
   --set imageRegistry="${EKS_ECR_REGISTRY}/" \
-  --values pipeline-values.yaml
+  --values server-values.yaml
