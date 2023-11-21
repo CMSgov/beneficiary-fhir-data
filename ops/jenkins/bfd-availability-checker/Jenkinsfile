@@ -99,11 +99,11 @@ pipeline {
             steps {
               script {
                 echo "test_parameter = \"${params.test_parameter}\""
-                if (${params.test_param_string} == null) {
+                if (params.test_param_string == null) {
                   params.test_param_string = "Default value assigned"
                 }
                 echo "test_param_string = \"${params.test_param_string}\""
-                
+
                 def metricName = "availability/success"
                 try {
                   def httpReturnCode = sh(
