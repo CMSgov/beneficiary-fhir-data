@@ -41,6 +41,8 @@ fi
 
 cd `dirname $0`
 
+UNDEFINED="--undefined--"
+
 function set_const_params() {
     value=$1
     to=$2
