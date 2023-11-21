@@ -7,6 +7,10 @@ import org.slf4j.spi.MDCAdapter;
  * Wrapper for to the {@link MDC} class (used in logging). Historically, we have used "." to delimit
  * parts of the MDC keys, such as "http_access.request.header". For AWS CloudWatch Metrics, though,
  * the "." character is not supported, so we need to change these to "_".
+ *
+ * <p>Note that some static MDC expressions below are not used to explicitly set these values in our
+ * requests/responses; some MDC values are automatically added internal to our libraries and the
+ * values in this class are used only for convenience in tests.
  */
 public class BfdMDC {
 
@@ -183,6 +187,10 @@ public class BfdMDC {
   public static final String HTTP_ACCESS_REQUEST_URI =
       computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "uri");
 
+  /** MDC key for the http request header content type. */
+  public static final String HTTP_ACCESS_REQUEST_HEADER_CONTENT_TYPE =
+      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "Content-Type");
+
   /** MDC key for the http request_Start_Key. */
   public static final String REQUEST_START_KEY =
       computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, "start_milliseconds");
@@ -199,12 +207,18 @@ public class BfdMDC {
   public static final String HTTP_ACCESS_RESPONSE_HEADER_ENCODING =
       computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Encoding");
 
-  /** MDC key for the http response header content location. */
-  public static final String HTTP_ACCESS_RESPONSE_HEADER_LOCATION =
+  /** MDC key for the http response header content location. This gets set on read operations
+   * to return the caller uri path, likely set by HAPI-FHIR or Spring (as it's programmatically added
+   * to the MDC along with other response headers in RequestResponsePopulateMdcFilter). */
+  public static final String HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION =
       computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Location");
 
+  /** MDC key for the http response header content length. */
+  public static final String HTTP_ACCESS_RESPONSE_CONTENT_LENGTH =
+      computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Length");
+
   /** MDC key for the http response header content type. */
-  public static final String HTTP_ACCESS_RESPONSE_HEADER_TYPE =
+  public static final String HTTP_ACCESS_RESPONSE_HEADER_CONTENT_TYPE =
       computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Type");
 
   /** MDC key for the http response header date. */

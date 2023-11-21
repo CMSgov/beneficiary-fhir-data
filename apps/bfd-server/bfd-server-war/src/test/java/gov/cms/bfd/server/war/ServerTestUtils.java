@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war;
 
+import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -36,12 +40,15 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -62,6 +69,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -92,6 +100,7 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 /** Contains test utilities. */
 public final class ServerTestUtils {
@@ -1036,5 +1045,158 @@ public final class ServerTestUtils {
     } catch (IOException e) {
       throw new UncheckedIOException("Could not write file at " + filePath, e);
     }
+  }
+
+  /**
+   * Assert mdc keys are written to the access.json log when calling the given REST query string.
+   * Will check a set of common mdc keys that should be on every call, and optionally takes a list
+   * of additional keys to check for specific to the request made.
+   *
+   * @param requestAuth the request auth for the restAssured call
+   * @param requestString the request string for the restAssured call
+   * @param additionalMdcKeysToCheck any additional mdc keys to check that arent in the base list of
+   *     mdc keys to check for in the access.json
+   * @throws IOException if there is an issue with the IO around the access.json file
+   */
+  public static void assertAccessJsonHasMdcKeys(
+      RequestSpecification requestAuth, String requestString, List<String> additionalMdcKeysToCheck)
+      throws IOException {
+    assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalMdcKeysToCheck, new HashMap<>());
+  }
+
+  /**
+   * Assert mdc keys are written to the access.json log when calling the given REST query string.
+   * Will check a set of common mdc keys that should be on every call, and optionally takes a list
+   * of additional keys to check for specific to the request made.
+   *
+   * @param requestAuth the request auth for the restAssured call
+   * @param requestString the request string for the restAssured call
+   * @param additionalMdcKeysToCheck any additional mdc keys to check that arent in the base list of
+   *     mdc keys to check for in the access.json
+   * @param headers the headers needed for the restAssured request
+   * @throws IOException if there is an issue with the IO around the access.json file
+   */
+  public static void assertAccessJsonHasMdcKeys(
+      RequestSpecification requestAuth,
+      String requestString,
+      List<String> additionalMdcKeysToCheck,
+      Map<String, String> headers)
+      throws IOException {
+
+    Path accessLogJson =
+        ServerTestUtils.getWarProjectDirectory()
+            .resolve("target")
+            .resolve("server-work")
+            .resolve("access.json");
+
+    // A list of base mdc keys that should be on every write to access.json
+    List<String> baseKeysToCheck =
+        Arrays.asList(
+            BfdMDC.BENE_ID,
+            BfdMDC.DATABASE_QUERY_BATCH,
+            BfdMDC.DATABASE_QUERY_TYPE,
+            BfdMDC.DATABASE_QUERY_BATCH_SIZE,
+            BfdMDC.DATABASE_QUERY_SIZE,
+            BfdMDC.DATABASE_QUERY_MILLI,
+            BfdMDC.DATABASE_QUERY_SUCCESS,
+            BfdMDC.DATABASE_QUERY_SOURCE_NAME,
+            BfdMDC.HAPI_RESPONSE_TIMESTAMP_MILLI,
+            BfdMDC.HAPI_POST_PROCESS_TIMESTAMP_MILLI,
+            BfdMDC.HAPI_PRE_HANDLE_TIMESTAMP_MILLI,
+            BfdMDC.HAPI_PRE_PROCESS_TIMESTAMP_MILLI,
+            BfdMDC.HAPI_PROCESSING_COMPLETED_TIMESTAMP_MILLI,
+            BfdMDC.HAPI_PROCESSING_COMPLETED_NORM_TIMESTAMP_MILLI,
+            BfdMDC.HTTP_ACCESS_REQUEST_CLIENTSSL_DN,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONN_ENCODING,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_HOST_ENCODING,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_USER_AGENT,
+            BfdMDC.HTTP_ACCESS_REQUEST_HTTP_METHOD,
+            BfdMDC.HTTP_ACCESS_REQUEST_OPERATION,
+            BfdMDC.HTTP_ACCESS_REQUEST_QUERY_STR,
+            BfdMDC.HTTP_ACCESS_REQUEST_TYPE,
+            BfdMDC.HTTP_ACCESS_REQUEST_URI,
+            BfdMDC.HTTP_ACCESS_REQUEST_URL,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONTENT_TYPE,
+            BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS,
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_ENCODING,
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_TYPE,
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_DATE,
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_LAST_MODIFIED,
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_POWERED_BY,
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID,
+            BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
+            BfdMDC.HTTP_ACCESS_RESPONSE_STATUS,
+            BfdMDC.HTTP_ACCESS_RESPONSE_CONTENT_LENGTH,
+            BfdMDC.RESOURCES_RETURNED);
+
+    // Copy array so its mutable for the below add
+    List<String> mdcAccessKeysToCheck = new ArrayList<>(baseKeysToCheck);
+
+    // If there are any other additional mdc keys specific to this call, add them to the list to
+    // check
+    mdcAccessKeysToCheck.addAll(additionalMdcKeysToCheck);
+
+    // Empty the access json to avoid pollution from other tests
+    try (BufferedWriter writer = Files.newBufferedWriter(accessLogJson)) {
+      Files.writeString(accessLogJson, "");
+    }
+
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .contentType("application/json")
+        .expect()
+        .statusCode(200)
+        .when()
+        .get(requestString);
+
+    // Wait for access log to be written
+    Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> Files.isReadable(accessLogJson));
+
+    assertTrue(Files.isReadable(accessLogJson));
+    assertTrue(Files.size(accessLogJson) > 0);
+
+    String content = Files.readString(accessLogJson);
+
+    content = content.substring(content.indexOf("mdc\":{") + 6, content.indexOf("}"));
+    List<String> headerList = List.of(content.split("\","));
+    Map<String, String> mdcKeyValueMap = new HashMap<>();
+    for (String header : headerList) {
+      LOGGER.info(header);
+      String[] headerVal = header.split("\":");
+      // Capture both the key and value, in case we want to test any of the values
+      String key = headerVal[0].replace("\"", "");
+      String val = headerVal[1].replace("\"", "");
+      mdcKeyValueMap.put(key, val);
+    }
+
+    // Compile a list of mdc keys that are missing from the expected list
+    List<String> missingMdcKeys = new ArrayList<>();
+    for (String mdcKey : mdcAccessKeysToCheck) {
+      if (!mdcKeyValueMap.containsKey(mdcKey)) {
+        LOGGER.info("Missing header: " + mdcKey);
+        missingMdcKeys.add(mdcKey);
+      }
+    }
+
+    /* Check for any extra new mdc keys that may have suddenly appeared
+     * Ignore JPA and database entries unless/until we care about comprehensively
+     * testing them on all endpoints */
+    List<String> extraMdcKeys = new ArrayList<>();
+    for (String mdcKey : mdcKeyValueMap.keySet()) {
+      if (!mdcAccessKeysToCheck.contains(mdcKey)
+          && !mdcKey.startsWith("jpa")
+          && !mdcKey.startsWith("database")) {
+        LOGGER.info("Extra header: " + mdcKey);
+        extraMdcKeys.add(mdcKey);
+      }
+    }
+    // Check we have no missing mdc keys in a way that makes a useful assertion error if not
+    assertEquals(missingMdcKeys, new ArrayList<>(), "Missing expected MDC keys in access.json");
+    assertEquals(
+        extraMdcKeys, new ArrayList<>(), "Found unexpected additional MDC keys in access.json");
   }
 }
