@@ -11,7 +11,7 @@ try {
 
         stage('CallMain') {
                 script {
-                    def mainJenkinsFile = load('Jenkinsfile')
+                    def mainJenkinsFile = load('./Jenkinsfile')
                     mainJenkinsFile.method()
                 }
         }
