@@ -9,7 +9,6 @@ properties([
 
 try {
 
-    stages {
         stage('CallMain') {
             steps {
                 script {
@@ -18,7 +17,6 @@ try {
                 }
             }
         }
-    }
 } finally {
 
 }
