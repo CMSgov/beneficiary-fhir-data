@@ -119,7 +119,7 @@ jobs:
       - name: Build and Deliver Apps Container Image
         run: |
           SANITIZED_REF="${GITHUB_REF_NAME////-}"
-          IMAGE_NAME="ghcr.io/cmsgov/bfd-ansible"
+          IMAGE_NAME="ghcr.io/cmsgov/bfd-apps"
           SHORT_SHA="$(git rev-parse --short HEAD)"
           FULL_BRANCH_TAG="${IMAGE_NAME}:${SANITIZED_REF}" # human readable, branch name tag
           FULL_COMMIT_TAG="${IMAGE_NAME}:${SHORT_SHA}"     # a short sha suffixed image tag

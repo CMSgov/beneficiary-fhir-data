@@ -3,11 +3,9 @@ on:
   push:
     branches:
       - master
-      - ade/BFD-3050-UpgradeToJDK21
     paths:
       - ops/Dockerfile
       - .github/workflows/ci-base-container-image.yml
-
 jobs:
   build-container:
     name: Build and Deliver Container

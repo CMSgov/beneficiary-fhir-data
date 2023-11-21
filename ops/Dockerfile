@@ -25,7 +25,7 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.baselineVersion=0 >> /flyway/conf/flyway.conf \
     && echo flyway.postgresql.transactional.lock=false >> /flyway/conf/flyway.conf
 
-FROM amazonlinux:2023 as al2023
+FROM amazonlinux:2 as al2
 ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz"
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 
@@ -42,8 +42,12 @@ LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir
 # NOTE: Packages specified below should generally be kept up-to-date
 #       with the dependencies encoded in the BFD platinum image
 #       instructions.
-RUN yum update -y --security && \
+
+RUN rpm --import https://yum.corretto.aws/corretto.key && \
+    curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo && \
     yum clean metadata && \
+    yum update -y --security && \
+    amazon-linux-extras install epel -y && \
     yum -y groupinstall "Development Tools" && \
     yum install -y \
     java-21-amazon-corretto-devel \
@@ -85,7 +89,7 @@ STOPSIGNAL SIGRTMIN+3
 VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
 
-FROM al2023 as dist
+FROM al2 as dist
 # inject prebuilt flyway and configuration from flyway/flyway
 COPY --from=flyway /flyway /flyway
 ENV PATH="/flyway:${PATH}"
