@@ -38,11 +38,11 @@ String tagResource(Map args = [:]) {
         tagParameter = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
         return tagParameter
     } else {
-        type = "--resource-type ${args.resourceType}"
-        id = "--resource-id ${args.resourceId}"
+        rTypeOpt = "--resource-type ${args.resourceType}"
+        rId = "--resource-id ${args.resourceId}"
         tags = "--tags ${args.resourceTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
 
-        tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${type} ${id} ${tags}").trim()
+        tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
         return tagOutput
     }
 }
