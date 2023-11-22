@@ -33,6 +33,11 @@ spec:
                 parameterType: "String",
                 shouldOverwrite: true
             )
+            awsSsm.tagResource(
+                resourceType: "Parameter",
+                resourceId: "/bfd/test/common/nonsensitive/brandon_test",
+                resourceTags: "Key=Boo,Value=Yah",
+             )
         }
       }
     }
