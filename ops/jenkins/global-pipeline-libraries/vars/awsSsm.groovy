@@ -27,22 +27,22 @@ String putParameter(Map args = [:]) {
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
     parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${typeOpt} ${awsRegionOpt} ${overwriteOpt}").trim()
-    tagResource()
+    tagParameter()
     return parameterOutput
+}
+
+String tagParameter(Map args =[:]) {
+//If Parameter, this should be called by putParameter()
+    tagParameter = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
+    return tagParameter
 }
 
 // Adds or overwrites one or more tags for the specified resource
 String tagResource(Map args = [:]) {
-    //If Parameter, this should be called by putParameter()
-    if (rTypeOpt == '--resource-type Parameter') {
-        tagParameter = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
-        return tagParameter
-    } else {
         rType = "--resource-type ${args.resourceType ?: 'Parameter'}"
         rId = "--resource-id ${args.resourceId}"
         tags = "--tags ${args.resourceTags}"
 
         tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rType} ${rId} ${tags}").trim()
         return tagOutput
-    }
 }
