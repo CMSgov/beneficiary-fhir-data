@@ -94,7 +94,7 @@ resource "aws_iam_policy" "rds" {
                 "rds:DescribeDBClusters"
             ],
             "Resource": [
-                "arn:aws:rds:us-east-1:${local.account_id}:cluster:bfd-${local.env}-aurora-cluster"
+                "arn:aws:rds:us-east-1:${local.account_id}:cluster:bfd-${local.env}-*"
             ]
         }
     ]

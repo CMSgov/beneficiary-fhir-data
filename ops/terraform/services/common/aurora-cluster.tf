@@ -34,6 +34,11 @@ resource "aws_security_group" "aurora_cluster" {
 }
 
 resource "aws_rds_cluster" "aurora_cluster" {
+  engine            = "aurora-postgresql"
+  engine_mode       = "provisioned"
+  engine_version    = "14.9"
+  apply_immediately = local.rds_apply_immediately
+
   backtrack_window                    = 0
   backup_retention_period             = local.rds_backup_retention_period
   cluster_identifier                  = local.rds_cluster_identifier
@@ -41,10 +46,6 @@ resource "aws_rds_cluster" "aurora_cluster" {
   db_cluster_parameter_group_name     = aws_rds_cluster_parameter_group.aurora_cluster.name
   db_instance_parameter_group_name    = aws_db_parameter_group.aurora_cluster.name
   db_subnet_group_name                = aws_db_subnet_group.aurora_cluster.name
-  deletion_protection                 = !local.is_ephemeral_env # TODO: consider having this overridable in the future, especially for longer-lasting ephemeral clusters
-  engine                              = "aurora-postgresql"
-  engine_mode                         = "provisioned"
-  engine_version                      = "14.7"
   iam_database_authentication_enabled = local.rds_iam_database_authentication_enabled
   kms_key_id                          = data.aws_kms_key.cmk.arn
   port                                = 5432
@@ -52,6 +53,10 @@ resource "aws_rds_cluster" "aurora_cluster" {
   preferred_maintenance_window        = "fri:07:00-fri:08:00"
   skip_final_snapshot                 = true
   storage_encrypted                   = true
+
+  # if deletion_protection_override is null, use the default value for the environment, otherwise use the override
+  deletion_protection = local.rds_deletion_protection_override != null ? local.rds_deletion_protection_override : !local.is_ephemeral_env
+
   # TODO: consider implementing conditional inclusion of the 'cpm backup' tag
   tags = { "cpm backup" = "Weekly Monthly", "Layer" = "data" }
 
@@ -112,8 +117,8 @@ resource "aws_db_parameter_group" "aurora_cluster" {
 
 resource "aws_rds_cluster_instance" "nodes" {
   count                           = local.rds_instance_count
-  auto_minor_version_upgrade      = true
-  ca_cert_identifier              = "rds-ca-2019" # NOTE: This seems like an invariant
+  auto_minor_version_upgrade      = false # minor cluster upgrades can cause downtime
+  ca_cert_identifier              = "rds-ca-rsa4096-g1"
   cluster_identifier              = aws_rds_cluster.aurora_cluster.id
   copy_tags_to_snapshot           = true
   db_subnet_group_name            = aws_rds_cluster.aurora_cluster.db_subnet_group_name

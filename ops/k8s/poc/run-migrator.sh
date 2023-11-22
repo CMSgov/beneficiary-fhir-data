@@ -58,14 +58,15 @@ function copy_secure_param() {
     aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
 }
 
-config_path="${EKS_SSM_PREFIX}/migrator/${EKS_SSM_CONFIG_ROOT}"
+base_path="${EKS_SSM_PREFIX}/migrator"
+config_path="${base_path}/${EKS_SSM_CONFIG_ROOT}"
 
 set_const_param \
   "5" \
   "$config_path/DATABASE_MAX_POOL_SIZE"
 
 copy_param \
-  "$EKS_SSM_PREFIX/migrator/nonsensitive/sqs_queue_name" \
+  "${base_path}/nonsensitive/sqs_queue_name" \
   "$config_path/DB_MIGRATOR_SQS_QUEUE"
 
 set_const_secure_param \
@@ -73,11 +74,11 @@ set_const_secure_param \
   "$config_path/DATABASE_URL"
 
 copy_secure_param \
-  "$EKS_SSM_PREFIX/migrator/sensitive/db_migrator_db_username" \
+  "${base_path}/sensitive/db_migrator_db_username" \
   "$config_path/DATABASE_USERNAME"
 
 copy_secure_param \
-  "$EKS_SSM_PREFIX/migrator/sensitive/db_migrator_db_password" \
+  "${base_path}/sensitive/db_migrator_db_password" \
   "$config_path/DATABASE_PASSWORD"
 
 namespace=eks-test

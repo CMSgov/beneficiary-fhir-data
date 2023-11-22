@@ -1,10 +1,11 @@
 # EKS POC
 
 This directory contains the script and helm values file used in the EKS Proof of Concept.
-The script copies values into SSM for use by the migrator job and then publishes the
-job to the EKS cluster using helm.
+The script supports all three applications in bfd: server, pipeline (rda and ccw), and migrator.
+The script copies configuration values from their current locations in SSM into a flat hierarchy
+within SSM for use by the apps and then publishes the app to the EKS cluster using helm.
 
-The migrator job was sucessfully executed in a POC environment.
+All three applications have been successfully executed in a POC environment.
 
 In order to run the POC you need to have an available EKS cluster.
 In order to avoid adding sensitive information to either the script or values
@@ -18,6 +19,13 @@ These are:
 - `EKS_SSM_CONFIG_ROOT`: Name of a new hierarchy node within SSM to add runtime configuration settings to.
 - `EKS_RDS_WRITER_ENDPOINT`: Endpoint name for the RDS database's writer node.
 - `EKS_ECR_REGISTRY`: ECR name that can be added to image names to allow K8S to download images from the registry.
+
+Additional environment variables are required only for the pipeline script:
+
+- `EKS_RDA_GRPC_HOST`: Host name of the RDA API server to be called by the RDA pipeline.
+- `EKS_RDA_GRPC_PORT`: Port of the RDA API server to be called by the RDA pipeline.
+- `EKS_RDA_GRPC_AUTH_TOKEN`: Token used by the RDA pipeline to authenticate to the RDA API server.
+- `EKS_S3_BUCKET_NAME`: Name of the S3 bucket used by the CCW and RDA pipelines.
 
 EKS has some special needs that a desktop cluster does not.
 These have been accomodated by adding new values to the helm values file and expanding the template to use those values if they are present.  The special values are:
@@ -41,3 +49,11 @@ When this list is non-empty the template renders a `labels` property in the job'
 
 A new `serviceAccountName` string value was defined to specify the appropriate service account for the job.
 When this has a non-empty value a `serviceAccountName` property is added to the job's pod spec.
+
+# Run scripts
+
+The `run-migrator.sh` script does not require any command line arguments.
+
+The `run-pipeline.sh` script requires a single command line argument to specify its run mode.  Possible values are `rda` (call the RDA API server and retrieve values from it), `random` (use an internal random rda server), or `ccw` (load CCW/RIF data from the S3 bucket).
+
+The `run-server.sh` script requires a single command line argument to specify a working directory.  The script will use this directory to hold temporary files containing certs and a keystore file downloaded from SSM until they can be uploaded to a secret in EKS.  Once they have been uploaded to EKS the working files are deleted.
