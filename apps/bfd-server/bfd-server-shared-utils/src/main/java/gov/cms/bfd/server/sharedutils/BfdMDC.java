@@ -207,9 +207,11 @@ public class BfdMDC {
   public static final String HTTP_ACCESS_RESPONSE_HEADER_ENCODING =
       computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Encoding");
 
-  /** MDC key for the http response header content location. This gets set on read operations
-   * to return the caller uri path, likely set by HAPI-FHIR or Spring (as it's programmatically added
-   * to the MDC along with other response headers in RequestResponsePopulateMdcFilter). */
+  /**
+   * MDC key for the http response header content location. This gets set on read operations to
+   * return the caller uri path, likely set by HAPI-FHIR or Spring (as it's programmatically added
+   * to the MDC along with other response headers in RequestResponsePopulateMdcFilter).
+   */
   public static final String HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION =
       computeMDCKey(MDC_PREFIX, RESPONSE_PREFIX, HEADER_PREFIX, "Content-Location");
 
