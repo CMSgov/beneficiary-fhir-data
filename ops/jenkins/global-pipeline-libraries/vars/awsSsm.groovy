@@ -1,6 +1,9 @@
 #!/usr/bin/env groovy
 // awsSsm.groovy contains methods that wrap awscli ssm subcommands
 
+class Parameter {
+    String name
+
 // Gets value from SSM parameter store based on parameter name.
 // If a SSM parameter does not exist, it will result in an exception.
 String getParameter(Map args = [:]) {
@@ -27,16 +30,18 @@ String putParameter(Map args = [:]) {
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
     parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' ${typeOpt} ${awsRegionOpt} ${overwriteOpt}").trim()
-    tagResource()
+    tagResource(name)
     return parameterOutput
 }
 
 // Adds or overwrites one or more tags for the specified resource
 String tagResource(Map args = [:]) {
-        rTypeOpt = "--resource-type ${args.resourceType}"
+        rTypeOpt = "--resource-type ${args.resourceType ?: 'Parameter'}"
         rId = "--resource-id ${args.resourceId}"
+        name = rId
         tags = "--tags ${args.resourceTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
 
-        tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
+        tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${name} ${tags}").trim()
         return tagOutput
+}
 }
