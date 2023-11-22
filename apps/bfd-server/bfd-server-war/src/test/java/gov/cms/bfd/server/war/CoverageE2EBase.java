@@ -399,7 +399,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
 
   /**
    * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
-   * expected for EOB read.
+   * expected for Coverage read.
    */
   @Test
   public void testCoverageReadIdHasAccessJsonWithExpectedMdcKeys() throws IOException {
@@ -416,7 +416,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
 
   /**
    * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
-   * expected for EOB read.
+   * expected for Coverage search by bene id.
    */
   @Test
   public void testCoverageSearchByBeneHasAccessJsonWithExpectedMdcKeys() throws IOException {
