@@ -47,6 +47,7 @@ pipeline {
                 build job: 'bfd-availability-checker-test',
                         parameters: [
                                 [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: "test"],
+                                [$class: 'BooleanParameterValue', name: 'test_parameter', value: true],
                                 [$class: 'StringParameterValue', name: 'test_param_string', value: "wrapper passed in"]
                         ]
             }
