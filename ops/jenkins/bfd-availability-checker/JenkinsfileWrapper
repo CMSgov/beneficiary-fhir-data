@@ -7,9 +7,35 @@ properties([
         ])
 ])
 
-try {
-    node {
-        stage ("Example Call to build another Jenkins Job") {
+pipeline {
+    agent {
+        kubernetes {
+            defaultContainer 'bfd-cbc-build'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  containers:
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk17-mvn3-tfenv3-kt1.9-latest'
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: Always
+    resources:
+      requests:
+        memory: '16384Mi'
+        cpu: '8000m'
+      limits:
+        memory: '16384Mi'
+        cpu: '8000m'
+"""
+        }
+    }
+
+    stages {
+        stage("Example Call to build another Jenkins Job") {
             steps {
                 build job: 'bfd-availability-checker-test',
                         parameters: [
@@ -19,6 +45,4 @@ try {
             }
         }
     }
-} finally {
-
 }
