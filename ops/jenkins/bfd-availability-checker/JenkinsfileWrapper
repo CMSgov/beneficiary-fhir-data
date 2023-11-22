@@ -9,10 +9,13 @@ properties([
 
 try {
     node {
-        stage('CallMain') {
-            script {
-                def mainJenkinsFile = load('./Jenkinsfile')
-                mainJenkinsFile()
+        stage ("Example Call to build another Jenkins Job") {
+            steps {
+                build job: 'bfd-availability-checker-test',
+                        parameters: [
+                                [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: "test"],
+                                [$class: 'StringParameterValue', name: 'test_param_string', value: "wrapper passed in"]
+                        ]
             }
         }
     }
