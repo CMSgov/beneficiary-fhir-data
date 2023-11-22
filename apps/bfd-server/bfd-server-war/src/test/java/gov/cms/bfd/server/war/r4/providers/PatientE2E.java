@@ -18,6 +18,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import io.restassured.response.Response;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -209,7 +210,8 @@ public class PatientE2E extends PatientE2EBase {
             + "&_has:Coverage.rfrncyr="
             + refYear;
 
-    List<String> additionalExpectedMdcKeys = List.of(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
+    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
 
     ServerTestUtils.assertAccessJsonHasMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys, headers);

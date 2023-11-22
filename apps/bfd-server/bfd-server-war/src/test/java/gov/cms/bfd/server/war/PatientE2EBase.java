@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -55,6 +56,20 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
   /** The current Mbi as found in the SAMPLE A data. */
   protected static final String currentMbi = "3456789";
+
+  /**
+   * The base MDC keys expected for all Patient endpoint calls which are not common to all other
+   * endpoints.
+   */
+  protected static final List<String> MDC_EXPECTED_BASE_KEYS =
+      List.of(
+          BfdMDC.DATABASE_QUERY_BATCH,
+          BfdMDC.DATABASE_QUERY_TYPE,
+          BfdMDC.DATABASE_QUERY_BATCH_SIZE,
+          BfdMDC.DATABASE_QUERY_SIZE,
+          BfdMDC.DATABASE_QUERY_MILLI,
+          BfdMDC.DATABASE_QUERY_SUCCESS,
+          BfdMDC.DATABASE_QUERY_SOURCE_NAME);
 
   /** Verifies patient read with an existing bene returns a 200 and response. */
   @Test
@@ -692,7 +707,8 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
             + "|"
             + mbiHash;
 
-    List<String> additionalExpectedMdcKeys = List.of(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
+    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
 
     ServerTestUtils.assertAccessJsonHasMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys);
@@ -707,8 +723,8 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     String requestString = patientEndpoint + patientId;
 
-    List<String> additionalExpectedMdcKeys =
-        List.of(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION);
+    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION);
 
     ServerTestUtils.assertAccessJsonHasMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys);
@@ -723,7 +739,8 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     String requestString = patientEndpoint + "?_id=" + patientId;
 
-    List<String> additionalExpectedMdcKeys = List.of(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
+    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
 
     ServerTestUtils.assertAccessJsonHasMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys);

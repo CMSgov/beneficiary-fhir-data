@@ -16,16 +16,21 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
+import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import io.restassured.response.Response;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.r4.model.Patient;
@@ -202,7 +207,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    * Verifies that the EOB returns a 200 with the expected DD paths for each claim type returned.
    */
   @Test
-  public void testEobByPatientIdWithValidPatientIdExpectValidEob() {
+  public void testEobByPatientIdWithValidPatientIdExpect200() {
 
     List<Object> loadedData = testUtils.loadSampleAData();
     String patientId = testUtils.getPatientId(loadedData);
@@ -1052,6 +1057,57 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   }
 
   /**
+   * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
+   * expected for EOB read.
+   */
+  @Test
+  public void testEobReadIdHasAccessJsonWithExpectedMdcKeys() throws IOException {
+    List<Object> loadedRecords = testUtils.loadSampleAData();
+    String claimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
+    String eobId = CommonTransformerUtils.buildEobId(ClaimType.CARRIER, claimId);
+    String requestString = eobEndpoint + eobId;
+
+    Map<String, String> headers = new HashMap<>();
+    headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
+    headers.put(R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, "true");
+    // Add extra check for accept-charset to make sure it passes through
+    headers.put("Accept-Charset", "utf-8");
+    List<String> additionalExpectedMdcKeys =
+        List.of(
+            BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET);
+
+    ServerTestUtils.assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalExpectedMdcKeys, headers);
+  }
+
+  /**
+   * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
+   * expected for EOB by patient id.
+   */
+  @Test
+  public void testEobByPatientIdHasAccessJsonWithExpectedMdcKeys() throws IOException {
+    List<Object> loadedData = testUtils.loadSampleAData();
+    String patientId = testUtils.getPatientId(loadedData);
+    String requestString = eobEndpoint + "?patient=" + patientId;
+
+    Map<String, String> headers = new HashMap<>();
+    headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
+    headers.put(R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, "true");
+    List<String> additionalExpectedMdcKeys =
+        List.of(
+            BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS);
+
+    ServerTestUtils.assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalExpectedMdcKeys, headers);
+  }
+
+  /**
    * Verify a successful EOB response returns when searching for the specified claim type's id (as
    * taken from the sample data).
    *
@@ -1059,9 +1115,9 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    */
   private void verifySuccessfulResponseAndClaimIdFor(ClaimType claimType) {
     List<Object> loadedRecords = testUtils.loadSampleAData();
-    String claimId = testUtils.getClaimIdFor(loadedRecords, claimType);
+    String claimId = ServerTestUtils.getClaimIdFor(loadedRecords, claimType);
     // Code is the same between utils, so can use v2 call for both
-    String eobId = TransformerUtilsV2.buildEobId(claimType, claimId);
+    String eobId = CommonTransformerUtils.buildEobId(claimType, claimId);
     String systemId = "https://bluebutton.cms.gov/resources/variables/clm_id";
     if (claimType == ClaimType.PDE) {
       // PDE uses a diff identifier for its ID

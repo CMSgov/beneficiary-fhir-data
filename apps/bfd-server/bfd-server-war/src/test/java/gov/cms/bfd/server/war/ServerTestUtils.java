@@ -1094,13 +1094,6 @@ public final class ServerTestUtils {
     List<String> baseKeysToCheck =
         Arrays.asList(
             BfdMDC.BENE_ID,
-            BfdMDC.DATABASE_QUERY_BATCH,
-            BfdMDC.DATABASE_QUERY_TYPE,
-            BfdMDC.DATABASE_QUERY_BATCH_SIZE,
-            BfdMDC.DATABASE_QUERY_SIZE,
-            BfdMDC.DATABASE_QUERY_MILLI,
-            BfdMDC.DATABASE_QUERY_SUCCESS,
-            BfdMDC.DATABASE_QUERY_SOURCE_NAME,
             BfdMDC.HAPI_RESPONSE_TIMESTAMP_MILLI,
             BfdMDC.HAPI_POST_PROCESS_TIMESTAMP_MILLI,
             BfdMDC.HAPI_PRE_HANDLE_TIMESTAMP_MILLI,
@@ -1165,7 +1158,6 @@ public final class ServerTestUtils {
     List<String> headerList = List.of(content.split("\","));
     Map<String, String> mdcKeyValueMap = new HashMap<>();
     for (String header : headerList) {
-      LOGGER.info(header);
       String[] headerVal = header.split("\":");
       // Capture both the key and value, in case we want to test any of the values
       String key = headerVal[0].replace("\"", "");
