@@ -33,11 +33,6 @@ String putParameter(Map args = [:]) {
 
 // Adds or overwrites one or more tags for the specified resource
 String tagResource(Map args = [:]) {
-    //If Parameter, this should be called by putParameter()
-    if (rTypeOpt == '--resource-type Parameter') {
-        tagParameter = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
-        return tagParameter
-    } else {
         rTypeOpt = "--resource-type ${args.resourceType}"
         rId = "--resource-id ${args.resourceId}"
         tags = "--tags ${args.resourceTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
