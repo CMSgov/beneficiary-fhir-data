@@ -3,7 +3,7 @@
 properties([
         parameters([
                 booleanParam(name: 'test_parameter', description: 'This is a test parameter'),
-                string(name: 'test_param_string', description: 'Test parameter string type')
+                string(name: 'test_param_string', description: 'Test parameter string type', defaultValue: 'internal default value')
         ])
 ])
 
