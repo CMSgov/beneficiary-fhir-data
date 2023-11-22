@@ -194,18 +194,15 @@ jobs:
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-pipeline
-      image_tag: ${{ inputs.image_tag }}
 
   ansible-role-bfd-server:
     needs: mvn-verify
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-server
-      image_tag: ${{ inputs.image_tag }}
 
   ansible-role-bfd-db-migrator:
     needs: mvn-verify
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-db-migrator
-      image_tag: ${{ inputs.image_tag }}
