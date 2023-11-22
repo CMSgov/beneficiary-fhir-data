@@ -39,5 +39,4 @@ String tagResource(Map args = [:]) {
 
         tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${rId} ${tags}").trim()
         return tagOutput
-    }
 }
