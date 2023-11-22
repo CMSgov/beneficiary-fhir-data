@@ -62,6 +62,9 @@ public class DocGenerator {
             version);
       }
 
+      // save Excel workbook file
+      workbook.write(xlsxOutputStream);
+
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

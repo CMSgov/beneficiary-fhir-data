@@ -3,7 +3,6 @@ package gov.cms.bfd.datadictionary.mappers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.datadictionary.model.FhirElement;
 import gov.cms.bfd.datadictionary.util.FhirElementStream;
@@ -91,8 +90,6 @@ class CsvToExcelTest {
       stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
     }
 
-    // assert that workbook was written to output stream
-    assertTrue(output.size() > 0);
     // check that formatting was applied
     assertEquals(
         CsvToExcel.CUSTOM_BLUE.getIndex(),

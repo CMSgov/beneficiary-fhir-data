@@ -105,7 +105,6 @@ public class CsvToExcel implements Consumer<String>, Closeable {
   public void close() throws IOException {
     var widths = ("V1".equalsIgnoreCase(version.name())) ? v1ColumnsWidths : v2ColumnsWidths;
     formatSheet(widths);
-    workbook.write(outputStream);
   }
 
   /**
