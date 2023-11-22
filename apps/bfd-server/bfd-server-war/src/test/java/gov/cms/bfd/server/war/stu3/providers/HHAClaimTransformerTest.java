@@ -3,6 +3,8 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
@@ -42,24 +44,50 @@ public final class HHAClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
+
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
+
   /** The NPI org lookup to use for the test. */
   @Mock NPIOrgLookup npiOrgLookup;
-
-  /** The mock metric timer. */
-  @Mock Timer mockTimer;
-
-  /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
-    when(metricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
+
     when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
         .thenReturn(Optional.of("UNKNOWN"));
 
     hhaClaimTransformer = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
+  }
+
+  /**
+   * Verifies that when transform is called, the metric registry is passed the correct class and
+   * subtype name, is started, and stopped. Note that timer.stop() and timer.close() are equivalent
+   * and one or the other may be called based on how the timer is used in code.
+   */
+  @Test
+  public void testTransformRunsMetricTimer() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    HHAClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(HHAClaim.class::cast)
+            .findFirst()
+            .orElseThrow();
+
+    hhaClaimTransformer.transform(claim, false);
+
+    String expectedTimerName = hhaClaimTransformer.getClass().getSimpleName() + ".transform";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).close();
   }
 
   /**

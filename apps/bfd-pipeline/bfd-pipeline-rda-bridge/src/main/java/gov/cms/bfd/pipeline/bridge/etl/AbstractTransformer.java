@@ -49,20 +49,6 @@ public abstract class AbstractTransformer {
   }
 
   /**
-   * Returns the computed result of the given {@link UnaryOperator} if the given value is not null,
-   * otherwise returns null.
-   *
-   * @param value The value to check against
-   * @param action The {@link UnaryOperator} for computing the result if value is not null
-   * @param <T> The type of value being handled
-   * @return Returns the computed result of the given {@link UnaryOperator} if the given value is
-   *     not null, otherwise returns null
-   */
-  public <T> T ifNotNull(T value, UnaryOperator<T> action) {
-    return ifNotNull(value, action, () -> null);
-  }
-
-  /**
    * Returns the computed result of the given {@link UnaryOperator} if value is not null, otherwise
    * returns the computed result of {@link Supplier}.
    *

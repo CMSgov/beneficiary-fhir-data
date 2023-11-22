@@ -12,6 +12,7 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerConstants.CurrencyIdentifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -58,9 +59,8 @@ final class BeneficiaryTransformer {
   public Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
     Objects.requireNonNull(beneficiary);
     Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, this.getClass().getSimpleName(), "transform");
 
     Patient patient = new Patient();
 
@@ -384,13 +384,5 @@ final class BeneficiaryTransformer {
             historicalIdentifier);
       }
     }
-  }
-
-  /** Enumerates the options for the currency of an {@link Identifier}. */
-  public enum CurrencyIdentifier {
-    /** Represents a current identifier. */
-    CURRENT,
-    /** Represents a historic identifier. */
-    HISTORIC;
   }
 }

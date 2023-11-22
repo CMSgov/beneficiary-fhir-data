@@ -47,3 +47,10 @@ containerResources:
 
 # Maximum number of retry attempts if pod cannot be scheduled successfully.
 backoffLimit: 4
+
+# Properties of the volume used for temp space
+tempVolume:
+  # Either emptyDir, local-path, or ebs
+  type: emptyDir
+  # Maximum size string
+  size: 100Mi

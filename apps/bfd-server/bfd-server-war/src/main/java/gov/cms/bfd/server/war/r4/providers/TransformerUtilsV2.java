@@ -49,6 +49,7 @@ import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.TransformerConstants.CurrencyIdentifier;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
@@ -60,7 +61,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
-import gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -1605,25 +1605,6 @@ public final class TransformerUtilsV2 {
         new Extension(TransformerConstants.CODING_SYSTEM_IDENTIFIER_CURRENCY, currentValueCoding);
 
     return currencyIdentifierExtension;
-  }
-
-  /**
-   * Records the JPA query details in {@link BfdMDC}.
-   *
-   * @param queryId an ID that identifies the type of JPA query being run, e.g. "bene_by_id"
-   * @param queryDurationNanoseconds the JPA query's duration, in nanoseconds
-   * @param recordCount the number of top-level records (e.g. JPA entities) returned by the query
-   */
-  public static void recordQueryInMdc(
-      String queryId, long queryDurationNanoseconds, long recordCount) {
-    String keyPrefix = String.format("jpa_query_%s", queryId);
-    BfdMDC.put(
-        String.format("%s_duration_nanoseconds", keyPrefix),
-        Long.toString(queryDurationNanoseconds));
-    BfdMDC.put(
-        String.format("%s_duration_milliseconds", keyPrefix),
-        Long.toString(queryDurationNanoseconds / 1000000));
-    BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
   }
 
   /**

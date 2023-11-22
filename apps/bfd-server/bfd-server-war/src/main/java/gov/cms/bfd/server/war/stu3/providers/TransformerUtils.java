@@ -36,7 +36,6 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimColumn;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -50,7 +49,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
+import gov.cms.bfd.server.war.commons.TransformerConstants.CurrencyIdentifier;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -110,16 +109,12 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Organization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
  * resources (e.g. {@link Patient}).
  */
 public final class TransformerUtils {
-  private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
-
   /**
    * Adds an adjudication total to the specified {@link ExplanationOfBenefit}.
    *
@@ -2819,25 +2814,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * Records the JPA query details in {@link BfdMDC}.
-   *
-   * @param queryId an ID that identifies the type of JPA query being run, e.g. "bene_by_id"
-   * @param queryDurationNanoseconds the JPA query's duration, in nanoseconds
-   * @param recordCount the number of top-level records (e.g. JPA entities) returned by the query
-   */
-  public static void recordQueryInMdc(
-      String queryId, long queryDurationNanoseconds, long recordCount) {
-    String keyPrefix = String.format("jpa_query_%s", queryId);
-    BfdMDC.put(
-        String.format("%s_duration_nanoseconds", keyPrefix),
-        Long.toString(queryDurationNanoseconds));
-    BfdMDC.put(
-        String.format("%s_duration_milliseconds", keyPrefix),
-        Long.toString(queryDurationNanoseconds / 1000000));
-    BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
-  }
-
-  /**
    * Sets the lastUpdated value in the resource.
    *
    * @param resource is the FHIR resource to set lastUpdate
@@ -2953,5 +2929,25 @@ public final class TransformerUtils {
       availSet.add(ClaimType.HHA);
     }
     return availSet;
+  }
+
+  /**
+   * Adds the revenue center ansi adjudication to the given item, if the revCntr1stAnsiCd is
+   * present.
+   *
+   * @param item the item to add the adjudication to
+   * @param eob the eob to get info from needed to create the adjudication
+   * @param revCntr1stAnsiCd the revenue center ansi Optional
+   */
+  static void addRevCenterAnsiAdjudication(
+      ItemComponent item, ExplanationOfBenefit eob, Optional<String> revCntr1stAnsiCd) {
+    if (revCntr1stAnsiCd.isPresent()) {
+      item.addAdjudication()
+          .setCategory(
+              TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD))
+          .setReason(
+              TransformerUtils.createCodeableConcept(
+                  eob, CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD, revCntr1stAnsiCd));
+    }
   }
 }

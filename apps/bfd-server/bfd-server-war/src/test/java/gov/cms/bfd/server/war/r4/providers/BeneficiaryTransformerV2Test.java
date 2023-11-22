@@ -7,11 +7,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -49,8 +54,15 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class BeneficiaryTransformerV2Test {
 
   /** Fhir context for parsing the test file. */
@@ -62,6 +74,15 @@ public final class BeneficiaryTransformerV2Test {
   /** Patient under test. */
   private static Patient patient = null;
 
+  /** The metrics registry. */
+  @Mock MetricRegistry metricRegistry;
+
+  /** The metrics timer. Used for determining the timer was started. */
+  @Mock Timer metricsTimer;
+
+  /** The metrics timer context. Used for determining the timer was stopped. */
+  @Mock Timer.Context metricsTimerContext;
+
   /** The class under test. */
   private static BeneficiaryTransformerV2 beneficiaryTransformerV2;
 
@@ -71,7 +92,9 @@ public final class BeneficiaryTransformerV2Test {
    */
   @BeforeEach
   public void setup() {
-    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(new MetricRegistry());
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -112,6 +135,20 @@ public final class BeneficiaryTransformerV2Test {
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genPatient);
     patient = parser.parseResource(Patient.class, json);
+  }
+
+  /**
+   * Verifies that when transform is called, the metric registry is passed the correct class and
+   * subtype name, is started, and stopped. Note that timer.stop() and timer.close() are equivalent
+   * and one or the other may be called based on how the timer is used in code.
+   */
+  @Test
+  public void testTransformRunsMetricTimer() {
+    String expectedTimerName = beneficiaryTransformerV2.getClass().getSimpleName() + ".transform";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).stop();
   }
 
   /** 'Test' to output the json value of the test patient to the console for debugging. */

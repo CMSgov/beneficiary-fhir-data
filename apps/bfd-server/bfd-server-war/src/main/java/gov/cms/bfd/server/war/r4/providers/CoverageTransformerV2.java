@@ -14,7 +14,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,7 +92,7 @@ final class CoverageTransformerV2 {
    *     Beneficiary}
    */
   private Coverage transformPartA(Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext("part_a");
+    Timer.Context timer = createTimerContext("part_a");
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
@@ -156,7 +155,7 @@ final class CoverageTransformerV2 {
    *     Beneficiary}
    */
   private Coverage transformPartB(Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext("part_b");
+    Timer.Context timer = createTimerContext("part_b");
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
@@ -213,7 +212,7 @@ final class CoverageTransformerV2 {
    *     Beneficiary}
    */
   private Coverage transformPartC(Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext("part_c");
+    Timer.Context timer = createTimerContext("part_c");
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
@@ -267,7 +266,7 @@ final class CoverageTransformerV2 {
    *     Beneficiary}
    */
   private Coverage transformPartD(Beneficiary beneficiary) {
-    Timer.Context timer = getTimerContext("part_d");
+    Timer.Context timer = createTimerContext("part_d");
     Coverage coverage = new Coverage();
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
@@ -307,28 +306,10 @@ final class CoverageTransformerV2 {
               beneMonthly -> {
                 int month = beneMonthly.getYearMonth().getMonthValue();
                 String yearMonth =
-                    String.format(
-                        "%s-%s",
-                        String.valueOf(beneMonthly.getYearMonth().getYear()),
-                        String.valueOf(month));
+                    String.format("%s-%s", beneMonthly.getYearMonth().getYear(), month);
 
                 Map<Integer, CcwCodebookVariable> mapOfMonth =
-                    new HashMap<Integer, CcwCodebookVariable>() {
-                      {
-                        put(1, CcwCodebookVariable.PTDCNTRCT01);
-                        put(2, CcwCodebookVariable.PTDCNTRCT02);
-                        put(3, CcwCodebookVariable.PTDCNTRCT03);
-                        put(4, CcwCodebookVariable.PTDCNTRCT04);
-                        put(5, CcwCodebookVariable.PTDCNTRCT05);
-                        put(6, CcwCodebookVariable.PTDCNTRCT06);
-                        put(7, CcwCodebookVariable.PTDCNTRCT07);
-                        put(8, CcwCodebookVariable.PTDCNTRCT08);
-                        put(9, CcwCodebookVariable.PTDCNTRCT09);
-                        put(10, CcwCodebookVariable.PTDCNTRCT10);
-                        put(11, CcwCodebookVariable.PTDCNTRCT11);
-                        put(12, CcwCodebookVariable.PTDCNTRCT12);
-                      }
-                    };
+                    CommonTransformerUtils.getPartDCcwCodebookMonthMap();
 
                 if (mapOfMonth.containsKey(month)) {
                   if (beneMonthly.getPartDContractNumberId().isEmpty()
@@ -917,10 +898,8 @@ final class CoverageTransformerV2 {
    * @param partId The context string {@link String}
    * @return the timer context
    */
-  Timer.Context getTimerContext(String partId) {
-    return metricRegistry
-        .timer(
-            MetricRegistry.name(CoverageTransformerV2.class.getSimpleName(), "transform", partId))
-        .time();
+  Timer.Context createTimerContext(String partId) {
+    return CommonTransformerUtils.createMetricsTimer(
+        metricRegistry, getClass().getSimpleName(), "transform", partId);
   }
 }

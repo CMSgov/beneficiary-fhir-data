@@ -34,6 +34,10 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
   /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
   private final NPIOrgLookup npiOrgLookup;
 
+  /** The metric name. */
+  private static final String METRIC_NAME =
+      MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform");
+
   /**
    * Instantiates a new transformer.
    *
@@ -63,11 +67,7 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
-    try (Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform"))
-            .time()) {
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       eob = transformClaim((OutpatientClaim) claim);
     }
     return eob;
@@ -181,20 +181,9 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
     for (OutpatientClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
       item.setSequence(claimLine.getLineNumber());
-
       item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
+      TransformerUtils.addRevCenterAnsiAdjudication(item, eob, claimLine.getRevCntr1stAnsiCd());
 
-      if (claimLine.getRevCntr1stAnsiCd().isPresent()) {
-        item.addAdjudication()
-            .setCategory(
-                TransformerUtils.createAdjudicationCategory(
-                    CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD))
-            .setReason(
-                TransformerUtils.createCodeableConcept(
-                    eob,
-                    CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD,
-                    claimLine.getRevCntr1stAnsiCd()));
-      }
       if (claimLine.getRevCntr2ndAnsiCd().isPresent()) {
         item.addAdjudication()
             .setCategory(

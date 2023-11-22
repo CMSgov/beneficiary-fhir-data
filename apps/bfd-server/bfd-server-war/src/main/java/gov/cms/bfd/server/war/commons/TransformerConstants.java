@@ -461,4 +461,12 @@ public final class TransformerConstants {
    */
   public static final String C4BB_Institutional_Claim_SubType =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType";
+
+  /** Enumerates the options for the currency of an {@link org.hl7.fhir.r4.model.Identifier}. */
+  public enum CurrencyIdentifier {
+    /** Represents a current identifier. */
+    CURRENT,
+    /** Represents a historic identifier. */
+    HISTORIC;
+  }
 }

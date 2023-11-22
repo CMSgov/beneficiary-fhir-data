@@ -26,11 +26,6 @@ import lombok.Data;
  * @param <TEnum> the protobuf field's enum class
  */
 public interface EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
-  /** Single Result instance for any missing value. */
-  Result NO_VALUE_RESULT = new Result(Status.NoValue);
-
-  /** Single Result instance for any invalid value. */
-  Result INVALID_VALUE_RESULT = new Result(Status.InvalidValue);
 
   /**
    * Check the record to see if a value exists and return a Result object containing either the

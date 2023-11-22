@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -593,5 +595,42 @@ public final class CommonTransformerUtils {
         String.format("%s_duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
     BfdMDC.put(String.format("%s_record_count", keyPrefix), Long.toString(recordCount));
+  }
+
+  /**
+   * Gets the metrics registry timer.
+   *
+   * @param metricRegistry the metric registry
+   * @param baseRegistryName the base registry name
+   * @param registrySubNames the registry sub names
+   * @return the metrics registry timer
+   */
+  public static Timer.Context createMetricsTimer(
+      MetricRegistry metricRegistry, String baseRegistryName, String... registrySubNames) {
+    return metricRegistry.timer(MetricRegistry.name(baseRegistryName, registrySubNames)).time();
+  }
+
+  /**
+   * Gets the part D ccw codebook month map.
+   *
+   * @return the ccw codebook month map
+   */
+  public static Map<Integer, CcwCodebookVariable> getPartDCcwCodebookMonthMap() {
+    return new HashMap<>() {
+      {
+        put(1, CcwCodebookVariable.PTDCNTRCT01);
+        put(2, CcwCodebookVariable.PTDCNTRCT02);
+        put(3, CcwCodebookVariable.PTDCNTRCT03);
+        put(4, CcwCodebookVariable.PTDCNTRCT04);
+        put(5, CcwCodebookVariable.PTDCNTRCT05);
+        put(6, CcwCodebookVariable.PTDCNTRCT06);
+        put(7, CcwCodebookVariable.PTDCNTRCT07);
+        put(8, CcwCodebookVariable.PTDCNTRCT08);
+        put(9, CcwCodebookVariable.PTDCNTRCT09);
+        put(10, CcwCodebookVariable.PTDCNTRCT10);
+        put(11, CcwCodebookVariable.PTDCNTRCT11);
+        put(12, CcwCodebookVariable.PTDCNTRCT12);
+      }
+    };
   }
 }

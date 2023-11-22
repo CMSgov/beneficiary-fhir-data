@@ -9,7 +9,7 @@
 
 # Builds complete image spec by combining imageName and bfdVersion.
 {{- define "imageSpec" -}}
-    {{- printf "%s:%s" .Values.imageName .Values.bfdVersion -}}
+    {{- printf "%s%s:%s" .Values.imageRegistry .Values.imageName .Values.bfdVersion -}}
 {{- end -}}
 
 # Builds LayeredConfig configuration string with all ssmHierarchies.

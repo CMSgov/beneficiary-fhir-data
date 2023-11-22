@@ -21,6 +21,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -275,16 +276,14 @@ public final class CoverageResourceProvider implements IResourceProvider {
     criteria.where(wherePredicate);
 
     Beneficiary beneficiary = null;
-    Long beneByIdQueryNanoSeconds = null;
     Timer.Context timerBeneQuery =
-        metricRegistry
-            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id"))
-            .time();
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
     } finally {
-      beneByIdQueryNanoSeconds = timerBeneQuery.stop();
-      TransformerUtils.recordQueryInMdc(
+      long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+      CommonTransformerUtils.recordQueryInMdc(
           "bene_by_id_include_", beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
     }
     return beneficiary;

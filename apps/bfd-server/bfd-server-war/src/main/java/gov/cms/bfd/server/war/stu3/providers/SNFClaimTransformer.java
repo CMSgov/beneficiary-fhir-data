@@ -35,6 +35,10 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
   /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
   private final NPIOrgLookup npiOrgLookup;
 
+  /** The metric name. */
+  private static final String METRIC_NAME =
+      MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform");
+
   /**
    * Instantiates a new transformer.
    *
@@ -64,10 +68,7 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
-    try (Timer.Context timer =
-        metricRegistry
-            .timer(MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform"))
-            .time()) {
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       eob = transformClaim((SNFClaim) claim);
     }
     return eob;

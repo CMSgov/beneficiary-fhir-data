@@ -310,8 +310,6 @@ public final class RifLoader {
     RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
     MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
     RifFileType rifFileType = fileEvent.getFile().getFileType();
-    // keep track if we are processing synthetic data
-    boolean isSyntheticData = fileEvent.getParentFilesEvent().isSyntheticData();
 
     if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {

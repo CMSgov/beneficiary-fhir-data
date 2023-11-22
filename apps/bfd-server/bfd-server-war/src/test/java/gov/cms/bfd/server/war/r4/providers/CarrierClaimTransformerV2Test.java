@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -76,13 +78,13 @@ public class CarrierClaimTransformerV2Test {
   CarrierClaimTransformerV2 carrierClaimTransformer;
 
   /** The mock metric registry. */
-  @Mock MetricRegistry mockMetricRegistry;
+  @Mock MetricRegistry metricRegistry;
 
   /** The mock metric timer. */
-  @Mock Timer mockTimer;
+  @Mock Timer metricsTimer;
 
   /** The mock metric timer context (used to stop the metric). */
-  @Mock Timer.Context mockTimerContext;
+  @Mock Timer.Context metricsTimerContext;
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -112,12 +114,12 @@ public class CarrierClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
-    when(mockMetricRegistry.timer(any())).thenReturn(mockTimer);
-    when(mockTimer.time()).thenReturn(mockTimerContext);
+    when(metricRegistry.timer(any())).thenReturn(metricsTimer);
+    when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(
-            mockMetricRegistry,
+            metricRegistry,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
             new NPIOrgLookup());
 
@@ -126,6 +128,20 @@ public class CarrierClaimTransformerV2Test {
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
+  }
+
+  /**
+   * Verifies that when transform is called, the metric registry is passed the correct class and
+   * subtype name, is started, and stopped. Note that timer.stop() and timer.close() are equivalent
+   * and one or the other may be called based on how the timer is used in code.
+   */
+  @Test
+  public void testTransformRunsMetricTimer() {
+    String expectedTimerName = carrierClaimTransformer.getClass().getSimpleName() + ".transform";
+    verify(metricRegistry, times(1)).timer(expectedTimerName);
+    // time() starts the timer
+    verify(metricsTimer, times(1)).time();
+    verify(metricsTimerContext, times(1)).close();
   }
 
   /**
