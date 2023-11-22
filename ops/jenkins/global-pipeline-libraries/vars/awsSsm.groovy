@@ -40,8 +40,8 @@ String tagResource(Map args = [:]) {
     } else {
         rTypeOpt = "--resource-type ${args.resourceType}"
         rId = "--resource-id ${args.resourceId}"
-        tags = "--tags ${args.resourceTags ?: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda"}"
-
+        tags = "--tags ${args.resourceTags}"
+        
         tagOutput = sh(returnStdout: true, script: "aws ssm add-tags-to-resource ${rTypeOpt} ${name} ${tags}").trim()
         return tagOutput
     }
