@@ -45,6 +45,12 @@ public class CsvToExcel implements Consumer<String>, Closeable {
   public static final XSSFColor CUSTOM_GREY =
       new XSSFColor(new java.awt.Color(243, 243, 243), null);
 
+  /** Cell range for the Applies To column. */
+  private static final String APPLIES_TO_RANGE = "D2:D";
+
+  /** Cell range for the STU3 Discriminator and STU3 Additional columns. */
+  private static final String STU3_DISCRIMINATOR_ADDITIONAL_RANGE = "I2:J";
+
   /** Output stream for writing the Excel workbook file. */
   private OutputStream outputStream;
 
@@ -128,8 +134,11 @@ public class CsvToExcel implements Consumer<String>, Closeable {
   private void formatSheet(List<Integer> columnsWidths) {
     var maxRowIndex = sheet.getLastRowNum();
     var maxColIndex = columnsWidths.size() - 1;
-    searchAndReplace(CellRangeAddress.valueOf("D2:D" + (maxRowIndex + 1)), ";", "\n");
-    searchAndReplace(CellRangeAddress.valueOf("I2:J" + (maxRowIndex + 1)), ";", "\n");
+    searchAndReplace(CellRangeAddress.valueOf(APPLIES_TO_RANGE + (maxRowIndex + 1)), ";", "\n");
+    searchAndReplace(
+        CellRangeAddress.valueOf(STU3_DISCRIMINATOR_ADDITIONAL_RANGE + (maxRowIndex + 1)),
+        ";",
+        "\n");
     setStyle(new CellRangeAddress(0, 0, 0, maxColIndex), getHeaderCellStyle());
     setStyle(new CellRangeAddress(1, maxRowIndex, 0, maxColIndex), getDataCellStyle());
     rowShading(new CellRangeAddress(1, maxRowIndex, 0, maxColIndex), getRowShadingStyle());
