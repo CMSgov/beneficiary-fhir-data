@@ -3,7 +3,7 @@
 # is currently causing instances to fail their healthchecks.
 ACTIVATIONURL='dsm://internal-dsm-prod-elb-us-east-1-1932432501.us-east-1.elb.amazonaws.com:4120/'
 MANAGERURL='https://internal-dsm-prod-elb-us-east-1-1932432501.us-east-1.elb.amazonaws.com:4119'
-CURLOPTIONS='--silent --tlsv1.2'
+CURLOPTIONS='--tlsv1.2'
 linuxPlatform='';
 isRPM='';
 
@@ -31,7 +31,7 @@ if ! type curl >/dev/null 2>&1; then
     exit 1
 fi
 
-curl $MANAGERURL/software/deploymentscript/platform/linuxdetectscriptv1/ -o /tmp/PlatformDetection "$CURLOPTIONS" --insecure
+curl "$CURLOPTIONS" $MANAGERURL/software/deploymentscript/platform/linuxdetectscriptv1/ -o /tmp/PlatformDetection --insecure
 curlRet=$?
 
 if [[ $curlRet == 0 && -s /tmp/PlatformDetection ]]; then
@@ -99,3 +99,4 @@ sleep 15
 /opt/ds_agent/dsa_control -r
 /opt/ds_agent/dsa_control -a $ACTIVATIONURL "policyid:513"
 # /opt/ds_agent/dsa_control -a dsm://internal-dsm-prod-elb-us-east-1-1932432501.us-east-1.elb.amazonaws.com:4120/ "policyid:513"
+
