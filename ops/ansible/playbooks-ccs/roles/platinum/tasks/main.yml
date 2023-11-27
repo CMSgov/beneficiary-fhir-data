@@ -1,4 +1,6 @@
 ---
+- name: Install DS Agent Upgrade hotfix
+  import_tasks: install-ds-agent-upgrade-hotfix.yml
 - name: Install Dependencies
   import_tasks: install-dependencies.yml
 - name: Install Modern Python3
