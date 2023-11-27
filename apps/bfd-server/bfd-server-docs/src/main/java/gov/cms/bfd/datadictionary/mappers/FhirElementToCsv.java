@@ -193,17 +193,18 @@ public class FhirElementToCsv implements Function<FhirElement, List<String>>, Cl
       case "appliesTo" -> String.join(";", element.getAppliesTo());
       case "ccwMapping" -> String.join(";", element.getCcwMapping());
       case "cclfMapping" -> String.join(";", element.getCclfMapping());
-      case "resource" -> element.getFhirMapping()[0].getResource();
-      case "element" -> element.getFhirMapping()[0].getElement();
-      case "derived" -> element.getFhirMapping()[0].getDerived();
-      case "note" -> element.getFhirMapping()[0].getNote();
-      case "fhirPath" -> element.getFhirMapping()[0].getFhirPath();
-      case "example" -> element.getFhirMapping()[0].getExample();
-      case "version" -> element.getFhirMapping()[0].getVersion();
-      case "discriminator" -> String.join(";", element.getFhirMapping()[0].getDiscriminator());
-      case "additional" -> String.join(";", element.getFhirMapping()[0].getAdditional());
-      case "AB2D", "BB2", "BCDA", "BFD", "DPC", "SyntheticData" -> (List.of(element.getSuppliedIn())
-              .contains(field))
+      case "resource" -> element.getFhirMapping().get(0).getResource();
+      case "element" -> element.getFhirMapping().get(0).getElement();
+      case "derived" -> element.getFhirMapping().get(0).getDerived();
+      case "note" -> element.getFhirMapping().get(0).getNote();
+      case "fhirPath" -> element.getFhirMapping().get(0).getFhirPath();
+      case "example" -> element.getFhirMapping().get(0).getExample();
+      case "version" -> element.getFhirMapping().get(0).getVersion();
+      case "discriminator" -> String.join(";", element.getFhirMapping().get(0).getDiscriminator());
+      case "additional" -> String.join(";", element.getFhirMapping().get(0).getAdditional());
+      case "AB2D", "BB2", "BCDA", "BFD", "DPC", "SyntheticData" -> element
+              .getSuppliedIn()
+              .contains(field)
           ? "X"
           : "";
       case "bfdTableType" -> element.getBfdTableType();

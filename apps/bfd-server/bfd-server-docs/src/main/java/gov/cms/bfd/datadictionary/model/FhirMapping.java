@@ -1,5 +1,6 @@
 package gov.cms.bfd.datadictionary.model;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,11 +20,11 @@ public class FhirMapping {
   /** FHIR Path. */
   private String fhirPath;
 
-  /** String[] of discriminators. */
-  private String[] discriminator;
+  /** List of String, of discriminators. */
+  private List<String> discriminator;
 
-  /** String[] of additional info. */
-  private String[] additional;
+  /** List of String, of additional info. */
+  private List<String> additional;
 
   /** Derived. */
   private String derived;

@@ -1,5 +1,6 @@
 package gov.cms.bfd.datadictionary.model;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,11 +17,11 @@ public class FhirElement {
   /** Description. */
   private String description;
 
-  /** String[] Applies To. */
-  private String[] appliesTo;
+  /** List of String, Applies To. */
+  private List<String> appliesTo;
 
-  /** String[] Supplied In. */
-  private String[] suppliedIn;
+  /** List of String, Supplied In. */
+  private List<String> suppliedIn;
 
   /** BFD Database Table Type. */
   private String bfdTableType;
@@ -37,12 +38,12 @@ public class FhirElement {
   /** BFD Java Field Name. */
   private String bfdJavaFieldName;
 
-  /** String[] of CCW Mappings. */
-  private String[] ccwMapping;
+  /** List of String, of CCW Mappings. */
+  private List<String> ccwMapping;
 
-  /** String[] of CCLF Mappings. */
-  private String[] cclfMapping;
+  /** List of String, of CCLF Mappings. */
+  private List<String> cclfMapping;
 
-  /** Array of FHIR Mappings. */
-  private FhirMapping[] fhirMapping;
+  /** List of FHIR Mappings. */
+  private List<FhirMapping> fhirMapping;
 }
