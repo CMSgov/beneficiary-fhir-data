@@ -7,9 +7,8 @@
     - "tm-ds-agent-upgrade.sh"
 
 - name: Run the ds agent hotfix upgrade
-  ansible.builtin.command:
-    cmd: /usr/local/bin/tm-ds-agent-upgrade.sh
-    timeout: 300
+  ansible.builtin.shell:
+    cmd: "timeout 300 /usr/local/bin/tm-ds-agent-upgrade.sh"
   register: ds_agent_upgrade_result
 
 - name: Fail if ds agent upgrade was unsuccessful
