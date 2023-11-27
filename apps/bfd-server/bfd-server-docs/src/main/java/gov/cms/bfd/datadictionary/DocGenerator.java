@@ -53,13 +53,7 @@ public class DocGenerator {
         var templatePath = templateFileMap.get(version);
 
         processDirectory(
-            resourceDirPath,
-            destinationDirectory,
-            projectVersion,
-            templatePath,
-            xlsxOutputStream,
-            workbook,
-            version);
+            resourceDirPath, destinationDirectory, projectVersion, templatePath, workbook, version);
       }
 
       // save Excel workbook file
@@ -77,7 +71,6 @@ public class DocGenerator {
    * @param destinationDirectory the output file path
    * @param projectVersion the project version
    * @param csvTemplatePath the path within the module resources to the CSV template file
-   * @param xlsxOutputStream the output stream for the Excel workbook
    * @param workbook the Excel workbook (shared across data dictionary versions)
    * @param version the BFD API version, e.g. V1, V2
    */
@@ -86,7 +79,6 @@ public class DocGenerator {
       String destinationDirectory,
       String projectVersion,
       String csvTemplatePath,
-      FileOutputStream xlsxOutputStream,
       XSSFWorkbook workbook,
       Version version) {
 
@@ -99,7 +91,7 @@ public class DocGenerator {
     try (var elementToJson = FhirElementToJson.createInstance(new FileWriter(jsonPath));
         var elementToCsv =
             FhirElementToCsv.createInstance(new FileWriter(csvPath), csvTemplatePath);
-        var csvToExcel = CsvToExcel.createInstance(xlsxOutputStream, workbook, version);
+        var csvToExcel = CsvToExcel.createInstance(workbook, version);
         var elementStream = new FhirElementStream(resourceDirPath).stream()) {
 
       // stream over elements and write json, csv, excel

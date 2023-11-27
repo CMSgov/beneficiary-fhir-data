@@ -3,7 +3,6 @@ package gov.cms.bfd.datadictionary.mappers;
 import gov.cms.bfd.datadictionary.util.Version;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.function.Consumer;
 import org.apache.commons.csv.CSVFormat;
@@ -51,9 +50,6 @@ public class CsvToExcel implements Consumer<String>, Closeable {
   /** Cell range for the STU3 Discriminator and STU3 Additional columns. */
   private static final String STU3_DISCRIMINATOR_ADDITIONAL_RANGE = "I2:J";
 
-  /** Output stream for writing the Excel workbook file. */
-  private OutputStream outputStream;
-
   /** Excel data dictionary workbook. */
   private Workbook workbook;
 
@@ -66,14 +62,12 @@ public class CsvToExcel implements Consumer<String>, Closeable {
   /**
    * Creates and instance of the CsvToExcel given and OutputStream, workbook and version.
    *
-   * @param outputStream the OutputStream to save the Excel workbook to
    * @param workbook the Excel workbook to load and format
    * @param version the BFD API version, e.g. V1, V2
    * @return an CsvToExcel
    */
-  public static CsvToExcel createInstance(
-      OutputStream outputStream, Workbook workbook, Version version) {
-    var CsvToExcel = new CsvToExcel(outputStream, workbook, version);
+  public static CsvToExcel createInstance(Workbook workbook, Version version) {
+    var CsvToExcel = new CsvToExcel(workbook, version);
     CsvToExcel.init();
     return CsvToExcel;
   }
@@ -110,12 +104,10 @@ public class CsvToExcel implements Consumer<String>, Closeable {
   /**
    * Private constructor.
    *
-   * @param outputStream the OutputStream to save the Excel workbook to
    * @param workbook the Excel workbook to load and format
    * @param version the BFD API version, e.g. V1, V2
    */
-  private CsvToExcel(OutputStream outputStream, Workbook workbook, Version version) {
-    this.outputStream = outputStream;
+  private CsvToExcel(Workbook workbook, Version version) {
     this.workbook = workbook;
     this.version = version;
   }

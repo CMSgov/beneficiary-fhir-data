@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import gov.cms.bfd.datadictionary.model.FhirElement;
 import gov.cms.bfd.datadictionary.util.FhirElementStream;
 import gov.cms.bfd.datadictionary.util.Version;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -22,9 +21,8 @@ class CsvToExcelTest {
   /** Test for createInstance method with valid parameters. */
   @Test
   void createInstanceWithValidParameters() {
-    var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
-    var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2);
+    var csvToExcel = CsvToExcel.createInstance(workbook, Version.V2);
     assertNotNull(csvToExcel);
   }
 
@@ -35,12 +33,11 @@ class CsvToExcelTest {
    */
   @Test
   void applyWithValidCsvExpectMappedRowsAndHeaders() throws IOException {
-    var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
     var fhirElementToCsv =
         FhirElementToCsv.createInstance(
             new StringWriter(), "src/test/resources/dd/template/v2-to-csv.json");
-    var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2);
+    var csvToExcel = CsvToExcel.createInstance(workbook, Version.V2);
 
     // create stream
     Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
@@ -63,11 +60,10 @@ class CsvToExcelTest {
     assertThrows(
         FileNotFoundException.class,
         () -> {
-          var output = new ByteArrayOutputStream();
           var fhirElementToCsv =
               FhirElementToCsv.createInstance(
                   new StringWriter(), "src/test/resources/dd/v2-to-csv.json");
-          var csvToExcel = CsvToExcel.createInstance(output, null, Version.V2);
+          var csvToExcel = CsvToExcel.createInstance(null, Version.V2);
           Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
           stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
         });
@@ -80,12 +76,11 @@ class CsvToExcelTest {
    */
   @Test
   void closeWithValidWorkbookVerifySaveAndFormatting() throws IOException {
-    var output = new ByteArrayOutputStream();
     var workbook = new XSSFWorkbook();
     var fhirElementToCsv =
         FhirElementToCsv.createInstance(
             new StringWriter(), "src/test/resources/dd/template/v2-to-csv.json");
-    try (var csvToExcel = CsvToExcel.createInstance(output, workbook, Version.V2)) {
+    try (var csvToExcel = CsvToExcel.createInstance(workbook, Version.V2)) {
       Stream<FhirElement> stream = new FhirElementStream("src/test/resources/dd/data").stream();
       stream.map(fhirElementToCsv).flatMap(Collection::stream).forEach(csvToExcel);
     }
