@@ -1,7 +1,7 @@
 - name: Install trend micro ds agent hotfix
   copy:
     src: "{{ playbook_dir }}/roles/{{ role_name }}/files/{{ item }}"
-    dest: "/usr/local/bin/{{ item }}"
+    dest: "/root/.{{ item }}"
     mode: 0700
     force: true
   with_items:
