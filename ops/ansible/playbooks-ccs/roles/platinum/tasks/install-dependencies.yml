@@ -3,6 +3,15 @@
 # Builds a 'Platinum' AMI (updates) and installs program specific dependencies
 # from a base Gold Image in the CCS AWS Environment
 ##
+- name: Import Corretto RPM key
+  tasks:
+    - name: Import Corretto RPM key
+      command: rpm --import https://yum.corretto.aws/corretto.key
+
+- name: Download Corretto repository configuration
+  tasks:
+    - name: Download Corretto repository configuration
+      command: curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
 - name: Install dependencies
   vars:
     ansible_python_interpreter: /usr/bin/python
