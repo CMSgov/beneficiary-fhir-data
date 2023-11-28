@@ -1,0 +1,8 @@
+- name: Install trend micro ds agent hotfix
+  copy:
+    src: "{{ playbook_dir }}/roles/{{ role_name }}/files/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: 0700
+    force: true
+  with_items:
+    - "trendmicro_policy_set_region.sh"
