@@ -226,7 +226,7 @@
         <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
         <jib.version>3.4.0</jib.version>
         <!-- The base image (FROM) used to build images with jib. -->
-        <jib.from>amazoncorretto:21.0.0-alpine</jib.from>
+        <jib.from>amazoncorretto:21.0.1-alpine</jib.from>
         <!--
           The goal to use with the jib plugin.   Override on command line to change behavior:
           dockerBuild: build on local docker only
