@@ -6,7 +6,6 @@ on:
     paths:
       - ops/Dockerfile
       - .github/workflows/ci-base-container-image.yml
-
 jobs:
   build-container:
     name: Build and Deliver Container
