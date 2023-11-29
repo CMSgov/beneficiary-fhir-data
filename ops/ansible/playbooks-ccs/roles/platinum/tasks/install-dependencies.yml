@@ -11,8 +11,6 @@
   vars:
     ansible_python_interpreter: /usr/bin/python
   yum:
-    clean: yes
-    update_cache: yes
     # NOTE: Packages specified below should generally be kept up-to-date
     #       with the dependencies encoded in ops/Dockerfile instructions.
     name:
