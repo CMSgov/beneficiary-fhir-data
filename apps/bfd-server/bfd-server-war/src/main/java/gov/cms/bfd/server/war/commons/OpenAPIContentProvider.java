@@ -221,6 +221,16 @@ public final class OpenAPIContentProvider {
    Example:
       - `includeTaxNumbers=true`""";
 
+  /** Open API short description for /ExplanationOfBenefit's clientContextData parameter. */
+  public static final String EOB_CLIENT_CONTEXT_SHORT =
+      """
+    Free-form text that can be used by a client to provide optional processing rules.""";
+
+  /** Open API content value for /ExplanationOfBenefit's clientContextData parameter. */
+  public static final String EOB_CLIENT_CONTEXT_VALUE =
+      """
+    TBD; could be used to provide processing filters / rules.""";
+
   /** Open API content short description for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_SHORT =
       "The patient medicare beneficiary identifier (MBI) to search for.";

@@ -3,11 +3,11 @@ package gov.cms.bfd.server.war.r4.providers;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -66,6 +66,9 @@ import org.springframework.stereotype.Component;
  * This FHIR {@link IResourceProvider} adds support for R4 {@link ExplanationOfBenefit} resources,
  * derived from the CCW claims.
  */
+@ResourceDef(
+    name = "ExplanationOfBenefit",
+    profile = "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit")
 @Component
 public final class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
     implements IResourceProvider {
@@ -275,6 +278,9 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * There may be many different methods annotated with this {@link Search} annotation, to support
    * many different search criteria.
    *
+   * <p>This method supports both HTTP GET with URL parameters, and HTTP POST with parameters
+   * specified within the POST body.
+   *
    * @param patient a {@link ReferenceParam} for the {@link ExplanationOfBenefit#getPatient()} to
    *     try and find matches for {@link ExplanationOfBenefit}s
    * @param type a list of {@link ClaimType} to include in the result. Defaults to all types.
@@ -287,6 +293,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
    *     ExplanationOfBenefit}s that completed
    * @param taxNumbers an {@link OptionalParam} for whether to include tax numbers in the response
+   * @param clientContextData an {@link String} of client info
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
@@ -295,7 +302,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @Search
   @Trace
   public Bundle findByPatient(
-      @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
+      @OptionalParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(
               shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
               value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
@@ -330,6 +337,16 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
               value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
           String taxNumbers,
+      //
+      // This is simply a placeholder that may go away depending on future
+      // needs with respect to filters, etc. It is here as a POC for what
+      // can be implemented with arbitrary content.
+      //
+      @OptionalParam(name = "clientContextData")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_CLIENT_CONTEXT_SHORT,
+              value = OpenAPIContentProvider.EOB_CLIENT_CONTEXT_VALUE)
+          String clientContextData,
       RequestDetails requestDetails) {
 
     /*
