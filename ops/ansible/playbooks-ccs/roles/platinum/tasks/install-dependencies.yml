@@ -4,19 +4,16 @@
 # from a base Gold Image in the CCS AWS Environment
 ##
 - name: Import Corretto RPM key
-  tasks:
-    - name: Import Corretto RPM key
-      command: rpm --import https://yum.corretto.aws/corretto.key
-
+  ansible.builtin.command : rpm --import https://yum.corretto.aws/corretto.key
 - name: Download Corretto repository configuration
-  tasks:
-    - name: Download Corretto repository configuration
-      command: curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
+  ansible.builtin.command: curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
 - name: Install dependencies
   vars:
     ansible_python_interpreter: /usr/bin/python
   yum:
-    # NOTE: Packages sepecified below should generally be kept up-to-date
+    clean: yes
+    update_cache: yes
+    # NOTE: Packages specified below should generally be kept up-to-date
     #       with the dependencies encoded in ops/Dockerfile instructions.
     name:
       - "@Development Tools" # equivalent to `yum groupinstall "Development Tools"`
