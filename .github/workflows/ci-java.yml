@@ -18,7 +18,7 @@ env:
   ^ops/ansible/roles/bfd-pipeline/|\
   ^ops/ansible/roles/bfd-server/|\
   ^.github/workflows/ci-ansible.yml|\
-  ^.github/workflows/ci-java.yml\
+  ^.github/workflows/yml\
   )"
 
 jobs:
@@ -123,7 +123,7 @@ jobs:
           SHORT_SHA="$(git rev-parse --short HEAD)"
           FULL_BRANCH_TAG="${IMAGE_NAME}:${SANITIZED_REF}" # human readable, branch name tag
           FULL_COMMIT_TAG="${IMAGE_NAME}:${SHORT_SHA}"     # a short sha suffixed image tag
-          docker build . --tag "$FULL_BRANCH_TAG" --build-arg BASE_ANSIBLE_TAG="a861fa7"
+          docker build . --tag "$FULL_BRANCH_TAG"
           docker tag "$FULL_BRANCH_TAG" "$FULL_COMMIT_TAG"
           docker push "$FULL_BRANCH_TAG"
           docker push "$FULL_COMMIT_TAG"
