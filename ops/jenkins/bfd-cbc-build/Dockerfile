@@ -4,7 +4,6 @@ ARG PACKER_VERSION
 ARG YQ_VERSION
 
 FROM maven:${MAVEN_VERSION}-amazoncorretto-${JAVA_VERSION} AS base
-
 RUN yum update -y --security && \
     amazon-linux-extras install epel -y && \
     yum clean metadata && \
