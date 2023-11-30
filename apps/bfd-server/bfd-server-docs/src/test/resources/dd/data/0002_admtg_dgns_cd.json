@@ -1,0 +1,54 @@
+{
+    "id": 2,
+    "name": "Admitting Diagnosis Code",
+    "description": "A diagnosis code on the institutional claim indicating the beneficiary's initial diagnosis at admission.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "admtg_dgns_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosisAdmittingCode",
+    "ccwMapping": [
+        "ADMTG_DGNS_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.ADMTG_DGNS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "diagnosis.where(type.coding.code='admitting').diagnosisCodeableConcept.coding.where(system='http://hl7.org/fhir/sid/icd-10-cm').code",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'http://terminology.hl7.org/CodeSystem/ex-diagnosistype'",
+                "diagnosis[N].type[N].coding[N].code = 'admitting'"
+            ],
+            "additional": [
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10-cm'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+                "eob.diagnosis[N].type[N].coding[N].display = 'Admitting Diagnosis'",
+                "eob.diagnosis[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1'",
+                "eob.diagnosis[N].extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1'",
+                "eob.diagnosis[N].extension[N].valueCoding.code = 'Y'",
+                "eob.diagnosis[N].extension[N].valueCoding.display = 'Diagnosis was present at the time of admission (POA)'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n    \"code\": \"A37\",\\n    \"display\": \"WHOOPING COUGH\"\\n  }\\n]"
+        }
+    ]
+}

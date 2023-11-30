@@ -84,7 +84,7 @@ spec:
   serviceAccount: bfd
   containers:
   - name: bfd-cbc-build
-    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk17-mvn3-tfenv3-kt1.9-latest'
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk21-mvn3-tfenv3-kt1.9-latest'
     command:
     - cat
     tty: true
@@ -135,7 +135,7 @@ spec:
                             returnStdout: true,
                             script: "aws ec2 describe-images \
                             --filters 'Name=tag:amiSourceId,Values=${goldAmiId}' \
-                            'Name=name,Values=bfd-amzn2-jdk17-platinum-??????????????' \
+                            'Name=name,Values=bfd-amzn2-jdk21-platinum-??????????????' \
                             'Name=state,Values=available' --region us-east-1 \
                             --query 'Images[*].[ImageId]' \
                             --output text"

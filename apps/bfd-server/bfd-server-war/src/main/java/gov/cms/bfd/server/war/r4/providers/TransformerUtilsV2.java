@@ -2173,26 +2173,6 @@ public final class TransformerUtilsV2 {
   /**
    * Builds an id for an {@link ExplanationOfBenefit}.
    *
-   * <p>Internally BFD treats claimId as a Long (db bigint); however, within FHIR, an Identifier
-   * {@link org.hl7.fhir.r4.model.Identifier} has a value {@link org.hl7.fhir.r4.model.StringType}
-   * that does not constrain itself to numeric. So this convenience method will continue to exist as
-   * a means to create a {@link ExplanationOfBenefit#getId()} whose claim ID is not numeric. This
-   * non-numeric handling may be used in integration tests to trigger {@link
-   * ca.uhn.fhir.rest.server.exceptions.InvalidRequestException}.
-   *
-   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
-   * @param claimId the <code>claimId</code> field value (e.g. from {@link
-   *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for
-   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
-   *     </code> value
-   */
-  public static String buildEobId(ClaimType claimType, String claimId) {
-    return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
-  }
-
-  /**
-   * Builds an id for an {@link ExplanationOfBenefit}.
-   *
    * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()} to compute an {@link ExplanationOfBenefit#getId()} for

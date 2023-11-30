@@ -125,7 +125,7 @@ try {
 		containers: [
 			containerTemplate(
 				name: 'bfd-cbc-build',
-				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk17-mvn3-tfenv3-kt1.9-latest', // TODO: consider a smarter solution for resolving this image
+				image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk21-mvn3-tfenv3-kt1.9-latest', // TODO: consider a smarter solution for resolving this image
 				command: 'cat',
 				ttyEnabled: true,
 				alwaysPullImage: false, // NOTE: This implies that we observe immutable container images
