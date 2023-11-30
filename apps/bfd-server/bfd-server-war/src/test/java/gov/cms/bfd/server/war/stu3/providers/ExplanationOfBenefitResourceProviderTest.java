@@ -23,8 +23,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -40,6 +38,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
@@ -310,87 +309,6 @@ public class ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Verifies that {@link TokenAndListParam} can be parsed correctly.
-   * ExplanationOfBenefitResourceProvider#parseTypeParam(TokenAndListParam)} works as expected.
-   */
-  @Test
-  void parseTypeParam() {
-    TokenAndListParam typeParamNull = null;
-    Set<ClaimType> typesForNull =
-        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamNull);
-    assertEquals(ClaimType.values().length, typesForNull.size());
-
-    TokenAndListParam typeParamSystemWildcard =
-        new TokenAndListParam()
-            .addAnd(
-                new TokenOrListParam()
-                    .add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
-    Set<ClaimType> typesForSystemWildcard =
-        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSystemWildcard);
-    assertEquals(ClaimType.values().length, typesForSystemWildcard.size());
-
-    TokenAndListParam typeParamSingle =
-        new TokenAndListParam()
-            .addAnd(
-                new TokenOrListParam(
-                    TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.CARRIER.name()));
-    Set<ClaimType> typesForSingle =
-        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingle);
-    assertEquals(1, typesForSingle.size());
-    assertTrue(typesForSingle.contains(ClaimType.CARRIER));
-
-    TokenAndListParam typeParamSingleNullSystem =
-        new TokenAndListParam().addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name()));
-    Set<ClaimType> typesForSingleNullSystem =
-        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleNullSystem);
-    assertEquals(1, typesForSingleNullSystem.size());
-    assertTrue(typesForSingleNullSystem.contains(ClaimType.CARRIER));
-
-    TokenAndListParam typeParamSingleInvalidSystem =
-        new TokenAndListParam().addAnd(new TokenOrListParam("foo", ClaimType.CARRIER.name()));
-    Set<ClaimType> typesForSingleInvalidSystem =
-        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleInvalidSystem);
-    assertEquals(0, typesForSingleInvalidSystem.size());
-
-    TokenAndListParam typeParamSingleInvalidCode =
-        new TokenAndListParam().addAnd(new TokenOrListParam(null, "foo"));
-    Set<ClaimType> typesForSingleInvalidCode =
-        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamSingleInvalidCode);
-    assertEquals(0, typesForSingleInvalidCode.size());
-
-    TokenAndListParam typeParamTwoEntries =
-        new TokenAndListParam()
-            .addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name(), ClaimType.DME.name()))
-            .addAnd(new TokenOrListParam(null, ClaimType.CARRIER.name()));
-    Set<ClaimType> typesForTwoEntries =
-        ExplanationOfBenefitResourceProvider.parseTypeParam(typeParamTwoEntries);
-    assertEquals(1, typesForTwoEntries.size());
-    assertTrue(typesForTwoEntries.contains(ClaimType.CARRIER));
-  }
-
-  /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#parseTypeParam(TokenAndListParam)}
-   * throws an exception when query param modifiers are used, which are unsupported.
-   */
-  @Test
-  void parseTypeParam_modifiers() {
-    TokenAndListParam typeParam =
-        new TokenAndListParam()
-            .addAnd(
-                new TokenOrListParam()
-                    .add(
-                        new TokenParam(
-                                TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE,
-                                ClaimType.CARRIER.name())
-                            .setModifier(TokenParamModifier.ABOVE)));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          ExplanationOfBenefitResourceProvider.parseTypeParam(typeParam);
-        });
-  }
-
-  /**
    * Verifies that {@link R4ExplanationOfBenefitResourceProvider#read} starts and stops its metrics.
    */
   @Test
@@ -405,6 +323,17 @@ public class ExplanationOfBenefitResourceProviderTest {
     // time() starts the timer
     verify(metricsTimer, times(1)).time();
     verify(metricsTimerContext, times(1)).stop();
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} throws an exception for an
+   * {@link IdType} that has an unsupported claim type.
+   */
+  @Test
+  void testEobReadWhereInvalidClaimTypeInIdExpectException() {
+    when(eobId.getIdPart()).thenReturn("foo-1234");
+
+    assertThrows(ResourceNotFoundException.class, () -> eobProvider.read(eobId, requestDetails));
   }
 
   /**
@@ -569,13 +498,13 @@ public class ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#parseTypeParam} ignores an invalid or
-   * unspecified claim type.
+   * Verifies that {@link CommonTransformerUtils#parseTypeParam} ignores an invalid or unspecified
+   * claim type.
    */
   @Test
   void testFindByPatientIgnoresInvalidClaimType() {
     TokenAndListParam listParam = createClaimsTokenAndListParam(Arrays.asList("carriers", "dme"));
-    Set<ClaimType> result = ExplanationOfBenefitResourceProvider.parseTypeParam(listParam);
+    Set<ClaimType> result = CommonTransformerUtils.parseTypeParam(listParam);
     assertEquals(1, result.size());
     assertFalse(result.contains(ClaimType.CARRIER)); // ignored carriers, should be carrier
     assertTrue(result.contains(ClaimType.DME));
@@ -583,12 +512,12 @@ public class ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#parseTypeParam} supports null claim
-   * type and returns all claim types in the EnumSet.
+   * Verifies that {@link CommonTransformerUtils#parseTypeParam} supports null claim type and
+   * returns all claim types in the EnumSet.
    */
   @Test
   void testFindByPatientSupportsNullRequestedClaimType() {
-    Set<ClaimType> result = ExplanationOfBenefitResourceProvider.parseTypeParam(null);
+    Set<ClaimType> result = CommonTransformerUtils.parseTypeParam(null);
     assertEquals(8, result.size());
     assertTrue(result.contains(ClaimType.CARRIER));
     assertTrue(result.contains(ClaimType.DME));
