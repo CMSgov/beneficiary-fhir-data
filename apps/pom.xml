@@ -130,7 +130,6 @@
         <logback.json.classic.version>0.1.5</logback.json.classic.version>
         <mockito.version>5.7.0</mockito.version>
         <byte-buddy.version>1.14.9</byte-buddy.version>
-        <mockito-inline.version>5.2.0</mockito-inline.version>
         <rest-assured.version>5.3.2</rest-assured.version>
         <assertj.version>3.24.2</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
@@ -302,11 +301,6 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
                 <version>${flyway.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito-inline.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
             <dependency>
