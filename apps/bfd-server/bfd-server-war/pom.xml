@@ -347,7 +347,7 @@
         <dependency>
             <groupId>gov.cms.bfd.data.fda.utility</groupId>
             <artifactId>bfd-data-fda</artifactId>
-            <version>${bfd.data.fda.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
