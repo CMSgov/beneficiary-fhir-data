@@ -38,7 +38,6 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -309,7 +308,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   }
 
   /**
-   * Verifies that {@link ExplanationOfBenefitResourceProvider#read} throws an exception for an
+   * Verifies that {@link R4ExplanationOfBenefitResourceProvider#read} throws an exception for an
    * {@link org.hl7.fhir.dstu3.model.IdType} that has an unsupported claim type.
    */
   @Test
