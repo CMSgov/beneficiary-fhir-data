@@ -1,11 +1,9 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -38,7 +36,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
-import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
@@ -51,7 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.persistence.EntityManager;
@@ -495,38 +491,6 @@ public class ExplanationOfBenefitResourceProviderTest {
         eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     assertEquals(0, response.getTotal());
-  }
-
-  /**
-   * Verifies that {@link CommonTransformerUtils#parseTypeParam} ignores an invalid or unspecified
-   * claim type.
-   */
-  @Test
-  void testFindByPatientIgnoresInvalidClaimType() {
-    TokenAndListParam listParam = createClaimsTokenAndListParam(Arrays.asList("carriers", "dme"));
-    Set<ClaimType> result = CommonTransformerUtils.parseTypeParam(listParam);
-    assertEquals(1, result.size());
-    assertFalse(result.contains(ClaimType.CARRIER)); // ignored carriers, should be carrier
-    assertTrue(result.contains(ClaimType.DME));
-    assertFalse(result.contains(ClaimType.SNF));
-  }
-
-  /**
-   * Verifies that {@link CommonTransformerUtils#parseTypeParam} supports null claim type and
-   * returns all claim types in the EnumSet.
-   */
-  @Test
-  void testFindByPatientSupportsNullRequestedClaimType() {
-    Set<ClaimType> result = CommonTransformerUtils.parseTypeParam(null);
-    assertEquals(8, result.size());
-    assertTrue(result.contains(ClaimType.CARRIER));
-    assertTrue(result.contains(ClaimType.DME));
-    assertTrue(result.contains(ClaimType.SNF));
-    assertTrue(result.contains(ClaimType.PDE));
-    assertTrue(result.contains(ClaimType.HHA));
-    assertTrue(result.contains(ClaimType.HOSPICE));
-    assertTrue(result.contains(ClaimType.INPATIENT));
-    assertTrue(result.contains(ClaimType.OUTPATIENT));
   }
 
   /**

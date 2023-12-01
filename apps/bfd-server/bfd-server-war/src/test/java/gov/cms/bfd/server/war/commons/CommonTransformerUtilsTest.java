@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,6 +23,14 @@ public class CommonTransformerUtilsTest {
   void testParseTypeParamWhenInputNullExpectAllTypes() {
     Set<ClaimType> typesForNull = CommonTransformerUtils.parseTypeParam(null);
     assertEquals(ClaimType.values().length, typesForNull.size());
+    assertTrue(typesForNull.contains(ClaimType.CARRIER));
+    assertTrue(typesForNull.contains(ClaimType.DME));
+    assertTrue(typesForNull.contains(ClaimType.SNF));
+    assertTrue(typesForNull.contains(ClaimType.PDE));
+    assertTrue(typesForNull.contains(ClaimType.HHA));
+    assertTrue(typesForNull.contains(ClaimType.HOSPICE));
+    assertTrue(typesForNull.contains(ClaimType.INPATIENT));
+    assertTrue(typesForNull.contains(ClaimType.OUTPATIENT));
   }
 
   /**
@@ -94,6 +103,21 @@ public class CommonTransformerUtilsTest {
     Set<ClaimType> typesForSingleInvalidCode =
         CommonTransformerUtils.parseTypeParam(typeParamSingleInvalidCode);
     assertEquals(0, typesForSingleInvalidCode.size());
+  }
+
+  /**
+   * Verifies that {@link CommonTransformerUtils#parseTypeParam} ignores an invalid or unspecified
+   * claim type.
+   */
+  @Test
+  void testParseTypeParamWhenInvalidClaimTypeExpectBadTypeIgnored() {
+    TokenAndListParam typeParamSingleInvalidCode =
+        new TokenAndListParam().addAnd(new TokenOrListParam(null, "carriers", "dme"));
+    Set<ClaimType> result = CommonTransformerUtils.parseTypeParam(typeParamSingleInvalidCode);
+    assertEquals(1, result.size());
+    assertFalse(result.contains(ClaimType.CARRIER)); // ignored carriers, should be carrier
+    assertTrue(result.contains(ClaimType.DME));
+    assertFalse(result.contains(ClaimType.SNF));
   }
 
   /**
