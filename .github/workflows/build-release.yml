@@ -174,10 +174,11 @@ jobs:
           CA_PACKAGE: bfd-server-war
           CA_DATA_DICTIONARY_ASSETS: |
             [
-              "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.csv",
-              "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.csv",
-              "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.json"
+              "bfd-server-war-V1-data-dictionary-${{ inputs.releaseVersion }}.csv",
+              "bfd-server-war-V2-data-dictionary-${{ inputs.releaseVersion }}.csv",
+              "bfd-server-war-V1-data-dictionary-${{ inputs.releaseVersion }}.json",
+              "bfd-server-war-V2-data-dictionary-${{ inputs.releaseVersion }}.json",
+              "bfd-server-war-data-dictionary-${{ inputs.releaseVersion }}.xlsx"
             ]
 
       - name: Release
@@ -191,3 +192,4 @@ jobs:
           files: |
             *.csv
             *.json
+            *.xlsx
