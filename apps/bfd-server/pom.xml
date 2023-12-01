@@ -77,7 +77,7 @@
             <dependency>
                 <groupId>gov.cms.bfd.data.fda.utility</groupId>
                 <artifactId>bfd-data-fda</artifactId>
-                <version>${bfd.data.fda.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -93,7 +93,7 @@
         <dependency>
             <groupId>gov.cms.bfd.data.npi</groupId>
             <artifactId>bfd-data-npi</artifactId>
-            <version>${bfd.data.npi.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -49,7 +49,54 @@ resource "aws_iam_policy" "github_actions_s3its" {
   "Version": "2012-10-17"
 }
 POLICY
+}
 
+resource "aws_iam_policy" "github_actions_ecr" {
+  name = "bfd-${local.env}-ecr-rw"
+  path = "/"
+  policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = [
+            "ecr:GetAuthorizationToken",
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+          Sid      = "GetAuthorizationToken"
+        },
+        {
+          Action = [
+            "ecr:BatchGetImage",
+            "ecr:BatchCheckLayerAvailability",
+            "ecr:CompleteLayerUpload",
+            "ecr:GetDownloadUrlForLayer",
+            "ecr:InitiateLayerUpload",
+            "ecr:PutImage",
+            "ecr:UploadLayerPart",
+          ]
+          Effect = "Allow"
+          Resource = [
+            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-db-migrator",
+            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-server",
+            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-pipeline-app",
+          ]
+          Sid = "AllowPushPull"
+        },
+        {
+          Sid    = "AllowDescribeRegistry",
+          Effect = "Allow",
+          Action = [
+            "ecr:DescribeRegistry"
+          ],
+          Resource = [
+            "*"
+          ]
+        }
+      ]
+      Version = "2012-10-17"
+    }
+  )
 }
 
 data "tls_certificate" "github_actions" {
@@ -68,8 +115,9 @@ resource "aws_iam_role" "github_actions" {
   description = "OIDC Assumable GitHub Actions Role"
 
   managed_policy_arns = [
-    aws_iam_policy.code_artifact_ro.arn,
-    aws_iam_policy.github_actions_s3its.arn
+    aws_iam_policy.code_artifact_rw.arn,
+    aws_iam_policy.github_actions_s3its.arn,
+    aws_iam_policy.github_actions_ecr.arn
   ]
 
   assume_role_policy = jsonencode(

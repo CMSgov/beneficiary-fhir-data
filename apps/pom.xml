@@ -38,13 +38,15 @@
 
     <scm>
         <!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-        <connection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</connection>
-        <developerConnection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</developerConnection>
+        <connection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</connection>
+        <developerConnection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</developerConnection>
         <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
         <tag>HEAD</tag>
     </scm>
 
     <modules>
+        <module>bfd-data-npi</module>
+        <module>bfd-data-fda</module>
         <module>bfd-shared-utils</module>
         <module>bfd-shared-test-utils</module>
         <module>bfd-model</module>
@@ -68,8 +70,6 @@
             they are reproducible bit-by-bit no matter when/where they are generated.
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
         <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
-        <bfd.data.fda.version>1.0-SNAPSHOT</bfd.data.fda.version>
-        <bfd.data.npi.version>1.0-SNAPSHOT</bfd.data.npi.version>
         <maven.jacoco.plugin.version>0.8.11</maven.jacoco.plugin.version>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
