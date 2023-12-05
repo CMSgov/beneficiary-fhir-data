@@ -24,6 +24,8 @@
  * </p>
  */
 
+echo "Starting Jenkinsfile"
+
 properties([
 	parameters([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: true, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
@@ -118,10 +120,13 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 	// future notifications can go here. (email, other channels, etc)
 }
 
+echo "Starting pipeline"
+
 // begin pipeline
 try {
 	// See ops/jenkins/cbc-build-push.sh for this image's definition.
 	podTemplate(
+			echo "In podTemplate"
 		containers: [
 			containerTemplate(
 				name: 'bfd-cbc-build',
