@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -435,6 +436,18 @@ public class PatientE2E extends PatientE2EBase {
     // basically second param doesnt matter for this test
     String hicnHash = getHicnHash("543217066U", false, loadedRecords);
 
+    List<Long> distinctBeneIdList =
+        loadedRecords.stream()
+            .filter(Beneficiary.class::isInstance)
+            .map(Beneficiary.class::cast)
+            .collect(Collectors.groupingBy(Beneficiary::getMbiHash))
+            .values()
+            .stream()
+            .flatMap(List::stream)
+            .map(Beneficiary::getBeneficiaryId)
+            .distinct()
+            .toList();
+
     String requestString =
         patientEndpoint
             + "?identifier="
@@ -449,7 +462,12 @@ public class PatientE2E extends PatientE2EBase {
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
-        .body("issue.diagnostics", hasItem("By hash query found more than one distinct BENE_ID: 5"))
+        .body(
+            "issue.diagnostics",
+            hasItem(
+                "By hash query found more than one distinct BENE_ID: 5,"
+                    + " "
+                    + distinctBeneIdList))
         .log()
         .all()
         .when()
@@ -468,6 +486,18 @@ public class PatientE2E extends PatientE2EBase {
     List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
     String hicnHash = getHicnHash("DUPHISTHIC", true, loadedRecords);
 
+    List<Long> distinctBeneIdList =
+        loadedRecords.stream()
+            .filter(BeneficiaryHistory.class::isInstance)
+            .map(BeneficiaryHistory.class::cast)
+            .collect(Collectors.groupingBy(BeneficiaryHistory::getMbiHash))
+            .values()
+            .stream()
+            .flatMap(List::stream)
+            .map(BeneficiaryHistory::getBeneficiaryId)
+            .distinct()
+            .toList();
+
     String requestString =
         patientEndpoint
             + "?identifier="
@@ -482,7 +512,12 @@ public class PatientE2E extends PatientE2EBase {
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
-        .body("issue.diagnostics", hasItem("By hash query found more than one distinct BENE_ID: 2"))
+        .body(
+            "issue.diagnostics",
+            hasItem(
+                "By hash query found more than one distinct BENE_ID: 2,"
+                    + " "
+                    + distinctBeneIdList))
         .when()
         .get(requestString);
   }
