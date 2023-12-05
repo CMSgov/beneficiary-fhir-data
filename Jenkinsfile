@@ -115,7 +115,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 	}
 
 	// send Slack messages
-	slackSend(color: buildColor, message: slackMsg)
+//	slackSend(color: buildColor, message: slackMsg)
 
 	// future notifications can go here. (email, other channels, etc)
 }
