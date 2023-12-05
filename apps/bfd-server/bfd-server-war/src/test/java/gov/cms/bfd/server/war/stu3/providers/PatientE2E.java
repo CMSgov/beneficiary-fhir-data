@@ -449,10 +449,7 @@ public class PatientE2E extends PatientE2EBase {
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
-        .body(
-            "issue.diagnostics",
-            hasItem(
-                "By hash query found more than one distinct BENE_ID: 5" + " MbiHash: " + hicnHash))
+        .body("issue.diagnostics", hasItem("By hash query found more than one distinct BENE_ID: 5"))
         .log()
         .all()
         .when()

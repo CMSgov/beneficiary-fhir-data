@@ -177,10 +177,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
-        .body(
-            "issue.diagnostics",
-            hasItem(
-                "By hash query found more than one distinct BENE_ID: 5" + " MbiHash: " + mbiHash))
+        .body("issue.diagnostics", hasItem("By hash query found more than one distinct BENE_ID: 5"))
         .when()
         .get(requestString);
   }
