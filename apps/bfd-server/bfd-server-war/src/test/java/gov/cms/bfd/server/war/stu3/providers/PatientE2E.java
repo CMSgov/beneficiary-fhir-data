@@ -449,7 +449,12 @@ public class PatientE2E extends PatientE2EBase {
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
-        .body("issue.diagnostics", hasItem("By hash query found more than one distinct BENE_ID: 5"))
+        .body(
+            "issue.diagnostics",
+            hasItem(
+                "By hash query found more than one distinct BENE_ID: 5" + " MbiHash: " + hicnHash))
+        .log()
+        .all()
         .when()
         .get(requestString);
   }
@@ -480,7 +485,10 @@ public class PatientE2E extends PatientE2EBase {
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
-        .body("issue.diagnostics", hasItem("By hash query found more than one distinct BENE_ID: 2"))
+        .body(
+            "issue.diagnostics",
+            hasItem(
+                "By hash query found more than one distinct BENE_ID: 2" + " MbiHash: " + hicnHash))
         .when()
         .get(requestString);
   }
