@@ -42,6 +42,13 @@ def use_latest_images = params.use_latest_images
 def force_migrator_deployment = params.force_migrator_deployment
 def server_regression_image_override = params.server_regression_image_override
 
+println "deploy_prod_from_non_master: ${deploy_prod_from_non_master}"
+println "deploy_prod_skip_confirm: ${deploy_prod_skip_confirm}"
+println "user_latest_images: ${use_latest_images}"
+println "force_migrator_deployment: ${force_migrator_deployment}"
+println "server_regression_image_overrie: ${server_regression_image_override}"
+
+
 // These variables are accessible throughout this file (except inside methods and classes).
 def scriptForApps
 def scriptForDeploys
