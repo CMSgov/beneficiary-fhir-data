@@ -921,10 +921,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       BfdMDC.put(
           "database_query_by_hash_collision_distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
-          "By hash query found more than one distinct BENE_ID: "
-              + Long.toString(distinctBeneIds)
-              + " MbiHash: "
-              + hash);
+          "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
       beneficiary = matchingBenes.get(0);
     }
