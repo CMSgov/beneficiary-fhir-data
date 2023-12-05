@@ -9,13 +9,16 @@ import static org.hamcrest.Matchers.hasItems;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import io.restassured.response.Response;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import org.hl7.fhir.r4.model.Coverage;
 import org.junit.jupiter.api.Test;
 
@@ -392,6 +395,40 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .statusCode(200)
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
+   * expected for Coverage read.
+   */
+  @Test
+  public void testCoverageReadIdHasAccessJsonWithExpectedMdcKeys() throws IOException {
+    Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
+    IdDt coverageId = CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary);
+    String requestString = coverageEndpoint + coverageId.getIdPart();
+
+    List<String> additionalExpectedMdcKeys =
+        List.of(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION);
+
+    ServerTestUtils.assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalExpectedMdcKeys);
+  }
+
+  /**
+   * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
+   * expected for Coverage search by bene id.
+   */
+  @Test
+  public void testCoverageSearchByBeneHasAccessJsonWithExpectedMdcKeys() throws IOException {
+    String beneficiaryId =
+        String.valueOf(
+            testUtils.getFirstBeneficiary(testUtils.loadSampleAData()).getBeneficiaryId());
+    String requestString = coverageEndpoint + "?beneficiary=" + beneficiaryId;
+
+    List<String> additionalExpectedMdcKeys = List.of(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
+
+    ServerTestUtils.assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalExpectedMdcKeys);
   }
 
   /**

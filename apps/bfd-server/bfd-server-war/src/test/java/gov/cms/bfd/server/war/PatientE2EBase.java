@@ -14,12 +14,15 @@ import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -53,6 +56,20 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
   /** The current Mbi as found in the SAMPLE A data. */
   protected static final String currentMbi = "3456789";
+
+  /**
+   * The base MDC keys expected for all Patient endpoint calls which are not common to all other
+   * endpoints.
+   */
+  protected static final List<String> MDC_EXPECTED_BASE_KEYS =
+      List.of(
+          BfdMDC.DATABASE_QUERY_BATCH,
+          BfdMDC.DATABASE_QUERY_TYPE,
+          BfdMDC.DATABASE_QUERY_BATCH_SIZE,
+          BfdMDC.DATABASE_QUERY_SIZE,
+          BfdMDC.DATABASE_QUERY_MILLI,
+          BfdMDC.DATABASE_QUERY_SUCCESS,
+          BfdMDC.DATABASE_QUERY_SOURCE_NAME);
 
   /** Verifies patient read with an existing bene returns a 200 and response. */
   @Test
@@ -673,6 +690,60 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .statusCode(200)
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
+   * expected for Patient by mbi.
+   */
+  @Test
+  public void testPatientByIdentifierHasAccessJsonWithExpectedMdcKeys() throws IOException {
+    Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
+    String mbiHash = beneficiary.getMbiHash().orElseThrow();
+    String requestString =
+        patientEndpoint
+            + "?identifier="
+            + TransformerConstants.CODING_BBAPI_BENE_MBI_HASH
+            + "|"
+            + mbiHash;
+
+    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
+
+    ServerTestUtils.assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalExpectedMdcKeys);
+  }
+
+  /**
+   * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
+   * expected for Patient read.
+   */
+  @Test
+  public void testPatientReadHasAccessJsonWithExpectedMdcKeys() throws IOException {
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = patientEndpoint + patientId;
+
+    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION);
+
+    ServerTestUtils.assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalExpectedMdcKeys);
+  }
+
+  /**
+   * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
+   * expected for Patient by logical id.
+   */
+  @Test
+  public void testPatientByLogicalIdHasAccessJsonWithExpectedMdcKeys() throws IOException {
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    String requestString = patientEndpoint + "?_id=" + patientId;
+
+    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
+
+    ServerTestUtils.assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalExpectedMdcKeys);
   }
 
   /**

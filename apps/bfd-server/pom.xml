@@ -29,6 +29,7 @@
     </properties>
 
     <modules>
+        <module>bfd-server-docs</module>
         <module>bfd-server-launcher-sample</module>
         <module>bfd-server-launcher</module>
         <module>bfd-server-shared-utils</module>
