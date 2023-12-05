@@ -24,8 +24,6 @@
  * </p>
  */
 
-echo "Starting Jenkinsfile"
-
 properties([
 	parameters([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: true, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
@@ -37,6 +35,12 @@ properties([
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
+
+def deploy_prod_from_non_master = params.deploy_prod_from_non_master
+def deploy_prod_skip_confirm = params.deploy_prod_skip_confirm
+def use_latest_images = params.use_latest_images
+def force_migrator_deployment = params.force_migrator_deployment
+def server_regression_image_override = params.server_regression_image_override
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def scriptForApps
@@ -115,12 +119,10 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 	}
 
 	// send Slack messages
-//	slackSend(color: buildColor, message: slackMsg)
+	// slackSend(color: buildColor, message: slackMsg)
 
 	// future notifications can go here. (email, other channels, etc)
 }
-
-echo "Starting pipeline"
 
 // begin pipeline
 try {
@@ -177,7 +179,7 @@ try {
 					amiIds = scriptForDeploys.findAmis(gitBranchName)
 
 					// These variables track our decision on whether or not to deploy to prod-like envs.
-					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
+					canDeployToProdEnvs = env.BRANCH_NAME == "master" || deploy_prod_from_non_master
 					willDeployToProdEnvs = false
 
 					// Get the current commit id
@@ -192,7 +194,7 @@ try {
 			}
 
 			stage('Build Apps') {
-				if (!params.use_latest_images) {
+				if (!use_latest_images) {
 					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_apps_start')
 
@@ -203,7 +205,7 @@ try {
 			}
 
 			stage('Build App AMIs') {
-				if (!params.use_latest_images) {
+				if (!use_latest_images) {
 					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_app_amis_test_start')
 
@@ -253,7 +255,7 @@ try {
 							bfdEnv: bfdEnv,
 							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 							awsRegion: awsRegion,
-							forceDeployment: params.force_migrator_deployment
+							forceDeployment: force_migrator_deployment
 						)
 						if (migratorDeploymentSuccessful) {
 							println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
@@ -302,7 +304,7 @@ try {
 							env: bfdEnv,
 							directory: "ops/terraform/services/server/server-regression",
 							tfVars: [
-								docker_image_tag_override: params.server_regression_image_override
+								docker_image_tag_override: server_regression_image_override
 							]
 						)
 
@@ -340,7 +342,7 @@ try {
 					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
 					* deploying to production environments.
 					*/
-					if (!params.deploy_prod_skip_confirm) {
+					if (!deploy_prod_skip_confirm) {
 						/*
 						* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
 						* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
@@ -408,7 +410,7 @@ try {
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
-								forceDeployment: params.force_migrator_deployment
+								forceDeployment: force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -465,7 +467,7 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
-									docker_image_tag_override: params.server_regression_image_override
+									docker_image_tag_override: server_regression_image_override
 								]
 							)
 
@@ -550,7 +552,7 @@ try {
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
-								forceDeployment: params.force_migrator_deployment
+								forceDeployment: force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -609,7 +611,7 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
-									docker_image_tag_override: params.server_regression_image_override
+									docker_image_tag_override: server_regression_image_override
 								]
 							)
 
