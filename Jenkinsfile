@@ -126,7 +126,6 @@ echo "Starting pipeline"
 try {
 	// See ops/jenkins/cbc-build-push.sh for this image's definition.
 	podTemplate(
-			echo "In podTemplate"
 		containers: [
 			containerTemplate(
 				name: 'bfd-cbc-build',
