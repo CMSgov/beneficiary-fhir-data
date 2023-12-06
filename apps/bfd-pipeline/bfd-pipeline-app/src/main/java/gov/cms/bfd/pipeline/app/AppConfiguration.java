@@ -51,7 +51,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * The name of the environment variable that should be used to provide the {@link
    * ExtractionOptions#getS3BucketName()} value.
    */
-  public static final String ENV_VAR_KEY_BUCKET = "S3_BUCKET_NAME";
+  public static final String ENV_VAR_KEY_BUCKET = "ccw.s3_bucket_name";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -61,41 +61,40 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * RifFileType}. For example, specifying "BENEFICIARY" will configure the application to only
    * process data sets that <strong>only</strong> contain {@link RifFileType#BENEFICIARY}s.
    */
-  public static final String ENV_VAR_KEY_ALLOWED_RIF_TYPE = "DATA_SET_TYPE_ALLOWED";
+  public static final String ENV_VAR_KEY_ALLOWED_RIF_TYPE = "ccw.job.allowed_data_set_type";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getCcwRifLoadOptions()} {@link IdHasher.Config#getHashIterations()} value.
    */
-  public static final String ENV_VAR_KEY_HICN_HASH_ITERATIONS = "HICN_HASH_ITERATIONS";
+  public static final String ENV_VAR_KEY_HICN_HASH_ITERATIONS = "hicn_hash.iterations";
 
   /**
    * The name of the environment variable that should be used to provide a hex encoded
    * representation of the {@link #getCcwRifLoadOptions()} {@link IdHasher.Config#getHashPepper()}
    * ()} value.
    */
-  public static final String ENV_VAR_KEY_HICN_HASH_PEPPER = "HICN_HASH_PEPPER";
+  public static final String ENV_VAR_KEY_HICN_HASH_PEPPER = "hicn_hash.pepper";
 
   /**
    * The name of the environment variable that should be used to provide an integer size for the
    * in-memory cache of computed hicn/mbi hash values. Used to set the {@link
    * IdHasher.Config#getCacheSize()}.
    */
-  private static final String ENV_VAR_KEY_HICN_HASH_CACHE_SIZE = "HICN_HASH_CACHE_SIZE";
+  private static final String ENV_VAR_KEY_HICN_HASH_CACHE_SIZE = "hicn_hash.cache_size";
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
    * configure the CCW RIF data load job. Defaults to true to run the job unless disabled.
    */
-  public static final String ENV_VAR_KEY_CCW_RIF_JOB_ENABLED = "CCW_RIF_JOB_ENABLED";
+  public static final String ENV_VAR_KEY_CCW_RIF_JOB_ENABLED = "ccw.job.enabled";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getRunInterval()} value. This variable's
    * value should be the frequency at which this job runs in seconds.
    */
-  public static final String ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS =
-      "CCW_RIF_JOB_INTERVAL_SECONDS";
+  public static final String ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS = "ccw.job.interval_seconds";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -104,7 +103,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
    * depends on number of cores, cpu speed, i/o throughput, and database performance.
    */
-  public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
+  public static final String ENV_VAR_KEY_LOADER_THREADS = "loader_thread_count";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -114,13 +113,14 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * <p>Benchmarking is necessary to determine an optimal value in any given environment as it
    * depends on number of cores, cpu speed, i/o throughput, and database performance.
    */
-  public static final String ENV_VAR_KEY_LOADER_THREADS_CLAIMS = "LOADER_THREADS_CLAIMS";
+  public static final String ENV_VAR_KEY_LOADER_THREADS_CLAIMS =
+      "ccw.job.claims.loader_thread_count";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getCcwRifLoadOptions()} {@link LoadAppOptions#isIdempotencyRequired()} value.
    */
-  public static final String ENV_VAR_KEY_IDEMPOTENCY_REQUIRED = "IDEMPOTENCY_REQUIRED";
+  public static final String ENV_VAR_KEY_IDEMPOTENCY_REQUIRED = "ccw.idempotency_enabled";
 
   /**
    * The name of the environment variable that should be used to provide the number of {@link
@@ -130,7 +130,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
    * the performance boost from larger batch sizes drops off quickly.
    */
-  public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE = "RIF_JOB_BATCH_SIZE";
+  public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE = "ccw.job.batch_size";
 
   /**
    * The name of the environment variable that should be used to provide the number of {@link
@@ -141,7 +141,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * <p>Benchmarking is necessary to determine an optimal value in any given environment. Generally
    * the performance boost from larger batch sizes drops off quickly.
    */
-  public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS = "RIF_JOB_BATCH_SIZE_CLAIMS";
+  public static final String ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS = "ccw.job.claims.batch_size";
 
   /**
    * The name of the environment variable that should be used to provide the work queue size for the
@@ -155,7 +155,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * database.
    */
   public static final String ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE =
-      "RIF_JOB_QUEUE_SIZE_MULTIPLE";
+      "ccw.job.queue_size_multiple";
 
   /**
    * The name of the environment variable that should be used to provide the work queue size for the
@@ -169,50 +169,50 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * database.
    */
   public static final String ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS =
-      "RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS";
+      "ccw.job.claims.queue_size_multiple";
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
    * configure the RDA GRPC data load job. Defaults to false to not run the job unless enabled.
    */
-  public static final String ENV_VAR_KEY_RDA_JOB_ENABLED = "RDA_JOB_ENABLED";
+  public static final String ENV_VAR_KEY_RDA_JOB_ENABLED = "rda.job.enabled";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getRunInterval()} value. This variable's
    * value should be the frequency at which this job runs in seconds.
    */
-  public static final String ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS = "RDA_JOB_INTERVAL_SECONDS";
+  public static final String ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS = "rda.job.interval_seconds";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getBatchSize()} value.
    */
-  public static final String ENV_VAR_KEY_RDA_JOB_BATCH_SIZE = "RDA_JOB_BATCH_SIZE";
+  public static final String ENV_VAR_KEY_RDA_JOB_BATCH_SIZE = "rda.job.batch_size";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getWriteThreads()} value.
    */
-  public static final String ENV_VAR_KEY_RDA_JOB_WRITE_THREADS = "RDA_JOB_WRITE_THREADS";
+  public static final String ENV_VAR_KEY_RDA_JOB_WRITE_THREADS = "rda.job.write_thread_count";
 
   /**
    * The name of the environment variable that specifies which type of RDA API server to connect to.
    * {@link RdaSourceConfig#getServerType()}
    */
-  public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "RDA_GRPC_SERVER_TYPE";
+  public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "rda.grpc.server_type";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link RdaSourceConfig#getHost()} ()} value.
    */
-  public static final String ENV_VAR_KEY_RDA_GRPC_HOST = "RDA_GRPC_HOST";
+  public static final String ENV_VAR_KEY_RDA_GRPC_HOST = "rda.grpc.host";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link RdaSourceConfig#getPort()} value.
    */
-  public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "RDA_GRPC_PORT";
+  public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "rda.grpc.port";
 
   /**
    * The name of the environment variable that specifies the name of an in-process mock RDA API
@@ -220,14 +220,14 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * {@link RdaSourceConfig#getInProcessServerName()}
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME =
-      "RDA_GRPC_INPROC_SERVER_NAME";
+      "rda.grpc.inprocess_server.name";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link RdaSourceConfig#getMaxIdle()} value. This variable value should be
    * in seconds.
    */
-  public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "RDA_GRPC_MAX_IDLE_SECONDS";
+  public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "rda.grpc.max_idle_seconds";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -235,46 +235,46 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * This variable value should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP =
-      "RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP";
+      "rda.grpc.seconds_before_connection_drop";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link RdaSourceConfig#getAuthenticationToken()} value.
    */
-  public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "RDA_GRPC_AUTH_TOKEN";
+  public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "rda.grpc.auth_token";
 
   /**
    * The name of the environment variable that should be used to indicate how many RDA messages can
    * error without causing the job to stop processing prematurely.
    */
-  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT = "RDA_JOB_ERROR_LIMIT";
+  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_LIMIT = "rda.job.error_limit";
 
   /**
    * The name of the environment variable that should be used to indicate the maximum number of days
    * that processed records can remain in the {@link MessageError} table.
    */
-  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS = "RDA_JOB_ERROR_EXPIRE_DAYS";
+  public static final String ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS = "rda.job.error_expire_days";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getStartingFissSeqNum()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM =
-      "RDA_JOB_STARTING_FISS_SEQ_NUM";
+      "rda.job.starting_fiss_seq_num";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getStartingMcsSeqNum()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM =
-      "RDA_JOB_STARTING_MCS_SEQ_NUM";
+      "rda.job.starting_mcs_seq_num";
 
   /**
    * The name of the boolean environment variable that should be used to determine if the {@link
    * gov.cms.bfd.pipeline.rda.grpc.source.DLQGrpcRdaSource} task should be run on subsequent job
    * runs.
    */
-  public static final String ENV_VAR_KEY_PROCESS_DLQ = "RDA_JOB_PROCESS_DLQ";
+  public static final String ENV_VAR_KEY_PROCESS_DLQ = "rda.job.process_dlq";
 
   /**
    * The name of the string environment variable that can be set to override the RDA API Version
@@ -282,7 +282,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * default value hardcoded in the code, but this env variable can be used for special
    * circumstances.
    */
-  public static final String ENV_VAR_KEY_RDA_VERSION = "RDA_JOB_RDA_VERSION";
+  public static final String ENV_VAR_KEY_RDA_VERSION = "rda.job.rda_version";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -290,35 +290,35 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * server.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE =
-      "RDA_GRPC_INPROC_SERVER_MODE";
+      "rda.grpc.inprocess_server.mode";
 
   /**
    * The name of the environment variable that should be used to provide the run interval in seconds
    * for the in-process RDA API server job.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS =
-      "RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS";
+      "rda.grpc.inprocess_server.interval_seconds";
 
   /**
    * The name of the environment variable that should be used to provide the random number generator
    * for the PRNG used by the the in-process RDA API server job's random mode.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED =
-      "RDA_GRPC_INPROC_SERVER_RANDOM_SEED";
+      "rda.grpc.inprocess_server.random.seed";
 
   /**
    * The name of the environment variable that should be used to provide the maximum number of
    * random claims to be returned to clients by the in-process RDA API server job's random mode.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS =
-      "RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS";
+      "rda.grpc.inprocess_server.random.max_claims";
 
   /**
    * The name of the environment variable that should be used to provide the name of the S3 bucket
    * used to serve claims by the in-process RDA API server job's random mode.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET =
-      "RDA_GRPC_INPROC_SERVER_S3_BUCKET";
+      "rda.grpc.inprocess_server.s3.bucket";
 
   /**
    * The name of the environment variable that should be used to provide a directory path to add as
@@ -326,14 +326,14 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * being accessed at the bucket's root.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
-      "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
+      "rda.grpc.inprocess_server.s3.dir";
 
   /**
    * Environment variable containing the namespace to use when sending Micrometer metrics to
    * CloudWatch. This is a required environment variable if {@link #ENV_VAR_KEY_CCW_RIF_JOB_ENABLED}
    * is set to true.
    */
-  public static final String ENV_VAR_MICROMETER_CW_NAMESPACE = "MICROMETER_CW_NAMESPACE";
+  public static final String ENV_VAR_MICROMETER_CW_NAMESPACE = "micrometer_cw.namespace";
 
   /**
    * Environment variable containing the update interval to use when sending Micrometer metrics to
@@ -341,19 +341,19 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * value is PT1M (1 minute). More frequent updates provide higher resolution but can also increase
    * CW costs.
    */
-  public static final String ENV_VAR_MICROMETER_CW_INTERVAL = "MICROMETER_CW_INTERVAL";
+  public static final String ENV_VAR_MICROMETER_CW_INTERVAL = "micrometer_cw.interval";
 
   /**
    * Environment variable indicating whether Micrometer metrics should be sent to CloudWatch.
    * Defaults to false.
    */
-  public static final String ENV_VAR_MICROMETER_CW_ENABLED = "MICROMETER_CW_ENABLED";
+  public static final String ENV_VAR_MICROMETER_CW_ENABLED = "micrometer_cw.enabled";
 
   /**
    * Environment variable indicating whether Micrometer metrics should be sent to JMX. Defaults to
    * false. Can be used when testing the pipeline locally to monitor metrics as the pipeline runs.
    */
-  public static final String ENV_VAR_MICROMETER_JMX_ENABLED = "MICROMETER_JMX_ENABLED";
+  public static final String ENV_VAR_MICROMETER_JMX_ENABLED = "micrometer_cw.jmx_enabled";
 
   /**
    * List of metric names that are allowed to be published to Cloudwatch by Micrometer. Using an
