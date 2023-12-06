@@ -71,6 +71,8 @@ if (params.server_regression_image_override != null) {
     server_regression_image_override = ""
 }
 
+println "hello: ${env.BRANCH_NAME}"
+
 println "deploy_prod_from_non_master: ${deploy_prod_from_non_master}"
 println "deploy_prod_skip_confirm: ${deploy_prod_skip_confirm}"
 println "user_latest_images: ${use_latest_images}"
