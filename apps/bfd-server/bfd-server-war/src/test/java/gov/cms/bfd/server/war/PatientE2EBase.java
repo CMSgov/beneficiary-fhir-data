@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -164,16 +165,18 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     // basically second param doesn't matter for this test
     String mbiHash = getMbiHash(currentMbi, false, loadedRecords);
 
-    List<Long> distinctBeneIdList =
+    Map<Optional<String>, List<Beneficiary>> beneficiaryMap =
         loadedRecords.stream()
             .filter(Beneficiary.class::isInstance)
             .map(Beneficiary.class::cast)
-            .collect(Collectors.groupingBy(Beneficiary::getMbiHash))
-            .values()
+            .toList()
             .stream()
-            .flatMap(List::stream)
+            .collect(Collectors.groupingBy(Beneficiary::getMbiHash));
+
+    List<Long> distinctBeneIdList =
+        beneficiaryMap.get(Optional.of(mbiHash)).stream()
             .map(Beneficiary::getBeneficiaryId)
-            .distinct()
+            .sorted()
             .toList();
 
     String requestString =
@@ -211,16 +214,18 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
     String mbiHash = getMbiHash("DUPHISTMBI", true, loadedRecords);
 
-    List<Long> distinctBeneIdList =
+    Map<Optional<String>, List<BeneficiaryHistory>> beneficiaryMap =
         loadedRecords.stream()
             .filter(BeneficiaryHistory.class::isInstance)
             .map(BeneficiaryHistory.class::cast)
-            .collect(Collectors.groupingBy(BeneficiaryHistory::getMbiHash))
-            .values()
+            .toList()
             .stream()
-            .flatMap(List::stream)
+            .collect(Collectors.groupingBy(BeneficiaryHistory::getMbiHash));
+
+    List<Long> distinctBeneIdList =
+        beneficiaryMap.get(Optional.of(mbiHash)).stream()
             .map(BeneficiaryHistory::getBeneficiaryId)
-            .distinct()
+            .sorted()
             .toList();
 
     String requestString =

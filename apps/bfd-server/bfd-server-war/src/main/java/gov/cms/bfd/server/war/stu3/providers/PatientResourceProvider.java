@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -938,6 +939,13 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
             .filter(Objects::nonNull)
             .distinct()
             .count();
+    List<Long> distinctBeneIdsList =
+        matchingBenes.stream()
+            .map(Beneficiary::getBeneficiaryId)
+            .distinct()
+            .sorted()
+            .collect(ImmutableList.toImmutableList());
+
     Beneficiary beneficiary = null;
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
@@ -945,7 +953,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       BfdMDC.put(
           "database_query_by_hash_collision_distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
-          "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
+          "By hash query found more than one distinct BENE_ID: "
+              + Long.toString(distinctBeneIds)
+              + ", DistinctBeneIdsList: "
+              + distinctBeneIdsList);
     } else if (distinctBeneIds == 1) {
       beneficiary = matchingBenes.get(0);
     }

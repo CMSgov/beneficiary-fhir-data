@@ -918,6 +918,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         matchingBenes.stream()
             .map(Beneficiary::getBeneficiaryId)
             .distinct()
+            .sorted()
             .collect(ImmutableList.toImmutableList());
 
     Beneficiary beneficiary = null;

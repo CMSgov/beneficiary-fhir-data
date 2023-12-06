@@ -436,17 +436,16 @@ public class PatientE2E extends PatientE2EBase {
     // basically second param doesnt matter for this test
     String hicnHash = getHicnHash("543217066U", false, loadedRecords);
 
-    List<Long> distinctBeneIdList =
+    Map<String, List<Beneficiary>> beneficiaryMap =
         loadedRecords.stream()
             .filter(Beneficiary.class::isInstance)
             .map(Beneficiary.class::cast)
-            .collect(Collectors.groupingBy(Beneficiary::getMbiHash))
-            .values()
+            .toList()
             .stream()
-            .flatMap(List::stream)
-            .map(Beneficiary::getBeneficiaryId)
-            .distinct()
-            .toList();
+            .collect(Collectors.groupingBy(Beneficiary::getHicn));
+
+    List<Long> distinctBeneIdList =
+        beneficiaryMap.get(hicnHash).stream().map(Beneficiary::getBeneficiaryId).sorted().toList();
 
     String requestString =
         patientEndpoint
@@ -486,16 +485,18 @@ public class PatientE2E extends PatientE2EBase {
     List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
     String hicnHash = getHicnHash("DUPHISTHIC", true, loadedRecords);
 
-    List<Long> distinctBeneIdList =
+    Map<String, List<BeneficiaryHistory>> beneficiaryMap =
         loadedRecords.stream()
             .filter(BeneficiaryHistory.class::isInstance)
             .map(BeneficiaryHistory.class::cast)
-            .collect(Collectors.groupingBy(BeneficiaryHistory::getMbiHash))
-            .values()
+            .toList()
             .stream()
-            .flatMap(List::stream)
+            .collect(Collectors.groupingBy(BeneficiaryHistory::getHicn));
+
+    List<Long> distinctBeneIdList =
+        beneficiaryMap.get(hicnHash).stream()
             .map(BeneficiaryHistory::getBeneficiaryId)
-            .distinct()
+            .sorted()
             .toList();
 
     String requestString =
