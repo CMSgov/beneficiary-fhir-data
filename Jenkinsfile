@@ -36,18 +36,46 @@ properties([
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
-def deploy_prod_from_non_master = params.deploy_prod_from_non_master
-def deploy_prod_skip_confirm = params.deploy_prod_skip_confirm
-def use_latest_images = params.use_latest_images
-def force_migrator_deployment = params.force_migrator_deployment
-def server_regression_image_override = params.server_regression_image_override
+def deploy_prod_from_non_master
+if (params.deploy_prod_from_non_master != null) {
+    deploy_prod_from_non_master = params.deploy_prod_from_non_master
+} else {
+	deploy_prod_from_non_master = true
+}
+
+def deploy_prod_skip_confirm
+if (params.deploy_prod_skip_confirm != null) {
+    deploy_prod_skip_confirm = params.deploy_prod_skip_confirm
+} else {
+    deploy_prod_skip_confirm = false
+}
+
+def use_latest_images
+if (params.use_latest_images != null) {
+    use_latest_images = params.use_latest_images
+} else {
+	use_latest_images = false
+}
+
+def force_migrator_deployment
+if (params.force_migrator_deployment != null) {
+	force_migrator_deployment = verboseMaven = params.verbose_mvn_logging
+} else {
+    force_migrator_deployment = false
+}
+
+def server_regression_image_override
+if (params.server_regression_image_override != null) {
+    server_regression_image_override = params.server_regression_image_override
+} else {
+    server_regression_image_override = ""
+}
 
 println "deploy_prod_from_non_master: ${deploy_prod_from_non_master}"
 println "deploy_prod_skip_confirm: ${deploy_prod_skip_confirm}"
 println "user_latest_images: ${use_latest_images}"
 println "force_migrator_deployment: ${force_migrator_deployment}"
 println "server_regression_image_overrie: ${server_regression_image_override}"
-
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def scriptForApps
