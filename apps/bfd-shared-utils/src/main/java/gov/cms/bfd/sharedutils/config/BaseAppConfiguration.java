@@ -22,67 +22,61 @@ public abstract class BaseAppConfiguration {
    * The name of the environment variable that should be used to provide the {@link
    * #databaseOptions} {@link DatabaseOptions#authenticationType} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_AUTH_TYPE = "DATABASE_AUTH_TYPE";
+  public static final String ENV_VAR_KEY_DATABASE_AUTH_TYPE = "db.auth_type";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #databaseOptions} {@link DatabaseOptions#databaseUrl} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_URL = "DATABASE_URL";
+  public static final String ENV_VAR_KEY_DATABASE_URL = "db.url";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #databaseOptions} {@link DatabaseOptions#databaseUsername} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_USERNAME = "DATABASE_USERNAME";
+  public static final String ENV_VAR_KEY_DATABASE_USERNAME = "db.username";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #databaseOptions} {@link DatabaseOptions#databasePassword} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_PASSWORD = "DATABASE_PASSWORD";
+  public static final String ENV_VAR_KEY_DATABASE_PASSWORD = "db.password";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #databaseOptions} {@link DatabaseOptions#maxPoolSize} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE = "DATABASE_MAX_POOL_SIZE";
+  public static final String ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE = "db.max_connections";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #metricOptions}
    * {@link MetricOptions#getNewRelicMetricKey()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "NEW_RELIC_METRIC_KEY";
+  public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "new_relic.metrics.license_key";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #metricOptions}
    * {@link MetricOptions#getNewRelicAppName()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_APP_NAME = "NEW_RELIC_APP_NAME";
+  public static final String ENV_VAR_NEW_RELIC_APP_NAME = "new_relic.app_name";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #metricOptions}
    * {@link MetricOptions#getNewRelicMetricHost()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_HOST = "NEW_RELIC_METRIC_HOST";
+  public static final String ENV_VAR_NEW_RELIC_METRIC_HOST = "new_relic.metrics.host";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #metricOptions}
    * {@link MetricOptions#getNewRelicMetricPath()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_PATH = "NEW_RELIC_METRIC_PATH";
+  public static final String ENV_VAR_NEW_RELIC_METRIC_PATH = "new_relic.metrics.path";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #metricOptions}
    * {@link MetricOptions#getNewRelicMetricPeriod()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "NEW_RELIC_METRIC_PERIOD";
-
-  /**
-   * The name of the environment variable that should be used to provide the location of the flyway
-   * scripts.
-   */
-  public static final String ENV_VAR_FLYWAY_SCRIPT_LOCATION = "FLYWAY_SCRIPT_LOCATION";
+  public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "new_relic.metrics.period";
 
   /** Name of setting containing alternative endpoint URL for AWS services. */
   public static final String ENV_VAR_KEY_AWS_ENDPOINT = "AWS_ENDPOINT";
