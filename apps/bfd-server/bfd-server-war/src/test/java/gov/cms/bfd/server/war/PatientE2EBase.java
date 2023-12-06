@@ -161,7 +161,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     // bene ids
     List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
     // history has the same mbi, so returns the same hash;
-    // basically second param doesnt matter for this test
+    // basically second param doesn't matter for this test
     String mbiHash = getMbiHash(currentMbi, false, loadedRecords);
 
     List<Long> distinctBeneIdList =
@@ -194,7 +194,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
             "issue.diagnostics",
             hasItem(
                 "By hash query found more than one distinct BENE_ID: 5,"
-                    + " "
+                    + " DistinctBeneIdsList: "
                     + distinctBeneIdList))
         .when()
         .get(requestString);
@@ -241,7 +241,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
             "issue.diagnostics",
             hasItem(
                 "By hash query found more than one distinct BENE_ID: 2,"
-                    + " "
+                    + " DistinctBeneIdsList: "
                     + distinctBeneIdList))
         .when()
         .get(requestString);

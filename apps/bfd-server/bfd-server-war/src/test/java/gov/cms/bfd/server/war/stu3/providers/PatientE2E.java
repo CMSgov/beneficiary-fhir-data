@@ -466,7 +466,7 @@ public class PatientE2E extends PatientE2EBase {
             "issue.diagnostics",
             hasItem(
                 "By hash query found more than one distinct BENE_ID: 5,"
-                    + " "
+                    + " DistinctBeneIdsList: "
                     + distinctBeneIdList))
         .log()
         .all()
@@ -516,7 +516,7 @@ public class PatientE2E extends PatientE2EBase {
             "issue.diagnostics",
             hasItem(
                 "By hash query found more than one distinct BENE_ID: 2,"
-                    + " "
+                    + " DistinctBeneIdsList: "
                     + distinctBeneIdList))
         .when()
         .get(requestString);
