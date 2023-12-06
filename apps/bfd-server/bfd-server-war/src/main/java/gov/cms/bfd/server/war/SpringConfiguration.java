@@ -1,6 +1,16 @@
 package gov.cms.bfd.server.war;
 
 import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_AUTH_TYPE;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_URL;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_APP_NAME;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_METRIC_HOST;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_METRIC_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_METRIC_PATH;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_METRIC_PERIOD;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
@@ -71,24 +81,6 @@ import software.amazon.awssdk.regions.Region;
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
 public class SpringConfiguration {
-  /** The authentication type that BFD will use for all database connections. */
-  public static final String PROP_DB_AUTH_TYPE = "bfdServer.db.authType";
-
-  /** The database url that BFD will use for all database calls. */
-  public static final String PROP_DB_URL = "bfdServer.db.url";
-
-  /** The database username. */
-  public static final String PROP_DB_USERNAME = "bfdServer.db.username";
-
-  /** The database password. */
-  public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
-
-  /** The max number of database connections to be used. */
-  public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
-
-  /** The schema apply text. */
-  public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
-
   /**
    * The {@link String } Boolean property that is used to enable the fake drug code (00000-0000)
    * that is used for integration testing. When this property is set to the string 'true', this fake
@@ -104,6 +96,22 @@ public class SpringConfiguration {
    * integration testing.
    */
   public static final String PROP_INCLUDE_FAKE_ORG_NAME = "bfdServer.include.fake.org.name";
+
+  /**
+   * The {@link String } Boolean property that is used to enable the partially adjudicated claims
+   * data resources.
+   */
+  public static final String PROP_PAC_ENABLED = "bfdServer.pac.enabled";
+
+  /**
+   * The {@link String } Boolean property that is used to enable using old MBI hash values for
+   * queries. Only needed for a limited time after rotating hashing parameters to allow clients to
+   * query using old and new hashed values during a compatibility window.
+   */
+  public static final String PROP_PAC_OLD_MBI_HASH_ENABLED = "bfdServer.pac.oldMbiHash.enabled";
+
+  /** Maximum number of threads to use for executing EOB claim transformers in parallel. */
+  public static final String PROP_EXECUTOR_SERVICE_THREADS = "bfdServer.executorService.threads";
 
   /** The database transaction timeout value (seconds). */
   public static final int TRANSACTION_TIMEOUT = 30;
@@ -181,11 +189,11 @@ public class SpringConfiguration {
    */
   @Bean
   public DataSourceFactory dataSourceFactory(
-      @Value("${" + PROP_DB_AUTH_TYPE + ":JDBC}") String authTypeName,
-      @Value("${" + PROP_DB_URL + "}") String url,
-      @Value("${" + PROP_DB_USERNAME + "}") String username,
-      @Value("${" + PROP_DB_PASSWORD + ":}") String password,
-      @Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText,
+      @Value("${" + ENV_VAR_KEY_DATABASE_AUTH_TYPE + ":JDBC}") String authTypeName,
+      @Value("${" + ENV_VAR_KEY_DATABASE_URL + "}") String url,
+      @Value("${" + ENV_VAR_KEY_DATABASE_USERNAME + "}") String username,
+      @Value("${" + ENV_VAR_KEY_DATABASE_PASSWORD + ":}") String password,
+      @Value("${" + ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE + ":-1}") String connectionsMaxText,
       AwsClientConfig awsClientConfig) {
     final var authType = DatabaseOptions.AuthenticationType.valueOf(authTypeName);
     final int maxPoolSize = DatabaseUtils.computeMaximumPoolSize(connectionsMaxText);
@@ -348,7 +356,7 @@ public class SpringConfiguration {
    */
   @Bean(name = PAC_OLD_MBI_HASH_ENABLED)
   Boolean isPacOldMbiHashEnabled(
-      @Value("${bfdServer.pac.oldMbiHash.enabled:false}") Boolean enabled) {
+      @Value("${" + PROP_PAC_OLD_MBI_HASH_ENABLED + ":false}") Boolean enabled) {
     return enabled;
   }
 
@@ -371,7 +379,7 @@ public class SpringConfiguration {
       R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider,
       R4ClaimResourceProvider r4ClaimResourceProvider,
       R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider,
-      @Value("${bfdServer.pac.enabled:false}") Boolean pacEnabled) {
+      @Value("${" + PROP_PAC_ENABLED + ":false}") Boolean pacEnabled) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
@@ -398,13 +406,13 @@ public class SpringConfiguration {
     metricRegistry.registerAll(new MemoryUsageGaugeSet());
     metricRegistry.registerAll(new GarbageCollectorMetricSet());
 
-    String newRelicMetricKey = config.stringValue("NEW_RELIC_METRIC_KEY", null);
+    String newRelicMetricKey = config.stringValue(ENV_VAR_NEW_RELIC_METRIC_KEY, null);
 
     if (newRelicMetricKey != null) {
-      String newRelicAppName = config.stringValue("NEW_RELIC_APP_NAME", null);
-      String newRelicMetricHost = config.stringValue("NEW_RELIC_METRIC_HOST", null);
-      String newRelicMetricPath = config.stringValue("NEW_RELIC_METRIC_PATH", null);
-      String rawNewRelicPeriod = config.stringValue("NEW_RELIC_METRIC_PERIOD", null);
+      String newRelicAppName = config.stringValue(ENV_VAR_NEW_RELIC_APP_NAME, null);
+      String newRelicMetricHost = config.stringValue(ENV_VAR_NEW_RELIC_METRIC_HOST, null);
+      String newRelicMetricPath = config.stringValue(ENV_VAR_NEW_RELIC_METRIC_PATH, null);
+      String rawNewRelicPeriod = config.stringValue(ENV_VAR_NEW_RELIC_METRIC_PERIOD, null);
 
       int newRelicPeriod;
       try {
@@ -522,7 +530,7 @@ public class SpringConfiguration {
    */
   @Bean
   public ExecutorService executorService(
-      @Value("${bfdServer.executorService.threads:80}") Integer threadCount) {
+      @Value("${" + PROP_EXECUTOR_SERVICE_THREADS + ":80}") Integer threadCount) {
     return Executors.newFixedThreadPool(
         threadCount,
         r -> {
