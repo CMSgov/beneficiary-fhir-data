@@ -467,8 +467,6 @@ public class PatientE2E extends PatientE2EBase {
                 "By hash query found more than one distinct BENE_ID: 5,"
                     + " DistinctBeneIdsList: "
                     + distinctBeneIdList))
-        .log()
-        .all()
         .when()
         .get(requestString);
   }
