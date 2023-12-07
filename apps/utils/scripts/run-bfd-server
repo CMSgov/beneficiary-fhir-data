@@ -158,13 +158,14 @@ fi
 # parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
 # SSM in the cloud.
 function setvar() {
-  name="$1"
-  value="$2"
+  env_name="$1"
+  ssm_name="$2"
+  value="$3"
   if [[ -z "$AWS_REGION" ]] ; then
-    eval "export ${name}=\"${value}\""
+    eval "export ${env_name}=\"${value}\""
   else
     echo put-parameter $name
-    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${name}" --value "${value}" > /dev/null
+    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${ssm_name}" --value "${value}" > /dev/null
   fi
 }
 
@@ -232,7 +233,8 @@ if [[ $install = "true" ]] ; then
   cp $ssl_dir/* $bin_dir/ssl
   cp $war_file $bin_dir
   rmdir $unzip_dir
-elif [[ x$image_tag = x ]] && [[ x$kubernetes = xfalse ]] ; then
+fi
+if [[ x$image_tag = x ]] && [[ x$kubernetes = xfalse ]] ; then
   lib_dir=${bin_dir}/lib
   launcher_jar="${bin_dir}/bfd-server-launcher-${project_version}.jar"
   if [[ ! -r $launcher_jar ]] || [[ ! -d $lib_dir ]] ; then
@@ -247,14 +249,16 @@ war_file_name=bfd-server-war-${project_version}.war
 
 # Set up the configuration variables using the setvar function.
 export BFD_ENV_NAME="laptop"
-setvar BFD_PORT $bfd_port
-setvar BFD_TRUSTSTORE "$bin_dir/ssl/${truststore_file}"
-setvar BFD_KEYSTORE "$bin_dir/ssl/${keystore_file}"
-setvar BFD_WAR "$bin_dir/$war_file_name"
+setvar BFD_PORT port $bfd_port
+setvar BFD_PATHS_FILES_TRUSTSTORE paths/files/truststore "$bin_dir/ssl/${truststore_file}"
+setvar BFD_PATHS_FILES_KEYSTORE paths/files/keystore "$bin_dir/ssl/${keystore_file}"
+setvar BFD_PATHS_FILES_WAR paths/files/war "$bin_dir/$war_file_name"
+
+setvar BFD_DB_URL db/url "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=false"
+setvar BFD_DB_USERNAME db/username "bfd"
+setvar BFD_DB_PASSWORD db/password "InsecureLocalDev"
 
 # Set up the configuration properties using the setprop function.
-setprop bfdServer.db.url "jdbc:postgresql://${db_host}:${db_port}/bfd?user=bfd&password=InsecureLocalDev&logServerErrorDetail=false"
-setprop bfdServer.v2.enabled true
 setprop bfdServer.pac.enabled true
 setprop bfdServer.pac.claimSourceTypes "fiss,mcs"
 
@@ -278,9 +282,9 @@ if [[ x$kubernetes = xtrue ]] ; then
   app_root=/app
   ssl_mount=${app_root}/ssl
   war_file=${app_root}/$war_file_name
-  setvar BFD_TRUSTSTORE "$ssl_mount/${truststore_file}"
-  setvar BFD_KEYSTORE "$ssl_mount/${keystore_file}"
-  setvar BFD_WAR "$app_root/$war_file_name"
+  setvar BFD_PATHS_FILES_TRUSTSTORE paths/files/truststore "$ssl_mount/${truststore_file}"
+  setvar BFD_PATHS_FILES_KEYSTORE paths/files/keystore "$ssl_mount/${keystore_file}"
+  setvar BFD_PATHS_FILES_WAR paths/files/war "$app_root/$war_file_name"
   echo Ignore \"release: not found\" message if this is first time running in cluster.
   helm -n dev uninstall server || true
   helm -n dev install server server
@@ -299,9 +303,9 @@ else
     --env AWS_ENDPOINT \
     --env CONFIG_SETTINGS_JSON \
     --env HOME=/home/app \
-    --env BFD_TRUSTSTORE=$ssl_mount/$truststore_file \
-    --env BFD_KEYSTORE=$ssl_mount/$keystore_file \
-    --env BFD_WAR=/app/$war_file_name \
+    --env BFD_PATHS_FILES_TRUSTSTORE=$ssl_mount/$truststore_file \
+    --env BFD_PATHS_FILES_KEYSTORE=$ssl_mount/$keystore_file \
+    --env BFD_PATHS_FILES_WAR=/app/$war_file_name \
     --env BFD_ENV_NAME="$BFD_ENV_NAME" \
     -v $bin_dir/ssl:$ssl_mount \
     -v $HOME/.aws/credentials:/home/app/.aws/credentials:ro \
