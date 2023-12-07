@@ -18,8 +18,7 @@ env:
   ^ops/ansible/roles/bfd-pipeline/|\
   ^ops/ansible/roles/bfd-server/|\
   ^.github/workflows/ci-ansible.yml|\
-  ^.github/workflows/yml\
-  )"
+  ^.github/workflows/ci-java.yml)"
 
 jobs:
   workflow:
@@ -111,6 +110,11 @@ jobs:
         run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false verify
         working-directory: ./apps
 
+      - name: 'Install yq'
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
       - name: Login to GitHub Container Registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" \
@@ -118,12 +122,14 @@ jobs:
 
       - name: Build and Deliver Apps Container Image
         run: |
+          BFD_PARENT_VERSION="$(yq '.project.version' pom.xml)"
           SANITIZED_REF="${GITHUB_REF_NAME////-}"
           IMAGE_NAME="ghcr.io/cmsgov/bfd-apps"
           SHORT_SHA="$(git rev-parse --short HEAD)"
           FULL_BRANCH_TAG="${IMAGE_NAME}:${SANITIZED_REF}" # human readable, branch name tag
           FULL_COMMIT_TAG="${IMAGE_NAME}:${SHORT_SHA}"     # a short sha suffixed image tag
-          docker build . --tag "$FULL_BRANCH_TAG"
+          echo "Building ${BFD_PARENT_VERSION} Container"
+          docker build --tag "$FULL_BRANCH_TAG" --build-arg="BFD_VERSION=${BFD_PARENT_VERSION}" .
           docker tag "$FULL_BRANCH_TAG" "$FULL_COMMIT_TAG"
           docker push "$FULL_BRANCH_TAG"
           docker push "$FULL_COMMIT_TAG"
