@@ -169,13 +169,12 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         loadedRecords.stream()
             .filter(Beneficiary.class::isInstance)
             .map(Beneficiary.class::cast)
-            .toList()
-            .stream()
             .collect(Collectors.groupingBy(Beneficiary::getMbiHash));
 
     List<Long> distinctBeneIdList =
         beneficiaryMap.get(Optional.of(mbiHash)).stream()
             .map(Beneficiary::getBeneficiaryId)
+            .distinct()
             .sorted()
             .toList();
 
@@ -196,8 +195,9 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .body(
             "issue.diagnostics",
             hasItem(
-                "By hash query found more than one distinct BENE_ID: 5,"
-                    + " DistinctBeneIdsList: "
+                "By hash query found more than one distinct BENE_ID: "
+                    + distinctBeneIdList.size()
+                    + ", DistinctBeneIdsList: "
                     + distinctBeneIdList))
         .when()
         .get(requestString);
@@ -218,8 +218,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         loadedRecords.stream()
             .filter(BeneficiaryHistory.class::isInstance)
             .map(BeneficiaryHistory.class::cast)
-            .toList()
-            .stream()
+            .distinct()
             .collect(Collectors.groupingBy(BeneficiaryHistory::getMbiHash));
 
     List<Long> distinctBeneIdList =
@@ -245,8 +244,9 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .body(
             "issue.diagnostics",
             hasItem(
-                "By hash query found more than one distinct BENE_ID: 2,"
-                    + " DistinctBeneIdsList: "
+                "By hash query found more than one distinct BENE_ID: "
+                    + distinctBeneIdList.size()
+                    + ", DistinctBeneIdsList: "
                     + distinctBeneIdList))
         .when()
         .get(requestString);

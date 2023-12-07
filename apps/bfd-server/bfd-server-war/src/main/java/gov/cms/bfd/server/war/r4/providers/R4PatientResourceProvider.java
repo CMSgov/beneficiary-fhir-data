@@ -51,7 +51,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -907,34 +906,28 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes.size());
     }
-    // Then, if we found more than one distinct BENE_ID, or none, throw an error.
-    long distinctBeneIds =
-        matchingBenes.stream()
-            .map(Beneficiary::getBeneficiaryId)
-            .filter(Objects::nonNull)
-            .distinct()
-            .count();
-    List<Long> distinctBeneIdsList =
+
+    List<Long> distinctBeneIds =
         matchingBenes.stream()
             .map(Beneficiary::getBeneficiaryId)
             .distinct()
             .sorted()
             .collect(ImmutableList.toImmutableList());
 
-    Beneficiary beneficiary = null;
-    if (distinctBeneIds <= 0) {
+    Beneficiary beneficiary;
+    if (distinctBeneIds.size() == 0) {
       throw new NoResultException();
-    } else if (distinctBeneIds > 1) {
+    } else if (distinctBeneIds.size() > 1) {
       BfdMDC.put(
-          "database_query_by_hash_collision_distinct_bene_ids", Long.toString(distinctBeneIds));
+          "database_query_by_hash_collision_distinct_bene_ids",
+          Long.toString(distinctBeneIds.size()));
       throw new ResourceNotFoundException(
           "By hash query found more than one distinct BENE_ID: "
-              + Long.toString(distinctBeneIds)
+              + distinctBeneIds.size()
               + ", DistinctBeneIdsList: "
-              + distinctBeneIdsList);
-    } else if (distinctBeneIds == 1) {
-      beneficiary = matchingBenes.get(0);
+              + distinctBeneIds);
     }
+    beneficiary = matchingBenes.get(0);
 
     // Null out the unhashed HICNs; in v2 we are ignoring HICNs
     beneficiary.setHicnUnhashed(Optional.empty());

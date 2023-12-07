@@ -440,8 +440,6 @@ public class PatientE2E extends PatientE2EBase {
         loadedRecords.stream()
             .filter(Beneficiary.class::isInstance)
             .map(Beneficiary.class::cast)
-            .toList()
-            .stream()
             .collect(Collectors.groupingBy(Beneficiary::getHicn));
 
     List<Long> distinctBeneIdList =
@@ -464,8 +462,9 @@ public class PatientE2E extends PatientE2EBase {
         .body(
             "issue.diagnostics",
             hasItem(
-                "By hash query found more than one distinct BENE_ID: 5,"
-                    + " DistinctBeneIdsList: "
+                "By hash query found more than one distinct BENE_ID: "
+                    + distinctBeneIdList.size()
+                    + ", DistinctBeneIdsList: "
                     + distinctBeneIdList))
         .when()
         .get(requestString);
@@ -487,8 +486,6 @@ public class PatientE2E extends PatientE2EBase {
         loadedRecords.stream()
             .filter(BeneficiaryHistory.class::isInstance)
             .map(BeneficiaryHistory.class::cast)
-            .toList()
-            .stream()
             .collect(Collectors.groupingBy(BeneficiaryHistory::getHicn));
 
     List<Long> distinctBeneIdList =
@@ -514,8 +511,9 @@ public class PatientE2E extends PatientE2EBase {
         .body(
             "issue.diagnostics",
             hasItem(
-                "By hash query found more than one distinct BENE_ID: 2,"
-                    + " DistinctBeneIdsList: "
+                "By hash query found more than one distinct BENE_ID: "
+                    + distinctBeneIdList.size()
+                    + ", DistinctBeneIdsList: "
                     + distinctBeneIdList))
         .when()
         .get(requestString);
