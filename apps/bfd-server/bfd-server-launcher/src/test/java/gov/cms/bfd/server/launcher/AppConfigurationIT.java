@@ -105,7 +105,9 @@ public final class AppConfigurationIT {
         assertThrows(ConfigException.class, () -> AppConfiguration.loadConfig(config));
     assertEquals(AppConfiguration.ENV_VAR_KEY_PORT, exception.getName());
     assertEquals(
-        "Configuration value error: name='BFD_PORT' detail='required option not provided'",
+        String.format(
+            "Configuration value error: name='%s' detail='required option not provided'",
+            AppConfiguration.ENV_VAR_KEY_PORT),
         exception.getMessage());
   }
 }
