@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -86,6 +87,35 @@ public abstract class ConfigLoaderSource {
    */
   public static ConfigLoaderSource fromPrioritizedSources(List<ConfigLoaderSource> sources) {
     return new CombinedSource(sources);
+  }
+
+  /**
+   * Create an instance that adds a prefix to every name before looking up the value in another
+   * source.
+   *
+   * @param prefix string prefix added to every name prior to lookup
+   * @param otherSource source used to find value using the prefixed name
+   * @return the source that was created
+   */
+  public static ConfigLoaderSource fromOtherUsingNamePrefix(
+      String prefix, ConfigLoaderSource otherSource) {
+    return new PrefixedNameSource(prefix, otherSource);
+  }
+
+  /**
+   * Create an instance that applies the SSM to environment variable mapping before looking up the
+   * value in another source. The mapping involves adding a prefix, converting any '.' to '_', and
+   * converting all characters to upper case. This is intended to take an SSM hierarchy or java
+   * property dotted name and turn it into a string compatible with shell environment variable name
+   * restrictions.
+   *
+   * @param prefix string prefix added to every name prior to lookup
+   * @param otherSource source used to find value using the mapped name
+   * @return the source that was created
+   */
+  public static ConfigLoaderSource fromOtherUsingSsmToEnvVarMapping(
+      String prefix, ConfigLoaderSource otherSource) {
+    return new SsmToEnvVarMappingSource(prefix, otherSource);
   }
 
   /** Implementation used by {@link ConfigLoaderSource#fromProperties}. */
@@ -227,6 +257,76 @@ public abstract class ConfigLoaderSource {
     public String toString() {
       return String.format(
           "%s with %d sources: %s", getClass().getSimpleName(), sources.size(), sources);
+    }
+  }
+
+  /** Implementation used by {@link ConfigLoaderSource#fromOtherUsingNamePrefix}. */
+  @AllArgsConstructor
+  @EqualsAndHashCode(callSuper = false)
+  private static class PrefixedNameSource extends ConfigLoaderSource {
+    private final String prefix;
+    private final ConfigLoaderSource realSource;
+
+    @Nonnull
+    @Override
+    public Set<String> validNames() {
+      return realSource.validNames().stream()
+          .filter(name -> name.startsWith(prefix))
+          .map(name -> name.substring(prefix.length()))
+          .collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Nullable
+    @Override
+    public Collection<String> lookup(String name) {
+      return realSource.lookup(prefix + name);
+    }
+
+    @Override
+    public String toString() {
+      return String.format(
+          "%s with prefix %s and source %s", getClass().getSimpleName(), prefix, realSource);
+    }
+  }
+
+  /** Implementation used by {@link ConfigLoaderSource#fromOtherUsingSsmToEnvVarMapping}. */
+  @AllArgsConstructor
+  @EqualsAndHashCode(callSuper = false)
+  private static class SsmToEnvVarMappingSource extends ConfigLoaderSource {
+    private final String prefix;
+    private final ConfigLoaderSource realSource;
+
+    @Nonnull
+    @Override
+    public Set<String> validNames() {
+      final Pattern validNameRegex = Pattern.compile(mapName("") + "[A-Z_0-9]+");
+      return realSource.validNames().stream()
+          .filter(name -> validNameRegex.matcher(name).matches())
+          .map(name -> name.substring(prefix.length()))
+          .collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Nullable
+    @Override
+    public Collection<String> lookup(String name) {
+      return realSource.lookup(mapName(name));
+    }
+
+    @Override
+    public String toString() {
+      return String.format(
+          "%s with prefix %s and source %s", getClass().getSimpleName(), prefix, realSource);
+    }
+
+    /**
+     * Maps a name to match environment variable naming conventions by adding our prefix, replacing
+     * any '.' with '_', and converting all characters to upper case.
+     *
+     * @param name name to map
+     * @return mapped name
+     */
+    private String mapName(String name) {
+      return (prefix + name).replace('.', '_').toUpperCase();
     }
   }
 }
