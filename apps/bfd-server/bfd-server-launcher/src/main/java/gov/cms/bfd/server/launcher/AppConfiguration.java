@@ -13,31 +13,31 @@ public final class AppConfiguration {
    * The name of the environment variable that should be used to provide the {@link #getHost()}
    * value.
    */
-  public static final String ENV_VAR_KEY_HOST = "BFD_HOST";
+  public static final String ENV_VAR_KEY_HOST = "host";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #getPort()}
    * value.
    */
-  public static final String ENV_VAR_KEY_PORT = "BFD_PORT";
+  public static final String ENV_VAR_KEY_PORT = "port";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #getKeystore()}
    * value.
    */
-  public static final String ENV_VAR_KEY_KEYSTORE = "BFD_KEYSTORE";
+  public static final String ENV_VAR_KEY_KEYSTORE = "paths.files.keystore";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getTruststore()} value.
    */
-  public static final String ENV_VAR_KEY_TRUSTSTORE = "BFD_TRUSTSTORE";
+  public static final String ENV_VAR_KEY_TRUSTSTORE = "paths.files.truststore";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #getWar()}
    * value.
    */
-  public static final String ENV_VAR_KEY_WAR = "BFD_WAR";
+  public static final String ENV_VAR_KEY_WAR = "paths.files.war";
 
   /** The host/address that the server will bind to and listen for HTTPS connections on. * */
   private final String host;
