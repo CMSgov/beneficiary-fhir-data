@@ -139,7 +139,7 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
 }
 EOF
 )
-  export DB_MIGRATOR_SQS_QUEUE=migrator-status
+  export BFD_SQS_QUEUE_NAME=migrator-status
   echo "ensuring migrator progress queue exists in SQS"
   aws --endpoint-url=$AWS_ENDPOINT sqs create-queue --queue-name=$DB_MIGRATOR_SQS_QUEUE
 fi
@@ -148,13 +148,14 @@ fi
 # parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
 # SSM in the cloud.
 function setvar() {
-  name="$1"
-  value="$2"
+  env_name="$1"
+  ssm_name="$2"
+  value="$3"
   if [[ -z "$AWS_REGION" ]] ; then
-    eval "export ${name}=\"${value}\""
+    eval "export ${env_name}=\"${value}\""
   else
     echo put-parameter $name
-    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${name}" --value "${value}" > /dev/null
+    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${ssm_name}" --value "${value}" > /dev/null
   fi
 }
 
@@ -225,10 +226,10 @@ elif [[ x$image_tag = x ]] && [[ x$kubernetes = xfalse ]] ; then
 fi
 
 # Set up the configuration variables using the setvar function.
-setvar BFD_ENV_NAME laptop
-setvar DATABASE_URL "jdbc:postgresql://${db_host}:${db_port}/bfd"
-setvar DATABASE_USERNAME 'bfd'
-setvar DATABASE_PASSWORD 'InsecureLocalDev'
+export BFD_ENV_NAME=laptop
+setvar BFD_DB_URL db/url "jdbc:postgresql://${db_host}:${db_port}/bfd"
+setvar BFD_DB_USERNAME db/username 'bfd'
+setvar BFD_DB_PASSWORD db/password 'InsecureLocalDev'
 
 classpath="${jar_file}:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.migrator.app.MigratorApp"
@@ -261,7 +262,7 @@ else
     --env AWS_REGION \
     --env AWS_ENDPOINT \
     --env CONFIG_SETTINGS_JSON \
-    --env DB_MIGRATOR_SQS_QUEUE \
+    --env BFD_SQS_QUEUE_NAME \
     --env HOME=/home/app \
     -v $HOME/.aws/credentials:/home/app/.aws/credentials:ro \
     $image_name:$image_tag
