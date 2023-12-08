@@ -179,7 +179,7 @@ function setprop() {
   if [[ -z "$AWS_REGION" ]] ; then
     properties="${properties} -D${name}=${value}"
   else
-    echo put-parameter $name
+    echo put-parameter $ssm_name
     aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${name}" --value "${value}" > /dev/null
   fi
 }

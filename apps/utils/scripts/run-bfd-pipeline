@@ -240,7 +240,7 @@ function setvar() {
   if [[ $localstack_running = "false" ]] ; then
     eval "export ${env_name}=\"${value}\""
   else
-    echo put-parameter $name
+    echo put-parameter $ssm_name
     aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${ssm_name}" --value "${value}" > /dev/null
   fi
 }
@@ -334,7 +334,7 @@ fi
 
 # Set up the configuration variables using the setvar function.
 export BFD_ENV_NAME="laptop"
-setvar BFD_CCW_S3_BUCKET_NAME ccw/s3_bucket_name S3_BUCKET_NAME "$s3_bucket"
+setvar BFD_CCW_S3_BUCKET_NAME ccw/s3_bucket_name "$s3_bucket"
 setvar BFD_HICN_HASH_ITERATIONS hicn_hash/iterations "1000"  # The minimum number of iterations recommended by NIST is 1000.
 setvar BFD_HICN_HASH_PEPPER hicn_hash/pepper "6f6e7474656865726c61657070707265" # nottherealpepper
 setvar BFD_DB_URL db/url "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=false"
