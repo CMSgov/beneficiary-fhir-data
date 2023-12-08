@@ -1,5 +1,6 @@
 package gov.cms.bfd.sharedutils.config;
 
+import static gov.cms.bfd.sharedutils.config.LayeredConfiguration.PROPERTY_NAME_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -242,7 +243,16 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
 
     // no layered config variables so only defaults, env and properties should be used
     var expectedLoader =
-        ConfigLoader.builder().addMap(defaultValues).add(getenv).addSystemProperties().build();
+        ConfigLoader.builder()
+            .addMap(defaultValues)
+            .add(ConfigLoaderSource.fromOtherUsingSsmToEnvVarMapping(PROPERTY_NAME_PREFIX, getenv))
+            .add(getenv)
+            .add(
+                ConfigLoaderSource.fromOtherUsingNamePrefix(
+                    PROPERTY_NAME_PREFIX,
+                    ConfigLoaderSource.fromProperties(System.getProperties())))
+            .addSystemProperties()
+            .build();
     var actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
     assertEquals(expectedLoader, actualLoader);
 
@@ -259,7 +269,12 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .addMap(defaultValues)
             .addMap(hierarchiesMap)
             .addProperties(expectedProperties)
+            .add(ConfigLoaderSource.fromOtherUsingSsmToEnvVarMapping(PROPERTY_NAME_PREFIX, getenv))
             .add(getenv)
+            .add(
+                ConfigLoaderSource.fromOtherUsingNamePrefix(
+                    PROPERTY_NAME_PREFIX,
+                    ConfigLoaderSource.fromProperties(System.getProperties())))
             .addSystemProperties()
             .build();
     actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
