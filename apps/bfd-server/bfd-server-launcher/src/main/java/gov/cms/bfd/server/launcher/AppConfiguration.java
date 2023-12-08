@@ -12,33 +12,27 @@ import lombok.Getter;
 @Getter
 public final class AppConfiguration {
 
-  /**
-   * The name of the environment variable that should be used to provide the {@link #getHost()}
-   * value.
-   */
+  /** The name of the environment variable that should be used to provide the server's host name. */
   public static final String ENV_VAR_KEY_HOST = "host";
 
-  /**
-   * The name of the environment variable that should be used to provide the {@link #getPort()}
-   * value.
-   */
+  /** The name of the environment variable that should be used to provide the server's port. */
   public static final String ENV_VAR_KEY_PORT = "port";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link #getKeystore()}
-   * value.
+   * The name of the environment variable that should be used to provide the path to the keystore
+   * file.
    */
   public static final String ENV_VAR_KEY_KEYSTORE = "paths.files.keystore";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getTruststore()} value.
+   * The name of the environment variable that should be used to provide the path to the truststore
+   * file.
    */
   public static final String ENV_VAR_KEY_TRUSTSTORE = "paths.files.truststore";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link #getWar()}
-   * value.
+   * The name of the environment variable that should be used to provide the web application's war
+   * file or directory.
    */
   public static final String ENV_VAR_KEY_WAR = "paths.files.war";
 

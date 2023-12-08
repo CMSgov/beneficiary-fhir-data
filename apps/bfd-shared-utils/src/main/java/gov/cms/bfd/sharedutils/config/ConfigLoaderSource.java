@@ -264,7 +264,10 @@ public abstract class ConfigLoaderSource {
   @AllArgsConstructor
   @EqualsAndHashCode(callSuper = false)
   private static class PrefixedNameSource extends ConfigLoaderSource {
+    /** Prefix to add to every incoming parameter name before looking it up in the real source. */
     private final String prefix;
+
+    /** The real source of configuration parameters to look for our modified parameter names. */
     private final ConfigLoaderSource realSource;
 
     @Nonnull
@@ -293,7 +296,10 @@ public abstract class ConfigLoaderSource {
   @AllArgsConstructor
   @EqualsAndHashCode(callSuper = false)
   private static class SsmToEnvVarMappingSource extends ConfigLoaderSource {
+    /** Prefix to add to every incoming parameter name before looking it up in the real source. */
     private final String prefix;
+
+    /** The real source of configuration parameters to look for our modified parameter names. */
     private final ConfigLoaderSource realSource;
 
     @Nonnull
