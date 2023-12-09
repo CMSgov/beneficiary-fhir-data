@@ -111,14 +111,14 @@ public class ConfigLoaderSourceTest {
     values.setProperty("x.d", "XD");
     ConfigLoaderSource otherSource = ConfigLoaderSource.fromProperties(values);
     ConfigLoaderSource prefixedSource =
-        ConfigLoaderSource.fromOtherUsingNamePrefix("x.", otherSource);
+        ConfigLoaderSource.fromOtherUsingSsmToPropertyMapping("x.", otherSource);
     assertEquals(Set.of("c", "d"), prefixedSource.validNames());
     assertEquals(null, prefixedSource.lookup("a"));
     assertEquals(List.of("XC"), prefixedSource.lookup("c"));
     assertEquals(List.of("XD"), prefixedSource.lookup("d"));
   }
 
-  /** Verifies that name prefix is applied correctly. */
+  /** Verifies that name prefix and character mapping are applied correctly. */
   @Test
   void testFromOtherUsingSsmToEnvVarMapping() {
     Properties values = new Properties();
@@ -126,9 +126,9 @@ public class ConfigLoaderSourceTest {
     values.setProperty("BFD_X_ONE", "XC");
     ConfigLoaderSource otherSource = ConfigLoaderSource.fromProperties(values);
     ConfigLoaderSource prefixedSource =
-        ConfigLoaderSource.fromOtherUsingSsmToEnvVarMapping("bfd.", otherSource);
+        ConfigLoaderSource.fromOtherUsingSsmToEnvVarMapping("bfd_", otherSource);
     assertEquals(Set.of("X_ONE"), prefixedSource.validNames());
     assertEquals(null, prefixedSource.lookup("a"));
-    assertEquals(List.of("XC"), prefixedSource.lookup("x.one"));
+    assertEquals(List.of("XC"), prefixedSource.lookup("x/one"));
   }
 }
