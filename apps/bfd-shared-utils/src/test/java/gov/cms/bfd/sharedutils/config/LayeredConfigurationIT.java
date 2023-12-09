@@ -1,5 +1,6 @@
 package gov.cms.bfd.sharedutils.config;
 
+import static gov.cms.bfd.sharedutils.config.LayeredConfiguration.ENV_VAR_PREFIX;
 import static gov.cms.bfd.sharedutils.config.LayeredConfiguration.PROPERTY_NAME_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -189,7 +190,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
       assertEquals("e-ssm-common-parameter", config.stringValue(nameE));
       assertEquals("f-default", config.stringValue(nameF));
       assertEquals("g-ssm-parent-parameter", config.stringValue(nameG));
-      assertEquals("g-ssm-child-parameter", config.stringValue(ssmChildName + "." + nameG));
+      assertEquals("g-ssm-child-parameter", config.stringValue(ssmChildName + "/" + nameG));
       assertEquals("h-ssm-specific-parameter", config.stringValue(nameH));
       assertEquals(Optional.empty(), config.stringOption(nameZ));
 
@@ -220,7 +221,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     final var hierarchyPath = ssmBasePath + "root/";
     final var hierarchiesMap = new HashMap<String, String>();
     hierarchiesMap.put("new", "data");
-    hierarchiesMap.put("x.hover", "board");
+    hierarchiesMap.put("x/hover", "board");
     addParameterToSsm(hierarchyPath + "new", "data");
     addParameterToSsm(hierarchyPath + "x/hover", "board");
 
@@ -245,13 +246,10 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     var expectedLoader =
         ConfigLoader.builder()
             .addMap(defaultValues)
-            .add(ConfigLoaderSource.fromOtherUsingSsmToEnvVarMapping(PROPERTY_NAME_PREFIX, getenv))
             .add(getenv)
-            .add(
-                ConfigLoaderSource.fromOtherUsingNamePrefix(
-                    PROPERTY_NAME_PREFIX,
-                    ConfigLoaderSource.fromProperties(System.getProperties())))
+            .alsoWithSsmToEnvVarMapping(ENV_VAR_PREFIX)
             .addSystemProperties()
+            .alsoWithSsmToPropertyMapping(PROPERTY_NAME_PREFIX)
             .build();
     var actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
     assertEquals(expectedLoader, actualLoader);
@@ -269,13 +267,11 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .addMap(defaultValues)
             .addMap(hierarchiesMap)
             .addProperties(expectedProperties)
-            .add(ConfigLoaderSource.fromOtherUsingSsmToEnvVarMapping(PROPERTY_NAME_PREFIX, getenv))
+            .alsoWithSsmToPropertyMapping(PROPERTY_NAME_PREFIX)
             .add(getenv)
-            .add(
-                ConfigLoaderSource.fromOtherUsingNamePrefix(
-                    PROPERTY_NAME_PREFIX,
-                    ConfigLoaderSource.fromProperties(System.getProperties())))
+            .alsoWithSsmToEnvVarMapping(ENV_VAR_PREFIX)
             .addSystemProperties()
+            .alsoWithSsmToPropertyMapping(PROPERTY_NAME_PREFIX)
             .build();
     actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
     assertEquals(expectedLoader, actualLoader);

@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -647,6 +648,46 @@ public class ConfigLoader {
      */
     public Builder addSystemProperties() {
       return add(ConfigLoaderSource.fromProperties(System.getProperties()));
+    }
+
+    /**
+     * Call this after adding some other source to add an extra source that will look in the most
+     * recently added source using a name with {@link
+     * ConfigLoaderSource#fromOtherUsingSsmToPropertyMapping}. Can be used to allow SSM parameter
+     * paths to be found in a java properties source using a java properties compatible name.
+     *
+     * @param propertyNamePrefix Prefix to add when mapping SSM name into property name.
+     * @return the builder for chaining
+     */
+    public Builder alsoWithSsmToPropertyMapping(String propertyNamePrefix) {
+      if (sources.isEmpty()) {
+        throw new BadCodeMonkeyException("No sources have been added yet.");
+      }
+      final var previousSource = sources.getLast();
+      final var mappedSource =
+          ConfigLoaderSource.fromOtherUsingSsmToPropertyMapping(propertyNamePrefix, previousSource);
+      return add(mappedSource);
+    }
+
+    /**
+     * Call this after adding some other source to add an extra source that will look in the most
+     * recently added source using a name with {@link
+     * ConfigLoaderSource#fromOtherUsingSsmToEnvVarMapping}. Can be used to allow SSM parameter
+     * paths to be found in an environment variable source using an environment variable compatible
+     * name.
+     *
+     * @param envVarNamePrefix Prefix to add when mapping SSM name into an environment variable
+     *     name.
+     * @return the builder for chaining
+     */
+    public Builder alsoWithSsmToEnvVarMapping(String envVarNamePrefix) {
+      if (sources.isEmpty()) {
+        throw new BadCodeMonkeyException("No sources have been added yet.");
+      }
+      final var previousSource = sources.getLast();
+      final var mappedSource =
+          ConfigLoaderSource.fromOtherUsingSsmToEnvVarMapping(envVarNamePrefix, previousSource);
+      return add(mappedSource);
     }
 
     /**

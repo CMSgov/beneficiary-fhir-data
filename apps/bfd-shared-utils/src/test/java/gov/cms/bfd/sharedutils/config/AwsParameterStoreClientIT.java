@@ -86,7 +86,7 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
       final var folderPath = basePath + "/" + folderName;
 
       // put a value into the folder
-      addValue(expectedParameters, folderPath + "/port", "443", folderName + "." + "port");
+      addValue(expectedParameters, folderPath + "/port", "443", folderName + "/" + "port");
 
       // put values into sub-folders within the folder
       for (var subFolderName : List.of("delta", "echo", "foxtrot")) {
@@ -96,7 +96,7 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
           String paramName = "extra_" + i;
           String paramPath = subFolderPath + "/" + paramName;
           String paramValue = "value-" + i;
-          String mapKey = folderName + "." + subFolderName + "." + paramName;
+          String mapKey = folderName + "/" + subFolderName + "/" + paramName;
           addValue(expectedParameters, paramPath, paramValue, mapKey);
         }
       }
