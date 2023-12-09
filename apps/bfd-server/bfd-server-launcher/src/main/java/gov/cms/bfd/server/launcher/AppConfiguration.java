@@ -22,19 +22,19 @@ public final class AppConfiguration {
    * The name of the environment variable that should be used to provide the path to the keystore
    * file.
    */
-  public static final String ENV_VAR_KEY_KEYSTORE = "paths.files.keystore";
+  public static final String ENV_VAR_KEY_KEYSTORE = "paths/files/keystore";
 
   /**
    * The name of the environment variable that should be used to provide the path to the truststore
    * file.
    */
-  public static final String ENV_VAR_KEY_TRUSTSTORE = "paths.files.truststore";
+  public static final String ENV_VAR_KEY_TRUSTSTORE = "paths/files/truststore";
 
   /**
    * The name of the environment variable that should be used to provide the web application's war
    * file or directory.
    */
-  public static final String ENV_VAR_KEY_WAR = "paths.files.war";
+  public static final String ENV_VAR_KEY_WAR = "paths/files/war";
 
   /**
    * The host/address that the server will bind to and listen for HTTPS connections on.
