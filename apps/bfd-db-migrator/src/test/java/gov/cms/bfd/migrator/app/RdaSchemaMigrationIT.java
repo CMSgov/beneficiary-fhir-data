@@ -134,12 +134,12 @@ public class RdaSchemaMigrationIT {
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     ImmutableMap.Builder<String, String> environment = ImmutableMap.builder();
-    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
+    environment.put(AppConfiguration.SSM_PATH_DATABASE_URL, dataSourceComponents.getUrl());
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
+        AppConfiguration.SSM_PATH_DATABASE_USERNAME, dataSourceComponents.getUsername());
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
+        AppConfiguration.SSM_PATH_DATABASE_PASSWORD, dataSourceComponents.getPassword());
+    environment.put(AppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE, "2");
 
     return ConfigLoader.builder().addMap(environment.build()).build();
   }

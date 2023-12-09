@@ -79,10 +79,10 @@ public class ServerExecutor {
     final var appSettings = new HashMap<String, String>();
     addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
     final var configLoader = ConfigLoader.builder().addMap(appSettings).build();
-    appSettings.put(AppConfiguration.ENV_VAR_KEY_PORT, serverPort);
-    appSettings.put(AppConfiguration.ENV_VAR_KEY_KEYSTORE, keyStore);
-    appSettings.put(AppConfiguration.ENV_VAR_KEY_TRUSTSTORE, trustStore);
-    appSettings.put(AppConfiguration.ENV_VAR_KEY_WAR, warArtifactLocation);
+    appSettings.put(AppConfiguration.SSM_PATH_PORT, serverPort);
+    appSettings.put(AppConfiguration.SSM_PATH_KEYSTORE, keyStore);
+    appSettings.put(AppConfiguration.SSM_PATH_TRUSTSTORE, trustStore);
+    appSettings.put(AppConfiguration.SSM_PATH_WAR, warArtifactLocation);
     AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
     serverInfo = DataServerLauncherApp.createServer(appConfig);
 
@@ -150,9 +150,9 @@ public class ServerExecutor {
     appSettings.put(SpringConfiguration.PROP_PAC_ENABLED, pacEnabled);
     appSettings.put(SpringConfiguration.PROP_PAC_OLD_MBI_HASH_ENABLED, pacOldMbiHashEnabled);
     appSettings.put(SpringConfiguration.PROP_PAC_CLAIM_SOURCE_TYPES, pacClaimSourceTypes);
-    appSettings.put(BaseAppConfiguration.ENV_VAR_KEY_DATABASE_URL, dbUrl);
-    appSettings.put(BaseAppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dbUsername);
-    appSettings.put(BaseAppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dbPassword);
+    appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_URL, dbUrl);
+    appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_USERNAME, dbUsername);
+    appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD, dbPassword);
     appSettings.put(SpringConfiguration.PROP_INCLUDE_FAKE_DRUG_CODE, includeFakeDrugCode);
     appSettings.put(SpringConfiguration.PROP_INCLUDE_FAKE_ORG_NAME, includeFakeOrgName);
   }
