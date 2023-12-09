@@ -90,16 +90,16 @@ public abstract class ConfigLoaderSource {
   }
 
   /**
-   * Create an instance that adds a prefix to every name before looking up the value in another
-   * source.
+   * Create an instance that adds a prefix to every name and removes any before looking up the value
+   * in another source.
    *
    * @param prefix string prefix added to every name prior to lookup
    * @param otherSource source used to find value using the prefixed name
    * @return the source that was created
    */
-  public static ConfigLoaderSource fromOtherUsingNamePrefix(
+  public static ConfigLoaderSource fromOtherUsingSsmToPropertyMapping(
       String prefix, ConfigLoaderSource otherSource) {
-    return new PrefixedNameSource(prefix, otherSource);
+    return new SsmToPropertyMappingSource(prefix, otherSource);
   }
 
   /**
@@ -260,10 +260,10 @@ public abstract class ConfigLoaderSource {
     }
   }
 
-  /** Implementation used by {@link ConfigLoaderSource#fromOtherUsingNamePrefix}. */
+  /** Implementation used by {@link ConfigLoaderSource#fromOtherUsingSsmToPropertyMapping}. */
   @AllArgsConstructor
   @EqualsAndHashCode(callSuper = false)
-  private static class PrefixedNameSource extends ConfigLoaderSource {
+  private static class SsmToPropertyMappingSource extends ConfigLoaderSource {
     /** Prefix to add to every incoming parameter name before looking it up in the real source. */
     private final String prefix;
 
@@ -273,8 +273,9 @@ public abstract class ConfigLoaderSource {
     @Nonnull
     @Override
     public Set<String> validNames() {
+      final Pattern validNameRegex = Pattern.compile(mapName("") + "[.a-zA-Z_0-9]+");
       return realSource.validNames().stream()
-          .filter(name -> name.startsWith(prefix))
+          .filter(name -> validNameRegex.matcher(name).matches())
           .map(name -> name.substring(prefix.length()))
           .collect(Collectors.toUnmodifiableSet());
     }
@@ -289,6 +290,17 @@ public abstract class ConfigLoaderSource {
     public String toString() {
       return String.format(
           "%s with prefix %s and source %s", getClass().getSimpleName(), prefix, realSource);
+    }
+
+    /**
+     * Maps a name to match property naming conventions by adding our prefix and replacing any '/'
+     * with '.'.
+     *
+     * @param name name to map
+     * @return mapped name
+     */
+    private String mapName(String name) {
+      return (prefix + name).replace('/', '.');
     }
   }
 
@@ -332,7 +344,7 @@ public abstract class ConfigLoaderSource {
      * @return mapped name
      */
     private String mapName(String name) {
-      return (prefix + name).replace('.', '_').toUpperCase();
+      return (prefix + name).replace('/', '_').toUpperCase();
     }
   }
 }

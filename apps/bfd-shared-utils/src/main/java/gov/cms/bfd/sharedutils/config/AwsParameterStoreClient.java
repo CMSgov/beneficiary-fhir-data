@@ -22,8 +22,9 @@ public class AwsParameterStoreClient {
 
   /**
    * Load all parameters at the specified path into an immutable {@link Map} and return it. Can be
-   * used with {@link ConfigLoader.Builder#addMap}. When loading parameters recursively the '/'
-   * character is converted to a '.' character in the final parameter name.
+   * used with {@link ConfigLoader.Builder#addMap}. The base path is not included in any parameter
+   * names. When loading parameters recursively any '/' characters from sub-hierarchies are retained
+   * in the final parameter name.
    *
    * @param path path containing the parameters
    * @param recursive true if parameters from sub-folders should also be downloaded
@@ -45,7 +46,7 @@ public class AwsParameterStoreClient {
         final var response = ssmClient.getParametersByPath(request);
         for (Parameter parameter : response.parameters()) {
           final var paramPath = parameter.name();
-          final var paramName = paramPath.substring(prefix.length()).replace('/', '.');
+          final var paramName = paramPath.substring(prefix.length());
           mapBuilder.put(paramName, parameter.value());
         }
         request = request.toBuilder().nextToken(response.nextToken()).build();

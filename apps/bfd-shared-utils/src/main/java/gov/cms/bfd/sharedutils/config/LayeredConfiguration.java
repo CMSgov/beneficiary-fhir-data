@@ -26,8 +26,11 @@ import software.amazon.awssdk.services.ssm.SsmClient;
  */
 @AllArgsConstructor
 public final class LayeredConfiguration {
-  /** Alternative name prefix used for java property and environment variable lookup. */
+  /** Alternative name prefix used for java property lookup. */
   public static final String PROPERTY_NAME_PREFIX = "bfd.";
+
+  /** Alternative name prefix used for environment variable lookup. */
+  public static final String ENV_VAR_PREFIX = "BFD_";
 
   /**
    * The name of the environment variable that can be used to provide a JSON string defining a
@@ -78,27 +81,16 @@ public final class LayeredConfiguration {
       addSsmParametersToBuilder(settings.getSsmHierarchies(), parameterStore, configBuilder);
     }
 
-    // load properties from file if configured
+    // load properties from properties file if configured
     if (settings.hasPropertiesFile()) {
       addPropertiesFileToBuilder(settings.getPropertiesFile(), configBuilder);
     }
 
-    // load environment variables with our SSM->ENV mapping in place to find env var equivalents of
-    // SSM parameter names
-    configBuilder.add(
-        ConfigLoaderSource.fromOtherUsingSsmToEnvVarMapping(
-            PROPERTY_NAME_PREFIX, baseConfig.getSource()));
+    // load environment variables with or without SSM parameter name mapping
+    configBuilder.add(baseConfig.getSource()).alsoWithSsmToEnvVarMapping(ENV_VAR_PREFIX);
 
-    // load environment variables without any mapping
-    configBuilder.add(baseConfig.getSource());
+    configBuilder.addSystemProperties().alsoWithSsmToPropertyMapping(PROPERTY_NAME_PREFIX);
 
-    // load system properties with our prefix
-    final var propertiesSource = ConfigLoaderSource.fromProperties(System.getProperties());
-    configBuilder.add(
-        ConfigLoaderSource.fromOtherUsingNamePrefix(PROPERTY_NAME_PREFIX, propertiesSource));
-
-    // load system properties without or prefix
-    configBuilder.add(propertiesSource);
     return configBuilder.build();
   }
 
@@ -171,7 +163,7 @@ public final class LayeredConfiguration {
       String propertiesFile, ConfigLoader.Builder configBuilder) {
     try {
       final var file = new File(propertiesFile);
-      configBuilder.addPropertiesFile(file);
+      configBuilder.addPropertiesFile(file).alsoWithSsmToPropertyMapping(PROPERTY_NAME_PREFIX);
     } catch (IOException ex) {
       throw new ConfigException("propertiesFile", "error parsing file", ex);
     }
