@@ -1,14 +1,14 @@
 package gov.cms.bfd.migrator.app;
 
-import static gov.cms.bfd.migrator.app.AppConfiguration.ENV_VAR_KEY_SQS_QUEUE_NAME;
+import static gov.cms.bfd.migrator.app.AppConfiguration.SSM_PATH_SQS_QUEUE_NAME;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_BAD_CONFIG;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_HIBERNATE_VALIDATION;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_MIGRATION;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_SUCCESS;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -364,19 +364,19 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     ImmutableMap.Builder<String, String> environment = ImmutableMap.builder();
-    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
+    environment.put(AppConfiguration.SSM_PATH_DATABASE_URL, dataSourceComponents.getUrl());
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
+        AppConfiguration.SSM_PATH_DATABASE_USERNAME, dataSourceComponents.getUsername());
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "2");
+        AppConfiguration.SSM_PATH_DATABASE_PASSWORD, dataSourceComponents.getPassword());
+    environment.put(AppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE, "2");
 
     // add SQS related configuration settings
-    environment.put(ENV_VAR_KEY_SQS_QUEUE_NAME, SQS_QUEUE_NAME);
-    environment.put(ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString());
-    environment.put(ENV_VAR_KEY_AWS_REGION, localstack.getRegion());
-    environment.put(ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey());
-    environment.put(ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey());
+    environment.put(SSM_PATH_SQS_QUEUE_NAME, SQS_QUEUE_NAME);
+    environment.put(ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString());
+    environment.put(ENV_VAR_AWS_REGION, localstack.getRegion());
+    environment.put(ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey());
+    environment.put(ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey());
 
     Path testFilePath =
         Path.of(".", "src", "test", "resources", "db", "migration-test", "error-scenarios");

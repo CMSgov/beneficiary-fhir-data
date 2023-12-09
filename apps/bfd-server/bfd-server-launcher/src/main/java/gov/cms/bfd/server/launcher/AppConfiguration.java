@@ -12,29 +12,25 @@ import lombok.Getter;
 @Getter
 public final class AppConfiguration {
 
-  /** The name of the environment variable that should be used to provide the server's host name. */
-  public static final String ENV_VAR_KEY_HOST = "host";
+  /** The path of the SSM parameter that should be used to provide the server's host name. */
+  public static final String SSM_PATH_HOST = "host";
 
-  /** The name of the environment variable that should be used to provide the server's port. */
-  public static final String ENV_VAR_KEY_PORT = "port";
+  /** The path of the SSM parameter that should be used to provide the server's port. */
+  public static final String SSM_PATH_PORT = "port";
 
-  /**
-   * The name of the environment variable that should be used to provide the path to the keystore
-   * file.
-   */
-  public static final String ENV_VAR_KEY_KEYSTORE = "paths/files/keystore";
+  /** The path of the SSM parameter that should be used to provide the path to the keystore file. */
+  public static final String SSM_PATH_KEYSTORE = "paths/files/keystore";
 
   /**
-   * The name of the environment variable that should be used to provide the path to the truststore
-   * file.
+   * The path of the SSM parameter that should be used to provide the path to the truststore file.
    */
-  public static final String ENV_VAR_KEY_TRUSTSTORE = "paths/files/truststore";
+  public static final String SSM_PATH_TRUSTSTORE = "paths/files/truststore";
 
   /**
-   * The name of the environment variable that should be used to provide the web application's war
-   * file or directory.
+   * The path of the SSM parameter that should be used to provide the web application's war file or
+   * directory.
    */
-  public static final String ENV_VAR_KEY_WAR = "paths/files/war";
+  public static final String SSM_PATH_WAR = "paths/files/war";
 
   /**
    * The host/address that the server will bind to and listen for HTTPS connections on.
@@ -86,11 +82,11 @@ public final class AppConfiguration {
    *     incorrect.
    */
   public static AppConfiguration loadConfig(ConfigLoader config) {
-    Optional<String> host = config.stringOption(ENV_VAR_KEY_HOST);
-    int port = config.positiveIntValueZeroOK(ENV_VAR_KEY_PORT);
-    Path war = Path.of(config.stringValue(ENV_VAR_KEY_WAR));
-    Path keystore = config.readableFile(ENV_VAR_KEY_KEYSTORE).toPath();
-    Path truststore = config.readableFile(ENV_VAR_KEY_TRUSTSTORE).toPath();
+    Optional<String> host = config.stringOption(SSM_PATH_HOST);
+    int port = config.positiveIntValueZeroOK(SSM_PATH_PORT);
+    Path war = Path.of(config.stringValue(SSM_PATH_WAR));
+    Path keystore = config.readableFile(SSM_PATH_KEYSTORE).toPath();
+    Path truststore = config.readableFile(SSM_PATH_TRUSTSTORE).toPath();
     return new AppConfiguration(host, port, keystore, truststore, war);
   }
 }

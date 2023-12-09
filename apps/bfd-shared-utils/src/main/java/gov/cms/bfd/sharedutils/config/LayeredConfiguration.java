@@ -1,9 +1,9 @@
 package gov.cms.bfd.sharedutils.config;
 
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +36,7 @@ public final class LayeredConfiguration {
    * The name of the environment variable that can be used to provide a JSON string defining a
    * {@link LayeredConfigurationSettings} object.
    */
-  public static final String ENV_VAR_KEY_CONFIG_SETTINGS_JSON = "CONFIG_SETTINGS_JSON";
+  public static final String SSM_PATH_CONFIG_SETTINGS_JSON = "CONFIG_SETTINGS_JSON";
 
   /** Source of basic configuration data (usually environment variables). */
   private final ConfigLoader baseConfig;
@@ -100,8 +100,8 @@ public final class LayeredConfiguration {
    * so that these can be simulated in tests without having to fork a process.
    *
    * <p>Internally this creates a {@link LayeredConfigurationSettings} by parsing the JSON value in
-   * {@link #ENV_VAR_KEY_CONFIG_SETTINGS_JSON} and then creates an instance of this class and
-   * returns a value using its {@link #createConfigLoader} method.
+   * {@link #SSM_PATH_CONFIG_SETTINGS_JSON} and then creates an instance of this class and returns a
+   * value using its {@link #createConfigLoader} method.
    *
    * @param defaultValues map containing default values for variables
    * @param getenv source of environment variables (provided explicitly for testing)
@@ -177,12 +177,11 @@ public final class LayeredConfiguration {
    */
   private AwsClientConfig loadAwsClientConfig() {
     return AwsClientConfig.awsBuilder()
-        .region(
-            baseConfig.parsedOption(ENV_VAR_KEY_AWS_REGION, Region.class, Region::of).orElse(null))
+        .region(baseConfig.parsedOption(ENV_VAR_AWS_REGION, Region.class, Region::of).orElse(null))
         .endpointOverride(
-            baseConfig.parsedOption(ENV_VAR_KEY_AWS_ENDPOINT, URI.class, URI::create).orElse(null))
-        .accessKey(baseConfig.stringValue(ENV_VAR_KEY_AWS_ACCESS_KEY, null))
-        .secretKey(baseConfig.stringValue(ENV_VAR_KEY_AWS_SECRET_KEY, null))
+            baseConfig.parsedOption(ENV_VAR_AWS_ENDPOINT, URI.class, URI::create).orElse(null))
+        .accessKey(baseConfig.stringValue(ENV_VAR_AWS_ACCESS_KEY, null))
+        .secretKey(baseConfig.stringValue(ENV_VAR_AWS_SECRET_KEY, null))
         .build();
   }
 
@@ -201,23 +200,22 @@ public final class LayeredConfiguration {
 
   /**
    * Uses the provided {@link ConfigLoader} to create a {@link LayeredConfigurationSettings} object.
-   * The settings are provided in a JSON string contained in {@link
-   * #ENV_VAR_KEY_CONFIG_SETTINGS_JSON}. Defaults are used if no settings are defined.
+   * The settings are provided in a JSON string contained in {@link #SSM_PATH_CONFIG_SETTINGS_JSON}.
+   * Defaults are used if no settings are defined.
    *
    * @param config used to read settings
    * @return the created settings
    */
   @VisibleForTesting
   static LayeredConfigurationSettings loadLayeredConfigurationSettings(ConfigLoader config) {
-    final var configJson = config.stringValue(ENV_VAR_KEY_CONFIG_SETTINGS_JSON, "");
+    final var configJson = config.stringValue(SSM_PATH_CONFIG_SETTINGS_JSON, "");
     final LayeredConfigurationSettings settings;
     if (configJson.length() > 0) {
       ObjectMapper mapper = new ObjectMapper();
       try {
         settings = mapper.readValue(configJson, LayeredConfigurationSettings.class);
       } catch (JsonProcessingException e) {
-        throw new ConfigException(
-            ENV_VAR_KEY_CONFIG_SETTINGS_JSON, "error parsing settings JSON", e);
+        throw new ConfigException(SSM_PATH_CONFIG_SETTINGS_JSON, "error parsing settings JSON", e);
       }
     } else {
       settings = LayeredConfigurationSettings.builder().build();

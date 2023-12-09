@@ -444,26 +444,26 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
+        AppConfiguration.SSM_PATH_HICN_HASH_ITERATIONS,
         String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
+        AppConfiguration.SSM_PATH_HICN_HASH_PEPPER,
         Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
-    environment.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
+    environment.put(AppConfiguration.SSM_PATH_DATABASE_URL, dataSourceComponents.getUrl());
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
+        AppConfiguration.SSM_PATH_DATABASE_USERNAME, dataSourceComponents.getUsername());
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
+        AppConfiguration.SSM_PATH_DATABASE_PASSWORD, dataSourceComponents.getPassword());
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_LOADER_THREADS,
+        AppConfiguration.SSM_PATH_LOADER_THREADS,
         String.valueOf(LoadAppOptions.DEFAULT_LOADER_THREADS));
     environment.put(
-        AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
+        AppConfiguration.SSM_PATH_IDEMPOTENCY_REQUIRED,
         String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
 
-    environment.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString());
-    environment.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey());
-    environment.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey());
+    environment.put(AppConfiguration.ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString());
+    environment.put(AppConfiguration.ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey());
+    environment.put(AppConfiguration.ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey());
   }
 
   /**
@@ -477,12 +477,12 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     final var environment = new HashMap<String, String>();
     addCommonAppSettings(environment);
 
-    environment.put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED, "false");
-    environment.put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED, "true");
-    environment.put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket);
+    environment.put(AppConfiguration.SSM_PATH_RDA_JOB_ENABLED, "false");
+    environment.put(AppConfiguration.SSM_PATH_CCW_RIF_JOB_ENABLED, "true");
+    environment.put(AppConfiguration.SSM_PATH_BUCKET, bucket);
 
     // ensure the job runs only once so the app doesn't loop forever
-    environment.put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_INTERVAL_SECONDS, "0");
+    environment.put(AppConfiguration.SSM_PATH_CCW_RIF_JOB_INTERVAL_SECONDS, "0");
 
     return AppConfiguration.createConfigLoaderForTesting(environment);
   }
@@ -497,13 +497,13 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     final var environment = new HashMap<String, String>();
     addCommonAppSettings(environment);
 
-    environment.put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED, "false");
-    environment.put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED, "true");
-    environment.put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "10");
-    environment.put(AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT, String.valueOf(port));
+    environment.put(AppConfiguration.SSM_PATH_CCW_RIF_JOB_ENABLED, "false");
+    environment.put(AppConfiguration.SSM_PATH_RDA_JOB_ENABLED, "true");
+    environment.put(AppConfiguration.SSM_PATH_RDA_JOB_BATCH_SIZE, "10");
+    environment.put(AppConfiguration.SSM_PATH_RDA_GRPC_PORT, String.valueOf(port));
 
     // ensure the job runs only once so the app doesn't loop forever
-    environment.put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, "0");
+    environment.put(AppConfiguration.SSM_PATH_RDA_JOB_INTERVAL_SECONDS, "0");
 
     return AppConfiguration.createConfigLoaderForTesting(environment);
   }

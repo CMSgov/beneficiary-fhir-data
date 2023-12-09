@@ -109,11 +109,11 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
         ImmutableMap.<String, String>builder().put(nameA, "a-system-property").build();
     final var envVars =
         ImmutableMap.<String, String>builder()
-            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION, localstack.getRegion())
-            .put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, configSettingsJson)
-            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString())
-            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey())
-            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_REGION, localstack.getRegion())
+            .put(LayeredConfiguration.SSM_PATH_CONFIG_SETTINGS_JSON, configSettingsJson)
+            .put(BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey())
             .put(nameA, "a-env-var")
             .put(nameB, "b-env-var")
             .build();
@@ -230,10 +230,10 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
 
     // Set up map to hold our simulated environment variables
     final var envVars = new HashMap<String, String>();
-    envVars.put(BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION, localstack.getRegion());
-    envVars.put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString());
-    envVars.put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey());
-    envVars.put(BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_REGION, localstack.getRegion());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey());
 
     // the source we'll pass as our environment variables
     final var getenv = ConfigLoaderSource.fromMap(envVars);
@@ -261,7 +261,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .ssmHierarchies(List.of(hierarchyPath))
             .build();
     final var configSettingsJson = new ObjectMapper().writeValueAsString(configSettings);
-    envVars.put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, configSettingsJson);
+    envVars.put(LayeredConfiguration.SSM_PATH_CONFIG_SETTINGS_JSON, configSettingsJson);
     expectedLoader =
         ConfigLoader.builder()
             .addMap(defaultValues)
