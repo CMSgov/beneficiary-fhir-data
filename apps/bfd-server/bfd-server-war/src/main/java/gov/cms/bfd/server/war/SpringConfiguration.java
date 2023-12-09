@@ -114,7 +114,7 @@ public class SpringConfiguration {
    * Comma separated list of claim source types to support when querying for partially adjudicated
    * claims data.
    */
-  public static final String PROP_PAC_CLAIM_SOURCE_TYPES = "pac.claim_source_types";
+  public static final String PROP_PAC_CLAIM_SOURCE_TYPES = "pac/claim_source_types";
 
   /** Maximum number of threads to use for executing EOB claim transformers in parallel. */
   public static final String PROP_EXECUTOR_SERVICE_THREADS = "bfdServer.executorService.threads";

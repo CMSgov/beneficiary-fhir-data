@@ -19,7 +19,7 @@ public class AppConfiguration extends BaseAppConfiguration {
   public static final String ENV_VAR_FLYWAY_SCRIPT_LOCATION = "FLYWAY_SCRIPT_LOCATION";
 
   /** Name of setting containing name of SQS queue to which progress messages can be sent. */
-  public static final String ENV_VAR_KEY_SQS_QUEUE_NAME = "sqs.queue_name";
+  public static final String ENV_VAR_KEY_SQS_QUEUE_NAME = "sqs/queue_name";
 
   /**
    * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway

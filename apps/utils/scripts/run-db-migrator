@@ -131,10 +131,12 @@ fi
 # parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
 # SSM in the cloud.
 function setvar() {
-  env_name="$1"
-  ssm_name="$2"
-  value="$3"
+  ssm_name="$1"
+  value="$2"
   if [[ -z "$AWS_REGION" ]] ; then
+    # env var names are ssm paths converted upper case and with / replaced by _.
+    env_name=`echo "BFD_${ssm_name}" | tr '/' '_' | tr '[a-z]' '[A-Z]'`
+    echo export $env_name
     eval "export ${env_name}=\"${value}\""
   else
     echo put-parameter $ssm_name
@@ -155,7 +157,7 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
 EOF
 )
   queue_name=migrator-status
-  setvar BFD_SQS_QUEUE_NAME sqs/queue_name $queue_name
+  setvar sqs/queue_name $queue_name
   echo "ensuring migrator progress queue exists in SQS"
   aws --endpoint-url=$AWS_ENDPOINT sqs create-queue --queue-name=$queue_name
 fi
@@ -228,9 +230,9 @@ fi
 
 # Set up the configuration variables using the setvar function.
 export BFD_ENV_NAME=laptop
-setvar BFD_DB_URL db/url "jdbc:postgresql://${db_host}:${db_port}/bfd"
-setvar BFD_DB_USERNAME db/username 'bfd'
-setvar BFD_DB_PASSWORD db/password 'InsecureLocalDev'
+setvar db/url "jdbc:postgresql://${db_host}:${db_port}/bfd"
+setvar db/username 'bfd'
+setvar db/password 'InsecureLocalDev'
 
 classpath="${jar_file}:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.migrator.app.MigratorApp"
