@@ -127,23 +127,6 @@ if [[ x$image_tag != x ]] ; then
   echo "using docker image $image_name:$image_tag"
 fi
 
-# Autodetect if localstack is running based on whether we can connect to its port locally.
-if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
-  echo "using localstack"
-  export AWS_REGION=us-east-1
-  export AWS_ENDPOINT=http://${localstack_ip}:4566
-  SSM_PARAMETER_PATH=/bfd-db-migrator
-  export CONFIG_SETTINGS_JSON=$(cat <<EOF
-{
-  "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
-}
-EOF
-)
-  export BFD_SQS_QUEUE_NAME=migrator-status
-  echo "ensuring migrator progress queue exists in SQS"
-  aws --endpoint-url=$AWS_ENDPOINT sqs create-queue --queue-name=$DB_MIGRATOR_SQS_QUEUE
-fi
-
 # Either export an environment variable (if not using SSM for config) or set the appropriate
 # parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
 # SSM in the cloud.
@@ -158,6 +141,24 @@ function setvar() {
     aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${ssm_name}" --value "${value}" > /dev/null
   fi
 }
+
+# Autodetect if localstack is running based on whether we can connect to its port locally.
+if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
+  echo "using localstack"
+  export AWS_REGION=us-east-1
+  export AWS_ENDPOINT=http://${localstack_ip}:4566
+  SSM_PARAMETER_PATH=/bfd-db-migrator
+  export CONFIG_SETTINGS_JSON=$(cat <<EOF
+{
+  "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
+}
+EOF
+)
+  queue_name=migrator-status
+  setvar BFD_SQS_QUEUE_NAME sqs/queue_name $queue_name
+  echo "ensuring migrator progress queue exists in SQS"
+  aws --endpoint-url=$AWS_ENDPOINT sqs create-queue --queue-name=$queue_name
+fi
 
 ARGS="-Xms${max_heap} -Xmx${max_heap}"
 ARGS="$ARGS -Dorg.jboss.logging.provider=slf4j"
