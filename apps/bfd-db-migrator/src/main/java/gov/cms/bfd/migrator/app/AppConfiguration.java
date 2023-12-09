@@ -18,8 +18,10 @@ public class AppConfiguration extends BaseAppConfiguration {
    */
   public static final String ENV_VAR_FLYWAY_SCRIPT_LOCATION = "FLYWAY_SCRIPT_LOCATION";
 
-  /** Name of setting containing name of SQS queue to which progress messages can be sent. */
-  public static final String ENV_VAR_KEY_SQS_QUEUE_NAME = "sqs/queue_name";
+  /**
+   * Path of the SSM parameter containing name of SQS queue to which progress messages can be sent.
+   */
+  public static final String SSM_PATH_SQS_QUEUE_NAME = "sqs/queue_name";
 
   /**
    * Controls where flyway looks for migration scripts. If not set (null or empty string) flyway
@@ -93,7 +95,7 @@ public class AppConfiguration extends BaseAppConfiguration {
         configLoader.stringOptionEmptyOK(ENV_VAR_FLYWAY_SCRIPT_LOCATION).orElse("");
 
     final AwsClientConfig awsClientConfig = loadAwsClientConfig(configLoader);
-    final String sqsQueueName = configLoader.stringValue(ENV_VAR_KEY_SQS_QUEUE_NAME, "");
+    final String sqsQueueName = configLoader.stringValue(SSM_PATH_SQS_QUEUE_NAME, "");
     final SqsClient sqsClient = sqsQueueName.isEmpty() ? null : createSqsClient(awsClientConfig);
 
     return new AppConfiguration(

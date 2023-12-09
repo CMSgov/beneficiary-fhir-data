@@ -1,16 +1,16 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_AUTH_TYPE;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_URL;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_APP_NAME;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_METRIC_HOST;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_METRIC_KEY;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_METRIC_PATH;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_NEW_RELIC_METRIC_PERIOD;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_AUTH_TYPE;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_URL;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_USERNAME;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_APP_NAME;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_HOST;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_PATH;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_PERIOD;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
@@ -177,7 +177,7 @@ public class SpringConfiguration {
    */
   @Bean
   public AwsClientConfig awsClientConfig(
-      @Value("${" + ENV_VAR_KEY_AWS_REGION + ":}") String awsRegionName) {
+      @Value("${" + ENV_VAR_AWS_REGION + ":}") String awsRegionName) {
     Region region = Strings.isNullOrEmpty(awsRegionName) ? null : Region.of(awsRegionName);
     return AwsClientConfig.awsBuilder().region(region).build();
   }
@@ -195,11 +195,11 @@ public class SpringConfiguration {
    */
   @Bean
   public DataSourceFactory dataSourceFactory(
-      @Value("${" + ENV_VAR_KEY_DATABASE_AUTH_TYPE + ":JDBC}") String authTypeName,
-      @Value("${" + ENV_VAR_KEY_DATABASE_URL + "}") String url,
-      @Value("${" + ENV_VAR_KEY_DATABASE_USERNAME + "}") String username,
-      @Value("${" + ENV_VAR_KEY_DATABASE_PASSWORD + ":}") String password,
-      @Value("${" + ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE + ":-1}") String connectionsMaxText,
+      @Value("${" + SSM_PATH_DATABASE_AUTH_TYPE + ":JDBC}") String authTypeName,
+      @Value("${" + SSM_PATH_DATABASE_URL + "}") String url,
+      @Value("${" + SSM_PATH_DATABASE_USERNAME + "}") String username,
+      @Value("${" + SSM_PATH_DATABASE_PASSWORD + ":}") String password,
+      @Value("${" + SSM_PATH_DATABASE_MAX_POOL_SIZE + ":-1}") String connectionsMaxText,
       AwsClientConfig awsClientConfig) {
     final var authType = DatabaseOptions.AuthenticationType.valueOf(authTypeName);
     final int maxPoolSize = DatabaseUtils.computeMaximumPoolSize(connectionsMaxText);
@@ -412,13 +412,13 @@ public class SpringConfiguration {
     metricRegistry.registerAll(new MemoryUsageGaugeSet());
     metricRegistry.registerAll(new GarbageCollectorMetricSet());
 
-    String newRelicMetricKey = config.stringValue(ENV_VAR_NEW_RELIC_METRIC_KEY, null);
+    String newRelicMetricKey = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_KEY, null);
 
     if (newRelicMetricKey != null) {
-      String newRelicAppName = config.stringValue(ENV_VAR_NEW_RELIC_APP_NAME, null);
-      String newRelicMetricHost = config.stringValue(ENV_VAR_NEW_RELIC_METRIC_HOST, null);
-      String newRelicMetricPath = config.stringValue(ENV_VAR_NEW_RELIC_METRIC_PATH, null);
-      String rawNewRelicPeriod = config.stringValue(ENV_VAR_NEW_RELIC_METRIC_PERIOD, null);
+      String newRelicAppName = config.stringValue(SSM_PATH_NEW_RELIC_APP_NAME, null);
+      String newRelicMetricHost = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_HOST, null);
+      String newRelicMetricPath = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_PATH, null);
+      String rawNewRelicPeriod = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_PERIOD, null);
 
       int newRelicPeriod;
       try {
