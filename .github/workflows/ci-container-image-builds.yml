@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4.0.1
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: build-and-push-image
@@ -29,6 +29,6 @@ jobs:
 
       - name: Get ECR Registry Namespace
         run: |
-          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
+          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "us-east-1" | jq -r '.registryId').dkr.ecr.us-east-1.amazonaws.com"
           echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
           echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
