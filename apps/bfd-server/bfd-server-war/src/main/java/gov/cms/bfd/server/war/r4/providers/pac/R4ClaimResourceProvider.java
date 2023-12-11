@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED;
-import static gov.cms.bfd.server.war.SpringConfiguration.PROP_PAC_CLAIM_SOURCE_TYPES;
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
@@ -44,7 +44,7 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
       @Qualifier(PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
       FissClaimTransformerV2 fissClaimTransformerV2,
       McsClaimTransformerV2 mcsClaimTransformerV2,
-      @Value("${" + PROP_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames) {
+      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames) {
     super(
         metricRegistry,
         samhsaMatcher,
