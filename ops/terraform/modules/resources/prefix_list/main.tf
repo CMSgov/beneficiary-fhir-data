@@ -9,7 +9,6 @@ resource "aws_ec2_managed_prefix_list" "prefix_list" {
   name           = var.name
   address_family = var.address_family
   max_entries    = var.max_entries
-  tags           = var.tags
   dynamic "entry" {
     for_each = var.entries
     content {

@@ -1,5 +1,6 @@
 ##
 # Encrypt EBS volumes by default
+##
 
 # Get the default AWS managed key for the current region.
 data "aws_kms_key" "ebs_amk" {

@@ -1,3 +1,7 @@
+##
+# Moved from global/s3/temporary.tf
+##
+
 resource "aws_s3_bucket" "aws-glue-scripts" {
   bucket = "aws-glue-scripts-${local.account_id}-us-east-1"
 }

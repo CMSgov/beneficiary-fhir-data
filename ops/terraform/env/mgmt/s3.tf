@@ -158,8 +158,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "bfd_public_test_data" {
     filter {}
 
     transition {
-      days            = 7
-      storage_class   = "GLACIER_IR"
+      days          = 7
+      storage_class = "GLACIER_IR"
     }
 
     status = "Enabled"
