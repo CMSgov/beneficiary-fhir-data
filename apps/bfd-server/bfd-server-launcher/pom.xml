@@ -189,37 +189,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--
-             File permissions on some of the files in the bfd-server-launcher zip file cause builds to
-             fail with a permission violation when unpacking the file while the files already exist.
-             This maven-clean-plugin execution solves that problem by automatically deleting the unpacked
-             files before the dependency plugin unpacks them again.
-             -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <configuration>
-                            <filesets>
-                                <fileset>
-                                    <directory>${project.build.directory}/server-work</directory>
-                                    <includes>
-                                        <include>**</include>
-                                    </includes>
-                                    <followSymlinks>false</followSymlinks>
-                                </fileset>
-                            </filesets>
-                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                        </configuration>
-                        <id>delete-launcher-artifacts</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
