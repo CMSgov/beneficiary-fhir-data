@@ -147,9 +147,9 @@ public class ServerExecutor {
     final String includeFakeDrugCode = "true";
     final String includeFakeOrgName = "true";
 
-    appSettings.put(SpringConfiguration.PROP_PAC_ENABLED, pacEnabled);
+    appSettings.put(SpringConfiguration.SSM_PATH_PAC_ENABLED, pacEnabled);
     appSettings.put(SpringConfiguration.PROP_PAC_OLD_MBI_HASH_ENABLED, pacOldMbiHashEnabled);
-    appSettings.put(SpringConfiguration.PROP_PAC_CLAIM_SOURCE_TYPES, pacClaimSourceTypes);
+    appSettings.put(SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES, pacClaimSourceTypes);
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_URL, dbUrl);
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_USERNAME, dbUsername);
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD, dbPassword);

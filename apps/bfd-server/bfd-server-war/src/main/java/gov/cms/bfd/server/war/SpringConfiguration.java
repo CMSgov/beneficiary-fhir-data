@@ -101,7 +101,7 @@ public class SpringConfiguration {
    * The {@link String } Boolean property that is used to enable the partially adjudicated claims
    * data resources.
    */
-  public static final String PROP_PAC_ENABLED = "bfdServer.pac.enabled";
+  public static final String SSM_PATH_PAC_ENABLED = "pac/enabled";
 
   /**
    * The {@link String } Boolean property that is used to enable using old MBI hash values for
@@ -114,7 +114,7 @@ public class SpringConfiguration {
    * Comma separated list of claim source types to support when querying for partially adjudicated
    * claims data.
    */
-  public static final String PROP_PAC_CLAIM_SOURCE_TYPES = "pac/claim_source_types";
+  public static final String SSM_PATH_PAC_CLAIM_SOURCE_TYPES = "pac/claim_source_types";
 
   /** Maximum number of threads to use for executing EOB claim transformers in parallel. */
   public static final String PROP_EXECUTOR_SERVICE_THREADS = "bfdServer.executorService.threads";
@@ -385,7 +385,7 @@ public class SpringConfiguration {
       R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider,
       R4ClaimResourceProvider r4ClaimResourceProvider,
       R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider,
-      @Value("${" + PROP_PAC_ENABLED + ":false}") Boolean pacEnabled) {
+      @Value("${" + SSM_PATH_PAC_ENABLED + ":false}") Boolean pacEnabled) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
