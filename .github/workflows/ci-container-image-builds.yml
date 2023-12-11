@@ -1,0 +1,34 @@
+name: "CI - Container AWS ECR Build & Push"
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ops/jenkins/bfd-cbc-build/Dockerfile
+      - .github/workflows/ci-container-image-builds.yml
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: build-and-push-image
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: "true"
+
+      - name: Get ECR Registry Namespace
+        run: |
+          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
+          echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
+          echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
