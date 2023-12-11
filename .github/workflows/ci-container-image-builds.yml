@@ -2,7 +2,7 @@ name: "CI - Container AWS ECR Build & Push"
 on:
   push:
     branches:
-      - master
+      - "brandon-BFD-2681"
     paths:
       - ops/jenkins/bfd-cbc-build/Dockerfile
       - .github/workflows/ci-container-image-builds.yml
