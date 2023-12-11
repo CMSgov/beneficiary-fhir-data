@@ -185,10 +185,13 @@ try {
 			stage('Set Branch Name') {
 				currentStage = env.STAGE_NAME
 				script {
-					if (env.BRANCH_NAME.startsWith('PR')) {
+					if (env.BRANCH_NAME != null && env.BRANCH_NAME.startsWith('PR')) {
 						gitBranchName = env.CHANGE_BRANCH
 					} else {
 						gitBranchName = env.BRANCH_NAME
+					}
+					if (gitBranchName == null) {
+						gitBranchName = "rick/BFD-3077-deploy-from-nonmaster"
 					}
 				}
 			}
