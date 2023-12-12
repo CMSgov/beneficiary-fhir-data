@@ -1,37 +1,29 @@
 #!/usr/bin/env bash
 
-##
-# This script runs our test cases locally, via Docker.
-##
-
 # Stop immediately if any command returns a non-zero result.
 set -eou pipefail
 
 function help() {
     echo "This script runs our test cases locally, via Docker."
-    echo "Usage: ${0} [-e extra-vars] [-hk] [image id]"
+    echo "Usage: ${0} [-e extra-vars] [-hk] [-i image] [bfd_version]"
     echo "Options:"
     echo "  ${0} -e <extra-vars>: [e]xtra variables for ansible-playbook."
     echo "  ${0} -h:              [h]elp displays this message and exits."
-    # TODO: complete the getopts implementation. See BFD-1628.
-    # echo "  ${0} -i <ID>: image [i]d set in 'ghcr.io/cmsgov/bfd-apps:<ID>'. Defaults to current commit hash."
-    echo "  ${0} -k:              [k]eeps the container under test instead of removing it. Defaults to removing the container."
+    echo "  ${0} -i <ID>:         [i]mage id set in 'ghcr.io/cmsgov/bfd-apps:<ID>'. Defaults to current commit hash."
+    echo "  ${0} -k:              [k]eep the container under test instead of removing it. Defaults to removing the container."
 }
 
-REMOVE_CONTAINER=true # exported after getopts below...
+# defaults, exported after getopts below...
+REMOVE_CONTAINER=true
+BFD_APPS_IMAGE_ID="$(git rev-parse --short HEAD)"
+
 export ROLE=bfd-server
 export CONTAINER_NAME="$ROLE"
 export TEST_PLAY=test_basic.yml
 export ANSIBLE_SPEC="ansible"
-# use input "$1" or default to current commit's short sha
-export BFD_APPS_IMAGE_ID="${1:-$(git rev-parse --short HEAD)}"
-export LAUNCHER_DIRECTORY="/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT"
-export LAUNCHER_ARTIFACT="bfd-server-launcher-1.0.0-SNAPSHOT.zip"
-export WAR_DIRECTORY="/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT"
-export WAR_ARTIFACT="bfd-server-war-1.0.0-SNAPSHOT.war"
 
 # iterate getopts
-while getopts "e:hk" option; do
+while getopts "e:i:hk" option; do
     case "$option" in
       e) # extra-vars
         EXTRA_VARS="$OPTARG"
@@ -40,9 +32,8 @@ while getopts "e:hk" option; do
         help
         exit
         ;;
-      # TODO: complete the getopts implementation. See BFD-1628.
-      # i) # image id
-      #    input_bfd_apps_image_id="$OPTARG";;
+      i) # image id
+        BFD_APPS_IMAGE_ID="$OPTARG";;
       k) # keep container
         REMOVE_CONTAINER=false
         ;;
@@ -54,14 +45,15 @@ while getopts "e:hk" option; do
 done
 shift "$((OPTIND-1))"
 
-# TODO: complete the getopts implementation. See BFD-1628.
-# use the input from option '-i' or default to current commit's short sha
-# export BFD_APPS_IMAGE_ID="${input_bfd_apps_image_id:-$(git rev-parse --short HEAD)}"
-# use input "$1" or default to current commit's short sha
-# Determine the directory that this script is in.
-export BFD_APPS_IMAGE_ID="${1:-$(git rev-parse --short HEAD)}"
-export REMOVE_CONTAINER EXTRA_VARS
+export BFD_VERSION="${1:-1.0.0-SNAPSHOT}"
+export LAUNCHER_DIRECTORY="/.m2/repository/gov/cms/bfd/bfd-server-launcher/${BFD_VERSION}"
+export LAUNCHER_ARTIFACT="bfd-server-launcher-${BFD_VERSION}.zip"
+export WAR_DIRECTORY="/.m2/repository/gov/cms/bfd/bfd-server-war/${BFD_VERSION}"
+export WAR_ARTIFACT="bfd-server-war-${BFD_VERSION}.war"
 
+export REMOVE_CONTAINER EXTRA_VARS BFD_APPS_IMAGE_ID
+
+# Determine the directory that this script is in.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Launch the Docker container that will be used in the tests.
