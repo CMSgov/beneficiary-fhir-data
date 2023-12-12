@@ -88,9 +88,9 @@ function copy_params() {
         echo setting $to
         aws ssm put-parameter --name $to --value "$value" --type String --overwrite
       fi
-      shift 2
-      from=$1
-      to=$2
+      shift 3
+      from=$1/$3
+      to=$2/$3
     done
 }
 
@@ -104,9 +104,9 @@ function copy_secure_params() {
         echo setting $to
         aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
       fi
-      shift 2
-      from=$1
-      to=$2
+      shift 3
+      from=$1/$3
+      to=$2/$3
     done
 }
 
