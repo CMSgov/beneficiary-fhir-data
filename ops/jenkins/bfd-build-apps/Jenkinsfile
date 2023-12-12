@@ -94,6 +94,7 @@ spec:
         }
     }
 
+    properties(
     parameters {
         booleanParam(name: 'verbose_mvn_logging',
             description: 'When true, `mvn` will produce verbose logs.',
@@ -102,7 +103,7 @@ spec:
             description: 'When true, the docker host AMI based on branch will be built. Note: `force_build_amis` must' +
                 'also be true.',
             defaultValue: false)
-    }
+    })
 
     stages {
         /* This stage switches the gitBranchName (needed for our CCS downsream stages)
