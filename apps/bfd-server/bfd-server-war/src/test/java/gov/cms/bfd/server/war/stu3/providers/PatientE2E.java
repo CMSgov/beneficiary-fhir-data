@@ -12,13 +12,17 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.PatientE2EBase;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -432,6 +436,15 @@ public class PatientE2E extends PatientE2EBase {
     // basically second param doesnt matter for this test
     String hicnHash = getHicnHash("543217066U", false, loadedRecords);
 
+    Map<String, List<Beneficiary>> beneficiaryMap =
+        loadedRecords.stream()
+            .filter(Beneficiary.class::isInstance)
+            .map(Beneficiary.class::cast)
+            .collect(Collectors.groupingBy(Beneficiary::getHicn));
+
+    List<Long> distinctBeneIdList =
+        beneficiaryMap.get(hicnHash).stream().map(Beneficiary::getBeneficiaryId).sorted().toList();
+
     String requestString =
         patientEndpoint
             + "?identifier="
@@ -446,7 +459,13 @@ public class PatientE2E extends PatientE2EBase {
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
-        .body("issue.diagnostics", hasItem("By hash query found more than one distinct BENE_ID: 5"))
+        .body(
+            "issue.diagnostics",
+            hasItem(
+                "By hash query found more than one distinct BENE_ID: "
+                    + distinctBeneIdList.size()
+                    + ", DistinctBeneIdsList: "
+                    + distinctBeneIdList))
         .when()
         .get(requestString);
   }
@@ -463,6 +482,18 @@ public class PatientE2E extends PatientE2EBase {
     List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
     String hicnHash = getHicnHash("DUPHISTHIC", true, loadedRecords);
 
+    Map<String, List<BeneficiaryHistory>> beneficiaryMap =
+        loadedRecords.stream()
+            .filter(BeneficiaryHistory.class::isInstance)
+            .map(BeneficiaryHistory.class::cast)
+            .collect(Collectors.groupingBy(BeneficiaryHistory::getHicn));
+
+    List<Long> distinctBeneIdList =
+        beneficiaryMap.get(hicnHash).stream()
+            .map(BeneficiaryHistory::getBeneficiaryId)
+            .sorted()
+            .toList();
+
     String requestString =
         patientEndpoint
             + "?identifier="
@@ -477,7 +508,13 @@ public class PatientE2E extends PatientE2EBase {
         .expect()
         .statusCode(404)
         .body("issue.severity", hasItem("error"))
-        .body("issue.diagnostics", hasItem("By hash query found more than one distinct BENE_ID: 2"))
+        .body(
+            "issue.diagnostics",
+            hasItem(
+                "By hash query found more than one distinct BENE_ID: "
+                    + distinctBeneIdList.size()
+                    + ", DistinctBeneIdsList: "
+                    + distinctBeneIdList))
         .when()
         .get(requestString);
   }
@@ -645,6 +682,31 @@ public class PatientE2E extends PatientE2EBase {
         .statusCode(200)
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verifies that access.json is written to within BFD-server-war via API call and has the MDC keys
+   * expected for Patient by part D contract.
+   */
+  @Test
+  public void testPatientByPartDContractHasAccessJsonWithExpectedMdcKeys() throws IOException {
+    testUtils.loadSampleAData();
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
+    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
+    String requestString =
+        patientEndpoint
+            + "?_has:Coverage.extension="
+            + contractId
+            + "&_has:Coverage.rfrncyr="
+            + refYear;
+
+    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_IDENTIFIERS);
+
+    ServerTestUtils.assertAccessJsonHasMdcKeys(
+        requestAuth, requestString, additionalExpectedMdcKeys, headers);
   }
 
   /**

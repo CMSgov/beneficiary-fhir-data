@@ -1,6 +1,10 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
@@ -10,6 +14,7 @@ import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,13 +26,17 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -632,5 +641,120 @@ public final class CommonTransformerUtils {
         put(12, CcwCodebookVariable.PTDCNTRCT12);
       }
     };
+  }
+
+  /**
+   * Checks that the eob id passed in is not null, has no version set, had an id set, and matches
+   * the expected EOB id pattern. If so, returns the matcher to pull the eob id parts from, else
+   * throws an {@link InvalidRequestException}.
+   *
+   * @param versionIdPart the version id part of the eob id
+   * @param idPart the id part of the eob id
+   * @return the eob id matcher (contains the pieces of the eob id) if valid
+   */
+  public static Matcher validateAndReturnEobMatcher(Long versionIdPart, String idPart) {
+
+    /*
+     * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
+     * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
+     */
+    Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Digit}+)");
+
+    if (versionIdPart != null) {
+      throw new InvalidRequestException("ExplanationOfBenefit ID must not define a version");
+    }
+
+    if (idPart == null || idPart.trim().isEmpty()) {
+      throw new InvalidRequestException("Missing required ExplanationOfBenefit ID");
+    }
+
+    Matcher eobIdMatcher = EOB_ID_PATTERN.matcher(idPart);
+    if (!eobIdMatcher.matches()) {
+      throw new InvalidRequestException(
+          "ExplanationOfBenefit ID pattern: '"
+              + idPart
+              + "' does not match expected pattern: {alphaString}-{idNumber}");
+    }
+    return eobIdMatcher;
+  }
+
+  /**
+   * Publish mdc operation name.
+   *
+   * @param endpoint the endpoint
+   * @param operationOptions the operation options
+   */
+  public static void publishMdcOperationName(
+      CanonicalOperation.Endpoint endpoint, Map<String, String> operationOptions) {
+    CanonicalOperation operation = new CanonicalOperation(endpoint);
+    for (String key : operationOptions.keySet()) {
+      operation.setOption(key, operationOptions.get(key));
+    }
+    operation.publishOperationName();
+  }
+
+  /**
+   * Parses the claim types to return in the search by parsing out the type tokens parameters.
+   *
+   * @param type a {@link TokenAndListParam} for the "type" field in a search
+   * @return The {@link ClaimType}s to be searched, as computed from the specified "type" {@link
+   *     TokenAndListParam} search param
+   */
+  public static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
+    if (type == null) {
+      type =
+          new TokenAndListParam()
+              .addAnd(
+                  new TokenOrListParam()
+                      .add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
+    }
+
+    /*
+     * This logic kinda' stinks, but HAPI forces us to handle some odd query
+     * formulations, e.g. (in postfix notation):
+     * "and(or(claimType==FOO, claimType==BAR), or(claimType==FOO))".
+     */
+    Set<ClaimType> claimTypes = new HashSet<>(Arrays.asList(ClaimType.values()));
+    for (TokenOrListParam typeToken : type.getValuesAsQueryTokens()) {
+      /*
+       * Each OR entry is additive: we start with an empty set and add every (valid)
+       * ClaimType that's encountered.
+       */
+      Set<ClaimType> claimTypesInner = new HashSet<>();
+      for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
+        if (codingToken.getModifier() != null) {
+          throw new IllegalArgumentException();
+        }
+
+        /*
+         * Per the FHIR spec (https://www.hl7.org/fhir/search.html), there are lots of
+         * edge cases here: we could have null or wildcard or exact system, we can have
+         * an exact or wildcard code. All of those need to be handled carefully -- see
+         * the spec for details.
+         */
+        Optional<ClaimType> claimType =
+            codingToken.getValue() != null
+                ? ClaimType.parse(codingToken.getValue().toLowerCase())
+                : Optional.empty();
+
+        if (codingToken.getSystem() != null
+            && codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
+            && claimType.isEmpty()) {
+          claimTypesInner.addAll(Arrays.asList(ClaimType.values()));
+        } else if (codingToken.getSystem() == null
+            || codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)) {
+          if (claimType.isPresent()) {
+            claimTypesInner.add(claimType.get());
+          }
+        }
+      }
+
+      /*
+       * All multiple AND parameters will do is reduce the number of possible matches.
+       */
+      claimTypes.retainAll(claimTypesInner);
+    }
+
+    return claimTypes;
   }
 }

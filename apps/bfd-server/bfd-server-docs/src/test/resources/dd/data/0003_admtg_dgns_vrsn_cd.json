@@ -1,0 +1,41 @@
+{
+    "id": 3,
+    "name": "Admitting Diagnosis Code Version",
+    "description": "Effective with Version \u2018J,\u2019 the code used to indicate if the diagnosis code is ICD-9/ICD-10.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "admtg_dgns_vrsn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisAdmittingCodeVersion",
+    "ccwMapping": [
+        "ADMTG_DGNS_VRSN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].system",
+            "fhirPath": "diagnosis.where(type.coding.code='admitting').diagnosisCodeableConcept.coding.where(system='http://hl7.org/fhir/sid/icd-10-cm').system",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'http://terminology.hl7.org/CodeSystem/ex-diagnosistype'",
+                "diagnosis[N].type[N].coding[N].code = 'admitting'"
+            ],
+            "additional": [],
+            "derived": "IF = 9 then eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm'.  IF = 0  eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10-cm'",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n    \"code\": \"A37\",\\n    \"display\": \"WHOOPING COUGH\"\\n  }\\n]"
+        }
+    ]
+}

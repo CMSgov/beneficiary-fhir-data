@@ -501,6 +501,11 @@
                                     <type>yaml</type>
                                     <classifier>v2-openapi</classifier>
                                 </artifact>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/data-dictionary-${project.version}.xlsx</file>
+                                    <type>xlsx</type>
+                                    <classifier>data-dictionary</classifier>
+                                </artifact>
                             </artifacts>
                         </configuration>
                     </execution>

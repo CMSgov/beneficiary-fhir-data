@@ -1,8 +1,3 @@
-variable "tags" {
-  description = "tags"
-  type = map(string)
-}
-
 variable "name" {
   description = "(Required) Prefix list name (must not start with com.amazonaws)"
   type = string
