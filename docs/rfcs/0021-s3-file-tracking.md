@@ -26,14 +26,15 @@ Several options are proposed.
 * [Terminology](#terminology)
 * [Background](#background)
 * [Proposed Solution](#proposed-solution)
-    * [Option MF](#proposed-solution-option-mf)
-    * [Option DF](#proposed-solution-option-df)
-    * [Option T](#proposed-solution-option-t)
-    * [Option P](#proposed-solution-option-p)
+    * [Option B](#option-b)
+    * [Option MF](#option-mf)
+    * [Option DF](#option-df)
+    * [Option T](#option-t)
+    * [Option P](#option-p)
+    * [Process Integration](#process-integration)
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addenda](#addenda)
-* [Definitions](#definitions)
 
 ## Terminology
 [Terminoligy]: #terminology
@@ -75,8 +76,27 @@ Any such process is outside the scope of this document.
 This section lists, in order of increasing complexity, several possible alternatives to the S3 move operation.
 The author recommends that BFD implement Option-P (full progress tracking), possibly with the addition of status file upload from option MF.
 
+### Option B: Only Move the Manifest File
+[Option B]: #option-b
+
+As silly as this sounds the minimal option is simply to move the manifest files after processing while leaving the data files in place.
+The manifest files are tiny and drive the entire process.
+Moving one requires little time or expense and accomplishes the goal of signalling that the file has been processed.
+
+Pros:
+
+* Easy to implement.
+* Allows external processes to react to the movement of the manifest to signal completion of processing.
+* Minimizes overhead of moving files.
+
+Cons:
+
+* Splits manifests from their data files.
+* No tracking in our database.
+* Leaves the `Incoming` tree in a mess.  Was the manifest ever there?  Or did we move it?
+
 ### Option MF: Add A Manifest Status File In Same Bucket Directory
-[Option MF]: #proposed-solution-option-mf
+[Option MF]: #option-mf
 
 Instead of moving files to another directory in the bucket just upload a tiny file next to the processed manifest file.
 The uploaded file would use the same name as original but with `_status` added to its base name.
@@ -99,7 +119,7 @@ Cons:
 * Adds still more files to the Incoming tree that have to be ignored on pipeline startup.
 
 ### Option DF: Add A Data Status File In Same Bucket Directory
-[Option DF]: #proposed-solution-option-df
+[Option DF]: #option-df
 
 Same as option MF except that pipeline also uploads a status file for each data file.
 Would allow resume after interrupt to skip entire files.
@@ -115,7 +135,7 @@ Cons:
 * Adds still more files to the Incoming tree that have to be ignored later.
 
 ### Option T: Add Tables
-[Option T]: #proposed-solution-option-t
+[Option T]: #option-t
 
 Adds new tables to track all files from S3: `manifest_files` and `data_files`.
 Include basic tracking columns in each table:
@@ -141,7 +161,7 @@ Cons:
 * No indication in S3 of whether a file has been processed yet.
 
 ### Option P: Option T Plus Progress and Change Tracking
-[Option P]: #proposed-solution-option-p
+[Option P]: #option-p
 
 Adds progress tracking and auditing to all tables.
 
@@ -182,6 +202,28 @@ Cons:
 * Added logic for the `record_progress` updates.
 * Adding columns to bene and all claims table requires migration.
 * Added database I/O to populate the new columns and track progress.
+
+### Integration With External Processes
+[Process Integration]: #process-integration
+
+Some external processes (notably lambda functions) look for and react to the movement of files out of the `Incoming` tree to coordinate their actions with the pipeline.
+Eliminating the move will necessarily break that method.
+
+Depending on the option selected, an external process could either look for the appearance of a status file or query the database to look for a status change.
+The database query option would be complicated and tightly couple the process with the pipeline's database.
+An easier integration option would be to modify the pipeline to send status updates to an SQS queue.
+This would follow the pattern used by the database migrator.
+
+The application could push a message to the queue for events such as:
+
+* starting up
+* discovering a file
+* processing a file
+* finished processing a file
+* shutting down
+
+Applications could then react to any of these messages as they see fit without being tightly coupled to the pipeline or its database schema.
+
 
 ## Prior Art
 [Prior Art]: #prior-art
