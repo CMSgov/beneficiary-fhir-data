@@ -74,16 +74,17 @@ def findAmis(String branchName) {
 def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	amiIdsWrapper = new AmiIds();
 
-	amis = [
-		'data_server_launcher': "${workspace}/${appBuildResults.dataServerLauncher}",
-		'data_server_war': "${workspace}/${appBuildResults.dataServerWar}",
-		'data_pipeline_zip': "${workspace}/${appBuildResults.dataPipelineZip}",
-		'db_migrator_zip': "${workspace}/${appBuildResults.dbMigratorZip}"
+	extraVars = [
+		'data_server_launcher': "${appBuildResults.dataServerLauncher}",
+		'data_server_war': "${appBuildResults.dataServerWar}",
+		'data_pipeline_zip': "${appBuildResults.dataPipelineZip}",
+		'db_migrator_zip': "${appBuildResults.dbMigratorZip}",
+		'bfd_version': sh(returnStdout: true, script: "yq '.project.version' ${workspace}/apps/pom.xml").trim()
 	]
 
 	dir('ops/ansible/playbooks-ccs'){
 
-		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: amis
+		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: extraVars
 			packerBuildAmis(amiIds.platinumAmiId, gitBranchName, gitCommitId,
 					"../../packer/build_bfd-all.json")
 
