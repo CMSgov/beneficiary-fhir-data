@@ -31,7 +31,7 @@ properties([
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
 		booleanParam(name: 'force_migrator_deployment', description: 'When true, force the migrator to deploy.', defaultValue: false),
-		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
+		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: "")
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
