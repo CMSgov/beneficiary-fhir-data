@@ -221,15 +221,24 @@ public final class OpenAPIContentProvider {
    Example:
       - `includeTaxNumbers=true`""";
 
-  /** Open API short description for /ExplanationOfBenefit's clientContextData parameter. */
-  public static final String EOB_CLIENT_CONTEXT_SHORT =
+  /** Open API short description for /ExplanationOfBenefit's _filter parameter. */
+  public static final String EOB_CLIENT_ELEMENTS_SHORT =
       """
-    Free-form text that can be used by a client to provide optional processing rules.""";
+    Per FHIR spec, client-sprecified, comma-separated list, to be returned as part of a returned
+    resource.""";
 
   /** Open API content value for /ExplanationOfBenefit's clientContextData parameter. */
-  public static final String EOB_CLIENT_CONTEXT_VALUE =
+  public static final String EOB_CLIENT_ELEMENTS_VALUE =
       """
-    TBD; could be used to provide processing filters / rules.""";
+    The _elements parameter consists of a comma-separated list of base element names such as,
+    elements defined at the root level in the resource. Only elements that are listed are to be
+    returned. Clients SHOULD list all mandatory and modifier elements in a resource as part of
+    the list of elements. The list of elements does not apply to included resources.
+
+    Servers are not obliged to return just the requested elements. Servers SHOULD always return
+    mandatory elements whether they are requested or not. Servers SHOULD mark the resources with
+    the tag SUBSETTED to ensure that the incomplete resource is not actually used to overwrite
+    a complete resource.""";
 
   /** Open API content short description for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_SHORT =

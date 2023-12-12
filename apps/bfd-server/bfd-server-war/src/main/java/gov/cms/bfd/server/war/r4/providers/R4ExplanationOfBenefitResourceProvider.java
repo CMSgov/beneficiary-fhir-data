@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -279,7 +280,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * many different search criteria.
    *
    * <p>This method supports both HTTP GET with URL parameters, and HTTP POST with parameters
-   * specified within the POST body.
+   * specified within the POST body.protected
    *
    * @param patient a {@link ReferenceParam} for the {@link ExplanationOfBenefit#getPatient()} to
    *     try and find matches for {@link ExplanationOfBenefit}s
@@ -293,7 +294,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
    *     ExplanationOfBenefit}s that completed
    * @param taxNumbers an {@link OptionalParam} for whether to include tax numbers in the response
-   * @param clientContextData an {@link String} of client info
+   * @param elements a {@link String} of client-specified FHIR elements to be included in each EOB.
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
@@ -302,7 +303,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @Search
   @Trace
   public Bundle findByPatient(
-      @OptionalParam(name = ExplanationOfBenefit.SP_PATIENT)
+      @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(
               shortDefinition = OpenAPIContentProvider.PATIENT_SP_RES_ID_SHORT,
               value = OpenAPIContentProvider.PATIENT_SP_RES_ID_VALUE)
@@ -337,16 +338,15 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
               value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
           String taxNumbers,
-      //
-      // This is simply a placeholder that may go away depending on future
-      // needs with respect to filters, etc. It is here as a POC for what
-      // can be implemented with arbitrary content.
-      //
-      @OptionalParam(name = "clientContextData")
+      // the _elements tag is not yet supported; this is simply a placeholder pending
+      // further discovery and business requirement for supporting the FHIR _elements
+      // in a returned resource.
+      // 3.1.1.5.9 : https://www.hl7.org/fhir/R4/search.html#elements
+      @OptionalParam(name = "_elements")
           @Description(
-              shortDefinition = OpenAPIContentProvider.EOB_CLIENT_CONTEXT_SHORT,
-              value = OpenAPIContentProvider.EOB_CLIENT_CONTEXT_VALUE)
-          String clientContextData,
+              shortDefinition = OpenAPIContentProvider.EOB_CLIENT_ELEMENTS_SHORT,
+              value = OpenAPIContentProvider.EOB_CLIENT_ELEMENTS_VALUE)
+          String elements,
       RequestDetails requestDetails) {
 
     /*
@@ -419,6 +419,8 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           TransformerUtilsV2.createBundle(
               paging, new ArrayList<IBaseResource>(), loadedFilterManager.getTransactionTime());
     }
+    // In theory, we could now apply a client-provided _filter vs. the EOB Bundle (payload)
+    // to only those elements specified in the filter.
     return bundle;
   }
 
