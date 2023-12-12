@@ -85,16 +85,20 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 	dir('ops/ansible/playbooks-ccs'){
 
 		writeJSON file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", json: extraVars
-			packerBuildAmis(amiIds.platinumAmiId, gitBranchName, gitCommitId,
-					"../../packer/build_bfd-all.json")
 
-			amiIdsWrapper.platinumAmiId = amiIds.platinumAmiId
-			amiIdsWrapper.bfdPipelineAmiId = extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json"))
-			amiIdsWrapper.bfdServerAmiId = extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json"))
-			amiIdsWrapper.bfdMigratorAmiId = extractAmiIdFromPackerManifest(readFile(
-						file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json"))
+		packerBuildAmis(amiIds.platinumAmiId, gitBranchName, gitCommitId,
+				"../../packer/build_bfd-all.json")
+
+		amiIdsWrapper.platinumAmiId = amiIds.platinumAmiId
+
+		amiIdsWrapper.bfdPipelineAmiId = extractAmiIdFromPackerManifest(readFile(
+			file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json"))
+
+		amiIdsWrapper.bfdServerAmiId = extractAmiIdFromPackerManifest(readFile(
+			file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json"))
+
+		amiIdsWrapper.bfdMigratorAmiId = extractAmiIdFromPackerManifest(readFile(
+			file: "${workspace}/ops/ansible/playbooks-ccs/manifest_db-migrator.json"))
 	}
 
 	return amiIdsWrapper
