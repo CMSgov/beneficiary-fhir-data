@@ -31,53 +31,16 @@ properties([
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
 		booleanParam(name: 'force_migrator_deployment', description: 'When true, force the migrator to deploy.', defaultValue: false),
-		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: "")
+		string(name: 'server_regression_image_override', description: 'Overrides the Docker image tag used when deploying the server-regression lambda', defaultValue: null)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
-def deploy_prod_from_non_master
-if (params.deploy_prod_from_non_master != null) {
-    deploy_prod_from_non_master = params.deploy_prod_from_non_master
-} else {
-	deploy_prod_from_non_master = true
-}
-
-def deploy_prod_skip_confirm
-if (params.deploy_prod_skip_confirm != null) {
-    deploy_prod_skip_confirm = params.deploy_prod_skip_confirm
-} else {
-    deploy_prod_skip_confirm = false
-}
-
-def use_latest_images
-if (params.use_latest_images != null) {
-    use_latest_images = params.use_latest_images
-} else {
-	use_latest_images = false
-}
-
-def force_migrator_deployment
-if (params.force_migrator_deployment != null) {
-	force_migrator_deployment = verboseMaven = params.verbose_mvn_logging
-} else {
-    force_migrator_deployment = false
-}
-
-def server_regression_image_override
-if (params.server_regression_image_override != null) {
-    server_regression_image_override = params.server_regression_image_override
-} else {
-    server_regression_image_override = ""
-}
-
-println "hello: ${env.BRANCH_NAME}"
-
-println "deploy_prod_from_non_master: ${deploy_prod_from_non_master}"
-println "deploy_prod_skip_confirm: ${deploy_prod_skip_confirm}"
-println "user_latest_images: ${use_latest_images}"
-println "force_migrator_deployment: ${force_migrator_deployment}"
-println "server_regression_image_overrie: ${server_regression_image_override}"
+println "deploy_prod_from_non_master: ${params.deploy_prod_from_non_master}"
+println "deploy_prod_skip_confirm: ${params.deploy_prod_skip_confirm}"
+println "use_latest_images: ${params.use_latest_images}"
+println "force_migrator_deployment: ${params.force_migrator_deployment}"
+println "server_regression_image_overrie: ${params.server_regression_image_override}"
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def scriptForApps
@@ -219,7 +182,7 @@ try {
 					amiIds = scriptForDeploys.findAmis(gitBranchName)
 
 					// These variables track our decision on whether or not to deploy to prod-like envs.
-					canDeployToProdEnvs = env.BRANCH_NAME == "master" || deploy_prod_from_non_master
+					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
 					willDeployToProdEnvs = false
 
 					// Get the current commit id
@@ -229,12 +192,12 @@ try {
 					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
 					// Send notifications that the build has started
-					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+					//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 				}
 			}
 
 			stage('Build Apps') {
-				if (!use_latest_images) {
+				if (!params.use_latest_images) {
 					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_apps_start')
 
@@ -245,7 +208,7 @@ try {
 			}
 
 			stage('Build App AMIs') {
-				if (!use_latest_images) {
+				if (!params.use_latest_images) {
 					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_build_app_amis_test_start')
 
@@ -295,7 +258,7 @@ try {
 							bfdEnv: bfdEnv,
 							heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 							awsRegion: awsRegion,
-							forceDeployment: force_migrator_deployment
+							forceDeployment: params.force_migrator_deployment
 						)
 						if (migratorDeploymentSuccessful) {
 							println "Proceeding to Stage: 'Deploy Pipeline to ${bfdEnv.toUpperCase()}'"
@@ -344,7 +307,7 @@ try {
 							env: bfdEnv,
 							directory: "ops/terraform/services/server/server-regression",
 							tfVars: [
-								docker_image_tag_override: server_regression_image_override
+								docker_image_tag_override: params.server_regression_image_override
 							]
 						)
 
@@ -382,7 +345,7 @@ try {
 					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
 					* deploying to production environments.
 					*/
-					if (!deploy_prod_skip_confirm) {
+					if (!params.deploy_prod_skip_confirm) {
 						/*
 						* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
 						* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
@@ -450,7 +413,7 @@ try {
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
-								forceDeployment: force_migrator_deployment
+								forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -507,7 +470,7 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
-									docker_image_tag_override: server_regression_image_override
+									docker_image_tag_override: params.server_regression_image_override
 								]
 							)
 
@@ -592,7 +555,7 @@ try {
 								bfdEnv: bfdEnv,
 								heartbeatInterval: 30, // TODO: Consider implementing a backoff functionality in the future
 								awsRegion: awsRegion,
-								forceDeployment: force_migrator_deployment
+								forceDeployment: params.force_migrator_deployment
 							)
 
 							if (migratorDeploymentSuccessful) {
@@ -651,7 +614,7 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/server/server-regression",
 								tfVars: [
-									docker_image_tag_override: server_regression_image_override
+									docker_image_tag_override: params.server_regression_image_override
 								]
 							)
 
@@ -693,5 +656,5 @@ try {
 	currentBuild.result = "FAILURE"
 	throw ex
 } finally {
-	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+	//sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
 }
