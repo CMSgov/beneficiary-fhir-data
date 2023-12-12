@@ -20,7 +20,7 @@ Role Variables
 
 This role is highly configurable, though it tries to provide reasonable defaults where possible. Here are the variables that must be defined by users:
 
-    data_pipeline_zip: /home/karlmdavis/workspaces/cms/beneficiary-fhir-data.git/apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT.zip
+    data_pipeline_zip: /home/karlmdavis/workspaces/cms/beneficiary-fhir-data.git/apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-2.0.0-SNAPSHOT.zip
     data_pipeline_s3_bucket: name-of-the-s3-bucket-with-the-data-to-process
     data_pipeline_hicn_hash_iterations: 42  # NIST recommends at least 1000
     data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
@@ -51,7 +51,7 @@ Here's an example of how to apply this role to the `etlbox` host in an Ansible p
         - include_role:
             name: bfd-pipeline
           vars:
-            data_pipeline_zip: /home/karlmdavis/workspaces/cms/beneficiary-fhir-data.git/apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT.zip
+            data_pipeline_zip: /home/karlmdavis/workspaces/cms/beneficiary-fhir-data.git/apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-2.0.0-SNAPSHOT.zip
             data_pipeline_s3_bucket: name-of-the-s3-bucket-with-the-data-to-process
             data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
             data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
