@@ -343,11 +343,6 @@ setvar db/url "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=
 setvar db/username "bfd"
 setvar db/password "InsecureLocalDev"
 
-#setvar "-- data_pipeline_new_relic_app_name --"
-#setvar "-- data_pipeline_new_relic_metric_host --"
-#setvar "-- data_pipeline_new_relic_metric_path --"
-#setvar "-- data_pipeline_new_relic_metric_key --"
-
 # For testing RIF performance.
 if [[ x$bene_threads = x ]] ; then
   setvar loader_thread_count "$threads"
