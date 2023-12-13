@@ -22,6 +22,14 @@
             <artifactId>flyway-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-hsqldb</artifactId>
+        </dependency>
+        <dependency>
             <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>

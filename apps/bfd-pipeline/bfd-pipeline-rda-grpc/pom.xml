@@ -168,10 +168,9 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <!-- Used for annotating RDA API. -->
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
+        <dependency> <!-- recommended by grpc-java -->
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>annotations-api</artifactId>
         </dependency>
         <dependency>
             <groupId>gov.cms.bfd</groupId>
