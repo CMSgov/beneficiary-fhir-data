@@ -1256,7 +1256,7 @@
         <profile>
             <id>release</id>
             <properties>
-                <jib.skip>false</jib.skip>
+                <jib.skip>true</jib.skip>
                 <jib.goal>build</jib.goal>
                 <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
                 <maven.build.cache.enabled>false</maven.build.cache.enabled>
