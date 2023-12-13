@@ -1254,7 +1254,7 @@
 
     <profiles>
         <profile>
-            <id>test-release</id>
+            <id>release</id>
             <properties>
                 <jib.skip>false</jib.skip>
                 <jib.goal>build</jib.goal>
@@ -1262,6 +1262,8 @@
                 <maven.build.cache.enabled>false</maven.build.cache.enabled>
                 <!-- Source jars are large and we don't need to publish them. -->
                 <maven.source.skip>true</maven.source.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <checkstyle.skip>true</checkstyle.skip>
             </properties>
             <distributionManagement>
                 <repository>
