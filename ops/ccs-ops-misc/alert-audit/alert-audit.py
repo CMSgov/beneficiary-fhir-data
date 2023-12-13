@@ -42,7 +42,6 @@ def create_valid_html(CWAlerts: List[CWAlert]):
         Creates a html report from the given alerts
     '''
 
-    file = open(f'alert_audit_{datetime.now().strftime("%Y%m%d-%H:%M:%S")}.html', 'w')
     html = '''
         <html>
         <head>
@@ -73,6 +72,7 @@ def create_valid_html(CWAlerts: List[CWAlert]):
         '''
 
     if (len(CWAlerts) > 0):
+        file = open(f'alert_audit_{datetime.now().strftime("%Y%m%d-%H:%M:%S")}.html', 'w')
         html += '<tr>'
         html += '<th>index</th>'
         for key, value in CWAlerts[0]:
