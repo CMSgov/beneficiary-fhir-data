@@ -94,10 +94,10 @@ EOF
 	}
 
 	return new AppBuildResults(
-		dbMigratorZip: 'apps/bfd-db-migrator/target/bfd-db-migrator-1.0.0-SNAPSHOT.zip',
-		dataPipelineZip: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT.zip',
-		dataServerLauncher: 'apps/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT.zip',
-		dataServerWar: 'apps/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war'
+		dbMigratorZip:      sh(returnStdout: true, script: """find "${workspace}/apps/bfd-db-migrator/target" -type f -name bfd-db-migrator-*.zip""").trim(),
+		dataPipelineZip:    sh(returnStdout: true, script: """find "${workspace}/apps/bfd-pipeline/bfd-pipeline-app/target" -type f -name bfd-pipeline-app-*.zip""").trim(),
+		dataServerLauncher: sh(returnStdout: true, script: """find "${workspace}/apps/bfd-server/bfd-server-launcher/target" -type f -name bfd-server-launcher-*.zip""").trim(),
+		dataServerWar:      sh(returnStdout: true, script: """find "${workspace}/apps/bfd-server/bfd-server-war/target" -type f -name bfd-server-war-*.war""").trim()
 	)
 }
 

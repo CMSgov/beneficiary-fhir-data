@@ -5,6 +5,9 @@ on:
       role:
         required: true
         type: string
+      bfd_version:
+        required: true
+        type: string
       image_tag:
         required: false
         type: string
@@ -20,4 +23,4 @@ jobs:
       - name: 'Run Tests for ${{ inputs.role }} Role'
         run: |
           export IMAGE_TAG="${image_tag:-$(git rev-parse --short HEAD)}"
-          ops/ansible/roles/${{ inputs.role }}/test/run-tests.sh "$IMAGE_TAG"
+          ops/ansible/roles/${{ inputs.role }}/test/run-tests.sh -i "$IMAGE_TAG" ${{ inputs.bfd_version }}
