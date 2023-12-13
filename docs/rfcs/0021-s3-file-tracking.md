@@ -164,7 +164,7 @@ Adds progress tracking and auditing to all tables.
   * Nullable so no change to existing records.
   * Allows every record to be traced back to the batch that last updated it.
   * Allows batches to be reconstructed after the fact when debugging.
-* Mostly obsoletes the `loaded_files` and `loaded_batches` tables.  They can be retained or removed as desired.
+
 
 Notes:
 
@@ -177,6 +177,9 @@ Notes:
   * Using `flatMap` in existing flux means no new threads or synchronization needed.
   * Progress values can be updated eagerly or limited by requiring minimum elapsed time between updates to minimize database overhead.
 * Only the most recent change to a record will be linked.
+* The `loaded_batches` table would still have to be updated for use with the server's bloom filter.
+  An easy solution to retain bloom filter support in a first implementation would be to add a `data_file_id` column to `loaded_files` and continue to update both `loaded_files` and `loaded_batches` as before.
+  At a later date we could consider tracking beneficiary updates in a different way.
 
 Pros:
 
