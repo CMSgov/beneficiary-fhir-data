@@ -1,5 +1,4 @@
 # RFC Proposal
-[RFC Proposal]: #rfc-proposal
 
 * RFC Proposal ID: `0021-s3-file-tracking`
 * Start Date: 2023-12-12
@@ -11,14 +10,12 @@ A proposal to eliminate the S3 file move operation currently used by the CCW pip
 Several options are proposed.
 
 ## Status
-[Status]: #status
 
 * Status: Proposed <!-- (Proposed/Approved/Rejected/Implemented) -->
 * Implementation JIRA Ticket(s):
     * n/a
 
 ## Table of Contents
-[Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
 * [Status](#status)
@@ -27,17 +24,16 @@ Several options are proposed.
 * [Background](#background)
 * [Proposed Solution](#proposed-solution)
     * [Option B](#option-b-only-move-the-manifest-file)
-    * [Option MF](#option-mf)
-    * [Option DF](#option-df)
-    * [Option T](#option-t)
-    * [Option P](#option-p)
+    * [Option MF](#option-add-a-manifest-status-file-in-same-bucket-folder)
+    * [Option DF](#option-df-add-a-data-status-file-in-same-bucket-folder)
+    * [Option T](#option-t-add-tables)
+    * [Option P](#option-p-option-t-plus-progress-and-change-tracking)
     * [Process Integration](#process-integration)
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addenda](#addenda)
 
 ## Terminology
-[Terminoligy]: #terminology
 
 This document refers to files and folders in the context of S3 because it is most natural to think of S3 as a file system.
 To translate into S3 terminology simply think "object" for "file", "prefix" for "folder", and "key" for "path".
@@ -47,7 +43,6 @@ S3 does not support a genuine move so in fact a move consists of copying the old
 A move is expensive and is not atomic (copy could succeed and delete fail, thus leaving both old and new files present in bucket).
 
 ## Background
-[Background]: #background
 
 The S3 bucket used to receive inbound files from CCW has two top level folders: `Incoming` for new files to be processed and `Done` for files that have been processed.
 When the CCW pipeline finishes processing all files referenced by a particular manifest file it moves the files from their folder under `Incoming` into an equivalent folder under `Done`.
@@ -71,7 +66,6 @@ Such a background process could also compress the files as it moves them.
 This document will discuss ideas for how those processes might work in the future possibilities section.
 
 ## Proposed Solution
-[Proposed Solution]: #proposed-solution
 
 This section lists, in order of increasing complexity, several possible alternatives to the S3 move operation.
 The author recommends that BFD implement Option-P (full progress tracking), possibly with the addition of status file upload from option MF.
@@ -94,8 +88,7 @@ Cons:
 * No tracking in our database.
 * Leaves the `Incoming` tree in a mess.  Was the manifest ever there?  Or did we move it?
 
-### Option MF: Add A Manifest Status File In Same Bucket Directory
-[Option MF]: #option-mf
+### Option MF: Add A Manifest Status File In Same Bucket Folder
 
 Instead of moving files to another directory in the bucket just upload a tiny file next to the processed manifest file.
 The uploaded file would use the same name as original but with `_status` added to its base name.
@@ -117,8 +110,7 @@ Cons:
 * No tracking in our database.
 * Adds still more files to the Incoming tree that have to be ignored on pipeline startup.
 
-### Option DF: Add A Data Status File In Same Bucket Directory
-[Option DF]: #option-df
+### Option DF: Add A Data Status File In Same Bucket Folder
 
 Same as option MF except that pipeline also uploads a status file for each data file.
 Would allow resume after interrupt to skip entire files.
@@ -134,7 +126,6 @@ Cons:
 * Adds still more files to the Incoming tree that have to be ignored later.
 
 ### Option T: Add Tables
-[Option T]: #option-t
 
 Adds new tables to track all files from S3: `manifest_files` and `data_files`.
 Include basic tracking columns in each table:
@@ -160,7 +151,6 @@ Cons:
 * No indication in S3 of whether a file has been processed yet.
 
 ### Option P: Option T Plus Progress and Change Tracking
-[Option P]: #option-p
 
 Adds progress tracking and auditing to all tables.
 
@@ -203,7 +193,6 @@ Cons:
 * Added database I/O to populate the new columns and track progress.
 
 ### Integration With External Processes
-[Process Integration]: #process-integration
 
 Some external processes (notably lambda functions) look for and react to the movement of files out of the `Incoming` tree to coordinate their actions with the pipeline.
 Eliminating the move will necessarily break that method.
@@ -226,7 +215,6 @@ Applications could then react to any of these messages as they see fit without b
 
 
 ## Prior Art
-[Prior Art]: #prior-art
 
 BFD currently uses two tables to provide rudimentary tracking of imported data:
 
@@ -237,7 +225,6 @@ The RDA API tracks progress by storing a sequence number (unique update number p
 Because batches are stored in parallel and may be written to the database out of order a class was written to track all sequence numbers in flight and the highest sequence number for which all recoreds with a lower number have been successfulyl written to the database.
 
 ## Future Possibilities
-[Future Possibilities]: #future-possibilities
 
 The current solution effectively archives files forever.
 Files are moved into the `Done` folder for permanent storage and forgotten.
@@ -259,6 +246,5 @@ The same job might also delete files from the archive after a configurable TTL h
 The job should be idempotent so that it can fail or be interrupted and automatically clean up any mess the next time it runs.
 
 ## Addenda
-[Addenda]: #addenda
 
 n/a
