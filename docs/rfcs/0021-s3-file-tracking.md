@@ -22,13 +22,14 @@ Several options are proposed.
 * [Table of Contents](#table-of-contents)
 * [Terminology](#terminology)
 * [Background](#background)
-* [Proposed Solution](#proposed-solution)
+* [Potential Solutions](#potential-solutions)
     * [Option B](#option-b-only-move-the-manifest-file)
     * [Option MF](#option-mf-add-a-manifest-status-file-in-same-bucket-folder)
     * [Option DF](#option-df-add-a-data-status-file-in-same-bucket-folder)
     * [Option T](#option-t-add-tables)
     * [Option P](#option-p-option-t-plus-progress-and-change-tracking)
     * [Process Integration](#integration-with-external-processes)
+* [Proposed Solution](#proposed-solution)
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addenda](#addenda)
@@ -44,7 +45,11 @@ A move is expensive and is not atomic (copy could succeed and delete fail, thus 
 
 ## Background
 
-The S3 bucket used to receive inbound files from CCW has two top level folders: `Incoming` for new files to be processed and `Done` for files that have been processed.
+The S3 bucket used to receive inbound files from CCW has two top level folders: 
+
+* `Incoming` for new files to be processed, and
+* `Done` for files that have been processed.
+
 When the CCW pipeline finishes processing all files referenced by a particular manifest file it moves the files from their folder under `Incoming` into an equivalent folder under `Done`.
 Moving the files ensures that the pipeline will not try to process them again in the future.
 
@@ -55,6 +60,10 @@ This move process has some pros and cons:
 * Con: If a move fails the pipeline might reprocess files the next time it runs.
 * Con: Interrupting the CCW pipeline has to wait for pending move operations to complete before the pipeline process can exit.
 
+Interruption is an important capability in an ETL pipeline.
+It allows greater flexibility in handling unusual circumatances and facilitates testing.
+Ongoing efforts to deploy BFD in an EKS+Fargate environment will make interruption more important than it has been in the past.
+
 This document outlines possible alternatives to this S3 move process.
 All of them share the con that they will leave the Incoming tree to grow indefinitely rather than pruning it as files are processed.
 This would add additional start-up time for the CCW pipeline when it reads a list of all Incoming files.
@@ -63,12 +72,11 @@ However the number of file names per year is relatively small so this extra over
 The focus of this document is eliminating the move step from the CCW pipeline.
 Nothing precludes a background process outside of the pipeline from periodically moving or deletng processed files.
 Such a background process could also compress the files as it moves them.
-This document will discuss ideas for how those processes might work in the future possibilities section.
+This document will discuss ideas for how those processes might work in the **Potential Solutions** section and a specific recommendation in the **Proposed Solution** section.
 
-## Proposed Solution
+## Potential Solutions
 
 This section lists, in order of increasing complexity, several possible alternatives to the S3 move operation.
-The author recommends that BFD implement Option-P (full progress tracking), possibly with the addition of status file upload from option MF.
 
 ### Option B: Only Move the Manifest File
 
@@ -164,6 +172,7 @@ Adds progress tracking and auditing to all tables.
   * Nullable so no change to existing records.
   * Allows every record to be traced back to the batch that last updated it.
   * Allows batches to be reconstructed after the fact when debugging.
+* Adds `data_file_id` column to the `loaded_files` table.
 
 
 Notes:
@@ -177,8 +186,8 @@ Notes:
   * Using `flatMap` in existing flux means no new threads or synchronization needed.
   * Progress values can be updated eagerly or limited by requiring minimum elapsed time between updates to minimize database overhead.
 * Only the most recent change to a record will be linked.
-* The `loaded_batches` table would still have to be updated for use with the server's bloom filter.
-  An easy solution to retain bloom filter support in a first implementation would be to add a `data_file_id` column to `loaded_files` and continue to update both `loaded_files` and `loaded_batches` as before.
+* The `loaded_files` and `loaded_batches` tables would still have to be updated for use with the server's bloom filter.
+  Linking each `loaded_files` record to a specific `data_files` record will provide traceability.
   At a later date we could consider tracking beneficiary updates in a different way.
 
 Pros:
@@ -197,7 +206,7 @@ Cons:
 
 ### Integration With External Processes
 
-Some external processes (notably lambda functions) look for and react to the movement of files out of the `Incoming` tree to coordinate their actions with the pipeline.
+Some external processes (notably AWS lambdas) look for and react to the movement of files out of the `Incoming` tree to coordinate their actions with the pipeline.
 Eliminating the move will necessarily break that method.
 
 Depending on the option selected, an external process could either look for the appearance of a status file or query the database to look for a status change.
@@ -208,14 +217,39 @@ This would follow the pattern used by the database migrator.
 The application could push a message to the queue for events such as:
 
 * starting up
+* checking S3 for new files
 * discovering a file
 * downloading a file
 * processing a file
 * finished processing a file
+* finished processing a manifest
+* sleeping before next run
 * shutting down
 
 Applications could then react to any of these messages as they see fit without being tightly coupled to the pipeline or its database schema.
 
+
+## Proposed Solution
+
+To derive the maximum benefits from this effort the proposed solution is also the most ambitious.
+
+* Implement status update event publishing to an SQS queue for integration with external systems.
+* Modify external processes to monitor the queue to know when a manifest has been processed.
+* Implement option P to provide full progress tracking and source of each claim and bene record.
+* Remove S3 file move logic from pipeline.
+
+Implementation can be performed using an epic with stories that each fit into a single sprint.
+Stories could be implemented on two parallel tracks:
+
+  * SQS: Changes to implement and use SQS event publishing.
+  * DB: Changes to track S3 files and progress in the database.
+
+| Story | Sprint | Points | Description |
+| SQS-1 | 1 | 3 | Implement status update event publishing via SQS. |
+| SQS-2 | 2 | 3 | Modify external processes to monitor SQS queue instead of S3 Done folder. |
+| DB-1 | 1 | 3-5 | Implement Option-T to track S3 files in database. |
+| DB-2 | 2 | 5-8 | Implement Option-P to add progress and change tracking. |
+| SQS-3 | 3 | 1 | Remove S3 file move logic from CCW pipeline and make pipeline interruptable. |
 
 ## Prior Art
 
