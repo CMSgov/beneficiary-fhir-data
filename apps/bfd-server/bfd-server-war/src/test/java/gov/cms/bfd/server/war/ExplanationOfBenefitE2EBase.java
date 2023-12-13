@@ -46,7 +46,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   protected static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
 
   /** The SAMHSA CPT code. */
-  public static final String SAMPLE_SAMHSA_CPT_CODE = "G0137";
+  protected static final String SAMPLE_SAMHSA_CPT_CODE = "G0137";
 
   /**
    * Verifies that an EOB Carrier claim can be requested using the read endpoint, successfully
