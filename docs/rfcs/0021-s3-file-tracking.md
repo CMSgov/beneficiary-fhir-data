@@ -68,7 +68,7 @@ However the number of file names per year is relatively small so this extra over
 The focus of this document is eliminating the move step from the CCW pipeline.
 Nothing precludes a background process outside of the pipeline from periodically moving or deletng processed files.
 Such a background process could also compress the files as it moves them.
-Any such process is outside the scope of this document.
+This document will discuss ideas for how those processes might work in the future possibilities section.
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
@@ -218,6 +218,7 @@ The application could push a message to the queue for events such as:
 
 * starting up
 * discovering a file
+* downloading a file
 * processing a file
 * finished processing a file
 * shutting down
@@ -239,7 +240,24 @@ Because batches are stored in parallel and may be written to the database out of
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
 
-n/a
+The current solution effectively archives files forever.
+Files are moved into the `Done` folder for permanent storage and forgotten.
+The utility of retaining these files for the long term is an open question.
+Even if the files should be retained there are alternative archiving options that might be more cost effective.
+
+How should archived files be stored in S3?
+Since RIF data files are text they should be highly compressible.
+Compressing them before archiving them would require some up front CPU time but would save on storage and I/O costs.
+However, the move to parquet format in the near future would make compression irrelevant.
+
+The CCW manifest file is not particularly useful for understanding an archived file.
+Ideally we should add our own meta data to the archive to indicate what version of BFD it was compatible with.
+This would simplify any effort to reingest a file in the future after CCW formats have changed.
+
+Whichever proposal we adopt for eliminating the S3 file move step from the pipeline there will still be a need in the future to clean up the `Incoming` directory.
+We might create a new pipeline job that checks for completed files in the `Incoming` tree and either deletes or archives them.
+The same job might also delete files from the archive after a configurable TTL has expired.
+The job should be idempotent so that it can fail or be interrupted and automatically clean up any mess the next time it runs.
 
 ## Addenda
 [Addenda]: #addenda
