@@ -33,17 +33,17 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SAMPLE_A_DME),
   /** Sample A with various SAMHSA data in each claim. */
   SAMPLE_A_SAMHSA(
-          StaticRifResource.SAMPLE_A_BENES,
-          StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
-          StaticRifResource.SAMPLE_A_CARRIER_SAMHSA,
-          // PDE has no SAMHSA data
-          StaticRifResource.SAMPLE_A_PDE,
-          StaticRifResource.SAMPLE_A_INPATIENT_SAMHSA,
-          StaticRifResource.SAMPLE_A_OUTPATIENT_SAMHSA,
-          StaticRifResource.SAMPLE_A_HHA_SAMHSA,
-          StaticRifResource.SAMPLE_A_HOSPICE_SAMHSA,
-          StaticRifResource.SAMPLE_A_SNF_SAMHSA,
-          StaticRifResource.SAMPLE_A_DME_SAMHSA),
+      StaticRifResource.SAMPLE_A_BENES,
+      StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
+      StaticRifResource.SAMPLE_A_CARRIER_SAMHSA,
+      // PDE has no SAMHSA data
+      StaticRifResource.SAMPLE_A_PDE,
+      StaticRifResource.SAMPLE_A_INPATIENT_SAMHSA,
+      StaticRifResource.SAMPLE_A_OUTPATIENT_SAMHSA,
+      StaticRifResource.SAMPLE_A_HHA_SAMHSA,
+      StaticRifResource.SAMPLE_A_HOSPICE_SAMHSA,
+      StaticRifResource.SAMPLE_A_SNF_SAMHSA,
+      StaticRifResource.SAMPLE_A_DME_SAMHSA),
   /** Sample A Four Character DRG Code Resource Group. */
   SAMPLE_A_FOUR_CHARACTER_DRG_CODE(
       StaticRifResource.SAMPLE_A_BENES,

@@ -186,26 +186,32 @@ public enum StaticRifResource {
       7),
 
   /** Sample A Carrier static rif. */
-  SAMPLE_A_CARRIER_SAMHSA(resourceUrl("rif-static-samples/samhsa/sample-a-carrier.txt"), RifFileType.CARRIER, 1),
+  SAMPLE_A_CARRIER_SAMHSA(
+      resourceUrl("rif-static-samples/samhsa/sample-a-carrier.txt"), RifFileType.CARRIER, 1),
 
   /** Sample A DME static rif. */
-  SAMPLE_A_DME_SAMHSA(resourceUrl("rif-static-samples/samhsa/sample-a-dme.txt"), RifFileType.DME, 1),
+  SAMPLE_A_DME_SAMHSA(
+      resourceUrl("rif-static-samples/samhsa/sample-a-dme.txt"), RifFileType.DME, 1),
 
   /** Sample A HHA static rif. */
-  SAMPLE_A_HHA_SAMHSA(resourceUrl("rif-static-samples/samhsa/sample-a-hha.txt"), RifFileType.HHA, 1),
+  SAMPLE_A_HHA_SAMHSA(
+      resourceUrl("rif-static-samples/samhsa/sample-a-hha.txt"), RifFileType.HHA, 1),
 
   /** Sample A Hospice static rif. */
-  SAMPLE_A_HOSPICE_SAMHSA(resourceUrl("rif-static-samples/samhsa/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
+  SAMPLE_A_HOSPICE_SAMHSA(
+      resourceUrl("rif-static-samples/samhsa/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
 
   /** Sample A Inpatient static rif. */
-  SAMPLE_A_INPATIENT_SAMHSA(resourceUrl("rif-static-samples/samhsa/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
+  SAMPLE_A_INPATIENT_SAMHSA(
+      resourceUrl("rif-static-samples/samhsa/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 
   /** Sample A Outpatient static rif. */
-  SAMPLE_A_OUTPATIENT_SAMHSA(resourceUrl("rif-static-samples/samhsa/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
+  SAMPLE_A_OUTPATIENT_SAMHSA(
+      resourceUrl("rif-static-samples/samhsa/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
 
   /** Sample A SNF static rif. */
-  SAMPLE_A_SNF_SAMHSA(resourceUrl("rif-static-samples/samhsa/sample-a-snf.txt"), RifFileType.SNF, 1);
-
+  SAMPLE_A_SNF_SAMHSA(
+      resourceUrl("rif-static-samples/samhsa/sample-a-snf.txt"), RifFileType.SNF, 1);
 
   /** The Resource URL Supplier for the different RIF files. */
   private final Supplier<URL> resourceUrlSupplier;

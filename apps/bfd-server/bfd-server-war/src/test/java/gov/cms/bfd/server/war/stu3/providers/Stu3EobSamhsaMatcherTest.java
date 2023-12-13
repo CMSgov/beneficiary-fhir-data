@@ -38,8 +38,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Unit tests for {@link Stu3EobSamhsaMatcherTest}. Integration with {@link
  * ExplanationOfBenefitResourceProvider} is covered by {@link
- * ExplanationOfBenefitE2E#testEobByPatientIdWithExcludeSamhsaTrueExpectFiltering} and related
- * E2E tests.
+ * ExplanationOfBenefitE2E#testEobByPatientIdWithExcludeSamhsaTrueExpectFiltering} and related E2E
+ * tests.
  */
 public final class Stu3EobSamhsaMatcherTest {
   /** The SAMHSA CPT code. */

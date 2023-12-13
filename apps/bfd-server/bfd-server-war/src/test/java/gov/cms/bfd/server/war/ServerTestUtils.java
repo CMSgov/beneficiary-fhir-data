@@ -43,7 +43,6 @@ import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
-import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.restassured.response.Response;
@@ -84,7 +83,6 @@ import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Table;
 import javax.sql.DataSource;
@@ -447,7 +445,8 @@ public final class ServerTestUtils {
    * @return the loaded records
    */
   public List<Object> loadSampleAData() {
-    return ServerTestUtils.get().loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    return ServerTestUtils.get()
+        .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
   }
 
   /**
@@ -456,7 +455,8 @@ public final class ServerTestUtils {
    * @return the loaded records
    */
   public List<Object> loadSampleASamhsaData() {
-    return ServerTestUtils.get().loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources()));
+    return ServerTestUtils.get()
+        .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources()));
   }
 
   /**

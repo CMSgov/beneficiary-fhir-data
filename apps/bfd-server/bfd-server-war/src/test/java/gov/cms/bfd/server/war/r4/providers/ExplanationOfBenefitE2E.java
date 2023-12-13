@@ -80,37 +80,37 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
     String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=false";
 
     given()
-            .spec(requestAuth)
-            .expect()
-            .body("resourceType", equalTo("Bundle"))
-            .body("entry.size()", equalTo(8))
-            // Check nothing is filtered and samhsa data is returned
-            .body(
-                    "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('dme') }.resource.item.productOrService.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_CPT_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            // Make sure pde is there too
-            .body("entry.resource.id", hasItem(containsString("pde")))
-            .statusCode(200)
-            .when()
-            .get(requestString);
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        .body("entry.size()", equalTo(8))
+        // Check nothing is filtered and samhsa data is returned
+        .body(
+            "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('dme') }.resource.item.productOrService.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_CPT_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        // Make sure pde is there too
+        .body("entry.resource.id", hasItem(containsString("pde")))
+        .statusCode(200)
+        .when()
+        .get(requestString);
   }
 
   /**
@@ -125,36 +125,36 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
     String requestString = eobEndpoint + "?patient=" + patientId;
 
     given()
-            .spec(requestAuth)
-            .expect()
-            .body("resourceType", equalTo("Bundle"))
-            .body("entry.size()", equalTo(8))
-            // Check nothing is filtered and samhsa data is returned
-            .body(
-                    "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('dme') }.resource.item.productOrService.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_CPT_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            .body(
-                    "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-                    hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-            // Make sure pde is there too
-            .body("entry.resource.id", hasItem(containsString("pde")))
-            .statusCode(200)
-            .when()
-            .get(requestString);
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        .body("entry.size()", equalTo(8))
+        // Check nothing is filtered and samhsa data is returned
+        .body(
+            "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('dme') }.resource.item.productOrService.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_CPT_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        .body(
+            "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
+            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+        // Make sure pde is there too
+        .body("entry.resource.id", hasItem(containsString("pde")))
+        .statusCode(200)
+        .when()
+        .get(requestString);
   }
 }
