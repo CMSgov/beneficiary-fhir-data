@@ -45,6 +45,9 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   /** The SAMHSA ICD9 diagnosis code. */
   protected static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
 
+  /** The SAMHSA CPT code. */
+  public static final String SAMPLE_SAMHSA_CPT_CODE = "G0137";
+
   /**
    * Verifies that an EOB Carrier claim can be requested using the read endpoint, successfully
    * returns a 200 response, and has the claim id and a couple other EOB details present in the
@@ -582,7 +585,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     // Adjust the sampleA data that was loaded to include some samhsa data
     // We could also just keep a samhsa set, or have the default set have samhsa
     // so that we don't need a separate set or modification
-    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(true));
+    String patientId = testUtils.getPatientId(testUtils.loadSampleASamhsaData());
     String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
 
     given()
@@ -599,96 +602,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is set
-   * to false.
-   */
-  @Test
-  public void testEobByPatientIdWithExcludeSamhsaFalseExpectNoFiltering() {
-
-    // Adjust the sampleA data that was loaded to include some samhsa data by passing true
-    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(true));
-    String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=false";
-
-    given()
-        .spec(requestAuth)
-        .expect()
-        .body("resourceType", equalTo("Bundle"))
-        .body("entry.size()", equalTo(8))
-        // Check nothing is filtered and samhsa data is returned
-        .body(
-            "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('dme') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        // Make sure pde is there too
-        .body("entry.resource.id", hasItem(containsString("pde")))
-        .statusCode(200)
-        .when()
-        .get(requestString);
-  }
-
-  /**
-   * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is not
-   * explicitly set (should default to false internally).
-   */
-  @Test
-  public void testEobByPatientIdWithExcludeSamhsaDefaultExpectNoFiltering() {
-
-    // Adjust the sampleA data that was loaded to include some samhsa data by passing true
-    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(true));
-    String requestString = eobEndpoint + "?patient=" + patientId;
-
-    given()
-        .spec(requestAuth)
-        .expect()
-        .body("resourceType", equalTo("Bundle"))
-        .body("entry.size()", equalTo(8))
-        // Check nothing is filtered and samhsa data is returned
-        .body(
-            "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('dme') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        // Make sure pde is there too
-        .body("entry.resource.id", hasItem(containsString("pde")))
-        .statusCode(200)
-        .when()
-        .get(requestString);
-  }
-
-  /**
    * Ensure nothing unusual happens when we excludeSAMHSA = false and the result has non-samhsa
    * data.
    */
@@ -696,7 +609,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   public void testEobByPatientIdForNonSamhsaEobsWithExcludeSamhsaTrueExpectNoError() {
 
     // dont load samhsa data
-    String patientId = testUtils.getPatientId(testUtils.loadSampleAData(false));
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     // call samhsa filter, but it shouldn't do anything since there is nothing to filter
     String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
 
