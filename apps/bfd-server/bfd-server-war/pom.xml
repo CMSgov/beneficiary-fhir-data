@@ -203,6 +203,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>annotations-api</artifactId>
+        </dependency>
+
+        <dependency>
             <!-- this allows the construction of POJOs without a lot of boilerplate code -->
             <!-- providd because it's only needed at compile time -->
             <groupId>org.projectlombok</groupId>
@@ -372,14 +377,15 @@
                   <execution>
                     <phase> pre-integration-test </phase>
                     <configuration>
-                      <tasks>
-                          <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war" dest="${project.build.directory}/test-webapp-directory">
+                      <target>
+                          <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war"
+                                 dest="${project.build.directory}/test-webapp-directory">
                               <patternset>
                                   <exclude name="**/lib/*" />
                                   <exclude name="**/classes/**" />
                               </patternset>
                           </unzip>
-                      </tasks>
+                      </target>
                     </configuration>
                     <goals>
                       <goal>run</goal>
