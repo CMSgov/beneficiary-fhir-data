@@ -1,74 +1,74 @@
 #!/bin/bash
 
-export CCW_RIF_JOB_ENABLED='{{ data_pipeline_ccw_rif_job_enabled }}'
-export S3_BUCKET_NAME='{{ data_pipeline_s3_bucket }}'
-export HICN_HASH_ITERATIONS='{{ data_pipeline_hicn_hash_iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
-export HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
-export DATABASE_URL='{{ data_pipeline_db_url }}'
-export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
-export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
+export CCW_RIF_JOB_ENABLED='{{ ccw/job/enabled }}'
+export S3_BUCKET_NAME='{{ ccw/s3_bucket_name }}'
+export HICN_HASH_ITERATIONS='{{ hicn_hash/iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
+export HICN_HASH_PEPPER='{{ hicn_hash/pepper }}'
+export DATABASE_URL='{{ db/url }}'
+export DATABASE_USERNAME='{{ db/username }}'
+export DATABASE_PASSWORD='{{ db/password }}'
 # NOTE: RIF Loader Threads are generally some multiple of available cpus/core, e.g. `$((3 * $(nproc)))`
-export LOADER_THREADS='{{ ansible_processor_vcpus * (rif_thread_multiple | int) }}'
-export RIF_JOB_BATCH_SIZE='{{ rif_job_batch_size }}'
-export RIF_JOB_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple }}'
-export LOADER_THREADS_CLAIMS='{{ ansible_processor_vcpus * (rif_thread_multiple_claims | int) }}'
-export RIF_JOB_BATCH_SIZE_CLAIMS='{{ rif_job_batch_size_claims }}'
-export RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS='{{ rif_job_queue_size_multiple_claims }}'
+export LOADER_THREADS='{{ loader_thread_count }}'
+export RIF_JOB_BATCH_SIZE='{{ ccw/job/batch_size }}'
+export RIF_JOB_QUEUE_SIZE_MULTIPLE='{{ ccw/job/queue_size_multiple }}'
+export LOADER_THREADS_CLAIMS='{{ ccw/job/claims/loader_thread_count	}}'
+export RIF_JOB_BATCH_SIZE_CLAIMS='{{ ccw/job/claims/batch_size }}'
+export RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS='{{ ccw/job/claims/queue_size_multiple }}'
 
-export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
+export IDEMPOTENCY_REQUIRED='{{ ccw/idempotency_enabled }}'
 
 # Observability
-{% if data_pipeline_micrometer_cw_enabled is defined and data_pipeline_micrometer_cw_namespace is defined %}
-export MICROMETER_CW_ENABLED={{ data_pipeline_micrometer_cw_enabled }}
-export MICROMETER_CW_NAMESPACE={{ data_pipeline_micrometer_cw_namespace }}
-export MICROMETER_CW_INTERVAL={{ data_pipeline_micrometer_cw_interval | default('PT1M') }}
+{% if micrometer_cw/enabled is defined and micrometer_cw/namespace is defined %}
+export MICROMETER_CW_ENABLED={{ micrometer_cw/enabled }}
+export MICROMETER_CW_NAMESPACE={{ micrometer_cw/namespace }}
+export MICROMETER_CW_INTERVAL={{ micrometer_cw/interval }}
 {% else %}
 # export MICROMETER_CW_ENABLED=
 # export MICROMETER_CW_NAMESPACE=
 # export MICROMETER_CW_INTERVAL=
 {% endif %}
 
-export NEW_RELIC_METRIC_HOST='{{ data_pipeline_new_relic_metric_host }}'
-export NEW_RELIC_METRIC_PATH='{{ data_pipeline_new_relic_metric_path }}'
-{% if data_pipeline_new_relic_app_name is defined %}
-export NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
+export NEW_RELIC_METRIC_HOST='{{ new_relic/metrics/host }}'
+export NEW_RELIC_METRIC_PATH='{{ new_relic/metrics/path }}'
+{% if new_relic/app_name is defined %}
+export NEW_RELIC_APP_NAME='{{ new_relic/app_name }}'
 {% else %}
 #export NEW_RELIC_APP_NAME=
 {% endif %}
-{% if data_pipeline_new_relic_metric_key is defined %}
-export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
+{% if new_relic/metrics/license_key is defined %}
+export NEW_RELIC_METRIC_KEY='{{ new_relic/metrics/license_key }}'
 {% else %}
 #export NEW_RELIC_METRIC_KEY=
 {% endif %}
 
-export RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
-export RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
-export RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
-export RDA_JOB_WRITE_THREADS='{{ data_pipeline_rda_job_write_threads }}'
-{% if data_pipeline_rda_process_dlq is defined %}
-export RDA_JOB_PROCESS_DLQ='{{ data_pipeline_rda_process_dlq }}'
+export RDA_JOB_ENABLED='{{ rda/job/enabled }}'
+export RDA_JOB_INTERVAL_SECONDS='{{ rda/job/interval_seconds }}'
+export RDA_JOB_BATCH_SIZE='{{ rda/job/batch_size }}'
+export RDA_JOB_WRITE_THREADS='{{ rda/job/write_thread_count }}'
+{% if rda/job/process_dlq is defined %}
+export RDA_JOB_PROCESS_DLQ='{{ rda/job/process_dlq }}'
 {% endif %}
 {% if data_pipeline_rda_version is defined %}
 export RDA_JOB_RDA_VERSION='{{ data_pipeline_rda_version }}'
 {% endif %}
-{% if data_pipeline_rda_job_starting_fiss_seq_num is defined %}
-export RDA_JOB_STARTING_FISS_SEQ_NUM='{{ data_pipeline_rda_job_starting_fiss_seq_num }}'
+{% if rda/job/starting_fiss_seq_num is defined %}
+export RDA_JOB_STARTING_FISS_SEQ_NUM='{{ rda/job/starting_fiss_seq_num }}'
 {% endif %}
-{% if data_pipeline_rda_job_starting_mcs_seq_num is defined %}
-export RDA_JOB_STARTING_MCS_SEQ_NUM='{{ data_pipeline_rda_job_starting_mcs_seq_num }}'
+{% if rda/job/starting_mcs_seq_num is defined %}
+export RDA_JOB_STARTING_MCS_SEQ_NUM='{{ rda/job/starting_mcs_seq_num }}'
 {% endif %}
-export RDA_GRPC_HOST='{{ data_pipeline_rda_grpc_host }}'
-export RDA_GRPC_PORT='{{ data_pipeline_rda_grpc_port }}'
-export RDA_GRPC_MAX_IDLE_SECONDS='{{ data_pipeline_rda_grpc_max_idle_seconds }}'
-export RDA_GRPC_AUTH_TOKEN='{{ data_pipeline_rda_grpc_auth_token }}'
-export RDA_GRPC_SERVER_TYPE='{{ data_pipeline_rda_grpc_server_type }}'
-export RDA_GRPC_INPROC_SERVER_MODE='{{ data_pipeline_rda_grpc_inproc_server_mode }}'
-export RDA_GRPC_INPROC_SERVER_S3_REGION='{{ data_pipeline_rda_grpc_inproc_server_s3_region }}'
-export RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ data_pipeline_rda_grpc_inproc_server_s3_bucket }}'
-export RDA_GRPC_INPROC_SERVER_S3_DIRECTORY='{{ data_pipeline_rda_grpc_inproc_server_s3_directory }}'
+export RDA_GRPC_HOST='{{ rda/grpc/host }}'
+export RDA_GRPC_PORT='{{ rda/grpc/port }}'
+export RDA_GRPC_MAX_IDLE_SECONDS='{{ rda/grpc/max_idle_seconds }}'
+export RDA_GRPC_AUTH_TOKEN='{{ rda/grpc/auth_token }}'
+export RDA_GRPC_SERVER_TYPE='{{ rda/grpc/server_type }}'
+export RDA_GRPC_INPROC_SERVER_MODE='{{ rda/grpc/inprocess_server/mode }}'
+export RDA_GRPC_INPROC_SERVER_S3_REGION='{{ rda/grpc/inprocess_server/s3/region }}'
+export RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ rda/grpc/inprocess_server/s3/bucket }}'
+export RDA_GRPC_INPROC_SERVER_S3_DIRECTORY='{{ rda/grpc/inprocess_server/s3/dir }}'
 
 # Referenced by the pipeline's logback.xml file to add environment name for use in splunk.
-export BFD_ENV_NAME='{{ env_name_std }}'
+export BFD_ENV_NAME='{{ env_name }}'
 
 
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
@@ -77,7 +77,7 @@ export BFD_ENV_NAME='{{ env_name_std }}'
 # Set some additional variables.
 JVM_ARGS='{{ data_pipeline_jvm_args }}'
 
-exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
+exec "{{ paths/files/launcher_script }}" \
 	${JVM_ARGS} \
-	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} -Dorg.jboss.logging.provider=slf4j \
-	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"
+	-Djava.io.tmpdir={{ paths/dirs/tmp }} -Dorg.jboss.logging.provider={{ java/jboss/logging_provider }} \
+	&>> "{{ paths/files/launcher_log }}""
