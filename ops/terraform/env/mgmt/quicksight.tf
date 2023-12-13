@@ -2,16 +2,23 @@ locals {
   quicksight_config = zipmap(
     [for name in data.aws_ssm_parameters_by_path.sensitive_quicksight_config.names :
     element(split("/", name), length(split("/", name)) - 1)],
-    [for value in nonsensitive(data.aws_ssm_parameters_by_path.sensitive_quicksight_config.values) : jsondecode(value)]
+    [for value in nonsensitive(data.aws_ssm_parameters_by_path.sensitive_quicksight_config.values) : value]
   )
 
-  quicksight_users  = local.quicksight_config["users"]
-  quicksight_groups = [for group in local.quicksight_config["groups"] : group["group_name"]]
+  quicksight_users  = jsondecode(local.quicksight_config["users"])
+  quicksight_groups = [for group in jsondecode(local.quicksight_config["groups"]) : group["group_name"]]
   quicksight_group_memberships = flatten([
     for user in local.quicksight_users : [
       for group_name in user["groups"] : { "member_name" : lookup(user, "iam", user["email"]), "group_name" : group_name }
     ]
   ])
+
+  quicksight_principal_admin_arn          = local.quicksight_config["principal_admin_arn"]
+  transfer_quicksight_permissions_script  = "${path.module}/scripts/transfer-quicksight-permissions.sh"
+  transfer_quicksight_permissions_command = <<-EOF
+chmod +x ${local.transfer_quicksight_permissions_script}
+${local.transfer_quicksight_permissions_script}
+EOF
 }
 
 data "aws_ssm_parameters_by_path" "sensitive_quicksight_config" {
@@ -30,6 +37,28 @@ resource "aws_quicksight_user" "quicksight_user" {
   user_role     = upper(each.value["user_role"])
   iam_arn       = each.value["identity_type"] == "IAM" ? "arn:aws:quicksight:us-east-1:${local.account_id}:user/default/${each.value["iam"]}" : null
   user_name     = each.value["identity_type"] == "QUICKSIGHT" ? sensitive(each.value["email"]) : null
+}
+
+# On deletion, transfer ownership of assets (for which this user is the sole owner) to the principal admin as defined
+# in SSM
+resource "null_resource" "destroy_quicksight_user" {
+  for_each = aws_quicksight_user.quicksight_user
+  triggers = {
+    account_id          = local.account_id
+    sole_owner_arn      = each.value.arn,
+    principal_admin_arn = local.quicksight_principal_admin_arn
+    command             = local.transfer_quicksight_permissions_command
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = self.triggers.command
+    environment = {
+      AWS_ACCOUNT_ID      = self.triggers.account_id
+      PRINCIPAL_ADMIN_ARN = self.triggers.principal_admin_arn
+      SOLE_OWNER_ARN      = self.triggers.sole_owner_arn
+    }
+  }
 }
 
 # Quicksight groups are expected to adhere to the following json format:
