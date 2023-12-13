@@ -26,7 +26,7 @@ Several options are proposed.
 * [Terminology](#terminology)
 * [Background](#background)
 * [Proposed Solution](#proposed-solution)
-    * [Option B](#option-b)
+    * [Option B](#option-b-only-move-the-manifest-file)
     * [Option MF](#option-mf)
     * [Option DF](#option-df)
     * [Option T](#option-t)
@@ -77,7 +77,6 @@ This section lists, in order of increasing complexity, several possible alternat
 The author recommends that BFD implement Option-P (full progress tracking), possibly with the addition of status file upload from option MF.
 
 ### Option B: Only Move the Manifest File
-[Option B]: #option-b
 
 As silly as this sounds the minimal option is simply to move the manifest files after processing while leaving the data files in place.
 The manifest files are tiny and drive the entire process.
