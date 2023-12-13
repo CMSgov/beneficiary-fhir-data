@@ -12,8 +12,8 @@
       vars:
         # TODO: data_server_appserver_https_port anchor to be used in subsequent verification step, e.g. external curl
         data_server_appserver_https_port: &data_server_appserver_https_port "7443"
-        data_server_launcher: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
-        data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
+        data_server_launcher: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/{{ bfd_version }}/bfd-server-launcher-{{ bfd_version }}.zip"
+        data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/{{ bfd_version }}/bfd-server-war-{{ bfd_version }}.war"
         data_server_ssl_client_certificates:
           - alias: client_foo
             certificate: |-

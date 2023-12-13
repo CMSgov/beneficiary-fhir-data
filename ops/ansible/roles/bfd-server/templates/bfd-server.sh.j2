@@ -4,7 +4,7 @@
 export BFD_PORT='{{ data_server_appserver_https_port }}'
 export BFD_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.pfx'
 export BFD_TRUSTSTORE='{{ data_server_dir }}/bluebutton-appserver-truststore.pfx'
-export BFD_WAR='{{ data_server_dir }}/{{ data_server_war | basename }}'
+export BFD_WAR="$(find {{ data_server_dir }} -name 'bfd-server-war-*.war')"
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
@@ -184,7 +184,7 @@ service_startup_check() {
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 
 # 3... 2... 1... launch!
-bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
+bfd-server-launcher-{{ bfd_version }}/bfd-server-launcher.sh \
   -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
