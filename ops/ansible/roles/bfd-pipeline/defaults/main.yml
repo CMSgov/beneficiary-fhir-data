@@ -1,5 +1,4 @@
 ---
-bfd_version: 1.0.0-SNAPSHOT
 env_name_std: 'unknown-environment'
 
 data_pipeline_dir: /usr/local/bluebutton-data-pipeline

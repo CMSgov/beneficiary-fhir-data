@@ -45,7 +45,7 @@ while getopts "e:i:hk" option; do
 done
 shift "$((OPTIND-1))"
 
-export BFD_VERSION="${1:-1.0.0-SNAPSHOT}"
+export BFD_VERSION="$1"
 export ARTIFACT_DIRECTORY=".m2/repository/gov/cms/bfd/bfd-db-migrator/${BFD_VERSION}"
 export ARTIFACT="bfd-db-migrator-${BFD_VERSION}.zip"
 

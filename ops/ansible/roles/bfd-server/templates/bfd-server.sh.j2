@@ -182,9 +182,10 @@ service_startup_check() {
 
 # Set some additional variables.
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
+SERVICE_SCRIPT="$(find {{ data_server_dir }} -name bfd-server-launcher.sh)"
 
 # 3... 2... 1... launch!
-bfd-server-launcher-{{ bfd_version }}/bfd-server-launcher.sh \
+"$SERVICE_SCRIPT" \
   -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
