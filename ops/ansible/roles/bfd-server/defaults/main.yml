@@ -1,6 +1,6 @@
 ---
-
-# The directory that the Blue Button Data Server will be installed to. 
+bfd_version: 1.0.0-SNAPSHOT
+# The directory that the Blue Button Data Server will be installed to.
 data_server_dir: /usr/local/bfd-server
 
 # The directory that will be set as the 'java.io.tmpdir'

@@ -77,7 +77,7 @@ export BFD_ENV_NAME='{{ env_name }}'
 # Set some additional variables.
 JVM_ARGS='{{ data_pipeline_jvm_args }}'
 
-exec "{{ paths/files/launcher_script }}" \
+exec "{{ data_pipeline_dir }}/bfd-pipeline-app-{{ bfd_version }}/bfd-pipeline-app.sh" \
 	${JVM_ARGS} \
 	-Djava.io.tmpdir={{ paths/dirs/tmp }} -Dorg.jboss.logging.provider={{ java/jboss/logging_provider }} \
 	&>> "{{ paths/files/launcher_log }}""

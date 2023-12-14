@@ -72,6 +72,8 @@ jobs:
   mvn-verify:
     runs-on: ubuntu-20.04
     needs: workflow
+    outputs:
+      BFD_PARENT_VERSION: ${{ steps.bfd-parent-version.outputs.BFD_PARENT_VERSION }}
     if: needs.workflow.outputs.files
     steps:
       - name: 'Checkout repo'
@@ -120,9 +122,14 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" \
           | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      - name: Determine the BFD Parent Version
+        id: bfd-parent-version
+        run: |
+          echo "BFD_PARENT_VERSION=$(yq '.project.version' apps/pom.xml)" >> "$GITHUB_OUTPUT"
+          echo "BFD_PARENT_VERSION=$(yq '.project.version' apps/pom.xml)" >> "$GITHUB_ENV"
+
       - name: Build and Deliver Apps Container Image
         run: |
-          BFD_PARENT_VERSION="$(yq '.project.version' pom.xml)"
           SANITIZED_REF="${GITHUB_REF_NAME////-}"
           IMAGE_NAME="ghcr.io/cmsgov/bfd-apps"
           SHORT_SHA="$(git rev-parse --short HEAD)"
@@ -199,15 +206,18 @@ jobs:
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-pipeline
+      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}
 
   ansible-role-bfd-server:
     needs: mvn-verify
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-server
+      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}
 
   ansible-role-bfd-db-migrator:
     needs: mvn-verify
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-db-migrator
+      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}

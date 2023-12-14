@@ -25,16 +25,16 @@ public class ClaimE2E extends ServerRequiredTest {
 
   /** A base ignore pattern for testing the read endpoint responses against an expected file. */
   private static final Set<String> READ_IGNORE_PATTERNS =
-      Set.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
+      Set.of("/link/[0-9]+/url", "/created", "/meta/lastUpdated");
 
   /** A base ignore pattern for testing the search by mbi responses against an expected file. */
   private static final Set<String> MBI_IGNORE_PATTERNS =
       Set.of(
-          "\"/link/[0-9]+/url\"",
-          "\"/created\"",
-          "\"/meta/lastUpdated\"",
-          "\"/id\"",
-          "\"/entry/[0-9]+/resource/created\"");
+          "/link/[0-9]+/url",
+          "/created",
+          "/meta/lastUpdated",
+          "/id",
+          "/entry/[0-9]+/resource/created");
 
   /** Sets up the test resources. */
   @BeforeEach

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # The launcher picks up its config from environment variables, so set those.
-export BFD_PORT='{{ port }}'
-export BFD_KEYSTORE='{{ paths/files/keystore }}'
-export BFD_TRUSTSTORE='{{ paths/files/truststore }}'
-export BFD_WAR='{{ paths/files/war }}'
+export BFD_PORT='{{ data_server_appserver_https_port }}'
+export BFD_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.pfx'
+export BFD_TRUSTSTORE='{{ data_server_dir }}/bluebutton-appserver-truststore.pfx'
+export BFD_WAR="$(find {{ data_server_dir }} -name 'bfd-server-war-*.war')"
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
@@ -184,8 +184,8 @@ service_startup_check() {
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 
 # 3... 2... 1... launch!
-{{ paths/files/launcher_script }} \
-  -javaagent:{{ paths/files/new_relic_agent_jar }} \
+bfd-server-launcher-{{ bfd_version }}/bfd-server-launcher.sh \
+  -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
   "-DbfdServer.db.url=${DB_URL}" \
