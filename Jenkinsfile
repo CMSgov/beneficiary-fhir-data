@@ -36,12 +36,6 @@ properties([
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
-println "deploy_prod_from_non_master: ${params.deploy_prod_from_non_master}"
-println "deploy_prod_skip_confirm: ${params.deploy_prod_skip_confirm}"
-println "use_latest_images: ${params.use_latest_images}"
-println "force_migrator_deployment: ${params.force_migrator_deployment}"
-println "server_regression_image_overrie: ${params.server_regression_image_override}"
-
 // These variables are accessible throughout this file (except inside methods and classes).
 def scriptForApps
 def scriptForDeploys
@@ -119,7 +113,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 	}
 
 	// send Slack messages
-	// slackSend(color: buildColor, message: slackMsg)
+	slackSend(color: buildColor, message: slackMsg)
 
 	// future notifications can go here. (email, other channels, etc)
 }
@@ -148,13 +142,10 @@ try {
 			stage('Set Branch Name') {
 				currentStage = env.STAGE_NAME
 				script {
-					if (env.BRANCH_NAME != null && env.BRANCH_NAME.startsWith('PR')) {
+					if (env.BRANCH_NAME.startsWith('PR')) {
 						gitBranchName = env.CHANGE_BRANCH
 					} else {
 						gitBranchName = env.BRANCH_NAME
-					}
-					if (gitBranchName == null) {
-						gitBranchName = "rick/BFD-3077-deploy-from-nonmaster"
 					}
 				}
 			}
@@ -192,7 +183,7 @@ try {
 					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
 					// Send notifications that the build has started
-					//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 				}
 			}
 
@@ -656,5 +647,5 @@ try {
 	currentBuild.result = "FAILURE"
 	throw ex
 } finally {
-	//sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
 }

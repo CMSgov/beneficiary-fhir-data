@@ -7,14 +7,14 @@
  */
 
 properties([
-        parameters ([
-            booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.',
+    parameters ([
+        booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.',
                     defaultValue: false),
-            booleanParam(name: 'force_build_docker_host_ami',
+        booleanParam(name: 'force_build_docker_host_ami',
                     description: 'When true, the docker host AMI based on branch will be built. Note: `force_build_amis` must' +
                             'also be true.', defaultValue: false)
-        ])
-        ])
+    ])
+])
 
 // These variables are accessible throughout this file (except inside methods and classes).
 def verboseMaven = params.verbose_mvn_logging
