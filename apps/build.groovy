@@ -48,43 +48,45 @@ aws codeartifact get-repository-endpoint \
 }
 
 def fetch() {
-    bfdRelease = sh(returnStdout: true, script: "yq '.project.version' ${workspace}/apps/pom.xml").trim()
+    env.BFD_RELEASE = sh(returnStdout: true, script: "yq '.project.version' ${workspace}/apps/pom.xml").trim()
     setupCodeArtifactEnvironment()
     archives = [
-        'bfd-db-migrator':     "bfd-db-migrator-${bfdRelease}.zip",
-        'bfd-pipeline-app':    "bfd-pipeline-app-${bfdRelease}.zip",
-        'bfd-server-launcher': "bfd-server-launcher-${bfdRelease}.zip",
-        'bfd-server-war':      "bfd-server-war-${bfdRelease}.war"
+        'bfd-db-migrator':     "bfd-db-migrator-${env.BFD_RELEASE}.zip",
+        'bfd-pipeline-app':    "bfd-pipeline-app-${env.BFD_RELEASE}.zip",
+        'bfd-server-launcher': "bfd-server-launcher-${env.BFD_RELEASE}.zip",
+        'bfd-server-war':      "bfd-server-war-${env.BFD_RELEASE}.war"
     ]
 
     // Create a "dist" directory at the root workspace level
-    dist = "${workspace}/dist"
-    sh "mkdir ${dist}"
+    env.DIST_DIR = "${workspace}/dist"
+    sh 'mkdir -p "$DIR_DIR"'
 
     dir(dist) {
         for (arch in archives) {
             withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'AWS_ACCOUNT_ID')]) {
-                sh """aws codeartifact get-package-version-asset
---domain-owner $AWS_ACCOUNT_ID \
---domain $CA_DOMAIN \
---repository $CA_REPOSITORY \
---asset ${arch.value} \
---package-version ${bfdRelease} \
---package ${arch.key} \
---namespace $CA_NAMESPACE \
+                withEnv(["PACKAGE_NAME=${arch.key}", "PACKAGE_ASSET=${arch.asset}"]) {
+                    sh '''aws codeartifact get-package-version-asset
+--domain-owner "$AWS_ACCOUNT_ID" \
+--domain "$CA_DOMAIN" \
+--repository "$CA_REPOSITORY" \
+--asset "$PACKAGE_ASSET" \
+--package-version "$BFD_RELEASE" \
+--package "$PACKAGE_NAME" \
+--namespace "$CA_NAMESPACE" \
 --format maven \
---region $AWS_REGION \
-"${dist}/${arch.value}"
-"""
+--region "$AWS_REGION" \
+"${DIST_DIR}/${PACKAGE_ASSET}"
+'''
+                }
             }
         }
     }
 
     return new AppResults(
-        dbMigratorZip:      "${dist}/${archives['bfd-db-migrator']}",
-        dataPipelineZip:    "${dist}/${archives['bfd-pipeline-app']}",
-        dataServerLauncher: "${dist}/${archives['bfd-server-launcher']}",
-        dataServerWar:      "${dist}/${archives['bfd-server-war']}"
+        dbMigratorZip:      "${env.DIST_DIR}/${archives['bfd-db-migrator']}",
+        dataPipelineZip:    "${env.DIST_DIR}/${archives['bfd-pipeline-app']}",
+        dataServerLauncher: "${env.DIST_DIR}/${archives['bfd-server-launcher']}",
+        dataServerWar:      "${env.DIST_DIR}/${archives['bfd-server-war']}"
     )
 }
 
