@@ -59,7 +59,7 @@ def fetch() {
 
     // Create a "dist" directory at the root workspace level
     env.DIST_DIR = "${workspace}/dist"
-    sh 'mkdir -p "$DIR_DIR"'
+    sh 'mkdir -p "$DIST_DIR"'
 
     dir(dist) {
         for (arch in archives) {
