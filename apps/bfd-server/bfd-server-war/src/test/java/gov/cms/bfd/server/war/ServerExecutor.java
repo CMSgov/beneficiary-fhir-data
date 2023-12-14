@@ -6,7 +6,6 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +62,6 @@ public class ServerExecutor {
     String targetPath = "target";
     String workDirectory = targetPath + "/server-work";
     String warArtifactLocation = targetPath + "/" + TEST_WEBAPP_DIRECTORY;
-    String serverPortsFile = workDirectory + "/server-ports.properties";
     // These two files are copied into server-work during build time by maven for convenience
     // from: bfd-server/dev/ssl-stores
     String keyStore = workDirectory + "/server-keystore.pfx";
@@ -71,12 +69,11 @@ public class ServerExecutor {
 
     // Validate the paths and properties needed to run the server war exist
     if (!validateRequiredServerSetup(
-        targetPath, workDirectory, warArtifactLocation, serverPortsFile, keyStore, trustStore)) {
+        targetPath, workDirectory, warArtifactLocation, keyStore, trustStore)) {
       return false;
     }
 
-    String portFileContents = Files.readString(Path.of(serverPortsFile)).trim();
-    String serverPort = portFileContents.substring(portFileContents.indexOf('=') + 1);
+    String serverPort = "0";
     LOGGER.info("Configured server to run on HTTPS port {}.", serverPort);
 
     final var appSettings = new HashMap<String, String>();
@@ -112,12 +109,13 @@ public class ServerExecutor {
     }
 
     // Wait for the server to begin listening on its port.
+    final String finalServerPort = Integer.toString(serverInfo.getServer().getURI().getPort());
     try {
       Awaitility.await()
           .atMost(2, TimeUnit.MINUTES)
           .until(
               () -> {
-                try (Socket ignored = new Socket("localhost", Integer.parseInt(serverPort))) {
+                try (Socket ignored = new Socket("localhost", Integer.parseInt(finalServerPort))) {
                   return true;
                 } catch (Exception e) {
                   return false;
@@ -126,7 +124,7 @@ public class ServerExecutor {
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException("Error: Server failed to start within 120 seconds.", e);
     }
-    testServerPort = serverPort;
+    testServerPort = finalServerPort;
     return true;
   }
 
@@ -200,7 +198,6 @@ public class ServerExecutor {
    * @param targetPath the target directory location
    * @param serverWorkPath the server-work directory location
    * @param warArtifactLocation the war artifact location
-   * @param serverPortsFileLocation the server ports file location
    * @param keyStoreLocation the key store location
    * @param trustStoreLocation the trust store location
    * @return false if required paths or properties dont exist
@@ -209,25 +206,18 @@ public class ServerExecutor {
       String targetPath,
       String serverWorkPath,
       String warArtifactLocation,
-      String serverPortsFileLocation,
       String keyStoreLocation,
       String trustStoreLocation) {
 
     // Check required paths exist
     boolean targetIsDir = Files.isDirectory(Paths.get(targetPath));
     boolean serverWorkExists = Files.exists(Paths.get(serverWorkPath));
-    boolean serverPortFileExists = Files.exists(Paths.get(serverPortsFileLocation));
     boolean keyStoreExists = Files.exists(Paths.get(keyStoreLocation));
     boolean trustStoreExists = Files.exists(Paths.get(trustStoreLocation));
-    if (!targetIsDir
-        || !serverWorkExists
-        || !serverPortFileExists
-        || !keyStoreExists
-        || !trustStoreExists) {
+    if (!targetIsDir || !serverWorkExists || !keyStoreExists || !trustStoreExists) {
       LOGGER.error("Could not setup server; could not find required path.");
       LOGGER.error("   found target: {}", targetIsDir);
       LOGGER.error("   found target/server-work: {}", serverWorkExists);
-      LOGGER.error("   found server port file: {}", serverPortFileExists);
       LOGGER.error("   found keystore: {}", keyStoreExists);
       LOGGER.error("   found trust store: {}", trustStoreExists);
       return false;
