@@ -19,4 +19,4 @@ source venv/bin/activate
 ansible-playbook "$TEST_PLAY" --syntax-check --inventory=inventory.docker.yaml
 
 # Run the Ansible test case.
-ansible-playbook "$TEST_PLAY" --inventory=inventory.docker.yaml --extra-vars "$EXTRA_VARS" --extra-vars bfd_version="$BFD_VERSION"
+ansible-playbook "$TEST_PLAY" --inventory=inventory.docker.yaml --extra-vars "$EXTRA_VARS"
