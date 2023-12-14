@@ -111,16 +111,6 @@ spec:
         }
     }
 
-//     parameters {
-//         string(name: 'GOLD_AMI_ID',
-//         defaultValue: '',
-//         description: 'In case the latest Gold image is subpar, force a platinum build with a different gold AMI.')
-//
-//         booleanParam(name: 'FORCE_PLATINUM',
-//         defaultValue: false,
-//         description: 'Forces a new platinum build with the latest Gold AMI ID source tagged.')
-//     }
-
     // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
     triggers {
         cron('30 11 * * *')
