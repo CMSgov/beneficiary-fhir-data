@@ -74,7 +74,6 @@ public class ServerExecutor {
     }
 
     String serverPort = "0";
-    LOGGER.info("Configured server to run on HTTPS port {}.", serverPort);
 
     final var appSettings = new HashMap<String, String>();
     addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
@@ -110,6 +109,8 @@ public class ServerExecutor {
 
     // Wait for the server to begin listening on its port.
     final String finalServerPort = Integer.toString(serverInfo.getServer().getURI().getPort());
+    LOGGER.info("Configured server to run on HTTPS port {}.", serverPort);
+
     try {
       Awaitility.await()
           .atMost(2, TimeUnit.MINUTES)
