@@ -1,4 +1,16 @@
 // Variables defined here are accessible throughout this file (except inside methods and classes).
+properties([
+	parameters([
+        string(name: 'env', description: 'The BFD Environment to deploy the Terraservice to'),
+        string(name: 'ami_override', description: 'BFD Pipeline override AMI ID. Optional, ' +
+            'defaults to latest Pipeline AMI from `master`'),
+        booleanParam(name: 'create_ccw_pipeline_instance', defaultValue: false,
+            description: 'Whether or not the BFD CCW Pipeline instance should be created to load data'),
+        booleanParam(name: 'create_rda_pipeline_instance', defaultValue: true,
+            description: 'Whether or not the BFD RDA Pipeline instance should be created to load data')
+    ])
+])
+
 def scriptForDeploys
 def scriptForApps
 def gitBranchName
@@ -25,27 +37,27 @@ spec:
     }
   }
 
-  parameters {
-    string(
-      name: 'env',
-      description: 'The BFD Environment to deploy the Terraservice to'
-    )
-    string(
-      name: 'ami_override',
-      description: 'BFD Pipeline override AMI ID. Optional, defaults to latest Pipeline AMI from '
-                   + '`master`'
-    )
-    booleanParam(
-      name: 'create_ccw_pipeline_instance',
-      defaultValue: false,
-      description: 'Whether or not the BFD CCW Pipeline instance should be created to load data'
-    )
-    booleanParam(
-      name: 'create_rda_pipeline_instance',
-      defaultValue: true,
-      description: 'Whether or not the BFD RDA Pipeline instance should be created to load data'
-    )
-  }
+//   parameters {
+//     string(
+//       name: 'env',
+//       description: 'The BFD Environment to deploy the Terraservice to'
+//     )
+//     string(
+//       name: 'ami_override',
+//       description: 'BFD Pipeline override AMI ID. Optional, defaults to latest Pipeline AMI from '
+//                    + '`master`'
+//     )
+//     booleanParam(
+//       name: 'create_ccw_pipeline_instance',
+//       defaultValue: false,
+//       description: 'Whether or not the BFD CCW Pipeline instance should be created to load data'
+//     )
+//     booleanParam(
+//       name: 'create_rda_pipeline_instance',
+//       defaultValue: true,
+//       description: 'Whether or not the BFD RDA Pipeline instance should be created to load data'
+//     )
+//   }
 
   stages {
     stage('Set Branch Name') {
