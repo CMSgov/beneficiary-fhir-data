@@ -45,7 +45,7 @@ while getopts "e:i:hk" option; do
 done
 shift "$((OPTIND-1))"
 
-export BFD_VERSION="${1:-1.0.0-SNAPSHOT}"
+export BFD_VERSION="$1"
 export LAUNCHER_DIRECTORY="/.m2/repository/gov/cms/bfd/bfd-server-launcher/${BFD_VERSION}"
 export LAUNCHER_ARTIFACT="bfd-server-launcher-${BFD_VERSION}.zip"
 export WAR_DIRECTORY="/.m2/repository/gov/cms/bfd/bfd-server-war/${BFD_VERSION}"
