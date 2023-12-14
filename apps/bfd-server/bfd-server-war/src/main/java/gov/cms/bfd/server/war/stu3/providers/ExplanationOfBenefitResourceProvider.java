@@ -13,8 +13,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -32,13 +30,12 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -46,8 +43,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -111,12 +106,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
 
   /** The transformer for snf claims. */
   private final SNFClaimTransformer snfClaimTransformer;
-
-  /**
-   * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
-   * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
-   */
-  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Digit}+)");
 
   /**
    * Instantiates a new {@link ExplanationOfBenefitResourceProvider}.
@@ -198,41 +187,31 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   @Read(version = false)
   @Trace
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
+
     if (eobId == null) {
       throw new InvalidRequestException("Missing required ExplanationOfBenefit ID");
     }
-    if (eobId.getVersionIdPartAsLong() != null) {
-      throw new InvalidRequestException("ExplanationOfBenefit ID must not define a version");
-    }
 
-    String eobIdText = eobId.getIdPart();
-    if (eobIdText == null || eobIdText.trim().isEmpty()) {
-      throw new InvalidRequestException("Missing required ExplanationOfBenefit ID");
-    }
-
-    Matcher eobIdMatcher = EOB_ID_PATTERN.matcher(eobIdText);
-    if (!eobIdMatcher.matches()) {
-      throw new InvalidRequestException(
-          "ExplanationOfBenefit ID pattern: '"
-              + eobIdText
-              + "' does not match expected pattern: {alphaString}-{idNumber}");
-    }
+    Matcher eobIdMatcher =
+        CommonTransformerUtils.validateAndReturnEobMatcher(
+            eobId.getVersionIdPartAsLong(), eobId.getIdPart());
     String eobIdTypeText = eobIdMatcher.group(1);
     Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
-    if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
+    if (eobIdType.isEmpty()) {
+      throw new ResourceNotFoundException(eobId);
+    }
     ClaimType claimType = eobIdType.get();
-    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     String eobIdClaimIdText = eobIdMatcher.group(2);
-    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
-    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
-    operation.setOption("by", "id");
-    operation.publishOperationName();
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
+    CommonTransformerUtils.publishMdcOperationName(
+        CanonicalOperation.Endpoint.V1_EOB,
+        Map.of("IncludeTaxNumbers", String.valueOf(includeTaxNumbers), "by", "id"));
 
     Class<?> entityClass = eobIdType.get().getEntityClass();
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery(entityClass);
     Root root = criteria.from(entityClass);
-    eobIdType.get().getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
+    eobIdType.get().getEntityLazyAttributes().forEach(a -> root.fetch(a));
     criteria.select(root);
     criteria.where(builder.equal(root.get(claimType.getEntityIdAttribute()), eobIdClaimIdText));
 
@@ -339,26 +318,27 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
      */
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
-    Set<ClaimType> claimTypesRequested = parseTypeParam(type);
+    Set<ClaimType> claimTypesRequested = CommonTransformerUtils.parseTypeParam(type);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     boolean filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
-    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_EOB);
-    operation.setOption("by", "patient");
-    operation.setOption(
+    Map<String, String> operationOptions = new HashMap<>();
+    operationOptions.put("by", "patient");
+    operationOptions.put(
         "types",
         (claimTypesRequested.size() == ClaimType.values().length)
             ? "*"
             : claimTypesRequested.stream()
                 .sorted(Comparator.comparing(ClaimType::name))
-                .collect(Collectors.toList())
+                .toList()
                 .toString());
-    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
-    operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
-    operation.setOption(
+    operationOptions.put("IncludeTaxNumbers", "" + includeTaxNumbers);
+    operationOptions.put("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+    operationOptions.put(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
-    operation.setOption(
+    operationOptions.put(
         "service-date", Boolean.toString(serviceDate != null && !serviceDate.isEmpty()));
-    operation.publishOperationName();
+    CommonTransformerUtils.publishMdcOperationName(
+        CanonicalOperation.Endpoint.V1_EOB, operationOptions);
 
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
@@ -398,7 +378,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       LoggingUtils.logResourceCountToMdc(0);
       bundle =
           TransformerUtils.createBundle(
-              paging, new ArrayList<IBaseResource>(), loadedFilterManager.getTransactionTime());
+              paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
     return bundle;
   }
@@ -445,7 +425,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     if (claimsToProcess.isEmpty()) {
       return null;
     }
-    List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+    List<IBaseResource> eobs = new ArrayList<>();
 
     /*
      * The way our JPA/SQL schema is setup, we have to run a separate search for
@@ -523,7 +503,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
     ExplanationOfBenefit eob1 = (ExplanationOfBenefit) res1;
     ExplanationOfBenefit eob2 = (ExplanationOfBenefit) res2;
     if (TransformerUtils.getUnprefixedClaimId(eob1)
-        == TransformerUtils.getUnprefixedClaimId(eob2)) {
+        .equals(TransformerUtils.getUnprefixedClaimId(eob2))) {
       return TransformerUtils.getClaimType(eob1).compareTo(TransformerUtils.getClaimType(eob2));
     } else {
       return TransformerUtils.getUnprefixedClaimId(eob1)
@@ -557,70 +537,6 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
       case SNF:
         return snfClaimTransformer;
     }
-    return null;
-  }
-
-  /**
-   * Parses the claim types to return in the search by parsing out the type tokens parameters.
-   *
-   * @param type a {@link TokenAndListParam} for the "type" field in a search
-   * @return The {@link ClaimType}s to be searched, as computed from the specified "type" {@link
-   *     TokenAndListParam} search param
-   */
-  public static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
-    if (type == null) {
-      type =
-          new TokenAndListParam()
-              .addAnd(
-                  new TokenOrListParam()
-                      .add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
-    }
-
-    /*
-     * This logic kinda' stinks, but HAPI forces us to handle some odd query
-     * formulations, e.g. (in postfix notation):
-     * "and(or(claimType==FOO, claimType==BAR), or(claimType==FOO))".
-     */
-    Set<ClaimType> claimTypes = new HashSet<ClaimType>(Arrays.asList(ClaimType.values()));
-    for (TokenOrListParam typeToken : type.getValuesAsQueryTokens()) {
-      /*
-       * Each OR entry is additive: we start with an empty set and add every (valid)
-       * ClaimType that's encountered.
-       */
-      Set<ClaimType> claimTypesInner = new HashSet<ClaimType>();
-      for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
-        if (codingToken.getModifier() != null) {
-          throw new IllegalArgumentException();
-        }
-
-        /*
-         * Per the FHIR spec (https://www.hl7.org/fhir/search.html), there are lots of
-         * edge cases here: we could have null or wildcard or exact system, we can have
-         * an exact or wildcard code. All of those need to be handled carefully -- see
-         * the spec for details.
-         */
-        Optional<ClaimType> claimType =
-            codingToken.getValue() != null
-                ? ClaimType.parse(codingToken.getValue().toLowerCase())
-                : Optional.empty();
-
-        if (codingToken.getSystem() != null
-            && codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
-            && !claimType.isPresent()) {
-          claimTypesInner.addAll(Arrays.asList(ClaimType.values()));
-        } else if (codingToken.getSystem() == null
-            || codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)) {
-          if (claimType.isPresent()) {
-            claimTypesInner.add(claimType.get());
-          }
-        }
-      }
-
-      /*
-       * All multiple AND parameters will do is reduce the number of possible matches.
-       */
-      claimTypes.retainAll(claimTypesInner);
-    }
-    return claimTypes;
+    throw new InvalidRequestException("Invalid requested claim type: " + eobIdType);
   }
 }

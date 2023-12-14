@@ -77,7 +77,7 @@ export BFD_ENV_NAME='{{ env_name_std }}'
 # Set some additional variables.
 JVM_ARGS='{{ data_pipeline_jvm_args }}'
 
-exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
+exec "{{ data_pipeline_dir }}/bfd-pipeline-app-{{ bfd_version }}/bfd-pipeline-app.sh" \
 	${JVM_ARGS} \
 	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} -Dorg.jboss.logging.provider=slf4j \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"

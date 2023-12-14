@@ -1,3 +1,7 @@
+##
+# Original Cloudformation config from ITOPS
+##
+
 resource "aws_s3_bucket" "cf-bfd-management-vpc" {
   bucket = "cf-bfd-management-vpc"
 }

@@ -1,4 +1,5 @@
 ---
+bfd_version: 1.0.0-SNAPSHOT
 env: test
 db_migrator_dir: /opt/bfd-db-migrator
 db_migrator_user: bb-migrator
