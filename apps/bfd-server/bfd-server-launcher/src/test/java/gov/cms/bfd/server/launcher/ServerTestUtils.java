@@ -2,6 +2,7 @@ package gov.cms.bfd.server.launcher;
 
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import gov.cms.bfd.MavenUtils;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -140,12 +141,14 @@ public final class ServerTestUtils {
   }
 
   /**
-   * Gets the {@link Path} to the <code>bfd-server-launcher-sample</code> WAR.
+   * Gets the {@link Path} to the {@code bfd-server-launcher-sample} WAR.
    *
    * @return the {@link Path}
    */
   static Path getSampleWar() {
+    final String projectVersion = MavenUtils.findProjectVersion();
+    final String warFileName = String.format("bfd-server-launcher-sample-%s.war", projectVersion);
     return AppConfigurationIT.getProjectDirectory()
-        .resolve(Paths.get("target", "sample", "bfd-server-launcher-sample-1.0.0-SNAPSHOT.war"));
+        .resolve(Paths.get("target", "sample", warFileName));
   }
 }
