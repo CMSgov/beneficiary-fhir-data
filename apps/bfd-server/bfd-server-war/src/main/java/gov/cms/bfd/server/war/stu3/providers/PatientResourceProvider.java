@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -50,7 +51,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -932,23 +932,28 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
 
     // Then, if we found more than one distinct BENE_ID, or none, throw an error.
-    long distinctBeneIds =
+    List<Long> distinctBeneIds =
         matchingBenes.stream()
             .map(Beneficiary::getBeneficiaryId)
-            .filter(Objects::nonNull)
             .distinct()
-            .count();
-    Beneficiary beneficiary = null;
-    if (distinctBeneIds <= 0) {
+            .sorted()
+            .collect(ImmutableList.toImmutableList());
+
+    Beneficiary beneficiary;
+    if (distinctBeneIds.size() == 0) {
       throw new NoResultException();
-    } else if (distinctBeneIds > 1) {
+    } else if (distinctBeneIds.size() > 1) {
       BfdMDC.put(
-          "database_query_by_hash_collision_distinct_bene_ids", Long.toString(distinctBeneIds));
+          "database_query_by_hash_collision_distinct_bene_ids",
+          Long.toString(distinctBeneIds.size()));
       throw new ResourceNotFoundException(
-          "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
-    } else if (distinctBeneIds == 1) {
-      beneficiary = matchingBenes.get(0);
+          "By hash query found more than one distinct BENE_ID: "
+              + distinctBeneIds.size()
+              + ", DistinctBeneIdsList: "
+              + distinctBeneIds);
     }
+
+    beneficiary = matchingBenes.get(0);
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
     if (!requestHeader.isHICNinIncludeIdentifiers()) {

@@ -1,22 +1,19 @@
 locals {
-  account_id              = data.aws_caller_identity.current.account_id
   bfd_state_bucket        = "bfd-tf-state"
   bcda_aws_account_number = data.aws_ssm_parameter.bcda_aws_account_number.value
-  kms_key_id              = data.aws_kms_key.state.arn
+  state_kms_key_id        = data.aws_kms_key.state.arn
   legacy_kms_key_id       = data.aws_kms_key.legacy.arn
   cloudtrail_logs_bucket  = "bfd-cloudtrail-logs"
 
   default_tags = {
-    Environment    = "global"
+    Environment    = "mgmt"
     application    = "bfd"
     business       = "oeda"
-    stack          = "global"
+    stack          = "mgmt"
     Terraform      = true
-    tf_module_root = "ops/terraform/env/global/s3"
+    tf_module_root = "ops/terraform/env/mgmt"
   }
 }
-
-data "aws_caller_identity" "current" {}
 
 data "aws_ssm_parameter" "bcda_aws_account_number" {
   name            = "/bcda/global/terraform/sensitive/aws_account_number"
@@ -96,7 +93,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
-      kms_master_key_id = local.kms_key_id
+      kms_master_key_id = local.state_kms_key_id
     }
   }
 }

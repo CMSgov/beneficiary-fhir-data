@@ -79,7 +79,7 @@
 
 - name: Find New Relic Agent
   find:
-    paths: "{{ data_server_dir }}/bfd-server-launcher-1.0.0-SNAPSHOT/lib/"
+    paths: "{{ data_server_dir }}/bfd-server-launcher-{{ bfd_version }}/lib/"
     pattern: newrelic-agent*.jar
   register: find_nra
 
