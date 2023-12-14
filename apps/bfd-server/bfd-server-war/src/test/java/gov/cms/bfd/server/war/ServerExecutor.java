@@ -109,7 +109,7 @@ public class ServerExecutor {
 
     // Wait for the server to begin listening on its port.
     final String finalServerPort = Integer.toString(serverInfo.getServer().getURI().getPort());
-    LOGGER.info("Configured server to run on HTTPS port {}.", serverPort);
+    LOGGER.info("Configured server to run on HTTPS port {}.", finalServerPort);
 
     try {
       Awaitility.await()
