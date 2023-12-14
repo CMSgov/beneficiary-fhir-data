@@ -67,11 +67,11 @@ def findAmis(String branchName) {
  * Builds the BFD Pipeline and BFD Server AMIs.
  *
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that already exist
- * @param appBuildResults the {@link AppBuildResults} containing the paths to the app binaries that were built
+ * @param appBuildResults the {@link AppResults} containing the paths to the app binaries that were built
  * @return a new {@link AmiIds} instance detailing the shiny new AMIs that are now available for use
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
-def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
+def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppResults appBuildResults) {
 	amiIdsWrapper = new AmiIds();
 
 	extraVars = [
