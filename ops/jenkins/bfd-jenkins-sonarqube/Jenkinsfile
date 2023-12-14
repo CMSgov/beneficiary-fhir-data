@@ -62,11 +62,7 @@ spec:
 """
         }
     }
-//     parameters {
-//         booleanParam(name: 'verbose_mvn_logging',
-//         description: 'When true, `mvn` will produce verbose logs.',
-//         defaultValue: false)
-//     }
+
     environment {
         SONAR_PROJECT_KEY = 'bfd-parent'
         SONAR_HOST_URL = 'https://sonarqube.cloud.cms.gov'
