@@ -43,7 +43,6 @@ import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
-import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.restassured.response.Response;
@@ -82,7 +81,6 @@ import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Table;
 import javax.sql.DataSource;
@@ -414,231 +412,18 @@ public final class ServerTestUtils {
    * @return the loaded records
    */
   public List<Object> loadSampleAData() {
-    return loadSampleAData(false);
+    return ServerTestUtils.get()
+        .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
   }
 
   /**
-   * Loads the sample A data to use in tests.
+   * Loads the sample A data with various samhsa codes to use in tests.
    *
-   * @param addSamhsa if samhsa data should be added to the carrier test data
    * @return the loaded records
    */
-  public List<Object> loadSampleAData(boolean addSamhsa) {
-
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    if (addSamhsa) {
-      addSamhsaToLoadedRecords(loadedRecords);
-    }
-
-    return loadedRecords;
-  }
-
-  /**
-   * Load the SAMPLE_A resources and then tweak carrier claim types to have a SAMHSA diagnosis code.
-   *
-   * @param loadedRecords the loaded records
-   */
-  private void addSamhsaToLoadedRecords(List<Object> loadedRecords) {
-    // Load the SAMPLE_A resources normally.
-    EntityManager entityManager = null;
-
-    try {
-      EntityManagerFactory entityManagerFactory =
-          PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
-      entityManager = entityManagerFactory.createEntityManager();
-
-      // Tweak the SAMPLE_A claims such that they are SAMHSA-related.
-      adjustCarrierClaimForSamhsaDiagnosis(loadedRecords, entityManager);
-      adjustHhaRecordForSamhsaDiagnosis(loadedRecords, entityManager);
-      adjustDmeRecordForSamhsaDiagnosis(loadedRecords, entityManager);
-      adjustInpatientRecordForSamhsaDiagnosis(loadedRecords, entityManager);
-      adjustHospiceRecordForSamhsaDiagnosis(loadedRecords, entityManager);
-      adjustOutpatientRecordForSamhsaDiagnosis(loadedRecords, entityManager);
-      adjustSnfRecordForSamhsaDiagnosis(loadedRecords, entityManager);
-
-    } finally {
-      if (entityManager != null && entityManager.getTransaction().isActive())
-        entityManager.getTransaction().rollback();
-      if (entityManager != null) entityManager.close();
-    }
-  }
-
-  /**
-   * Adjusts the carrier claim to support samhsa.
-   *
-   * @param loadedRecords the loaded records
-   * @param entityManager the entity manager
-   */
-  private void adjustCarrierClaimForSamhsaDiagnosis(
-      List<Object> loadedRecords, EntityManager entityManager) {
-
-    CarrierClaim carrierRifRecord =
-        loadedRecords.stream()
-            .filter(r -> r instanceof CarrierClaim)
-            .map(CarrierClaim.class::cast)
-            .findFirst()
-            .get();
-
-    entityManager.getTransaction().begin();
-    carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
-    carrierRifRecord.setDiagnosis2Code(
-        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-    carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-    entityManager.merge(carrierRifRecord);
-    entityManager.getTransaction().commit();
-  }
-
-  /**
-   * Adjusts the first inpatient record to support samhsa.
-   *
-   * @param loadedRecords the loaded records
-   * @param entityManager the entity manager
-   */
-  private void adjustInpatientRecordForSamhsaDiagnosis(
-      List<Object> loadedRecords, EntityManager entityManager) {
-
-    InpatientClaim inpatientRifRecord =
-        loadedRecords.stream()
-            .filter(r -> r instanceof InpatientClaim)
-            .map(InpatientClaim.class::cast)
-            .findFirst()
-            .get();
-
-    entityManager.getTransaction().begin();
-    inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
-    inpatientRifRecord.setDiagnosis2Code(
-        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-    inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-    entityManager.merge(inpatientRifRecord);
-    entityManager.getTransaction().commit();
-  }
-
-  /**
-   * Adjusts the first outpatient record to support samhsa.
-   *
-   * @param loadedRecords the loaded records
-   * @param entityManager the entity manager
-   */
-  private void adjustOutpatientRecordForSamhsaDiagnosis(
-      List<Object> loadedRecords, EntityManager entityManager) {
-
-    OutpatientClaim outpatientRifRecord =
-        loadedRecords.stream()
-            .filter(r -> r instanceof OutpatientClaim)
-            .map(OutpatientClaim.class::cast)
-            .findFirst()
-            .get();
-
-    entityManager.getTransaction().begin();
-    outpatientRifRecord =
-        entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
-    outpatientRifRecord.setDiagnosis2Code(
-        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-    outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-    entityManager.merge(outpatientRifRecord);
-    entityManager.getTransaction().commit();
-  }
-
-  /**
-   * Adjusts the first HHA record to support samhsa.
-   *
-   * @param loadedRecords the loaded records
-   * @param entityManager the entity manager
-   */
-  private void adjustHhaRecordForSamhsaDiagnosis(
-      List<Object> loadedRecords, EntityManager entityManager) {
-
-    HHAClaim hhaRifRecord =
-        loadedRecords.stream()
-            .filter(r -> r instanceof HHAClaim)
-            .map(HHAClaim.class::cast)
-            .findFirst()
-            .get();
-
-    entityManager.getTransaction().begin();
-    hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
-    hhaRifRecord.setDiagnosis2Code(
-        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-    hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-    entityManager.merge(hhaRifRecord);
-    entityManager.getTransaction().commit();
-  }
-
-  /**
-   * Adjusts the first SNF record to support samhsa.
-   *
-   * @param loadedRecords the loaded records
-   * @param entityManager the entity manager
-   */
-  private void adjustSnfRecordForSamhsaDiagnosis(
-      List<Object> loadedRecords, EntityManager entityManager) {
-
-    SNFClaim snfRifRecord =
-        loadedRecords.stream()
-            .filter(r -> r instanceof SNFClaim)
-            .map(SNFClaim.class::cast)
-            .findFirst()
-            .get();
-
-    entityManager.getTransaction().begin();
-    snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
-    snfRifRecord.setDiagnosis2Code(
-        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-    snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-    entityManager.merge(snfRifRecord);
-    entityManager.getTransaction().commit();
-  }
-
-  /**
-   * Adjusts the first Hospice record to support samhsa.
-   *
-   * @param loadedRecords the loaded records
-   * @param entityManager the entity manager
-   */
-  private void adjustHospiceRecordForSamhsaDiagnosis(
-      List<Object> loadedRecords, EntityManager entityManager) {
-
-    HospiceClaim hospiceRifRecord =
-        loadedRecords.stream()
-            .filter(r -> r instanceof HospiceClaim)
-            .map(HospiceClaim.class::cast)
-            .findFirst()
-            .get();
-
-    entityManager.getTransaction().begin();
-    hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
-    hospiceRifRecord.setDiagnosis2Code(
-        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-    hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-    entityManager.merge(hospiceRifRecord);
-    entityManager.getTransaction().commit();
-  }
-
-  /**
-   * Adjusts the first DME record to support samhsa.
-   *
-   * @param loadedRecords the loaded records
-   * @param entityManager the entity manager
-   */
-  private void adjustDmeRecordForSamhsaDiagnosis(
-      List<Object> loadedRecords, EntityManager entityManager) {
-
-    DMEClaim dmeRifRecord =
-        loadedRecords.stream()
-            .filter(r -> r instanceof DMEClaim)
-            .map(DMEClaim.class::cast)
-            .findFirst()
-            .get();
-
-    entityManager.getTransaction().begin();
-    dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
-    dmeRifRecord.setDiagnosis2Code(
-        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-    dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-    entityManager.merge(dmeRifRecord);
-    entityManager.getTransaction().commit();
+  public List<Object> loadSampleASamhsaData() {
+    return ServerTestUtils.get()
+        .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources()));
   }
 
   /**
