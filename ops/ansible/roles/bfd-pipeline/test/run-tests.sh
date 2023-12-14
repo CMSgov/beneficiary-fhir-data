@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Stop immediately if any command returns a non-zero result.
-set -eou pipefail
+set -xeou pipefail
 
 function help() {
     echo "This script runs our test cases locally, via Docker."
