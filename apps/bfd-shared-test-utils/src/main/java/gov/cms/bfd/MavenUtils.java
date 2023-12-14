@@ -18,7 +18,7 @@ public class MavenUtils {
   public static final String POM_FILE_NAME = "pom.xml";
 
   /**
-   * Searches for a {@code pom.xml} file starting from the current working directly and then
+   * Searches for a {@code pom.xml} file starting from the current working directory and then
    * proceeding through parent directories until root is reached. Looks for parent version string
    * within the pom file and returns it if one is found that is not empty.
    *
@@ -30,7 +30,7 @@ public class MavenUtils {
   }
 
   /**
-   * Searches for a {@code pom.xml} file starting from the current working directly and then
+   * Searches for a file with the given name starting from the current working directory and then
    * proceeding through parent directories until root is reached. Looks for parent version string
    * within the pom file and returns it if one is found that is not empty.
    *
