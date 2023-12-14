@@ -61,7 +61,7 @@ def fetch() {
     env.DIST_DIR = "${workspace}/dist"
     sh 'mkdir -p "$DIST_DIR"'
 
-    dir(dist) {
+    dir(env.DIST_DIR) {
         for (arch in archives) {
             withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'AWS_ACCOUNT_ID')]) {
                 withEnv(["PACKAGE_NAME=${arch.key}", "PACKAGE_ASSET=${arch.asset}"]) {
