@@ -49,7 +49,7 @@
          name: 'force_migrator_deployment',
          description: 'When true, force the migrator to deploy.',
          defaultValue: false
-         )
+         ),
 
          string(
          name: 'server_regression_image_override',
