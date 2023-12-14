@@ -38,13 +38,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Unit tests for {@link Stu3EobSamhsaMatcherTest}. Integration with {@link
  * ExplanationOfBenefitResourceProvider} is covered by {@link
- * ExplanationOfBenefitResourceProviderE2E#searchForSamhsaEobsWithExcludeSamhsaTrue} and related
- * integration tests.
+ * ExplanationOfBenefitE2E#testEobByPatientIdWithExcludeSamhsaTrueExpectFiltering} and related E2E
+ * tests.
  */
 public final class Stu3EobSamhsaMatcherTest {
-  // TODO complete and verify that these exactly match real values in our DB
   /** The SAMHSA CPT code. */
-  public static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
+  public static final String SAMPLE_SAMHSA_CPT_CODE = "G0137";
 
   /** The SAMHSA ICD9 diagnosis code. */
   public static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
@@ -122,7 +121,7 @@ public final class Stu3EobSamhsaMatcherTest {
                   doReturn(system).when(mockCoding).getSystem();
                   return mockCoding;
                 })
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
 
     doReturn(codings).when(mockConcept).getCoding();
 
