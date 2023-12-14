@@ -62,10 +62,10 @@ def fetch() {
     sh 'mkdir -p "$DIST_DIR"'
 
     dir(env.DIST_DIR) {
-        for (arch in archives) {
+        archives.each{k,v->
             withCredentials([string(credentialsId: 'bfd-aws-account-id', variable: 'AWS_ACCOUNT_ID')]) {
-                withEnv(["PACKAGE_NAME=${arch.key}", "PACKAGE_ASSET=${arch.asset}"]) {
-                    sh '''aws codeartifact get-package-version-asset
+                withEnv(["PACKAGE_NAME=${k}", "PACKAGE_ASSET=${v}"]) {
+                    sh '''aws codeartifact get-package-version-asset \
 --domain-owner "$AWS_ACCOUNT_ID" \
 --domain "$CA_DOMAIN" \
 --repository "$CA_REPOSITORY" \
