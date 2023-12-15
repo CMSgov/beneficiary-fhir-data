@@ -60,99 +60,145 @@ bfd:
     migrator:
       instance_type: m6i.large
       volume_size: 100
-      sqs/queue_name: bfd-test-migrator
+      sqs:
+        queue_name: bfd-test-migrator
       db_migrator_dir: /opt/bfd-db-migrator
-      paths/dirs/tmp: /opt/bfd-db-migrator/tmp
-      db/username: <<CIPHER>>AgV4nu-Vdw4Yv_WO86LX2WnDyWm57xaYOZKTEs2DSHlrsxwAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEzOEhhcEticTNObldCZFhKaWx6QVNzeWVxVEY1T2JpVFhObHB2RkhUcWJsRHVFZWtNSXVvZS9OVFJkMTNHWEh4QT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEEWMMdT3Ur95v234Oi0gdiAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMCISIZ904MUT51ckLAgEQgDvkWPZqWMYULNBUGn1cHu2WFZ8whw90tvRv1E02wdrmb_RqGfWN-xbG7FXHXoPeYeg_HGR_p81c40zKDgIAABAA_usmZ2Fzedal6yaymhTn5hNuzvbW2pCd6aNOUKzlDSlMVT28eUf_Ox2W8izOJSRe_____wAAAAEAAAAAAAAAAAAAAAEAAAATpZBbNY27FnUeT7Crn2XEp9vjqufa_NT-28aScBz1rb7CFAgAZzBlAjEAxz7XzoqIWbxJyTPGL5m4pDOjzJhqv__iz5dqn4r7QD1rQGzSFsYcu5XwH6h06PsgAjBgDocv1caCyzI3FcEZv144U5G6ZN1b9TeCKVQv3zhzNJDJo-I7G2VcJeeSLQKGTEE=<</CIPHER>>
-      db/password: <<CIPHER>>AgV4oUzItl8KVC7IJ3yWxYnOvlyb58o5DpfIS64n3k6_gEUAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF6elVkMmw3RjhseXZmTE1yUXVTUFZZRGZlb0orem5FeVpuaWNKWHpWWlNGTzJHczVrK3RKdmN5dmtsenR6WGNIQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGKyV2Pwu2ATsOfLT8KHyO8AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMv_T-qfQNK2NunXFOAgEQgDt_AMdyyEUblgiFbh8hcloKYgFzBdT5m5STgPsumajnKBtUi0q_RUTi_hCj9Z0rSy4IL7fzLwQLK2zXygIAABAAkE-gakbLQH1MrJJj6fmujxfK4BbqhApDxkASHs0O9vBGZEtSkC0zbeXxvH4bmjh3_____wAAAAEAAAAAAAAAAAAAAAEAAAAan556w9-2sEur3cMKn0SiKbd8WAEyvjbsmIVJKeV0LligmgZ7QaE4Q08GAGcwZQIwPPZ9SKv7ZGaZm2gFRbcnl6XYoXORNJQyIJi7wEr9Cs4YLq80DYTh8GP9tkIY7DLEAjEAxRHV8LbSfsYQk1SF8RtpyNHoQ8yUtUunzUcqlRpPdCJy2uG4dHDFBY1bIB8cnHT8<</CIPHER>>
-      db/url: jdbc:postgresql://${rds_writer_endpoint()}:5432/fhirdb
-      db/max_connections:
-      db/auth_type:
-      new_relic/metrics/license_key:
-      new_relic/metrics/host:
-      new_relic/metrics/path:
-      new_relic/metrics/period:
-      new_relic/app_name:
-      paths/dirs/logs: /opt/bfd-db-migrator
-      paths/files/launcher_script: "/opt/bfd-db-migrator/bfd-db-migrator-1.0.0-SNAPSHOT/bfd-db-migrator.sh"
-      paths/files/launcher_log: "/opt/bfd-db-migrator/migrator-log.json"
-      java/app_main_class: "gov.cms.bfd.migrator.app.MigratorApp"
-      systemd/working_dir: /opt/bfd-db-migrator
-      systemd/exec_start: "/opt/bfd-db-migrator/bfd-db-migrator-service.sh"
-      systemd/user: "bb-migrator"
+      paths:
+        files:
+          launcher_script: "/opt/bfd-db-migrator/bfd-db-migrator-1.0.0-SNAPSHOT/bfd-db-migrator.sh"
+          launcher_log: "/opt/bfd-db-migrator/migrator-log.json"
+        dirs:
+          tmp: /opt/bfd-db-migrator/tmp
+          logs: /opt/bfd-db-migrator
+      db:
+        username: <<CIPHER>>AgV43zj8rzwmMQyJGVLvvIVr1Ik-Gxd7WhGea66kcvcXhFQAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEzZmVnS3pZNUNVWlBnVjk5WUVEdllkRjc4RnZMYnQzZGxJVStVNk4yM0dzY2NjMERMNWxTQ3Z2WUNuVnhEenY0UT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHBkdhW0yEum7JDJfIlBmB8AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMw1jZaaRtMuJ4f08oAgEQgDvBnWcghx4RGGhAbJJ17StEI80EWUJuoqrMq1jdcEvy98fvDP60r1daFOMKvYKvPcSfgWTRCHxLrXQYWAIAABAA9kpbwtvk4zsN27KteLwz5gKBfH_hsI2RUzSZhoBWQANFg3b0I4M-no172R9FkWB9_____wAAAAEAAAAAAAAAAAAAAAEAAAATj5Siv2NQuq4PNYViBNJOFXkQ0VFo3_R3Zo8DFK4nSFtroTIAZzBlAjEA1agnxJm9iaLN3auJ64FihADFnb2RSk6sL-VkNFb85sFYKG3TKK9uJ4703UXOUdD3AjAE-P8zY-P2z3iC7xE7eu6Qudi0hkXeTdo_QEQFqXRHfeIEmI4Jhc8y9Ia4DPttNyc=<</CIPHER>>
+        password: <<CIPHER>>AgV4maWJ8FSOIgYK4rJum3yLJxYr5oA0dJBUN3SlCeMs2w4AdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE0QVBaRU9PUU5xRk1UTXVwWDAvblpZQUc0ZjFwU3YvejFvRmZZL3BuT3RHOXRjQU55aTlCblMyRWsyVVdGUE1DQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAF74IkIDO_ONpYZsLazO01sAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMPLpxeOx-hua9584rAgEQgDumt7C8yI_iLNA-gHwIJSDI1D1oAfHX2aUuy2x63axi-CJ5gS_uGHArutTcAbK0PCBGOLwGrMcw0frgZgIAABAAAB-MgaKkBbhRrJ8odACKIOP9yPcfEouv9xbLRMm4nw2UDrj-UywFoYxZAOn2VsLU_____wAAAAEAAAAAAAAAAAAAAAEAAAAaXZ03fBb4S_UQbNd1Nr6D8I-pjX1JgZPv6JN-F7yF2om36W74KSzQvllwAGcwZQIwcgdqanaNzJ_2i8MhMFQSFQpYbne50-ssiK3raUbiysBTkp_1RxYXxHtdAympX0-fAjEAlZRLd6-CylznbaBQ04cDMKNxU31yNt6lrIGrn87MrILEulY5VfuDOJrNO9UvYdXU<</CIPHER>>
+        url: jdbc:postgresql://${rds_writer_endpoint()}:5432/fhirdb
+        max_connections:
+        auth_type:
+      new_relic:
+        app_name:
+        metrics:
+          license_key:
+          host:
+          path:
+          period:
+      java:
+        app_main_class: "gov.cms.bfd.migrator.app.MigratorApp"
+      systemd:
+        working_dir: /opt/bfd-db-migrator
+        exec_start: "/opt/bfd-db-migrator/bfd-db-migrator-service.sh"
+        user: "bb-migrator"
     pipeline:
       shared:
         env_name: test
         bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
         data_pipeline_dir: *bfdPipelineDir
-        new_relic/metrics/host: *newRelicMetricHost
-        new_relic/metrics/path: *newRelicMetricPath
+        new_relic:
+          metrics:
+            host: *newRelicMetricHost
+            path: *newRelicMetricPath
+            license_key: <<CIPHER>>AgV4AfRmfcSJkXEo-R3WGtM8d_SqHFDVcS-TsKf5O29KGIgAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF2Q2hwaFBUWlhHOGJEbnZPMWtzcTFXVzJBVWRFM09YVU1TVFQ4bUJ0NnVRVDVEMGRpcXhwVkx5ci9SQU9wcWwvZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAELAbUpkoLfZonWJkrEy4f7AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMocFCy8EFi8Y96_35AgEQgDsXPoJENeu9wOhCl4NaixM_cZWtYPsSnq2XMxrEVK_bL4bOcFk72ARULP0O2kC8nUAulOmpvSto8l2hbgIAABAA3hQHlTXStDnSXopuCp96iHtzZu6L5eeWucB72X-TaRAGHcq6w0FgCxaAd2OCI2zH_____wAAAAEAAAAAAAAAAAAAAAEAAAAnGrWmoqT6Q0FGzrDZUSlc2ID_-FArBCf11GUGLhvqISSzY5iOnoVoek10I2c9kEP-l-1-uY7wXwBnMGUCMQD3WwnfUemuL_G8QM6txd2knz_X2vbaunJBfoMOHCqXVSoJdj9xe9EFqD61Bb5yDb4CMGQ3ZvTPTHNv4qXio3ALNHdYtP9fZs04TfeKfy-zKbCUYsH8p4kkA2cYTxvGEuFN2w==<</CIPHER>>
         data_pipeline_user: bb-etl
-        micrometer_cw/enabled: false
-        micrometer_cw/namespace: bfd-test/bfd-pipeline
+        micrometer_cw:
+          enabled: false
+          namespace: bfd-test/bfd-pipeline
+          interval: "default bfd-test/bfd-pipeline, 'PT1M'"
         data_pipeline_micrometer_cw_interval: PT1M
-        micrometer_cw/interval: "default bfd-test/bfd-pipeline, 'PT1M'"
-        ccw/s3_bucket_name: <<CIPHER>>AgV4gwHyXISVfoOmrSCpao4i5Q8lcwKLuatdltHdmvivJxwAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFnQmEwQ2tFdWo5alArczJna2YwdTFvRVcvNkQ1elJ1NHlucStEb1ZrbjJwVW5yWVRBcTFIWTdkUkxQYk1ZTElTUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAG0bHsQDtLfkyNLGMO_REEsAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMXZ63PEhCmGtATEwiAgEQgDvJyEcKYKq07PIMzGgpyAvBto2dUJeSAtRkH-ewyirokFeJDXzeLd5GGO8oa5yYndUCxYtVyXXYj_lDxAIAABAANclREmoLPeV7afsdOJwNEbIAv_7B0Ebxt1N9RQcXMl9RGefgScJ-NdoNTT06IIdL_____wAAAAEAAAAAAAAAAAAAAAEAAAAbdbzwjWAv3HVJ7cr2NKsOMjMe2kwF8sz1EM_yNXC9pTLNogzXglCaVuDupQBnMGUCMQCkyE-1967R_18JtTRv0WdnHEI1fqLjt2NDWdrLq8fHQJeyTWhQ5-Csu61xT1sKpOsCMDM7deasTpqfoWg0RaFHWwN30zPgK2LyJy24cF3bUcKirRyngAy8cvirqGRQ93IZeA==<</CIPHER>>
-        hicn_hash/iterations: <<CIPHER>>AgV4TEqgeh_qM20y17G3yA37XFyojY6wo-hn176t0V7AJWgAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEyY2pSOTJGSEp5NGRWdUFTVk8rRlZmU1F1NDFpQnVHbUpnUWlldjRJMDV2bVpIWTRZODZXamlNUnVpT0JEMXZ5QT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFyVDo7iNroAciGUTV91hjNAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMZHKCg9917x1d1iruAgEQgDvQKDRWDdsaBXyMuL2mlH-tUlht-jN6EaKolzPWV_HRLevH_5oktrQjxeUeE4BqCP7zYkwdVrC8_yuIeAIAABAAg1s2i6-yacg4CdtOXGbXeg1AZ20qsvp-S-sCn7gdK3XWSuUVGbvIn1ORAKV4mxUB_____wAAAAEAAAAAAAAAAAAAAAEAAAAGqY5EVbhv__D29lhXAb_1f1edfhyBQABnMGUCMEG6Rzo5Uo_Vrtnk0wO584fge5HUyyNGyjuWyFrp62LnFiGjYFSmeu6EknbW5t2UhAIxAIgVVhpuykCz1smk2eS7-dkuPMNbgx1d6vJluKNUDie-H2rIm1ahGo_aRHfp6V1Kdw==<</CIPHER>>
-        hicn_hash/pepper: <<CIPHER>>AgV42D6-aVM4ibJO3WvUqX09XS3pe3I4xKW_sFvzNJ3iqDsAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFpdDRMMm1sTCtwNEk4cnkzNXdEQnJpcUt4UGgzZ3FSWlI1Y1JubURNUDVNWGtmQVRYcUJiaUlGcFB5c040OGhHZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFSmXfN2xHzsXhE2E6JA37iAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMKuraS5c6AXwIGPvpAgEQgDuqAp4YOglTbw0lckanX0Ju5eD8n8HBZxW3KUCXRXkvqvdxMd3BEd6UPffJCS-k7UAIGhnOIFUCyADAxwIAABAAhbWV75e-F6ENp0ABOQeCcEIXUf7Zyf4IVeqEAF4tMc7V56iYKtcAQpGvyeCpBjqL_____wAAAAEAAAAAAAAAAAAAAAEAAAI9u_U_MvKgXpN2zMjyIBW4MGhpEk0_JUwUPthqT-eqSg9urNq2KjjoIQLyfCrzTSPrdAlemAcGfXlPSvQTMIQJEVpyPJ5ySzsfpa-18zENiXuF8VM5cMnBAS3fvPtESpQsRSH21a6rsFqWLftAk7P832lO3BP_zRwnQVpSV24n2HCAeGcyTE3e71XN1qkn0zwjWo4MleY7t6Ti7vAQCmRO6L1aZJClzNXYlsbztihseHClkyXdc_CmuUauJPbqM6dBtZ7o432Kf-VSOsHyPffEfZlAymSP_lAUXh3RvPhITXhLQMS46p5EYOqW6AZCCX4xTXgHHmZnSTwsx6kUlD0Md_-NzCNegWzSIfxegbSymmlnEnSlNVJIfZvVEDAEWdq9_Ih4PjH3Qub5TdwEHRkVSaMnOIujZ7YlMG0hMtOMcSo49AMIFRJ011797XC5wcnPvDWd-rsE-bI1FJDNOC249s8iled8nw1r3aK0tPQh2hQKctM5DaQwURNt5cHSw5bJBAqqKYdp2t98G1TFFKPEIm5eTS6h3UyT09zV9CaW0QmiMCmdKMx2DIxrsakiuYGR40m7gTkxNrtw6jYK9p14B1u7-2Fnr5DUtHqVvJUimOWKwqexG7kUrIeJ0lYUb796ZTyAqeMDuYZPt-VgJTU3vgD11P906xnvhDNBbvdCnBiDoeYaXReA9mdSE-zBbTpRPnUW8GOZB21QpYdvb6VVRY0mEWUDv9akGY8_3smTpMcFMEmra8nlFVoaBTsMSFcPSOGN1cewtBlhBatAAwBnMGUCMH5nFpKwUXq9FO9vgHhRuEiI2o2FHxegmA2h23TuQSr1gdOqB5OWsp-uwLMu_jf4yQIxAJ1Tx3hmiGg9g-2zmpy4YF3iCsU-T9V_KM8hnZEFQrhpOAjKxkq64myGvz5V7t2DPw==<</CIPHER>>
-        new_relic/metrics/license_key: <<CIPHER>>AgV4vhGVKcGaQlKFVup2XhLV-jL9064VPB5assQ5xrYm1uIAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFzS1hrdTZ3aU94aW8rN1RrRmdmdmFBdFN3VWViWjdMZDdVRlUvempRVEJTcWNOU2o3cVZBL2N6TlUvNTI3azdCdz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFxdEdXU_Z89FTErtK37YmTAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMvquGPhgyoh3aoYkgAgEQgDsdnRPpI-Okhnmxjfe9wnLnisY0Aj9-JYYdhctI97N3bm3zBdb2lRsDuV7zUUiP40Uog58wObpOUiX0tQIAABAAVjIWSDRZf3FqY6K-l6fjCrcZQo7x7xf_pW32_9sxSABC4HW87MZSAV9zTMdIokU______wAAAAEAAAAAAAAAAAAAAAEAAAAnj7JJBe54sqye64UyIDiD_LScj3xXFyMegDADQfysCqiyLjn9kgn0xnTtkK-k7MLpHdCNAge9ZQBnMGUCMBqiQhRxJ9x6XaHD74PZrfSZyAf9SxCk8e1ePc_QCKFjNrMztN4oXHuKBQrPkabIFgIxAPafv8hUD85PE5bJQ-tS5JRXCTd9giiwn4mRziDGHT8JxE7hQ4QwtNlFbzW8Ds_-cA==<</CIPHER>>
-        paths/files/launcher_script: "*bfdPipelineDir/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh"
-        paths/dirs/tmp: "*bfdPipelineDir/tmp"
-        java/jboss/logging_provider: "slf4j"
-        paths/files/launcher_log: "*bfdPipelineDir//bluebutton-data-pipeline.log"
-        java/app_main_class: "gov.cms.bfd.pipeline.app.PipelineApplication"
-        systemd/working_dir: *bfdPipelineDir
-        systemd/exec_start: "*bfdPipelineDir/bfd-pipeline-service.sh"
-        systemd/user: bb-etl
+        hicn_hash:
+          iterations: <<CIPHER>>AgV4eEy7Q9Empr10BOX6Olp9zIUBSohqSvyx1rdePAr8_wsAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFsZEJjdEI0N0M1ME9UNnBNMy8yN2ZaZEcvWFVYQk5oNkp3bjMzeVZFT29WMldCYi9tQkdPUkpjWDJkYVRIb2hHUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAExKe2RGcEy9GmQzughG9WnAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMHO_hDfY06gsJtCOTAgEQgDuM9yRnqBZ2wL0gkuqkEXSv27-0Pvt_zjeqojPE-MBUNt8yxShGH0EbuuOywZ7cgxQ-uw62UDnjb5WNCAIAABAAvDpu5rAZ4StLFgX45UfOuZ5iLMXV6_7YKkvBvOVX5znhkoYBx4SSq52LidIB9Ssg_____wAAAAEAAAAAAAAAAAAAAAEAAAAGurXsyS68j7_4bUNMgv3C-02eadA-SwBnMGUCMQCrotp_-R1FHhWyUHYTA2vPAGn8UyY9eHxfWDuPzZsrMVSJaTHL6yUDds2LBdjEDAwCMHAWe5gaTDsskNZhKQeBMDMOMxixyg9OZKgVTMeNcbA5390Ge4P5TN-EGGyyOJ02jg==<</CIPHER>>
+          pepper: <<CIPHER>>AgV4zVZHvMQXQKUQ2Cr3Gg94YLgVsKDjikj6N1goLQHEYYUAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE4VWYySXVRYmpnZXJZS083RllnRjlVQkNSUEhzMkw3N0pUUnVQVEI2bm5KcVRISnlxSjZRWGlJTkNtaUQ3Q0FUZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHFXowZZCC-8mdT7LiCbNS1AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNBVV9rznkeq0GUeWAgEQgDuc2C7PgBO9y2Mp-BinpeCsWP2OYzKplF8djq4MpN--qubzttZlLAOCfTypoM-ukog-RimFnqiyr3zCfQIAABAARdYL1OCKd-4yWY9O9A7BddVTKCkDGFx7FvZHBKAyk_v8FXbgX6RFqRJ9j4uPb2M3_____wAAAAEAAAAAAAAAAAAAAAEAAAI9oRVSv3DNGH9tWF9bgHWOAxTgyaPOkjAStC5GEhdhw4b279JkdB_ljoXT8JLlEb1TptZBbEzMq-kCnMlDpWl9nUXsMN1b5IG6If8LwYzEPN_Ufm5W9MCwITNXyh6CBrM0O3ghuLD8LvUW9a89U62RaRg-LNEk7e4qtKCctp5tk7VHbBPWo3Xt9zTXP4Y6HPDQysYTDgSPXzXxs3kz4_G6xLS6C9s6qdRHl_NfNk47YHZBhUjGFHWUPTKaCHHPlquhnNLk_dErAFqm8z31T-4q5L-B7CDUTevws2Xw6XecFqvlmN6C-J9wkcZAAlGktCwQSMPtdyFYDbOr31Q8DRkxOKo2cTRKcgBv5B0lpBH65Y9D7OIq9qZ2iyaiLhKyH5JJSaqyY0lRyz5QnV_UWU8lD0aAAaS1SCkuNUUeyE9FJXEzqrN8-MM52WoUTYcPJ79aSa2pSszTjHXY9Yhx1C3OW-W4vYawcqMsfDXfnGQL4Wca2F5561ieZBxZEmu71erj6GDwmFKs5Sv1OnoxQ1zMBadmSNJEwYwHzrNmSJ8enWSGz_DQmQGv7B2ccoVrSpcdU2rhKrqGwlA_1je3uf01CQ5dlMb_l4MSclpT74xN5H_B2xNby5rHbQLzvjYw2l5q2hit9m0XnR9jUvBhlJtSF5qNvm5dtfjUGNegEUTRvIIbmsYL_MYRVjHe6NbqsIHtFlEecW_EO9APCImQdnBWJj6h_oRNhY8YvQv1c-wkpMEhfcNxS6li_4gyo5gVr6A5CN6h45UZtSJ9u8UrWQBnMGUCMQDXqqBqrk9Ok25MOgKbZRynQTLF9im9us8G9geY4ZHQtUVLy8HLYKuHFSVyxPobVaoCMC-snX6bYnvncF0Uo8f1WNYxnQ_PtbUmsfh9odwToOxxbuVgFbHBG-kgGs9lMuuASg==<</CIPHER>>
+        paths:
+          files:
+            launcher_script: "*bfdPipelineDir/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh"
+            launcher_log: "*bfdPipelineDir//bluebutton-data-pipeline.log"
+          dirs:
+            tmp: "*bfdPipelineDir/tmp"
+        java:
+          jboss:
+            logging_provider: "slf4j"
+          app_main_class: "gov.cms.bfd.pipeline.app.PipelineApplication"
+        systemd:
+          working_dir: *bfdPipelineDir
+          exec_start: "*bfdPipelineDir/bfd-pipeline-service.sh"
+          user: bb-etl
         # We have two ETL service accounts that we alternate between as we rotate password. Having
         # two accounts to cycle through allows for 0 downtime. When the need to rotate DB passwords
         # arises (every 120 days) you will want to swap the accounts. The commented account will
         # need to have it's password changed in the DB, then updated here and the user and password
         # lines uncommented.
-        db/username: <<CIPHER>>AgV4afYU2e3FydaD5JpSGWcn0goRM1Mv-Xq-YNEwe7N54AUAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF4Smc0TVJRbkNNcTZFVEFjeHJ6YXQ4RnpwM0YrbUVUTTl2a1VjeXhzU3pwSFpHNm02dEpqRGdVTTR3d2piWnAyUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEcw19W0AYrxoIRmWvPDCwTAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMdlD6mdLvp-Z4YJpsAgEQgDuIWWKQvK8poCevH1ClT8inSIU9HRm6W7J5oAvRJBnY1CONsM5t7eOlf4MRyZvGJRb3bCobweAE7iq5xgIAABAAzVwbRbUwLK4-980Yhj5xu5cdyeUJ_TySEVV6ucKZIfmSeCHASdL4sDqHNr0MBGMP_____wAAAAEAAAAAAAAAAAAAAAEAAAAUbmvgEpyJy7eW5HeeusNmRUfx2xutq_O5xo5ZUUshYRfWwx7NAGcwZQIxAOA4vb5_lI6IFgR4PIVdEgZ_l1D3lZTcqS1kR7wAobvuChrx01RJ2OB5JSYLCsS90AIwX9JGhbbSFtTSkSo5iKDRx97Fo0XxRUfNgKVjM4ozTEtQFCiPELTnd61Q5F96r0H_<</CIPHER>>
-        db/password: <<CIPHER>>AgV4-c1PZs9BR_jzRKp6gWZ6OfsbPW_yDfqBp_Sb1Aw-BIMAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE3ZHp1V1JrUVUxVlB4Wmxaa3F4YjVWVGExWjErU0JiTVNqS0Y4YTlWcno4dmFmNDZvck4vc3p3R2dmbWtmLzlNQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHXV3oLfo8Duc3e9orHSlCZAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMdTs0qezpS7ZZNB9YAgEQgDthJKnJkkaKaiazyE_nyn6fc4APrFQI4XDaTfkEnps9RmvBY1Nwwsgs2nVjeQAIt7MKK0mFtY6C7eXwZAIAABAAbzt4mwEFKH1Sv_iFRafti0K00nwwaCGe313IRerVq4RyFOpZNoZ5AGo5Z6EX8IOT_____wAAAAEAAAAAAAAAAAAAAAEAAAAa5r3WAxjZkIWhqNZmSa5wyvBM-byNEKINOjH6eXw2BeJbliBiejUoRD7tAGcwZQIwRWEA6h666Wo3BPtSd4V0VXWwtP-Vu1MpfFLJpstk5ro1Uh6WFn7YyZ71Ro61qnDzAjEA2Y8jw8mYEWch5NTglwndgUE3LOuRvo1OKjGueY7F7O2Qn0493Ax1wIlsN5cdt9rd<</CIPHER>>
-        db/max_connections:
-        db/auth_type:
+        db:
+          username: <<CIPHER>>AgV4uvDI5PZpZjNgfSjKsI1VCuZ3y2qCEodipdeFx4rYuZAAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE0WktGYWVJY2dvMDVHWk9Udzk1QzBUWXJwdjlvNHprbUhSRUl6eVZuOHZDNXNVUWRHQy9hU2VBaHNRc1dvMTNRQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHB-3jK4wIyrxY93n4lupEaAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMW4-xzeqAp1H359FfAgEQgDsszOus0q7KuBQ2YvD92wEKM12eZ8PNy6KGSkdeOnvQNUHKSQ28YszKbUJL9IxogEx1qneOR4AP6ZtKTgIAABAAc1etZcRNyzoBIoZZRMgsxh8bnbHUqTAiKmQTGifwHpn2T77rAmTmseniCJa4VKgQ_____wAAAAEAAAAAAAAAAAAAAAEAAAAUBjjQuHht4ux1K8qz8S0xHEAB6EKMQu0EIFHfcaFDYDlv3eAgAGcwZQIwGN3bM2XgvpVKgRFsWeLy1RbXOb2GUpDmbArtzAkKlis2SpAeAQHrjCWusCol--4zAjEAoPptICha17B-IB5EeCLbQfsVVajk_FPHrGEMXU-G00IZ_MVlmGm5D0bGLiYoupzg<</CIPHER>>
+          password: <<CIPHER>>AgV4zKp6xDFB7Sc-T8e6ff3SK67V_ggN08lp8N-qthTS1qYAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFvcndsdzBpUkwrbEJmcTdOTS8zNXQrbXl2QlVNcS9kS3NmaWYwVDBsY09lRkk3RkYyVTNEZjBmYktiZjd2aC9GQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFEtrFOnzAIOWRE-HGiYvGfAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMuvuDEIfEpnIS8NP2AgEQgDtuiMaDXsgqOdU6uxmJy5qEjn3LOR4c4DubgIIP0ugEa4U3KLk0XR4-2CShxhUSnvj1_G8v40mPGVmyeAIAABAAuDwxfQwn_RguCsmunC8cAtKmnVguqYu8cEIJyG84mQRfaUSVVvY2OCBhaiCAedtS_____wAAAAEAAAAAAAAAAAAAAAEAAAAaqPa11SvLNcloYC4Q1M6APg55nWvF-DjF3EA9kyPyXtM7FPBU5jHuFQIrAGcwZQIwTFhv5KXw68-ebHdmAaXVMAuvnOeKPdb1QbNACyjxlsfTacYWGOvMDwz1vhRVQkDeAjEA0oCs7TGyxwSBeGbMUNhGeZvaZFQX7tfPfbvaLAcpA76y9SxdrTICveauyqD-g137<</CIPHER>>
+          max_connections:
+          auth_type:
         loader_thread_count: ansible_processor_vcpus() * int(3)
         ## PIPELINE+RDA VALUES
-        rda/grpc/auth_token: <<CIPHER>>AgV4uXk3Pxgq8dAoQdfFFxrPQYgtZi_aKQ7Cgitmk6l9RTAAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREExaXhzb1ppUG1yQlVUNnNJazVlM3Qvc3hMSFcyMzlESVRBb1dldVdVZlZuNGYzYnRsS25NeGE3Wk9GTmUzU0p3QT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFU_-1D8ekFrbka2tkZ5Gs5AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMdW57ZN2fgyhPUaEJAgEQgDt-inAPgaeufdK7WbfqML8TF7604VAhuqyCcjqmuN_nXj0csEgVODZGBVfULC0W49mGX-9HPg11xOtHwAIAABAA9JlcI4DfQf00u-7GHE6Gty_TugtY67yPuFoZ6SCsBG7WYPOYFMFmxpOSzKCftiE4_____wAAAAEAAAAAAAAAAAAAAAEAAAIB_DbR9juImNc4hiwYHOqgILaNSUu2RrvTbTFM-o_2Pfe92gswXrc3LoFp7g-FrHmTUxbWLaEe8uelDQUSAwUNYwUcDs6I6Od8kM49WLcNTGyC0MvERoj_TsDhlT_kJ_mXXqqerpXz5_mRx9WYiSR3qp98rYHyNzCOScG0NZtr8cwikJLx4LjxmJGBv2THgPPYrbBOQfAg226h5uK4GvUNO4_LRr0YBEgjUN5rk8IJ970CB1qV6Jmi1Aj96PKvg3adOxJvraUzLb9LvSTdhxHMo2qaGGDUloGm-kRIBf-nJLgKuRbOGuE5fwd2JWI3CyRRgw0BIgdK7Js4Y-Oc9gbaBbX_T-CCBEhi_78U8v60M-oQoFYCKpQcdbN3UuxbvJ00zCyrtmqxOwdDDGnupkkTAiA479gH_2GE_COPFEQgfZXq7wto67H2gx_MMnvdpRp9Q-m8APSzbhcDDNhdr2bsdXSOy1gKrj5IG9EuDB1ENgEgFL4blGqrdp8yzDXdLM78NLTyq0I65Aa6BpGvHP5jemw19AirrSe9amgu8R8UyGFDK9U_M7tvxMJywehDy5VDkbflp5SLdTGRby5WQ45CnkjUSL_fefClswoNaYNbfn6SaJoMwdde1pCvk6LhkTUheEDbT_EkY2vbJzPEmHkGkM_drvbw4l2MPXhEj64wQ-vDDQKOuie3bsVqrRs29y7VpwBnMGUCMQDbMu6QrB-v6ArDQdbhbLg5TAMctx0zyMeFyO3A9bAP55xenMSJyiAUtPCywe_vhtICMBMNUWIgjx-V6dapMkTUC-kKxadbCf1rpxjGrvI9-1q1MiX4VwR3kXhcms-4uNRe1A==<</CIPHER>>
-        rda/grpc/host: <<CIPHER>>AgV4uWB30kh7HA4I6Q4suxZq93Dv2ycAR8kjAfePKPAsf1MAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF0d1UxODhyU3JCYmsvcXRhampKc1VWQ1VYOVhBazFUeWwxTFBnVmlGaXA2NnVqYTE1eXJ2N2tkdFlqMFV1aCs0QT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFkLEI6-xODoE8rdqsDErIxAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQME9tKxhQVcD9UcyNmAgEQgDtasdgciaRCclvrC52h77IyMeDWk9n2EJ1HkN-tQBuhS8VKR-hH67rZaPwo-d7TGOIpCcmxykNoyNr6mQIAABAAnTeuNXZF7tGFhsL8exKm9iMpj1ckK8rcIRA3yVIwrvVstAyZ1ZcjdyTYcmm7MGBf_____wAAAAEAAAAAAAAAAAAAAAEAAAAXGCJkmwiBJKB9UerAszbuIQofkQSppSbnA04cq3VHvhcVPyUPb_VJAGcwZQIwGFrduY-wtFLf-ufp1PrvT1RrfbvOzzBlO1GesMnW80KPcvNno8iLnykFKuqnFWpDAjEAy37-iLo02voZvDPoPT9MDqEWyjde4-Mf51ANslVufOQ8l0qDYBSBR5sizDYtksiv<</CIPHER>>
-        rda/grpc/port: <<CIPHER>>AgV4WhYgnO8jdpV64mncb3_nJJCK2pUTvIe_dtX7yqn8buUAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFsa0RFdkpmRU9rTEprSDkwR2haZ0FuNU1lMEpsM1kzVC9CVjd1NDhJRVVldGpueHlRbHY0ZmdDYTFGeGdpbGg3dz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGaRJVf5QY3jK-xQGQvfZ5dAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMN6_2IpISS9ICLtp4AgEQgDu4JYlDTBh3q8hVXk19QQAS59DTrs8je2glNG8ku0MoklcWy5mXqZFnyfnY78OPIIGigaiykObczSXRdwIAABAAvuK827wyPssOElFK34eFyG5KeundwyshZy53y2JgXX7nF2DQKz_GbdGchGkjfs0I_____wAAAAEAAAAAAAAAAAAAAAEAAAAF4NFqS18u0u-RcDalnfTV9r0mWDvhAGcwZQIwUE1OxhtdbhY6SGOffE1J2SrD4cKTyTbflPqEnm_dXwWHIQbx1mtBR6Srp28LfOoTAjEAmHgXoL8fyKtEiRo87hvtpLJEefwS_UrLt9dJPe0WfV7JDb1XVKzmJnDdZtkRFrL2<</CIPHER>>
+        rda:
+          grpc:
+            auth_token: <<CIPHER>>AgV45lt9PvPNpOt0cS8Us7L_e9klku8-zCnG2rA7WpBDFYgAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFndzRKdmlsSVNYcmxNNnNjcERxbGh1QUFZTjk3K04vRHU5ZkYrT3BHRlQ0R2RrTHg1ZHVaUCs3VEhMdjNhL1NiQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGCgo0DwJ6NujFSxrlJL3wMAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM-dUpBHENQ6PjlrfXAgEQgDsAXNYYalGfXmIWr3EqkMt6Ic4UY7xOE7hwNiyWbq6nxde2pRrsUiw19yNvIe2yRf9HKKhfVn326zCbAgIAABAAKLY_zkJLnzs9N_h7xbeSDnYZ0BmP2YdRDXCpWTQ2PUmcXW3-EvuqRKv5z4eDoAnr_____wAAAAEAAAAAAAAAAAAAAAEAAAIBOjxzileP9aNCH-5bgXSrbAAE-svRjOABJoGncHF22wT3HqeZSUdzbc2tIjVtlApuVgtV_6y1IHKDS7eBl_OHvCzJpbkwQTg6Q7h3LuUPqFhYuCG44K6MUK_TY-W76XULiyxXGAwuMz5-PkCqXBidS8T-Sqh7fFMbvsRjrRl5Ny_spDOQ0Htil4lXgQmi1HieB1RC0jokllzd1qRV-v3sp9E3gJSQf5UnX0QQ65wH-wk4YhOlJ7QFYHcL2YlWzlTLxFtpgIvQ_t5ASxaHVRFEM4Kn-rOCVIfuHt5ixZ4k65_LrHA-DwvvRWPGin7SlRK2M45f2A7bUKwUauoLwknrDQRsxvsv9lIZYbozTI4atULYOJTxvQMOn9pJH_Pg53NdJyrRUO5GRjYUmR0-vcpO38-6DcxTBTwchnJut-W211k2ka1lG7jJXPUd3axWJT8kTatsXtVMH-tRBeXhwkrhB3ad_ZFWXsJ68UzTUP9j0Ry4hhCV320lQ1KXjofr4YvqG2iMXHxb3ZZNuiiKXK3z3_Z5rZmWkPZj6OB-Qz7DFNNC-HOi4i7n4ueJfCBT5eVSeZfTOG0SY0TvDGAeoMEakpb8poa99QMWYelg-8sD7vOuV-o-yvUUcmFpA9q0WVOv-nvCkOjrFqFR8mYMQnDcXohSob2racPNCF5mXDtmIqXl-oXyjPc7cGTXXkUo0JWEoQBnMGUCMCn8xzKtKbfp5pAuvqNg1e8iVYG2cSAaj7w_maTryTIMJjrbv6YrdBMTyHOkQrU-FgIxAI0sKh64lydphkohg7iyG3y6zUr4MkZrYSN2NH_NPWRtNUF5rVwBpVLa1j7QM_NlgQ==<</CIPHER>>
+            host: <<CIPHER>>AgV409AKB3BD9p5tZ_mu9Ts3mWYAu5b7ouEI_jlKm9lyW_IAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEvbVpmZXRvQXdqeTNqV1QwZFBncklSSkRCdjI3enc2NUsxd1dtbWI4cFFKQWIrT2J1WE5EUXB0ZWRjSlFpZzhrdz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEJ_LXQjldAzcGy02hlUl3YAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM-WFxZSixRF4ZpXcWAgEQgDsh9mYufKujhg0QGYuVZoL_-7WebAtCn8J8JaJbcbMBUPd1DuT-zn9BhdnipvC-xP2SZ79Zavsc4o4g9gIAABAAsZ6u3lbDk9zQtXZ5XDeUTTP4mB9_e6oKA2lT0iXsqy-RzGSkGkWqGuz7dvQZ8WF0_____wAAAAEAAAAAAAAAAAAAAAEAAAAXet-23ouPW-K_OS0nSBCvfo_DOJQOTSH6CCPmUPlbbRt3SccuCF_3AGcwZQIwRTZh39kI2jTjue6YEYAhWBeSAez32UxxAJksdu_SB_mrZc9VHfuhmAJz4cDua4t0AjEAyZOrAdmpLHMEJk6N66yFzfGGyol_sNL3e_Z2qQtDvo842k72OrxKKcBPsbV2ikqh<</CIPHER>>
+            port: <<CIPHER>>AgV4qGgkWhkkmnrr6YLu9czE3lKtU0ZZWd_VXJuWw3DyUhAAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFvVEVuNytQRkN4UUYwYUdjWVhmSExWTXp6UlRIREhVajhJMFFCeFFXSXZRajFqWFp2NjlkUlJoK0lxV0phMWJ5UT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFR_f7-bTXCwi_OaX6zFwd8AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMPmaP9_u8334TMHswAgEQgDtsedIXyV25Q9PZozvz7v0x9sJdhwFHwwgGMmuLeSxt4Y7nuH2VbIQ1IKbXlNcj30llblm13veRSTzfzAIAABAAg7jHus5F-tVoyUn5F7w5dxA1f2tqkswPBXgjHJysfuS4oGpjmDlRZudJeKYSP7Yx_____wAAAAEAAAAAAAAAAAAAAAEAAAAFmUv04bfudKj1wBJMle0L9DrssrSWAGcwZQIxAPWZVrnkJgpwqM1ltWmpBNjxkyWKQC6qV0sadCFUN3rppXg9yElXCU_4oDG_5v2NNwIwAZsnb1_nskWvJSjZMh72Zn1GMQXk_28vjYpm6nfdecIKIgtjmeDVnmGVcoLFrExz<</CIPHER>>
       ccw:
-        rda/job/enabled: false # RDA Jobs are disabled by default on CCW Pipelines
-        ccw/job/enabled: true
-        ccw/idempotency_enabled: true
+        s3_bucket_name: <<CIPHER>>AgV4nGf3jVDr2ovPotPKBPdaLehVYM95HCM3TP_s0LrvY78AdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE4Qk8xbDNwRkYzMDRMcWdXODZOQnAvMTFockhlRWlkQW1BNkxwMlZnWkdyazd0QTM3dktGVm5GaE5GVVdxWmFkUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHRETSDZlHaWarF2jFfNJYMAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMZ8yL_Ge_1eTyhCkCAgEQgDs8sbavwgJUpYZdFpCFZqbLaSvgT8UDWFqq2Qz6h9IutRiy6HJhkx46cB28DaeMCJWJLQTnWKzhdZVitAIAABAAbYeqpCgPetLjyFm7UOAk946YBhScV4b7BTngqIeX1XRROK8Jkg7UJMIaSeK7W9xR_____wAAAAEAAAAAAAAAAAAAAAEAAAAbrtwY54W5vwp2hYJUVSdhQ9oLWc1BxQhPH_PLqIx27YidvYpUuN9jyMtE_wBnMGUCMBrFSixl1EyOr04LAMjNWSIBEDDcyg4mPtW2pinQ0IpzjDDUBAeehGjO5CZ4p8YENwIxAPaP2YvRXueHWfjfNjZ9qgWVQZ2yxo6A5S3Ief4bWi0qlwk80kNZHQyk6AwuuMHqNA==<</CIPHER>>
+        rda:
+          job:
+            enabled: false # RDA Jobs are disabled by default on CCW Pipelines
+        ccw:
+          job:
+            enabled: true
+            batch_size: 7
+            queue_size_multiple: 5
+            claims:
+              loader_thread_count: ansible_processor_vcpus() * int(100)
+              batch_size: 100
+              queue_size_multiple: 10
+          idempotency_enabled: true
         instance_type: c6i.4xlarge
-        ccw/job/batch_size: 7
-        ccw/job/queue_size_multiple: 5
-        ccw/job/claims/loader_thread_count: ansible_processor_vcpus() * int(100)
         rif_thread_multiple: 3
-        ccw/job/claims/batch_size: 100
-        ccw/job/claims/queue_size_multiple: 10
         rif_thread_multiple_claims: 25
         slis_repeater_lambda_invoke_rate: 1 minutes
       rda:
-        ccw/job/enabled: false # CCW Jobs are disabled by default on RDA Pipelines
-        rda/job/enabled: true
-        rda/grpc/inprocess_server/mode: UNDEFINED
-        rda/grpc/inprocess_server/s3/region:
-        rda/grpc/inprocess_server/s3/bucket:
-        rda/grpc/inprocess_server/s3/dir:
-        rda/grpc/max_idle_seconds: 600
-        rda/grpc/server_type: "Remote"
-        rda/job/batch_size: 20
-        rda/job/interval_seconds: 3600 # 60 minutes
-        rda/job/starting_fiss_seq_num: 0
-        rda/job/starting_mcs_seq_num: 0
-        rda/job/write_thread_count: 5
-        rda/job/process_dlq: true
+        ccw:
+          job:
+            enabled: false # CCW Jobs are disabled by default on RDA Pipelines
+        job:
+          enabled: true
+          batch_size: 20
+          interval_seconds: 3600 # 60 minutes
+          starting_fiss_seq_num: 0
+          starting_mcs_seq_num: 0
+          write_thread_count: 5
+          process_dlq: true
+        grpc:
+          inprocess_server:
+            mode: UNDEFINED
+            s3:
+              region:
+              bucket:
+              dir:
+          max_idle_seconds: 600
+          server_type: "Remote"
         instance_type: m6i.large
     server:
       data_server_dir: /usr/local/bfd-server
-      new_relic/metrics/host: *newRelicMetricHost
-      new_relic/metrics/path: *newRelicMetricPath
-      pac/enabled: true
-      pac/claim_source_types: fiss,mcs
+      new_relic:
+        host: "gov-collector.newrelic.com"
+        log_path: /usr/local/bfd-server/
+        high_security_enabled: false
+        extensions_dir: /usr/local/bfd-server/newrelic/extensions/
+        app_name: BFD Server test
+        env: test
+        agent:
+          license_key: <<CIPHER>>AgV4TL9iR_P_T4IwONEkNNhW3cB4tE91xKDylx8QaBh4hucAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE2ZHRVc1U0OStGdytTazNDTWxLc2JzMzg1UUE0TDBQOUNac3pGTDZuQVQydFBpS0N3V0hNZDVwV2VhcEw3NDN4UT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEbJk6ulxn3NUefMg0ZuUcLAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMAEpTKTNEuyPtOS0iAgEQgDsTlea2ACkFeVwiC8_8acAg_Yia1q4cmshLzGgaaxRO6wpfs_CjnD_OsdeuKBh88WDWsPCfhjRb-zfttQIAABAA1FyBrPwPUSOYIaCwKxwmurvYT0WH-gpAhxTB9jNyXWO69_hTA4Pwmk0x1XIj8cwD_____wAAAAEAAAAAAAAAAAAAAAEAAAAqE2LgIrYNvj8mhv4hdfDKg4ZZ5RxUsPztu0AgQyMbmc5w7AiW3olKzEAPhqO2Wf4kBA8KRNLmm-hH9wBnMGUCMCRPHfzlnE0zjJQ7ELC4KxCdvMDCoV8CNoxdG5R9TqvQk6LaYCpDq0Cs5tItSVxM5wIxAO7d5_p4xmOY2-l9u8LPYem4L281O-6xC_iMiDNk1_faRld6V6RP1gIbm1qOa_r56w==<</CIPHER>>
+        metrics:
+          host: *newRelicMetricHost
+          path: *newRelicMetricPath
+          license_key: <<CIPHER>>AgV4RXNaJxJit8xVDoy6zeQhFt-_m2LUdyNOJ4gTGlp394UAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFpb1JHK2tlSUhKaVgrVnZqNkVRSTNRRml6Mko1SkJhalFmOFBmbFBDVFhDa2pDNXBYV05la2hnQkhNb3lLODI0Zz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAH5lLiKdQfZi_YYe02dd4djAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM8jJiSibbSKI-vwS0AgEQgDs1Z_ZkteQhak6OkyjwhsnMzj_J5_NpJANf3NGb31xs_Zl2z5obu2n973l95w9sXATVxhpnook-Eo63VwIAABAAZxIh8JwLPtFrVihxZYXgwz6spos3oOfM7TACxg_yw2RJubecdN_tVKLDmMXexrWG_____wAAAAEAAAAAAAAAAAAAAAEAAAAnNce3BK652kEq06rU0M4dwMBR_6_0GaqfVpEIM_e--rQ0JJNh411DCjlVYbgMuNov8APkel9dawBnMGUCMFT0ADwapKWKWLsTdFz2Nev_dOKLjP-l-09PZNck5SlcKOzKgT-sxNxlrghwFLxwXAIxAMcPijIzIwv9bICpEyUeu2vf3DjCLWXoA7QO6I_iou6QdW5-q6Qg8bMbUK2VEcRzrA==<</CIPHER>>
+          period:
+      pac:
+        enabled: true
+        claim_source_types: fiss,mcs
       lb_is_public: false
       lb_ingress_port: 443
       lb_egress_port: 7443
@@ -188,38 +234,37 @@ bfd:
       # (every 120 days) you will want to swap the accounts. The commented account will need to have
       # it's password changed in the DB, then updated here and the user and password lines
       # uncommented.
-      db/username: <<CIPHER>>AgV4164Cnlg9ps3zK6ZXwrTTwIDwMzQHM10toEb2tm2z5ccAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFvOGtRZVpJOEt4ekFMcyswamlrWFFzaXpWMEVFamd0eWVNNkt6VTM2TGFJOWJ4cVZ1cEVGQWVZSWNqOVRJd3Bpdz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHgr9ogQoQgHrvfdhIe1qbjAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMvpeoyxhrMNo3RDC7AgEQgDuBjTCa04AFDIeAMe8X6rgpdDtbPfY7sMG2LMnFdjppWnPWcJRjx1Z-VK-odly2KSuqxL9xsstb2m2lTwIAABAALC9VTCy-FGPT681PJL6mizIETSOlPZGDp-A8qefnmGKySOh0J7MTl3GHoTTr4xOD_____wAAAAEAAAAAAAAAAAAAAAEAAAASkDH9pxD0tge9AHELKjr9GFDUFbUDELHE7MEddE49P3pl7gBnMGUCMQDCRPosBNr2KsfwBTqJq0MG3gvonMiyvbsn_FN2UidN91hGDx6sb0YyACE2iPzoOykCMAkSOEdl7c0Iuwz5BEyzIAReMK0UaRCBIkqKg43AQ6itC3xh9hYEAjHiqcb_rlPs3A==<</CIPHER>>
-      db/password: <<CIPHER>>AgV4uiG4CuOVb8ax6M1xhM0B-x7iUOZLL9QDtF3qbm8b_F0AdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF4ZHdQd1RVd2dUSkNyWU45WDhZcFJGRmg0aWdDeUZidzNHNDgzSXk1N3RIZER6SmVwOGI4WENVKzBtdUdORU9wUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGJtd3KFMc3O8aPANt1fAtqAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMDnDe-g9HZAi_WApMAgEQgDsyKOKwSTkBJoD43HvIB7s_AsTBC-PCJmA5rFhaNj-Vk5Hj4Hk5i49FBza7kk2bPKxJXC6Rgw16K_CpqQIAABAAA6k92SFtdViKPRKT2vf8qOZA8Ftlxq7mbJ11pDwDvjxusE2wIOmrfS9_dYGnatwV_____wAAAAEAAAAAAAAAAAAAAAEAAAAaVU2Tj6Ru5IZ0P-SAqHn-VDyq-9Xam-3rm4Z7_7QsozAxOOfAMiksRq9QAGcwZQIwNbuxv0PBs7bAlquvIauiLk-dQu28DPR5lXJwU9cI-YxScgpsBcgO7jMWXAvkEQSrAjEA6spaFeJEaHbOJTy42dv2_rKZx2R67avJchXWLhEQRG0CRwag7gRM7naYDQLVBz4l<</CIPHER>>
-      db/url: <<CIPHER>>AgV4dHb1h_tHptvtYXk2I2RqSc8gcksT7BiFdflozzco3SIAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFrNUhqaFd4ZnRQYkk1STFQNU1QNHUxTC8vSDFwQlczVlZNUG5scGRXM1Y3TDBVQmxrWjROMnhPZi8rcGhobWxXUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGE1KGkpSWCfOTv4syFqJnIAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJljYTzPTbm9hR2riAgEQgDtS2BH2vLwIGMWJtKABHkd8xS5zELA0pl5hY1yULoxi1hHxxMfPKVSQMxzlk-_nxFrs2eVb3_C3acANOAIAABAAIoVrje6tFCo5mwzBtEJOFyjOQmDO9nnK-XiKBStpoTbQGAFijNiCZT3x-13aphzz_____wAAAAEAAAAAAAAAAAAAAAEAAACGZVucO3FiiLDG4k2mFNrKKYGQxFaAFWwMnpgw_nGXvLaz-mNyZE88uSAIH6ztwuGzNQhn3m1QjKqjI8FvWD-weJS1daeE7TpVHEIQTVIo_1YuX6DuaYEojlv4n-GqK-DourdLLcCcbHq8cZDO46LQv9Cr0mO83HoM2GZDF0_XL70HXlCFIb1uVC6WpxyL6KAPsZvfbCFRAGcwZQIwT0w9ywl0nyufNclwpH-_UMu9DkkqhMXQsuJew4EG2zWH21xqwjLYqNMNnqOziv3fAjEAwHuVbs4Z9impNzleirqcR6RVvMe3l8m8hn1PoG0Pkfzmhsdo-sueTxxH62ZgJ1n0<</CIPHER>>
-      new_relic/agent/license_key: <<CIPHER>>AgV4UoNYlUWPyuwYCy62nTj1fXQ-9fAjV2AZKUSFQFpuSzcAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE3VlhhUXoxeW9tR3JmY2FlN1JkcFJJUU5qd2MwSlJ0YVY0N0VWZFVrczNDQWpQcUZOR2Z0L1N1TVlXZzc1Ym9DZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHoGIngU76uXX33_okRi8osAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMcigr6P48cum-Zyt-AgEQgDv6zyzJ4NCCFD0CnAmgRxXZR7872PiTRGafOPHb_CgQuB8wrOrUk-FvzXd5fKLtfGRbkzPNmCVzRVWSbQIAABAAs5xrpSFBYjV5IfFGkSDYGWhIERolwzAVqIfqXFzvIxkPgMxL6hbw-lW2v0WIxi8Y_____wAAAAEAAAAAAAAAAAAAAAEAAAAqZpeDFEGhb5JPm4IvIjS_l2oyCw1YfYKQxNrEfuz71FtNQyNRBKDjlPLm5yR-1JBOqVL_llk6H1L91wBnMGUCMQDwd_JIwgsIwp4oCg-WFR0ZXHKai30qdwsYiSa8qNjTy25yfm3_WAwkxprq7mVTwH4CMAaCxeQ0Dmi0-rc_Xv5Sk70Do0Il5V2zO9dhmgrgOZ54u6UOlqS-Q3eyu6pPjBLqEw==<</CIPHER>>
-      new_relic/metrics/license_key: <<CIPHER>>AgV48_QwFlUQTqAeaCi8XNk0BnqYgVVDV0lxvPPnqXB5zsgAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF4ajlsUFpiSExNTHJZVVpWM3h6ajFBRGJHRHZ6Q1dRS0VtTHRoOUR4aU85dTRWQ2Z1ZXJQWkJ6UElWdy90dklLdz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHSoBXnf2BLT9TCXr8EbGXKAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM7I8sYVANBGW22sIhAgEQgDtJoh6UdeWbAbk88rYFDboynEH38b0p_2xfcFqi71s0a4fkUFsHZjQNVM7pMMfpmN1aKh3PStWJzKBoEAIAABAAT24hpy-rZ5qF69kWOHg6u6dpf_3-Ry91PYB2ySydk9ZMDymC9Fe9_3B4RxqtyRHW_____wAAAAEAAAAAAAAAAAAAAAEAAAAnBckgylC2ejTBAIe1bURWbz-PcG0jHiiX9C9gmQV3QdK0sqHirFmkN59iu1_A4U_NS574BZkUhgBnMGUCMQCx7vr3EX0Lw1xD5-PBeqDGrbgGudVTCjoAJAXC3XE_ujJSO5r5QVOx7Ytq9liL5ikCMBkuVFxZbK19gDV9EjGev8beyoOfayyLShW3mRq62yVMWCA53Cn9m-LxeB4ciuFb5A==<</CIPHER>>
+      db:
+        username: <<CIPHER>>AgV42TkW5WwwBbj5UvsIEmvLS4ELE7QslKs8O7dpnfbskQIAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEwNFpkeTJHNG45RjUzUVN4ZGtWNXRVVzNVeDJ4UGh0WFVsKzYrNHJLMXQvRkNOSmNXYXVBOWxRc1BtVUtmb1lqZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAH8g4dq8e4dzCnS-fKxxOksAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMIQ5SE5hy-bz99l9WAgEQgDukvBBlisr1MeVeMsvaeGks2U3xB6VTZDiHa3rIxQP_MaXq1rNSB5H18RQ5PPAqOXrU9-jjcVzF4JlJKAIAABAAePM0x1WRk4IYCxkW2lNeslb5_U-_T24CAzpi2Y9V-ZCjjjM0UkHMEqEqA6PGzKkQ_____wAAAAEAAAAAAAAAAAAAAAEAAAASasTRJ2UuXQTh5_CWft-iUiBSswX6Mdg5CEyLbQIOJv5RMwBnMGUCMQCDz6vKy5wOVe0KFCPdcpE8B_5EtTjs49TS8EDPiHJIUPHY81yDBicYuC1wIJe9ewoCME68M3eHAFAvB0SxYM2lyssTdHXoygfDfowoWLbr_dJfb6IJgb-ZOo7sQndbSIxXtQ==<</CIPHER>>
+        password: <<CIPHER>>AgV4-yRNLan7wrYgHj-etwtc0hCkB6VDeZTUqdEkNF8XuOQAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFqRWd0WnBMZGJYK3lhanNYbER2eWdaS3dpVUcrcGR6RUcrZ2lNYXpCanpQaGN3Z0h4ZGtYdUZBOFNaU1VkdXUvUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFy5pjejuGs2Z16DVBbX8DbAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMZubEa6vBuufIN_HeAgEQgDtJsGxd_raYx8YNFYKDJmzpqEau6IcJlffU-tvHXWg8Wwl9IBpgX686QAFq0E0lyxGLDUv_6CNeDcqE8gIAABAAX2MNAZBS9i7tao0ZHVEiDqHyno0M5UmZTzb9_T0FP8EYkXVTUGCXrkoPcFSnl_qR_____wAAAAEAAAAAAAAAAAAAAAEAAAAaEM5WAjO-ziezgZcQMe1hCki3NKp73fMk8Y1YMKP91vlHMLrWSqjDF6TPAGcwZQIwS9WAgFxOQr-_9rQdBdVRGHQQJ0OI5zdqx1mLxsmpn0c8gBW6Ke694HyENa4J1sDCAjEA3OflhaJRNnVUvOqm7Vq7AYoazNKO1bEkKCre0fXkkhmwgmboGLBBCkgRuu0mZc1t<</CIPHER>>
+        url: <<CIPHER>>AgV4G5VSo2HcJJnmtoUafmt3dHcPZu6PZK-7Y7MLSymaowEAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFoUDg4U2JqZGhwYXRDZzZTU1Bkdm1LM3ZKNjhWNVBEc3VHb3lxMDhLS3YxRlhGS1VWNHY2U0wrdUQ3QlFJVHpSdz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAG4GZA40NB0PAb9n7YuuZIGAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMl2rhJAdDbXWkag7WAgEQgDtqpcYRDXc_Cf8387kU-UHzosKP-CSA8vfA-sHFmfSheuRuNZPBIGBLUMyJGmnKxiYHaDRKn742L6vRzgIAABAAYSNxW9C8c2uny1kx1sR8-pODfKvnqPJJ_EuM-WQ5QPIKNK-107Z7ftv-HBrQOQXi_____wAAAAEAAAAAAAAAAAAAAAEAAACGaSQ_4aoZMucoB857-6E3YhfOhSmQHzc0xFwtrp8rvNsmG2_uM2PBk2hHk1s-n0fQua7sBjJqRZPD9o7CHJOuCqa8u6vjy9duwiaMcck2AV9I6cUE-iagzbAzlnhbW4KM6GDDkEkaienJXANsbjtrKPt-OQYXGgI0sfe7EN60Y7v4cMEeszQ057yR858XRi-WphUUTzZIAGcwZQIwDi4wN6dsrA8nXCindGtiE86UsEX9-7Y-FOOSI2F37rUHrdUuaDcWWgbN8ejaZEL4AjEAgVrbbmhDrrqNSn_C5kk43-Lv5KRR7lBWSilZDnVLa1bXdpIbnLwtYxvXWrGYOgBb<</CIPHER>>
+        max_connections: ansible_processor_vcpus() * 10
+        auth_type:
       port: <<CIPHER>>AgV4xOQCJmU1GJW6Waz297NULOep6vg5zsMAGOLMG36tZH0AdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE4TVJsY0plQTNLdStYYVc0UWpPTzd6NE5yMDlGb2tobjhxRjlkZVM3eXJLaGRyb085YTdkVHZlcDJuSGZUQnlrQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHdWrjPLlN02QWojCKug93WAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMVSQ9VtqVLYlh0q9gAgEQgDsTkNgVJ28Zg1SZK4pnX07I_ePe8eQqCpjJZaQKlBCO9vloyFIt9PE-h5C3ZMnZkZjxO4Q7n0FFa154pQIAABAAB-3QOZkTJEzirxoAnywNvWhnG4QMoF9DlgzPIRvfJMDdIBGg90b0GsZ00fFyljip_____wAAAAEAAAAAAAAAAAAAAAEAAAAGylqWEEVLwtCM2cOl7D5Frtw7Ra8aEABnMGUCMHh9Pk1xvUbz4cTao-wdiCHzgvUvFATa3Wu7oZOY46W5qHyE5lNYkH1VcVXPCcXSvAIxANA-i94EkM66GGW5womSWQzjZF9wyks5TSiLQqfubp_l-kDd1tmlA9ngIGBBr9T2yw==<</CIPHER>>
-      paths/files/keystore: /usr/local/bfd-server/bluebutton-appserver-keystore.pfx
-      paths/files/truststore: /usr/local/bfd-server/bluebutton-appserver-truststore.pfx
-      paths/files/war: /usr/local/bfd-server/basename('bfd-server-war-1.0.0-SNAPSHOT.war')
-      paths/dirs/logs: /usr/local/bfd-server/
-      db/max_connections: ansible_processor_vcpus() * 10
-      db/auth_type:
-      new_relic/host: "gov-collector.newrelic.com"
-      new_relic/log_path: /usr/local/bfd-server/
-      new_relic/high_security_enabled: false
-      new_relic/extensions_dir: /usr/local/bfd-server/newrelic/extensions/
-      new_relic/app_name: BFD Server test
-      new_relic/env: test
-      new_relic/metrics/period:
-      healthcheck/request_timeout_seconds: 15
-      healthcheck/request_backoff_seconds: 1
-      healthcheck/testing_bene_id: -88888888888888
-      healthcheck/launch_lifecycle_hook: bfd-test-fhir-on-launch
-      paths/files/launcher_script: bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh
-      paths/files/new_relic_agent_jar: /usr/local/bfd-server/newrelic/newrelic.jar
-      paths/dirs/tmp: /usr/local/bfd-server/tmp
-      jboss/logging_provider: slf4j
-      paths/files/launcher_log: /usr/local/bfd-server/bluebutton-server-app-log.json
-      java/app_main_class: gov.cms.bfd.server.launcher.DataServerLauncherApp
-      systemd/working_dir: /usr/local/bfd-server
-      systemd/exec_start: /usr/local/bfd-server/bfd-server.sh
-      systemd/user: bfd
+      paths:
+        files:
+          keystore: /usr/local/bfd-server/bluebutton-appserver-keystore.pfx
+          truststore: /usr/local/bfd-server/bluebutton-appserver-truststore.pfx
+          war: /usr/local/bfd-server/basename('bfd-server-war-1.0.0-SNAPSHOT.war')
+          launcher_script: bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh
+          new_relic_agent_jar: /usr/local/bfd-server/newrelic/newrelic.jar
+          launcher_log: /usr/local/bfd-server/bluebutton-server-app-log.json
+        dirs:
+          logs: /usr/local/bfd-server/
+          tmp: /usr/local/bfd-server/tmp
+      healthcheck:
+        request_timeout_seconds: 15
+        request_backoff_seconds: 1
+        testing_bene_id: -88888888888888
+        launch_lifecycle_hook: bfd-test-fhir-on-launch
+      jboss:
+        logging_provider: slf4j
+      java:
+        app_main_class: gov.cms.bfd.server.launcher.DataServerLauncherApp
+      systemd:
+        working_dir: /usr/local/bfd-server
+        exec_start: /usr/local/bfd-server/bfd-server.sh
+        user: bfd
 
       # The BFD Server's PKCS12 keystore is stored in base64 as SSM does not support binary values.
       # It will be decoded in the server's user-data init script, upon launch Note that this data is
