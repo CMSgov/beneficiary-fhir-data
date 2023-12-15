@@ -4,7 +4,7 @@
 export BFD_PORT='{{ data_server_appserver_https_port }}'
 export BFD_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.pfx'
 export BFD_TRUSTSTORE='{{ data_server_dir }}/bluebutton-appserver-truststore.pfx'
-export BFD_WAR="$(find {{ data_server_dir }} -name 'bfd-server-war-*.war')"
+export BFD_WAR="$(find {{ data_server_dir }} -type f -name 'bfd-server-war-*.war')"
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
@@ -182,7 +182,7 @@ service_startup_check() {
 
 # Set some additional variables.
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
-SERVICE_SCRIPT="$(find {{ data_server_dir }} -name bfd-server-launcher.sh)"
+SERVICE_SCRIPT="$(find {{ data_server_dir }} -type f -name bfd-server-launcher.sh)"
 
 # 3... 2... 1... launch!
 "$SERVICE_SCRIPT" \

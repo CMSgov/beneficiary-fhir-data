@@ -31,7 +31,7 @@ export NEW_RELIC_METRIC_PERIOD='{{ db_migrator_new_relic_metric_period }}'
 
 LOGS_DIR='{{ db_migrator_dir }}/'
 
-SERVICE_SCRIPT="$(find {{ db_migrator_dir }} -name bfd-db-migrator.sh)"
+SERVICE_SCRIPT="$(find {{ db_migrator_dir }} -type f -name bfd-db-migrator.sh)"
 
 exec "${SERVICE_SCRIPT}" \
 	"-DbfdDbMigrator.logs.dir=${LOGS_DIR}" \
