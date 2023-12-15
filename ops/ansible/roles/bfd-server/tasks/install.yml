@@ -31,19 +31,18 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
-
 # Create the temp directory if and only if it's missing. (Don't want to
 # accidentally change the permissions on /tmp.)
 - name: Check for Custom Temp Directory
   stat:
-    path: "{{ data_server_tmp_dir }}"
+    path: "{{ tmp }}"
   become: true
   register: stat_tmp
-  when: data_server_tmp_dir is defined
+  when: tmp is defined
 
 - name: Create Custom Temp Directory
   file:
-    path: "{{ data_server_tmp_dir }}"
+    path: "{{ tmp }}"
     state: directory
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
@@ -97,7 +96,7 @@
 
 - name: Copy New Relic Java Agent Config
   template:
-    src: 'newrelic.yml.j2'
+    src: "newrelic.yml.j2"
     dest: "{{ data_server_dir }}/newrelic/newrelic.yml"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
@@ -106,7 +105,7 @@
 
 - name: Configure New Relic Extensions
   template:
-    src: 'newrelic_tracing.xml.j2'
+    src: "newrelic_tracing.xml.j2"
     dest: "{{ data_server_dir }}/newrelic/extensions/tracing.xml"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
@@ -116,6 +115,6 @@
 ### Logrotate Stuff
 - name: Configure bfd-server Log Rotation
   template:
-    src: 'bfd-server.j2'
+    src: "bfd-server.j2"
     dest: /etc/logrotate.d/bfd-server
   become: true
