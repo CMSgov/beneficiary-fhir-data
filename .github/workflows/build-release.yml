@@ -167,7 +167,17 @@ jobs:
               --namespace "$CA_NAMESPACE" \
               --format maven \
               --region "$AWS_REGION" \
-              "${asset/$CA_PACKAGE-/}" 1>/dev/null
+              "${asset/$CA_PACKAGE-${{ inputs.releaseVersion }}-/}" 1>/dev/null
+          done
+
+          # rename data dictionary release assets to follow historical naming conventions
+          for item in ./*data-dictionary*
+          do
+            filename=$(basename -- "$item")
+            extension="${filename##*.}"
+            filename="$(echo "${filename%.*}" | sed -E 's/^v([0-9]+.*)$/V\1/')"
+            
+            mv "$item" "$filename-${{ inputs.releaseVersion }}.$extension"
           done
         env:
           CA_NAMESPACE: gov.cms.bfd
