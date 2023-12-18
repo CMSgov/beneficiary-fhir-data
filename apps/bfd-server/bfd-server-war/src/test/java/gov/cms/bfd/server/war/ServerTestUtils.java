@@ -48,7 +48,6 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.management.ManagementFactory;
@@ -72,7 +71,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -159,40 +157,9 @@ public final class ServerTestUtils {
    * @return the value to use for {@link #getServerBaseUrl()}
    */
   private static String initServerBaseUrl() {
-    Properties testServerPorts = initTestServerPortsProperties();
-    int httpsPort = Integer.parseInt(testServerPorts.getProperty("server.port.https"));
+    int httpsPort = Integer.parseInt(ServerExecutor.getServerPort());
     String serverBaseUrl = String.format("https://localhost:%d", httpsPort);
     return serverBaseUrl;
-  }
-
-  /**
-   * Returns the server port {@link Properties} that are written to a file during the <code>
-   * reserve-server-ports</code> maven plugin step. This allows us to use the same server port
-   * during the entire test runtime.
-   *
-   * @return the server port properties
-   */
-  private static Properties initTestServerPortsProperties() {
-    /*
-     * The working directory for tests will either be the module directory or their parent
-     * directory. With that knowledge, we're searching for the target/server-work directory.
-     */
-    Path serverRunDir = Paths.get("target", "server-work");
-    if (!Files.isDirectory(serverRunDir))
-      serverRunDir = Paths.get("bfd-server-war", "target", "server-work");
-    if (!Files.isDirectory(serverRunDir))
-      throw new IllegalStateException(
-          "Unable to find server-work directory from current working directory: "
-              + Paths.get(".").toAbsolutePath());
-
-    Properties serverPortsProps = new Properties();
-    try {
-      serverPortsProps.load(
-          new FileReader(serverRunDir.resolve("server-ports.properties").toFile()));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-    return serverPortsProps;
   }
 
   /**
