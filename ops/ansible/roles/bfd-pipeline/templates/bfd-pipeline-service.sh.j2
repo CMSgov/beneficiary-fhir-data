@@ -1,71 +1,71 @@
 #!/bin/bash
 
-export CCW_RIF_JOB_ENABLED='{{ ccw/job/enabled }}'
-export S3_BUCKET_NAME='{{ ccw/s3_bucket_name }}'
-export HICN_HASH_ITERATIONS='{{ hicn_hash/iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
-export HICN_HASH_PEPPER='{{ hicn_hash/pepper }}'
-export DATABASE_URL='{{ db/url }}'
-export DATABASE_USERNAME='{{ db/username }}'
-export DATABASE_PASSWORD='{{ db/password }}'
+export CCW_RIF_JOB_ENABLED='{{ enabled }}'
+export S3_BUCKET_NAME='{{ s3_bucket_name }}'
+export HICN_HASH_ITERATIONS='{{ iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
+export HICN_HASH_PEPPER='{{ pepper }}'
+export DATABASE_URL='{{ url }}'
+export DATABASE_USERNAME='{{ username }}'
+export DATABASE_PASSWORD='{{ password }}'
 # NOTE: RIF Loader Threads are generally some multiple of available cpus/core, e.g. `$((3 * $(nproc)))`
 export LOADER_THREADS='{{ loader_thread_count }}'
-export RIF_JOB_BATCH_SIZE='{{ ccw/job/batch_size }}'
-export RIF_JOB_QUEUE_SIZE_MULTIPLE='{{ ccw/job/queue_size_multiple }}'
-export LOADER_THREADS_CLAIMS='{{ ccw/job/claims/loader_thread_count	}}'
-export RIF_JOB_BATCH_SIZE_CLAIMS='{{ ccw/job/claims/batch_size }}'
-export RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS='{{ ccw/job/claims/queue_size_multiple }}'
+export RIF_JOB_BATCH_SIZE='{{ batch_size }}'
+export RIF_JOB_QUEUE_SIZE_MULTIPLE='{{ queue_size_multiple }}'
+export LOADER_THREADS_CLAIMS='{{ loader_thread_count	}}'
+export RIF_JOB_BATCH_SIZE_CLAIMS='{{ batch_size }}'
+export RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS='{{ queue_size_multiple }}'
 
-export IDEMPOTENCY_REQUIRED='{{ ccw/idempotency_enabled }}'
+export IDEMPOTENCY_REQUIRED='{{ idempotency_enabled }}'
 
 # Observability
-{% if micrometer_cw/enabled is defined and micrometer_cw/namespace is defined %}
-export MICROMETER_CW_ENABLED={{ micrometer_cw/enabled }}
-export MICROMETER_CW_NAMESPACE={{ micrometer_cw/namespace }}
-export MICROMETER_CW_INTERVAL={{ micrometer_cw/interval }}
+{% if enabled is defined and namespace is defined %}
+export MICROMETER_CW_ENABLED={{ enabled }}
+export MICROMETER_CW_NAMESPACE={{ namespace }}
+export MICROMETER_CW_INTERVAL={{ interval }}
 {% else %}
 # export MICROMETER_CW_ENABLED=
 # export MICROMETER_CW_NAMESPACE=
 # export MICROMETER_CW_INTERVAL=
 {% endif %}
 
-export NEW_RELIC_METRIC_HOST='{{ new_relic/metrics/host }}'
-export NEW_RELIC_METRIC_PATH='{{ new_relic/metrics/path }}'
-{% if new_relic/app_name is defined %}
-export NEW_RELIC_APP_NAME='{{ new_relic/app_name }}'
+export NEW_RELIC_METRIC_HOST='{{ host }}'
+export NEW_RELIC_METRIC_PATH='{{ path }}'
+{% if app_name is defined %}
+export NEW_RELIC_APP_NAME='{{ app_name }}'
 {% else %}
 #export NEW_RELIC_APP_NAME=
 {% endif %}
-{% if new_relic/metrics/license_key is defined %}
-export NEW_RELIC_METRIC_KEY='{{ new_relic/metrics/license_key }}'
+{% if license_key is defined %}
+export NEW_RELIC_METRIC_KEY='{{ license_key }}'
 {% else %}
 #export NEW_RELIC_METRIC_KEY=
 {% endif %}
 
-export RDA_JOB_ENABLED='{{ rda/job/enabled }}'
-export RDA_JOB_INTERVAL_SECONDS='{{ rda/job/interval_seconds }}'
-export RDA_JOB_BATCH_SIZE='{{ rda/job/batch_size }}'
-export RDA_JOB_WRITE_THREADS='{{ rda/job/write_thread_count }}'
-{% if rda/job/process_dlq is defined %}
-export RDA_JOB_PROCESS_DLQ='{{ rda/job/process_dlq }}'
+export RDA_JOB_ENABLED='{{ enabled }}'
+export RDA_JOB_INTERVAL_SECONDS='{{ interval_seconds }}'
+export RDA_JOB_BATCH_SIZE='{{ batch_size }}'
+export RDA_JOB_WRITE_THREADS='{{ write_thread_count }}'
+{% if process_dlq is defined %}
+export RDA_JOB_PROCESS_DLQ='{{ process_dlq }}'
 {% endif %}
 {% if data_pipeline_rda_version is defined %}
 export RDA_JOB_RDA_VERSION='{{ data_pipeline_rda_version }}'
 {% endif %}
-{% if rda/job/starting_fiss_seq_num is defined %}
-export RDA_JOB_STARTING_FISS_SEQ_NUM='{{ rda/job/starting_fiss_seq_num }}'
+{% if starting_fiss_seq_num is defined %}
+export RDA_JOB_STARTING_FISS_SEQ_NUM='{{ starting_fiss_seq_num }}'
 {% endif %}
-{% if rda/job/starting_mcs_seq_num is defined %}
-export RDA_JOB_STARTING_MCS_SEQ_NUM='{{ rda/job/starting_mcs_seq_num }}'
+{% if starting_mcs_seq_num is defined %}
+export RDA_JOB_STARTING_MCS_SEQ_NUM='{{ starting_mcs_seq_num }}'
 {% endif %}
-export RDA_GRPC_HOST='{{ rda/grpc/host }}'
-export RDA_GRPC_PORT='{{ rda/grpc/port }}'
-export RDA_GRPC_MAX_IDLE_SECONDS='{{ rda/grpc/max_idle_seconds }}'
-export RDA_GRPC_AUTH_TOKEN='{{ rda/grpc/auth_token }}'
-export RDA_GRPC_SERVER_TYPE='{{ rda/grpc/server_type }}'
-export RDA_GRPC_INPROC_SERVER_MODE='{{ rda/grpc/inprocess_server/mode }}'
-export RDA_GRPC_INPROC_SERVER_S3_REGION='{{ rda/grpc/inprocess_server/s3/region }}'
-export RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ rda/grpc/inprocess_server/s3/bucket }}'
-export RDA_GRPC_INPROC_SERVER_S3_DIRECTORY='{{ rda/grpc/inprocess_server/s3/dir }}'
+export RDA_GRPC_HOST='{{ host }}'
+export RDA_GRPC_PORT='{{ port }}'
+export RDA_GRPC_MAX_IDLE_SECONDS='{{ max_idle_seconds }}'
+export RDA_GRPC_AUTH_TOKEN='{{ auth_token }}'
+export RDA_GRPC_SERVER_TYPE='{{ server_type }}'
+export RDA_GRPC_INPROC_SERVER_MODE='{{ mode }}'
+export RDA_GRPC_INPROC_SERVER_S3_REGION='{{ region }}'
+export RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ bucket }}'
+export RDA_GRPC_INPROC_SERVER_S3_DIRECTORY='{{ dir }}'
 
 # Referenced by the pipeline's logback.xml file to add environment name for use in splunk.
 export BFD_ENV_NAME='{{ env_name }}'
@@ -79,5 +79,5 @@ JVM_ARGS='{{ data_pipeline_jvm_args }}'
 
 exec "{{ data_pipeline_dir }}/bfd-pipeline-app-{{ bfd_version }}/bfd-pipeline-app.sh" \
 	${JVM_ARGS} \
-	-Djava.io.tmpdir={{ paths/dirs/tmp }} -Dorg.jboss.logging.provider={{ java/jboss/logging_provider }} \
-	&>> "{{ paths/files/launcher_log }}""
+	-Djava.io.tmpdir={{ tmp }} -Dorg.jboss.logging.provider={{ logging_provider }} \
+	&>> "{{ launcher_log }}""

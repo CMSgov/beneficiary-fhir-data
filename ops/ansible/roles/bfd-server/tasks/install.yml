@@ -48,7 +48,7 @@
     group: "{{ data_server_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
-  when: data_server_tmp_dir is defined and stat_tmp.stat.exists == false
+  when: tmp is defined and stat_tmp.stat.exists == false
 
 - name: Copy and Unzip BFD Server Launcher
   unarchive:
