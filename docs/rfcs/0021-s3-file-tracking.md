@@ -245,6 +245,7 @@ Stories could be implemented on two parallel tracks:
   * DB: Changes to track S3 files and progress in the database.
 
 | Story | Sprint | Points | Description |
+|---|---|---|---|
 | SQS-1 | 1 | 3 | Implement status update event publishing via SQS. |
 | SQS-2 | 2 | 3 | Modify external processes to monitor SQS queue instead of S3 Done folder. |
 | DB-1 | 1 | 3-5 | Implement Option-T to track S3 files in database. |
