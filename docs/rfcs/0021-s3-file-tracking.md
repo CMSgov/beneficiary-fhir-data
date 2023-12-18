@@ -11,7 +11,7 @@ Several options are proposed.
 
 ## Status
 
-* Status: Proposed <!-- (Proposed/Approved/Rejected/Implemented) -->
+* Status: Approved <!-- (Proposed/Approved/Rejected/Implemented) -->
 * Implementation JIRA Ticket(s):
     * n/a
 
