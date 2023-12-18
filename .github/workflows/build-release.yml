@@ -175,8 +175,8 @@ jobs:
           do
             filename=$(basename -- "$item")
             extension="${filename##*.}"
-            filename="${filename%.*}"
-
+            filename="$(echo "${filename%.*}" | sed -E 's/^v([0-9]+.*)$/V\1/')"
+            
             mv "$item" "$filename-${{ inputs.releaseVersion }}.$extension"
           done
         env:
