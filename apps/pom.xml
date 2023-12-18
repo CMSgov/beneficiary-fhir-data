@@ -38,13 +38,15 @@
 
     <scm>
         <!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-        <connection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</connection>
-        <developerConnection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</developerConnection>
+        <connection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</connection>
+        <developerConnection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</developerConnection>
         <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
         <tag>HEAD</tag>
     </scm>
 
     <modules>
+        <module>bfd-data-npi</module>
+        <module>bfd-data-fda</module>
         <module>bfd-shared-utils</module>
         <module>bfd-shared-test-utils</module>
         <module>bfd-model</module>
@@ -68,8 +70,6 @@
             they are reproducible bit-by-bit no matter when/where they are generated.
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
         <project.build.outputTimestamp>2022-01-01T00:00:00Z</project.build.outputTimestamp>
-        <bfd.data.fda.version>1.0-SNAPSHOT</bfd.data.fda.version>
-        <bfd.data.npi.version>1.0-SNAPSHOT</bfd.data.npi.version>
         <maven.jacoco.plugin.version>0.8.11</maven.jacoco.plugin.version>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
@@ -1254,14 +1254,17 @@
 
     <profiles>
         <profile>
-            <id>test-release</id>
+            <id>release</id>
             <properties>
-                <jib.skip>false</jib.skip>
+                <!-- TODO: Update jib.skip to `false` as part of BFD-3120` -->
+                <jib.skip>true</jib.skip>
                 <jib.goal>build</jib.goal>
                 <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
                 <maven.build.cache.enabled>false</maven.build.cache.enabled>
                 <!-- Source jars are large and we don't need to publish them. -->
                 <maven.source.skip>true</maven.source.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <checkstyle.skip>true</checkstyle.skip>
             </properties>
             <distributionManagement>
                 <repository>
