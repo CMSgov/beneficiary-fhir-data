@@ -1254,14 +1254,17 @@
 
     <profiles>
         <profile>
-            <id>test-release</id>
+            <id>release</id>
             <properties>
-                <jib.skip>false</jib.skip>
+                <!-- TODO: Update jib.skip to `false` as part of BFD-3120` -->
+                <jib.skip>true</jib.skip>
                 <jib.goal>build</jib.goal>
                 <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
                 <maven.build.cache.enabled>false</maven.build.cache.enabled>
                 <!-- Source jars are large and we don't need to publish them. -->
                 <maven.source.skip>true</maven.source.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <checkstyle.skip>true</checkstyle.skip>
             </properties>
             <distributionManagement>
                 <repository>

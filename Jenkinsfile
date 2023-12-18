@@ -187,13 +187,13 @@ try {
 				}
 			}
 
-			stage('Build Apps') {
+			stage('Fetch Apps') {
 				if (!params.use_latest_images) {
 					currentStage = env.STAGE_NAME
-					milestone(label: 'stage_build_apps_start')
+					milestone(label: 'stage_fetch_app_start')
 
 					container('bfd-cbc-build') {
-						appBuildResults = scriptForApps.build(verboseMaven)
+						appFetchResults = scriptForApps.fetch()
 					}
 				}
 			}
@@ -204,7 +204,7 @@ try {
 					milestone(label: 'stage_build_app_amis_test_start')
 
 					container('bfd-cbc-build') {
-						amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+						amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appFetchResults)
 					}
 				}
 			}
