@@ -40,11 +40,7 @@ public final class AppConfigurationIT {
         getProjectDirectory()
             .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.pfx"))
             .toString());
-    envValues.put(
-        AppConfiguration.ENV_VAR_KEY_WAR,
-        getProjectDirectory()
-            .resolve(Paths.get("target", "sample", "bfd-server-launcher-sample-1.0.0-SNAPSHOT.war"))
-            .toString());
+    envValues.put(AppConfiguration.ENV_VAR_KEY_WAR, ServerTestUtils.getSampleWar().toString());
 
     ConfigLoader config = ConfigLoader.builder().addMap(envValues).build();
 

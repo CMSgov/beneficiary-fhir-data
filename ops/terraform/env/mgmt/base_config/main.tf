@@ -43,13 +43,17 @@ locals {
     for key, value in local.yaml
     : key => value if contains(split("/", key), "common") && value != "UNDEFINED"
   }
-  cpm_sensitive ={
+  cpm_sensitive = {
     for key, value in local.yaml
     : key => value if contains(split("/", key), "cpm") && value != "UNDEFINED"
   }
   jenkins_sensitive = {
     for key, value in local.yaml
     : key => value if contains(split("/", key), "jenkins") && value != "UNDEFINED"
+  }
+  quicksight_sensitive = {
+    for key, value in local.yaml
+    : key => value if contains(split("/", key), "quicksight") && value != "UNDEFINED"
   }
 }
 
@@ -104,6 +108,16 @@ resource "aws_ssm_parameter" "cpm_sensitive" {
 
 resource "aws_ssm_parameter" "jenkins_sensitive" {
   for_each = local.jenkins_sensitive
+
+  key_id    = local.kms_key_id
+  name      = each.key
+  overwrite = true
+  type      = "SecureString"
+  value     = each.value
+}
+
+resource "aws_ssm_parameter" "quicksight_sensitive" {
+  for_each = local.quicksight_sensitive
 
   key_id    = local.kms_key_id
   name      = each.key

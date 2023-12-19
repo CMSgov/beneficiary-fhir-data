@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>2.86.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-server-parent</artifactId>
@@ -77,7 +76,7 @@
             <dependency>
                 <groupId>gov.cms.bfd.data.fda.utility</groupId>
                 <artifactId>bfd-data-fda</artifactId>
-                <version>${bfd.data.fda.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -93,7 +92,7 @@
         <dependency>
             <groupId>gov.cms.bfd.data.npi</groupId>
             <artifactId>bfd-data-npi</artifactId>
-            <version>${bfd.data.npi.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

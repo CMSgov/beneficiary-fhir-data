@@ -78,8 +78,9 @@
 
 - name: Find New Relic Agent
   find:
-    paths: "{{ data_server_dir }}/bfd-server-launcher-{{ bfd_version }}/lib/"
+    paths: "{{ data_server_dir }}"
     pattern: newrelic-agent*.jar
+    recurse: true
   register: find_nra
 
 - name: Copy New Relic Java Agent

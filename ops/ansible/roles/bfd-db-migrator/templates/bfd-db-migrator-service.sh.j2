@@ -31,7 +31,9 @@ export NEW_RELIC_METRIC_PERIOD='{{ period }}'
 
 LOGS_DIR='{{ logs }}'
 
-exec "{{ db_migrator_dir }}/bfd-db-migrator-{{ bfd_version }}/bfd-db-migrator.sh" \
+SERVICE_SCRIPT="$(find {{ db_migrator_dir }} -type f -name bfd-db-migrator.sh)"
+
+exec "${SERVICE_SCRIPT}" \
 	"-DbfdDbMigrator.logs.dir=${LOGS_DIR}" \
 	-Djava.io.tmpdir={{ tmp }} \
 	&>> "{{ launcher_log }}"

@@ -1,5 +1,4 @@
 ---
-bfd_version: 1.0.0-SNAPSHOT
 # The directory that the Blue Button Data Server will be installed to.
 data_server_dir: /usr/local/bfd-server
 

@@ -136,7 +136,8 @@ resource "aws_iam_policy" "code_artifact_rw" {
         "codeartifact:ReadFromRepository",
         "codeartifact:TagResource",
         "codeartifact:UntagResource",
-        "codeartifact:UpdatePackageVersionsStatus"
+        "codeartifact:UpdatePackageVersionsStatus",
+        "codeartifact:GetAuthorizationToken"
       ],
       "Effect": "Allow",
       "Resource": [
@@ -147,18 +148,15 @@ resource "aws_iam_policy" "code_artifact_rw" {
       "Sid": "CodeArtifactReadWrite"
     },
     {
-      "Action": "codeartifact:GetAuthorizationToken",
+      "Action": "sts:GetServiceBearerToken",
       "Effect": "Allow",
-      "Resource": [
-        "${aws_codeartifact_domain.this.arn}"
-      ],
-      "Sid": "CodeArtifactAuthToken"
+      "Resource": "*",
+      "Sid": "TempCreds"
     }
   ],
   "Version": "2012-10-17"
 }
 POLICY
-
 }
 
 resource "aws_iam_policy" "code_artifact_ro" {
