@@ -121,6 +121,7 @@
         <postgresql.version>42.7.1</postgresql.version>
         <hsqldb.version>2.7.2</hsqldb.version>
         <slf4j.version>2.0.9</slf4j.version>
+        <log4j.version>2.22.0</log4j.version>
         <hikari.version>5.1.0</hikari.version>
         <flyway.version>10.2.0</flyway.version>
         <newrelic.agent.version>8.7.0</newrelic.agent.version>
@@ -368,6 +369,12 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>jul-to-slf4j</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-to-slf4j</artifactId>
+                <version>${log4j.version}</version>
             </dependency>
 
             <dependency>
