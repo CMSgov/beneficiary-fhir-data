@@ -6,6 +6,36 @@
  * </p>
  */
 
+properties([
+  parameters ([
+    booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.',
+      defaultValue: false),
+
+    booleanParam(name: 'force_build_amis', description: 'When true, AMIs based on branch will be built.',
+      defaultValue: false),
+
+    booleanParam(name: 'force_build_docker_host_ami',
+      description: 'When true, the docker host AMI based on branch will be built. Note: `force_build_amis` must' +
+      'also be true.', defaultValue: false),
+
+    string(name: 'env', description: 'The BFD Environment to deploy apps to'),
+
+    string(name: 'migrator_ami_override', description: 'The AMI ID to deploy migrator from', defaultValue: null),
+
+    string(name: 'pipeline_ami_override', description: 'The AMI ID to deploy pipeline from', defaultValue: null),
+
+    string(name: 'server_ami_override', description: 'The AMI ID to deploy server from', defaultValue: null),
+
+    booleanParam(name: 'force_migrator_deployment', description: 'When true, force the migrator to deploy.',
+      defaultValue: false),
+
+    string(name: 'server_regression_image_override',
+      description: 'Overrides the Docker image tag used when deploying the server-regression lambda',
+      defaultValue: null)
+  ])
+])
+
+
 // These variables are accessible throughout this file (except inside methods and classes).
 def gitBranchName
 
@@ -35,57 +65,6 @@ spec:
 """
         }
       }
-
-  parameters {
-        booleanParam(name: 'verbose_mvn_logging',
-        description: 'When true, `mvn` will produce verbose logs.',
-        defaultValue: false)
-
-        booleanParam(name: 'force_build_amis',
-        description: 'When true, AMIs based on branch will be built.',
-        defaultValue: false)
-
-        booleanParam(name: 'force_build_docker_host_ami',
-        description: 'When true, the docker host AMI based on branch will be built. Note: `force_build_amis` must' +
-                'also be true.',
-        defaultValue: false)
-
-        string(
-        name: 'env',
-        description: 'The BFD Environment to deploy apps to'
-        )
-
-        string(
-        name: 'migrator_ami_override',
-        description: 'The AMI ID to deploy migrator from',
-        defaultValue: null
-        )
-
-        string(
-        name: 'pipeline_ami_override',
-        description: 'The AMI ID to deploy pipeline from',
-        defaultValue: null
-        )
-
-        string(
-        name: 'server_ami_override',
-        description: 'The AMI ID to deploy server from',
-        defaultValue: null
-        )
-
-
-        booleanParam(
-        name: 'force_migrator_deployment',
-        description: 'When true, force the migrator to deploy.',
-        defaultValue: false
-        )
-
-        string(
-        name: 'server_regression_image_override',
-        description: 'Overrides the Docker image tag used when deploying the server-regression lambda',
-        defaultValue: null
-        )
-  }
 
   stages {
     /* This stage switches the gitBranchName (needed for our CCS downsream stages)
