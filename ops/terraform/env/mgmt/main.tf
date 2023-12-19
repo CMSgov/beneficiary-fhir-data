@@ -1,6 +1,9 @@
 locals {
   account_id = data.aws_caller_identity.current.account_id
-  env        = "mgmt"
+  region     = data.aws_region.current.name
+  alt_region = data.aws_region.alt.name
+
+  env = "mgmt"
   established_envs = [
     "test",
     "prod-sbx",
@@ -36,6 +39,11 @@ locals {
 }
 
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+data "aws_region" "alt" {
+  provider = aws.alt
+}
 
 data "aws_vpc" "main" {
   filter {
