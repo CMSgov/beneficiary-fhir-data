@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.war;
 
 import static gov.cms.bfd.DatabaseTestUtils.DEFAULT_IT_DATABASE;
-import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_PASSWORD;
-import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_USERNAME;
 import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_PASSWORD;
 import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_USERNAME;
 import static io.restassured.RestAssured.certificate;
@@ -17,7 +15,6 @@ import java.io.IOException;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.sql.DataSource;
-import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -66,10 +63,6 @@ public class ServerRequiredTest {
         resolvedDbUrl = ((PGSimpleDataSource) dataSource).getUrl();
         dbUsername = TEST_CONTAINER_DATABASE_USERNAME;
         dbPassword = TEST_CONTAINER_DATABASE_PASSWORD;
-      } else if (dataSource instanceof JDBCDataSource && DB_URL.contains("hsql")) {
-        resolvedDbUrl = ((JDBCDataSource) dataSource).getUrl();
-        dbUsername = HSQL_SERVER_USERNAME;
-        dbPassword = HSQL_SERVER_PASSWORD;
       } else {
         // If we support other datasources in the future, cast and pull the actual URL from them
         // like above
