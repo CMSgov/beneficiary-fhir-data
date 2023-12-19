@@ -1,5 +1,4 @@
 ---
-
 ##
 # Restarts the BFD Server service and waits for it to start accepting connections again afterwards.
 ##
@@ -21,7 +20,7 @@
 
 - name: Wait for BFD Server Service Ready
   wait_for:
-    port: "{{ data_server_appserver_https_port }}"
+    port: "{{ port }}"
     timeout: 90
   listen: Restart BFD Server Service
   when: launch_enabled | default(false)

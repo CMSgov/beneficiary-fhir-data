@@ -17,16 +17,16 @@ locals {
 
   # Targeted MIGRATOR hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
   migrator_seed_paths = local.is_ephemeral_env ? {
-    "/bfd/${local.env}/migrator/sensitive/db_migrator_db_username" = "/bfd/${local.seed_env}/migrator/sensitive/db_migrator_db_username"
-    "/bfd/${local.env}/migrator/sensitive/db_migrator_db_password" = "/bfd/${local.seed_env}/migrator/sensitive/db_migrator_db_password"
+    "/bfd/${local.env}/migrator/sensitive/db/username" = "/bfd/${local.seed_env}/migrator/sensitive/db/username"
+    "/bfd/${local.env}/migrator/sensitive/db/password" = "/bfd/${local.seed_env}/migrator/sensitive/db/password"
   } : {}
 
   # Targeted PIPELINE hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
   pipeline_seed_paths = local.is_ephemeral_env ? {
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_db_password"          = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_db_password"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_db_username"          = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_db_username"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_iterations"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"
+    "/bfd/${local.env}/pipeline/shared/sensitive/db/password"          = "/bfd/${local.seed_env}/pipeline/shared/sensitive/db/password"
+    "/bfd/${local.env}/pipeline/shared/sensitive/db/username"          = "/bfd/${local.seed_env}/pipeline/shared/sensitive/db/username"
+    "/bfd/${local.env}/pipeline/shared/sensitive/hicn_hash/iterations" = "/bfd/${local.seed_env}/pipeline/shared/sensitive/hicn_hash/iterations"
+    "/bfd/${local.env}/pipeline/shared/sensitive/hicn_hash/pepper"     = "/bfd/${local.seed_env}/pipeline/shared/sensitive/hicn_hash/pepper"
   } : {}
 
   # FUTURE: Fix this when hierarchies are supported with Terraform module.
@@ -74,11 +74,11 @@ locals {
     "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"  = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
     "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb" = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
     "/bfd/${local.env}/server/sensitive/server_keystore_base64"            = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
-    "/bfd/${local.env}/server/sensitive/data_server_appserver_https_port"  = "/bfd/${local.seed_env}/server/sensitive/data_server_appserver_https_port"
-    "/bfd/${local.env}/server/sensitive/data_server_db_password"           = "/bfd/${local.seed_env}/server/sensitive/data_server_db_password"
-    "/bfd/${local.env}/server/sensitive/data_server_db_username"           = "/bfd/${local.seed_env}/server/sensitive/data_server_db_username"
-    "/bfd/${local.env}/server/sensitive/data_server_new_relic_license_key" = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_license_key"
-    "/bfd/${local.env}/server/sensitive/data_server_new_relic_metric_key"  = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_metric_key"
+    "/bfd/${local.env}/server/sensitive/port"  = "/bfd/${local.seed_env}/server/sensitive/port"
+    "/bfd/${local.env}/server/sensitive/db/password"           = "/bfd/${local.seed_env}/server/sensitive/db/password"
+    "/bfd/${local.env}/server/sensitive/db/username"           = "/bfd/${local.seed_env}/server/sensitive/db/username"
+    "/bfd/${local.env}/server/sensitive/new_relic/agent/license_key" = "/bfd/${local.seed_env}/server/sensitive/new_relic/agent/license_key"
+    "/bfd/${local.env}/server/sensitive/new_relic/metrics/license_key"  = "/bfd/${local.seed_env}/server/sensitive/new_relic/metrics/license_key"
     "/bfd/${local.env}/server/sensitive/test_client_cert"                  = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
     "/bfd/${local.env}/server/sensitive/test_client_key"                   = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
   }, local.seed_env_certs[local.seed_env]) : {}

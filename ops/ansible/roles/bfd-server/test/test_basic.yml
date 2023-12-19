@@ -10,8 +10,8 @@
       import_role:
         name: bfd-server
       vars:
-        # TODO: data_server_appserver_https_port anchor to be used in subsequent verification step, e.g. external curl
-        data_server_appserver_https_port: &data_server_appserver_https_port "7443"
+        # TODO: port anchor to be used in subsequent verification step, e.g. external curl
+        port: &port "7443"
         data_server_launcher: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/{{ bfd_version }}/bfd-server-launcher-{{ bfd_version }}.zip"
         data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/{{ bfd_version }}/bfd-server-war-{{ bfd_version }}.war"
         data_server_ssl_client_certificates:
@@ -46,7 +46,7 @@
               43zlQzGM5qi5HbI2orE/MbpqkNh5HwVsLooefZnKaeVxHXzgkxorBxk=
               -----END CERTIFICATE-----
 
-        data_server_db_url: jdbc:postgresql://db:5432/fhirdb?logServerErrorDetail=false
+        url: jdbc:postgresql://db:5432/fhirdb?logServerErrorDetail=false
         data_server_ssl_client_certificate_test: |-
           Bag Attributes
               friendlyName: client-local-dev
@@ -108,9 +108,9 @@
               friendlyName: client-local-dev
               localKeyID: 54 69 6D 65 20 31 35 39 34 38 34 31 33 32 33 32 33 37 
           subject=CN = client-local-dev
-          
+
           issuer=CN = client-local-dev
-          
+
           -----BEGIN CERTIFICATE-----
           MIIE1TCCAr2gAwIBAgIEQbImGTANBgkqhkiG9w0BAQsFADAbMRkwFwYDVQQDExBj
           bGllbnQtbG9jYWwtZGV2MB4XDTIwMDcxNTE5MjMxN1oXDTMwMDcxMzE5MjMxN1ow
@@ -140,8 +140,8 @@
           43zlQzGM5qi5HbI2orE/MbpqkNh5HwVsLooefZnKaeVxHXzgkxorBxk=
           -----END CERTIFICATE-----
 
-        data_server_db_username: bfd
-        data_server_db_password: bfd
+        username: bfd
+        password: bfd
         server_keystore_base64: |
           MIIQtAIBAzCCEF4GCSqGSIb3DQEHAaCCEE8EghBLMIIQRzCCCi4GCSqGSIb3DQEHAaCCCh8Eggob
           MIIKFzCCChMGCyqGSIb3DQEMCgECoIIJwDCCCbwwZgYJKoZIhvcNAQUNMFkwOAYJKoZIhvcNAQUM
@@ -304,7 +304,7 @@
           -----END PRIVATE KEY-----
 
         # NOTE: `-Djavax.net.debug=all:handshake:verbose` can be a helpful option for SSL issues
-        data_server_appserver_jvmargs: '-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=1024m'
+        data_server_appserver_jvmargs: "-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=1024m"
         data_server_dir: &data_server_dir /usr/local/bfd-server
 
     - name: Ensure Service Is Running

@@ -94,12 +94,12 @@ def _main():
         )
         username = get_ssm_parameter(
             ssm_client=ssm_client,
-            name=f"/bfd/{environment}/server/sensitive/data_server_db_username",
+            name=f"/bfd/{environment}/server/sensitive/db/username",
             with_decrypt=True,
         )
         raw_password = get_ssm_parameter(
             ssm_client=ssm_client,
-            name=f"/bfd/{environment}/server/sensitive/data_server_db_password",
+            name=f"/bfd/{environment}/server/sensitive/db/password",
             with_decrypt=True,
         )
     except ValueError as exc:

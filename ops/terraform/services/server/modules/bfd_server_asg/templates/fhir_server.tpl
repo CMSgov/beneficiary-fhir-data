@@ -39,7 +39,7 @@ cat <<EOF > extra_vars.json
   "data_server_new_relic_app_name": "BFD Server ({{ env_name_std }})",
   "data_server_new_relic_environment": "{{ env_name_std }}",
   "data_server_tmp_dir": "{{ data_server_dir }}/tmp",
-  "data_server_db_url": "${data_server_db_url}",
+  "url": "${url}",
   "env": "${env}",
   "launch_lifecycle_hook": "${launch_lifecycle_hook}"
 }
