@@ -1,11 +1,10 @@
 #!/usr/bin/env groovy
 
 properties([
-	parameters([
-        booleanParam(name: 'verbose_mvn_logging',
-        description: 'When true, `mvn` will produce verbose logs.',
-        defaultValue: false)
-    ])
+  parameters([
+    booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.',
+      defaultValue: false)
+  ])
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).

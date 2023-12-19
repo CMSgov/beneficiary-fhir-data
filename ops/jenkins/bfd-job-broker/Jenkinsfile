@@ -1,7 +1,7 @@
 properties([
-	parameters([
-        string(name: 'sqs_body',
-            description: 'The body of the SQS message invoking this Pipeline. Automatically populated')
+  parameters([
+    string(name: 'sqs_body',
+      description: 'The body of the SQS message invoking this Pipeline. Automatically populated')
   ])
 ])
 

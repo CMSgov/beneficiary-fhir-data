@@ -8,10 +8,12 @@
  */
 
 properties([
-	parameters([
-        booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
-        booleanParam(name:'forceRebuild', description: 'When true, it will force a rebuild of the fda project.', defaultValue: false)
-    ])
+  parameters([
+    booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.',
+      defaultValue: false),
+    booleanParam(name:'forceRebuild', description: 'When true, it will force a rebuild of the fda project.',
+      defaultValue: false)
+  ])
 ])
 
 pipeline {

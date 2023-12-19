@@ -6,14 +6,12 @@
  * </p>
  */
 properties([
-	parameters([
-        string(name: 'GOLD_AMI_ID',
-        defaultValue: '',
-        description: 'In case the latest Gold image is subpar, force a platinum build with a different gold AMI.'),
+  parameters([
+    string(name: 'GOLD_AMI_ID', defaultValue: '',
+      description: 'In case the latest Gold image is subpar, force a platinum build with a different gold AMI.'),
 
-        booleanParam(name: 'FORCE_PLATINUM',
-        defaultValue: false,
-        description: 'Forces a new platinum build with the latest Gold AMI ID source tagged.')
+    booleanParam(name: 'FORCE_PLATINUM', defaultValue: false,
+      description: 'Forces a new platinum build with the latest Gold AMI ID source tagged.')
     ])
 ])
 
