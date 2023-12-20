@@ -7,6 +7,7 @@ import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import gov.cms.model.dsl.codegen.library.CsvRifObject;
 import gov.cms.model.dsl.codegen.library.RifObject;
+import java.io.IOException;
 import java.util.List;
 import javax.annotation.concurrent.ThreadSafe;
 import lombok.AllArgsConstructor;
@@ -40,7 +41,7 @@ public abstract class RifFileParser {
 
     @Override
     public Flux<RifRecordEvent<?>> parseRifFile(RifFile rifFile) {
-      return parseCsvRifFile(rifFile).map(FluxUtils.wrapFunction(parser));
+      return parseAutoDetectedRifFile(rifFile).map(FluxUtils.wrapFunction(parser));
     }
   }
 
@@ -58,7 +59,7 @@ public abstract class RifFileParser {
 
     @Override
     public Flux<RifRecordEvent<?>> parseRifFile(RifFile rifFile) {
-      return parseCsvRifFile(rifFile)
+      return parseAutoDetectedRifFile(rifFile)
           // joins consecutive records with same grouping column value
           .bufferUntilChanged(csvRecord -> csvRecord.get(groupingColumn))
           // parses the list of records
@@ -80,12 +81,46 @@ public abstract class RifFileParser {
     }
   }
 
+  public static Flux<RifObject> parseAutoDetectedRifFile(RifFile rifFile) {
+    try {
+      if (rifFile.getFile().getPath().endsWith(".parquet")) {
+        return parseParquetRifFile(rifFile);
+      } else {
+        return parseCsvRifFile(rifFile);
+      }
+    } catch (IOException ex) {
+      return parseCsvRifFile(rifFile);
+    }
+  }
+
   public static Flux<RifObject> parseCsvRifFile(RifFile rifFile) {
     return FluxUtils.fromAutoCloseable(
         // creates a CSVParser for new subscriber
         () -> RifParsingUtils.createCsvParser(rifFile),
         // creates flux for subscriber to receive parsed events
         csvParser -> Flux.fromIterable(csvParser).map(CsvRifObject::new),
+        // used in log message if closing the CSVParser fails
+        rifFile.getDisplayName());
+  }
+
+  public static Flux<RifObject> parseParquetRifFile(RifFile rifFile) {
+    return FluxUtils.fromAutoCloseable(
+        // creates a ParquetFileParser for new subscriber
+        () -> new ParquetFileParser(rifFile.getFile()),
+        // creates flux for subscriber to receive parsed events
+        parquetParser ->
+            Flux.generate(
+                sink -> {
+                  try {
+                    if (parquetParser.readNext()) {
+                      sink.next(parquetParser.getCurrentObject());
+                    } else {
+                      sink.complete();
+                    }
+                  } catch (IOException ex) {
+                    sink.error(ex);
+                  }
+                }),
         // used in log message if closing the CSVParser fails
         rifFile.getDisplayName());
   }

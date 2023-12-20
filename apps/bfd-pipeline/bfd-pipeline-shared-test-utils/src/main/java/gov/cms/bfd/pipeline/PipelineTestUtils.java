@@ -7,9 +7,6 @@ import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
-import gov.cms.bfd.model.rif.RifFile;
-import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
@@ -34,13 +31,9 @@ import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -298,39 +291,6 @@ public final class PipelineTestUtils {
     return entityManager
         .createQuery("select f from LoadedFile f order by f.created desc", LoadedFile.class)
         .getResultList();
-  }
-
-  /**
-   * Return a Files Event with a single dummy file.
-   *
-   * @return a new RifFilesEvent
-   */
-  public RifFilesEvent createDummyFilesEvent() {
-    RifFile dummyFile =
-        new RifFile() {
-
-          @Override
-          public InputStream open() {
-            return null;
-          }
-
-          @Override
-          public RifFileType getFileType() {
-            return RifFileType.BENEFICIARY;
-          }
-
-          @Override
-          public String getDisplayName() {
-            return "Dummy.txt";
-          }
-
-          @Override
-          public Charset getCharset() {
-            return StandardCharsets.UTF_8;
-          }
-        };
-
-    return new RifFilesEvent(Instant.now(), false, Arrays.asList(dummyFile));
   }
 
   /**

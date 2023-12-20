@@ -26,25 +26,21 @@ final class StaticRifFile implements RifFile {
     this.staticRifResource = staticRifResource;
   }
 
-  /** {@inheritDoc} */
   @Override
   public RifFileType getFileType() {
     return staticRifResource.getRifFileType();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDisplayName() {
     return staticRifResource.name();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** {@inheritDoc} */
   @Override
   public InputStream open() {
     try {
@@ -54,7 +50,6 @@ final class StaticRifFile implements RifFile {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

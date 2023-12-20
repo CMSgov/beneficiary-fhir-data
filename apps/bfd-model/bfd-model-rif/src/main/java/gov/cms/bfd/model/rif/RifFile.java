@@ -1,5 +1,7 @@
 package gov.cms.bfd.model.rif;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
@@ -32,4 +34,8 @@ public interface RifFile {
    * @return a new {@link InputStream}
    */
   InputStream open();
+
+  default File getFile() throws IOException {
+    throw new IOException("not a file");
+  }
 }

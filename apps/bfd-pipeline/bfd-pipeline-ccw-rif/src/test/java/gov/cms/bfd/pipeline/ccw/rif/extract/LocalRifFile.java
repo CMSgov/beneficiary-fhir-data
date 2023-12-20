@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -56,5 +57,10 @@ public final class LocalRifFile implements RifFile {
     } catch (FileNotFoundException e) {
       throw new UncheckedIOException(e);
     }
+  }
+
+  @Override
+  public File getFile() {
+    return localFile.toFile();
   }
 }

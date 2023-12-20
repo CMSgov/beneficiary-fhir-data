@@ -9,6 +9,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -102,6 +103,12 @@ public final class S3RifFile implements RifFile {
     }
 
     return fileDownloadStream;
+  }
+
+  @Override
+  public File getFile() throws IOException {
+    ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
+    return fileDownloadResult.getLocalDownload().toFile();
   }
 
   /**
