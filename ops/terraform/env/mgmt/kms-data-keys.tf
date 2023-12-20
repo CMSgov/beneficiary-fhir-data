@@ -76,7 +76,10 @@ data "aws_iam_policy_document" "alt_data_key_policy_combined" {
   ]
 }
 
-# Key policy statements used by *both* the primary and alt region data keys.
+# Key policy statements used by *both* the primary and alt region data keys. Please note: `resources = ["*"]` may seem
+# like an overly permissive statement, but it's actually required for the key to be usable. This *only* applies to kms
+# key policies not iam policies. See the following on key policy statements for more info:
+#   - https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-overview.html#key-policy-elements
 data "aws_iam_policy_document" "data_keys" {
   # Allow our asg's to use the key to encrypt/decrypt data
   statement {
