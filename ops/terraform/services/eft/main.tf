@@ -56,27 +56,89 @@ locals {
   subnet_ip_reservations = jsondecode(
     local.ssm_config["/bfd/${local.service}/subnet_to_ip_reservations_nlb_json"]
   )
-  host_key              = local.ssm_config["/bfd/${local.service}/sftp_transfer_server_host_private_key"]
-  eft_r53_hosted_zone   = local.ssm_config["/bfd/${local.service}/r53_hosted_zone"]
-  eft_user_sftp_pub_key = local.ssm_config["/bfd/${local.service}/sftp_eft_user_public_key"]
-  eft_user_username     = local.ssm_config["/bfd/${local.service}/sftp_eft_user_username"]
+  host_key                = local.ssm_config["/bfd/${local.service}/sftp_transfer_server_host_private_key"]
+  eft_r53_hosted_zone     = local.ssm_config["/bfd/${local.service}/r53_hosted_zone"]
+  eft_user_sftp_pub_key   = local.ssm_config["/bfd/${local.service}/sftp_eft_user_public_key"]
+  eft_user_username       = local.ssm_config["/bfd/${local.service}/sftp_eft_user_username"]
+  eft_s3_sftp_home_folder = trim(local.ssm_config["/bfd/${local.service}/sftp_eft_home_dir"], "/")
   eft_partners_config = {
     for partner in local.eft_partners :
     partner => {
-      bucket_iam_assumer_arn             = local.ssm_config["/${partner}/${local.service}/bucket_iam_assumer_arn"]
-      bucket_home_path                   = trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/")
-      bucket_notifs_subscriber_principal = lookup(local.ssm_config, "/${partner}/${local.service}/bucket_notifications_subscriber_principal_arn", null)
-      bucket_notifs_subscriber_arn       = lookup(local.ssm_config, "/${partner}/${local.service}/bucket_notifications_subscriber_arn", null)
-      bucket_notifs_subscriber_protocol  = lookup(local.ssm_config, "/${partner}/${local.service}/bucket_notifications_subscriber_protocol", null)
+      bucket_home_path        = "${local.eft_s3_sftp_home_folder}/${trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/")}"
+      bucket_iam_assumer_arns = jsondecode(local.ssm_config["/${partner}/${local.service}/bucket_iam_assumer_arn"])
+      inbound = {
+        dir = join(
+          "/",
+          [
+            local.eft_s3_sftp_home_folder,
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/"),
+            trim(local.ssm_config["/${partner}/${local.service}/inbound/dir"], "/")
+          ]
+        )
+        s3_notifications = {
+          received_file_targets = jsondecode(
+            lookup(local.ssm_config, "/${partner}/${local.service}/inbound/s3_notifications/received_file_targets_json", "[]")
+          )
+        }
+      }
+      outbound = {
+        pending_dir = join(
+          "/",
+          [
+            local.eft_s3_sftp_home_folder,
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/"),
+            trim(local.ssm_config["/${partner}/${local.service}/outbound/pending_dir"], "/")
+          ]
+        ),
+        sent_dir = join(
+          "/",
+          [
+            local.eft_s3_sftp_home_folder,
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/"),
+            trim(local.ssm_config["/${partner}/${local.service}/outbound/sent_dir"], "/")
+          ]
+        ),
+        failed_dir = join(
+          "/",
+          [
+            local.eft_s3_sftp_home_folder,
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/"),
+            trim(local.ssm_config["/${partner}/${local.service}/outbound/failed_dir"], "/")
+          ]
+        ),
+        recognized_files = jsondecode(
+          lookup(local.ssm_config, "/${partner}/${local.service}/outbound/recognized_files_json", "[]")
+        ),
+        s3_notifications = {
+          pending_file_targets = jsondecode(
+            lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/pending_file_targets_json", "[]")
+          ),
+          sent_file_targets = jsondecode(
+            lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/sent_file_targets_json", "[]")
+          ),
+          failed_file_targets = jsondecode(
+            lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/failed_file_targets_json", "[]")
+          )
+        }
+      }
     }
   }
-  eft_partners_with_s3_notifs = [
-    for partner, config in local.eft_partners_config : partner
-    if config.bucket_notifs_subscriber_principal != null &&
-    config.bucket_notifs_subscriber_arn != null &&
-    config.bucket_notifs_subscriber_protocol != null
+  eft_partners_with_inbound_received_notifs = [
+    for partner in local.eft_partners :
+    partner if length(local.eft_partners_config[partner].inbound.received_file_targets) > 0
   ]
-
+  eft_partners_with_outbound_pending_notifs = [
+    for partner in local.eft_partners :
+    partner if length(local.eft_partners_config[partner].outbound.pending_file_targets) > 0
+  ]
+  eft_partners_with_outbound_sent_notifs = [
+    for partner in local.eft_partners :
+    partner if length(local.eft_partners_config[partner].outbound.sent_file_targets) > 0
+  ]
+  eft_partners_with_outbound_failed_notifs = [
+    for partner in local.eft_partners :
+    partner if length(local.eft_partners_config[partner].outbound.failed_file_targets) > 0
+  ]
   # Data source lookups
 
   account_id     = data.aws_caller_identity.current.account_id
