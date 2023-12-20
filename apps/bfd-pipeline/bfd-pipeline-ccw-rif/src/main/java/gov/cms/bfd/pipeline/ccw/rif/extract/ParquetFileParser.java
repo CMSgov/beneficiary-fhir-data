@@ -4,9 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.parquet.column.page.PageReadStore;
 import org.apache.parquet.example.data.simple.SimpleGroup;
+import org.apache.parquet.example.data.simple.convert.GroupRecordConverter;
 import org.apache.parquet.hadoop.ParquetFileReader;
+import org.apache.parquet.hadoop.util.HadoopInputFile;
+import org.apache.parquet.io.ColumnIOFactory;
+import org.apache.parquet.io.MessageColumnIO;
 import org.apache.parquet.io.RecordReader;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.Type;
@@ -14,6 +20,7 @@ import org.apache.parquet.schema.Type;
 public class ParquetFileParser implements AutoCloseable {
   private final List<Type> fieldTypes;
   private final List<String> fieldNames;
+  private final MessageType schema;
   private final ParquetFileReader fileReader;
   private long pagesRemaining;
   private PageReadStore pages;
@@ -23,8 +30,10 @@ public class ParquetFileParser implements AutoCloseable {
   private RifParquetObject currentRecord;
 
   public ParquetFileParser(File parquetFile) throws IOException {
-    fileReader = ParquetFileReader.open(new MyInputFile(parquetFile));
-    MessageType schema = fileReader.getFooter().getFileMetaData().getSchema();
+    fileReader =
+        ParquetFileReader.open(
+            HadoopInputFile.fromPath(new Path(parquetFile.toURI()), new Configuration()));
+    schema = fileReader.getFooter().getFileMetaData().getSchema();
     fieldTypes = schema.getFields();
     fieldNames = fieldTypes.stream().map(Type::getName).toList();
     pagesRemaining = fileReader.getRowGroups().size();
@@ -39,6 +48,8 @@ public class ParquetFileParser implements AutoCloseable {
       pagesRemaining -= 1;
       pages = fileReader.readNextRowGroup();
       pageRowsRemaining = pages.getRowCount();
+      MessageColumnIO columnIO = new ColumnIOFactory().getColumnIO(schema);
+      recordReader = columnIO.getRecordReader(pages, new GroupRecordConverter(schema));
     }
     pageRowsRemaining -= 1;
     recordNumber += 1;

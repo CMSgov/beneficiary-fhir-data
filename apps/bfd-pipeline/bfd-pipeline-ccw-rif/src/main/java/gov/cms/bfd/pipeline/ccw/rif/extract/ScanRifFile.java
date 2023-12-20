@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -61,14 +62,19 @@ public class ScanRifFile {
                   }
                   if (csvClaim.getLines().size() != parquetClaim.getLines().size()) {
                     System.out.printf(
-                        "ling count mismatch: %s != %s%n",
+                        "line count mismatch: %s != %s%n",
                         csvClaim.getLines().size(), parquetClaim.getLines().size());
                     return false;
                   }
+                  if (!EqualsBuilder.reflectionEquals(csvClaim, parquetClaim)) {
+                    System.out.println("reflection equals returned false");
+                    return false;
+                  }
+
                   return true;
                 })
             .all(x -> x);
-    System.out.printf("Final result is %s%n", equals.blockOptional());
+    System.out.printf("Final result is %s even using reflection equals!%n", equals.blockOptional());
   }
 
   public static class LocalRifFile implements RifFile {
