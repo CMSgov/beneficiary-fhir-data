@@ -25,7 +25,7 @@ public final class RifFileEvent {
    * @param parentFilesEvent the value to use for {@link #getParentFilesEvent()}
    * @param file the value to use for {@link #getFile()}
    */
-  RifFileEvent(RifFilesEvent parentFilesEvent, RifFile file) {
+  public RifFileEvent(RifFilesEvent parentFilesEvent, RifFile file) {
     Objects.requireNonNull(parentFilesEvent);
     Objects.requireNonNull(file);
 

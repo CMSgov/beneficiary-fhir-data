@@ -35,6 +35,11 @@
             <artifactId>parquet-avro</artifactId>
             <version>1.13.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>3.3.6</version>
+        </dependency>
 
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
