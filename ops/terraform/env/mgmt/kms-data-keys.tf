@@ -58,7 +58,7 @@ resource "aws_kms_alias" "data_keys_alt" {
   for_each = toset(local.established_envs)
 
   name          = "alias/bfd-${each.key}-cmk"
-  target_key_id = aws_kms_key.data_keys[each.key].arn
+  target_key_id = aws_kms_key.data_keys_alt[each.key].arn
 }
 
 data "aws_iam_policy_document" "primary_data_key_policy_combined" {
