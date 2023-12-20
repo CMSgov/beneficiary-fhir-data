@@ -20,67 +20,54 @@ locals {
   layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"
 
-  eft_partners    = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json.value))
-  ssm_hierarchies = concat(["bfd"], local.eft_partners)
-  ssm_services    = ["common", local.service]
-  ssm_all_paths = {
-    for x in setproduct(local.ssm_hierarchies, local.ssm_services) :
-    "${x[0]}-${x[1]}" => {
-      hierarchy = x[0]
-      service   = x[1]
-    }
+  eft_partners        = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json.value))
+  ssm_hierarchy_roots = concat(["bfd"], local.eft_partners)
+  ssm_hierarchies = flatten([
+    for root in local.ssm_hierarchy_roots :
+    ["/${root}/${local.env}/common", "/${root}/${local.env}/${local.service}"]
+  ])
+  ssm_flattened_data = {
+    names = flatten(
+      [for k, v in data.aws_ssm_parameters_by_path.params : v.names]
+    )
+    values = flatten(
+      [for k, v in data.aws_ssm_parameters_by_path.params : nonsensitive(v.values)]
+    )
   }
-  # This returns an object with nested keys in the following format: ssm_config.<top-level hierarchy
-  # name>.<service name>; for example, to get a parameter named "vpc_name" in BFD's hierarchy in the
-  # "common" service, it would be: local.ssm_config.bfd.common.vpc_name.
-  # FUTURE: Refactor this out into a distinct module much like bfd-terraservice above
-  ssm_config = {
-    # This would be much easier if Terraform had a reduce() or if merge() was a deep merge instead
-    # of shallow. We must do a double iteration otherwise we end up with objects with the same
-    # top-level keys but different inner keys (i.e. {bfd = common = ...} and {bfd = eft = ...}).
-    # Using merge() to merge those would result in only the last object being taken ({bfd = eft = ...})
-    for hierarchy in local.ssm_hierarchies :
-    hierarchy => {
-      for key, meta in local.ssm_all_paths :
-      # We know all services within a given hierarchy are distinct, so we can just iterate over them
-      # and build a full object at once.
-      "${meta.service}" => zipmap(
-        [
-          for name in concat(
-            data.aws_ssm_parameters_by_path.nonsensitive[key].names,
-            data.aws_ssm_parameters_by_path.sensitive[key].names
-          ) : element(split("/", name), length(split("/", name)) - 1)
-        ],
-        nonsensitive(
-          concat(
-            data.aws_ssm_parameters_by_path.nonsensitive[key].values,
-            data.aws_ssm_parameters_by_path.sensitive[key].values
-          )
-        )
-      )
-      if hierarchy == meta.hierarchy
-    }
-  }
+  # This returns an object with keys that follow conventional SSM Parameter naming, _excluding_ the
+  # nonsensitve/sensitive node. for example, to get a parameter named "vpc_name" in BFD's hierarchy
+  # in the "common" service, it would be: local.ssm_config["/bfd/common/vpc_name"]. Or, if the
+  # parameter is something more like /dpc/eft/sensitive/inbound/dir, it'd be like:
+  # local.ssm_config["/dpc/eft/inbound/dir"]. Essentially, the environment and sensitivity nodes in
+  # a given parameter's path are removed to reduce the verbosity of referencing parameters
+  #FUTURE: Refactor something like this out into a distinct module much like bfd-terraservice above
+  ssm_config = zipmap(
+    [
+      for name in local.ssm_flattened_data.names :
+      replace(name, "/((non)*sensitive|${local.env})//", "")
+    ],
+    local.ssm_flattened_data.values
+  )
 
   # SSM Lookup
-  kms_key_alias = local.ssm_config.bfd.common["kms_key_alias"]
-  vpc_name      = local.ssm_config.bfd.common["vpc_name"]
+  kms_key_alias = local.ssm_config["/bfd/common/kms_key_alias"]
+  vpc_name      = local.ssm_config["/bfd/common/vpc_name"]
 
   subnet_ip_reservations = jsondecode(
-    local.ssm_config.bfd[local.service]["subnet_to_ip_reservations_nlb_json"]
+    local.ssm_config["/bfd/${local.service}/subnet_to_ip_reservations_nlb_json"]
   )
-  host_key              = local.ssm_config.bfd[local.service]["sftp_transfer_server_host_private_key"]
-  eft_r53_hosted_zone   = local.ssm_config.bfd[local.service]["r53_hosted_zone"]
-  eft_user_sftp_pub_key = local.ssm_config.bfd[local.service]["sftp_eft_user_public_key"]
-  eft_user_username     = local.ssm_config.bfd[local.service]["sftp_eft_user_username"]
+  host_key              = local.ssm_config["/bfd/${local.service}/sftp_transfer_server_host_private_key"]
+  eft_r53_hosted_zone   = local.ssm_config["/bfd/${local.service}/r53_hosted_zone"]
+  eft_user_sftp_pub_key = local.ssm_config["/bfd/${local.service}/sftp_eft_user_public_key"]
+  eft_user_username     = local.ssm_config["/bfd/${local.service}/sftp_eft_user_username"]
   eft_partners_config = {
     for partner in local.eft_partners :
     partner => {
-      bucket_iam_assumer_arn             = local.ssm_config[partner][local.service]["bucket_iam_assumer_arn"]
-      bucket_home_path                   = trim(local.ssm_config[partner][local.service]["bucket_home_path"], "/")
-      bucket_notifs_subscriber_principal = lookup(local.ssm_config[partner][local.service], "bucket_notifications_subscriber_principal_arn", null)
-      bucket_notifs_subscriber_arn       = lookup(local.ssm_config[partner][local.service], "bucket_notifications_subscriber_arn", null)
-      bucket_notifs_subscriber_protocol  = lookup(local.ssm_config[partner][local.service], "bucket_notifications_subscriber_protocol", null)
+      bucket_iam_assumer_arn             = local.ssm_config["/${partner}/${local.service}/bucket_iam_assumer_arn"]
+      bucket_home_path                   = trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/")
+      bucket_notifs_subscriber_principal = lookup(local.ssm_config, "/${partner}/${local.service}/bucket_notifications_subscriber_principal_arn", null)
+      bucket_notifs_subscriber_arn       = lookup(local.ssm_config, "/${partner}/${local.service}/bucket_notifications_subscriber_arn", null)
+      bucket_notifs_subscriber_protocol  = lookup(local.ssm_config, "/${partner}/${local.service}/bucket_notifications_subscriber_protocol", null)
     }
   }
   eft_partners_with_s3_notifs = [

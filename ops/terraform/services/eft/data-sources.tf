@@ -11,17 +11,12 @@ data "aws_ssm_parameter" "partners_list_json" {
   with_decryption = true
 }
 
-data "aws_ssm_parameters_by_path" "sensitive" {
-  for_each = local.ssm_all_paths
+data "aws_ssm_parameters_by_path" "params" {
+  for_each = toset(local.ssm_hierarchies)
 
-  path            = "/${each.value.hierarchy}/${local.env}/${each.value.service}/sensitive"
+  recursive       = true
+  path            = each.value
   with_decryption = true
-}
-
-data "aws_ssm_parameters_by_path" "nonsensitive" {
-  for_each = local.ssm_all_paths
-
-  path = "/${each.value.hierarchy}/${local.env}/${each.value.service}/nonsensitive"
 }
 
 data "aws_ec2_managed_prefix_list" "vpn" {
