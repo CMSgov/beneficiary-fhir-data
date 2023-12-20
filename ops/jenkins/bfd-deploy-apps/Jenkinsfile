@@ -6,6 +6,25 @@
  * </p>
  */
 
+properties([
+  parameters([
+    string(name: 'env', description: 'The BFD Environment to deploy apps to'),
+
+    string(name: 'migrator_ami_override', description: 'The AMI ID to deploy migrator from', defaultValue: null),
+
+    string(name: 'pipeline_ami_override', description: 'The AMI ID to deploy pipeline from', defaultValue: null),
+
+    string(name: 'server_ami_override', description: 'The AMI ID to deploy server from', defaultValue: null),
+
+    booleanParam(name: 'force_migrator_deployment', description: 'When true, force the migrator to deploy.',
+      defaultValue: false),
+
+    string(name: 'server_regression_image_override',
+      description: 'Overrides the Docker image tag used when deploying the server-regression lambda',
+      defaultValue: null)
+  ])
+])
+
 // These variables are accessible throughout this file (except inside methods and classes).
 def gitBranchName
 def migratorScripts
@@ -96,43 +115,6 @@ spec:
         cpu: '8000m'
 """
         }
-    }
-
-    parameters {
-        string(
-        name: 'env',
-        description: 'The BFD Environment to deploy apps to'
-        )
-
-        string(
-        name: 'migrator_ami_override',
-        description: 'The AMI ID to deploy migrator from',
-        defaultValue: null
-        )
-
-        string(
-        name: 'pipeline_ami_override',
-        description: 'The AMI ID to deploy pipeline from',
-        defaultValue: null
-        )
-
-        string(
-        name: 'server_ami_override',
-        description: 'The AMI ID to deploy server from',
-        defaultValue: null
-        )
-
-        booleanParam(
-        name: 'force_migrator_deployment',
-        description: 'When true, force the migrator to deploy.',
-        defaultValue: false
-        )
-
-        string(
-        name: 'server_regression_image_override',
-        description: 'Overrides the Docker image tag used when deploying the server-regression lambda',
-        defaultValue: null
-        )
     }
 
     stages {

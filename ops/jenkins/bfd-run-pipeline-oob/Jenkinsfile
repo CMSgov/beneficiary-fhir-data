@@ -1,3 +1,31 @@
+ properties([
+   parameters([
+     string(name: 'env', description: 'The BFD Environment to run the BFD Pipeline out-of-band in'),
+     choice(name: 'pipeline_variant',
+       // TODO: Update with RDA when possible
+       choices: ['ccw'],
+       description: 'The variant of BFD Pipeline to run out-of-band'
+     ),
+     string(name: 'timeout_minutes',
+       defaultValue: '60',
+       description: 'The timeout, in minutes, that this Jenkins Pipeline will wait until '
+                   + 'automatically scaling-in the out-of-band BFD Pipeline instance'
+     ),
+     booleanParam(name: 'lock_environment_resource', defaultValue: true,
+       description: 'Whether or not the corresponding environment resource is locked while this '
+                   + 'Jenkins Pipeline is running. Setting this to false will allow for '
+                   + 'deployments and other potentially destructive actions to occur while the OOB '
+                   + 'BFD Pipeline is running'
+     ),
+     booleanParam(name: 'suspend_scheduled_actions', defaultValue: true,
+       description: 'Whether or not AutoScaling Scheduled Actions will be suspended on the BFD '
+                   + 'Pipeline AutoScaling Group. If this is false (toggled off), ASG Scheduled '
+                   + 'Actions created by the BFD Pipeline Scheduler will execute and could '
+                   + 'potentially destroy the Pipeline created by this Jenkins Pipeline'
+     )
+  ])
+])
+
 pipeline {
   agent {
     kubernetes {
@@ -17,41 +45,6 @@ spec:
       imagePullPolicy: IfNotPresent
 """
     }
-  }
-
-  parameters {
-    string(
-      name: 'env',
-      description: 'The BFD Environment to run the BFD Pipeline out-of-band in'
-    )
-    choice(
-      name: 'pipeline_variant',
-      // TODO: Update with RDA when possible
-      choices: ['ccw'],
-      description: 'The variant of BFD Pipeline to run out-of-band'
-    )
-    string(
-      name: 'timeout_minutes',
-      defaultValue: '60',
-      description: 'The timeout, in minutes, that this Jenkin Pipeline will wait until '
-                   + 'automatically scaling-in the out-of-band BFD Pipeline instance'
-    )
-    booleanParam(
-      name: 'lock_environment_resource',
-      defaultValue: true,
-      description: 'Whether or not the corresponding environment resource is locked while this '
-                   + 'Jenkins Pipeline is running. Setting this to false will allow for '
-                   + 'deployments and other potentially destructive actions to occur while the OOB '
-                   + 'BFD Pipeline is running'
-    )
-    booleanParam(
-      name: 'suspend_scheduled_actions',
-      defaultValue: true,
-      description: 'Whether or not AutoScaling Scheduled Actions will be suspended on the BFD '
-                   + 'Pipeline AutoScaling Group. If this is false (toggled off), ASG Scheduled '
-                   + 'Actions created by the BFD Pipeline Scheduler will execute and could '
-                   + 'potentially destroy the Pipeline created by this Jenkins Pipeline'
-    )
   }
 
   options {

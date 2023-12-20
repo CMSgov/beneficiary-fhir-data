@@ -1,5 +1,32 @@
 #!/usr/bin/env groovy
 
+properties([
+  parameters([
+    string(name: 'NUM_BENES', defaultValue: '10000',
+      description: 'The number of synthetic beneficiaries to generate'),
+
+    string(name: 'NUM_FUTURE_MONTHS', defaultValue: '0',
+      description: 'The number of months into the future that claim lines should be '
+      + 'generated. If specified, future claims will be split in the '
+      + 'generated output to allow for proper loading'),
+
+    booleanParam(name: 'USE_TARGET_CONTRACT', defaultValue: false,
+      description: 'If checked, use the below contract partD contract number for all generated items.'),
+
+    string(name: 'TARGET_CONTRACT', defaultValue: 'Y9999',
+      description: 'If USE_TARGET_CONTRACT is checked, indicates a single part D contract that all generated claims'
+      + ' will be associated with.'),
+
+    booleanParam(name: 'UPDATE_END_STATE_S3', defaultValue: true,
+      description: 'Specifies whether the main end_state.properties stored in the synthea S3 '
+      + 'bucket should be updated with the end_state.properties '
+      + 'of this run. If false, the main end_state.properties is left as-is. '
+      + 'If true, the main end_state.properties is replaced. Regardless of this '
+      + 'parameter\'s value, the starting and final end_state.properties will '
+      + 'be available in the generated output directory uploaded to S3')
+  ])
+])
+
 pipeline {
   agent {
     kubernetes {
@@ -39,38 +66,6 @@ spec:
         cpu: 8000m
 """
     }
-  }
-
-  parameters {
-    string(name: 'NUM_BENES',
-           defaultValue: '10000',
-           description: 'The number of synthetic beneficiaries to generate')
-
-    string(name: 'NUM_FUTURE_MONTHS',
-           defaultValue: '0',
-           description: 'The number of months into the future that claim lines should be '
-                        + 'generated. If specified, future claims will be split in the '
-                        + 'generated output to allow for proper loading')
-                        
-    booleanParam(
-        name: 'USE_TARGET_CONTRACT',
-        description: 'If checked, use the below contract partD contract number for all generated items.',
-        defaultValue: false
-    )
-                        
-    string(name: 'TARGET_CONTRACT',
-           defaultValue: 'Y9999',
-           description: 'If USE_TARGET_CONTRACT is checked, indicates a single part D contract that all generated claims'
-                        + ' will be associated with.')
-
-    booleanParam(name: 'UPDATE_END_STATE_S3',
-           defaultValue: true,
-           description: 'Specifies whether the main end_state.properties stored in the synthea S3 '
-                        + 'bucket should be updated with the end_state.properties '
-                        + 'of this run. If false, the main end_state.properties is left as-is. '
-                        + 'If true, the main end_state.properties is replaced. Regardless of this '
-                        + 'parameter\'s value, the starting and final end_state.properties will '
-                        + 'be available in the generated output directory uploaded to S3')
   }
 
   options {
