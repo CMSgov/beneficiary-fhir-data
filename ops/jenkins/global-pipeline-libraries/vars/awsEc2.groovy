@@ -8,7 +8,7 @@ aws ec2 describe-images --owners self --filters \
 ${gitBranch != "" ? "'Name=tag:Branch,Values=${gitBranch}'" : ""} \
 'Name=name,Values=${amiName}' \
 'Name=state,Values=available' --region us-east-1 --output json | \
-jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'
 """
         amiId = sh(returnStdout: true, script: command).trim()
     return amiId
