@@ -7,6 +7,13 @@ data "external" "rds" {
 
 data "aws_caller_identity" "current" {}
 
+data "aws_region" "primary" {
+  provider = aws
+}
+data "aws_region" "alt" {
+  provider = aws.alt
+}
+
 data "aws_security_group" "vpn" {
   vpc_id = data.aws_vpc.main.id
   filter {
@@ -55,6 +62,12 @@ data "aws_kms_key" "cmk" {
   key_id = local.nonsensitive_common_config["kms_key_alias"]
 }
 
+data "aws_kms_key" "cmk_alt" {
+  provider = aws.alt
+
+  key_id = "alias/bfd-${local.env}-cmk"
+}
+
 data "aws_kms_key" "config_cmk" {
   key_id = local.nonsensitive_common_config["kms_config_key_alias"]
 }
@@ -96,7 +109,7 @@ data "aws_ssm_parameters_by_path" "nonsensitive_shared" {
 }
 
 data "aws_ssm_parameters_by_path" "sensitive_ccw" {
-  path = "/bfd/${local.env}/${local.service}/ccw/sensitive"
+  path            = "/bfd/${local.env}/${local.service}/ccw/sensitive"
   with_decryption = true
 }
 

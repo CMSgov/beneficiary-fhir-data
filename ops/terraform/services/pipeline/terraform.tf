@@ -4,6 +4,13 @@ provider "aws" {
     tags = local.default_tags
   }
 }
+provider "aws" {
+  region = "us-west-2"
+  alias  = "alt"
+  default_tags {
+    tags = local.default_tags
+  }
+}
 
 terraform {
   backend "s3" {

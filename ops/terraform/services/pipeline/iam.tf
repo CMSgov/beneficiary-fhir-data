@@ -1,7 +1,7 @@
 resource "aws_iam_role" "ccw_rif" {
-  count = local.is_prod ? 1 : 0
-  name = "bfd-${local.env}-ccw-rif"
-  description = "Role assumed by CCW to read and write to the ${local.env} production and verification ETL buckets."
+  count                = local.is_prod ? 1 : 0
+  name                 = "bfd-${local.env}-ccw-rif"
+  description          = "Role assumed by CCW to read and write to the ${local.env} production and verification ETL buckets."
   max_session_duration = 43200 # max session duration is 12 hours (43200 seconds)- going big for long data-loads
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -16,7 +16,7 @@ resource "aws_iam_role" "ccw_rif" {
         }
         Condition = {
           StringEquals = {
-            "sts:ExternalId": local.sensitive_ccw_service_config["ccw_rif_role_external_id"]
+            "sts:ExternalId" : local.sensitive_ccw_service_config["ccw_rif_role_external_id"]
           }
         }
       }
@@ -25,7 +25,7 @@ resource "aws_iam_role" "ccw_rif" {
 }
 
 resource "aws_iam_role_policy_attachment" "ccw_rif" {
-  count = local.is_prod ? 1 : 0
+  count      = local.is_prod ? 1 : 0
   role       = aws_iam_role.ccw_rif[0].name
   policy_arn = aws_iam_policy.etl-rw-s3[0].arn
 }
