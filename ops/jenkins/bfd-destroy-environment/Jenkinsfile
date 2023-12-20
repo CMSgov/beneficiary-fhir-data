@@ -6,6 +6,16 @@
  * </p>
  */
 
+properties([
+  parameters([
+    string(name: 'env', description: 'The BFD ephemeral environment to destroy'),
+    booleanParam(name: 'force_plan_approval',
+      description: 'When true, force the operator to manually approve each tfplan', defaultValue: true),
+    booleanParam(name: 'force_stage_approval',
+      description: 'When true, force the operator to approve each stage before continuing', defaultValue: false)
+  ])
+])
+
 // These variables are accessible throughout this file (except inside methods and classes).
 def gitBranchName
 def trimmedEnv
@@ -98,23 +108,6 @@ spec:
         cpu: '8000m'
 """
         }
-    }
-
-    parameters {
-        string(
-            name: 'env',
-            description: 'The BFD ephemeral environment to destroy'
-        )
-        booleanParam(
-            name: 'force_plan_approval',
-            description: 'When true, force the operator to manually approve each tfplan',
-            defaultValue: true
-        )
-        booleanParam(
-            name: 'force_stage_approval',
-            description: 'When true, force the operator to approve each stage before continuing',
-            defaultValue: false
-        )
     }
 
     stages {
