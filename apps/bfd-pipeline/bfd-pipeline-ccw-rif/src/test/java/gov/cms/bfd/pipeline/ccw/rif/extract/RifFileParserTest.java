@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
+import gov.cms.model.dsl.codegen.library.RifObject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -155,7 +156,7 @@ public class RifFileParserTest {
    * @param csvRecord record selected by the parser for this event
    * @return a {@link RifRecordEvent} holding the provided {@link CSVRecord}
    */
-  private RifRecordEvent<Beneficiary> parseSingle(CSVRecord csvRecord) {
+  private RifRecordEvent<Beneficiary> parseSingle(RifObject csvRecord) {
     return new RifRecordEvent<>(
         rifFileEventMock, List.of(csvRecord), RecordAction.INSERT, 1L, new Beneficiary());
   }
@@ -167,7 +168,7 @@ public class RifFileParserTest {
    * @param csvRecords records selected by the parser for this event
    * @return a {@link RifRecordEvent} holding the provided {@link CSVRecord}s
    */
-  private RifRecordEvent<Beneficiary> parseGroup(List<CSVRecord> csvRecords) {
+  private RifRecordEvent<Beneficiary> parseGroup(List<RifObject> csvRecords) {
     return new RifRecordEvent<>(
         rifFileEventMock, csvRecords, RecordAction.INSERT, 1L, new Beneficiary());
   }
@@ -199,7 +200,7 @@ public class RifFileParserTest {
    * @param csvRecords the records to convert
    * @return the resulting string
    */
-  private String convertRecordsIntoStrings(List<CSVRecord> csvRecords) {
+  private String convertRecordsIntoStrings(List<RifObject> csvRecords) {
     List<String> recordStrings =
         csvRecords.stream()
             .map(csvRecord -> csvRecord.stream().collect(Collectors.joining("-")))

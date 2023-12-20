@@ -5,6 +5,8 @@ import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import gov.cms.model.dsl.codegen.library.CsvRifObject;
+import gov.cms.model.dsl.codegen.library.RifObject;
 import java.util.List;
 import javax.annotation.concurrent.ThreadSafe;
 import lombok.AllArgsConstructor;
@@ -34,17 +36,11 @@ public abstract class RifFileParser {
   @AllArgsConstructor
   public static class Simple extends RifFileParser {
     /** Lambda used to parse a single {@link CSVRecord} into a {@link RifRecordEvent}. */
-    private final ThrowingFunction<RifRecordEvent<?>, CSVRecord, Exception> parser;
+    private final ThrowingFunction<RifRecordEvent<?>, RifObject, Exception> parser;
 
     @Override
     public Flux<RifRecordEvent<?>> parseRifFile(RifFile rifFile) {
-      return FluxUtils.fromAutoCloseable(
-          // creates a CSVParser for new subscriber
-          () -> RifParsingUtils.createCsvParser(rifFile),
-          // creates flux for subscriber to receive parsed events
-          csvParser -> Flux.fromIterable(csvParser).map(FluxUtils.wrapFunction(parser)),
-          // used in log message if closing the CSVParser fails
-          rifFile.getDisplayName());
+      return parseCsvRifFile(rifFile).map(FluxUtils.wrapFunction(parser));
     }
   }
 
@@ -58,22 +54,15 @@ public abstract class RifFileParser {
     private final String groupingColumn;
 
     /** Lambda used to parse one or more {@link CSVRecord}s into a {@link RifRecordEvent}. */
-    private final ThrowingFunction<RifRecordEvent<?>, List<CSVRecord>, Exception> parser;
+    private final ThrowingFunction<RifRecordEvent<?>, List<RifObject>, Exception> parser;
 
     @Override
     public Flux<RifRecordEvent<?>> parseRifFile(RifFile rifFile) {
-      return FluxUtils.fromAutoCloseable(
-          // creates a CSVParser for new subscriber
-          () -> RifParsingUtils.createCsvParser(rifFile),
-          // creates flux for subscriber to receive parsed events
-          csvParser ->
-              Flux.fromIterable(csvParser)
-                  // joins consecutive records with same grouping column value
-                  .bufferUntilChanged(csvRecord -> csvRecord.get(groupingColumn))
-                  // parses the list of records
-                  .flatMap(this::parse),
-          // used in log message if closing the CSVParser fails
-          rifFile.getDisplayName());
+      return parseCsvRifFile(rifFile)
+          // joins consecutive records with same grouping column value
+          .bufferUntilChanged(csvRecord -> csvRecord.get(groupingColumn))
+          // parses the list of records
+          .flatMap(this::parse);
     }
 
     /**
@@ -82,12 +71,22 @@ public abstract class RifFileParser {
      * @param records group of records to parse (may be empty)
      * @return flux containing the resulting object or an empty flux if the list was empty
      */
-    private Flux<RifRecordEvent<?>> parse(List<CSVRecord> records) {
+    private Flux<RifRecordEvent<?>> parse(List<RifObject> records) {
       try {
         return records.isEmpty() ? Flux.empty() : Flux.just(parser.apply(records));
       } catch (Exception ex) {
         return Flux.error(ex);
       }
     }
+  }
+
+  public static Flux<RifObject> parseCsvRifFile(RifFile rifFile) {
+    return FluxUtils.fromAutoCloseable(
+        // creates a CSVParser for new subscriber
+        () -> RifParsingUtils.createCsvParser(rifFile),
+        // creates flux for subscriber to receive parsed events
+        csvParser -> Flux.fromIterable(csvParser).map(CsvRifObject::new),
+        // used in log message if closing the CSVParser fails
+        rifFile.getDisplayName());
   }
 }

@@ -15,20 +15,20 @@ public class RifObjectWrapper {
    * The first record contains the data for the claim object and any additional lines contain data
    * for claim lines.
    */
-  private final List<CSVRecord> lines;
+  private final List<RifObject> lines;
 
   /**
    * Contains the CSV header for the object. Used for determining whether or not a given column
    * label is valid.
    */
-  private final CSVRecord header;
+  private final RifObject header;
 
   /**
    * Constructs a new object for the given {@link CSVRecord}s.
    *
    * @param csvRecords one or more records containing data for the object
    */
-  public RifObjectWrapper(List<CSVRecord> csvRecords) {
+  public RifObjectWrapper(List<RifObject> csvRecords) {
     // Verify the inputs.
     Objects.requireNonNull(csvRecords);
     if (csvRecords.isEmpty()) {
@@ -43,7 +43,7 @@ public class RifObjectWrapper {
    *
    * @param singleLine one line of CSV data
    */
-  public RifObjectWrapper(CSVRecord singleLine) {
+  public RifObjectWrapper(RifObject singleLine) {
     lines = ImmutableList.of(singleLine);
     header = singleLine;
   }

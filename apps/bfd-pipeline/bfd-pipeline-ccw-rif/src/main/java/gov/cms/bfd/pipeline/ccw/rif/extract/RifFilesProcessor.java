@@ -27,13 +27,13 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimParser;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.model.dsl.codegen.library.DataTransformer.TransformationException;
+import gov.cms.model.dsl.codegen.library.RifObject;
 import gov.cms.model.dsl.codegen.library.RifObjectWrapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.csv.CSVRecord;
 import reactor.core.publisher.Flux;
 
 /** Contains services responsible for handling new RIF files. */
@@ -79,7 +79,7 @@ public class RifFilesProcessor {
     return new RifFileParser.Simple(
         csvRecord -> {
           trace(csvRecord);
-          final List<CSVRecord> csvRecords = List.of(csvRecord);
+          final List<RifObject> csvRecords = List.of(csvRecord);
           final RecordAction recordAction = parseRecordAction(csvRecord);
           final Beneficiary beneficiaryRow = parse(csvRecords, parser::transformMessage);
 
@@ -107,7 +107,7 @@ public class RifFilesProcessor {
     return new RifFileParser.Simple(
         csvRecord -> {
           trace(csvRecord);
-          final List<CSVRecord> csvRecords = List.of(csvRecord);
+          final List<RifObject> csvRecords = List.of(csvRecord);
           final RecordAction recordAction = parseRecordAction(csvRecord);
           final BeneficiaryHistory beneHistoryRow = parse(csvRecords, parser::transformMessage);
           return new RifRecordEvent<>(
@@ -130,7 +130,7 @@ public class RifFilesProcessor {
     return new RifFileParser.Simple(
         csvRecord -> {
           trace(csvRecord);
-          final List<CSVRecord> csvRecords = List.of(csvRecord);
+          final List<RifObject> csvRecords = List.of(csvRecord);
           final RecordAction recordAction = parseRecordAction(csvRecord);
           final PartDEvent partDEvent = parse(csvRecords, parser::transformMessage);
           return new RifRecordEvent<>(
@@ -272,7 +272,7 @@ public class RifFilesProcessor {
   }
 
   /**
-   * Calls the provided parser lambda function with the given list of {@link CSVRecord}s to produce
+   * Calls the provided parser lambda function with the given list of {@link RifObject}s to produce
    * an object. {@link TransformationException}s are converted into {@link
    * InvalidRifValueException}s.
    *
@@ -281,7 +281,7 @@ public class RifFilesProcessor {
    * @return the object returned by the lambda function
    * @param <T> the type of object returned by the lambda function
    */
-  private static <T> T parse(List<CSVRecord> csvRecords, Function<RifObjectWrapper, T> parser) {
+  private static <T> T parse(List<RifObject> csvRecords, Function<RifObjectWrapper, T> parser) {
     try {
       return parser.apply(new RifObjectWrapper(csvRecords));
     } catch (TransformationException error) {
@@ -302,7 +302,7 @@ public class RifFilesProcessor {
    * @return the action
    */
   @Nonnull
-  private static RecordAction parseRecordAction(CSVRecord csvRecord) {
+  private static RecordAction parseRecordAction(RifObject csvRecord) {
     return RecordAction.match(csvRecord.get(RECORD_ACTION_COLUMN));
   }
 
@@ -313,7 +313,7 @@ public class RifFilesProcessor {
    * @return the action
    */
   @Nonnull
-  private static RecordAction parseRecordAction(List<CSVRecord> csvRecords) {
+  private static RecordAction parseRecordAction(List<RifObject> csvRecords) {
     return parseRecordAction(csvRecords.get(0));
   }
 
@@ -322,7 +322,7 @@ public class RifFilesProcessor {
    *
    * @param csvRecords the records
    */
-  private static void trace(List<CSVRecord> csvRecords) {
+  private static void trace(List<RifObject> csvRecords) {
     if (log.isTraceEnabled()) {
       log.trace(csvRecords.toString());
     }
@@ -333,7 +333,7 @@ public class RifFilesProcessor {
    *
    * @param csvRecord the record
    */
-  private static void trace(CSVRecord csvRecord) {
+  private static void trace(RifObject csvRecord) {
     if (log.isTraceEnabled()) {
       log.trace(csvRecord.toString());
     }

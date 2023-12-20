@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.rif;
 
+import gov.cms.model.dsl.codegen.library.RifObject;
 import java.util.List;
 import org.apache.commons.csv.CSVRecord;
 
@@ -15,7 +16,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
   private final RifFileEvent fileEvent;
 
   /** The {@link CSVRecord}s that this was built from / represents. */
-  private final List<CSVRecord> rawCsvRecords;
+  private final List<RifObject> rawCsvRecords;
 
   /** The RIF {@link RecordAction} indicated for the {@link #getRecord()}. */
   private final RecordAction recordAction;
@@ -37,7 +38,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
    */
   public RifRecordEvent(
       RifFileEvent fileEvent,
-      List<CSVRecord> rawCsvRecords,
+      List<RifObject> rawCsvRecords,
       RecordAction recordAction,
       Long beneficiaryId,
       R record) {
@@ -68,7 +69,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
    *
    * @return the {@link CSVRecord}s that this was built from / represents
    */
-  public List<CSVRecord> getRawCsvRecords() {
+  public List<RifObject> getRawCsvRecords() {
     return rawCsvRecords;
   }
 

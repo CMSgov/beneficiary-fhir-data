@@ -35,6 +35,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.dsl.codegen.library.RifObject;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -60,7 +61,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -238,7 +238,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
         rifRecordEvent -> {
-          CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          RifObject beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
           List<String> beneCsvValues =
               StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
           beneCsvValues.set(0, "UPDATE");
@@ -1017,7 +1017,7 @@ public final class RifLoaderIT {
             StaticRifResourceGroup.SAMPLE_A.getResources());
     Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
         rifRecordEvent -> {
-          CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          RifObject beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
           List<String> beneCsvValues =
               StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
           beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal() + 1, refYear);
@@ -1055,7 +1055,7 @@ public final class RifLoaderIT {
   private Stream<RifFile> editStreamToBeUpdate(Stream<RifFile> samplesStream) {
     Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
         rifRecordEvent -> {
-          CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          RifObject beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
           List<String> beneCsvValues =
               StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
           beneCsvValues.set(0, "UPDATE");
