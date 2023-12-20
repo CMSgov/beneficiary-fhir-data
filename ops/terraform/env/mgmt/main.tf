@@ -13,9 +13,9 @@ locals {
   bfd_insights_kms_key_id = data.aws_kms_key.insights.arn
   kms_key_id              = data.aws_kms_key.cmk.arn
   tf_state_kms_key_id     = data.aws_kms_key.tf_state.arn
-  test_kms_key_id         = data.aws_kms_key.test_cmk.arn
-  prod_sbx_kms_key_id     = data.aws_kms_key.prod_sbx_cmk.arn
-  prod_kms_key_id         = data.aws_kms_key.prod_cmk.arn
+  test_kms_key_id         = aws_kms_key.data_keys["test"].arn
+  prod_sbx_kms_key_id     = aws_kms_key.data_keys["prod-sbx"].arn
+  prod_kms_key_id         = aws_kms_key.data_keys["prod"].arn
 
   all_kms_config_key_arns = flatten(
     [
@@ -54,18 +54,6 @@ data "aws_vpc" "main" {
 
 data "aws_kms_key" "cmk" {
   key_id = "alias/bfd-mgmt-cmk"
-}
-
-data "aws_kms_key" "test_cmk" {
-  key_id = "alias/bfd-test-cmk"
-}
-
-data "aws_kms_key" "prod_sbx_cmk" {
-  key_id = "alias/bfd-prod-sbx-cmk"
-}
-
-data "aws_kms_key" "prod_cmk" {
-  key_id = "alias/bfd-prod-cmk"
 }
 
 data "aws_kms_key" "config_cmk" {
