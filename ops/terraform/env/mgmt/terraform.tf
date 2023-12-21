@@ -12,6 +12,21 @@ provider "aws" {
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+  alias  = "alt"
+  default_tags {
+    tags = {
+      Environment    = local.env
+      application    = "bfd"
+      business       = "oeda"
+      stack          = local.env
+      Terraform      = true
+      tf_module_root = "ops/terraform/env/mgmt"
+    }
+  }
+}
+
 terraform {
   backend "s3" {
     bucket         = "bfd-tf-state"
