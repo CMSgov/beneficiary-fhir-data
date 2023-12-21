@@ -61,18 +61,38 @@ locals {
   eft_user_sftp_pub_key   = local.ssm_config["/bfd/${local.service}/sftp_eft_user_public_key"]
   eft_user_username       = local.ssm_config["/bfd/${local.service}/sftp_eft_user_username"]
   eft_s3_sftp_home_folder = trim(local.ssm_config["/bfd/${local.service}/sftp_eft_home_dir"], "/")
-  eft_partners_config = {
+  # First, construct the configuration for each partner. Partners with invalid path configuration
+  # will be discarded below. We could assume that configuration is infallible, but unlike target
+  # configuration, invalid paths may not cause Terraform (really, AWS) to fail fast when generating
+  # corresponding infrastructure. We don't want that to happen, so we need to check those
+  # preconditions manually. The verbosity and repetition is intentional, albeit unfortunate, as
+  # Terraform does not support the language constructs necessary to reduce it
+  unfiltered_eft_partners_config = {
     for partner in local.eft_partners :
     partner => {
-      bucket_home_path        = "${local.eft_s3_sftp_home_folder}/${trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/")}"
+      bucket_home_path = join(
+        "/",
+        [
+          # Terraform doesn't support functions, so this pattern is duplicated wherever a path is
+          # constructed from config. This guards against empty, null, or whitespace-only paths,
+          # taking advantage of coalesce to do a "null or empty" check all at once and replace to
+          # strip out whitespace such that the full check becomes "is not null or whitespace"
+          for path in [
+            local.eft_s3_sftp_home_folder,
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/")
+          ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
+        ]
+      ),
       bucket_iam_assumer_arns = jsondecode(local.ssm_config["/${partner}/${local.service}/bucket_iam_assumer_arns_json"])
       inbound = {
         dir = join(
           "/",
           [
-            local.eft_s3_sftp_home_folder,
-            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
-            trim(local.ssm_config["/${partner}/${local.service}/inbound/dir"], "/")
+            for path in [
+              local.eft_s3_sftp_home_folder,
+              trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
+              trim(local.ssm_config["/${partner}/${local.service}/inbound/dir"], "/")
+            ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         )
         s3_notifications = {
@@ -85,25 +105,31 @@ locals {
         pending_path = join(
           "/",
           [
-            local.eft_s3_sftp_home_folder,
-            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
-            trim(local.ssm_config["/${partner}/${local.service}/outbound/pending_dir"], "/")
+            for path in [
+              local.eft_s3_sftp_home_folder,
+              trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
+              trim(local.ssm_config["/${partner}/${local.service}/outbound/pending_dir"], "/")
+            ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         ),
         sent_path = join(
           "/",
           [
-            local.eft_s3_sftp_home_folder,
-            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
-            trim(local.ssm_config["/${partner}/${local.service}/outbound/sent_dir"], "/")
+            for path in [
+              local.eft_s3_sftp_home_folder,
+              trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
+              trim(local.ssm_config["/${partner}/${local.service}/outbound/sent_dir"], "/")
+            ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         ),
         failed_path = join(
           "/",
           [
-            local.eft_s3_sftp_home_folder,
-            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
-            trim(local.ssm_config["/${partner}/${local.service}/outbound/failed_dir"], "/")
+            for path in [
+              local.eft_s3_sftp_home_folder,
+              trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
+              trim(local.ssm_config["/${partner}/${local.service}/outbound/failed_dir"], "/")
+            ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         ),
         s3_notifications = {
@@ -119,6 +145,21 @@ locals {
         }
       }
     }
+  }
+  # Filter out any partners with invalid path configuration (such as paths with whitespace in them,
+  # or if any of the paths for a given partner are null or empty)
+  eft_partners_config = {
+    for partner, data in local.unfiltered_eft_partners_config :
+    partner => data if alltrue([
+      for path in [
+        local.unfiltered_eft_partners_config[partner].bucket_home_path,
+        local.unfiltered_eft_partners_config[partner].inbound.dir,
+        local.unfiltered_eft_partners_config[partner].outbound.pending_path,
+        local.unfiltered_eft_partners_config[partner].outbound.sent_path,
+        local.unfiltered_eft_partners_config[partner].outbound.failed_path
+      ] :
+      coalesce(path, "INVALID") != "INVALID" && length(regexall("\\s", path)) == 0
+    ])
   }
   eft_partners_with_inbound_received_notifs = [
     for partner in local.eft_partners :
@@ -136,7 +177,6 @@ locals {
     for partner in local.eft_partners :
     partner if length(local.eft_partners_config[partner].outbound.s3_notifications.failed_file_targets) > 0
   ]
-  # Data source lookups
 
   account_id     = data.aws_caller_identity.current.account_id
   vpc_id         = data.aws_vpc.this.id
