@@ -112,13 +112,13 @@ resource "aws_iam_role" "partner_bucket_role" {
   assume_role_policy = jsonencode(
     {
       Statement = [
-        {
+        for assumer_arn in each.value.bucket_iam_assumer_arns : {
           Effect = "Allow"
           Action = "sts:AssumeRole"
           Principal = {
-            AWS = each.value.bucket_iam_assumer_arn
+            AWS = assumer_arn
           }
-        },
+        }
       ]
       Version = "2012-10-17"
     }
