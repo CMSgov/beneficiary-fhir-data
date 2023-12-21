@@ -93,7 +93,7 @@ resource "aws_iam_policy" "eft_user" {
             "s3:GetObjectACL",
             "s3:PutObjectACL"
           ]
-          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_s3_sftp_home_folder}*"]
+          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_s3_sftp_home_folder}/*"]
         }
       ]
     }
@@ -151,7 +151,7 @@ resource "aws_iam_policy" "partner_bucket_access" {
           Resource = [aws_s3_bucket.this.arn]
           Condition = {
             StringLike = {
-              "s3:prefix" = ["${each.value.bucket_home_path}*"]
+              "s3:prefix" = ["${each.value.bucket_home_path}/*"]
             }
           }
         },
@@ -171,7 +171,7 @@ resource "aws_iam_policy" "partner_bucket_access" {
             "s3:PutObjectVersionAcl"
           ],
           Resource = [
-            "${aws_s3_bucket.this.arn}/${each.value.bucket_home_path}*"
+            "${aws_s3_bucket.this.arn}/${each.value.bucket_home_path}/*"
           ]
         },
         {
