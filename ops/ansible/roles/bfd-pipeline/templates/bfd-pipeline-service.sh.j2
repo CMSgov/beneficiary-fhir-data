@@ -1,71 +1,71 @@
 #!/bin/bash
 
-export CCW_RIF_JOB_ENABLED='{{ data_pipeline_ccw_rif_job_enabled }}'
-export S3_BUCKET_NAME='{{ data_pipeline_s3_bucket }}'
-export HICN_HASH_ITERATIONS='{{ data_pipeline_hicn_hash_iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
-export HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
-export DATABASE_URL='{{ data_pipeline_db_url }}'
-export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
-export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
+export BFD_CCW_JOB_ENABLED='{{ data_pipeline_ccw_rif_job_enabled }}'
+export BFD_CCW_S3_BUCKET_NAME='{{ data_pipeline_s3_bucket }}'
+export BFD_HICN_HASH_ITERATIONS='{{ data_pipeline_hicn_hash_iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
+export BFD_HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
+export BFD_DB_URL='{{ data_pipeline_db_url }}'
+export BFD_DB_USERNAME='{{ data_pipeline_db_username }}'
+export BFD_DB_PASSWORD='{{ data_pipeline_db_password }}'
 # NOTE: RIF Loader Threads are generally some multiple of available cpus/core, e.g. `$((3 * $(nproc)))`
-export LOADER_THREADS='{{ ansible_processor_vcpus * (rif_thread_multiple | int) }}'
-export RIF_JOB_BATCH_SIZE='{{ rif_job_batch_size }}'
-export RIF_JOB_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple }}'
-export LOADER_THREADS_CLAIMS='{{ ansible_processor_vcpus * (rif_thread_multiple_claims | int) }}'
-export RIF_JOB_BATCH_SIZE_CLAIMS='{{ rif_job_batch_size_claims }}'
-export RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS='{{ rif_job_queue_size_multiple_claims }}'
+export BFD_LOADER_THREAD_COUNT='{{ ansible_processor_vcpus * (rif_thread_multiple | int) }}'
+export BFD_CCW_JOB_BATCH_SIZE='{{ rif_job_batch_size }}'
+export BFD_CCW_JOB_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple }}'
+export BFD_CCW_JOB_CLAIMS_LOADER_THREAD_COUNT='{{ ansible_processor_vcpus * (rif_thread_multiple_claims | int) }}'
+export BFD_CCW_JOB_CLAIMS_BATCH_SIZE='{{ rif_job_batch_size_claims }}'
+export BFD_CCW_JOB_CLAIMS_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple_claims }}'
 
-export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
+export BFD_CCW_IDEMPOTENCY_ENABLED='{{ data_pipeline_idempotency_required }}'
 
 # Observability
 {% if data_pipeline_micrometer_cw_enabled is defined and data_pipeline_micrometer_cw_namespace is defined %}
-export MICROMETER_CW_ENABLED={{ data_pipeline_micrometer_cw_enabled }}
-export MICROMETER_CW_NAMESPACE={{ data_pipeline_micrometer_cw_namespace }}
-export MICROMETER_CW_INTERVAL={{ data_pipeline_micrometer_cw_interval | default('PT1M') }}
+export BFD_MICROMETER_CW_ENABLED={{ data_pipeline_micrometer_cw_enabled }}
+export BFD_MICROMETER_CW_NAMESPACE={{ data_pipeline_micrometer_cw_namespace }}
+export BFD_MICROMETER_CW_INTERVAL={{ data_pipeline_micrometer_cw_interval | default('PT1M') }}
 {% else %}
-# export MICROMETER_CW_ENABLED=
-# export MICROMETER_CW_NAMESPACE=
-# export MICROMETER_CW_INTERVAL=
+# export BFD_MICROMETER_CW_ENABLED=
+# export BFD_MICROMETER_CW_NAMESPACE=
+# export BFD_MICROMETER_CW_INTERVAL=
 {% endif %}
 
-export NEW_RELIC_METRIC_HOST='{{ data_pipeline_new_relic_metric_host }}'
-export NEW_RELIC_METRIC_PATH='{{ data_pipeline_new_relic_metric_path }}'
+export BFD_NEW_RELIC_METRICS_HOST='{{ data_pipeline_new_relic_metric_host }}'
+export BFD_NEW_RELIC_METRICS_PATH='{{ data_pipeline_new_relic_metric_path }}'
 {% if data_pipeline_new_relic_app_name is defined %}
-export NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
+export BFD_NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
 {% else %}
-#export NEW_RELIC_APP_NAME=
+#export BFD_NEW_RELIC_APP_NAME=
 {% endif %}
 {% if data_pipeline_new_relic_metric_key is defined %}
-export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
+export BFD_NEW_RELIC_METRICS_LICENSE_KEY='{{ data_pipeline_new_relic_metric_key }}'
 {% else %}
-#export NEW_RELIC_METRIC_KEY=
+#export BFD_NEW_RELIC_METRICS_LICENSE_KEY=
 {% endif %}
 
-export RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
-export RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
-export RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
-export RDA_JOB_WRITE_THREADS='{{ data_pipeline_rda_job_write_threads }}'
+export BFD_RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
+export BFD_RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
+export BFD_RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
+export BFD_RDA_JOB_WRITE_THREAD_COUNT='{{ data_pipeline_rda_job_write_threads }}'
 {% if data_pipeline_rda_process_dlq is defined %}
-export RDA_JOB_PROCESS_DLQ='{{ data_pipeline_rda_process_dlq }}'
+export BFD_RDA_JOB_PROCESS_DLQ='{{ data_pipeline_rda_process_dlq }}'
 {% endif %}
 {% if data_pipeline_rda_version is defined %}
-export RDA_JOB_RDA_VERSION='{{ data_pipeline_rda_version }}'
+export BFD_RDA_JOB_RDA_VERSION='{{ data_pipeline_rda_version }}'
 {% endif %}
 {% if data_pipeline_rda_job_starting_fiss_seq_num is defined %}
-export RDA_JOB_STARTING_FISS_SEQ_NUM='{{ data_pipeline_rda_job_starting_fiss_seq_num }}'
+export BFD_RDA_JOB_STARTING_FISS_SEQ_NUM='{{ data_pipeline_rda_job_starting_fiss_seq_num }}'
 {% endif %}
 {% if data_pipeline_rda_job_starting_mcs_seq_num is defined %}
-export RDA_JOB_STARTING_MCS_SEQ_NUM='{{ data_pipeline_rda_job_starting_mcs_seq_num }}'
+export BFD_RDA_JOB_STARTING_MCS_SEQ_NUM='{{ data_pipeline_rda_job_starting_mcs_seq_num }}'
 {% endif %}
-export RDA_GRPC_HOST='{{ data_pipeline_rda_grpc_host }}'
-export RDA_GRPC_PORT='{{ data_pipeline_rda_grpc_port }}'
-export RDA_GRPC_MAX_IDLE_SECONDS='{{ data_pipeline_rda_grpc_max_idle_seconds }}'
-export RDA_GRPC_AUTH_TOKEN='{{ data_pipeline_rda_grpc_auth_token }}'
-export RDA_GRPC_SERVER_TYPE='{{ data_pipeline_rda_grpc_server_type }}'
-export RDA_GRPC_INPROC_SERVER_MODE='{{ data_pipeline_rda_grpc_inproc_server_mode }}'
-export RDA_GRPC_INPROC_SERVER_S3_REGION='{{ data_pipeline_rda_grpc_inproc_server_s3_region }}'
-export RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ data_pipeline_rda_grpc_inproc_server_s3_bucket }}'
-export RDA_GRPC_INPROC_SERVER_S3_DIRECTORY='{{ data_pipeline_rda_grpc_inproc_server_s3_directory }}'
+export BFD_RDA_GRPC_HOST='{{ data_pipeline_rda_grpc_host }}'
+export BFD_RDA_GRPC_PORT='{{ data_pipeline_rda_grpc_port }}'
+export BFD_RDA_GRPC_MAX_IDLE_SECONDS='{{ data_pipeline_rda_grpc_max_idle_seconds }}'
+export BFD_RDA_GRPC_AUTH_TOKEN='{{ data_pipeline_rda_grpc_auth_token }}'
+export BFD_RDA_GRPC_SERVER_TYPE='{{ data_pipeline_rda_grpc_server_type }}'
+export BFD_RDA_GRPC_INPROCESS_SERVER_MODE='{{ data_pipeline_rda_grpc_inproc_server_mode }}'
+export BFD_RDA_GRPC_INPROCESS_SERVER_S3_REGION='{{ data_pipeline_rda_grpc_inproc_server_s3_region }}'
+export BFD_RDA_GRPC_INPROCESS_SERVER_S3_BUCKET='{{ data_pipeline_rda_grpc_inproc_server_s3_bucket }}'
+export BFD_RDA_GRPC_INPROCESS_SERVER_S3_DIR='{{ data_pipeline_rda_grpc_inproc_server_s3_directory }}'
 
 # Referenced by the pipeline's logback.xml file to add environment name for use in splunk.
 export BFD_ENV_NAME='{{ env_name_std }}'
