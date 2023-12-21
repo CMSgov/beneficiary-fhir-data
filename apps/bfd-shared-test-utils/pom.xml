@@ -90,10 +90,6 @@
             <version>${testcontainers.version}</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
