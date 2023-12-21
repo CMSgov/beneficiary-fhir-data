@@ -9,12 +9,12 @@ export BFD_PATHS_FILES_WAR="$(find {{ data_server_dir }} -type f -name 'bfd-serv
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
 LOGS_DIR='{{ data_server_dir }}/'
-BFD_DB_URL='{{ data_server_db_url }}'
-BFD_DB_USERNAME='{{ data_server_db_username }}'
-BFD_DB_PASSWORD='{{ data_server_db_password }}'
-BFD_DB_MAX_CONNECTIONS='{{ data_server_db_connections_max }}'
-BFD_PAC_ENABLED='{{ pac_resources_enabled }}'
-BFD_PAC_CLAIM_SOURCE_TYPES='{{ pac_claim_source_types }}'
+export BFD_DB_URL='{{ data_server_db_url }}'
+export BFD_DB_USERNAME='{{ data_server_db_username }}'
+export BFD_DB_PASSWORD='{{ data_server_db_password }}'
+export BFD_DB_MAX_CONNECTIONS='{{ data_server_db_connections_max }}'
+export BFD_PAC_ENABLED='{{ pac_resources_enabled }}'
+export BFD_PAC_CLAIM_SOURCE_TYPES='{{ pac_claim_source_types }}'
 
 # The New Relic agent running in the WAR needs some additional environment variables, so set those.
 {% if data_server_new_relic_license_key is defined %}
