@@ -7,7 +7,7 @@ import sys
 from base64 import decodebytes
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum, auto
 from typing import Any
 from urllib.parse import unquote
 
@@ -60,6 +60,12 @@ class S3EventType(str, Enum):
     event"""
 
     OBJECT_CREATED = "ObjectCreated"
+
+
+class FileTransferError(StrEnum):
+    UNRECOGNIZED_FILE = auto()
+    SFTP_CONNECTION_ERROR = auto()
+    SFTP_TRANSFER_ERROR = auto()
 
 
 @dataclass(frozen=True, eq=True)
@@ -131,6 +137,18 @@ def get_ssm_parameter(name: str, with_decrypt: bool = False) -> str:
         return response["Parameter"]["Value"]
     except KeyError as exc:
         raise ValueError(f'SSM parameter "{name}" not found or empty') from exc
+
+
+def move_s3_object(object_key: str, destination: str) -> None:
+    try:
+        s3_resource.meta.client.copy(
+            CopySource={"Bucket": eft_bucket.name, "Key": object_key},
+            Bucket=eft_bucket.name,
+            Key=destination,
+        )
+        eft_bucket.Object(object_key).delete()
+    except botocore.exceptions.ClientError as exc:
+        raise RuntimeError(f"Unable to copy or delete {object_key}") from exc
 
 
 def handler(event: Any, context: Any):
@@ -256,13 +274,28 @@ def handler(event: Any, context: Any):
             str(partner_config.recognized_files),
             partner,
         )
+        failed_full_path = "/".join(
+            [
+                partner_config.failed_files_full_path,
+                FileTransferError.UNRECOGNIZED_FILE,
+                filename,
+            ]
+        )
         logger.error(
             'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
             decoded_file_key,
-            partner_config.failed_files_full_path,
+            failed_full_path,
             BUCKET,
         )
-        # TODO: Move the file to the appropriate subdirectory in S3
+
+        try:
+            move_s3_object(object_key=decoded_file_key, destination=failed_full_path)
+        except RuntimeError:
+            logger.error(
+                "Unrecoverable error occurred when attempting to move %s to %s",
+                decoded_file_key,
+                failed_full_path,
+            )
         return
 
     logger.info(
@@ -306,14 +339,28 @@ def handler(event: Any, context: Any):
                 SFTP_DEST_HOST,
                 exc_info=True,
             )
+            failed_full_path = "/".join(
+                [
+                    partner_config.failed_files_full_path,
+                    FileTransferError.SFTP_CONNECTION_ERROR,
+                    filename,
+                ]
+            )
             logger.error(
                 'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
                 decoded_file_key,
-                partner_config.failed_files_full_path,
+                failed_full_path,
                 BUCKET,
             )
 
-            # TODO: Move file to failed directory
+            try:
+                move_s3_object(object_key=decoded_file_key, destination=failed_full_path)
+            except RuntimeError:
+                logger.error(
+                    "Unrecoverable error occurred when attempting to move %s to %s",
+                    decoded_file_key,
+                    failed_full_path,
+                )
             return
 
         logger.info(
@@ -336,14 +383,28 @@ def handler(event: Any, context: Any):
                 SFTP_DEST_HOST,
                 exc_info=True,
             )
+            failed_full_path = "/".join(
+                [
+                    partner_config.failed_files_full_path,
+                    FileTransferError.SFTP_TRANSFER_ERROR,
+                    filename,
+                ]
+            )
             logger.error(
                 'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
                 decoded_file_key,
-                partner_config.failed_files_full_path,
+                failed_full_path,
                 BUCKET,
             )
 
-            # TODO: Move file to failed directory
+            try:
+                move_s3_object(object_key=decoded_file_key, destination=failed_full_path)
+            except RuntimeError:
+                logger.error(
+                    "Unrecoverable error occurred when attempting to move %s to %s",
+                    decoded_file_key,
+                    failed_full_path,
+                )
             return
 
         logger.info(
@@ -352,10 +413,19 @@ def handler(event: Any, context: Any):
             destination_folder,
             SFTP_DEST_HOST,
         )
-        logger.error(
+        success_full_path = f"{partner_config.sent_files_full_path}/{filename}"
+        logger.info(
             'The file "%s" will be moved to %s in the %s bucket to indicate that the file was'
             " successfully uploaded",
             decoded_file_key,
-            partner_config.sent_files_full_path,
+            success_full_path,
             BUCKET,
         )
+        try:
+            move_s3_object(object_key=decoded_file_key, destination=success_full_path)
+        except RuntimeError:
+            logger.error(
+                "Unrecoverable error occurred when attempting to move %s to %s",
+                decoded_file_key,
+                success_full_path,
+            )
