@@ -3,7 +3,7 @@
 @Library('bfd@bfd-3119-handle-spaces-in-pipeline-job-name-values')
 
 /** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
-STATUS_FINISHED = "Finished"
+def STATUS_FINISHED = "Finished"
 
 String getFormattedMonitorMsg(String msg) {
     return "[Migrator monitor]: ${msg}"
@@ -70,7 +70,7 @@ boolean deployMigrator(Map args = [:]) {
             parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
             parameterValue: finalMigratorStatus[1],
             parameterType: "String",
-            parameterTags: ["Environment": ${bfdEnv}, "stack": ${bfdEnv}],
+            parameterTags: ["Environment": bfdEnv, "stack": bfdEnv],
             shouldOverwrite: true
         )
 
