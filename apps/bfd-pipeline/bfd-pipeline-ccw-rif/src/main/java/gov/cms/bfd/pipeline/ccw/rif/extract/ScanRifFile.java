@@ -41,16 +41,6 @@ public class ScanRifFile {
     RifFileRecords parquetRecords =
         new RifFilesProcessor().produceRecords(parquetEvent.getFileEvents().getFirst());
 
-    System.out.println(new Date() + ": reading csv claims...");
-    csvRecords
-        .getRecords()
-        .doOnNext(
-            record -> {
-              HHAClaim claim = (HHAClaim) record.getRecord();
-              csvClaims.put(claim.getClaimId(), claim);
-            })
-        .count()
-        .block();
     System.out.println(new Date() + ": reading parquet claims...");
     parquetRecords
         .getRecords()
@@ -58,6 +48,16 @@ public class ScanRifFile {
             record -> {
               HHAClaim claim = (HHAClaim) record.getRecord();
               parquetClaims.put(claim.getClaimId(), claim);
+            })
+        .count()
+        .block();
+    System.out.println(new Date() + ": reading csv claims...");
+    csvRecords
+        .getRecords()
+        .doOnNext(
+            record -> {
+              HHAClaim claim = (HHAClaim) record.getRecord();
+              csvClaims.put(claim.getClaimId(), claim);
             })
         .count()
         .block();
