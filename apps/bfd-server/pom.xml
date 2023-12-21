@@ -94,10 +94,6 @@
             <artifactId>bfd-data-npi</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>annotations-api</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
