@@ -375,6 +375,17 @@ def handler(event: Any, context: Any):
 
         try:
             with ssh_client.open_sftp() as sftp_client:
+                current_dir = ""
+                for dir_part in destination_folder.split("/"):
+                    if not dir_part:
+                        continue
+                    current_dir += f"/{dir_part}"
+                    try:
+                        sftp_client.listdir(current_dir)
+                    except IOError:
+                        logger.info("%s does not exist, creating it", current_dir)
+                        sftp_client.mkdir(current_dir)
+
                 with sftp_client.open(f"{destination_folder}/{filename}", "wb", 32768) as f:
                     s3_client.download_fileobj(Bucket=BUCKET, Key=decoded_file_key, Fileobj=f)  # type: ignore
         except (SSHException, IOError, botocore.exceptions.ClientError):
