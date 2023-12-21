@@ -34,9 +34,9 @@ resource "aws_quicksight_user" "quicksight_user" {
 
   email         = sensitive(each.value["email"])
   identity_type = each.value["identity_type"]
+  iam_arn       = each.value["identity_type"] == "IAM" ? "arn:aws:iam::${local.account_id}:user/${each.value["iam"]}" : null
   user_role     = upper(each.value["user_role"])
-  iam_arn       = each.value["identity_type"] == "IAM" ? "arn:aws:quicksight:us-east-1:${local.account_id}:user/default/${each.value["iam"]}" : null
-  user_name     = each.value["identity_type"] == "QUICKSIGHT" ? sensitive(each.value["email"]) : null
+  user_name     = each.value["identity_type"] == "QUICKSIGHT" ? sensitive(each.value["email"]) : each.value["iam"]
 }
 
 # On deletion, transfer ownership of assets (for which this user is the sole owner) to the principal admin as defined
