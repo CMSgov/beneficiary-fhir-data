@@ -4,10 +4,11 @@ import os
 import re
 import socket
 import sys
-from base64 import decodebytes
+from base64 import b64decode, decodebytes
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, StrEnum, auto
+from io import StringIO
 from typing import Any
 from urllib.parse import unquote
 
@@ -43,8 +44,7 @@ BOTO_CONFIG = Config(
 logging.basicConfig(level=logging.INFO, force=True)
 logger = logging.getLogger()
 try:
-    s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
-    eft_bucket = s3_resource.Bucket(BUCKET)  # type: ignore
+    s3_client = boto3.client("s3", config=BOTO_CONFIG)  # type: ignore
     ssm_client = boto3.client("ssm", config=BOTO_CONFIG)  # type: ignore
 except Exception:
     logger.error(
@@ -97,12 +97,15 @@ class PartnerSsmConfig:
         failed_files_dir = get_ssm_parameter(
             f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/failed_dir", with_decrypt=True
         )
-        recognized_files: list[RecognizedFile] = json.loads(
-            get_ssm_parameter(
-                f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/recognized_files_json",
-                with_decrypt=True,
+        recognized_files = [
+            RecognizedFile(**file_dict)
+            for file_dict in json.loads(
+                get_ssm_parameter(
+                    f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/recognized_files_json",
+                    with_decrypt=True,
+                )
             )
-        )
+        ]
 
         return PartnerSsmConfig(
             partner=partner,
@@ -115,7 +118,7 @@ class PartnerSsmConfig:
 
     @property
     def bucket_home_path(self):
-        return f"{self.partner}/{self.bucket_home_dir}"
+        return f"{BUCKET_ROOT_DIR}/{self.bucket_home_dir}"
 
     @property
     def pending_files_full_path(self):
@@ -141,12 +144,12 @@ def get_ssm_parameter(name: str, with_decrypt: bool = False) -> str:
 
 def move_s3_object(object_key: str, destination: str) -> None:
     try:
-        s3_resource.meta.client.copy(
-            CopySource={"Bucket": eft_bucket.name, "Key": object_key},
-            Bucket=eft_bucket.name,
+        s3_client.copy(
+            CopySource={"Bucket": BUCKET, "Key": object_key},
+            Bucket=BUCKET,
             Key=destination,
         )
-        eft_bucket.Object(object_key).delete()
+        s3_client.delete_object(Bucket=BUCKET, Key=object_key)
     except botocore.exceptions.ClientError as exc:
         raise RuntimeError(f"Unable to copy or delete {object_key}") from exc
 
@@ -221,7 +224,7 @@ def handler(event: Any, context: Any):
     logger.info("S3 Object Key: %s", decoded_file_key)
     logger.info("S3 Event Type: %s, Specific Event Name: %s", event_type.name, event_type_str)
 
-    object_key_pattern = rf"^{BUCKET_ROOT_DIR}/([\w_]+)/([\w_]+)/(.*\..*)$"
+    object_key_pattern = rf"^{BUCKET_ROOT_DIR}/([\w_]+)/([\w_]+)/(.*)$"
     match = re.search(
         pattern=object_key_pattern,
         string=decoded_file_key,
@@ -235,9 +238,9 @@ def handler(event: Any, context: Any):
         )
         return
 
-    partner = match.group(0)
-    subfolder = match.group(1)
-    filename = match.group(2)
+    partner = match.group(1)
+    subfolder = match.group(2)
+    filename = match.group(3)
 
     try:
         partner_config = PartnerSsmConfig.from_partner(partner=partner)
@@ -295,6 +298,7 @@ def handler(event: Any, context: Any):
                 "Unrecoverable error occurred when attempting to move %s to %s",
                 decoded_file_key,
                 failed_full_path,
+                exc_info=True,
             )
         return
 
@@ -305,28 +309,26 @@ def handler(event: Any, context: Any):
         SFTP_DEST_USER,
     )
 
-    try:
-        sftp_host_key = paramiko.RSAKey(data=decodebytes(SFTP_DEST_HOST_KEY_B64.encode()))
-    except paramiko.SSHException:
-        logger.error(
-            "An unrecoverable error occurred when trying to read the SFTP server host key: ",
-            exc_info=True,
-        )
-        return
-
-    try:
-        sftp_priv_key = paramiko.RSAKey(data=decodebytes(SFTP_DEST_PRIV_KEY_B64.encode()))
-    except paramiko.SSHException:
-        logger.error(
-            "An unrecoverable error occurred when trying to read the SFTP private key: ",
-            exc_info=True,
-        )
-        return
-
     with paramiko.SSHClient() as ssh_client:
         try:
-            ssh_client.get_host_keys().add(SFTP_DEST_HOST, "ssh-rsa", sftp_host_key)
-            ssh_client.connect(SFTP_DEST_HOST, username=SFTP_DEST_USER, pkey=sftp_priv_key)
+            sftp_host_key = paramiko.RSAKey(
+                data=decodebytes(
+                    b64decode(SFTP_DEST_HOST_KEY_B64).removeprefix("ssh-rsa ".encode())
+                )
+            )
+            sftp_priv_key = paramiko.RSAKey.from_private_key(
+                StringIO(b64decode(SFTP_DEST_PRIV_KEY_B64).decode("unicode_escape"))
+            )
+            ssh_client.get_host_keys().add(
+                hostname=SFTP_DEST_HOST, keytype="ssh-rsa", key=sftp_host_key
+            )
+            ssh_client.connect(
+                SFTP_DEST_HOST,
+                username=SFTP_DEST_USER,
+                pkey=sftp_priv_key,
+                look_for_keys=False,
+                allow_agent=False,
+            )
         except (
             BadHostKeyException,
             AuthenticationException,
@@ -372,8 +374,8 @@ def handler(event: Any, context: Any):
 
         try:
             with ssh_client.open_sftp() as sftp_client:
-                with sftp_client.open(f"{destination_folder}/{filename}", "w+", 32768) as f:
-                    eft_bucket.download_fileobj(Key=decoded_file_key, Fileobj=f)  # type: ignore
+                with sftp_client.open(f"{destination_folder}/{filename}", "wb", 32768) as f:
+                    s3_client.download_fileobj(Bucket=BUCKET, Key=decoded_file_key, Fileobj=f)  # type: ignore
         except (SSHException, IOError, botocore.exceptions.ClientError):
             logger.error(
                 "An unrecoverable exception occurred when attempting to upload %s via SFTP to %s on"
