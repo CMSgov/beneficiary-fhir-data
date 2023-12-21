@@ -106,9 +106,6 @@ locals {
             trim(local.ssm_config["/${partner}/${local.service}/outbound/failed_dir"], "/")
           ]
         ),
-        recognized_files = jsondecode(
-          lookup(local.ssm_config, "/${partner}/${local.service}/outbound/recognized_files_json", "[]")
-        ),
         s3_notifications = {
           pending_file_targets = jsondecode(
             lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/pending_file_targets_json", "[]")
