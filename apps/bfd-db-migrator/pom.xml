@@ -105,13 +105,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <!-- HSQL is used in this project's integration tests, which means it
-                needs to be baked into the JAR. -->
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <!-- Used in tests to help with managing asynchronous behavior. Reference:
                 https://github.com/awaitility/awaitility -->
             <groupId>org.awaitility</groupId>

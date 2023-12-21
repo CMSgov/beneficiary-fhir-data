@@ -150,8 +150,9 @@ public class OpenApiDocs {
     var dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     String resolvedDbUrl = ((PGSimpleDataSource) dataSource).getUrl();
 
-    boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, TEST_CONTAINER_DATABASE_USERNAME,
-                                                       TEST_CONTAINER_DATABASE_PASSWORD);
+    boolean startedServer =
+        ServerExecutor.startServer(
+            resolvedDbUrl, TEST_CONTAINER_DATABASE_USERNAME, TEST_CONTAINER_DATABASE_PASSWORD);
     if (startedServer) {
       baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
       setRequestAuth();

@@ -2,6 +2,8 @@ package gov.cms.bfd;
 
 import static java.util.Collections.singletonMap;
 
+import com.codahale.metrics.MetricRegistry;
+import com.zaxxer.hikari.HikariDataSource;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -41,10 +43,8 @@ public final class DatabaseTestUtils {
   /**
    * We need to inform Flyway of all of our schemas in order for {@link Flyway#clean()} to work
    * properly.
-   *
-   * <p>PUBLIC for hsql and public for postgres since they differ in caps sensitivity.
    */
-  public static final List<String> FLYWAY_CLEAN_SCHEMAS = List.of("public", "PUBLIC", "rda", "RDA");
+  public static final List<String> FLYWAY_CLEAN_SCHEMAS = List.of("public", "rda");
 
   /** The default database type to use for the integration tests when nothing is provided. */
   public static final String DEFAULT_IT_DATABASE = "jdbc:bfd-test:tc";
@@ -279,6 +279,51 @@ public final class DatabaseTestUtils {
   }
 
   /**
+   * Initiates a pooled Test Container PostgreSQL {@link DataSource} for the test DB.
+   *
+   * @param maxPoolSize the max pool size
+   * @param metrics the metrics
+   * @return a PostgreSQL {@link DataSource} for the test DB
+   */
+  public static HikariDataSource createPooledTestContainerDataSourceForTestContainerWithPostgres(
+      int maxPoolSize, MetricRegistry metrics) {
+
+    String testContainerDatabaseImage =
+        System.getProperty(
+            TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
+    LOGGER.debug("Starting container, using image {}", testContainerDatabaseImage);
+    container =
+        new PostgreSQLContainer(testContainerDatabaseImage)
+            .withDatabaseName("fhirdb")
+            .withUsername(DatabaseTestUtils.TEST_CONTAINER_DATABASE_USERNAME)
+            .withPassword(DatabaseTestUtils.TEST_CONTAINER_DATABASE_PASSWORD)
+            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"))
+            .waitingFor(Wait.forListeningPort());
+    container.start();
+
+    LOGGER.debug("Container started, running migrations...");
+    JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
+    HikariDataSource pooledDataSource = new HikariDataSource();
+    Properties dataSourceProperties = new Properties();
+    dataSourceProperties.setProperty("stringtype", "unspecified");
+    pooledDataSource.setDataSourceProperties(dataSourceProperties);
+    pooledDataSource.setJdbcUrl(jdbcContainer.getJdbcUrl());
+    pooledDataSource.setUsername(jdbcContainer.getUsername());
+    pooledDataSource.setPassword(jdbcContainer.getPassword());
+    pooledDataSource.setMaximumPoolSize(maxPoolSize);
+    pooledDataSource.setRegisterMbeans(true);
+    pooledDataSource.setMetricRegistry(metrics);
+
+    boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(pooledDataSource);
+    if (!migrationSuccess) {
+      throw new RuntimeException("Schema migration failed during test setup");
+    }
+
+    LOGGER.debug("Ran migrations on container.");
+    return pooledDataSource;
+  }
+
+  /**
    * Gets the cached and shared unpooled {@link DataSource} for the database to test against (as
    * specified by the <code>its.db.*</code> system properties, see {@link #initUnpooledDataSource()
    * for details}).
@@ -292,10 +337,7 @@ public final class DatabaseTestUtils {
   }
 
   /**
-   * Drops all schemas in the {@link #getUnpooledDataSource()} database. Please note that this
-   * operation appears to not be transactional for HSQL DB: unless <strong>all</strong> connections
-   * are closed and re-opened, they may end up with an inconsistent view of the database after this
-   * operation.
+   * Drops all schemas in the {@link #getUnpooledDataSource()} database.
    *
    * @return if the database was successfully cleaned
    */
@@ -308,7 +350,7 @@ public final class DatabaseTestUtils {
       LOGGER.error("SQL Exception when cleaning DB: ", e);
       return false;
     }
-    if (!url.contains("localhost") && !url.contains("127.0.0.1") && !url.contains("hsqldb:mem")) {
+    if (!url.contains("localhost") && !url.contains("127.0.0.1")) {
       LOGGER.error("Our builds can only be run against local test DBs.");
       return false;
     }

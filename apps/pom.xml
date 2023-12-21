@@ -535,13 +535,6 @@
                 <version>${postgresql.version}</version>
             </dependency>
             <dependency>
-                <!-- In-memory database that is used in some tests to speed things up. -->
-                <groupId>org.hsqldb</groupId>
-                <artifactId>hsqldb</artifactId>
-                <version>${hsqldb.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                     for details. -->
                 <groupId>com.zaxxer</groupId>

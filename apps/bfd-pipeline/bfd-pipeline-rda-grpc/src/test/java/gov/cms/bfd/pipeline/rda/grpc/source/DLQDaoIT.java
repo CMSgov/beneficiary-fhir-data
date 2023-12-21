@@ -60,7 +60,6 @@ public class DLQDaoIT {
     final var allRecords = List.of(record1, record2, record3);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        DLQDaoIT.class,
         clock,
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
@@ -100,7 +99,6 @@ public class DLQDaoIT {
     final var expectedMatches = List.of(match1, match2);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        DLQDaoIT.class,
         clock,
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
@@ -150,7 +148,6 @@ public class DLQDaoIT {
         List.of(updatedRecord, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        DLQDaoIT.class,
         clock,
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
@@ -227,7 +224,6 @@ public class DLQDaoIT {
             validUnresolved);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        DLQDaoIT.class,
         clock,
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
@@ -274,8 +270,8 @@ public class DLQDaoIT {
         .sequenceNumber(sequenceNumber)
         .claimId(claimId)
         .status(status)
-        .errors("")
-        .message("")
+        .errors("{}")
+        .message("{}")
         .build();
   }
 }

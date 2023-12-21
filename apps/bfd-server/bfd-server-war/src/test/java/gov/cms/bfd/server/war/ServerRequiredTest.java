@@ -51,7 +51,7 @@ public class ServerRequiredTest {
     if (!ServerExecutor.isRunning()) {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(DB_URL),
-          "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise) OR an in-memory hsql db.");
+          "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise).");
       // Initialize/get the database/datasource, so we can just pass a connection string to the
       // server
       dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
