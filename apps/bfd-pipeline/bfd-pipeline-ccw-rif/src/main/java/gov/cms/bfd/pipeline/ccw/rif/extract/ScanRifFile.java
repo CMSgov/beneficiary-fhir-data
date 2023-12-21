@@ -15,6 +15,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import reactor.core.publisher.Flux;
@@ -27,6 +29,9 @@ public class ScanRifFile {
       System.exit(1);
     }
 
+    Map<Long, HHAClaim> csvClaims = new HashMap<>();
+    Map<Long, HHAClaim> parquetClaims = new HashMap<>();
+
     RifFile csvFile = new LocalRifFile(new File(args[0]), RifFileType.HHA);
     RifFile parquetFile = new LocalRifFile(new File(args[1]), RifFileType.HHA);
     RifFilesEvent csvEvent = new RifFilesEvent(Instant.now(), false, csvFile);
@@ -36,45 +41,95 @@ public class ScanRifFile {
         new RifFilesProcessor().produceRecords(csvEvent.getFileEvents().getFirst());
     RifFileRecords parquetRecords =
         new RifFilesProcessor().produceRecords(parquetEvent.getFileEvents().getFirst());
-    var recordNumber = new AtomicLong();
-    Mono<Boolean> equals =
-        Flux.zip(
-                csvRecords.getRecords(),
-                parquetRecords.getRecords(),
-                (csvRecord, parquetRecord) -> {
-                  recordNumber.incrementAndGet();
-                  if (recordNumber.get() % 1000 == 0) {
-                    System.out.printf("processed %d so far...%n", recordNumber.get());
-                  }
-                  HHAClaim csvClaim = (HHAClaim) csvRecord.getRecord();
-                  HHAClaim parquetClaim = (HHAClaim) csvRecord.getRecord();
-                  if (csvClaim.getBeneficiaryId() != parquetClaim.getBeneficiaryId()) {
-                    System.out.printf(
-                        "bene_id mismatch: %s != %s%n",
-                        csvClaim.getBeneficiaryId(), parquetClaim.getBeneficiaryId());
-                    return false;
-                  }
-                  if (csvClaim.getClaimId() != parquetClaim.getClaimId()) {
-                    System.out.printf(
-                        "claim_id mismatch: %s != %s%n",
-                        csvClaim.getClaimId(), parquetClaim.getClaimId());
-                    return false;
-                  }
-                  if (csvClaim.getLines().size() != parquetClaim.getLines().size()) {
-                    System.out.printf(
-                        "line count mismatch: %s != %s%n",
-                        csvClaim.getLines().size(), parquetClaim.getLines().size());
-                    return false;
-                  }
-                  if (!EqualsBuilder.reflectionEquals(csvClaim, parquetClaim)) {
-                    System.out.println("reflection equals returned false");
-                    return false;
-                  }
+    System.out.println("reading csv claims...");
+    csvRecords
+        .getRecords()
+        .doOnNext(
+            record -> {
+              HHAClaim claim = (HHAClaim) record.getRecord();
+              csvClaims.put(claim.getClaimId(), claim);
+            })
+        .count()
+        .block();
+    System.out.println("reading parquet claims...");
+    parquetRecords
+        .getRecords()
+        .doOnNext(
+            record -> {
+              HHAClaim claim = (HHAClaim) record.getRecord();
+              parquetClaims.put(claim.getClaimId(), claim);
+            })
+        .count()
+        .block();
+    System.out.println("comparing sizes...");
+    if (csvClaims.size() != parquetClaims.size()) {
+      System.out.printf("size mismatch: %s != %s%n", csvClaims.size(), parquetClaims.size());
+      return;
+    }
+    System.out.println("comparing claims...");
+    for (HHAClaim parquetClaim : parquetClaims.values()) {
+      HHAClaim csvClaim = csvClaims.get(parquetClaim.getClaimId());
+      if (csvClaim == null) {
+        System.out.printf("no match for claimId %s%n", parquetClaim.getClaimId());
+        return;
+      }
+      if (!EqualsBuilder.reflectionEquals(csvClaim, parquetClaim, false, null, false, "lines")) {
+        System.out.printf(
+            "reflection equals returned false for claimId %s%n", parquetClaim.getClaimId());
+        return;
+      }
+    }
+    System.out.printf("All claims were equal: count=%d%n", parquetClaims.size());
+  }
 
-                  return true;
-                })
-            .all(x -> x);
-    System.out.printf("Final result is %s even using reflection equals!%n", equals.blockOptional());
+  private Mono<Boolean> compareFilesDirectly(RifFile csvFile, RifFile parquetFile) {
+    RifFilesEvent csvEvent = new RifFilesEvent(Instant.now(), false, csvFile);
+    RifFilesEvent parquetEvent = new RifFilesEvent(Instant.now(), false, parquetFile);
+    new RifFileEvent(parquetEvent, parquetFile);
+    RifFileRecords csvRecords =
+        new RifFilesProcessor().produceRecords(csvEvent.getFileEvents().getFirst());
+    RifFileRecords parquetRecords =
+        new RifFilesProcessor().produceRecords(parquetEvent.getFileEvents().getFirst());
+    var recordNumber = new AtomicLong();
+    return Flux.zip(
+            csvRecords.getRecords(),
+            parquetRecords.getRecords(),
+            (csvRecord, parquetRecord) -> {
+              recordNumber.incrementAndGet();
+              if (recordNumber.get() % 1000 == 0) {
+                System.out.printf("processed %d so far...%n", recordNumber.get());
+              }
+              HHAClaim csvClaim = (HHAClaim) csvRecord.getRecord();
+              HHAClaim parquetClaim = (HHAClaim) parquetRecord.getRecord();
+              if (csvClaim.getBeneficiaryId() != parquetClaim.getBeneficiaryId()) {
+                System.out.printf(
+                    "record %d bene_id mismatch: %s != %s%n",
+                    recordNumber.get(),
+                    csvClaim.getBeneficiaryId(),
+                    parquetClaim.getBeneficiaryId());
+                return false;
+              }
+              if (csvClaim.getClaimId() != parquetClaim.getClaimId()) {
+                System.out.printf(
+                    "record %d claim_id mismatch: %s != %s%n",
+                    recordNumber.get(), csvClaim.getClaimId(), parquetClaim.getClaimId());
+                return false;
+              }
+              if (csvClaim.getLines().size() != parquetClaim.getLines().size()) {
+                System.out.printf(
+                    "record %d line count mismatch: %s != %s%n",
+                    recordNumber.get(), csvClaim.getLines().size(), parquetClaim.getLines().size());
+                return false;
+              }
+              if (!EqualsBuilder.reflectionEquals(csvClaim, parquetClaim)) {
+                System.out.printf(
+                    "record %d reflection equals returned false%n", recordNumber.get());
+                return false;
+              }
+
+              return true;
+            })
+        .all(x -> x);
   }
 
   public static class LocalRifFile implements RifFile {

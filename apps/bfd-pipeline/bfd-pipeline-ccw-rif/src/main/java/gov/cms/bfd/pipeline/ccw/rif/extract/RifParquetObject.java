@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract;
 
+import com.google.common.base.Strings;
 import gov.cms.model.dsl.codegen.library.RifObject;
 import java.util.Iterator;
 import java.util.List;
@@ -18,7 +19,7 @@ public class RifParquetObject implements RifObject {
   @Nullable
   @Override
   public String get(String key) {
-    return group.getString(key, 0);
+    return Strings.nullToEmpty(group.getString(key, 0));
   }
 
   @Override
