@@ -671,7 +671,7 @@ resource "aws_transfer_user" "eft_user" {
 
   home_directory_mappings {
     entry  = "/"
-    target = "/${aws_s3_bucket.this.id}/${local.eft_user_username}"
+    target = "/${aws_s3_bucket.this.id}/${local.eft_s3_sftp_home_folder}"
   }
 }
 

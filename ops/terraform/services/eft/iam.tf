@@ -93,7 +93,7 @@ resource "aws_iam_policy" "eft_user" {
             "s3:GetObjectACL",
             "s3:PutObjectACL"
           ]
-          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_user_username}*"]
+          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_s3_sftp_home_folder}*"]
         }
       ]
     }
