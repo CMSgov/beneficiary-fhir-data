@@ -161,7 +161,6 @@ mvn deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::default::https://bfd-mg
                                     parameterName: "/bfd/mgmt/versioning/nonsensitive/bfd-data-npi-sha256",
                                     parameterValue: "${npiOrgNameSha256}",
                                     parameterType: "String",
-                                    parameterTags: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda",
                                     shouldOverwrite: true
                                 )
                             }
