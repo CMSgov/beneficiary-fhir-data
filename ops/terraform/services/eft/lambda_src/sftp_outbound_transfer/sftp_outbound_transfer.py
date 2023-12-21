@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import sys
 from dataclasses import dataclass
 from datetime import datetime
@@ -9,6 +10,8 @@ from typing import Any
 from urllib.parse import unquote
 
 import boto3
+import botocore
+import botocore.exceptions
 from botocore.config import Config
 
 
@@ -18,6 +21,77 @@ class S3EventType(str, Enum):
     event"""
 
     OBJECT_CREATED = "ObjectCreated"
+
+
+@dataclass(frozen=True, eq=True)
+class RecognizedFile:
+    filename_pattern: str
+    destination_folder: str
+
+
+@dataclass(frozen=True, eq=True)
+class PartnerSsmConfig:
+    partner: str
+    bucket_home_dir: str
+    pending_files_dir: str
+    sent_files_dir: str
+    failed_files_dir: str
+    recognized_files: list[RecognizedFile]
+
+    @classmethod
+    def from_partner(cls, partner: str) -> "PartnerSsmConfig":
+        bucket_home_dir = get_ssm_parameter(
+            f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/bucket_home_dir", with_decrypt=True
+        )
+        pending_files_dir = get_ssm_parameter(
+            f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/pending_dir", with_decrypt=True
+        )
+        sent_files_dir = get_ssm_parameter(
+            f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sent_dir", with_decrypt=True
+        )
+        failed_files_dir = get_ssm_parameter(
+            f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/failed_dir", with_decrypt=True
+        )
+        recognized_files: list[RecognizedFile] = json.loads(
+            get_ssm_parameter(
+                f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/recognized_files_json",
+                with_decrypt=True,
+            )
+        )
+
+        return PartnerSsmConfig(
+            partner=partner,
+            bucket_home_dir=bucket_home_dir,
+            pending_files_dir=pending_files_dir,
+            sent_files_dir=sent_files_dir,
+            failed_files_dir=failed_files_dir,
+            recognized_files=recognized_files,
+        )
+
+    @property
+    def bucket_home_path(self):
+        return f"{self.partner}/{self.bucket_home_dir}"
+
+    @property
+    def pending_files_full_path(self):
+        return f"{self.bucket_home_path}/{self.pending_files_dir}"
+
+    @property
+    def sent_files_full_path(self):
+        return f"{self.bucket_home_path}/{self.sent_files_dir}"
+
+    @property
+    def failed_files_full_path(self):
+        return f"{self.bucket_home_path}/{self.failed_files_dir}"
+
+
+def get_ssm_parameter(name: str, with_decrypt: bool = False) -> str:
+    response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
+
+    try:
+        return response["Parameter"]["Value"]
+    except KeyError as exc:
+        raise ValueError(f'SSM parameter "{name}" not found or empty') from exc
 
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
@@ -38,6 +112,7 @@ logger = logging.getLogger()
 try:
     s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
     etl_bucket = s3_resource.Bucket(BFD_EFT_BUCKET)  # type: ignore
+    ssm_client = boto3.client("ssm", config=BOTO_CONFIG)  # type: ignore
 except Exception:
     logger.error(
         "Unrecoverable exception occurred when attempting to create boto3 clients/resources: ",
@@ -104,3 +179,41 @@ def handler(event: Any, context: Any):
     logger.info("Invoked at: %s UTC", datetime.utcnow().isoformat())
     logger.info("S3 Object Key: %s", decoded_file_key)
     logger.info("S3 Event Type: %s, Specific Event Name: %s", event_type.name, event_type_str)
+
+    object_key_pattern = rf"^{BFD_EFT_SFTP_HOME_DIR}/([\w_]+)/([\w_]+)/(.*\..*)$"
+    match = re.search(
+        pattern=object_key_pattern,
+        string=decoded_file_key,
+        flags=re.IGNORECASE,
+    )
+    if match is None:
+        logger.error(
+            "Invocation event unsupported, object key does not match expected pattern: %s. See log"
+            " for additional detail. Exiting...",
+            object_key_pattern,
+        )
+        return
+
+    partner = match.group(0)
+    subfolder = match.group(1)
+    filename = match.group(2)
+
+    try:
+        partner_config = PartnerSsmConfig.from_partner(partner=partner)
+    except (ValueError, botocore.exceptions.ClientError):
+        logger.error(
+            "An unrecoverable error occurred when attempting to retrieve SSM configuration for"
+            " partner %s: ",
+            partner,
+            exc_info=True,
+        )
+        return
+
+    if subfolder != partner_config.pending_files_dir:
+        logger.error(
+            "%s pending files directory, %s, does not match object key: %s, exiting...",
+            partner,
+            partner_config.pending_files_dir,
+            decoded_file_key,
+        )
+        return
