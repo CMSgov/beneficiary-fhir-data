@@ -362,6 +362,7 @@ def handler(event: Any, context: Any):
                     "Unrecoverable error occurred when attempting to move %s to %s",
                     decoded_file_key,
                     failed_full_path,
+                    exc_info=True,
                 )
             return
 
@@ -406,6 +407,7 @@ def handler(event: Any, context: Any):
                     "Unrecoverable error occurred when attempting to move %s to %s",
                     decoded_file_key,
                     failed_full_path,
+                    exc_info=True,
                 )
             return
 
@@ -430,4 +432,5 @@ def handler(event: Any, context: Any):
                 "Unrecoverable error occurred when attempting to move %s to %s",
                 decoded_file_key,
                 success_full_path,
+                exc_info=True,
             )
