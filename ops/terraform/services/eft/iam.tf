@@ -79,7 +79,15 @@ resource "aws_iam_policy" "eft_user" {
             "s3:GetBucketLocation",
           ]
           Effect   = "Allow"
-          Resource = [aws_s3_bucket.this.arn],
+          Resource = [aws_s3_bucket.this.arn]
+          Condition = {
+            StringLike = {
+              "s3:prefix" = [
+                "${local.eft_s3_sftp_home_folder}/*",
+                local.eft_s3_sftp_home_folder
+              ]
+            }
+          }
         },
         {
           Sid    = "HomeDirObjectAccess"
@@ -93,7 +101,7 @@ resource "aws_iam_policy" "eft_user" {
             "s3:GetObjectACL",
             "s3:PutObjectACL"
           ]
-          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_s3_sftp_home_folder}/*"]
+          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_s3_sftp_home_folder}*"]
         }
       ]
     }
