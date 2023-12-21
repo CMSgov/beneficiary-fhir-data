@@ -2,7 +2,9 @@ import json
 import logging
 import os
 import re
+import socket
 import sys
+from base64 import decodebytes
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -12,7 +14,44 @@ from urllib.parse import unquote
 import boto3
 import botocore
 import botocore.exceptions
+import paramiko
 from botocore.config import Config
+from paramiko.ssh_exception import (
+    AuthenticationException,
+    BadHostKeyException,
+    NoValidConnectionsError,
+    SSHException,
+)
+
+REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
+BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
+BUCKET = os.environ.get("BUCKET", "")
+BUCKET_ROOT_DIR = os.environ.get("BUCKET_ROOT_DIR", "")
+SFTP_DEST_HOST = os.environ.get("SFTP_DEST_HOST", "")
+SFTP_DEST_HOST_KEY_B64 = os.environ.get("SFTP_DEST_HOST_KEY_B64", "")
+SFTP_DEST_USER = os.environ.get("SFTP_DEST_USER", "")
+SFTP_DEST_PRIV_KEY_B64 = os.environ.get("SFTP_DEST_PRIV_KEY_B64", "")
+BOTO_CONFIG = Config(
+    region_name=REGION,
+    # Instructs boto3 to retry upto 10 times using an exponential backoff
+    retries={
+        "total_max_attempts": 10,
+        "mode": "adaptive",
+    },
+)
+
+logging.basicConfig(level=logging.INFO, force=True)
+logger = logging.getLogger()
+try:
+    s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
+    eft_bucket = s3_resource.Bucket(BUCKET)  # type: ignore
+    ssm_client = boto3.client("ssm", config=BOTO_CONFIG)  # type: ignore
+except Exception:
+    logger.error(
+        "Unrecoverable exception occurred when attempting to create boto3 clients/resources: ",
+        exc_info=True,
+    )
+    sys.exit(0)
 
 
 class S3EventType(str, Enum):
@@ -94,35 +133,19 @@ def get_ssm_parameter(name: str, with_decrypt: bool = False) -> str:
         raise ValueError(f'SSM parameter "{name}" not found or empty') from exc
 
 
-REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
-BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
-BFD_EFT_BUCKET = os.environ.get("BFD_EFT_BUCKET", "")
-BFD_EFT_SFTP_HOME_DIR = os.environ.get("BFD_EFT_SFTP_HOME_DIR", "")
-BOTO_CONFIG = Config(
-    region_name=REGION,
-    # Instructs boto3 to retry upto 10 times using an exponential backoff
-    retries={
-        "total_max_attempts": 10,
-        "mode": "adaptive",
-    },
-)
-
-logging.basicConfig(level=logging.INFO, force=True)
-logger = logging.getLogger()
-try:
-    s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
-    etl_bucket = s3_resource.Bucket(BFD_EFT_BUCKET)  # type: ignore
-    ssm_client = boto3.client("ssm", config=BOTO_CONFIG)  # type: ignore
-except Exception:
-    logger.error(
-        "Unrecoverable exception occurred when attempting to create boto3 clients/resources: ",
-        exc_info=True,
-    )
-    sys.exit(0)
-
-
 def handler(event: Any, context: Any):
-    if not all([REGION, BFD_ENVIRONMENT, BFD_EFT_BUCKET, BFD_EFT_SFTP_HOME_DIR]):
+    if not all(
+        [
+            REGION,
+            BFD_ENVIRONMENT,
+            BUCKET,
+            BUCKET_ROOT_DIR,
+            SFTP_DEST_HOST,
+            SFTP_DEST_PRIV_KEY_B64,
+            SFTP_DEST_USER,
+            SFTP_DEST_PRIV_KEY_B64,
+        ]
+    ):
         logger.error("Not all necessary environment variables were defined, exiting...")
         return
 
@@ -180,7 +203,7 @@ def handler(event: Any, context: Any):
     logger.info("S3 Object Key: %s", decoded_file_key)
     logger.info("S3 Event Type: %s, Specific Event Name: %s", event_type.name, event_type_str)
 
-    object_key_pattern = rf"^{BFD_EFT_SFTP_HOME_DIR}/([\w_]+)/([\w_]+)/(.*\..*)$"
+    object_key_pattern = rf"^{BUCKET_ROOT_DIR}/([\w_]+)/([\w_]+)/(.*\..*)$"
     match = re.search(
         pattern=object_key_pattern,
         string=decoded_file_key,
@@ -217,3 +240,122 @@ def handler(event: Any, context: Any):
             decoded_file_key,
         )
         return
+
+    destination_folder = next(
+        (
+            recognized_file.destination_folder
+            for recognized_file in partner_config.recognized_files
+            if re.search(pattern=recognized_file.filename_pattern, string=filename)
+        ),
+        None,
+    )
+    if not destination_folder:
+        logger.error(
+            "The file %s did not match any recognized files (%s) for partner %s",
+            filename,
+            str(partner_config.recognized_files),
+            partner,
+        )
+        logger.error(
+            'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
+            decoded_file_key,
+            partner_config.failed_files_full_path,
+            BUCKET,
+        )
+        # TODO: Move the file to the appropriate subdirectory in S3
+        return
+
+    logger.info(
+        'Preconditions checked. Connecting to SFTP host "%s" as user "%s" with provided private key'
+        " and server host public key...",
+        SFTP_DEST_HOST,
+        SFTP_DEST_USER,
+    )
+
+    try:
+        sftp_host_key = paramiko.RSAKey(data=decodebytes(SFTP_DEST_HOST_KEY_B64.encode()))
+    except paramiko.SSHException:
+        logger.error(
+            "An unrecoverable error occurred when trying to read the SFTP server host key: ",
+            exc_info=True,
+        )
+        return
+
+    try:
+        sftp_priv_key = paramiko.RSAKey(data=decodebytes(SFTP_DEST_PRIV_KEY_B64.encode()))
+    except paramiko.SSHException:
+        logger.error(
+            "An unrecoverable error occurred when trying to read the SFTP private key: ",
+            exc_info=True,
+        )
+        return
+
+    with paramiko.SSHClient() as ssh_client:
+        try:
+            ssh_client.get_host_keys().add(SFTP_DEST_HOST, "ssh-rsa", sftp_host_key)
+            ssh_client.connect(SFTP_DEST_HOST, username=SFTP_DEST_USER, pkey=sftp_priv_key)
+        except (
+            BadHostKeyException,
+            AuthenticationException,
+            socket.error,
+            SSHException,
+            NoValidConnectionsError,
+        ):
+            logger.error(
+                "An unrecoverable exception occurred when attempting to connect to SFTP server %s",
+                SFTP_DEST_HOST,
+                exc_info=True,
+            )
+            logger.error(
+                'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
+                decoded_file_key,
+                partner_config.failed_files_full_path,
+                BUCKET,
+            )
+
+            # TODO: Move file to failed directory
+            return
+
+        logger.info(
+            "Connected successfully to %s. Attempting to upload %s to %s...",
+            SFTP_DEST_HOST,
+            filename,
+            destination_folder,
+        )
+
+        try:
+            with ssh_client.open_sftp() as sftp_client:
+                with sftp_client.open(f"{destination_folder}/{filename}", "w+", 32768) as f:
+                    eft_bucket.download_fileobj(Key=decoded_file_key, Fileobj=f)  # type: ignore
+        except (SSHException, IOError, botocore.exceptions.ClientError):
+            logger.error(
+                "An unrecoverable exception occurred when attempting to upload %s via SFTP to %s on"
+                " %s: ",
+                decoded_file_key,
+                destination_folder,
+                SFTP_DEST_HOST,
+                exc_info=True,
+            )
+            logger.error(
+                'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
+                decoded_file_key,
+                partner_config.failed_files_full_path,
+                BUCKET,
+            )
+
+            # TODO: Move file to failed directory
+            return
+
+        logger.info(
+            "%s uploaded successfully to %s on %s",
+            decoded_file_key,
+            destination_folder,
+            SFTP_DEST_HOST,
+        )
+        logger.error(
+            'The file "%s" will be moved to %s in the %s bucket to indicate that the file was'
+            " successfully uploaded",
+            decoded_file_key,
+            partner_config.sent_files_full_path,
+            BUCKET,
+        )
