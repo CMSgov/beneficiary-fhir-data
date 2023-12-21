@@ -64,7 +64,7 @@ locals {
   eft_partners_config = {
     for partner in local.eft_partners :
     partner => {
-      bucket_home_path        = "${local.eft_s3_sftp_home_folder}/${trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/")}"
+      bucket_home_path        = "${local.eft_s3_sftp_home_folder}/${trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/")}"
       bucket_iam_assumer_arns = jsondecode(local.ssm_config["/${partner}/${local.service}/bucket_iam_assumer_arn"])
       inbound = {
         dir = join(
@@ -82,7 +82,7 @@ locals {
         }
       }
       outbound = {
-        pending_dir = join(
+        pending_path = join(
           "/",
           [
             local.eft_s3_sftp_home_folder,
@@ -90,7 +90,7 @@ locals {
             trim(local.ssm_config["/${partner}/${local.service}/outbound/pending_dir"], "/")
           ]
         ),
-        sent_dir = join(
+        sent_path = join(
           "/",
           [
             local.eft_s3_sftp_home_folder,
@@ -98,7 +98,7 @@ locals {
             trim(local.ssm_config["/${partner}/${local.service}/outbound/sent_dir"], "/")
           ]
         ),
-        failed_dir = join(
+        failed_path = join(
           "/",
           [
             local.eft_s3_sftp_home_folder,
@@ -195,52 +195,52 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
 
   dynamic "topic" {
     for_each = {
-      for index, partner in local.eft_partners_with_inbound_received_notifs :
+      for index, partner in local.eft_partners_with_outbound_pending_notifs :
       index => flatten([
-        for target in local.eft_partners_config[partner].inbound.received_file_targets :
+        for target in local.eft_partners_config[partner].outbound.pending_file_targets :
         { partner = partner, target = target }
       ])
     }
 
     content {
       events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.value.partner].inbound.dir}/"
-      id            = aws_sns_topic.inbound_received_s3_notifs[topic.value.partner].name
-      topic_arn     = aws_sns_topic.inbound_received_s3_notifs[topic.value.partner].arn
+      filter_prefix = "${local.eft_partners_config[topic.value.partner].outbound.pending_path}/"
+      id            = aws_sns_topic.outbound_pending_s3_notifs[topic.value.partner].name
+      topic_arn     = aws_sns_topic.outbound_pending_s3_notifs[topic.value.partner].arn
     }
   }
 
   dynamic "topic" {
     for_each = {
-      for index, partner in local.eft_partners_with_inbound_received_notifs :
+      for index, partner in local.eft_partners_with_outbound_sent_notifs :
       index => flatten([
-        for target in local.eft_partners_config[partner].inbound.received_file_targets :
+        for target in local.eft_partners_config[partner].outbound.sent_file_targets :
         { partner = partner, target = target }
       ])
     }
 
     content {
       events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.value.partner].inbound.dir}/"
-      id            = aws_sns_topic.inbound_received_s3_notifs[topic.value.partner].name
-      topic_arn     = aws_sns_topic.inbound_received_s3_notifs[topic.value.partner].arn
+      filter_prefix = "${local.eft_partners_config[topic.value.partner].outbound.sent_path}/"
+      id            = aws_sns_topic.outbound_sent_s3_notifs[topic.value.partner].name
+      topic_arn     = aws_sns_topic.outbound_sent_s3_notifs[topic.value.partner].arn
     }
   }
 
   dynamic "topic" {
     for_each = {
-      for index, partner in local.eft_partners_with_inbound_received_notifs :
+      for index, partner in local.eft_partners_with_outbound_failed_notifs :
       index => flatten([
-        for target in local.eft_partners_config[partner].inbound.received_file_targets :
+        for target in local.eft_partners_config[partner].outbound.failed_file_targets :
         { partner = partner, target = target }
       ])
     }
 
     content {
       events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.value.partner].inbound.dir}/"
-      id            = aws_sns_topic.inbound_received_s3_notifs[topic.value.partner].name
-      topic_arn     = aws_sns_topic.inbound_received_s3_notifs[topic.value.partner].arn
+      filter_prefix = "${local.eft_partners_config[topic.value.partner].outbound.failed_path}/"
+      id            = aws_sns_topic.outbound_failed_s3_notifs[topic.value.partner].name
+      topic_arn     = aws_sns_topic.outbound_failed_s3_notifs[topic.value.partner].arn
     }
   }
 }
