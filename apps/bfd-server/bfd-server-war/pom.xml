@@ -203,11 +203,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>annotations-api</artifactId>
-        </dependency>
-
-        <dependency>
             <!-- this allows the construction of POJOs without a lot of boilerplate code -->
             <!-- providd because it's only needed at compile time -->
             <groupId>org.projectlombok</groupId>
