@@ -407,7 +407,7 @@ resource "aws_sns_topic" "outbound_sent_s3_notifs" {
 resource "aws_sns_topic_policy" "outbound_sent_s3_notifs" {
   for_each = toset(local.eft_partners_with_outbound_sent_notifs)
 
-  arn = aws_sns_topic.inbound_received_s3_notifs[each.key].arn
+  arn = aws_sns_topic.outbound_sent_s3_notifs[each.key].arn
   policy = jsonencode(
     {
       Version = "2012-10-17"
