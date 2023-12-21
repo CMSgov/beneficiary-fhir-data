@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+@Library('bfd@bfd-3119-handle-spaces-in-pipeline-job-name-values')
+
 /** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
 STATUS_FINISHED = "Finished"
 
