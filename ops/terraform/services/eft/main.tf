@@ -65,13 +65,13 @@ locals {
     for partner in local.eft_partners :
     partner => {
       bucket_home_path        = "${local.eft_s3_sftp_home_folder}/${trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/")}"
-      bucket_iam_assumer_arns = jsondecode(local.ssm_config["/${partner}/${local.service}/bucket_iam_assumer_arn"])
+      bucket_iam_assumer_arns = jsondecode(local.ssm_config["/${partner}/${local.service}/bucket_iam_assumer_arns_json"])
       inbound = {
         dir = join(
           "/",
           [
             local.eft_s3_sftp_home_folder,
-            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/"),
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
             trim(local.ssm_config["/${partner}/${local.service}/inbound/dir"], "/")
           ]
         )
@@ -86,7 +86,7 @@ locals {
           "/",
           [
             local.eft_s3_sftp_home_folder,
-            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/"),
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
             trim(local.ssm_config["/${partner}/${local.service}/outbound/pending_dir"], "/")
           ]
         ),
@@ -94,7 +94,7 @@ locals {
           "/",
           [
             local.eft_s3_sftp_home_folder,
-            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/"),
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
             trim(local.ssm_config["/${partner}/${local.service}/outbound/sent_dir"], "/")
           ]
         ),
@@ -102,7 +102,7 @@ locals {
           "/",
           [
             local.eft_s3_sftp_home_folder,
-            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_path"], "/"),
+            trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
             trim(local.ssm_config["/${partner}/${local.service}/outbound/failed_dir"], "/")
           ]
         ),
@@ -122,19 +122,19 @@ locals {
   }
   eft_partners_with_inbound_received_notifs = [
     for partner in local.eft_partners :
-    partner if length(local.eft_partners_config[partner].inbound.received_file_targets) > 0
+    partner if length(local.eft_partners_config[partner].inbound.s3_notifications.received_file_targets) > 0
   ]
   eft_partners_with_outbound_pending_notifs = [
     for partner in local.eft_partners :
-    partner if length(local.eft_partners_config[partner].outbound.pending_file_targets) > 0
+    partner if length(local.eft_partners_config[partner].outbound.s3_notifications.pending_file_targets) > 0
   ]
   eft_partners_with_outbound_sent_notifs = [
     for partner in local.eft_partners :
-    partner if length(local.eft_partners_config[partner].outbound.sent_file_targets) > 0
+    partner if length(local.eft_partners_config[partner].outbound.s3_notifications.sent_file_targets) > 0
   ]
   eft_partners_with_outbound_failed_notifs = [
     for partner in local.eft_partners :
-    partner if length(local.eft_partners_config[partner].outbound.failed_file_targets) > 0
+    partner if length(local.eft_partners_config[partner].outbound.s3_notifications.failed_file_targets) > 0
   ]
   # Data source lookups
 
@@ -178,11 +178,13 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
     # "for_each"'s limitations without additional code. The key is completely unnecessary, so the
     # index is used to ensure uniqueness
     for_each = {
-      for index, partner in local.eft_partners_with_inbound_received_notifs :
-      index => flatten([
-        for target in local.eft_partners_config[partner].inbound.received_file_targets :
-        { partner = partner, target = target }
-      ])
+      for index, tupl in flatten([
+        for partner in local.eft_partners_with_inbound_received_notifs :
+        [
+          for target in local.eft_partners_config[partner].inbound.s3_notifications.received_file_targets :
+          { partner = partner, target = target }
+        ]
+      ]) : index => tupl
     }
 
     content {
@@ -195,11 +197,13 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
 
   dynamic "topic" {
     for_each = {
-      for index, partner in local.eft_partners_with_outbound_pending_notifs :
-      index => flatten([
-        for target in local.eft_partners_config[partner].outbound.pending_file_targets :
-        { partner = partner, target = target }
-      ])
+      for index, tupl in flatten([
+        for partner in local.eft_partners_with_outbound_pending_notifs :
+        [
+          for target in local.eft_partners_config[partner].outbound.s3_notifications.pending_file_targets :
+          { partner = partner, target = target }
+        ]
+      ]) : index => tupl
     }
 
     content {
@@ -212,11 +216,13 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
 
   dynamic "topic" {
     for_each = {
-      for index, partner in local.eft_partners_with_outbound_sent_notifs :
-      index => flatten([
-        for target in local.eft_partners_config[partner].outbound.sent_file_targets :
-        { partner = partner, target = target }
-      ])
+      for index, tupl in flatten([
+        for partner in local.eft_partners_with_outbound_sent_notifs :
+        [
+          for target in local.eft_partners_config[partner].outbound.s3_notifications.sent_file_targets :
+          { partner = partner, target = target }
+        ]
+      ]) : index => tupl
     }
 
     content {
@@ -229,11 +235,13 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
 
   dynamic "topic" {
     for_each = {
-      for index, partner in local.eft_partners_with_outbound_failed_notifs :
-      index => flatten([
-        for target in local.eft_partners_config[partner].outbound.failed_file_targets :
-        { partner = partner, target = target }
-      ])
+      for index, tupl in flatten([
+        for partner in local.eft_partners_with_outbound_sent_notifs :
+        [
+          for target in local.eft_partners_config[partner].outbound.s3_notifications.failed_file_targets :
+          { partner = partner, target = target }
+        ]
+      ]) : index => tupl
     }
 
     content {
@@ -248,7 +256,7 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
 # FUTURE: If any additional SNS Topics are required similar to the ones defined below, this
 # duplication should be consolidated
 resource "aws_sns_topic" "inbound_received_s3_notifs" {
-  for_each = local.eft_partners_with_inbound_received_notifs
+  for_each = toset(local.eft_partners_with_inbound_received_notifs)
 
   name              = "${local.full_name}-inbound-received-s3-${each.key}"
   kms_master_key_id = local.kms_key_id
@@ -277,7 +285,7 @@ resource "aws_sns_topic_policy" "inbound_received_s3_notifs" {
           }
         ],
         [
-          for index, target in local.eft_partners_config[each.key].inbound.received_file_targets : {
+          for index, target in local.eft_partners_config[each.key].inbound.s3_notifications.received_file_targets : {
             Sid       = "Allow_Subscribe_from_${each.key}_${index}"
             Effect    = "Allow"
             Principal = { AWS = target.principal }
@@ -299,7 +307,7 @@ resource "aws_sns_topic_policy" "inbound_received_s3_notifs" {
 }
 
 resource "aws_sns_topic" "outbound_pending_s3_notifs" {
-  for_each = local.eft_partners_with_outbound_pending_notifs
+  for_each = toset(local.eft_partners_with_outbound_pending_notifs)
 
   name              = "${local.full_name}-outbound-pending-s3-${each.key}"
   kms_master_key_id = local.kms_key_id
@@ -328,7 +336,7 @@ resource "aws_sns_topic_policy" "outbound_pending_s3_notifs" {
           }
         ],
         [
-          for index, target in local.eft_partners_config[each.key].outbound.pending_file_targets : {
+          for index, target in local.eft_partners_config[each.key].outbound.s3_notifications.pending_file_targets : {
             Sid       = "Allow_Subscribe_from_${each.key}_${index}"
             Effect    = "Allow"
             Principal = { AWS = target.principal }
@@ -350,7 +358,7 @@ resource "aws_sns_topic_policy" "outbound_pending_s3_notifs" {
 }
 
 resource "aws_sns_topic" "outbound_sent_s3_notifs" {
-  for_each = local.eft_partners_with_outbound_sent_notifs
+  for_each = toset(local.eft_partners_with_outbound_sent_notifs)
 
   name              = "${local.full_name}-outbound-sent-s3-${each.key}"
   kms_master_key_id = local.kms_key_id
@@ -379,7 +387,7 @@ resource "aws_sns_topic_policy" "outbound_sent_s3_notifs" {
           }
         ],
         [
-          for index, target in local.eft_partners_config[each.key].outbound.sent_file_targets : {
+          for index, target in local.eft_partners_config[each.key].outbound.s3_notifications.sent_file_targets : {
             Sid       = "Allow_Subscribe_from_${each.key}_${index}"
             Effect    = "Allow"
             Principal = { AWS = target.principal }
@@ -401,7 +409,7 @@ resource "aws_sns_topic_policy" "outbound_sent_s3_notifs" {
 }
 
 resource "aws_sns_topic" "outbound_failed_s3_notifs" {
-  for_each = local.eft_partners_with_outbound_failed_notifs
+  for_each = toset(local.eft_partners_with_outbound_failed_notifs)
 
   name              = "${local.full_name}-outbound-failed-s3-${each.key}"
   kms_master_key_id = local.kms_key_id
@@ -430,7 +438,7 @@ resource "aws_sns_topic_policy" "outbound_failed_s3_notifs" {
           }
         ],
         [
-          for index, target in local.eft_partners_config[each.key].outbound.failed_file_targets : {
+          for index, target in local.eft_partners_config[each.key].outbound.s3_notifications.failed_file_targets : {
             Sid       = "Allow_Subscribe_from_${each.key}_${index}"
             Effect    = "Allow"
             Principal = { AWS = target.principal }
