@@ -266,6 +266,12 @@
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-server-openapi</artifactId>
             <version>${hapi-fhir.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <!-- Logging backend for tests.  -->
@@ -372,14 +378,15 @@
                   <execution>
                     <phase> pre-integration-test </phase>
                     <configuration>
-                      <tasks>
-                          <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war" dest="${project.build.directory}/test-webapp-directory">
+                      <target>
+                          <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war"
+                                 dest="${project.build.directory}/test-webapp-directory">
                               <patternset>
                                   <exclude name="**/lib/*" />
                                   <exclude name="**/classes/**" />
                               </patternset>
                           </unzip>
-                      </tasks>
+                      </target>
                     </configuration>
                     <goals>
                       <goal>run</goal>

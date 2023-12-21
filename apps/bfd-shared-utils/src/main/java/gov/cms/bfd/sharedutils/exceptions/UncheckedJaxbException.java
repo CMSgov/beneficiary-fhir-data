@@ -1,6 +1,6 @@
 package gov.cms.bfd.sharedutils.exceptions;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Wraps a checked {@link JAXBException} in an unchecked {@link RuntimeException} derivative, so
