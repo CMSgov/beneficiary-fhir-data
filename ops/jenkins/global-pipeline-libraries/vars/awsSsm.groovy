@@ -27,7 +27,7 @@ String putParameter(Map args = [:]) {
 }
 
 String putParameterTags(tagsMap, resourceId, resourceType) {
-    defaultTags = ["Source": "Changed for testing", "Environment": "mgmt", "stack": "mgmt", "Terraform": "false", "application": "bfd", "business": "oeda"]
+    defaultTags = ["Source": "${JOB_NAME}", "Environment": "mgmt", "stack": "mgmt", "Terraform": "false", "application": "bfd", "business": "oeda"]
     tags = (defaultTags + tagsMap).collect{ key, value -> "\"Key=${key},Value=${value}\"" }.join(" ")
     tagParameter = sh(returnStdout: true, script: "aws ssm add-tags-to-resource --resource-id ${resourceId} --resource-type ${resourceType ?: 'Parameter'} --tags ${tags}").trim()
     return tagParameter
