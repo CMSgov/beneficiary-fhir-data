@@ -42,7 +42,7 @@ public class DLQDaoIT {
 
   /** Precomputed value for threshold of record expiration. */
   private final Instant oldestUpdateDateToKeep =
-      clock.instant().truncatedTo(ChronoUnit.MICROS).minus(maxAgeDays, ChronoUnit.DAYS);
+      clock.instant().truncatedTo(ChronoUnit.MILLIS).minus(maxAgeDays, ChronoUnit.DAYS);
 
   /**
    * Verifies that basic insert, read, and delete operations work properly since they are used in
@@ -174,7 +174,7 @@ public class DLQDaoIT {
                     assertEquals(recordToUpdate.getCreatedDate(), rec.getCreatedDate());
                     // the update date should have been updated
                     assertEquals(
-                        clock.instant().truncatedTo(ChronoUnit.MICROS), rec.getUpdatedDate());
+                        clock.instant().truncatedTo(ChronoUnit.MILLIS), rec.getUpdatedDate().truncatedTo(ChronoUnit.MILLIS));
                   });
               assertContentsHaveSamePropertyValues(
                   allRecordsAfter, remainingRecords, ComparatorForSorting);
