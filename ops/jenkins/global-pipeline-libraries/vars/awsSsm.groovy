@@ -21,7 +21,7 @@ String putParameter(Map args = [:]) {
     awsRegion = args.awsRegion ?: "us-east-1"
 
     // TODO this is very naive and there are a crazy number of cases that this does not support. Beware.
-    parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value '${value}' --type ${type} --region ${awsRegion} ${applyOverwrite}").trim()
+    parameterOutput = sh(returnStdout: true, script: "aws ssm put-parameter --name ${name} --value \"${value}\" --type ${type} --region ${awsRegion} ${applyOverwrite}").trim()
     putParameterTags(args.parameterTags, args.resourceId ?: name, args.resourceType)
     return parameterOutput
 }
