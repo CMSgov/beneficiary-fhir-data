@@ -198,7 +198,7 @@ locals {
       local.outbound_sftp_host_key,
       local.outbound_sftp_username,
       local.outbound_sftp_user_priv_key
-    ] : coalesce(trimspace(x), "INVALID") != "INVALID"]) ? [
+    ] : trimspace(coalesce(x, "INVALID")) != "INVALID"]) ? [
     for partner, _ in local.eft_partners_config :
     partner
     if contains(local.outbound_eft_partners, partner) && length(
