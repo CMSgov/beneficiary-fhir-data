@@ -65,6 +65,7 @@ class FileTransferError(StrEnum):
 
 @dataclass(frozen=True, eq=True)
 class GlobalSsmConfig:
+    sftp_connect_timeout: int
     sftp_hostname: str
     sftp_host_pub_key: str
     sftp_username: str
@@ -72,6 +73,9 @@ class GlobalSsmConfig:
 
     @classmethod
     def from_ssm(cls) -> "GlobalSsmConfig":
+        sftp_connect_timeout = int(get_ssm_parameter(
+            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/timeout", with_decrypt=True
+        ))
         sftp_hostname = get_ssm_parameter(
             f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/host", with_decrypt=True
         )
@@ -86,6 +90,7 @@ class GlobalSsmConfig:
         )
 
         return GlobalSsmConfig(
+            sftp_connect_timeout=sftp_connect_timeout,
             sftp_hostname=sftp_hostname,
             sftp_host_pub_key=sftp_host_pub_key,
             sftp_username=sftp_username,
@@ -359,6 +364,7 @@ def handler(event: Any, context: Any):
                 pkey=sftp_priv_key,
                 look_for_keys=False,
                 allow_agent=False,
+                timeout=global_config.sftp_connect_timeout,
             )
         except (
             BadHostKeyException,
