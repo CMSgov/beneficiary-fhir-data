@@ -259,6 +259,6 @@ resource "aws_iam_role" "sftp_outbound_transfer" {
 resource "aws_iam_role_policy_attachment" "logs_to_lambda_role" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  role       = one(aws_iam_role.sftp_outbound_transfer[*].arn)
+  role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
   policy_arn = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn)
 }
