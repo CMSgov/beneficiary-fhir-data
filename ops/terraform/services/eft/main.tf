@@ -53,8 +53,9 @@ locals {
   )
 
   # SSM Lookup
-  kms_key_alias = local.ssm_config["/bfd/common/kms_key_alias"]
-  vpc_name      = local.ssm_config["/bfd/common/vpc_name"]
+  kms_key_alias        = local.ssm_config["/bfd/common/kms_key_alias"]
+  kms_config_key_alias = local.ssm_config["/bfd/common/kms_config_key_alias"]
+  vpc_name             = local.ssm_config["/bfd/common/vpc_name"]
 
   subnet_ip_reservations = jsondecode(
     local.ssm_config["/bfd/${local.service}/inbound/sftp_server/subnet_to_ip_reservations_nlb_json"]
@@ -222,10 +223,16 @@ locals {
     if length(local.eft_partners_config[partner].outbound.s3_notifications.failed_file_targets) > 0
   ]
 
-  account_id     = data.aws_caller_identity.current.account_id
-  region         = data.aws_region.current.name
-  vpc_id         = data.aws_vpc.this.id
-  kms_key_id     = data.aws_kms_key.cmk.arn
+  account_id = data.aws_caller_identity.current.account_id
+  region     = data.aws_region.current.name
+  vpc_id     = data.aws_vpc.this.id
+  kms_key_id = data.aws_kms_key.cmk.arn
+  kms_config_key_arns = flatten(
+    [
+      for v in data.aws_kms_key.config_cmk.multi_region_configuration :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
   sftp_port      = 22
   logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
 
@@ -338,8 +345,28 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
 
   role = one(aws_iam_role.sftp_outbound_transfer[*].arn)
 
-  # FUTURE: Implement VPC config allowing Lambda to interact _only_ with the EFT SFTP Server
+  vpc_config {
+    security_group_ids = [aws_security_group.sftp_outbound_transfer.id]
+    subnet_ids         = data.aws_subnets.sftp_outbound_transfer.ids
+  }
 }
+
+resource "aws_security_group" "sftp_outbound_transfer" {
+
+  name        = local.outbound_lambda_full_name
+  description = "Allow ${local.outbound_lambda_full_name} to the ${local.env} VPC"
+  vpc_id      = local.vpc_id
+  tags        = { Name = "${local.outbound_lambda_full_name}" }
+
+  egress {
+    from_port   = local.sftp_port
+    to_port     = local.sftp_port
+    protocol    = "tcp"
+    cidr_blocks = [data.aws_vpc.this.cidr_block]
+    description = "Allow SFTP egress"
+  }
+}
+
 
 resource "aws_lambda_permission" "sftp_outbound_transfer_sns" {
   for_each = toset(local.eft_partners_with_outbound_enabled)

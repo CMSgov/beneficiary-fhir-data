@@ -231,6 +231,57 @@ resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
   )
 }
 
+resource "aws_iam_policy" "sftp_outbound_transfer_ssm" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name        = "${local.outbound_lambda_full_name}-ssm"
+  description = "Permissions to get parameters from the appropriate hierarchies"
+  policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Action = [
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter"
+          ],
+          Resource = [
+            for hierarchy in local.ssm_hierarchies :
+            "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(hierarchy, "/")}/*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "sftp_outbound_transfer_kms" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name        = "${local.outbound_lambda_full_name}-kms"
+  description = "Permissions to decrypt master and config KMS keys for ${local.env}"
+  policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Action = [
+            "kms:Decrypt"
+          ],
+          Resource = concat(
+            [local.kms_key_id],
+            local.kms_config_key_arns
+          )
+        }
+      ]
+    }
+  )
+}
+
+
 resource "aws_iam_role" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
@@ -261,4 +312,18 @@ resource "aws_iam_role_policy_attachment" "logs_to_lambda_role" {
 
   role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
   policy_arn = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn)
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_to_lambda_role" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
+  policy_arn = one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn)
+}
+
+resource "aws_iam_role_policy_attachment" "kms_to_lambda_role" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
+  policy_arn = one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn)
 }

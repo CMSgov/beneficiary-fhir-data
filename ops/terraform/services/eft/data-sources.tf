@@ -6,6 +6,10 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_key_alias
 }
 
+data "aws_kms_key" "config_cmk" {
+  key_id = local.kms_config_key_alias
+}
+
 # This is a distinct parameter as we need to retrieve the list of partners first so that we know
 # which SSM hierarchies to get
 data "aws_ssm_parameter" "partners_list_json" {
@@ -43,6 +47,17 @@ data "aws_vpc" "this" {
   filter {
     name   = "tag:Name"
     values = [local.vpc_name]
+  }
+}
+
+data "aws_subnets" "sftp_outbound_transfer" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
+  filter {
+    name   = "tag:Layer"
+    values = [local.layer]
   }
 }
 
