@@ -87,7 +87,6 @@ public class MbiCacheIT {
   @Test
   public void createsNewRecordWhenNoneExists() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, transactionManager) -> {
           final MbiCache mbiCache =
@@ -118,7 +117,6 @@ public class MbiCacheIT {
   @Test
   public void usesExistingRecordWhenOneExists() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, transactionManager) -> {
           final String fakeHash1 = "not-a-real-hash-but-loads-from-db";
@@ -149,7 +147,6 @@ public class MbiCacheIT {
   @Test
   public void usesInMemoryCacheToAvoidExtraQueries() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, transactionManager) -> {
           final MbiCache mbiCache =
@@ -189,7 +186,6 @@ public class MbiCacheIT {
   @Test
   public void retryFiveTimes() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, transactionManager) -> {
           final PersistenceException error = new PersistenceException("oops");

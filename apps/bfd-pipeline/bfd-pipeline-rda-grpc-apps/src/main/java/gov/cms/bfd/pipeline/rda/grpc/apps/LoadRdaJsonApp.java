@@ -228,7 +228,7 @@ public class LoadRdaJsonApp {
           options
               .enumOption("database.authType", DatabaseOptions.AuthenticationType.class)
               .orElse(DatabaseOptions.AuthenticationType.JDBC);
-      dbUrl = options.stringValue("database.url", "jdbc:hsqldb:mem:LoadRdaJsonApp");
+      dbUrl = options.stringValue("database.url", "");
       dbUser = options.stringValue("database.user", "");
       dbPassword = options.stringValue("database.password", "");
 

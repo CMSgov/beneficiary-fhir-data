@@ -15,9 +15,8 @@ import javax.persistence.AttributeConverter;
 
 /**
  * Base class for {@code AttributeConverter} instances that provide a common mechanism for
- * converting our POJOs into JSON for inclusion in a JSONB postgresql column or varchar HSQLDB
- * column. One concrete subclass would be defined for each root object class that needs to be
- * converted to JSON.
+ * converting our POJOs into JSON for inclusion in a JSONB postgresql column. One concrete subclass
+ * would be defined for each root object class that needs to be converted to JSON.
  *
  * @param <T> type of one of our data POJOs
  */
