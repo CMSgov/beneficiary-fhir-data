@@ -359,12 +359,15 @@ resource "aws_security_group" "sftp_outbound_transfer" {
   vpc_id      = local.vpc_id
   tags        = { Name = "${local.outbound_lambda_full_name}" }
 
+  # Unfortunately, it seems restricting egress beyond just the VPC requires that the Lambda uses
+  # PrivateLink VPC Endpoints (or a VPC Gateway) to use any boto3 clients. That is beyond the scope
+  # of this Terraservice, but should be considered for future work
+  # FUTURE: Investigate tightening the egress rule
   egress {
-    from_port   = local.sftp_port
-    to_port     = local.sftp_port
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.this.cidr_block]
-    description = "Allow SFTP egress"
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
