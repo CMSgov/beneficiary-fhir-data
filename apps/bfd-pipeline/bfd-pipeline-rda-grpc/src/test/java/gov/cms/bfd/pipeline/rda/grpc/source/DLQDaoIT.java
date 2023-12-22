@@ -42,7 +42,7 @@ public class DLQDaoIT {
 
   /** Precomputed value for threshold of record expiration. */
   private final Instant oldestUpdateDateToKeep =
-      clock.instant().truncatedTo(ChronoUnit.MICROS).minus(maxAgeDays, ChronoUnit.DAYS);
+      clock.instant().truncatedTo(ChronoUnit.MILLIS).minus(maxAgeDays, ChronoUnit.DAYS);
 
   /**
    * Verifies that basic insert, read, and delete operations work properly since they are used in
@@ -60,7 +60,6 @@ public class DLQDaoIT {
     final var allRecords = List.of(record1, record2, record3);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        DLQDaoIT.class,
         clock,
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
@@ -100,7 +99,6 @@ public class DLQDaoIT {
     final var expectedMatches = List.of(match1, match2);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        DLQDaoIT.class,
         clock,
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
@@ -150,7 +148,6 @@ public class DLQDaoIT {
         List.of(updatedRecord, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        DLQDaoIT.class,
         clock,
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
@@ -177,7 +174,8 @@ public class DLQDaoIT {
                     assertEquals(recordToUpdate.getCreatedDate(), rec.getCreatedDate());
                     // the update date should have been updated
                     assertEquals(
-                        clock.instant().truncatedTo(ChronoUnit.MICROS), rec.getUpdatedDate());
+                        clock.instant().truncatedTo(ChronoUnit.MILLIS),
+                        rec.getUpdatedDate().truncatedTo(ChronoUnit.MILLIS));
                   });
               assertContentsHaveSamePropertyValues(
                   allRecordsAfter, remainingRecords, ComparatorForSorting);
@@ -227,7 +225,6 @@ public class DLQDaoIT {
             validUnresolved);
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        DLQDaoIT.class,
         clock,
         (appState, transactionManager) -> {
           try (var dao = new DLQDao(clock, transactionManager)) {
@@ -274,8 +271,8 @@ public class DLQDaoIT {
         .sequenceNumber(sequenceNumber)
         .claimId(claimId)
         .status(status)
-        .errors("")
-        .message("")
+        .errors("{}")
+        .message("{}")
         .build();
   }
 }

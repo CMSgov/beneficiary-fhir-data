@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_PASSWORD;
-import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_USERNAME;
+import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_PASSWORD;
+import static gov.cms.bfd.DatabaseTestUtils.TEST_CONTAINER_DATABASE_USERNAME;
 import static io.restassured.RestAssured.certificate;
 import static io.restassured.RestAssured.given;
 
@@ -14,13 +14,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Set;
-import org.hsqldb.jdbc.JDBCDataSource;
+import org.postgresql.ds.PGSimpleDataSource;
 
 /** Program to gather the OpenAPI yaml content for V1 and V2 and store. */
 public class OpenApiDocs {
-
-  /** The HSQL database url. */
-  private static final String INMEM_HSQL_DATABASE_URL = "jdbc:bfd-test:hsqldb:mem";
 
   /** The version from the project pom. */
   private final String projectVersion;
@@ -99,9 +96,6 @@ public class OpenApiDocs {
     // Update working directory so E2E test server instance can find properties.
     System.setProperty("user.dir", workingDirectory);
 
-    // Set database url for in memory HSQL database
-    System.setProperty("its.db.url", INMEM_HSQL_DATABASE_URL);
-
     var openApiDocs = new OpenApiDocs(projectVersion, destinationDirectory);
     try {
       // Start E2E test server instance.
@@ -154,10 +148,11 @@ public class OpenApiDocs {
    */
   private void setup() throws IOException {
     var dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
-    var resolvedDbUrl = ((JDBCDataSource) dataSource).getUrl();
+    String resolvedDbUrl = ((PGSimpleDataSource) dataSource).getUrl();
 
     boolean startedServer =
-        ServerExecutor.startServer(resolvedDbUrl, HSQL_SERVER_USERNAME, HSQL_SERVER_PASSWORD);
+        ServerExecutor.startServer(
+            resolvedDbUrl, TEST_CONTAINER_DATABASE_USERNAME, TEST_CONTAINER_DATABASE_PASSWORD);
     if (startedServer) {
       baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
       setRequestAuth();

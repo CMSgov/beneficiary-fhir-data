@@ -2,23 +2,17 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
-import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
-import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.time.Clock;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -78,45 +72,30 @@ public class RdaPipelineTestUtils {
   }
 
   /**
-   * Creates a temporary in-memory HSQLDB that is destroyed when the test ends plus a {@link
+   * Creates a containerized postgres DB that is destroyed when the test ends plus a {@link
    * PipelineApplicationState} and {@link TransactionManager} using that db, passes them to the
    * provided lambda function, then closes them and destroys the database.
    *
-   * @param testClass used to create a db name
    * @param clock used for the app state
    * @param test lambda to receive the appState and perform some testing
    * @throws Exception pass through from test
    */
-  public static void runTestWithTemporaryDb(Class<?> testClass, Clock clock, DatabaseConsumer test)
-      throws Exception {
-    final String dbUrl = "jdbc:hsqldb:mem:" + testClass.getSimpleName();
-    // the HSQLDB database will be destroyed when this connection is closed
-    try (Connection dbLifetimeConnection =
-        DriverManager.getConnection(dbUrl + ";shutdown=true", "", "")) {
-      final DatabaseOptions dbOptions =
-          DatabaseOptions.builder()
-              .databaseUrl(dbUrl)
-              .databaseUsername("")
-              .databasePassword("")
-              .maxPoolSize(10)
-              .build();
-      final MetricRegistry appMetrics = new MetricRegistry();
-      final DataSourceFactory dataSourceFactory = new HikariDataSourceFactory(dbOptions);
-      final HikariDataSource dataSource =
-          PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics);
-      assertTrue(
-          DatabaseSchemaManager.createOrUpdateSchema(dataSource), "schema migration failure");
-      try (PipelineApplicationState appState =
-              new PipelineApplicationState(
-                  new SimpleMeterRegistry(),
-                  appMetrics,
-                  dataSource,
-                  RDA_PERSISTENCE_UNIT_NAME,
-                  clock);
-          TransactionManager transactionManager =
-              new TransactionManager(appState.getEntityManagerFactory())) {
-        test.accept(appState, transactionManager);
-      }
+  public static void runTestWithTemporaryDb(Clock clock, DatabaseConsumer test) throws Exception {
+
+    final MetricRegistry appMetrics = new MetricRegistry();
+    final HikariDataSource dataSource =
+        DatabaseTestUtils.createPooledTestContainerDataSourceForTestContainerWithPostgres(
+            10, appMetrics);
+    try (PipelineApplicationState appState =
+            new PipelineApplicationState(
+                new SimpleMeterRegistry(),
+                appMetrics,
+                dataSource,
+                RDA_PERSISTENCE_UNIT_NAME,
+                clock);
+        TransactionManager transactionManager =
+            new TransactionManager(appState.getEntityManagerFactory())) {
+      test.accept(appState, transactionManager);
     }
   }
 
