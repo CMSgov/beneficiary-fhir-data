@@ -271,17 +271,89 @@ resource "aws_iam_policy" "sftp_outbound_transfer_kms" {
           Action = [
             "kms:Decrypt"
           ],
-          Resource = concat(
-            [local.kms_key_id],
-            local.kms_config_key_arns
-          )
+          Resource = local.kms_config_key_arns
         }
       ]
     }
   )
 }
 
+resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
+  name = "${local.outbound_lambda_full_name}-s3"
+  description = join("", [
+    "Allows the ${local.outbound_lambda_full_name} to manipulate objects within the ",
+    "${local.full_name} S3 bucket",
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid    = "AllowListingOfBucket"
+          Effect = "Allow"
+          Action = [
+            "s3:ListBucket",
+            "s3:GetBucketLocation"
+          ]
+          Resource = [aws_s3_bucket.this.arn]
+          Condition = {
+            StringLike = {
+              "s3:prefix" = flatten([
+                for partner in local.eft_partners_with_outbound_enabled :
+                [
+                  "${local.eft_partners_config[partner].outbound.pending_path}/*",
+                  "${local.eft_partners_config[partner].outbound.sent_path}/*",
+                  "${local.eft_partners_config[partner].outbound.failed_path}/*"
+                ]
+              ])
+            }
+          }
+        },
+        {
+          Sid    = "AllowAccessToOutboundPaths"
+          Effect = "Allow"
+          Action = [
+            "s3:AbortMultipartUpload",
+            "s3:DeleteObject",
+            "s3:DeleteObjectVersion",
+            "s3:GetObject",
+            "s3:GetObjectAcl",
+            "s3:GetObjectVersion",
+            "s3:GetObjectVersionAcl",
+            "s3:PutObject",
+            "s3:PutObjectAcl",
+            "s3:PutObjectVersionAcl"
+          ],
+          Resource = flatten([
+            for partner in local.eft_partners_with_outbound_enabled :
+            [
+              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.pending_path}/*",
+              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.sent_path}/*",
+              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.failed_path}/*"
+            ]
+          ])
+        },
+        {
+          Sid    = "AllowEncryptionAndDecryptionOfS3Files"
+          Effect = "Allow"
+          Action = [
+            "kms:Encrypt",
+            "kms:Decrypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey",
+          ]
+          Resource = [
+            local.kms_key_id
+          ]
+        },
+      ]
+    }
+  )
+}
 resource "aws_iam_role" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
@@ -309,12 +381,13 @@ resource "aws_iam_role" "sftp_outbound_transfer" {
 
 resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
   for_each = {
-    for arn in [
-      one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn),
-      one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn),
-      one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn),
-      "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-    ] : reverse(split("/", arn))[0] => arn
+    for key, arn in {
+      logs = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn),
+      ssm  = one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn),
+      kms  = one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn),
+      s3   = one(aws_iam_policy.sftp_outbound_transfer_s3[*].arn),
+      vpc  = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+    } : key => arn
     if length(local.eft_partners_with_outbound_enabled) > 0
   }
 
