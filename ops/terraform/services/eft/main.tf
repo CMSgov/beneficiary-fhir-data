@@ -202,7 +202,7 @@ locals {
     partner
     if contains(local.outbound_eft_partners, partner) && length(
       jsondecode(
-        lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/recognized_files_json", "[]")
+        lookup(local.ssm_config, "/${partner}/${local.service}/outbound/recognized_files_json", "[]")
       )
     ) > 0
   ] : []
