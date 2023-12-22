@@ -346,12 +346,13 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
   role = one(aws_iam_role.sftp_outbound_transfer[*].arn)
 
   vpc_config {
-    security_group_ids = [aws_security_group.sftp_outbound_transfer.id]
+    security_group_ids = aws_security_group.sftp_outbound_transfer[*].id
     subnet_ids         = data.aws_subnets.sftp_outbound_transfer.ids
   }
 }
 
 resource "aws_security_group" "sftp_outbound_transfer" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   name        = local.outbound_lambda_full_name
   description = "Allow ${local.outbound_lambda_full_name} to the ${local.env} VPC"

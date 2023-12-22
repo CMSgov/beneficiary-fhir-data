@@ -53,7 +53,7 @@ data "aws_vpc" "this" {
 data "aws_subnets" "sftp_outbound_transfer" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
+    values = [data.aws_vpc.this.id]
   }
   filter {
     name   = "tag:Layer"

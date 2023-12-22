@@ -307,23 +307,17 @@ resource "aws_iam_role" "sftp_outbound_transfer" {
   force_detach_policies = true
 }
 
-resource "aws_iam_role_policy_attachment" "logs_to_lambda_role" {
-  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
+  for_each = {
+    for arn in [
+      one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn),
+      one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn),
+      one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn),
+      "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+    ] : reverse(split("/", arn))[0] => arn
+    if length(local.eft_partners_with_outbound_enabled) > 0
+  }
 
   role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
-  policy_arn = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn)
-}
-
-resource "aws_iam_role_policy_attachment" "ssm_to_lambda_role" {
-  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
-  policy_arn = one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn)
-}
-
-resource "aws_iam_role_policy_attachment" "kms_to_lambda_role" {
-  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
-  policy_arn = one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn)
+  policy_arn = each.value
 }
