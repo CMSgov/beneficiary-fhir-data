@@ -113,7 +113,6 @@ public class RdaLoadJobIT {
   @Test
   public void fissClaimsTest() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        RdaLoadJobIT.class,
         clock,
         (appState, transactionManager) -> {
           assertTablesAreEmpty(transactionManager);
@@ -156,7 +155,6 @@ public class RdaLoadJobIT {
   @Test
   public void invalidFissClaimTest() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        RdaLoadJobIT.class,
         clock,
         (appState, transactionManager) -> {
           assertTablesAreEmpty(transactionManager);
@@ -224,7 +222,6 @@ public class RdaLoadJobIT {
   @Test
   public void mcsClaimsTest() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        RdaLoadJobIT.class,
         clock,
         (appState, transactionManager) -> {
           assertTablesAreEmpty(transactionManager);
@@ -268,7 +265,6 @@ public class RdaLoadJobIT {
   @Test
   public void serverExceptionTest() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        RdaLoadJobIT.class,
         clock,
         (appState, transactionManager) -> {
           assertTablesAreEmpty(transactionManager);

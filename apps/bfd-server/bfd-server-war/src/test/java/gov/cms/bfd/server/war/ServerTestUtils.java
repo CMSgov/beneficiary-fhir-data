@@ -632,8 +632,7 @@ public final class ServerTestUtils {
         // Then, switch to the appropriate schema.
         if (entityTableAnnotation.get().schema() != null
             && !entityTableAnnotation.get().schema().isEmpty()) {
-          String schemaNameSpecifier =
-              normalizeSchemaName(connection, entityTableAnnotation.get().schema());
+          String schemaNameSpecifier = normalizeSchemaName(entityTableAnnotation.get().schema());
           connection.setSchema(schemaNameSpecifier);
         } else {
           connection.setSchema(defaultSchemaName.get());
@@ -659,26 +658,19 @@ public final class ServerTestUtils {
   }
 
   /**
-   * Normalizes the schema names to work with both HSQL and postgres by preserving case and removing
-   * quotes.
+   * Normalizes the schema names by preserving case and removing quotes.
    *
-   * @param connection the connection
    * @param schemaNameSpecifier name of a schema from a hibernate annotation
    * @return value compatible with call to {@link Connection#setSchema(String)}
    * @throws SQLException the sql exception
    */
-  private String normalizeSchemaName(Connection connection, String schemaNameSpecifier)
-      throws SQLException {
-    String sql = schemaNameSpecifier.replaceAll("`", "");
-    if (DatabaseUtils.isHsqlConnection((connection))) {
-      sql = sql.toUpperCase();
-    }
-    return sql;
+  private String normalizeSchemaName(String schemaNameSpecifier) throws SQLException {
+    return schemaNameSpecifier.replaceAll("`", "");
   }
 
   /**
-   * Normalizes the table names to work with both HSQL and Hibernate by upper-casing table names
-   * without quotes and preserving case for other table names.
+   * Normalizes the table names by upper-casing table names without quotes and preserving case for
+   * other table names.
    *
    * @param tableNameSpecifier name of a table from a hibernate annotation
    * @return value compatible with call to {@link java.sql.Statement#execute(String)}
@@ -703,8 +695,7 @@ public final class ServerTestUtils {
   public static boolean isValidServerDatabase(String dbUrl) {
     boolean isTestContainer = dbUrl.endsWith("tc");
     boolean isLocalDb = dbUrl.contains("localhost") || dbUrl.contains("127.0.0.1");
-    boolean isHsqlDb = dbUrl.contains("hsql");
-    return !dbUrl.isBlank() && (isTestContainer || isLocalDb || isHsqlDb);
+    return !dbUrl.isBlank() && (isTestContainer || isLocalDb);
   }
 
   /**

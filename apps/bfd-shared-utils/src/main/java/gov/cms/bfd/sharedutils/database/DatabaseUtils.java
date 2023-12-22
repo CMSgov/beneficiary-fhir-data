@@ -12,17 +12,6 @@ public final class DatabaseUtils {
   private DatabaseUtils() {}
 
   /**
-   * Returns true if the connection is to an HSQL database @param connection the connection.
-   *
-   * @param connection the connection
-   * @return if the connection is to an HSQL database
-   * @throws SQLException any sql exception
-   */
-  public static boolean isHsqlConnection(Connection connection) throws SQLException {
-    return extractVendorName(connection).equals("HSQL Database Engine");
-  }
-
-  /**
    * Returns true if the connection is to a Postgres database @param connection the connection.
    *
    * @param connection the connection

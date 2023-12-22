@@ -1,9 +1,6 @@
 package gov.cms.bfd;
 
-import static gov.cms.bfd.DatabaseTestUtils.HSQL_SERVER_PASSWORD;
-
 import javax.sql.DataSource;
-import org.hsqldb.jdbc.JDBCDataSource;
 import org.postgresql.ds.PGSimpleDataSource;
 
 /**
@@ -29,18 +26,7 @@ public final class DataSourceComponents {
    * @param dataSource the data source
    */
   public DataSourceComponents(DataSource dataSource) {
-    if (dataSource instanceof JDBCDataSource) {
-      JDBCDataSource hsqlDataSource = (JDBCDataSource) dataSource;
-      this.url = hsqlDataSource.getUrl();
-      this.username = hsqlDataSource.getUser();
-      /*
-       * HSQL's implementation doesn't expose the DataSource's password, which is dumb. Because
-       * I'm lazy, I just hardcode it here. If you need this to NOT be hardcoded, simplest fix
-       * would be to write a helper method that pulls the field's value via reflection.
-       */
-      this.password = HSQL_SERVER_PASSWORD; // no getter available; hardcoded
-    } else if (dataSource instanceof PGSimpleDataSource) {
-      PGSimpleDataSource pgDataSource = (PGSimpleDataSource) dataSource;
+    if (dataSource instanceof PGSimpleDataSource pgDataSource) {
       this.url = pgDataSource.getUrl();
       this.username = pgDataSource.getUser();
       this.password = pgDataSource.getPassword();

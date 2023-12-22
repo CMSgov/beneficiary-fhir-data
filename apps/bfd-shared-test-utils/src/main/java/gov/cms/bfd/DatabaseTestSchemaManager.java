@@ -113,24 +113,7 @@ public class DatabaseTestSchemaManager {
   public static Map<String, String> createScriptPlaceholdersMap(DataSource dataSource) {
     Map<String, String> placeholders = new HashMap<>();
     try (Connection connection = dataSource.getConnection()) {
-      if (connection.getMetaData().getDatabaseProductName().equals("HSQL Database Engine")) {
-        placeholders.put("type.int4", "integer");
-        placeholders.put("type.text", "longvarchar");
-        placeholders.put("logic.tablespaces-escape", "--");
-        placeholders.put("logic.drop-tablespaces-escape", "--");
-        placeholders.put("logic.alter-column-type", "");
-        placeholders.put("logic.hsql-only-alter", "alter");
-        placeholders.put("logic.psql-only-alter", "-- alter");
-        placeholders.put("logic.alter-rename-column", "alter column");
-        placeholders.put("logic.alter-rename-constraint", "alter constraint");
-        placeholders.put("logic.rename-to", "rename to");
-        placeholders.put("logic.index-create-concurrently", "");
-        placeholders.put("logic.sequence-start", "start with");
-        placeholders.put("logic.sequence-increment", "increment by");
-        placeholders.put("logic.perms", "--");
-        placeholders.put("logic.psql-only", "-- ");
-        placeholders.put("logic.hsql-only", "");
-      } else if (connection.getMetaData().getDatabaseProductName().equals("PostgreSQL")) {
+      if (connection.getMetaData().getDatabaseProductName().equals("PostgreSQL")) {
         placeholders.put("type.int4", "int4");
         placeholders.put("type.text", "text");
         placeholders.put("logic.tablespaces-escape", "--");
@@ -148,7 +131,7 @@ public class DatabaseTestSchemaManager {
         placeholders.put("logic.psql-only", "");
         placeholders.put("logic.hsql-only", "-- ");
       } else {
-        throw new RuntimeException("Unknown database vendor");
+        throw new RuntimeException("Unsupported database vendor");
       }
     } catch (SQLException e) {
       throw new RuntimeException("SQL Exception while running migrations: ", e);

@@ -196,8 +196,7 @@ public final class PipelineTestUtils {
         // Then, switch to the appropriate schema.
         if (entityTableAnnotation.get().schema() != null
             && !entityTableAnnotation.get().schema().isEmpty()) {
-          String schemaNameSpecifier =
-              normalizeSchemaName(connection, entityTableAnnotation.get().schema());
+          String schemaNameSpecifier = normalizeSchemaName(entityTableAnnotation.get().schema());
           connection.setSchema(schemaNameSpecifier);
         } else {
           connection.setSchema(defaultSchemaName.get());
@@ -224,26 +223,18 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * For compatibility with HSQLDB and Postgresql, all schema names must have case preserved but any
-   * quotes in the name must be removed.
+   * Normalize the schema names by removing any quotes.
    *
-   * @param connection the connection
    * @param schemaNameSpecifier name of a schema from a hibernate annotation
    * @return value compatible with call to {@link Connection#setSchema(String)}
    * @throws SQLException the sql exception
    */
-  private String normalizeSchemaName(Connection connection, String schemaNameSpecifier)
-      throws SQLException {
-    String sql = schemaNameSpecifier.replaceAll("`", "");
-    if (isSchemaNameUppercaseRequired(connection)) {
-      sql = sql.toUpperCase();
-    }
-    return sql;
+  private String normalizeSchemaName(String schemaNameSpecifier) throws SQLException {
+    return schemaNameSpecifier.replaceAll("`", "");
   }
 
   /**
-   * Table names that use mixed case use quotes and have their original case preserved but those
-   * without quotes are converted to upper case to be compatible with Hibernate/HSQLDB.
+   * Normalize table names by removing quotes and uppercasing them.
    *
    * @param tableNameSpecifier name of a table from a hibernate annotation
    * @return value compatible with call to {@link java.sql.Statement#execute(String)}
@@ -255,18 +246,6 @@ public final class PipelineTestUtils {
       tableNameSpecifier = tableNameSpecifier.toUpperCase();
     }
     return tableNameSpecifier;
-  }
-
-  /**
-   * We're stuck in a painful situation where postgresql only recognizes the schema in its original
-   * case but HSQLDB only recognizes the schema in all uppercase.
-   *
-   * @param connection database connection used to make the decision
-   * @return true if the schema name should be converted to upper case
-   * @throws SQLException in case of failure
-   */
-  private boolean isSchemaNameUppercaseRequired(Connection connection) throws SQLException {
-    return DatabaseUtils.isHsqlConnection(connection);
   }
 
   /**

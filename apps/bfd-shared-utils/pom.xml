@@ -38,10 +38,6 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-hsqldb</artifactId>
-        </dependency>
-        <dependency>
             <!-- Used to interact with AWS' SSM service -->
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>ssm</artifactId>

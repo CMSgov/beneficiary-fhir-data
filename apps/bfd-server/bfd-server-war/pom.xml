@@ -280,12 +280,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- The builds for this and other BFD projects use HSQL in tests. -->
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <!-- Provides sample data used in tests. -->
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-model-rif-samples</artifactId>

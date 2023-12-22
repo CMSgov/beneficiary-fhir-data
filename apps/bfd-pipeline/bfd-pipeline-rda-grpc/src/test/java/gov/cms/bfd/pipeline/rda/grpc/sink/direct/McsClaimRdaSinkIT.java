@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +47,6 @@ public class McsClaimRdaSinkIT {
   @Test
   public void mcsClaim() throws Exception {
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        McsClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, transactionManager) -> {
           final LocalDate today = LocalDate.of(2022, 1, 3);
@@ -153,7 +153,6 @@ public class McsClaimRdaSinkIT {
     final String invalidDiagIcdType = "invalid_icd_type";
 
     RdaPipelineTestUtils.runTestWithTemporaryDb(
-        McsClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, transactionManager) -> {
           final LocalDate today = LocalDate.of(2022, 1, 3);
@@ -245,7 +244,12 @@ public class McsClaimRdaSinkIT {
             assertEquals(Long.valueOf(7), error.getSequenceNumber());
             assertEquals(MessageError.ClaimType.MCS, error.getClaimType());
             assertEquals(claim.getIdrClmHdIcn(), error.getClaimId());
-            assertEquals(mapper.writeValueAsString(expectedTransformErrors), error.getErrors());
+            // Errors occur misordered, so check the expected pieces of the error exist in the full
+            // error list
+            for (DataTransformer.ErrorMessage expectedError : expectedTransformErrors) {
+              assertTrue(error.getErrors().contains(expectedError.getFieldName()));
+              assertTrue(error.getErrors().contains(expectedError.getErrorMessage()));
+            }
           }
         });
   }

@@ -128,14 +128,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- In-memory database that can be used for testing. -->
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <!-- Only used by tests, but included in compile scope for use with test
-                utilities in that scope. -->
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <!-- The DB that BFD uses in production environments, included here for use in tests. -->
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>

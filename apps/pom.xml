@@ -120,7 +120,6 @@
         <assertj.version>3.24.2</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
         <postgresql.version>42.7.1</postgresql.version>
-        <hsqldb.version>2.7.2</hsqldb.version>
         <slf4j.version>2.0.9</slf4j.version>
         <log4j.version>2.22.0</log4j.version>
         <hikari.version>5.1.0</hikari.version>
@@ -306,11 +305,6 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-database-postgresql</artifactId>
-                <version>${flyway.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-database-hsqldb</artifactId>
                 <version>${flyway.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
@@ -533,13 +527,6 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
-            </dependency>
-            <dependency>
-                <!-- In-memory database that is used in some tests to speed things up. -->
-                <groupId>org.hsqldb</groupId>
-                <artifactId>hsqldb</artifactId>
-                <version>${hsqldb.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
