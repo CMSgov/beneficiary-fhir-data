@@ -15,6 +15,7 @@ locals {
   env              = module.terraservice.env
   seed_env         = module.terraservice.seed_env
   is_ephemeral_env = module.terraservice.is_ephemeral_env
+  latest_version   = module.terraservice.latest_bfd_release
 
   service   = "eft"
   layer     = "data"
@@ -188,11 +189,16 @@ locals {
   ]
 
   account_id     = data.aws_caller_identity.current.account_id
+  region         = data.aws_region.current.name
   vpc_id         = data.aws_vpc.this.id
   kms_key_id     = data.aws_kms_key.cmk.arn
   sftp_port      = 22
   logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
 
+  outbound_lambda_name      = "sftp-outbound-transfer"
+  outbound_lambda_full_name = "${local.full_name}-${local.outbound_lambda_name}"
+  outbound_lambda_src       = replace(local.outbound_lambda_name, "-", "_")
+  outbound_lambda_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.latest_version}"
   # For some reason, the transfer server endpoint service does not support us-east-1b and instead
   # opts to support us-east-1d. In order to enable support for this sub-az in the future
   # automatically (if transfer server VPC endpoints begin to support 1c), we filter our desired
@@ -264,6 +270,57 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
       topic_arn     = aws_sns_topic.outbound_failed_s3_notifs[topic.key].arn
     }
   }
+}
+
+resource "aws_lambda_function" "sftp_outbound_transfer" {
+  function_name = local.outbound_lambda_full_name
+
+  description = join("", [
+    "Invoked when participating Peering Partners upload files to their corresponding outbound ",
+    "pending files folder in the ${local.full_name} Bucket. This Lambda will then upload those ",
+    "file(s) via CMS EFT SFTP if they are recognized and valid."
+  ])
+
+  kms_key_arn  = local.kms_key_id
+  image_uri    = local.outbound_lambda_image_uri
+  package_type = "Image"
+  memory_size  = 512
+  timeout      = 600
+
+  tags = {
+    Name = local.outbound_lambda_full_name
+  }
+
+  environment {
+    variables = {
+      BFD_ENVIRONMENT = local.env
+      BUCKET          = local.full_name
+      BUCKET_ROOT_DIR = local.eft_s3_sftp_home_folder
+    }
+  }
+
+  role = aws_iam_role.sftp_outbound_transfer.arn
+
+  # FUTURE: Implement VPC config allowing Lambda to interact _only_ with the EFT SFTP Server
+}
+
+resource "aws_lambda_permission" "sftp_outbound_transfer_sns" {
+  for_each = toset(local.eft_partners_with_outbound_enabled)
+
+  statement_id   = "${local.outbound_lambda_full_name}-allow-sns"
+  action         = "lambda:InvokeFunction"
+  function_name  = aws_lambda_function.sftp_outbound_transfer.function_name
+  principal      = "sns.amazonaws.com"
+  source_arn     = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
+  source_account = local.account_id
+}
+
+resource "aws_sns_topic_subscription" "sftp_outbound_transfer" {
+  for_each = toset(local.eft_partners_with_outbound_enabled)
+
+  topic_arn = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.sftp_outbound_transfer.arn
 }
 
 # FUTURE: If any additional SNS Topics are required similar to the ones defined below, this

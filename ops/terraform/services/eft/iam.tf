@@ -200,3 +200,59 @@ resource "aws_iam_policy" "partner_bucket_access" {
     }
   )
 }
+
+resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
+  name = "${local.outbound_lambda_full_name}-logs"
+  description = join("", [
+    "Permissions for the ${local.outbound_lambda_full_name} Lambda to write to its corresponding ",
+    "CloudWatch Log Group and Log Stream",
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect   = "Allow"
+          Action   = "logs:CreateLogGroup"
+          Resource = "arn:aws:logs:${local.region}:${local.account_id}:*"
+        },
+        {
+          Effect = "Allow"
+          Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
+          Resource = [
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${local.outbound_lambda_full_name}:*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_role" "sftp_outbound_transfer" {
+  name        = local.outbound_lambda_full_name
+  path        = "/"
+  description = "Role for ${local.outbound_lambda_full_name} Lambda"
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Action = "sts:AssumeRole",
+          Effect = "Allow",
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          }
+        }
+      ]
+    }
+  )
+
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "logs_to_lambda_role" {
+  role       = aws_iam_role.sftp_outbound_transfer.arn
+  policy_arn = aws_iam_policy.sftp_outbound_transfer_logs.arn
+}

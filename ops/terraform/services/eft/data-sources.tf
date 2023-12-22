@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 data "aws_caller_identity" "current" {}
 
 data "aws_kms_key" "cmk" {
@@ -17,6 +19,10 @@ data "aws_ssm_parameters_by_path" "params" {
   recursive       = true
   path            = each.value
   with_decryption = true
+}
+
+data "aws_ecr_repository" "ecr" {
+  name = "bfd-mgmt-${local.service}"
 }
 
 data "aws_ec2_managed_prefix_list" "vpn" {
