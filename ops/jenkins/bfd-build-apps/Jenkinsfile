@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+@Library('bfd@bfd-3119-handle-spaces-in-pipeline-job-name-values') _
+
 /**
  * <p>
  * This script will be run by Jenkins when building apps and app AMIs.

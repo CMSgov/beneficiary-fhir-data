@@ -1,9 +1,6 @@
 #!/usr/bin/env groovy
 
-@Library('bfd@bfd-3119-handle-spaces-in-pipeline-job-name-values')
-
-/** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
-def STATUS_FINISHED = "Finished"
+@Library('bfd@bfd-3119-handle-spaces-in-pipeline-job-name-values') _
 
 String getFormattedMonitorMsg(String msg) {
     return "[Migrator monitor]: ${msg}"
@@ -63,8 +60,9 @@ boolean deployMigrator(Map args = [:]) {
     // re-authenticate
     awsAuth.assumeRole()
 
-    // set return value for final disposition
-    if (finalMigratorStatus[0] == STATUS_FINISHED) {
+    /** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
+    if (finalMigratorStatus[0] == "Finished") {
+        // set return value for final disposition
         migratorDeployedSuccessfully = true
         awsSsm.putParameter(
             parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
@@ -126,7 +124,8 @@ def monitorMigrator(Map args = [:]) {
                 println getFormattedMonitorMsg(getMigratorStatus(body))
                 awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
                 latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
-                if (body.appStage == STATUS_FINISHED) {
+                /** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
+                if (body.appStage == "Finished") {
                     return [body.appStage, latestSchemaVersion]
                 }
             }

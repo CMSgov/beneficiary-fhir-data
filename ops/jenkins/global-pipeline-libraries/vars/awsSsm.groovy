@@ -3,7 +3,7 @@
 
 // Gets value from SSM parameter store based on parameter name.
 // If a SSM parameter does not exist, it will result in an exception.
-@Library('bfd@bfd-3119-handle-spaces-in-pipeline-job-name-values')
+@Library('bfd@bfd-3119-handle-spaces-in-pipeline-job-name-values') _
 
 String getParameter(Map args = [:]) {
     name = args.parameterName
