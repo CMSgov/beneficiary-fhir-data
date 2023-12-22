@@ -1,7 +1,5 @@
 #!/usr/bin/env groovy
 
-@Library('bfd@bfd-3119-handle-spaces-in-pipeline-job-name-values') _
-
 String getFormattedMonitorMsg(String msg) {
     return "[Migrator monitor]: ${msg}"
 }
@@ -104,7 +102,7 @@ def monitorMigrator(Map args = [:]) {
     heartbeatInterval = args.heartbeatInterval
     maxMessages = args.maxMessages
     sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
-    latestSchemaVersion = null
+    latestSchemaVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as Integer
     while(true) {
         awsAuth.assumeRole()
         hasMessages = true;
@@ -123,7 +121,6 @@ def monitorMigrator(Map args = [:]) {
                 body = msg.body
                 println getFormattedMonitorMsg(getMigratorStatus(body))
                 awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-                latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
                 /** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
                 if (body.appStage == "Finished") {
                     return [body.appStage, latestSchemaVersion]
