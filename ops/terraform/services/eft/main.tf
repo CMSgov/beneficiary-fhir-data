@@ -188,19 +188,16 @@ locals {
   # enabled. Outbound will be globally disabled (this will be an empty list) if any global outbound
   # configuration is undefined or invalid. Additionally, partners must have at least one recognized
   # file configured in order for outbound to be considered enabled for them
-  eft_partners_with_outbound_enabled = length(
+  eft_partners_with_outbound_enabled = alltrue([
     # Essentially, this checks every global outbound configuration value to ensure none of them are
     # null or whitespace. If any are, the ternary will return an empty list of outbound partners, as
     # outbound requires this configuration to be defined
-    compact([
-      for x in [
-        local.outbound_sftp_host,
-        local.outbound_sftp_host_key,
-        local.outbound_sftp_username,
-        local.outbound_sftp_user_priv_key
-      ] : trimspace(x)
-    ])
-    ) > 0 ? [
+    for x in [
+      local.outbound_sftp_host,
+      local.outbound_sftp_host_key,
+      local.outbound_sftp_username,
+      local.outbound_sftp_user_priv_key
+    ] : coalesce(trimspace(x), "INVALID") != "INVALID"]) ? [
     for partner, _ in local.eft_partners_config :
     partner
     if contains(local.outbound_eft_partners, partner) && length(
