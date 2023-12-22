@@ -27,6 +27,11 @@ data "aws_ecr_repository" "ecr" {
   name = "bfd-mgmt-${local.service}-${local.outbound_lambda_name}-lambda"
 }
 
+data "aws_ecr_image" "sftp_outbound_transfer" {
+  repository_name = data.aws_ecr_repository.ecr.name
+  image_tag       = local.latest_version
+}
+
 data "aws_ec2_managed_prefix_list" "vpn" {
   filter {
     name   = "prefix-list-name"

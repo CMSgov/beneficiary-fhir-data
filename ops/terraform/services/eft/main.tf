@@ -317,11 +317,12 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
     "file(s) via CMS EFT SFTP if they are recognized and valid."
   ])
 
-  kms_key_arn  = local.kms_key_id
-  image_uri    = local.outbound_lambda_image_uri
-  package_type = "Image"
-  memory_size  = 512
-  timeout      = 600
+  kms_key_arn      = local.kms_key_id
+  image_uri        = local.outbound_lambda_image_uri
+  source_code_hash = trimprefix(data.aws_ecr_image.sftp_outbound_transfer.id, "sha256:")
+  package_type     = "Image"
+  memory_size      = 512
+  timeout          = 600
 
   tags = {
     Name = local.outbound_lambda_full_name
