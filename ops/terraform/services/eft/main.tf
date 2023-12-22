@@ -332,9 +332,13 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
 
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
-      BUCKET          = local.full_name
-      BUCKET_ROOT_DIR = local.inbound_sftp_s3_home_dir
+      BFD_ENVIRONMENT        = local.env
+      BUCKET                 = local.full_name
+      BUCKET_ROOT_DIR        = local.inbound_sftp_s3_home_dir
+      SFTP_DEST_HOST         = local.outbound_sftp_host
+      SFTP_DEST_HOST_KEY_B64 = base64encode(local.outbound_sftp_host_key)
+      SFTP_DEST_USER         = local.outbound_sftp_username
+      SFTP_DEST_PRIV_KEY_B64 = base64encode(local.outbound_sftp_user_priv_key)
     }
   }
 
