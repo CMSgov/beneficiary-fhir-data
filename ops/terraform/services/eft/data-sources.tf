@@ -9,7 +9,9 @@ data "aws_kms_key" "cmk" {
 # This is a distinct parameter as we need to retrieve the list of partners first so that we know
 # which SSM hierarchies to get
 data "aws_ssm_parameter" "partners_list_json" {
-  name            = "/bfd/${local.env}/${local.service}/sensitive/partners_list_json"
+  for_each = toset(["inbound", "outbound"])
+
+  name            = "/bfd/${local.env}/${local.service}/sensitive/${each.key}/partners_list_json"
   with_decryption = true
 }
 
@@ -65,12 +67,12 @@ data "aws_vpc_endpoint_service" "transfer_server" {
 }
 
 data "aws_ssm_parameter" "zone_name" {
-  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_${local.eft_r53_hosted_zone}_domain"
+  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_${local.inbound_r53_hosted_zone}_domain"
   with_decryption = true
 }
 
 data "aws_ssm_parameter" "zone_is_private" {
-  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_${local.eft_r53_hosted_zone}_is_private"
+  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_${local.inbound_r53_hosted_zone}_is_private"
   with_decryption = true
 }
 
@@ -78,6 +80,6 @@ data "aws_route53_zone" "this" {
   name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
   private_zone = nonsensitive(data.aws_ssm_parameter.zone_is_private.value)
   tags = {
-    "ConfigId" = local.eft_r53_hosted_zone
+    "ConfigId" = local.inbound_r53_hosted_zone
   }
 }

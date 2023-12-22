@@ -25,8 +25,8 @@ resource "aws_iam_role" "logs" {
 }
 
 resource "aws_iam_role" "eft_user" {
-  name        = "${local.full_name}-${local.eft_user_username}-sftp-user"
-  description = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.eft_user_username} SFTP user"
+  name        = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
+  description = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.inbound_sftp_user_username} SFTP user"
 
   assume_role_policy = jsonencode(
     {
@@ -48,10 +48,10 @@ resource "aws_iam_role" "eft_user" {
 }
 
 resource "aws_iam_policy" "eft_user" {
-  name = "${local.full_name}-${local.eft_user_username}-sftp-user"
+  name = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
   description = join("", [
-    "Allows the ${local.eft_user_username} SFTP user to access their restricted portion of the ",
-    "${aws_s3_bucket.this.id} S3 bucket when using SFTP"
+    "Allows the ${local.inbound_sftp_user_username} SFTP user to access their restricted portion ",
+    "of the ${aws_s3_bucket.this.id} S3 bucket when using SFTP"
   ])
 
   policy = jsonencode(
@@ -83,8 +83,8 @@ resource "aws_iam_policy" "eft_user" {
           Condition = {
             StringLike = {
               "s3:prefix" = [
-                "${local.eft_s3_sftp_home_folder}/*",
-                local.eft_s3_sftp_home_folder
+                "${local.inbound_sftp_s3_home_dir}/*",
+                local.inbound_sftp_s3_home_dir
               ]
             }
           }
@@ -101,7 +101,7 @@ resource "aws_iam_policy" "eft_user" {
             "s3:GetObjectACL",
             "s3:PutObjectACL"
           ]
-          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_s3_sftp_home_folder}*"]
+          Resource = ["${aws_s3_bucket.this.arn}/${local.inbound_sftp_s3_home_dir}*"]
         }
       ]
     }
@@ -202,6 +202,8 @@ resource "aws_iam_policy" "partner_bucket_access" {
 }
 
 resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
   name = "${local.outbound_lambda_full_name}-logs"
   description = join("", [
     "Permissions for the ${local.outbound_lambda_full_name} Lambda to write to its corresponding ",
@@ -230,6 +232,8 @@ resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
 }
 
 resource "aws_iam_role" "sftp_outbound_transfer" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
   name        = local.outbound_lambda_full_name
   path        = "/"
   description = "Role for ${local.outbound_lambda_full_name} Lambda"
@@ -253,6 +257,8 @@ resource "aws_iam_role" "sftp_outbound_transfer" {
 }
 
 resource "aws_iam_role_policy_attachment" "logs_to_lambda_role" {
-  role       = aws_iam_role.sftp_outbound_transfer.arn
-  policy_arn = aws_iam_policy.sftp_outbound_transfer_logs.arn
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  role       = one(aws_iam_role.sftp_outbound_transfer[*].arn)
+  policy_arn = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn)
 }
