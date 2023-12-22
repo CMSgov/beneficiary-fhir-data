@@ -104,8 +104,8 @@ locals {
           [
             for path in [
               local.inbound_sftp_s3_home_dir,
-              trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
-              trim(local.ssm_config["/${partner}/${local.service}/inbound/dir"], "/")
+              trim(lookup(local.ssm_config, "/${partner}/${local.service}/bucket_home_dir", ""), "/"),
+              trim(lookup(local.ssm_config, "/${partner}/${local.service}/inbound/dir", ""), "/")
             ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         )
@@ -121,8 +121,8 @@ locals {
           [
             for path in [
               local.inbound_sftp_s3_home_dir,
-              trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
-              trim(local.ssm_config["/${partner}/${local.service}/outbound/pending_dir"], "/")
+              trim(lookup(local.ssm_config, "/${partner}/${local.service}/bucket_home_dir", ""), "/"),
+              trim(lookup(local.ssm_config, "/${partner}/${local.service}/outbound/pending_dir", ""), "/")
             ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         ),
@@ -131,8 +131,8 @@ locals {
           [
             for path in [
               local.inbound_sftp_s3_home_dir,
-              trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
-              trim(local.ssm_config["/${partner}/${local.service}/outbound/sent_dir"], "/")
+              trim(lookup(local.ssm_config, "/${partner}/${local.service}/bucket_home_dir", ""), "/"),
+              trim(lookup(local.ssm_config, "/${partner}/${local.service}/outbound/sent_dir", ""), "/")
             ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         ),
@@ -141,8 +141,8 @@ locals {
           [
             for path in [
               local.inbound_sftp_s3_home_dir,
-              trim(local.ssm_config["/${partner}/${local.service}/bucket_home_dir"], "/"),
-              trim(local.ssm_config["/${partner}/${local.service}/outbound/failed_dir"], "/")
+              trim(lookup(local.ssm_config, "/${partner}/${local.service}/bucket_home_dir", ""), "/"),
+              trim(lookup(local.ssm_config, "/${partner}/${local.service}/outbound/failed_dir", ""), "/")
             ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         ),
