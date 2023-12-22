@@ -4,7 +4,7 @@ import os
 import re
 import socket
 import sys
-from base64 import b64decode, decodebytes
+from base64 import b64decode
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, StrEnum, auto
@@ -28,10 +28,6 @@ REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 BUCKET = os.environ.get("BUCKET", "")
 BUCKET_ROOT_DIR = os.environ.get("BUCKET_ROOT_DIR", "")
-SFTP_DEST_HOST = os.environ.get("SFTP_DEST_HOST", "")
-SFTP_DEST_HOST_KEY_B64 = os.environ.get("SFTP_DEST_HOST_KEY_B64", "")
-SFTP_DEST_USER = os.environ.get("SFTP_DEST_USER", "")
-SFTP_DEST_PRIV_KEY_B64 = os.environ.get("SFTP_DEST_PRIV_KEY_B64", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -66,6 +62,35 @@ class FileTransferError(StrEnum):
     UNRECOGNIZED_FILE = auto()
     SFTP_CONNECTION_ERROR = auto()
     SFTP_TRANSFER_ERROR = auto()
+
+@dataclass(frozen=True, eq=True)
+class GlobalSsmConfig:
+    sftp_hostname: str
+    sftp_host_pub_key: str
+    sftp_username: str
+    sftp_user_priv_key: str
+
+    @classmethod
+    def from_ssm(cls) -> "GlobalSsmConfig":
+        sftp_hostname = get_ssm_parameter(
+            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/host", with_decrypt=True
+        )
+        sftp_host_pub_key = get_ssm_parameter(
+            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/trusted_host_key", with_decrypt=True
+        )
+        sftp_username = get_ssm_parameter(
+            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/username", with_decrypt=True
+        )
+        sftp_user_priv_key = get_ssm_parameter(
+            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/user_priv_key", with_decrypt=True
+        )
+
+        return GlobalSsmConfig(
+            sftp_hostname=sftp_hostname,
+            sftp_host_pub_key=sftp_host_pub_key,
+            sftp_username=sftp_username,
+            sftp_user_priv_key=sftp_user_priv_key
+        )
 
 
 @dataclass(frozen=True, eq=True)
@@ -161,10 +186,6 @@ def handler(event: Any, context: Any):
             BFD_ENVIRONMENT,
             BUCKET,
             BUCKET_ROOT_DIR,
-            SFTP_DEST_HOST,
-            SFTP_DEST_PRIV_KEY_B64,
-            SFTP_DEST_USER,
-            SFTP_DEST_PRIV_KEY_B64,
         ]
     ):
         logger.error("Not all necessary environment variables were defined, exiting...")
@@ -242,6 +263,16 @@ def handler(event: Any, context: Any):
     subfolder = match.group(2)
     filename = match.group(3)
 
+    try: 
+        global_config = GlobalSsmConfig.from_ssm()
+    except (ValueError, botocore.exceptions.ClientError):
+        logger.error(
+            "An unrecoverable error occurred when attempting to retrieve "
+            "global outbound SSM configuration: ",
+            exc_info=True,
+        )
+        return
+
     try:
         partner_config = PartnerSsmConfig.from_partner(partner=partner)
     except (ValueError, botocore.exceptions.ClientError):
@@ -305,26 +336,26 @@ def handler(event: Any, context: Any):
     logger.info(
         'Preconditions checked. Connecting to SFTP host "%s" as user "%s" with provided private key'
         " and server host public key...",
-        SFTP_DEST_HOST,
-        SFTP_DEST_USER,
+        global_config.sftp_hostname,
+        global_config.sftp_username,
     )
 
     with paramiko.SSHClient() as ssh_client:
         try:
             sftp_host_key = paramiko.RSAKey(
-                data=decodebytes(
-                    b64decode(SFTP_DEST_HOST_KEY_B64).removeprefix("ssh-rsa ".encode())
+                data=b64decode(
+                    global_config.sftp_host_pub_key.removeprefix("ssh-rsa ")
                 )
             )
             sftp_priv_key = paramiko.RSAKey.from_private_key(
-                StringIO(b64decode(SFTP_DEST_PRIV_KEY_B64).decode("unicode_escape"))
+                StringIO(global_config.sftp_user_priv_key)
             )
             ssh_client.get_host_keys().add(
-                hostname=SFTP_DEST_HOST, keytype="ssh-rsa", key=sftp_host_key
+                hostname=global_config.sftp_hostname, keytype="ssh-rsa", key=sftp_host_key
             )
             ssh_client.connect(
-                SFTP_DEST_HOST,
-                username=SFTP_DEST_USER,
+                global_config.sftp_hostname,
+                username=global_config.sftp_username,
                 pkey=sftp_priv_key,
                 look_for_keys=False,
                 allow_agent=False,
@@ -338,7 +369,7 @@ def handler(event: Any, context: Any):
         ):
             logger.error(
                 "An unrecoverable exception occurred when attempting to connect to SFTP server %s",
-                SFTP_DEST_HOST,
+                global_config.sftp_hostname,
                 exc_info=True,
             )
             failed_full_path = "/".join(
@@ -368,7 +399,7 @@ def handler(event: Any, context: Any):
 
         logger.info(
             "Connected successfully to %s. Attempting to upload %s to %s...",
-            SFTP_DEST_HOST,
+            global_config.sftp_hostname,
             filename,
             destination_folder,
         )
@@ -394,7 +425,7 @@ def handler(event: Any, context: Any):
                 " %s: ",
                 decoded_file_key,
                 destination_folder,
-                SFTP_DEST_HOST,
+                global_config.sftp_hostname,
                 exc_info=True,
             )
             failed_full_path = "/".join(
@@ -426,7 +457,7 @@ def handler(event: Any, context: Any):
             "%s uploaded successfully to %s on %s",
             decoded_file_key,
             destination_folder,
-            SFTP_DEST_HOST,
+            global_config.sftp_hostname,
         )
         success_full_path = f"{partner_config.sent_files_full_path}/{filename}"
         logger.info(
