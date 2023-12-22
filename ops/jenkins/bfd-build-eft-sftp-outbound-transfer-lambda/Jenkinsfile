@@ -48,7 +48,7 @@ spec:
                     }
 
                     // Execute the existing build-push script
-                    dir('ops/jenkins/bfd-build-eft-sftp-outbound-lambda') {
+                    dir('ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda') {
                         sh 'bash build-push.sh'
                     }
                 }
