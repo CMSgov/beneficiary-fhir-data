@@ -174,7 +174,8 @@ public class DLQDaoIT {
                     assertEquals(recordToUpdate.getCreatedDate(), rec.getCreatedDate());
                     // the update date should have been updated
                     assertEquals(
-                        clock.instant().truncatedTo(ChronoUnit.MILLIS), rec.getUpdatedDate().truncatedTo(ChronoUnit.MILLIS));
+                        clock.instant().truncatedTo(ChronoUnit.MILLIS),
+                        rec.getUpdatedDate().truncatedTo(ChronoUnit.MILLIS));
                   });
               assertContentsHaveSamePropertyValues(
                   allRecordsAfter, remainingRecords, ComparatorForSorting);
