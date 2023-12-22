@@ -102,6 +102,11 @@ locals {
         }
       }
       outbound = {
+        is_enabled = length(
+          jsondecode(
+            lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/recognized_files_json", "[]")
+          )
+        ) > 0,
         pending_path = join(
           "/",
           [
@@ -165,17 +170,21 @@ locals {
     for partner in local.eft_partners :
     partner if length(local.eft_partners_config[partner].inbound.s3_notifications.received_file_targets) > 0
   ]
-  eft_partners_with_outbound_pending_notifs = [
+  eft_partners_with_outbound_enabled = [
     for partner in local.eft_partners :
-    partner if length(local.eft_partners_config[partner].outbound.s3_notifications.pending_file_targets) > 0
+    partner if local.eft_partners_config[partner].outbound.is_enabled
   ]
   eft_partners_with_outbound_sent_notifs = [
     for partner in local.eft_partners :
-    partner if length(local.eft_partners_config[partner].outbound.s3_notifications.sent_file_targets) > 0
+    partner
+    if length(local.eft_partners_config[partner].outbound.s3_notifications.sent_file_targets) > 0
+    && local.eft_partners_config[partner].outbound.is_enabled
   ]
   eft_partners_with_outbound_failed_notifs = [
     for partner in local.eft_partners :
-    partner if length(local.eft_partners_config[partner].outbound.s3_notifications.failed_file_targets) > 0
+    partner
+    if length(local.eft_partners_config[partner].outbound.s3_notifications.failed_file_targets) > 0
+    && local.eft_partners_config[partner].outbound.is_enabled
   ]
 
   account_id     = data.aws_caller_identity.current.account_id
@@ -205,7 +214,7 @@ resource "aws_s3_bucket" "this" {
 resource "aws_s3_bucket_notification" "bucket_notifications" {
   count = length(concat([
     local.eft_partners_with_inbound_received_notifs,
-    local.eft_partners_with_outbound_pending_notifs,
+    local.eft_partners_with_outbound_enabled,
     local.eft_partners_with_outbound_sent_notifs,
     local.eft_partners_with_outbound_failed_notifs
   ])) > 0 ? 1 : 0
@@ -213,82 +222,46 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
   bucket = aws_s3_bucket.this.id
 
   dynamic "topic" {
-    # This is pretty strange, but is necessitated by "for_each" requiring either a _set_ of strings
-    # or a map, and since partners aren't unique per-target this is the easiest way to workaround
-    # "for_each"'s limitations without additional code. The key is completely unnecessary, so the
-    # index is used to ensure uniqueness
-    for_each = {
-      for index, tupl in flatten([
-        for partner in local.eft_partners_with_inbound_received_notifs :
-        [
-          for target in local.eft_partners_config[partner].inbound.s3_notifications.received_file_targets :
-          { partner = partner, target = target }
-        ]
-      ]) : index => tupl
-    }
-
+    for_each = toset(local.eft_partners_with_inbound_received_notifs)
     content {
       events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.value.partner].inbound.dir}/"
-      id            = aws_sns_topic.inbound_received_s3_notifs[topic.value.partner].name
-      topic_arn     = aws_sns_topic.inbound_received_s3_notifs[topic.value.partner].arn
+      filter_prefix = "${local.eft_partners_config[topic.key].inbound.dir}/"
+      id            = aws_sns_topic.inbound_received_s3_notifs[topic.key].name
+      topic_arn     = aws_sns_topic.inbound_received_s3_notifs[topic.key].arn
     }
   }
 
   dynamic "topic" {
-    for_each = {
-      for index, tupl in flatten([
-        for partner in local.eft_partners_with_outbound_pending_notifs :
-        [
-          for target in local.eft_partners_config[partner].outbound.s3_notifications.pending_file_targets :
-          { partner = partner, target = target }
-        ]
-      ]) : index => tupl
-    }
-
+    # Unlike other outbound notification classes, we want to enable S3 Event Notifications for files
+    # landing in a partner's pending directory even if they have no configured targets if outbound
+    # is enabled for them (specifically, if they have any recognized files configured). This is
+    # necessary to invoke the outbound SFTP Lambda
+    for_each = toset(local.eft_partners_with_outbound_enabled)
     content {
       events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.value.partner].outbound.pending_path}/"
-      id            = aws_sns_topic.outbound_pending_s3_notifs[topic.value.partner].name
-      topic_arn     = aws_sns_topic.outbound_pending_s3_notifs[topic.value.partner].arn
+      filter_prefix = "${local.eft_partners_config[topic.key].outbound.pending_path}/"
+      id            = aws_sns_topic.outbound_pending_s3_notifs[topic.key].name
+      topic_arn     = aws_sns_topic.outbound_pending_s3_notifs[topic.key].arn
     }
   }
 
   dynamic "topic" {
-    for_each = {
-      for index, tupl in flatten([
-        for partner in local.eft_partners_with_outbound_sent_notifs :
-        [
-          for target in local.eft_partners_config[partner].outbound.s3_notifications.sent_file_targets :
-          { partner = partner, target = target }
-        ]
-      ]) : index => tupl
-    }
-
+    for_each = toset(local.eft_partners_with_outbound_sent_notifs)
     content {
       events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.value.partner].outbound.sent_path}/"
-      id            = aws_sns_topic.outbound_sent_s3_notifs[topic.value.partner].name
-      topic_arn     = aws_sns_topic.outbound_sent_s3_notifs[topic.value.partner].arn
+      filter_prefix = "${local.eft_partners_config[topic.key].outbound.sent_path}/"
+      id            = aws_sns_topic.outbound_sent_s3_notifs[topic.key].name
+      topic_arn     = aws_sns_topic.outbound_sent_s3_notifs[topic.key].arn
     }
   }
 
   dynamic "topic" {
-    for_each = {
-      for index, tupl in flatten([
-        for partner in local.eft_partners_with_outbound_sent_notifs :
-        [
-          for target in local.eft_partners_config[partner].outbound.s3_notifications.failed_file_targets :
-          { partner = partner, target = target }
-        ]
-      ]) : index => tupl
-    }
-
+    for_each = toset(local.eft_partners_with_outbound_failed_notifs)
     content {
       events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.value.partner].outbound.failed_path}/"
-      id            = aws_sns_topic.outbound_failed_s3_notifs[topic.value.partner].name
-      topic_arn     = aws_sns_topic.outbound_failed_s3_notifs[topic.value.partner].arn
+      filter_prefix = "${local.eft_partners_config[topic.key].outbound.failed_path}/"
+      id            = aws_sns_topic.outbound_failed_s3_notifs[topic.key].name
+      topic_arn     = aws_sns_topic.outbound_failed_s3_notifs[topic.key].arn
     }
   }
 }
@@ -347,14 +320,14 @@ resource "aws_sns_topic_policy" "inbound_received_s3_notifs" {
 }
 
 resource "aws_sns_topic" "outbound_pending_s3_notifs" {
-  for_each = toset(local.eft_partners_with_outbound_pending_notifs)
+  for_each = toset(local.eft_partners_with_outbound_enabled)
 
   name              = "${local.full_name}-outbound-pending-s3-${each.key}"
   kms_master_key_id = local.kms_key_id
 }
 
 resource "aws_sns_topic_policy" "outbound_pending_s3_notifs" {
-  for_each = toset(local.eft_partners_with_outbound_pending_notifs)
+  for_each = toset(local.eft_partners_with_outbound_enabled)
 
   arn = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
   policy = jsonencode(
