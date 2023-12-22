@@ -11,5 +11,5 @@ COPY --from=python /var/lang/lib/python3.12/site-packages /var/lang/lib/python3.
 COPY --from=python /var/lang/bin /var/lang/bin
 COPY . "${LAMBDA_TASK_ROOT}/"
 ENV PATH="/var/lang/lib/python3.12/site-packages:${PATH}"
-CMD [ "sftp_outbound_transfer/sftp_outbound_transfer.handler" ]
+CMD [ "sftp_outbound_transfer.handler" ]
 
