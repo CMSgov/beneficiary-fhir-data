@@ -17,7 +17,7 @@ CONTEXT_DIR="${REPO_ROOT}/ops/terraform/services/eft/lambda_src/sftp_outbound_tr
 # Constants
 AWS_REGION="us-east-1"
 PRIVATE_REGISTRY_URI="$(aws ecr describe-registry --region "$AWS_REGION" | yq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
-IMAGE_NAME_NODE="${PRIVATE_REGISTRY_URI}/eft_sftp_outbound_transfer_lambda"
+IMAGE_NAME_NODE="${PRIVATE_REGISTRY_URI}/bfd-mgmt-eft-sftp-outbound-transfer-lambda"
 
 # Overridable defaults
 DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"$BFD_PARENT_VERSION"}"
