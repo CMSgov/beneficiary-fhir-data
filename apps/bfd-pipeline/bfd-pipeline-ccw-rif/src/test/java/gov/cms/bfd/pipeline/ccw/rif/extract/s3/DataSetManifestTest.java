@@ -13,6 +13,10 @@ import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.UnmarshalException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -21,10 +25,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.UnmarshalException;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -320,9 +320,9 @@ public final class DataSetManifestTest {
 
   /**
    * Verifies that {@link DataSetManifest} content that is missing a required element of the {@link
-   * PreValidationProperties} will throw an exception {@link javax.xml.bind.UnmarshalException} when
-   * tryng to parse an XML stream. It further verifies that the primary exception contains a linked
-   * exception {@link javax.xml.bind.JAXBException}.
+   * PreValidationProperties} will throw an exception {@link jakarta.xml.bind.UnmarshalException}
+   * when tryng to parse an XML stream. It further verifies that the primary exception contains a
+   * linked exception {@link jakarta.xml.bind.JAXBException}.
    */
   @Test
   public void manifestSyntheticEndStateInvalid() {
@@ -333,12 +333,12 @@ public final class DataSetManifestTest {
 
     Exception exception =
         assertThrows(
-            javax.xml.bind.UnmarshalException.class,
+            jakarta.xml.bind.UnmarshalException.class,
             () -> {
               DataSetManifest manifest = convertStreamToManifest(manifestStream);
             });
 
-    Throwable throwable = ((javax.xml.bind.UnmarshalException) exception).getLinkedException();
+    Throwable throwable = ((jakarta.xml.bind.UnmarshalException) exception).getLinkedException();
     assertNotNull(throwable);
     assertNotNull(throwable.getMessage());
     assertTrue(

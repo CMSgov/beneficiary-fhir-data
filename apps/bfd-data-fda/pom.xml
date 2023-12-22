@@ -92,9 +92,9 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
-                                <mkdir dir="${basedir}/target/fda-drug-csv-output" />
-                            </tasks>
+                            <target>
+                                <mkdir dir="${basedir}/target/fda-drug-csv-output"/>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

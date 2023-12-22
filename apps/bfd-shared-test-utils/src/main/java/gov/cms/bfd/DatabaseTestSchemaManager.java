@@ -10,8 +10,8 @@ import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.MigrationState;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
-import org.flywaydb.core.internal.database.postgresql.PostgreSQLConfigurationExtension;
 import org.flywaydb.core.internal.sqlscript.FlywaySqlScriptException;
+import org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension;
 
 /**
  * A copy of DatabaseSchemaManager for testing purposes, to eliminate dependencies between util
