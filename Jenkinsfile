@@ -331,7 +331,7 @@ try {
 				currentStage = env.STAGE_NAME
 				echo "Manual Approval Stage with Tag name : ${env.TAG_NAME}"
 				// tag name must follow pattern to enable deploy to prod environments
-				if (env.TAG_NAME != null && env.TAG_NAME =~ /^(\d+)\.(\d+)\.(\d+)$/) {
+				if (env.TAG_NAME == null) {
 					/*
 					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
 					* deploying to production environments.
