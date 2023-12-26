@@ -181,7 +181,7 @@ try {
 					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
 					// Send notifications that the build has started
-					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+//					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 				}
 			}
 
@@ -329,7 +329,7 @@ try {
 
 			stage('Manual Approval') {
 				currentStage = env.STAGE_NAME
-				println "Running build with Tag name : ${env.TAG_NAME}"
+				println "Manual Approval Stage with Tag name : ${env.TAG_NAME}"
 				// tag name must follow pattern to enable deploy to prod environments
 				if (env.TAG_NAME != null && env.TAG_NAME ==~ /^\d+\.\d+\.\d+$/) {
 					/*
@@ -351,6 +351,7 @@ try {
 						}
 					}
 				} else {
+					println "Tag Name did not match pattern"
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
 				}
 			}
@@ -647,5 +648,5 @@ try {
 	currentBuild.result = "FAILURE"
 	throw ex
 } finally {
-	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+//	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
 }
