@@ -174,9 +174,13 @@ try {
 
 					// This variables track our decision on whether or not to deploy to prod-like envs.
 					canDeployToProdEnvs = false
+					env.TAG_NAME = "99.10.01"
 					echo "Prepare Stage with Tag name : ${env.TAG_NAME}"
 					if (env.TAG_NAME != null && env.TAG_NAME ==~ /^\d+\.\d+\.\d+$/) {
-						canDeployToProdEnvs = true
+						// canDeployToProdEnvs = true
+						echo "Tag name matched pattern"
+					} else {
+						echo "Tag name did not match pattern"
 					}
 					willDeployToProdEnvs = false
 
