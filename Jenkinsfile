@@ -41,6 +41,7 @@ def scriptForApps
 def scriptForDeploys
 def migratorScripts
 def serverScripts
+def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
 def amiIds
@@ -172,6 +173,11 @@ try {
 					amiIds = scriptForDeploys.findAmis(gitBranchName)
 
 					// This variables track our decision on whether or not to deploy to prod-like envs.
+					canDeployToProdEnvs = false
+					echo "Prepare Stage with Tag name : ${env.TAG_NAME}"
+					if (env.TAG_NAME != null && env.TAG_NAME ==~ /^\d+\.\d+\.\d+$/) {
+						canDeployToProdEnvs = true
+					}
 					willDeployToProdEnvs = false
 
 					// Get the current commit id
@@ -329,9 +335,8 @@ try {
 
 			stage('Manual Approval') {
 				currentStage = env.STAGE_NAME
-				echo "Manual Approval Stage with Tag name : ${env.TAG_NAME}"
 				// tag name must follow pattern to enable deploy to prod environments
-				if (env.TAG_NAME == null) {
+				if (canDeployToProdEnvs) {
 					/*
 					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
 					* deploying to production environments.
