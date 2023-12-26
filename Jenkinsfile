@@ -329,7 +329,7 @@ try {
 
 			stage('Manual Approval') {
 				currentStage = env.STAGE_NAME
-				println "Manual Approval Stage with Tag name : ${env.TAG_NAME}"
+				echo "Manual Approval Stage with Tag name : ${env.TAG_NAME}"
 				// tag name must follow pattern to enable deploy to prod environments
 				if (env.TAG_NAME != null && env.TAG_NAME ==~ /^\d+\.\d+\.\d+$/) {
 					/*
@@ -351,7 +351,7 @@ try {
 						}
 					}
 				} else {
-					println "Tag Name did not match pattern"
+					echo "Tag Name did not match pattern"
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
 				}
 			}
