@@ -1,8 +1,5 @@
 #!/usr/bin/env groovy
 
-/** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
-STATUS_FINISHED = "Finished"
-
 String getFormattedMonitorMsg(String msg) {
     return "[Migrator monitor]: ${msg}"
 }
@@ -61,14 +58,15 @@ boolean deployMigrator(Map args = [:]) {
     // re-authenticate
     awsAuth.assumeRole()
 
-    // set return value for final disposition
-    if (finalMigratorStatus[0] == STATUS_FINISHED) {
+    /** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
+    if (finalMigratorStatus[0] == "Finished") {
+        // set return value for final disposition
         migratorDeployedSuccessfully = true
         awsSsm.putParameter(
             parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
             parameterValue: finalMigratorStatus[1],
             parameterType: "String",
-            parameterTag: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=${bfdEnv} Key=stack,Value=${bfdEnv} Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda",
+            parameterTags: ["Environment": bfdEnv, "stack": bfdEnv],
             shouldOverwrite: true
         )
 
@@ -104,7 +102,7 @@ def monitorMigrator(Map args = [:]) {
     heartbeatInterval = args.heartbeatInterval
     maxMessages = args.maxMessages
     sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
-    latestSchemaVersion = null
+    latestSchemaVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as Integer
     while(true) {
         awsAuth.assumeRole()
         hasMessages = true;
@@ -123,8 +121,8 @@ def monitorMigrator(Map args = [:]) {
                 body = msg.body
                 println getFormattedMonitorMsg(getMigratorStatus(body))
                 awsSqs.deleteMessage(msg.receipt, sqsQueueUrl)
-                latestSchemaVersion = body?.migrationStage?.version != null ? body.migrationStage.version : latestSchemaVersion
-                if (body.appStage == STATUS_FINISHED) {
+                /** App has finished processing with no errors. See gov.cms.bfd.migrator.app.MigratorProgress */
+                if (body.appStage == "Finished") {
                     return [body.appStage, latestSchemaVersion]
                 }
             }
