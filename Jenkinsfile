@@ -174,7 +174,7 @@ try {
 					// This variables track our decision on whether or not to deploy to prod-like envs.
 					canDeployToProdEnvs = false
 
-					if (env.TAG_NAME != null && env.TAG_NAME ==~ /^\d+\.\d+\.\d+$/) {
+					if (env.TAG_NAME != null && env.TAG_NAME ==~ /(^\d+\.\d+\.\d+$)|(^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$)/) {
 						canDeployToProdEnvs = true
 						echo "Tag name matched pattern"
 					}
