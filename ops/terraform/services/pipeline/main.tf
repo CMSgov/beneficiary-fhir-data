@@ -14,8 +14,8 @@ locals {
   latest_bfd_release = module.terraservice.latest_bfd_release
 
   account_id        = data.aws_caller_identity.current.account_id
-  alt_region        = data.aws_region.alt.name
   primary_region    = data.aws_region.primary.name
+  alt_region        = data.aws_region.alt.name
   layer             = "data"
   create_slis       = !local.is_ephemeral_env || var.force_sli_creation
   create_dashboard  = !local.is_ephemeral_env || var.force_dashboard_creation

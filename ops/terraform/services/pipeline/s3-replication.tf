@@ -1,16 +1,22 @@
+# TODO:
+# - lifecycle policy to prune delete marker objects after n days
 locals {
-  obects_to_replicate = [
+  alt_bucket_storage_class = "STANDARD_IA"
+  objects_to_replicate = [
     "Backup",
     "Done",
     "Hold",
-    # "Incoming",
+    "Incoming",
     "RDA-Synthetic",
     "Sample",
-    "Synthetic",
+    "Synthetic/Incoming",
+    "Synthetic/Done",
+    "Synthetic/Failed",
   ]
 }
 
-# alt region bucket
+# S3 replication destination bucket. During a failover event, this bucket will need to be imported and treated as the
+# primary bucket.
 resource "aws_s3_bucket" "this_alt" {
   provider = aws.alt
 
@@ -19,15 +25,25 @@ resource "aws_s3_bucket" "this_alt" {
   tags = {
     Layer   = local.layer,
     role    = local.legacy_service
-    Note    = "CCW backup bucket"
+    Note    = "Replication bucket for ${local.legacy_service} in ${local.alt_region}"
     Purpose = "ETL PUT"
     UsedBy  = "CCW"
   }
 }
 
-# crr assume role
-resource "aws_iam_role" "crr" {
-  name = "bfd-${local.env}-${local.legacy_service}-crr-role"
+# During normal operations, we will send the alt bucket's logs to the primary logging bucket. This may need to be
+# changed during a failover event if the primary bucket is not available.
+resource "aws_s3_bucket_logging" "this_alt" {
+  count = local.is_ephemeral_env || local.primary_region == local.alt_region ? 0 : 1
+
+  bucket        = aws_s3_bucket.this_alt.id
+  target_bucket = aws_s3_bucket.this.id
+  target_prefix = "${local.legacy_service}_${local.alt_region}_s3_access_logs/"
+}
+
+# replication assume role
+resource "aws_iam_role" "replication" {
+  name = "bfd-${local.env}-${local.legacy_service}-replication-role"
   assume_role_policy = jsonencode({
     version = "2012-10-17"
     statement = [
@@ -43,15 +59,15 @@ resource "aws_iam_role" "crr" {
 
 }
 
-# crr policy
-resource "aws_iam_policy" "crr" {
-  name        = "${aws_s3_bucket.this.id}-${local.alt_region}-crr-policy"
-  description = "Allows cross-region replication from ${aws_s3_bucket.this.id} to ${aws_s3_bucket.this.id}-${local.alt_region}"
-  policy      = data.aws_iam_policy_document.ccw_crr.json
+# replication policy
+resource "aws_iam_policy" "replication" {
+  name        = "${aws_s3_bucket.this_alt.id}-replication-policy"
+  description = "Allows cross-region replication from ${aws_s3_bucket.this.id} to ${aws_s3_bucket.this_alt.id}"
+  policy      = data.aws_iam_policy_document.replication.json
 }
 
-data "aws_iam_policy_document" "crr" {
-  # allow crr role to use kms keys
+data "aws_iam_policy_document" "replication" {
+  # allow replication role to use kms keys
   statement {
     sid    = "AllowKeyUsage"
     effect = "Allow"
@@ -87,7 +103,7 @@ data "aws_iam_policy_document" "crr" {
       "s3:GetObjectVersionTagging",
     ]
     resources = flatten([
-      for folder in local.obects_to_replicate : [
+      for folder in local.objects_to_replicate : [
         "${aws_s3_bucket.this.arn}/${folder}",
         "${aws_s3_bucket.this.arn}/${folder}/*",
       ]
@@ -103,10 +119,45 @@ data "aws_iam_policy_document" "crr" {
       "s3:ReplicateTags",
     ]
     resources = flatten([
-      for folder in local.obects_to_replicate : [
-        "${aws_s3_bucket.destination.arn}/${folder}",
-        "${aws_s3_bucket.destination.arn}/${folder}/*",
+      for folder in local.objects_to_replicate : [
+        "${aws_s3_bucket.this_alt.arn}/${folder}",
+        "${aws_s3_bucket.this_alt.arn}/${folder}/*",
       ]
     ])
+  }
+}
+
+# The replication config.
+resource "aws_s3_bucket_replication_configuration" "replication" {
+  # Must have bucket versioning enabled first
+  depends_on = [
+    aws_s3_bucket_versioning.this,
+    aws_s3_bucket.this_alt,
+  ]
+
+  bucket = aws_s3_bucket.this.id
+  role   = aws_iam_role.replication.arn
+
+  dynamic "rule" {
+    for_each = local.objects_to_replicate
+
+    content {
+      id     = rule.value
+      priority = rule.key
+      status = "Enabled"
+
+      filter {
+        prefix = rule.value
+      }
+
+      destination {
+        bucket        = aws_s3_bucket.this_alt.arn
+        storage_class = local.alt_bucket_storage_class
+      }
+
+      delete_marker_replication {
+        status = "Enabled"
+      }
+    }
   }
 }
