@@ -38,7 +38,7 @@ resource "aws_s3_bucket_logging" "this_alt" {
 
   bucket        = aws_s3_bucket.this_alt.id
   target_bucket = aws_s3_bucket.this.id
-  target_prefix = "${local.legacy_service}_${local.alt_region}_s3_access_logs/"
+  target_prefix = replace("${local.legacy_service}_${local.alt_region}_s3_access_logs/", "-", "_")
 }
 
 # replication assume role
@@ -142,9 +142,9 @@ resource "aws_s3_bucket_replication_configuration" "replication" {
     for_each = local.objects_to_replicate
 
     content {
-      id     = rule.value
+      id       = rule.value
       priority = rule.key
-      status = "Enabled"
+      status   = "Enabled"
 
       filter {
         prefix = rule.value
