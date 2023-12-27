@@ -30,13 +30,13 @@ data "aws_ssm_parameters_by_path" "sensitive_quicksight_config" {
 # If "IAM" is specified as the identity_type, then "iam_arn" must be provided
 # If "QUICKSIGHT" is specified as the identity_type, then "user_name" must be provided
 resource "aws_quicksight_user" "quicksight_user" {
-  for_each = { for idx, user in local.quicksight_users : idx => user }
+  for_each = { for idx, user in local.quicksight_users : sha256("${user.email}-${user.identity_type}") => user }
 
   email         = sensitive(each.value["email"])
   identity_type = each.value["identity_type"]
-  iam_arn       = each.value["identity_type"] == "IAM" ? "arn:aws:iam::${local.account_id}:user/${each.value["iam"]}" : null
+  iam_arn       = each.value["identity_type"] == "IAM" ? sensitive("arn:aws:iam::${local.account_id}:user/${each.value["iam"]}") : null
   user_role     = upper(each.value["user_role"])
-  user_name     = each.value["identity_type"] == "QUICKSIGHT" ? sensitive(each.value["email"]) : each.value["iam"]
+  user_name     = sensitive(each.value["identity_type"] == "QUICKSIGHT" ? each.value["email"] : each.value["iam"])
 }
 
 # On deletion, transfer ownership of assets (for which this user is the sole owner) to the principal admin as defined
@@ -45,7 +45,7 @@ resource "null_resource" "destroy_quicksight_user" {
   for_each = aws_quicksight_user.quicksight_user
   triggers = {
     account_id          = local.account_id
-    sole_owner_arn      = each.value.arn,
+    sole_owner_arn      = sensitive(each.value.arn)
     principal_admin_arn = local.quicksight_principal_admin_arn
     command             = local.transfer_quicksight_permissions_command
   }
@@ -73,7 +73,7 @@ resource "aws_quicksight_group" "quicksight_group" {
 # For each user, for each group, we add an entry to a map and then create that group membership iteratively
 # e.g., { "0" => "user_name": "group_name", "1" => "user_name": "group_name" }
 resource "aws_quicksight_group_membership" "quicksight_group_membership" {
-  for_each = { for idx, group_membership in local.quicksight_group_memberships : idx => group_membership }
+  for_each = { for idx, group_membership in local.quicksight_group_memberships : sha256("${group_membership.group_name}-${group_membership.member_name}") => group_membership }
 
   group_name  = each.value["group_name"]
   member_name = sensitive(each.value["member_name"])
