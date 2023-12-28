@@ -13,8 +13,13 @@ import io.restassured.specification.RequestSpecification;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
 
 /** Program to gather the OpenAPI yaml content for V1 and V2 and store. */
 public class OpenApiDocs {
@@ -60,6 +65,8 @@ public class OpenApiDocs {
             .contentType("text/yaml")
             .extract()
             .asString();
+
+    response = addHeaderParameters(response, apiVersion);
 
     writeFile(apiVersion, response);
   }
@@ -182,5 +189,94 @@ public class OpenApiDocs {
                 .allowAllHostnames());
     requestAuth =
         new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
+  }
+
+  /**
+   * Adds header parameters to all paths except '/metadata'.
+   *
+   * @param specStr the OpenAPI spec String
+   * @param apiVersion the bfd api version, either V1 or V2.
+   * @return new OpenAPI spec String with header parameters added.
+   */
+  private String addHeaderParameters(String specStr, String apiVersion) {
+    Yaml yaml = new Yaml();
+    Map<String, Object> spec = yaml.load(specStr);
+
+    InputStream headersYaml =
+        this.getClass().getClassLoader().getResourceAsStream("openapi/headers.yaml");
+    Map<String, Object> headers = yaml.load(headersYaml);
+
+    // add header params to be used in refs
+    var components = (Map<String, Object>) spec.get("components");
+    var headerComponents = (Map<String, Object>) headers.get("components");
+    var headerParameters = (Map<String, Object>) headerComponents.get("parameters");
+    components.put("parameters", headerParameters);
+
+    // add parameter refs to each path
+    var paths = (Map<String, Object>) spec.get("paths");
+    for (String path : paths.keySet()) {
+      if (!"/metadata".equals(path)) {
+        var pathMap = (Map<String, Object>) paths.get(path);
+        var headerRefs = new ArrayList<>();
+        headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
+        if (includeIdentifiers(path, apiVersion)) {
+          headerRefs.add(createRef("#/components/parameters/IncludeIdentifiers-header"));
+        }
+        if (includeAddressFields(path)) {
+          headerRefs.add(createRef("#/components/parameters/IncludeAddressFields-header"));
+        }
+        if (includeTaxNumbers(path)) {
+          headerRefs.add(createRef("#/components/parameters/IncludeTaxNumbers-header"));
+        }
+        pathMap.put("parameters", headerRefs);
+      }
+    }
+
+    return yaml.dump(spec);
+  }
+
+  /**
+   * Helper function to create a new ref.
+   *
+   * @param link the target of the ref element.
+   * @return a new Map of the ref element.
+   */
+  private Map<String, Object> createRef(String link) {
+    var ref = new LinkedHashMap<String, Object>();
+    ref.put("$ref", link);
+    return ref;
+  }
+
+  /**
+   * Tests the path to see if the endpoint uses the IncludeIdentifiers header.
+   *
+   * @param path the endpoint path to check.
+   * @param apiVersion the bfd api version, either V1 or V2.
+   * @return true if the endpoint uses the IncludeIdentifiers header
+   */
+  private boolean includeIdentifiers(String path, String apiVersion) {
+    return path.contains("/Patient") && apiVersion.equals("V1");
+  }
+
+  /**
+   * Tests the path to see if the endpoint uses the IncludeAddressFields header.
+   *
+   * @param path the endpoint path to check.
+   * @return true if the endpoint uses the IncludeAddressFields header
+   */
+  private boolean includeAddressFields(String path) {
+    return path.contains("/Patient");
+  }
+
+  /**
+   * Tests the path to see if the endpoint uses the IncludeTaxNumbers header.
+   *
+   * @param path the endpoint path to check.
+   * @return true if the endpoint uses the IncludeTaxNumbers header
+   */
+  private boolean includeTaxNumbers(String path) {
+    return path.contains("/ExplanationOfBenefits") || path.contains("/Claim");
   }
 }
