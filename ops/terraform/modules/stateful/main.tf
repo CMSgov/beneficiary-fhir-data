@@ -78,42 +78,6 @@ data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${local.env}-cmk"
 }
 
-# subnets
-data "aws_subnet" "data_subnets" {
-  count             = length(local.azs)
-  vpc_id            = data.aws_vpc.main.id
-  availability_zone = local.azs[count.index]
-  filter {
-    name   = "tag:Layer"
-    values = ["data"]
-  }
-}
-
-# vpn
-data "aws_security_group" "vpn" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-${local.env}-vpn-private"]
-  }
-}
-
-# management security group
-data "aws_security_group" "tools" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-${local.env}-enterprise-tools"]
-  }
-}
-
-# tools security group 
-data "aws_security_group" "management" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-${local.env}-remote-management"]
-  }
-}
-
-
 ## VPC Private Local Zone for CNAME Records
 #
 module "local_zone" {
@@ -121,7 +85,6 @@ module "local_zone" {
   env_config = { env = var.env, vpc_id = data.aws_vpc.main.id }
   public     = false
 }
-
 
 ## CloudWatch SNS Topics for Alarms
 #
@@ -247,25 +210,6 @@ resource "aws_iam_policy" "etl_rw_s3" {
 EOF
 }
 
-resource "aws_iam_user" "etl" {
-  name = "bfd-${local.env}-etl"
-}
-
-resource "aws_iam_group" "etl" {
-  name = "bfd-${local.env}-etl"
-  path = "/"
-}
-
-resource "aws_iam_group_membership" "etl" {
-  name = "bfd-${local.env}-etl"
-
-  users = [
-    aws_iam_user.etl.name,
-  ]
-
-  group = aws_iam_group.etl.name
-}
-
 ## S3 bucket, policy, and KMS key for medicare opt out data
 #
 module "medicare_opt_out" {
@@ -283,7 +227,6 @@ module "medicare_opt_out" {
 
 ## CloudWatch Log Groups
 #
-
 resource "aws_cloudwatch_log_group" "var_log_messages" {
   name       = "/bfd/${local.env}/var/log/messages"
   kms_key_id = data.aws_kms_key.master_key.arn
@@ -296,11 +239,6 @@ resource "aws_cloudwatch_log_group" "var_log_secure" {
 
 resource "aws_cloudwatch_log_group" "bfd_pipeline_messages_txt" {
   name       = "/bfd/${local.env}/bfd-pipeline/messages.txt"
-  kms_key_id = data.aws_kms_key.master_key.arn
-}
-
-resource "aws_cloudwatch_log_group" "bfd_server_access_txt" {
-  name       = "/bfd/${local.env}/bfd-server/access.txt"
   kms_key_id = data.aws_kms_key.master_key.arn
 }
 
