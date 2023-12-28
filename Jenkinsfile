@@ -26,7 +26,6 @@
 
 properties([
 	parameters([
-		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'use_latest_images', description: 'When true, defer to latest available AMIs. Skips App and App Image Stages.', defaultValue: false),
 		booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.', defaultValue: false),
@@ -172,8 +171,13 @@ try {
 					// Find the most current AMI IDs (if any).
 					amiIds = scriptForDeploys.findAmis(gitBranchName)
 
-					// These variables track our decision on whether or not to deploy to prod-like envs.
-					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
+					// This variables track our decision on whether or not to deploy to prod-like envs.
+					canDeployToProdEnvs = false
+
+					if (env.TAG_NAME != null && !env.TAG_NAME.contains("-")) {
+						canDeployToProdEnvs = true
+						echo "Tag name matched pattern"
+					}
 					willDeployToProdEnvs = false
 
 					// Get the current commit id
@@ -331,6 +335,7 @@ try {
 
 			stage('Manual Approval') {
 				currentStage = env.STAGE_NAME
+				// tag name must follow pattern to enable deploy to prod environments
 				if (canDeployToProdEnvs) {
 					/*
 					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
@@ -351,6 +356,7 @@ try {
 						}
 					}
 				} else {
+					echo "Tag Name did not match pattern"
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
 				}
 			}
