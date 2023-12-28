@@ -34,35 +34,40 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${exec.maven.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <configuration>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-classpath</argument>
-                                <classpath />
-                                <argument>gov.cms.bfd.datadictionary.DocGenerator</argument>
-                                <argument>${project.version}</argument>
-                                <argument>${project.basedir}/data-dictionary/data</argument>
-                                <argument>${project.basedir}/../../../dist</argument>
-                                <argument>${project.basedir}/data-dictionary/template/v1-to-csv.json</argument>
-                                <argument>${project.basedir}/data-dictionary/template/v2-to-csv.json</argument>
-                            </arguments>
-                        </configuration>
-                        <id>create-data-dictionary-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-classpath</argument>
+                                        <classpath />
+                                        <argument>gov.cms.bfd.datadictionary.DocGenerator</argument>
+                                        <argument>${project.version}</argument>
+                                        <argument>${project.basedir}/data-dictionary/data</argument>
+                                        <argument>${project.basedir}/../../../dist</argument>
+                                        <argument>${project.basedir}/data-dictionary/template/v1-to-csv.json</argument>
+                                        <argument>${project.basedir}/data-dictionary/template/v2-to-csv.json</argument>
+                                    </arguments>
+                                </configuration>
+                                <id>create-data-dictionary-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
