@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
@@ -18,12 +17,6 @@ import javax.persistence.criteria.Root;
 
 /** As set of methods to help form JPA queries. */
 public class QueryUtils {
-  /**
-   * Database function that checks all claims for a given beneficiaryId and returns a bitwise mask
-   * value that shows if a given claim type will have any data.
-   */
-  public static final String CHECK_CLAIMS_FOR_DATA_SQL =
-      "SELECT * FROM check_claims_mask(:beneIdValue)";
 
   /** BitSet index identifier for Carrier Claims. */
   public static final int CARRIER_HAS_DATA = 0;
@@ -236,40 +229,5 @@ public class QueryUtils {
       }
     }
     return true;
-  }
-
-  /**
-   * Query database to determine which claim types have data for the specified beneficiary.
-   *
-   * @param entityManager {@link EntityManager} used to query database.
-   * @param beneficiaryId used to identify the Beneficiary to check claims for.
-   * @return int bitmask denoting which claims have data.
-   */
-  public static int availableClaimsData(EntityManager entityManager, long beneficiaryId) {
-    /*
-     * execute a database function that returns a bitwise mask value that denotes that the given
-     * claim type will have data for the specified beneficiaryId. This represents fast and efficient
-     * way to ignore a requested claim type that ultimately has no data for our beneficiaryId.
-     *
-     * The database function returns bits as follows:
-     * CARRIER_CLAIMS      : bit 0
-     * INPATIENT CLAIMS    : bit 1
-     * OUTPATIENT CLAIMS   : bit 2
-     * SNF CLAIMS          : bit 3
-     * DME CLAIMS          : bit 4
-     * HHA CLAIMS          : bit 5
-     * HOSPICE CLAIMS      : bit 6
-     * PART D CLAIMS       : bit 7
-     *
-     * For more information on the database function, see: V111__SETUP_CLAIMS_AVAILABILITY_FUNCTION.SQL
-     * in the db migration directory.
-     */
-    List<Object> values =
-        entityManager
-            .createNativeQuery(CHECK_CLAIMS_FOR_DATA_SQL)
-            .setParameter("beneIdValue", beneficiaryId)
-            .getResultList();
-
-    return (int) (values != null && values.size() > 0 ? values.get(0) : 0);
   }
 }
