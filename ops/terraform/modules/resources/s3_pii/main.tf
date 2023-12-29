@@ -1,42 +1,39 @@
 ## Setup an S3 bucket intended for PII
-#
-
 locals {
-  is_prod = substr(var.env_config.env, 0, 4) == "prod"
-  tags    = {
+  tags = {
     Layer = "data"
-    role = var.pii_bucket_config.name
+    role  = var.pii_bucket_config.name
   }
+  account_id = data.aws_caller_identity.current.account_id
 }
 
 data "aws_caller_identity" "current" {}
-
 
 ## S3 Bucket
 #
 
 resource "aws_kms_key" "pii_bucket_key" {
-  description             = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-cmk"
+  description             = "bfd-${var.env}-${var.pii_bucket_config.name}-cmk"
   deletion_window_in_days = 10
   enable_key_rotation     = true
 
   policy = templatefile("${path.module}/templates/kms-policy.json", {
-    env     = var.env_config.env
+    env     = var.env
     name    = var.pii_bucket_config.name
     admins  = var.pii_bucket_config.admin_arns
     readers = var.pii_bucket_config.read_arns
     writers = [aws_iam_role.pii_bucket_writer_role.arn]
-    root    = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    root    = ["arn:aws:iam::${local.account_id}:root"]
   })
 }
 
 resource "aws_kms_alias" "pii_bucket_key_alias" {
-  name          = "alias/bfd-${var.env_config.env}-${var.pii_bucket_config.name}-cmk"
+  name          = "alias/bfd-${var.env}-${var.pii_bucket_config.name}-cmk"
   target_key_id = aws_kms_key.pii_bucket_key.id
 }
 
 resource "aws_s3_bucket" "pii_bucket" {
-  bucket = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-${data.aws_caller_identity.current.account_id}"
+  bucket = "bfd-${var.env}-${var.pii_bucket_config.name}-${local.account_id}"
   acl    = "private"
   tags   = local.tags
 
@@ -59,7 +56,7 @@ resource "aws_s3_bucket" "pii_bucket" {
   }
 
   lifecycle_rule {
-    id      = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-versioning-rule"
+    id      = "bfd-${var.env}-${var.pii_bucket_config.name}-versioning-rule"
     enabled = true
 
     noncurrent_version_transition {
@@ -86,31 +83,31 @@ resource "aws_s3_bucket_policy" "pii_bucket_policy" {
   bucket = aws_s3_bucket.pii_bucket.id
 
   policy = templatefile("${path.module}/templates/bucket-policy.json", {
-    env         = var.env_config.env
+    env         = var.env
     bucket_id   = aws_s3_bucket.pii_bucket.id
     bucket_name = var.pii_bucket_config.name
     admins      = var.pii_bucket_config.admin_arns
     readers     = var.pii_bucket_config.read_arns
     writers     = [aws_iam_role.pii_bucket_writer_role.arn]
-    root        = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    root        = ["arn:aws:iam::${local.account_id}:root"]
   })
 }
 
 resource "aws_iam_role" "pii_bucket_writer_role" {
-  name = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-writer-role"
+  name = "bfd-${var.env}-${var.pii_bucket_config.name}-writer-role"
 
   assume_role_policy = templatefile("${path.module}/templates/iam-writer-assume-policy.json", {
-    env     = var.env_config.env
+    env     = var.env
     name    = var.pii_bucket_config.name
     writers = var.pii_bucket_config.write_accts
   })
 }
 
 resource "aws_iam_policy" "pii_bucket_writer_policy" {
-  name = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-writer-policy"
+  name = "bfd-${var.env}-${var.pii_bucket_config.name}-writer-policy"
 
   policy = templatefile("${path.module}/templates/iam-writer-policy.json", {
-    env       = var.env_config.env
+    env       = var.env
     name      = var.pii_bucket_config.name
     bucket_id = aws_s3_bucket.pii_bucket.id
   })
