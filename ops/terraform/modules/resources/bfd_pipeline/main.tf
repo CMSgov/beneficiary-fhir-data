@@ -36,10 +36,15 @@ data "aws_kms_key" "master_key" {
 }
 
 # CloudWatch metric filters
+resource "aws_cloudwatch_log_group" "bfd_pipeline_messages_txt" {
+  name       = local.log_groups.messages
+  kms_key_id = data.aws_kms_key.master_key.arn
+}
+
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
   name           = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/error"
   pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message]"
-  log_group_name = local.log_groups.messages
+  log_group_name = aws_cloudwatch_log_group.bfd_pipeline_messages_txt.name
 
   metric_transformation {
     name          = "messages/count/error"
