@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.89.0</version>
+    <version>2.90.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -40,7 +40,7 @@
         <connection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</connection>
         <developerConnection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</developerConnection>
         <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
-        <tag>2.89.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
@@ -69,7 +69,7 @@
             they are reproducible bit-by-bit no matter when/where they are generated.
             See https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
 
-        <project.build.outputTimestamp>2023-12-29T21:04:37Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2023-12-29T21:09:29Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
