@@ -221,15 +221,22 @@ public class OpenApiDocs {
         headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
-        if (includeIdentifiers(path, apiVersion)) {
+
+        // add ref for IncludeIdentifiers header for V1 Patient endpoints
+        if (path.contains("/Patient") && apiVersion.equals("V1")) {
           headerRefs.add(createRef("#/components/parameters/IncludeIdentifiers-header"));
         }
-        if (includeAddressFields(path)) {
+
+        // add ref for IncludeAddressFields for Patient endpoints
+        if (path.contains("/Patient")) {
           headerRefs.add(createRef("#/components/parameters/IncludeAddressFields-header"));
         }
-        if (includeTaxNumbers(path)) {
+
+        // add ref for IncludeTaxNumbers for ExplanationOfBenefit, Claim, ClaimResponse endpoints
+        if (path.contains("/ExplanationOfBenefit") || path.contains("/Claim")) {
           headerRefs.add(createRef("#/components/parameters/IncludeTaxNumbers-header"));
         }
+
         pathMap.put("parameters", headerRefs);
       }
     }
@@ -247,36 +254,5 @@ public class OpenApiDocs {
     var ref = new LinkedHashMap<String, Object>();
     ref.put("$ref", link);
     return ref;
-  }
-
-  /**
-   * Tests the path to see if the endpoint uses the IncludeIdentifiers header.
-   *
-   * @param path the endpoint path to check.
-   * @param apiVersion the bfd api version, either V1 or V2.
-   * @return true if the endpoint uses the IncludeIdentifiers header
-   */
-  private boolean includeIdentifiers(String path, String apiVersion) {
-    return path.contains("/Patient") && apiVersion.equals("V1");
-  }
-
-  /**
-   * Tests the path to see if the endpoint uses the IncludeAddressFields header.
-   *
-   * @param path the endpoint path to check.
-   * @return true if the endpoint uses the IncludeAddressFields header
-   */
-  private boolean includeAddressFields(String path) {
-    return path.contains("/Patient");
-  }
-
-  /**
-   * Tests the path to see if the endpoint uses the IncludeTaxNumbers header.
-   *
-   * @param path the endpoint path to check.
-   * @return true if the endpoint uses the IncludeTaxNumbers header
-   */
-  private boolean includeTaxNumbers(String path) {
-    return path.contains("/ExplanationOfBenefits") || path.contains("/Claim");
   }
 }
