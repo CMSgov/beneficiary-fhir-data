@@ -1,5 +1,5 @@
 locals {
-  account_id = data.aws_caller_identity.current.account_id
+  account_id             = data.aws_caller_identity.current.account_id
   lambda_timeout_seconds = 30
   lambda_name            = "cloudwatch-alarms-slack-notifier"
 
