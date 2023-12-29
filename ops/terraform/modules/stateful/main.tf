@@ -39,8 +39,6 @@ module "local_zone" {
   public     = false
 }
 
-
-
 ## IAM policy, user, and attachment to allow external read-write access to ETL bucket
 # NOTE: We only need this for production, however it is ok to
 # provision these resources for all environments since the mechanism
@@ -93,36 +91,4 @@ module "medicare_opt_out" {
     write_accts = var.medicare_opt_out_config.write_accts
     admin_arns  = var.medicare_opt_out_config.admin_users
   }
-}
-
-## CloudWatch Log Groups
-#
-resource "aws_cloudwatch_log_group" "var_log_messages" {
-  name       = "/bfd/${local.env}/var/log/messages"
-  kms_key_id = data.aws_kms_key.master_key.arn
-}
-
-resource "aws_cloudwatch_log_group" "var_log_secure" {
-  name       = "/bfd/${local.env}/var/log/secure"
-  kms_key_id = data.aws_kms_key.master_key.arn
-}
-
-resource "aws_cloudwatch_log_group" "bfd_server_access_json" {
-  name       = "/bfd/${local.env}/bfd-server/access.json"
-  kms_key_id = data.aws_kms_key.master_key.arn
-}
-
-resource "aws_cloudwatch_log_group" "bfd_server_messages_json" {
-  name       = "/bfd/${local.env}/bfd-server/messages.json"
-  kms_key_id = data.aws_kms_key.master_key.arn
-}
-
-resource "aws_cloudwatch_log_group" "bfd_server_newrelic_agent" {
-  name       = "/bfd/${local.env}/bfd-server/newrelic_agent.log"
-  kms_key_id = data.aws_kms_key.master_key.arn
-}
-
-resource "aws_cloudwatch_log_group" "bfd_server_gc" {
-  name       = "/bfd/${local.env}/bfd-server/gc.log"
-  kms_key_id = data.aws_kms_key.master_key.arn
 }
