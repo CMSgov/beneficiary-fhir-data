@@ -36,7 +36,11 @@ resource "aws_quicksight_user" "quicksight_user" {
   identity_type = each.value["identity_type"]
   iam_arn       = each.value["identity_type"] == "IAM" ? sensitive("arn:aws:iam::${local.account_id}:user/${each.value["iam"]}") : null
   user_role     = upper(each.value["user_role"])
-  user_name     = sensitive(each.value["identity_type"] == "QUICKSIGHT" ? each.value["email"] : each.value["iam"])
+  user_name     = sensitive(each.value["identity_type"] == "QUICKSIGHT" ? each.value["email"] : null)
+
+  lifecycle {
+    ignore_changes = [user_name]
+  }
 }
 
 # On deletion, transfer ownership of assets (for which this user is the sole owner) to the principal admin as defined

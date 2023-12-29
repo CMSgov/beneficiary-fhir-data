@@ -37,7 +37,7 @@ jobs:
       - name: Validate Inputs
         run: |
           echo "Validating inputs to ensure they conform to expected formats..."
-          echo "${{ inputs.releaseVersion }}" | grep -P '^\d+\.\d+\.\d+$'
+          echo "${{ inputs.releaseVersion }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
           echo "${{ inputs.developmentVersion }}" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT$'
 
       - name: "Generate an App Token"
