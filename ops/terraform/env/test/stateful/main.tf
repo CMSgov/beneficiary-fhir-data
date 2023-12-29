@@ -12,7 +12,4 @@ locals {
 
 module "stateful" {
   source = "../../../modules/stateful"
-
-  env                     = local.env
-  medicare_opt_out_config = var.medicare_opt_out_config
 }
