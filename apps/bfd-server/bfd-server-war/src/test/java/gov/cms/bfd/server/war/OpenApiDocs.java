@@ -221,6 +221,7 @@ public class OpenApiDocs {
         headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-UserId-header"));
 
         // add ref for IncludeIdentifiers header for V1 Patient endpoints
         if (path.contains("/Patient") && apiVersion.equals("V1")) {

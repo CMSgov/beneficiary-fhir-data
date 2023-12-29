@@ -67,7 +67,7 @@ components:
     BlueButton-UserId-header:
       in: header
       name: BlueButton-UserId
-      required: false
+      required: true
       schema:
         type: string
       description: | 
