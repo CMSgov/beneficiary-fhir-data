@@ -153,6 +153,7 @@ jobs:
         working-directory: ./apps
 
       - name: Pull Release Files
+        if: ${{ !contains(inputs.releaseVersion, '-') }}
         run: |
           readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -r -c '.[]')
           for asset in "${assets[@]}"
@@ -192,6 +193,7 @@ jobs:
             ]
 
       - name: Release
+        if: ${{ !contains(inputs.releaseVersion, '-') }}
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
