@@ -13,6 +13,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -29,7 +31,8 @@ public class DLQDaoIT {
           .thenComparing(MessageError::getClaimType);
 
   /** Fixed time used by the {@link DLQDao} clock. */
-  private final Instant clockTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+  private final Instant clockTime =
+      ZonedDateTime.of(2023, 1, 2, 3, 4, 5, 0, ZoneOffset.UTC).toInstant();
 
   /** Fixed clock for predictable times. */
   private final Clock clock = Clock.fixed(clockTime, ZoneId.systemDefault());
