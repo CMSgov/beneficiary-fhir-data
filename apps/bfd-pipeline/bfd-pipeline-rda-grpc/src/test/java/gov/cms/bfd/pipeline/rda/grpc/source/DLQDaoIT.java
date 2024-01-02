@@ -28,8 +28,11 @@ public class DLQDaoIT {
       Comparator.comparing(MessageError::getSequenceNumber)
           .thenComparing(MessageError::getClaimType);
 
+  /** Fixed time used by the {@link DLQDao} clock. */
+  private final Instant clockTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
   /** Fixed clock for predictable times. */
-  private final Clock clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
+  private final Clock clock = Clock.fixed(clockTime, ZoneId.systemDefault());
 
   /** Expected type for all tests. */
   private final MessageError.ClaimType claimType = MessageError.ClaimType.FISS;
@@ -41,8 +44,7 @@ public class DLQDaoIT {
   private final int maxAgeDays = 100;
 
   /** Precomputed value for threshold of record expiration. */
-  private final Instant oldestUpdateDateToKeep =
-      clock.instant().truncatedTo(ChronoUnit.MICROS).minus(maxAgeDays, ChronoUnit.DAYS);
+  private final Instant oldestUpdateDateToKeep = clockTime.minus(maxAgeDays, ChronoUnit.DAYS);
 
   /**
    * Verifies that basic insert, read, and delete operations work properly since they are used in
@@ -140,10 +142,7 @@ public class DLQDaoIT {
         List.of(recordToUpdate, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
     final var updatedRecord =
-        recordToUpdate.toBuilder()
-            .status(RESOLVED)
-            .updatedDate(clock.instant().truncatedTo(ChronoUnit.MICROS))
-            .build();
+        recordToUpdate.toBuilder().status(RESOLVED).updatedDate(clockTime).build();
     final var allRecordsAfter =
         List.of(updatedRecord, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
@@ -173,8 +172,7 @@ public class DLQDaoIT {
                     // the created date should be unchanged
                     assertEquals(recordToUpdate.getCreatedDate(), rec.getCreatedDate());
                     // the update date should have been updated
-                    assertEquals(
-                        clock.instant().truncatedTo(ChronoUnit.MICROS), rec.getUpdatedDate());
+                    assertEquals(clockTime, rec.getUpdatedDate());
                   });
               assertContentsHaveSamePropertyValues(
                   allRecordsAfter, remainingRecords, ComparatorForSorting);
