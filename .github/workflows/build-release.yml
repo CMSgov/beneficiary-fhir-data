@@ -155,6 +155,7 @@ jobs:
         working-directory: ./apps
 
       - name: Pull Release Files
+        # Naively, only pull artifacts for purported non-prerelease versions
         if: ${{ !contains(inputs.releaseVersion, '-') }}
         run: |
           readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -r -c '.[]')
@@ -195,7 +196,7 @@ jobs:
             ]
 
       - name: Release
-        # Naively, only create
+        # Naively, only create GitHub Release object for purported non-prerelease versions
         if: ${{ !contains(inputs.releaseVersion, '-') }}
         uses: softprops/action-gh-release@v1
         with:
