@@ -11,12 +11,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -26,6 +28,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 /** Provides utilities for managing the database in integration tests. */
 public final class DatabaseTestUtils {
@@ -234,12 +237,36 @@ public final class DatabaseTestUtils {
       throw new RuntimeException(e);
     }
 
+    // Wait until the database is fully up and running.
+    Awaitility.await()
+        .atMost(1, TimeUnit.MINUTES)
+        .until(() -> confirmDatabaseResponding(dataSource));
+
     boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(dataSource);
     if (!migrationSuccess) {
       throw new RuntimeException("Schema migration failed during test setup");
     }
 
     return dataSource;
+  }
+
+  /**
+   * Runs a trivial query against the provided {@link DataSource} to confirm that the database is
+   * accepting and processing queries. Used to wait for database to become ready before allowing
+   * tests to proceed.
+   *
+   * @param dataSource database to test
+   * @return true if the query was successfully processed, false otherwise
+   */
+  private static boolean confirmDatabaseResponding(DataSource dataSource) {
+    try (Connection conn = dataSource.getConnection();
+        Statement stmt = conn.createStatement()) {
+      ResultSet rs = stmt.executeQuery("SELECT 1");
+      return rs.next() && rs.getInt(1) == 1;
+    } catch (Exception ex) {
+      LOGGER.debug("database query failed: message={}", ex.getMessage(), ex);
+      return false;
+    }
   }
 
   /**
