@@ -1,7 +1,6 @@
 ##
 # CloudWatch SNS Topics Resources for Alarms for environments
 locals {
-  account_id                       = data.aws_caller_identity.current.account_id
   env                              = var.env
   is_prod                          = substr(var.env, 0, 4) == "prod"
   victor_ops_url                   = data.aws_ssm_parameter.victor_ops_url.value
