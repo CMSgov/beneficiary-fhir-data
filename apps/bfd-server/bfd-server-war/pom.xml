@@ -430,6 +430,7 @@
                                 <argument>${project.basedir}</argument>
                                 <argument>${project.basedir}/../../../dist</argument>
                             </arguments>
+                            <skip>${apidocgen.skip}</skip>
                         </configuration>
                         <id>create-openapi-artifacts</id>
                         <phase>verify</phase>
@@ -488,6 +489,7 @@
                                     <classifier>data-dictionary</classifier>
                                 </artifact>
                             </artifacts>
+                            <skipAttach>${apidocgen.skip}</skipAttach>
                         </configuration>
                     </execution>
                 </executions>
