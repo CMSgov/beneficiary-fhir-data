@@ -5,15 +5,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.MessageError;
+import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
+import gov.cms.bfd.model.rda.entities.RdaFissPayer;
+import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
+import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
+import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -21,6 +36,25 @@ import javax.persistence.criteria.Root;
 
 /** Tests the {@link RdaPipelineTestUtils}. */
 public class RdaPipelineTestUtils {
+  /**
+   * List of all RDA tables that could be updated by a test. Used by {@link #truncateRdaTables} to
+   * truncate all tables between tests.
+   */
+  private static final List<Class<?>> RDA_ENTITY_CLASSES =
+      List.of(
+          RdaFissRevenueLine.class,
+          RdaFissPayer.class,
+          RdaFissDiagnosisCode.class,
+          RdaFissProcCode.class,
+          RdaFissClaim.class,
+          RdaMcsDetail.class,
+          RdaMcsDiagnosisCode.class,
+          RdaMcsClaim.class,
+          RdaClaimMessageMetaData.class,
+          RdaApiProgress.class,
+          MessageError.class,
+          Mbi.class);
+
   /**
    * Verifies the expected value of a {@link Counter} with a meaningful message in case of a
    * mismatch.
@@ -72,21 +106,27 @@ public class RdaPipelineTestUtils {
   }
 
   /**
-   * Creates a containerized postgres DB that is destroyed when the test ends plus a {@link
-   * PipelineApplicationState} and {@link TransactionManager} using that db, passes them to the
-   * provided lambda function, then closes them and destroys the database.
+   * Creates a {@link HikariDataSource}, {@link PipelineApplicationState} and {@link
+   * TransactionManager} using the shared containerized postgres DB, passes them to the provided
+   * lambda function, then truncates all of the RDA tables and closes the {@link HikariDataSource}.
    *
    * @param clock used for the app state
    * @param test lambda to receive the appState and perform some testing
    * @throws Exception pass through from test
    */
   public static void runTestWithTemporaryDb(Clock clock, DatabaseConsumer test) throws Exception {
-
-    final MetricRegistry appMetrics = new MetricRegistry();
-    final HikariDataSource dataSource =
-        DatabaseTestUtils.createPooledTestContainerDataSourceForTestContainerWithPostgres(
-            10, appMetrics);
-    try (PipelineApplicationState appState =
+    final var appMetrics = new MetricRegistry();
+    final var rawDataSource = DatabaseTestUtils.get().getUnpooledDataSource();
+    final var dataSourceComponents = new DataSourceComponents(rawDataSource);
+    final var dbOptions =
+        DatabaseOptions.builder()
+            .databaseUrl(dataSourceComponents.getUrl())
+            .databaseUsername(dataSourceComponents.getUsername())
+            .databasePassword(dataSourceComponents.getPassword())
+            .maxPoolSize(10)
+            .build();
+    try (HikariDataSource dataSource = new HikariDataSourceFactory(dbOptions).createDataSource();
+        PipelineApplicationState appState =
             new PipelineApplicationState(
                 new SimpleMeterRegistry(),
                 appMetrics,
@@ -95,7 +135,24 @@ public class RdaPipelineTestUtils {
                 clock);
         TransactionManager transactionManager =
             new TransactionManager(appState.getEntityManagerFactory())) {
-      test.accept(appState, transactionManager);
+      try {
+        test.accept(appState, transactionManager);
+      } finally {
+        truncateRdaTables(transactionManager);
+      }
+    }
+  }
+
+  /**
+   * Truncates all RDA related tables using the provided {@link TransactionManager} so that they
+   * will be empty for the next test when it runs.
+   *
+   * @param transactionManager used to execute deletes.
+   */
+  private static void truncateRdaTables(TransactionManager transactionManager) {
+    for (Class<?> entityClass : RDA_ENTITY_CLASSES) {
+      final String deleteStatement = "delete from " + entityClass.getSimpleName() + " f";
+      transactionManager.executeProcedure(em -> em.createQuery(deleteStatement).executeUpdate());
     }
   }
 
