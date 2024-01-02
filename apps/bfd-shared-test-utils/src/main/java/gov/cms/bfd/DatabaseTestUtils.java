@@ -2,12 +2,9 @@ package gov.cms.bfd;
 
 import static java.util.Collections.singletonMap;
 
-import com.codahale.metrics.MetricRegistry;
-import com.zaxxer.hikari.HikariDataSource;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.io.Writer;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.nio.file.Files;
@@ -279,51 +276,6 @@ public final class DatabaseTestUtils {
   }
 
   /**
-   * Initiates a pooled Test Container PostgreSQL {@link DataSource} for the test DB.
-   *
-   * @param maxPoolSize the max pool size
-   * @param metrics the metrics
-   * @return a PostgreSQL {@link DataSource} for the test DB
-   */
-  public static HikariDataSource createPooledTestContainerDataSourceForTestContainerWithPostgres(
-      int maxPoolSize, MetricRegistry metrics) {
-
-    String testContainerDatabaseImage =
-        System.getProperty(
-            TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
-    LOGGER.debug("Starting container, using image {}", testContainerDatabaseImage);
-    container =
-        new PostgreSQLContainer(testContainerDatabaseImage)
-            .withDatabaseName("fhirdb")
-            .withUsername(DatabaseTestUtils.TEST_CONTAINER_DATABASE_USERNAME)
-            .withPassword(DatabaseTestUtils.TEST_CONTAINER_DATABASE_PASSWORD)
-            .withTmpFs(singletonMap("/var/lib/postgresql/data", "rw"))
-            .waitingFor(Wait.forListeningPort());
-    container.start();
-
-    LOGGER.debug("Container started, running migrations...");
-    JdbcDatabaseContainer<?> jdbcContainer = (JdbcDatabaseContainer<?>) container;
-    HikariDataSource pooledDataSource = new HikariDataSource();
-    Properties dataSourceProperties = new Properties();
-    dataSourceProperties.setProperty("stringtype", "unspecified");
-    pooledDataSource.setDataSourceProperties(dataSourceProperties);
-    pooledDataSource.setJdbcUrl(jdbcContainer.getJdbcUrl());
-    pooledDataSource.setUsername(jdbcContainer.getUsername());
-    pooledDataSource.setPassword(jdbcContainer.getPassword());
-    pooledDataSource.setMaximumPoolSize(maxPoolSize);
-    pooledDataSource.setRegisterMbeans(true);
-    pooledDataSource.setMetricRegistry(metrics);
-
-    boolean migrationSuccess = DatabaseTestSchemaManager.createOrUpdateSchema(pooledDataSource);
-    if (!migrationSuccess) {
-      throw new RuntimeException("Schema migration failed during test setup");
-    }
-
-    LOGGER.debug("Ran migrations on container.");
-    return pooledDataSource;
-  }
-
-  /**
    * Gets the cached and shared unpooled {@link DataSource} for the database to test against (as
    * specified by the <code>its.db.*</code> system properties, see {@link #initUnpooledDataSource()
    * for details}).
@@ -383,46 +335,5 @@ public final class DatabaseTestUtils {
       }
     }
     return true;
-  }
-
-  /** Sends output to a specified {@link Logger}. */
-  private static final class LoggerWriter extends Writer {
-    /** The logger to use for this writer. */
-    private final Logger logger;
-
-    /** The message prefix to put before log messages written. */
-    private final String messagePrefix;
-
-    /**
-     * Constructs a new {@link LoggerWriter} instance.
-     *
-     * @param logger the {@link Logger} to output to
-     * @param messagePrefix the text to prefix every log message with
-     */
-    public LoggerWriter(Logger logger, String messagePrefix) {
-      this.logger = logger;
-      this.messagePrefix = messagePrefix;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
-      String message = new String(cbuf, off, len);
-      if (message.trim().isEmpty()) return;
-
-      logger.debug(messagePrefix + message);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void flush() throws IOException {
-      // Nothing to do.
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void close() throws IOException {
-      // Nothing to do.
-    }
   }
 }
