@@ -1267,8 +1267,7 @@
         <profile>
             <id>release</id>
             <properties>
-                <!-- TODO: Update jib.skip to `false` as part of BFD-3120` -->
-                <jib.skip>true</jib.skip>
+                <jib.skip>false</jib.skip>
                 <jib.goal>build</jib.goal>
                 <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
                 <maven.build.cache.enabled>false</maven.build.cache.enabled>
