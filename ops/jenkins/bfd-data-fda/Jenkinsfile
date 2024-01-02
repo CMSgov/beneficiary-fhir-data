@@ -137,7 +137,6 @@ mvn ${quietFlags} clean deploy "-DaltDeploymentRepository=bfd-mgmt-bfd-mgmt::def
                                     parameterName: "/bfd/mgmt/versioning/nonsensitive/bfd-data-fda-sha256",
                                     parameterValue: "${fdaDrugCodeSha256}",
                                     parameterType: "String",
-                                    parameterTags: "Key=Source,Value=${JOB_NAME} Key=Environment,Value=mgmt Key=stack,Value=mgmt Key=Terraform,Value=False Key=application,Value=bfd Key=business,Value=oeda",
                                     shouldOverwrite: true
                                 )
                             }
