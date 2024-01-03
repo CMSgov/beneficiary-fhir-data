@@ -33,7 +33,6 @@ locals {
 module "quicksight-dataset-global-state" {
   source = "./modules/quicksight-dataset-global-state"
 
-  env                          = local.env
   id                           = local.dataset_vars.id
   name                         = local.dataset_vars.name
   data_source_id               = local.dataset_vars.data_source_id
@@ -48,7 +47,6 @@ module "quicksight-dataset-global-state" {
 module "quicksight-dataset-global-state-per-app" {
   source = "./modules/quicksight-dataset-global-state-per-app"
 
-  env                          = local.env
   id                           = local.dataset_per_app_vars.id
   name                         = local.dataset_per_app_vars.name
   data_source_id               = local.dataset_per_app_vars.data_source_id
