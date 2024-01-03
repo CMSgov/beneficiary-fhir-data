@@ -6,8 +6,9 @@ import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
-import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -87,14 +88,27 @@ public class CommonQueries {
         CommonTransformerUtils.createMetricsTimer(
             metricRegistry, "CommonQueries", "query", "find_beneficiary_identifier");
 
-    List<Object> values = null;
+    /*
+     * the function returns a String with comma-delimited values; done this way to avoid having
+     * to register a Hibernate custom data type handler for an Array of bigint values.
+     */
+    List<Long> values = null;
     try {
-      values =
+      List<Object> rawValues =
           entityManager
               .createNativeQuery(FIND_BENE_ID_FROM_IDENTIFIER_SQL)
               .setParameter("searchIdType", searchType)
               .setParameter("searchIdValue", searchValue)
               .getResultList();
+
+      if (rawValues != null && rawValues.get(0) != null) {
+        String arrayVals = (String) rawValues.get(0);
+        values =
+            Arrays.asList(arrayVals.split(",")).stream()
+                .map(String::trim)
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+      }
     } finally {
       long queryNanoSeconds = timerBeneQuery.stop();
       CommonTransformerUtils.recordQueryInMdc(
@@ -102,7 +116,7 @@ public class CommonQueries {
               "bene_by_%s_bene_by_%s_or_id_include_%s",
               searchType, searchType, queryIdentifierName),
           queryNanoSeconds,
-          values.size());
+          values != null ? values.size() : 0);
     }
 
     if (values == null || values.size() < 1) {
@@ -116,7 +130,7 @@ public class CommonQueries {
               + ", DistinctBeneIdsList: "
               + values);
     }
-    return ((BigInteger) values.get(0)).longValue();
+    return values.get(0);
   }
 
   /**
