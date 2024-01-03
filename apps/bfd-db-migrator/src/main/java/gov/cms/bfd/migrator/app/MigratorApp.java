@@ -236,7 +236,8 @@ public final class MigratorApp {
     } else {
       final var sqsDao = new SqsDao(sqsClient);
       final var queueUrl = sqsDao.lookupQueueUrl(appConfig.getSqsQueueName());
-      final var sqsProgressReporter = new SqsProgressReporter(sqsDao, queueUrl);
+      final var eventPublisher = new SqsEventPublisher(sqsDao, queueUrl);
+      final var sqsProgressReporter = new MigratorProgressReporter(eventPublisher);
       progressConsumer = sqsProgressReporter::reportMigratorProgress;
     }
     return new MigratorProgressTracker(progressConsumer);

@@ -1,6 +1,5 @@
 package gov.cms.bfd.migrator.app;
 
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -10,9 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/** Unit tests for {@link SqsProgressReporterTest}. */
+/** Unit tests for {@link SqsEventPublisher}. */
 @ExtendWith(MockitoExtension.class)
-class SqsProgressReporterTest {
+public class SqsEventPublisherTest {
   /** Used to simulate the SQS calls. */
   @Mock private SqsDao sqsDao;
 
@@ -26,15 +25,13 @@ class SqsProgressReporterTest {
             new DatabaseMigrationProgress(
                 DatabaseMigrationProgress.Stage.Completed, "1", "detail"));
     final var queueUrl = "queue-url";
-    final var messageGroupId = "group-id";
-    final var reporter = spy(new SqsProgressReporter(sqsDao, queueUrl, messageGroupId));
-    doReturn(5046L).when(reporter).getPid();
-    reporter.reportMigratorProgress(appProgress);
-    reporter.reportMigratorProgress(migratorProgress);
-    verify(sqsDao).sendMessage(queueUrl, "{\"appStage\":\"Started\",\"messageId\":1,\"pid\":5046}");
+    final var publisher = spy(new SqsEventPublisher(sqsDao, queueUrl));
+    publisher.publishEvent(appProgress);
+    publisher.publishEvent(migratorProgress);
+    verify(sqsDao).sendMessage(queueUrl, "{\"stage\":\"Started\"}");
     verify(sqsDao)
         .sendMessage(
             queueUrl,
-            "{\"appStage\":\"Migrating\",\"messageId\":2,\"migrationStage\":{\"stage\":\"Completed\",\"migrationFile\":\"detail\",\"version\":\"1\"},\"pid\":5046}");
+            "{\"migrationProgress\":{\"stage\":\"Completed\",\"migrationFile\":\"detail\",\"version\":\"1\"},\"stage\":\"Migrating\"}");
   }
 }

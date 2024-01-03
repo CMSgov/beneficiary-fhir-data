@@ -23,7 +23,8 @@ import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.FileBasedAssertionHelper;
-import gov.cms.bfd.migrator.app.SqsProgressReporter.SqsProgressMessage;
+import gov.cms.bfd.json.JsonConverter;
+import gov.cms.bfd.migrator.app.MigratorProgressReporter.SqsProgressMessage;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -397,11 +398,13 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
    * @return the list
    */
   private List<SqsProgressMessage> readProgressMessagesFromSQSQueue() {
+    final JsonConverter jsonConverter = JsonConverter.minimalInstance();
     final var queueUrl = sqsDao.lookupQueueUrl(SQS_QUEUE_NAME);
     var messages = new ArrayList<SqsProgressMessage>();
     sqsDao.processAllMessages(
         queueUrl,
-        messageJson -> messages.add(SqsProgressReporter.convertJsonToMessage(messageJson)));
+        messageJson ->
+            messages.add(jsonConverter.jsonToObject(messageJson, SqsProgressMessage.class)));
     messages.sort(SqsProgressMessage.SORT_BY_IDS);
     return messages;
   }
