@@ -667,7 +667,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
     }
-
+    
     if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
