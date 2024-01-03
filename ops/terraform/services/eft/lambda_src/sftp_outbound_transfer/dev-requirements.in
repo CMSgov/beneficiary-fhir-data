@@ -1,0 +1,4 @@
+black
+isort
+pylint
+setuptools>=69.0.2

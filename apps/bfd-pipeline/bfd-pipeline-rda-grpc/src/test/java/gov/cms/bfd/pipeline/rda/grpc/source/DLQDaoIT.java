@@ -13,6 +13,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -28,8 +30,12 @@ public class DLQDaoIT {
       Comparator.comparing(MessageError::getSequenceNumber)
           .thenComparing(MessageError::getClaimType);
 
+  /** Fixed time used by the {@link DLQDao} clock. */
+  private final Instant clockTime =
+      ZonedDateTime.of(2023, 1, 2, 3, 4, 5, 0, ZoneOffset.UTC).toInstant();
+
   /** Fixed clock for predictable times. */
-  private final Clock clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
+  private final Clock clock = Clock.fixed(clockTime, ZoneId.systemDefault());
 
   /** Expected type for all tests. */
   private final MessageError.ClaimType claimType = MessageError.ClaimType.FISS;
@@ -41,8 +47,7 @@ public class DLQDaoIT {
   private final int maxAgeDays = 100;
 
   /** Precomputed value for threshold of record expiration. */
-  private final Instant oldestUpdateDateToKeep =
-      clock.instant().truncatedTo(ChronoUnit.MILLIS).minus(maxAgeDays, ChronoUnit.DAYS);
+  private final Instant oldestUpdateDateToKeep = clockTime.minus(maxAgeDays, ChronoUnit.DAYS);
 
   /**
    * Verifies that basic insert, read, and delete operations work properly since they are used in
@@ -140,10 +145,7 @@ public class DLQDaoIT {
         List.of(recordToUpdate, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
     final var updatedRecord =
-        recordToUpdate.toBuilder()
-            .status(RESOLVED)
-            .updatedDate(clock.instant().truncatedTo(ChronoUnit.MICROS))
-            .build();
+        recordToUpdate.toBuilder().status(RESOLVED).updatedDate(clockTime).build();
     final var allRecordsAfter =
         List.of(updatedRecord, sameSeqNoWrongTypeRecord, wrongSeqSameTypeRecord);
 
@@ -173,9 +175,7 @@ public class DLQDaoIT {
                     // the created date should be unchanged
                     assertEquals(recordToUpdate.getCreatedDate(), rec.getCreatedDate());
                     // the update date should have been updated
-                    assertEquals(
-                        clock.instant().truncatedTo(ChronoUnit.MILLIS),
-                        rec.getUpdatedDate().truncatedTo(ChronoUnit.MILLIS));
+                    assertEquals(clockTime, rec.getUpdatedDate());
                   });
               assertContentsHaveSamePropertyValues(
                   allRecordsAfter, remainingRecords, ComparatorForSorting);

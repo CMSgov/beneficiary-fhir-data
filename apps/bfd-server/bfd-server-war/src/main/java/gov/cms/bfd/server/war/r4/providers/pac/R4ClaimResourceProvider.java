@@ -1,11 +1,13 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED;
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES;
+
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import gov.cms.bfd.server.war.SpringConfiguration;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Map;
 import java.util.Optional;
@@ -39,10 +41,10 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
   public R4ClaimResourceProvider(
       MetricRegistry metricRegistry,
       R4ClaimSamhsaMatcher samhsaMatcher,
-      @Qualifier(SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
+      @Qualifier(PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
       FissClaimTransformerV2 fissClaimTransformerV2,
       McsClaimTransformerV2 mcsClaimTransformerV2,
-      @Value("${bfdServer.pac.claimSourceTypes:}") String claimSourceTypeNames) {
+      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames) {
     super(
         metricRegistry,
         samhsaMatcher,

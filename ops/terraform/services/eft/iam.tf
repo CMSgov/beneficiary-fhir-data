@@ -25,8 +25,8 @@ resource "aws_iam_role" "logs" {
 }
 
 resource "aws_iam_role" "eft_user" {
-  name        = "${local.full_name}-${local.eft_user_username}-sftp-user"
-  description = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.eft_user_username} SFTP user"
+  name        = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
+  description = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.inbound_sftp_user_username} SFTP user"
 
   assume_role_policy = jsonencode(
     {
@@ -48,10 +48,10 @@ resource "aws_iam_role" "eft_user" {
 }
 
 resource "aws_iam_policy" "eft_user" {
-  name = "${local.full_name}-${local.eft_user_username}-sftp-user"
+  name = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
   description = join("", [
-    "Allows the ${local.eft_user_username} SFTP user to access their restricted portion of the ",
-    "${aws_s3_bucket.this.id} S3 bucket when using SFTP"
+    "Allows the ${local.inbound_sftp_user_username} SFTP user to access their restricted portion ",
+    "of the ${aws_s3_bucket.this.id} S3 bucket when using SFTP"
   ])
 
   policy = jsonencode(
@@ -79,7 +79,15 @@ resource "aws_iam_policy" "eft_user" {
             "s3:GetBucketLocation",
           ]
           Effect   = "Allow"
-          Resource = [aws_s3_bucket.this.arn],
+          Resource = [aws_s3_bucket.this.arn]
+          Condition = {
+            StringLike = {
+              "s3:prefix" = [
+                "${local.inbound_sftp_s3_home_dir}/*",
+                local.inbound_sftp_s3_home_dir
+              ]
+            }
+          }
         },
         {
           Sid    = "HomeDirObjectAccess"
@@ -93,7 +101,7 @@ resource "aws_iam_policy" "eft_user" {
             "s3:GetObjectACL",
             "s3:PutObjectACL"
           ]
-          Resource = ["${aws_s3_bucket.this.arn}/${local.eft_user_username}*"]
+          Resource = ["${aws_s3_bucket.this.arn}/${local.inbound_sftp_s3_home_dir}*"]
         }
       ]
     }
@@ -112,13 +120,13 @@ resource "aws_iam_role" "partner_bucket_role" {
   assume_role_policy = jsonencode(
     {
       Statement = [
-        {
+        for assumer_arn in each.value.bucket_iam_assumer_arns : {
           Effect = "Allow"
           Action = "sts:AssumeRole"
           Principal = {
-            AWS = each.value.bucket_iam_assumer_arn
+            AWS = assumer_arn
           }
-        },
+        }
       ]
       Version = "2012-10-17"
     }
@@ -151,7 +159,7 @@ resource "aws_iam_policy" "partner_bucket_access" {
           Resource = [aws_s3_bucket.this.arn]
           Condition = {
             StringLike = {
-              "s3:prefix" = ["${each.value.bucket_home_path}*"]
+              "s3:prefix" = ["${each.value.bucket_home_path}/*"]
             }
           }
         },
@@ -171,7 +179,7 @@ resource "aws_iam_policy" "partner_bucket_access" {
             "s3:PutObjectVersionAcl"
           ],
           Resource = [
-            "${aws_s3_bucket.this.arn}/${each.value.bucket_home_path}*"
+            "${aws_s3_bucket.this.arn}/${each.value.bucket_home_path}/*"
           ]
         },
         {
@@ -191,4 +199,198 @@ resource "aws_iam_policy" "partner_bucket_access" {
       ]
     }
   )
+}
+
+resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name = "${local.outbound_lambda_full_name}-logs"
+  description = join("", [
+    "Permissions for the ${local.outbound_lambda_full_name} Lambda to write to its corresponding ",
+    "CloudWatch Log Group and Log Stream",
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect   = "Allow"
+          Action   = "logs:CreateLogGroup"
+          Resource = "arn:aws:logs:${local.region}:${local.account_id}:*"
+        },
+        {
+          Effect = "Allow"
+          Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
+          Resource = [
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${local.outbound_lambda_full_name}:*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "sftp_outbound_transfer_ssm" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name        = "${local.outbound_lambda_full_name}-ssm"
+  description = "Permissions to get parameters from the appropriate hierarchies"
+  policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Action = [
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter"
+          ],
+          Resource = [
+            for hierarchy in local.ssm_hierarchies :
+            "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(hierarchy, "/")}/*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "sftp_outbound_transfer_kms" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name        = "${local.outbound_lambda_full_name}-kms"
+  description = "Permissions to decrypt master and config KMS keys for ${local.env}"
+  policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Action = [
+            "kms:Decrypt"
+          ],
+          Resource = local.kms_config_key_arns
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name = "${local.outbound_lambda_full_name}-s3"
+  description = join("", [
+    "Allows the ${local.outbound_lambda_full_name} to manipulate objects within the ",
+    "${local.full_name} S3 bucket",
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid    = "AllowListingOfBucket"
+          Effect = "Allow"
+          Action = [
+            "s3:ListBucket",
+            "s3:GetBucketLocation"
+          ]
+          Resource = [aws_s3_bucket.this.arn]
+          Condition = {
+            StringLike = {
+              "s3:prefix" = flatten([
+                for partner in local.eft_partners_with_outbound_enabled :
+                [
+                  "${local.eft_partners_config[partner].outbound.pending_path}/*",
+                  "${local.eft_partners_config[partner].outbound.sent_path}/*",
+                  "${local.eft_partners_config[partner].outbound.failed_path}/*"
+                ]
+              ])
+            }
+          }
+        },
+        {
+          Sid    = "AllowAccessToOutboundPaths"
+          Effect = "Allow"
+          Action = [
+            "s3:AbortMultipartUpload",
+            "s3:DeleteObject",
+            "s3:DeleteObjectVersion",
+            "s3:GetObject",
+            "s3:GetObjectAcl",
+            "s3:GetObjectVersion",
+            "s3:GetObjectVersionAcl",
+            "s3:PutObject",
+            "s3:PutObjectAcl",
+            "s3:PutObjectVersionAcl"
+          ],
+          Resource = flatten([
+            for partner in local.eft_partners_with_outbound_enabled :
+            [
+              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.pending_path}/*",
+              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.sent_path}/*",
+              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.failed_path}/*"
+            ]
+          ])
+        },
+        {
+          Sid    = "AllowEncryptionAndDecryptionOfS3Files"
+          Effect = "Allow"
+          Action = [
+            "kms:Encrypt",
+            "kms:Decrypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey",
+          ]
+          Resource = [
+            local.kms_key_id
+          ]
+        },
+      ]
+    }
+  )
+}
+resource "aws_iam_role" "sftp_outbound_transfer" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name        = local.outbound_lambda_full_name
+  path        = "/"
+  description = "Role for ${local.outbound_lambda_full_name} Lambda"
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Action = "sts:AssumeRole",
+          Effect = "Allow",
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          }
+        }
+      ]
+    }
+  )
+
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
+  for_each = {
+    for key, arn in {
+      logs = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn),
+      ssm  = one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn),
+      kms  = one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn),
+      s3   = one(aws_iam_policy.sftp_outbound_transfer_s3[*].arn),
+      vpc  = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+    } : key => arn
+    if length(local.eft_partners_with_outbound_enabled) > 0
+  }
+
+  role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
+  policy_arn = each.value
 }

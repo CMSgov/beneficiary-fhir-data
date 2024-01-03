@@ -19,82 +19,76 @@ import software.amazon.awssdk.regions.Region;
 public abstract class BaseAppConfiguration {
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #databaseOptions} {@link DatabaseOptions#authenticationType} value.
+   * The path of the SSM parameter that should be used to provide the {@link #databaseOptions}
+   * {@link DatabaseOptions#authenticationType} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_AUTH_TYPE = "DATABASE_AUTH_TYPE";
+  public static final String SSM_PATH_DATABASE_AUTH_TYPE = "db/auth_type";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #databaseOptions} {@link DatabaseOptions#databaseUrl} value.
+   * The path of the SSM parameter that should be used to provide the {@link #databaseOptions}
+   * {@link DatabaseOptions#databaseUrl} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_URL = "DATABASE_URL";
+  public static final String SSM_PATH_DATABASE_URL = "db/url";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #databaseOptions} {@link DatabaseOptions#databaseUsername} value.
+   * The path of the SSM parameter that should be used to provide the {@link #databaseOptions}
+   * {@link DatabaseOptions#databaseUsername} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_USERNAME = "DATABASE_USERNAME";
+  public static final String SSM_PATH_DATABASE_USERNAME = "db/username";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #databaseOptions} {@link DatabaseOptions#databasePassword} value.
+   * The path of the SSM parameter that should be used to provide the {@link #databaseOptions}
+   * {@link DatabaseOptions#databasePassword} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_PASSWORD = "DATABASE_PASSWORD";
+  public static final String SSM_PATH_DATABASE_PASSWORD = "db/password";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #databaseOptions} {@link DatabaseOptions#maxPoolSize} value.
+   * The path of the SSM parameter that should be used to provide the {@link #databaseOptions}
+   * {@link DatabaseOptions#maxPoolSize} value.
    */
-  public static final String ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE = "DATABASE_MAX_POOL_SIZE";
+  public static final String SSM_PATH_DATABASE_MAX_POOL_SIZE = "db/max_connections";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link #metricOptions}
-   * {@link MetricOptions#getNewRelicMetricKey()} value.
+   * The path of the SSM parameter that should be used to provide the {@link #metricOptions} {@link
+   * MetricOptions#getNewRelicMetricKey()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "NEW_RELIC_METRIC_KEY";
+  public static final String SSM_PATH_NEW_RELIC_METRIC_KEY = "new_relic/metrics/license_key";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link #metricOptions}
-   * {@link MetricOptions#getNewRelicAppName()} value.
+   * The path of the SSM parameter that should be used to provide the {@link #metricOptions} {@link
+   * MetricOptions#getNewRelicAppName()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_APP_NAME = "NEW_RELIC_APP_NAME";
+  public static final String SSM_PATH_NEW_RELIC_APP_NAME = "new_relic/app_name";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link #metricOptions}
-   * {@link MetricOptions#getNewRelicMetricHost()} value.
+   * The path of the SSM parameter that should be used to provide the {@link #metricOptions} {@link
+   * MetricOptions#getNewRelicMetricHost()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_HOST = "NEW_RELIC_METRIC_HOST";
+  public static final String SSM_PATH_NEW_RELIC_METRIC_HOST = "new_relic/metrics/host";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link #metricOptions}
-   * {@link MetricOptions#getNewRelicMetricPath()} value.
+   * The path of the SSM parameter that should be used to provide the {@link #metricOptions} {@link
+   * MetricOptions#getNewRelicMetricPath()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_PATH = "NEW_RELIC_METRIC_PATH";
+  public static final String SSM_PATH_NEW_RELIC_METRIC_PATH = "new_relic/metrics/path";
 
   /**
-   * The name of the environment variable that should be used to provide the {@link #metricOptions}
-   * {@link MetricOptions#getNewRelicMetricPeriod()} value.
+   * The path of the SSM parameter that should be used to provide the {@link #metricOptions} {@link
+   * MetricOptions#getNewRelicMetricPeriod()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "NEW_RELIC_METRIC_PERIOD";
-
-  /**
-   * The name of the environment variable that should be used to provide the location of the flyway
-   * scripts.
-   */
-  public static final String ENV_VAR_FLYWAY_SCRIPT_LOCATION = "FLYWAY_SCRIPT_LOCATION";
+  public static final String SSM_PATH_NEW_RELIC_METRIC_PERIOD = "new_relic/metrics/period";
 
   /** Name of setting containing alternative endpoint URL for AWS services. */
-  public static final String ENV_VAR_KEY_AWS_ENDPOINT = "AWS_ENDPOINT";
+  public static final String ENV_VAR_AWS_ENDPOINT = "AWS_ENDPOINT";
 
   /** Name of setting containing region name for AWS services. */
-  public static final String ENV_VAR_KEY_AWS_REGION = "AWS_REGION";
+  public static final String ENV_VAR_AWS_REGION = "AWS_REGION";
 
   /** Name of setting containing access key for AWS services. */
-  public static final String ENV_VAR_KEY_AWS_ACCESS_KEY = "AWS_ACCESS_KEY";
+  public static final String ENV_VAR_AWS_ACCESS_KEY = "AWS_ACCESS_KEY";
 
   /** Name of setting containing secret key for AWS services. */
-  public static final String ENV_VAR_KEY_AWS_SECRET_KEY = "AWS_SECRET_KEY";
+  public static final String ENV_VAR_AWS_SECRET_KEY = "AWS_SECRET_KEY";
 
   /** Object for capturing the metrics data. */
   @Getter private final MetricOptions metricOptions;
@@ -157,11 +151,13 @@ public abstract class BaseAppConfiguration {
    * @return the metric options
    */
   protected static MetricOptions loadMetricOptions(ConfigLoader config) {
-    Optional<String> newRelicMetricKey = config.stringOptionEmptyOK(ENV_VAR_NEW_RELIC_METRIC_KEY);
-    Optional<String> newRelicAppName = config.stringOptionEmptyOK(ENV_VAR_NEW_RELIC_APP_NAME);
-    Optional<String> newRelicMetricHost = config.stringOptionEmptyOK(ENV_VAR_NEW_RELIC_METRIC_HOST);
-    Optional<String> newRelicMetricPath = config.stringOptionEmptyOK(ENV_VAR_NEW_RELIC_METRIC_PATH);
-    Optional<Integer> newRelicMetricPeriod = config.intOption(ENV_VAR_NEW_RELIC_METRIC_PERIOD);
+    Optional<String> newRelicMetricKey = config.stringOptionEmptyOK(SSM_PATH_NEW_RELIC_METRIC_KEY);
+    Optional<String> newRelicAppName = config.stringOptionEmptyOK(SSM_PATH_NEW_RELIC_APP_NAME);
+    Optional<String> newRelicMetricHost =
+        config.stringOptionEmptyOK(SSM_PATH_NEW_RELIC_METRIC_HOST);
+    Optional<String> newRelicMetricPath =
+        config.stringOptionEmptyOK(SSM_PATH_NEW_RELIC_METRIC_PATH);
+    Optional<Integer> newRelicMetricPeriod = config.intOption(SSM_PATH_NEW_RELIC_METRIC_PERIOD);
 
     Optional<String> hostname;
     try {
@@ -188,13 +184,13 @@ public abstract class BaseAppConfiguration {
   protected static DatabaseOptions loadDatabaseOptions(ConfigLoader config) {
     DatabaseOptions.AuthenticationType databaseAuthType =
         config
-            .enumOption(ENV_VAR_KEY_DATABASE_AUTH_TYPE, DatabaseOptions.AuthenticationType.class)
+            .enumOption(SSM_PATH_DATABASE_AUTH_TYPE, DatabaseOptions.AuthenticationType.class)
             .orElse(DatabaseOptions.AuthenticationType.JDBC);
-    String databaseUrl = config.stringValue(ENV_VAR_KEY_DATABASE_URL);
-    String databaseUsername = config.stringValue(ENV_VAR_KEY_DATABASE_USERNAME);
-    String databasePassword = config.stringValue(ENV_VAR_KEY_DATABASE_PASSWORD);
+    String databaseUrl = config.stringValue(SSM_PATH_DATABASE_URL);
+    String databaseUsername = config.stringValue(SSM_PATH_DATABASE_USERNAME);
+    String databasePassword = config.stringValue(SSM_PATH_DATABASE_PASSWORD);
     Optional<Integer> databaseMaxPoolSize =
-        config.positiveIntOption(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
+        config.positiveIntOption(SSM_PATH_DATABASE_MAX_POOL_SIZE);
 
     return DatabaseOptions.builder()
         .authenticationType(databaseAuthType)
@@ -214,11 +210,11 @@ public abstract class BaseAppConfiguration {
    */
   protected static AwsClientConfig loadAwsClientConfig(ConfigLoader config) {
     return AwsClientConfig.awsBuilder()
-        .region(config.parsedOption(ENV_VAR_KEY_AWS_REGION, Region.class, Region::of).orElse(null))
+        .region(config.parsedOption(ENV_VAR_AWS_REGION, Region.class, Region::of).orElse(null))
         .endpointOverride(
-            config.parsedOption(ENV_VAR_KEY_AWS_ENDPOINT, URI.class, URI::create).orElse(null))
-        .accessKey(config.stringValue(ENV_VAR_KEY_AWS_ACCESS_KEY, null))
-        .secretKey(config.stringValue(ENV_VAR_KEY_AWS_SECRET_KEY, null))
+            config.parsedOption(ENV_VAR_AWS_ENDPOINT, URI.class, URI::create).orElse(null))
+        .accessKey(config.stringValue(ENV_VAR_AWS_ACCESS_KEY, null))
+        .secretKey(config.stringValue(ENV_VAR_AWS_SECRET_KEY, null))
         .build();
   }
 }
