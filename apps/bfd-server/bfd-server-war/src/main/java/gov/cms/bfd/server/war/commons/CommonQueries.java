@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import java.math.BigInteger;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -72,26 +73,50 @@ public class CommonQueries {
    * @param searchType used to denote what the searchValue represents; values are: mbi, mbi-hash,
    *     hich-hash.
    * @param searchValue identifier value used to search for a ENE_ID.
+   * @param queryIdentifierName {@link String} MDC query identifier.
    * @return long BENE_ID for a beneficiary or zero if not found.
    */
   public static long findBeneficiaryIdentifier(
       EntityManager entityManager,
       MetricRegistry metricRegistry,
       String searchType,
-      String searchValue) {
+      String searchValue,
+      String queryIdentifierName) {
 
     Timer.Context timerBeneQuery =
         CommonTransformerUtils.createMetricsTimer(
             metricRegistry, "CommonQueries", "query", "find_beneficiary_identifier");
 
-    List<Object> values =
-        entityManager
-            .createNativeQuery(FIND_BENE_ID_FROM_IDENTIFIER_SQL)
-            .setParameter("searchIdType", searchType)
-            .setParameter("searchIdValue", searchValue)
-            .getResultList();
+    List<Object> values = null;
+    try {
+      values =
+          entityManager
+              .createNativeQuery(FIND_BENE_ID_FROM_IDENTIFIER_SQL)
+              .setParameter("searchIdType", searchType)
+              .setParameter("searchIdValue", searchValue)
+              .getResultList();
+    } finally {
+      long queryNanoSeconds = timerBeneQuery.stop();
+      CommonTransformerUtils.recordQueryInMdc(
+          String.format(
+              "bene_by_%s_bene_by_%s_or_id_include_%s",
+              searchType, searchType, queryIdentifierName),
+          queryNanoSeconds,
+          values.size());
+    }
 
-    return values != null && values.size() > 0 ? ((BigInteger) values.get(0)).longValue() : 0;
+    if (values == null || values.size() < 1) {
+      throw new ResourceNotFoundException("Failed to find BENE_ID for: " + searchType);
+    } else if (values.size() > 1) {
+      BfdMDC.put(
+          "database_query_by_hash_collision_distinct_bene_ids", Long.toString(values.size()));
+      throw new ResourceNotFoundException(
+          "By hash query found more than one distinct BENE_ID: "
+              + values.size()
+              + ", DistinctBeneIdsList: "
+              + values);
+    }
+    return ((BigInteger) values.get(0)).longValue();
   }
 
   /**
@@ -99,29 +124,29 @@ public class CommonQueries {
    *
    * @param entityManager {@link EntityManager} used to query database.
    * @param metricRegistry {@link MetricRegistry} used to capture performance metrics.
-   * @param callerClassName {@link String} calling classname identifier.
-   * @param queryIdentifier {@link String} used to identify query metrics source.
    * @param beneId primary key identifier.
-   * @param includeIdentifiers boolean denoting if the Beneficiary object should include
-   *     BeneficiaryHistory objects.
+   * @param includeIdentifiers boolean denoting whether to include historical identifiers
+   * @param callerClassName {@link String} calling classname identifier.
+   * @param queryIdentifierName {@link String} MDC query identifier. BeneficiaryHistory objects.
    * @return {@link Beneficiary}.
    * @throws ResourceNotFoundException if record not found.
    */
   public static Beneficiary findBeneficiary(
       EntityManager entityManager,
       MetricRegistry metricRegistry,
-      String callerClassName,
-      String queryIdentifier,
       long beneId,
-      boolean includeIdentifiers) {
+      boolean includeIdentifiers,
+      String callerClassName,
+      String queryIdentifierName) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
-    // the following needs to be removed as part of final cleanup
-    root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     if (includeIdentifiers) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     }
+    // TODO : the following left join of skippedRifRecords needs to be removed as part of final
+    // cleanup
+    root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
@@ -144,7 +169,7 @@ public class CommonQueries {
       long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
       CommonTransformerUtils.recordQueryInMdc(
-          queryIdentifier, beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
+          queryIdentifierName, beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
     }
     return beneficiary;
   }
