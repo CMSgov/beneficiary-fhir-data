@@ -19,7 +19,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -28,9 +27,9 @@ import gov.cms.bfd.model.rif.entities.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
-import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.CommonQueries;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
@@ -88,7 +87,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       Arrays.asList(
           TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH,
-          TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
+          TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD,
+          TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED);
 
   /**
    * The header key used to determine which header should be used. See {@link
@@ -183,7 +183,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       throw new InvalidRequestException("Patient ID must be a number");
     }
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
-
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
     operation.setOption("by", "id");
     // there is another method with exclude list:
@@ -191,42 +190,23 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
-    Root<Beneficiary> root = criteria.from(Beneficiary.class);
-    root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
-    root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+    String queryIdentifier =
+        String.format(
+            "bene_by_id_include_%s",
+            String.join(
+                "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS)));
 
-    criteria.select(root);
-    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
+    Beneficiary beneficiary =
+        CommonQueries.findBeneficiary(
+            entityManager,
+            metricRegistry,
+            beneId,
+            true,
+            getClass().getSimpleName(),
+            queryIdentifier);
 
-    Beneficiary beneficiary = null;
-    Timer.Context timerBeneQuery =
-        CommonTransformerUtils.createMetricsTimer(
-            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
-    try {
-      beneficiary = entityManager.createQuery(criteria).getSingleResult();
-
-      // Add bene_id to MDC logs
-      LoggingUtils.logBeneIdToMdc(beneId);
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(1);
-    } catch (NoResultException e) {
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(0);
-
-      throw new ResourceNotFoundException(patientId);
-    } finally {
-      long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
-
-      CommonTransformerUtils.recordQueryInMdc(
-          String.format(
-              "bene_by_id_include_%s",
-              String.join(
-                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
-          beneByIdQueryNanoSeconds,
-          beneficiary == null ? 0 : 1);
-    }
+    // Null out the unhashed HICN; in v2 we are ignoring HICNs
+    beneficiary.setHicnUnhashed(Optional.empty());
 
     return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
   }
@@ -692,7 +672,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
-
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
     operation.setOption("by", "identifier");
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
@@ -701,16 +680,36 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     operation.publishOperationName();
 
     List<IBaseResource> patients;
-
     try {
       Patient patient;
       switch (identifier.getSystem()) {
+        case TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED:
+          patient =
+              queryDatabaseByHashOrMbi(
+                  identifier.getValue(),
+                  "mbi",
+                  Beneficiary_.medicareBeneficiaryId,
+                  BeneficiaryHistory_.medicareBeneficiaryId,
+                  requestHeader);
+          break;
         case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
-          patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
+          patient =
+              queryDatabaseByHashOrMbi(
+                  identifier.getValue(),
+                  "mbi-hash",
+                  Beneficiary_.mbiHash,
+                  BeneficiaryHistory_.mbiHash,
+                  requestHeader);
           break;
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
-          patient = queryDatabaseByHicnHash(identifier.getValue(), requestHeader);
+          patient =
+              queryDatabaseByHashOrMbi(
+                  identifier.getValue(),
+                  "hicn-hash",
+                  Beneficiary_.hicn,
+                  BeneficiaryHistory_.hicn,
+                  requestHeader);
           break;
         default:
           throw new InvalidRequestException(
@@ -737,44 +736,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Queries the database by hicn hash.
-   *
-   * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
-   * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
-   *     {@link Beneficiary#getHicn()} hash value
-   * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
-   *     Beneficiary} can be found
-   */
-  @Trace
-  private Patient queryDatabaseByHicnHash(String hicnHash, RequestHeaders requestHeader) {
-    return queryDatabaseByHash(
-        hicnHash, "hicn", Beneficiary_.hicn, BeneficiaryHistory_.hicn, requestHeader);
-  }
-
-  /**
-   * Queries the database by mbi hash.
-   *
-   * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
-   * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
-   * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
-   *     {@link Beneficiary#getMbiHash()} ()} hash value
-   * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
-   *     Beneficiary} can be found
-   */
-  @Trace
-  private Patient queryDatabaseByMbiHash(String mbiHash, RequestHeaders requestHeader) {
-    return queryDatabaseByHash(
-        mbiHash, "mbi", Beneficiary_.mbiHash, BeneficiaryHistory_.mbiHash, requestHeader);
-  }
-
-  /**
    * Queries the database by the specified hash type.
    *
-   * @param hash the {@link Beneficiary} hash value to match
-   * @param hashType a string to represent the hash type (used for logging purposes)
-   * @param beneficiaryHashField the JPA location of the beneficiary hash field
-   * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
+   * @param lookupValue the {@link Beneficiary} lookup value to match
+   * @param lookupType a string to represent the lookup type (used for logging purposes)
+   * @param beneficiaryField the JPA location of the beneficiary field
+   * @param beneficiaryHistoryField the JPA location of the beneficiary history field
    * @param requestHeader the {@link RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary} hash value
@@ -782,154 +749,37 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByHash(
-      String hash,
-      String hashType,
-      SingularAttribute<Beneficiary, String> beneficiaryHashField,
-      SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField,
+  private Patient queryDatabaseByHashOrMbi(
+      String lookupValue,
+      String lookupType,
+      SingularAttribute<Beneficiary, String> beneficiaryField,
+      SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryField,
       RequestHeaders requestHeader) {
-    if (hash == null || hash.trim().isEmpty()) {
-      throw new InvalidRequestException("Hash value cannot be null/empty");
+    if (lookupValue == null || lookupValue.trim().isEmpty()) {
+      throw new InvalidRequestException("lookupValue value cannot be null/empty");
     }
+    String queryIdentifierName =
+        String.format(
+            "bene_by_id_include_%s",
+            String.join(
+                "_",
+                (List<String>)
+                    requestHeader.getValue(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)));
 
-    /*
-     * Beneficiaries' MBIs can change over time and those past MBIs may land in
-     * BeneficiaryHistory records. Accordingly, we need to search for matching MBIs
-     * in both the
-     * Beneficiary and the BeneficiaryHistory records.
-     *
-     * There's no sane way to do this in a single query with JPA 2.1, it appears:
-     * JPA doesn't
-     * support UNIONs and it doesn't support subqueries in FROM clauses. That said,
-     * the ideal query
-     * would look like this:
-     *
-     * SELECT * FROM ( SELECT DISTINCT "beneficiaryId" FROM "Beneficiaries" WHERE
-     * "hicn" =
-     * :'hicn_hash' UNION SELECT DISTINCT "beneficiaryId" FROM
-     * "BeneficiariesHistory" WHERE "hicn" =
-     * :'hicn_hash') AS matching_benes INNER JOIN "Beneficiaries" ON
-     * matching_benes."beneficiaryId"
-     * = "Beneficiaries"."beneficiaryId" LEFT JOIN "BeneficiariesHistory" ON
-     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId" LEFT
-     * JOIN
-     * "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" =
-     * "MedicareBeneficiaryIdHistory"."beneficiaryId";
-     *
-     * ... with the returned columns and JOINs being dynamic, depending on
-     * IncludeIdentifiers.
-     *
-     * In lieu of that, we run two queries: one to find MBI matches in
-     * BeneficiariesHistory,
-     * and a second to find BENE_ID or MBI matches in Beneficiaries (with all of
-     * their data, so
-     * we're ready to return the result). This is bad and dumb but I can't find a
-     * better working
-     * alternative.
-     *
-     * (I'll just note that I did also try JPA/Hibernate native SQL queries but
-     * couldn't get the
-     * joins or fetch groups to work with them.)
-     *
-     * If we want to fix this, we need to move identifiers out entirely to separate
-     * tables:
-     * i.e., BeneficiaryMbis. We could then safely query these tables and join them
-     * back to Beneficiaries (and hopefully the optimizer will play nice, too).
-     */
+    long beneId =
+        CommonQueries.findBeneficiaryIdentifier(
+            entityManager, metricRegistry, lookupType, lookupValue, queryIdentifierName);
 
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-
-    // First, find all matching hashes from BeneficiariesHistory.
-    CriteriaQuery<Long> beneHistoryMatches = builder.createQuery(Long.class);
-    Root<BeneficiaryHistory> beneHistoryMatchesRoot =
-        beneHistoryMatches.from(BeneficiaryHistory.class);
-    beneHistoryMatches
-        .select(beneHistoryMatchesRoot.get(BeneficiaryHistory_.beneficiaryId))
-        .where(builder.equal(beneHistoryMatchesRoot.get(beneficiaryHistoryHashField), hash));
-    List<Long> matchingIdsFromBeneHistory = null;
-    Timer.Context beneHistoryMatchesTimer =
-        CommonTransformerUtils.createMetricsTimer(
+    Beneficiary beneficiary =
+        CommonQueries.findBeneficiary(
+            entityManager,
             metricRegistry,
+            beneId,
+            true, // for v2, always include historical idnetifiers
             getClass().getSimpleName(),
-            "query",
-            "bene_by_" + hashType,
-            hashType + "s_from_beneficiarieshistory");
-    try {
-      matchingIdsFromBeneHistory = entityManager.createQuery(beneHistoryMatches).getResultList();
-    } finally {
-      long fromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
-      CommonTransformerUtils.recordQueryInMdc(
-          "bene_by_" + hashType + "_" + hashType + "s_from_beneficiarieshistory",
-          fromHistoryQueryNanoSeconds,
-          matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
-    }
+            queryIdentifierName);
 
-    // Then, find all Beneficiary records that match the hash or those BENE_IDs.
-    CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
-    Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
-    beneMatchesRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
-
-    /*
-     * Check bene history table for historical MBIs;
-     * These will be used to return any historical MBIs in the response and/or find the bene_id
-     * in the event that the user is searching using an old MBI value.
-     */
-    beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-
-    beneMatches.select(beneMatchesRoot);
-    Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
-    if (matchingIdsFromBeneHistory != null && !matchingIdsFromBeneHistory.isEmpty()) {
-      Predicate beneHistoryHashMatches =
-          beneMatchesRoot.get(Beneficiary_.beneficiaryId).in(matchingIdsFromBeneHistory);
-      beneMatches.where(builder.or(beneHashMatches, beneHistoryHashMatches));
-    } else {
-      beneMatches.where(beneHashMatches);
-    }
-    List<Beneficiary> matchingBenes = Collections.emptyList();
-    Timer.Context timerQuery =
-        CommonTransformerUtils.createMetricsTimer(
-            metricRegistry,
-            getClass().getSimpleName(),
-            "query",
-            "bene_by_" + hashType,
-            "bene_by_" + hashType + "_or_id");
-    try {
-      matchingBenes = entityManager.createQuery(beneMatches).getResultList();
-    } finally {
-      long benesByHashOrIdQueryNanoSeconds = timerQuery.stop();
-
-      CommonTransformerUtils.recordQueryInMdc(
-          String.format(
-              "bene_by_" + hashType + "_bene_by_" + hashType + "_or_id_include_%s",
-              String.join(
-                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
-          benesByHashOrIdQueryNanoSeconds,
-          matchingBenes.size());
-    }
-
-    List<Long> distinctBeneIds =
-        matchingBenes.stream()
-            .map(Beneficiary::getBeneficiaryId)
-            .distinct()
-            .sorted()
-            .collect(ImmutableList.toImmutableList());
-
-    Beneficiary beneficiary;
-    if (distinctBeneIds.size() == 0) {
-      throw new NoResultException();
-    } else if (distinctBeneIds.size() > 1) {
-      BfdMDC.put(
-          "database_query_by_hash_collision_distinct_bene_ids",
-          Long.toString(distinctBeneIds.size()));
-      throw new ResourceNotFoundException(
-          "By hash query found more than one distinct BENE_ID: "
-              + distinctBeneIds.size()
-              + ", DistinctBeneIdsList: "
-              + distinctBeneIds);
-    }
-    beneficiary = matchingBenes.get(0);
-
-    // Null out the unhashed HICNs; in v2 we are ignoring HICNs
+    // Null out the unhashed HICN; in v2 we are ignoring HICNs
     beneficiary.setHicnUnhashed(Optional.empty());
 
     return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
