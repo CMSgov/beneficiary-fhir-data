@@ -9,6 +9,7 @@ locals {
 }
 
 module "medicare_opt_out" {
+  count  = local.is_ephemeral_env ? 0 : 1
   source = "../modules/resources/s3_pii"
   env    = local.env
 
