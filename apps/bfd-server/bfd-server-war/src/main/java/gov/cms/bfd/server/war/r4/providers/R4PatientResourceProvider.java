@@ -725,7 +725,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
-
     Bundle bundle =
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
 
