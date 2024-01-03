@@ -68,8 +68,8 @@ function set_const_secure_params() {
 }
 
 function copy_params() {
-    from=$1
-    to=$2
+    from=$1/$3
+    to=$2/$3
     while [[ x$1 != x ]] ; do
       echo getting $from
       value=`aws ssm get-parameter --name $from --output text --query Parameter.Value` || value=$UNDEFINED
@@ -77,15 +77,15 @@ function copy_params() {
         echo setting $to
         aws ssm put-parameter --name $to --value "$value" --type String --overwrite
       fi
-      shift 2
-      from=$1
-      to=$2
+      shift 3
+      from=$1/$3
+      to=$2/$3
     done
 }
 
 function copy_secure_params() {
-    from=$1
-    to=$2
+    from=$1/$3
+    to=$2/$3
     while [[ x$1 != x ]] ; do
       echo getting $from
       value=`aws ssm get-parameter --name $from --with-decryption --output text --query Parameter.Value` || value=$UNDEFINED
@@ -93,9 +93,9 @@ function copy_secure_params() {
         echo setting $to
         aws ssm put-parameter --name $to --value "$value" --type SecureString --overwrite --key-id $EKS_SSM_KEY_ID
       fi
-      shift 2
-      from=$1
-      to=$2
+      shift 3
+      from=$1/$3
+      to=$2/$3
     done
 }
 
@@ -103,25 +103,24 @@ base_path="${EKS_SSM_PREFIX}/server"
 base_config_path="${base_path}/${EKS_SSM_CONFIG_ROOT}"
 
 copy_params \
-  "${base_path}/nonsensitive/data_server_new_relic_metric_path" "${base_config_path}/NEW_RELIC_METRIC_PATH" \
-  "${base_path}/nonsensitive/data_server_new_relic_metric_host" "${base_config_path}/NEW_RELIC_METRIC_HOST" \
-  "${base_path}/nonsensitive/pac_claim_source_types" "${base_config_path}/bfdServer.pac.claimSourceTypes" \
-  "${base_path}/nonsensitive/pac_resources_enabled" "${base_config_path}/bfdServer.pac.enabled" \
+  "${base_path}" "${base_config_path}" /nonsensitive/new_relic/metrics/path \
+  "${base_path}" "${base_config_path}" /nonsensitive/new_relic/metrics/host \
+  "${base_path}" "${base_config_path}" /nonsensitive/pac/claim_source_types \
+  "${base_path}" "${base_config_path}" /nonsensitive/pac/enabled \
 
 copy_secure_params \
-  "${base_path}/sensitive/data_server_db_username" "${base_config_path}/bfdServer.db.username" \
-  "${base_path}/sensitive/data_server_db_password" "${base_config_path}/bfdServer.db.password" \
-  "${base_path}/sensitive/data_server_appserver_https_port" "${base_config_path}/BFD_PORT" \
-  "${base_path}/sensitive/data_server_new_relic_metric_key" "${base_config_path}/NEW_RELIC_METRIC_KEY" \
+  "${base_path}" "${base_config_path}" /sensitive/db/username \
+  "${base_path}" "${base_config_path}" /sensitive/db/password \
+  "${base_path}" "${base_config_path}" /sensitive/port \
+  "${base_path}" "${base_config_path}" /sensitive/new_relic/metrics/license_key \
 
 set_const_secure_params \
-  "jdbc:postgresql://${EKS_RDS_WRITER_ENDPOINT}:5432/fhirdb?logServerErrorDetail=false" "${base_config_path}/bfdServer.db.url" \
+  "jdbc:postgresql://${EKS_RDS_WRITER_ENDPOINT}:5432/fhirdb?logServerErrorDetail=false" "${base_config_path}/sensitive/db/url" \
 
 set_const_params \
-  "true" "${base_config_path}/bfdServer.v2.enabled" \
-  "10" "${base_config_path}/bfdServer.db.connections.max" \
-  "true" "${base_config_path}/bfdServer.pac.enabled" \
-  "fiss,mcs" "${base_config_path}/bfdServer.pac.claimSourceTypes" \
+  "10" "${base_config_path}/nonsensitive/db/max_connections" \
+  "true" "${base_config_path}/nonsensitive/pac/enabled" \
+  "fiss,mcs" "${base_config_path}/nonsensitive/pac/claim_source_types" \
 
 # Our docker image for bfd-server currently does not have support for New Relic agent jar.
 # See ops/ansible/roles/bfd-server/templates/bfd-server.sh.j2
@@ -189,8 +188,8 @@ aws ssm get-parameter --name "${base_path}/sensitive/server_keystore_base64" --w
 
 ssl_volume_path=/app/ssl
 set_const_secure_params \
-  "${ssl_volume_path}/${keystore_name}" "${base_config_path}/BFD_KEYSTORE" \
-  "${ssl_volume_path}/${truststore_name}" "${base_config_path}/BFD_TRUSTSTORE" \
+  "${ssl_volume_path}/${keystore_name}" "${base_config_path}/sensitive/paths/files/keystore" \
+  "${ssl_volume_path}/${truststore_name}" "${base_config_path}/sensitive/paths/files/truststore" \
 
 namespace=eks-test
 chart=../helm/server
@@ -203,6 +202,6 @@ rm ${truststore_file} ${keystore_file}
 
 helm -n $namespace uninstall "server" || true
 helm -n $namespace install "server" $chart \
-  --set ssmHierarchies="{${base_config_path}}" \
+  --set ssmHierarchies="{${base_config_path}/sensitive,${base_config_path}/nonsensitive}" \
   --set imageRegistry="${EKS_ECR_REGISTRY}/" \
   --values server-values.yaml

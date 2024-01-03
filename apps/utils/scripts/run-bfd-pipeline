@@ -80,6 +80,7 @@ interval_seconds=60
 rda_host=localhost
 rda_port=5003
 rda_token=
+s3_required=false
 s3_mode=local
 s3_bucket="bfd-pipeline"
 s3_directory=test
@@ -205,6 +206,10 @@ if [[ $# != 1 ]] ; then
 fi
 run_mode=$1
 
+if [[ $run_mode = rif ]] || [[ $run_mode = s3 ]] ; then
+  s3_required=true
+fi
+
 if [[ x$image_tag != x ]] ; then
   echo "using docker image $image_name:$image_tag"
 fi
@@ -216,6 +221,12 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   localstack_running=true
   export AWS_REGION=us-east-1
   export AWS_ENDPOINT=http://${localstack_ip}:4566/
+  # bfd environment variables
+  export AWS_ACCESS_KEY=000000000042
+  export AWS_SECRET_KEY=LSIAQAAAAAAVNCBMPNSG
+  # aws cli environment variables
+  export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
+  export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
   SSM_PARAMETER_PATH=/bfd-pipeline
   export CONFIG_SETTINGS_JSON=$(cat <<EOF
 {
@@ -229,13 +240,17 @@ fi
 # parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
 # SSM in the cloud.
 function setvar() {
-  name="$1"
+  ssm_name="$1"
   value="$2"
-  if [[ $localstack_running = "false" ]] ; then
-    eval "export ${name}=\"${value}\""
+  if [[ -z "$AWS_REGION" ]] ; then
+    # env var names are ssm paths converted upper case and with / replaced by _.
+    env_name=`echo "BFD_${ssm_name}" | tr '/' '_' | tr '[a-z]' '[A-Z]'`
+    echo export $env_name
+    eval "export ${env_name}=\"${value}\""
   else
-    echo put-parameter $name
-    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${SSM_PARAMETER_PATH}/${name}" --value "${value}" > /dev/null
+    full_ssm_name="${SSM_PARAMETER_PATH}/${ssm_name}"
+    echo put-parameter $full_ssm_name
+    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${full_ssm_name}" --value "${value}" # > /dev/null
   fi
 }
 
@@ -254,22 +269,24 @@ if [[ $debug_enabled = "true" ]] ; then
   ARGS="$ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=${debug_suspend},address=*:5005"
 fi
 
-case $s3_mode in
-local)
-  if [[ $localstack_running = "false" ]] ; then
-    echo error: s3 local mode requires localstack to be running 1>&2
+if [[ $s3_required = "true" ]] ; then
+  case $s3_mode in
+  local)
+    if [[ $localstack_running = "false" ]] ; then
+      echo error: s3 local mode requires localstack to be running 1>&2
+      usage
+      exit 1
+    fi
+    ;;
+  aws) ;;
+  *) echo error: s3 mode must be '"local" or "aws"' 1>&2 ; usage ; exit 1 ;;
+  esac
+
+  if [[ $s3_directory != "" ]] && [[ $s3_bucket = "" ]] ; then
+    echo "error: using s3 directory requires an s3 bucket" 1>&2
     usage
     exit 1
   fi
-  ;;
-aws) ;;
-*) echo error: s3 mode must be '"local" or "aws"' 1>&2 ; usage ; exit 1 ;;
-esac
-
-if [[ $s3_directory != "" ]] && [[ $s3_bucket = "" ]] ; then
-  echo "error: using s3 directory requires an s3 bucket" 1>&2
-  usage
-  exit 1
 fi
 
 # The pipeline app project will contain our runtime artifacts.
@@ -326,80 +343,74 @@ fi
 
 # Set up the configuration variables using the setvar function.
 export BFD_ENV_NAME="laptop"
-setvar S3_BUCKET_NAME "$s3_bucket"
-setvar HICN_HASH_ITERATIONS "1000"  # The minimum number of iterations recommended by NIST is 1000.
-setvar HICN_HASH_PEPPER "6f6e7474656865726c61657070707265" # nottherealpepper
-setvar DATABASE_URL "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=false"
-setvar DATABASE_USERNAME "bfd"
-setvar DATABASE_PASSWORD "InsecureLocalDev"
-setvar FILTERING_NON_NULL_AND_NON_2023_BENES "false"
-
-#setvar NEW_RELIC_APP_NAME "-- data_pipeline_new_relic_app_name --"
-#setvar NEW_RELIC_METRIC_HOST "-- data_pipeline_new_relic_metric_host --"
-#setvar NEW_RELIC_METRIC_PATH "-- data_pipeline_new_relic_metric_path --"
-#setvar NEW_RELIC_METRIC_KEY "-- data_pipeline_new_relic_metric_key --"
+setvar ccw/s3_bucket_name "$s3_bucket"
+setvar hicn_hash/iterations "1000"  # The minimum number of iterations recommended by NIST is 1000.
+setvar hicn_hash/pepper "6f6e7474656865726c61657070707265" # nottherealpepper
+setvar db/url "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=false"
+setvar db/username "bfd"
+setvar db/password "InsecureLocalDev"
 
 # For testing RIF performance.
 if [[ x$bene_threads = x ]] ; then
-  setvar LOADER_THREADS "$threads"
-  setvar RIF_JOB_BATCH_SIZE "$batch_size"
-  setvar RIF_JOB_QUEUE_SIZE_MULTIPLE "2"
+  setvar loader_thread_count "$threads"
+  setvar ccw/job/batch_size "$batch_size"
+  setvar ccw/job/queue_size_multiple "2"
 else
-  setvar LOADER_THREADS "$bene_threads"
-  setvar RIF_JOB_BATCH_SIZE "$bene_batch_size"
-  setvar RIF_JOB_QUEUE_SIZE_MULTIPLE "$bene_queue_multiple"
+  setvar loader_thread_count "$bene_threads"
+  setvar ccw/job/batch_size "$bene_batch_size"
+  setvar ccw/job/queue_size_multiple "$bene_queue_multiple"
 fi
 
 if [[ x$claim_threads != x ]] ; then
-  setvar LOADER_THREADS_CLAIMS "$claim_threads"
-  setvar RIF_JOB_BATCH_SIZE_CLAIMS "$claim_batch_size"
-  setvar RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS "$claim_queue_multiple"
+  setvar ccw/job/claims/loader_thread_count "$claim_threads"
+  setvar ccw/job/claims/batch_size "$claim_batch_size"
+  setvar ccw/job/claims/queue_size_multiple "$claim_queue_multiple"
 fi
 
-setvar HICN_HASH_CACHE_SIZE "$cache_size"
-setvar IDEMPOTENCY_REQUIRED "$idempotency_mode"
+setvar hicn_hash/cache_size "$cache_size"
+setvar ccw/idempotency_enabled "$idempotency_mode"
 
-setvar RDA_JOB_INTERVAL_SECONDS "$interval_seconds"
-setvar RDA_JOB_BATCH_SIZE "$batch_size"
-setvar RDA_JOB_WRITE_THREADS "$threads"
-setvar RDA_JOB_PROCESS_DLQ "true"
-setvar RDA_JOB_ERROR_EXPIRE_DAYS "5"
+setvar rda/job/interval_seconds "$interval_seconds"
+setvar rda/job/batch_size "$batch_size"
+setvar rda/job/write_thread_count "$threads"
+setvar rda/job/process_dlq "true"
+setvar rda/job/error_expire_days "5"
 
 # For testing RDA ingestion in a loop.
-#setvar RDA_JOB_STARTING_FISS_SEQ_NUM "0"
-#setvar RDA_JOB_STARTING_MCS_SEQ_NUM "0"
+#setvar rda/job/starting_fiss_seq_num "0"
+#setvar rda/job/starting_mcs_seq_num "0"
 
-setvar MICROMETER_JMX_ENABLED "true"
+setvar micrometer_cw/jmx_enabled "true"
 
 # Command line option below determines which jobs to run.
-setvar CCW_RIF_JOB_ENABLED "false"
-setvar RDA_JOB_ENABLED "false"
+setvar ccw/job/enabled "false"
+setvar rda/job/enabled "false"
 
 case $run_mode in
   rif)
-    setvar CCW_RIF_JOB_ENABLED "true"
+    setvar ccw/job/enabled "true"
     ;;
   random)
-    setvar RDA_JOB_ENABLED "true"
-    setvar RDA_GRPC_SERVER_TYPE "InProcess"
-    setvar RDA_GRPC_INPROC_SERVER_MODE "Random"
-    setvar RDA_GRPC_INPROC_SERVER_RANDOM_SEED "42"
-    setvar RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS "2500"
+    setvar rda/job/enabled "true"
+    setvar rda/grpc/server_type "InProcess"
+    setvar rda/grpc/inprocess_server/mode "Random"
+    setvar rda/grpc/inprocess_server/random/seed "42"
+    setvar rda/grpc/inprocess_server/random/max_claims "2500"
     ;;
   rda)
-    setvar RDA_JOB_ENABLED "true"
-    setvar RDA_GRPC_SERVER_TYPE "Remote"
-    setvar RDA_GRPC_HOST "$rda_host"
-    setvar RDA_GRPC_PORT "$rda_port"
-    setvar RDA_GRPC_MAX_IDLE_SECONDS "600"
-    setvar RDA_GRPC_AUTH_TOKEN "$rda_token"
+    setvar rda/job/enabled "true"
+    setvar rda/grpc/server_type "Remote"
+    setvar rda/grpc/host "$rda_host"
+    setvar rda/grpc/port "$rda_port"
+    setvar rda/grpc/max_idle_seconds "600"
+    setvar rda/grpc/auth_token "$rda_token"
     ;;
   s3)
-    setvar RDA_JOB_ENABLED "true"
-    setvar RDA_GRPC_SERVER_TYPE "InProcess"
-    setvar RDA_GRPC_INPROC_SERVER_MODE "S3"
-    setvar RDA_GRPC_INPROC_SERVER_S3_BUCKET "$s3_bucket"
-    setvar RDA_GRPC_INPROC_SERVER_S3_DIRECTORY "$s3_directory"
+    setvar rda/job/enabled "true"
+    setvar rda/grpc/server_type "InProcess"
+    setvar rda/grpc/inprocess_server/mode "S3"
+    setvar rda/grpc/inprocess_server/s3/bucket "$s3_bucket"
+    setvar rda/grpc/inprocess_server/s3/dir "$s3_directory"
     ;;
   *)
     echo Invalid value for run_mode: $run_mode 1>&2
@@ -437,6 +448,8 @@ else
     --name $image_name \
     --env AWS_REGION \
     --env AWS_ENDPOINT \
+    --env AWS_ACCESS_KEY \
+    --env AWS_SECRET_KEY \
     --env CONFIG_SETTINGS_JSON \
     --env HOME=/home/app \
     --env BFD_ENV_NAME="$BFD_ENV_NAME" \

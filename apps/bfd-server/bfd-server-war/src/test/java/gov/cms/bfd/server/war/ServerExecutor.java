@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war;
 
 import gov.cms.bfd.server.launcher.AppConfiguration;
 import gov.cms.bfd.server.launcher.DataServerLauncherApp;
+import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.IOException;
 import java.net.Socket;
@@ -78,10 +79,10 @@ public class ServerExecutor {
     final var appSettings = new HashMap<String, String>();
     addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
     final var configLoader = ConfigLoader.builder().addMap(appSettings).build();
-    appSettings.put("BFD_PORT", serverPort);
-    appSettings.put("BFD_KEYSTORE", keyStore);
-    appSettings.put("BFD_TRUSTSTORE", trustStore);
-    appSettings.put("BFD_WAR", warArtifactLocation);
+    appSettings.put(AppConfiguration.SSM_PATH_PORT, serverPort);
+    appSettings.put(AppConfiguration.SSM_PATH_KEYSTORE, keyStore);
+    appSettings.put(AppConfiguration.SSM_PATH_TRUSTSTORE, trustStore);
+    appSettings.put(AppConfiguration.SSM_PATH_WAR, warArtifactLocation);
     AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
     serverInfo = DataServerLauncherApp.createServer(appConfig);
 
@@ -140,20 +141,20 @@ public class ServerExecutor {
   private static void addServerSettings(
       Map<String, String> appSettings, String dbUrl, String dbUsername, String dbPassword) {
     // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
-    String pacEnabled = "true";
-    String pacOldMbiHashEnabled = "true";
-    String pacClaimSourceTypes = "fiss,mcs";
-    String includeFakeDrugCode = "true";
-    String includeFakeOrgName = "true";
+    final String pacEnabled = "true";
+    final String pacOldMbiHashEnabled = "true";
+    final String pacClaimSourceTypes = "fiss,mcs";
+    final String includeFakeDrugCode = "true";
+    final String includeFakeOrgName = "true";
 
-    appSettings.put("bfdServer.pac.enabled", pacEnabled);
-    appSettings.put("bfdServer.pac.oldMbiHash.enabled", pacOldMbiHashEnabled);
-    appSettings.put("bfdServer.pac.claimSourceTypes", pacClaimSourceTypes);
-    appSettings.put("bfdServer.db.url", dbUrl);
-    appSettings.put("bfdServer.db.username", dbUsername);
-    appSettings.put("bfdServer.db.password", dbPassword);
-    appSettings.put("bfdServer.include.fake.drug.code", includeFakeDrugCode);
-    appSettings.put("bfdServer.include.fake.org.name", includeFakeOrgName);
+    appSettings.put(SpringConfiguration.SSM_PATH_PAC_ENABLED, pacEnabled);
+    appSettings.put(SpringConfiguration.PROP_PAC_OLD_MBI_HASH_ENABLED, pacOldMbiHashEnabled);
+    appSettings.put(SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES, pacClaimSourceTypes);
+    appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_URL, dbUrl);
+    appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_USERNAME, dbUsername);
+    appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD, dbPassword);
+    appSettings.put(SpringConfiguration.PROP_INCLUDE_FAKE_DRUG_CODE, includeFakeDrugCode);
+    appSettings.put(SpringConfiguration.PROP_INCLUDE_FAKE_ORG_NAME, includeFakeOrgName);
   }
 
   /**

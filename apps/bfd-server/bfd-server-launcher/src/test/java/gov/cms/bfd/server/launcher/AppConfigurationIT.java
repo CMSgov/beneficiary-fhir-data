@@ -29,18 +29,18 @@ public final class AppConfigurationIT {
   @Test
   public void normalUsage() {
     Map<String, String> envValues = new HashMap<>();
-    envValues.put(AppConfiguration.ENV_VAR_KEY_PORT, "1");
+    envValues.put(AppConfiguration.SSM_PATH_PORT, "1");
     envValues.put(
-        AppConfiguration.ENV_VAR_KEY_KEYSTORE,
+        AppConfiguration.SSM_PATH_KEYSTORE,
         getProjectDirectory()
             .resolve(Paths.get("..", "dev", "ssl-stores", "server-keystore.pfx"))
             .toString());
     envValues.put(
-        AppConfiguration.ENV_VAR_KEY_TRUSTSTORE,
+        AppConfiguration.SSM_PATH_TRUSTSTORE,
         getProjectDirectory()
             .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.pfx"))
             .toString());
-    envValues.put(AppConfiguration.ENV_VAR_KEY_WAR, ServerTestUtils.getSampleWar().toString());
+    envValues.put(AppConfiguration.SSM_PATH_WAR, ServerTestUtils.getSampleWar().toString());
 
     ConfigLoader config = ConfigLoader.builder().addMap(envValues).build();
 
@@ -48,16 +48,13 @@ public final class AppConfigurationIT {
     assertNotNull(testAppConfig);
     assertEquals(Optional.<String>empty(), testAppConfig.getHost());
     assertEquals(
-        Integer.parseInt(envValues.get(AppConfiguration.ENV_VAR_KEY_PORT)),
-        testAppConfig.getPort());
+        Integer.parseInt(envValues.get(AppConfiguration.SSM_PATH_PORT)), testAppConfig.getPort());
     assertEquals(
-        envValues.get(AppConfiguration.ENV_VAR_KEY_KEYSTORE),
-        testAppConfig.getKeystore().toString());
+        envValues.get(AppConfiguration.SSM_PATH_KEYSTORE), testAppConfig.getKeystore().toString());
     assertEquals(
-        envValues.get(AppConfiguration.ENV_VAR_KEY_TRUSTSTORE),
+        envValues.get(AppConfiguration.SSM_PATH_TRUSTSTORE),
         testAppConfig.getTruststore().toString());
-    assertEquals(
-        envValues.get(AppConfiguration.ENV_VAR_KEY_WAR), testAppConfig.getWar().toString());
+    assertEquals(envValues.get(AppConfiguration.SSM_PATH_WAR), testAppConfig.getWar().toString());
   }
 
   /**
@@ -103,9 +100,11 @@ public final class AppConfigurationIT {
     ConfigLoader config = ConfigLoader.builder().addMap(envValues).build();
     ConfigException exception =
         assertThrows(ConfigException.class, () -> AppConfiguration.loadConfig(config));
-    assertEquals(AppConfiguration.ENV_VAR_KEY_PORT, exception.getName());
+    assertEquals(AppConfiguration.SSM_PATH_PORT, exception.getName());
     assertEquals(
-        "Configuration value error: name='BFD_PORT' detail='required option not provided'",
+        String.format(
+            "Configuration value error: name='%s' detail='required option not provided'",
+            AppConfiguration.SSM_PATH_PORT),
         exception.getMessage());
   }
 }

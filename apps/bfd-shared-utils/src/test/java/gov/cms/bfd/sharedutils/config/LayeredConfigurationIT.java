@@ -1,5 +1,7 @@
 package gov.cms.bfd.sharedutils.config;
 
+import static gov.cms.bfd.sharedutils.config.LayeredConfiguration.ENV_VAR_PREFIX;
+import static gov.cms.bfd.sharedutils.config.LayeredConfiguration.PROPERTY_NAME_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -107,11 +109,11 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
         ImmutableMap.<String, String>builder().put(nameA, "a-system-property").build();
     final var envVars =
         ImmutableMap.<String, String>builder()
-            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION, localstack.getRegion())
-            .put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, configSettingsJson)
-            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString())
-            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey())
-            .put(BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_REGION, localstack.getRegion())
+            .put(LayeredConfiguration.SSM_PATH_CONFIG_SETTINGS_JSON, configSettingsJson)
+            .put(BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey())
             .put(nameA, "a-env-var")
             .put(nameB, "b-env-var")
             .build();
@@ -188,7 +190,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
       assertEquals("e-ssm-common-parameter", config.stringValue(nameE));
       assertEquals("f-default", config.stringValue(nameF));
       assertEquals("g-ssm-parent-parameter", config.stringValue(nameG));
-      assertEquals("g-ssm-child-parameter", config.stringValue(ssmChildName + "." + nameG));
+      assertEquals("g-ssm-child-parameter", config.stringValue(ssmChildName + "/" + nameG));
       assertEquals("h-ssm-specific-parameter", config.stringValue(nameH));
       assertEquals(Optional.empty(), config.stringOption(nameZ));
 
@@ -219,7 +221,7 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
     final var hierarchyPath = ssmBasePath + "root/";
     final var hierarchiesMap = new HashMap<String, String>();
     hierarchiesMap.put("new", "data");
-    hierarchiesMap.put("x.hover", "board");
+    hierarchiesMap.put("x/hover", "board");
     addParameterToSsm(hierarchyPath + "new", "data");
     addParameterToSsm(hierarchyPath + "x/hover", "board");
 
@@ -228,10 +230,10 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
 
     // Set up map to hold our simulated environment variables
     final var envVars = new HashMap<String, String>();
-    envVars.put(BaseAppConfiguration.ENV_VAR_KEY_AWS_REGION, localstack.getRegion());
-    envVars.put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, localstack.getEndpoint().toString());
-    envVars.put(BaseAppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, localstack.getAccessKey());
-    envVars.put(BaseAppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, localstack.getSecretKey());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_REGION, localstack.getRegion());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey());
 
     // the source we'll pass as our environment variables
     final var getenv = ConfigLoaderSource.fromMap(envVars);
@@ -242,7 +244,13 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
 
     // no layered config variables so only defaults, env and properties should be used
     var expectedLoader =
-        ConfigLoader.builder().addMap(defaultValues).add(getenv).addSystemProperties().build();
+        ConfigLoader.builder()
+            .addMap(defaultValues)
+            .add(getenv)
+            .alsoWithSsmToEnvVarMapping(ENV_VAR_PREFIX)
+            .addSystemProperties()
+            .alsoWithSsmToPropertyMapping(PROPERTY_NAME_PREFIX)
+            .build();
     var actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
     assertEquals(expectedLoader, actualLoader);
 
@@ -253,14 +261,17 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
             .ssmHierarchies(List.of(hierarchyPath))
             .build();
     final var configSettingsJson = new ObjectMapper().writeValueAsString(configSettings);
-    envVars.put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, configSettingsJson);
+    envVars.put(LayeredConfiguration.SSM_PATH_CONFIG_SETTINGS_JSON, configSettingsJson);
     expectedLoader =
         ConfigLoader.builder()
             .addMap(defaultValues)
             .addMap(hierarchiesMap)
             .addProperties(expectedProperties)
+            .alsoWithSsmToPropertyMapping(PROPERTY_NAME_PREFIX)
             .add(getenv)
+            .alsoWithSsmToEnvVarMapping(ENV_VAR_PREFIX)
             .addSystemProperties()
+            .alsoWithSsmToPropertyMapping(PROPERTY_NAME_PREFIX)
             .build();
     actualLoader = LayeredConfiguration.createConfigLoader(defaultValues, getenv);
     assertEquals(expectedLoader, actualLoader);

@@ -1,25 +1,25 @@
 package gov.cms.bfd.pipeline.app;
 
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_HOST;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_BATCH_SIZE;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_JOB_WRITE_THREADS;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.ENV_VAR_KEY_RDA_VERSION;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_AUTH_TOKEN;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_HOST;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_INPROC_SERVER_MODE;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_INPROC_SERVER_NAME;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_INPROC_SERVER_RANDOM_SEED;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_INPROC_SERVER_S3_BUCKET;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_MAX_IDLE_SECONDS;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_PORT;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_SERVER_TYPE;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_BATCH_SIZE;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_ERROR_EXPIRE_DAYS;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_INTERVAL_SECONDS;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_STARTING_FISS_SEQ_NUM;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_STARTING_MCS_SEQ_NUM;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_WRITE_THREADS;
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_VERSION;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadBeneficiaryPerformanceSettings;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadClaimPerformanceSettings;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,31 +76,31 @@ public class AppConfigurationTest {
   @Test
   public void normalUsage() throws Exception {
     final var envVars = new HashMap<String, String>();
-    envVars.put(AppConfiguration.ENV_VAR_KEY_BUCKET, "foo");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE, RifFileType.BENEFICIARY.name());
+    envVars.put(AppConfiguration.SSM_PATH_BUCKET, "foo");
+    envVars.put(AppConfiguration.SSM_PATH_ALLOWED_RIF_TYPE, RifFileType.BENEFICIARY.name());
     envVars.put(
-        AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
+        AppConfiguration.SSM_PATH_HICN_HASH_ITERATIONS,
         String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
     envVars.put(
-        AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
+        AppConfiguration.SSM_PATH_HICN_HASH_PEPPER,
         Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
-    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, "some_url");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, "some_user");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "some_password");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, "unreal-access-key");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, "unreal-secret-key");
+    envVars.put(AppConfiguration.SSM_PATH_DATABASE_URL, "some_url");
+    envVars.put(AppConfiguration.SSM_PATH_DATABASE_USERNAME, "some_user");
+    envVars.put(AppConfiguration.SSM_PATH_DATABASE_PASSWORD, "some_password");
+    envVars.put(AppConfiguration.SSM_PATH_LOADER_THREADS, "42");
+    envVars.put(AppConfiguration.SSM_PATH_IDEMPOTENCY_REQUIRED, "true");
+    envVars.put(AppConfiguration.ENV_VAR_AWS_ENDPOINT, "http://localhost:999999");
+    envVars.put(AppConfiguration.ENV_VAR_AWS_ACCESS_KEY, "unreal-access-key");
+    envVars.put(AppConfiguration.ENV_VAR_AWS_SECRET_KEY, "unreal-secret-key");
     final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
     AppConfiguration testAppConfig = AppConfiguration.loadConfig(configLoader);
 
     assertNotNull(testAppConfig);
     assertEquals(
-        envVars.get(AppConfiguration.ENV_VAR_KEY_BUCKET),
+        envVars.get(AppConfiguration.SSM_PATH_BUCKET),
         testAppConfig.getCcwRifLoadOptions().get().getExtractionOptions().getS3BucketName());
     assertEquals(
-        envVars.get(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE),
+        envVars.get(AppConfiguration.SSM_PATH_ALLOWED_RIF_TYPE),
         testAppConfig
             .getCcwRifLoadOptions()
             .get()
@@ -109,7 +109,7 @@ public class AppConfigurationTest {
             .get()
             .name());
     assertEquals(
-        Integer.parseInt(envVars.get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS)),
+        Integer.parseInt(envVars.get(AppConfiguration.SSM_PATH_HICN_HASH_ITERATIONS)),
         testAppConfig
             .getCcwRifLoadOptions()
             .get()
@@ -117,7 +117,7 @@ public class AppConfigurationTest {
             .getIdHasherConfig()
             .getHashIterations());
     assertArrayEquals(
-        Hex.decodeHex(envVars.get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER).toCharArray()),
+        Hex.decodeHex(envVars.get(AppConfiguration.SSM_PATH_HICN_HASH_PEPPER).toCharArray()),
         testAppConfig
             .getCcwRifLoadOptions()
             .get()
@@ -129,19 +129,19 @@ public class AppConfigurationTest {
         DatabaseOptions.AuthenticationType.JDBC,
         testAppConfig.getDatabaseOptions().getAuthenticationType());
     assertEquals(
-        envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL),
+        envVars.get(AppConfiguration.SSM_PATH_DATABASE_URL),
         testAppConfig.getDatabaseOptions().getDatabaseUrl());
     assertEquals(
-        envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME),
+        envVars.get(AppConfiguration.SSM_PATH_DATABASE_USERNAME),
         testAppConfig.getDatabaseOptions().getDatabaseUsername());
     assertEquals(
-        envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD),
+        envVars.get(AppConfiguration.SSM_PATH_DATABASE_PASSWORD),
         testAppConfig.getDatabaseOptions().getDatabasePassword());
     assertThat(testAppConfig.createDataSourceFactory())
         .isExactlyInstanceOf(HikariDataSourceFactory.class);
 
     assertEquals(
-        Integer.parseInt(envVars.get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
+        Integer.parseInt(envVars.get(AppConfiguration.SSM_PATH_LOADER_THREADS)),
         testAppConfig
             .getCcwRifLoadOptions()
             .get()
@@ -149,13 +149,13 @@ public class AppConfigurationTest {
             .getBeneficiaryPerformanceSettings()
             .getLoaderThreads());
     assertEquals(
-        envVars.get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED),
+        envVars.get(AppConfiguration.SSM_PATH_IDEMPOTENCY_REQUIRED),
         "" + testAppConfig.getCcwRifLoadOptions().get().getLoadOptions().isIdempotencyRequired());
     assertEquals(
         S3ClientConfig.s3Builder()
-            .endpointOverride(URI.create(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT)))
-            .accessKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY))
-            .secretKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY))
+            .endpointOverride(URI.create(envVars.get(AppConfiguration.ENV_VAR_AWS_ENDPOINT)))
+            .accessKey(envVars.get(AppConfiguration.ENV_VAR_AWS_ACCESS_KEY))
+            .secretKey(envVars.get(AppConfiguration.ENV_VAR_AWS_SECRET_KEY))
             .build(),
         testAppConfig.getCcwRifLoadOptions().get().getExtractionOptions().getS3ClientConfig());
   }
@@ -164,11 +164,11 @@ public class AppConfigurationTest {
   @Test
   void testRdsDatabaseAuthenticationSettings() {
     final var envVars = new HashMap<String, String>();
-    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_AUTH_TYPE, "RDS");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, "jdbc:postgres://host:1234/fhirdb");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, "some_user");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "not-used");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, "14");
+    envVars.put(AppConfiguration.SSM_PATH_DATABASE_AUTH_TYPE, "RDS");
+    envVars.put(AppConfiguration.SSM_PATH_DATABASE_URL, "jdbc:postgres://host:1234/fhirdb");
+    envVars.put(AppConfiguration.SSM_PATH_DATABASE_USERNAME, "some_user");
+    envVars.put(AppConfiguration.SSM_PATH_DATABASE_PASSWORD, "not-used");
+    envVars.put(AppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE, "14");
     addRequiredSettingsForTest(envVars);
 
     final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
@@ -177,9 +177,9 @@ public class AppConfigurationTest {
     assertEquals(
         DatabaseOptions.builder()
             .authenticationType(DatabaseOptions.AuthenticationType.RDS)
-            .databaseUrl(envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL))
-            .databaseUsername(envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME))
-            .databasePassword(envVars.get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD))
+            .databaseUrl(envVars.get(AppConfiguration.SSM_PATH_DATABASE_URL))
+            .databaseUsername(envVars.get(AppConfiguration.SSM_PATH_DATABASE_USERNAME))
+            .databasePassword(envVars.get(AppConfiguration.SSM_PATH_DATABASE_PASSWORD))
             .maxPoolSize(14)
             .build(),
         testAppConfig.getDatabaseOptions());
@@ -191,10 +191,10 @@ public class AppConfigurationTest {
   @Test
   void testAwsSettings() {
     final var envVars = new HashMap<String, String>();
-    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_REGION, "us-west-1");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, "unreal-access-key");
-    envVars.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, "unreal-secret-key");
+    envVars.put(AppConfiguration.ENV_VAR_AWS_REGION, "us-west-1");
+    envVars.put(AppConfiguration.ENV_VAR_AWS_ENDPOINT, "http://localhost:999999");
+    envVars.put(AppConfiguration.ENV_VAR_AWS_ACCESS_KEY, "unreal-access-key");
+    envVars.put(AppConfiguration.ENV_VAR_AWS_SECRET_KEY, "unreal-secret-key");
     addRequiredSettingsForTest(envVars);
 
     final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
@@ -202,9 +202,9 @@ public class AppConfigurationTest {
 
     assertEquals(
         AwsClientConfig.awsBuilder()
-            .endpointOverride(URI.create(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT)))
-            .accessKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY))
-            .secretKey(envVars.get(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY))
+            .endpointOverride(URI.create(envVars.get(AppConfiguration.ENV_VAR_AWS_ENDPOINT)))
+            .accessKey(envVars.get(AppConfiguration.ENV_VAR_AWS_ACCESS_KEY))
+            .secretKey(envVars.get(AppConfiguration.ENV_VAR_AWS_SECRET_KEY))
             .region(Region.US_WEST_1)
             .build(),
         testAppConfig.getAwsClientConfig());
@@ -222,26 +222,26 @@ public class AppConfigurationTest {
     assertThrows(ConfigException.class, () -> loadBeneficiaryPerformanceSettings(configLoader));
 
     // verify values must be positive
-    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "0");
+    envVars.put(AppConfiguration.SSM_PATH_LOADER_THREADS, "0");
     assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
         .isInstanceOf(ConfigException.class)
-        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)
+        .hasMessageContaining(AppConfiguration.SSM_PATH_LOADER_THREADS)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
-    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "10");
+    envVars.put(AppConfiguration.SSM_PATH_LOADER_THREADS, "10");
 
-    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "-1");
+    envVars.put(AppConfiguration.SSM_PATH_RIF_JOB_BATCH_SIZE, "-1");
     assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
         .isInstanceOf(ConfigException.class)
-        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE)
+        .hasMessageContaining(AppConfiguration.SSM_PATH_RIF_JOB_BATCH_SIZE)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
-    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE, "11");
+    envVars.put(AppConfiguration.SSM_PATH_RIF_JOB_BATCH_SIZE, "11");
 
-    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "0");
+    envVars.put(AppConfiguration.SSM_PATH_RIF_JOB_QUEUE_SIZE_MULTIPLE, "0");
     assertThatThrownBy(() -> loadBeneficiaryPerformanceSettings(configLoader))
         .isInstanceOf(ConfigException.class)
-        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE)
+        .hasMessageContaining(AppConfiguration.SSM_PATH_RIF_JOB_QUEUE_SIZE_MULTIPLE)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
-    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE, "12");
+    envVars.put(AppConfiguration.SSM_PATH_RIF_JOB_QUEUE_SIZE_MULTIPLE, "12");
 
     // verify values are parsed correctly when present
     assertEquals(
@@ -265,26 +265,26 @@ public class AppConfigurationTest {
         loadClaimPerformanceSettings(configLoader, benePerformanceSettings));
 
     // verify values must be positive
-    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS, "0");
+    envVars.put(AppConfiguration.SSM_PATH_LOADER_THREADS_CLAIMS, "0");
     assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
         .isInstanceOf(ConfigException.class)
-        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS)
+        .hasMessageContaining(AppConfiguration.SSM_PATH_LOADER_THREADS_CLAIMS)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
-    envVars.put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS_CLAIMS, "20");
+    envVars.put(AppConfiguration.SSM_PATH_LOADER_THREADS_CLAIMS, "20");
 
-    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, "-1");
+    envVars.put(AppConfiguration.SSM_PATH_RIF_JOB_BATCH_SIZE_CLAIMS, "-1");
     assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
         .isInstanceOf(ConfigException.class)
-        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS)
+        .hasMessageContaining(AppConfiguration.SSM_PATH_RIF_JOB_BATCH_SIZE_CLAIMS)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
-    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_BATCH_SIZE_CLAIMS, "21");
+    envVars.put(AppConfiguration.SSM_PATH_RIF_JOB_BATCH_SIZE_CLAIMS, "21");
 
-    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "0");
+    envVars.put(AppConfiguration.SSM_PATH_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "0");
     assertThatThrownBy(() -> loadClaimPerformanceSettings(configLoader, benePerformanceSettings))
         .isInstanceOf(ConfigException.class)
-        .hasMessageContaining(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS)
+        .hasMessageContaining(AppConfiguration.SSM_PATH_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS)
         .hasMessageContaining(ConfigLoader.NOT_POSITIVE_INTEGER);
-    envVars.put(AppConfiguration.ENV_VAR_KEY_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "22");
+    envVars.put(AppConfiguration.SSM_PATH_RIF_JOB_QUEUE_SIZE_MULTIPLE_CLAIMS, "22");
 
     // verify values are parsed correctly when present
     assertEquals(
@@ -317,9 +317,9 @@ public class AppConfigurationTest {
     assertThrows(ValidationException.class, () -> config.namespace());
 
     // confirm explicit values are parsed correctly
-    envVars.put(AppConfiguration.ENV_VAR_MICROMETER_CW_ENABLED, "true");
-    envVars.put(AppConfiguration.ENV_VAR_MICROMETER_CW_INTERVAL, "PT28S");
-    envVars.put(AppConfiguration.ENV_VAR_MICROMETER_CW_NAMESPACE, "my-namespace");
+    envVars.put(AppConfiguration.SSM_PATH_MICROMETER_CW_ENABLED, "true");
+    envVars.put(AppConfiguration.SSM_PATH_MICROMETER_CW_INTERVAL, "PT28S");
+    envVars.put(AppConfiguration.SSM_PATH_MICROMETER_CW_NAMESPACE, "my-namespace");
     assertTrue(config.enabled());
     assertEquals(Duration.ofSeconds(28), config.step());
     assertEquals("my-namespace", config.namespace());
@@ -334,9 +334,9 @@ public class AppConfigurationTest {
   public void testLoadRdaLoadJobConfigOptions() {
     var settingsMap = new HashMap<String, String>();
     final var configLoader = AppConfiguration.createConfigLoaderForTesting(settingsMap);
-    settingsMap.put(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, "42");
-    settingsMap.put(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "5");
-    settingsMap.put(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS, "11");
+    settingsMap.put(SSM_PATH_RDA_JOB_INTERVAL_SECONDS, "42");
+    settingsMap.put(SSM_PATH_RDA_JOB_BATCH_SIZE, "5");
+    settingsMap.put(SSM_PATH_RDA_JOB_WRITE_THREADS, "11");
 
     // verify minimal required options load as expected and check defaults
     AbstractRdaLoadJob.Config jobConfig =
@@ -353,20 +353,20 @@ public class AppConfigurationTest {
     assertEquals(AbstractRdaLoadJob.SinkTypePreference.NONE, jobConfig.getSinkTypePreference());
 
     // verify providing an explicit RDA version string loads that version
-    settingsMap.put(ENV_VAR_KEY_RDA_VERSION, "^1.2.3");
+    settingsMap.put(SSM_PATH_RDA_VERSION, "^1.2.3");
     jobConfig = AppConfiguration.loadRdaLoadJobConfigOptions(configLoader);
     assertEquals(RdaVersion.builder().versionString("^1.2.3").build(), jobConfig.getRdaVersion());
 
     // verify setting the starting sequence numbers to zero/negative yields 1 as a setting
-    settingsMap.put(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, "0");
-    settingsMap.put(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, "-10");
+    settingsMap.put(SSM_PATH_RDA_JOB_STARTING_FISS_SEQ_NUM, "0");
+    settingsMap.put(SSM_PATH_RDA_JOB_STARTING_MCS_SEQ_NUM, "-10");
     jobConfig = AppConfiguration.loadRdaLoadJobConfigOptions(configLoader);
     assertEquals(Optional.of(1L), jobConfig.getStartingFissSeqNum());
     assertEquals(Optional.of(1L), jobConfig.getStartingMcsSeqNum());
 
     // verify setting the starting sequence numbers to positive number uses that number
-    settingsMap.put(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, "2");
-    settingsMap.put(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, "10");
+    settingsMap.put(SSM_PATH_RDA_JOB_STARTING_FISS_SEQ_NUM, "2");
+    settingsMap.put(SSM_PATH_RDA_JOB_STARTING_MCS_SEQ_NUM, "10");
     jobConfig = AppConfiguration.loadRdaLoadJobConfigOptions(configLoader);
     assertEquals(Optional.of(2L), jobConfig.getStartingFissSeqNum());
     assertEquals(Optional.of(10L), jobConfig.getStartingMcsSeqNum());
@@ -380,12 +380,12 @@ public class AppConfigurationTest {
   public void testLoadRdaSourceConfig() {
     var settingsMap = new HashMap<String, String>();
     final var configLoader = AppConfiguration.createConfigLoaderForTesting(settingsMap);
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.InProcess.name());
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_HOST, "host.test.com");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_PORT, "450");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME, "rda-test-server");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, "180");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP, "150");
+    settingsMap.put(SSM_PATH_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.InProcess.name());
+    settingsMap.put(SSM_PATH_RDA_GRPC_HOST, "host.test.com");
+    settingsMap.put(SSM_PATH_RDA_GRPC_PORT, "450");
+    settingsMap.put(SSM_PATH_RDA_GRPC_INPROC_SERVER_NAME, "rda-test-server");
+    settingsMap.put(SSM_PATH_RDA_GRPC_MAX_IDLE_SECONDS, "180");
+    settingsMap.put(SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP, "150");
 
     // verify minimal required options load as expected and check defaults
     RdaSourceConfig sourceConfig = AppConfiguration.loadRdaSourceConfig(configLoader);
@@ -400,7 +400,7 @@ public class AppConfigurationTest {
     assertEquals(Optional.empty(), sourceConfig.getMessageErrorExpirationDays());
 
     // verify empty string token is ignored properly
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN, "");
+    settingsMap.put(SSM_PATH_RDA_GRPC_AUTH_TOKEN, "");
     sourceConfig = AppConfiguration.loadRdaSourceConfig(configLoader);
     assertNull(sourceConfig.getAuthenticationToken());
 
@@ -409,8 +409,8 @@ public class AppConfigurationTest {
     String rawToken = String.format("{\"exp\":%d}", expiresMillis);
     String expiration = Base64.getEncoder().encodeToString(rawToken.getBytes());
     String token = String.format("NotAReal.%s.Token", expiration);
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN, token);
-    settingsMap.put(ENV_VAR_KEY_RDA_JOB_ERROR_EXPIRE_DAYS, "42");
+    settingsMap.put(SSM_PATH_RDA_GRPC_AUTH_TOKEN, token);
+    settingsMap.put(SSM_PATH_RDA_JOB_ERROR_EXPIRE_DAYS, "42");
     sourceConfig = AppConfiguration.loadRdaSourceConfig(configLoader);
     assertEquals(token, sourceConfig.getAuthenticationToken());
     assertEquals(expiresMillis, sourceConfig.getExpirationDate());
@@ -443,16 +443,15 @@ public class AppConfigurationTest {
     verifyNoMoreInteractions(configBuilder);
 
     // verify all options set
-    settingsMap.put(
-        ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.S3.name());
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS, "360");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED, "42");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS, "17");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET, "my-bucket");
-    settingsMap.put(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY, "/my-directory");
-    settingsMap.put(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
-    settingsMap.put(AppConfiguration.ENV_VAR_KEY_AWS_ACCESS_KEY, "unreal-access-key");
-    settingsMap.put(AppConfiguration.ENV_VAR_KEY_AWS_SECRET_KEY, "unreal-secret-key");
+    settingsMap.put(SSM_PATH_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode.S3.name());
+    settingsMap.put(SSM_PATH_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS, "360");
+    settingsMap.put(SSM_PATH_RDA_GRPC_INPROC_SERVER_RANDOM_SEED, "42");
+    settingsMap.put(SSM_PATH_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS, "17");
+    settingsMap.put(SSM_PATH_RDA_GRPC_INPROC_SERVER_S3_BUCKET, "my-bucket");
+    settingsMap.put(SSM_PATH_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY, "/my-directory");
+    settingsMap.put(AppConfiguration.ENV_VAR_AWS_ENDPOINT, "http://localhost:999999");
+    settingsMap.put(AppConfiguration.ENV_VAR_AWS_ACCESS_KEY, "unreal-access-key");
+    settingsMap.put(AppConfiguration.ENV_VAR_AWS_SECRET_KEY, "unreal-secret-key");
     expectedS3ClientConfig =
         S3ClientConfig.s3Builder()
             .endpointOverride(URI.create("http://localhost:999999"))
@@ -481,20 +480,19 @@ public class AppConfigurationTest {
    */
   private void addRequiredSettingsForTest(Map<String, String> envVars) {
     envVars.putIfAbsent(
-        AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
+        AppConfiguration.SSM_PATH_HICN_HASH_ITERATIONS,
         String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
     envVars.putIfAbsent(
-        AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
+        AppConfiguration.SSM_PATH_HICN_HASH_PEPPER,
         Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
-    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
-    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
-    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_BUCKET, "foo");
-    envVars.putIfAbsent(
-        AppConfiguration.ENV_VAR_KEY_DATABASE_URL, "jdbc:postgres://host:1234/fhirdb");
-    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, "some_user");
-    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, "not-used");
+    envVars.putIfAbsent(AppConfiguration.SSM_PATH_LOADER_THREADS, "42");
+    envVars.putIfAbsent(AppConfiguration.SSM_PATH_IDEMPOTENCY_REQUIRED, "true");
+    envVars.putIfAbsent(AppConfiguration.SSM_PATH_BUCKET, "foo");
+    envVars.putIfAbsent(AppConfiguration.SSM_PATH_DATABASE_URL, "jdbc:postgres://host:1234/fhirdb");
+    envVars.putIfAbsent(AppConfiguration.SSM_PATH_DATABASE_USERNAME, "some_user");
+    envVars.putIfAbsent(AppConfiguration.SSM_PATH_DATABASE_PASSWORD, "not-used");
 
     // if this one is absent the tests will do AWS credential checks!
-    envVars.putIfAbsent(AppConfiguration.ENV_VAR_KEY_AWS_ENDPOINT, "http://localhost:999999");
+    envVars.putIfAbsent(AppConfiguration.ENV_VAR_AWS_ENDPOINT, "http://localhost:999999");
   }
 }

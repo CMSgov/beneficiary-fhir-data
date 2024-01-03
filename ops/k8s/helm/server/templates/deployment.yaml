@@ -40,9 +40,9 @@ spec:
               value: "6500"
             - name: JAVA_TOOL_OPTIONS
               value: "-DbfdServer.logs.dir=/app/logs/ -Djava.io.tmpdir=/app/tmp -Dorg.jboss.logging.provider=slf4j"
-            - name: BFD_WAR
+            - name: BFD_PATHS_FILES_WAR
               value: {{ printf "/app/bfd-server-war-%s.war" .Values.bfdVersion | quote }}
-            - name: NEW_RELIC_APP_NAME
+            - name: BFD_NEW_RELIC_APP_NAME
               value: {{ printf "BFD Server (%s)" .Values.bfdEnvironment | quote }}
           envFrom:
             - secretRef:

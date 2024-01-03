@@ -169,23 +169,23 @@ public final class ServerProcess implements AutoCloseable {
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
 
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HOST, "127.0.0.1");
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_PORT, "0");
+    appRunBuilder.environment().put(AppConfiguration.SSM_PATH_HOST, "127.0.0.1");
+    appRunBuilder.environment().put(AppConfiguration.SSM_PATH_PORT, "0");
     appRunBuilder
         .environment()
         .put(
-            AppConfiguration.ENV_VAR_KEY_KEYSTORE,
+            AppConfiguration.SSM_PATH_KEYSTORE,
             AppConfigurationIT.getProjectDirectory()
                 .resolve(Paths.get("..", "dev", "ssl-stores", "server-keystore.pfx"))
                 .toString());
     appRunBuilder
         .environment()
         .put(
-            AppConfiguration.ENV_VAR_KEY_TRUSTSTORE,
+            AppConfiguration.SSM_PATH_TRUSTSTORE,
             AppConfigurationIT.getProjectDirectory()
                 .resolve(Paths.get("..", "dev", "ssl-stores", "server-truststore.pfx"))
                 .toString());
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_WAR, warPath.toString());
+    appRunBuilder.environment().put(AppConfiguration.SSM_PATH_WAR, warPath.toString());
 
     return appRunBuilder;
   }

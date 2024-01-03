@@ -50,7 +50,7 @@ public class LayeredConfigurationTest {
     final var settingsJson = objectMapper.writeValueAsString(expectedSettings);
 
     final var configMap = new HashMap<String, String>();
-    configMap.put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, settingsJson);
+    configMap.put(LayeredConfiguration.SSM_PATH_CONFIG_SETTINGS_JSON, settingsJson);
     final var configLoader = ConfigLoader.builder().addMap(configMap).build();
 
     final var actualSettings = LayeredConfiguration.loadLayeredConfigurationSettings(configLoader);
@@ -64,7 +64,7 @@ public class LayeredConfigurationTest {
     final var settingsJson = "{}";
 
     final var configMap = new HashMap<String, String>();
-    configMap.put(LayeredConfiguration.ENV_VAR_KEY_CONFIG_SETTINGS_JSON, settingsJson);
+    configMap.put(LayeredConfiguration.SSM_PATH_CONFIG_SETTINGS_JSON, settingsJson);
     final var configLoader = ConfigLoader.builder().addMap(configMap).build();
 
     final var actualSettings = LayeredConfiguration.loadLayeredConfigurationSettings(configLoader);
