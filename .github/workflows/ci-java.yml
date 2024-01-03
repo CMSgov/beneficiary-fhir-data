@@ -101,7 +101,7 @@ jobs:
           EOF
 
       - name: 'Run Maven Build'
-        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false verify
+        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false verify
         working-directory: ./apps
 
       - name: 'Install yq'
