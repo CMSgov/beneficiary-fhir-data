@@ -1,0 +1,58 @@
+#!/usr/bin/env groovy
+
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  volumes:
+  - name: docker-socket
+    emptyDir: {}
+  containers:
+  - name: docker
+    image: docker:20.10-git
+    command:
+    - sleep
+    args:
+    - 99d
+    volumeMounts:
+    - name: docker-socket
+      mountPath: /var/run
+    tty: true
+  - name: docker-daemon
+    image: docker:20.10-dind
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: docker-socket
+      mountPath: /var/run
+"""
+        }
+    }
+    stages {
+        stage('Docker Build') {
+            steps {
+                container('docker') {
+                    // Install prerequisites
+                    sh 'apk add --no-cache aws-cli bash yq curl'
+
+                    // Address limitations resulting from CVE-2022-24767
+                    sh 'git config --global --add safe.directory "$WORKSPACE"'
+
+                    // Setup AWS Credentials
+                    script {
+                        awsAuth.assumeRole()
+                    }
+
+                    // Execute the existing build-push script
+                    dir('ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda') {
+                        sh 'bash build-push.sh'
+                    }
+                }
+            }
+        }
+    }
+}
