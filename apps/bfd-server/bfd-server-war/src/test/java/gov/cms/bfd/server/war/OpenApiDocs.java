@@ -223,7 +223,8 @@ public class OpenApiDocs {
         headerRefs.add(createRef("#/components/parameters/BULK-JOBID-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryCounter-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryTimestamp-header"));
+        headerRefs.add(
+            createRef("#/components/parameters/BlueButton-OriginalQueryTimestamp-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-Developer-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
