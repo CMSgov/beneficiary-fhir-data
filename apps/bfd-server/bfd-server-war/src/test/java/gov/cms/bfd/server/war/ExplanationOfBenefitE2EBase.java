@@ -620,9 +620,9 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
 
   /**
    * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is not
-   * set, as we default to false. The server call takes a long time with the amount of exhaustive SAMHSA
-   * data, so the explicit tests to test the setting set to false and the default were combined
-   * for the sake of saving 25 seconds of test execution time.
+   * set, as we default to false. The server call takes a long time with the amount of exhaustive
+   * SAMHSA data, so the explicit tests to test the setting set to false and the default were
+   * combined for the sake of saving 25 seconds of test execution time.
    */
   @Test
   public void testEobByPatientIdWithExcludeSamhsaFalseByDefaultAndExpectNoFiltering() {
@@ -635,14 +635,15 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     int numSamhsaClaims = 4431;
 
     given()
-            .spec(requestAuth)
-            .expect()
-            .body("resourceType", equalTo("Bundle"))
-            // Check nothing is filtered; we should see tons of claims as we load 1 claim per SAMHSA code for each type
-            .body("total", equalTo(numSamhsaClaims))
-            .statusCode(200)
-            .when()
-            .get(requestString);
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // Check nothing is filtered; we should see tons of claims as we load 1 claim per SAMHSA
+        // code for each type
+        .body("total", equalTo(numSamhsaClaims))
+        .statusCode(200)
+        .when()
+        .get(requestString);
   }
 
   /**

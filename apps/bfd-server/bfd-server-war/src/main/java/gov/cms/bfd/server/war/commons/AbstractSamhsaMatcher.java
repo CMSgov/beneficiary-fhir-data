@@ -132,7 +132,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @return a {@link List} of values from the specified column of the specified CSV file
    */
   @VisibleForTesting
-  public static List<String> resourceCsvColumnToList(String csvResourceName, String columnToReturn) {
+  public static List<String> resourceCsvColumnToList(
+      String csvResourceName, String columnToReturn) {
     try (InputStream csvStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(csvResourceName);
         InputStreamReader csvReader = new InputStreamReader(csvStream, StandardCharsets.UTF_8);
