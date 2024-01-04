@@ -55,7 +55,9 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
       case INPATIENT:
       case OUTPATIENT:
       case SNF:
-        containsSamhsa = containsSamhsaIcdProcedureCode(adapter.getProcedure());
+        containsSamhsa =
+            containsSamhsaIcdProcedureCode(adapter.getProcedure())
+                || containsSamhsaSupportingInfo(adapter.getSupportingInfo());
       case CARRIER:
       case DME:
       case HHA:
