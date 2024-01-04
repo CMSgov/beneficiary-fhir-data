@@ -3,7 +3,7 @@ components:
     BlueButton-OriginalQueryId-header:
       in: header
       name: BlueButton-OriginalQueryId
-      required: true
+      required: false
       schema:
         type: string
         format: uuid
@@ -28,15 +28,15 @@ components:
       schema:
         type: string
         format: date-time
-      description: | 
+      description: |
         An ISO-8601 UTC timestamp representing (roughly) when the original request reached the frontend system.
     BlueButton-DeveloperId-header:
       in: header
       name: BlueButton-DeveloperId
-      required: true
+      required: false
       schema:
         type: string
-      description: | 
+      description: |
         The unique ID in the frontend system for the developer/vendor of the third-party application.
     BlueButton-Developer-header:
       in: header
@@ -49,7 +49,7 @@ components:
     BlueButton-ApplicationId-header:
       in: header
       name: BlueButton-ApplicationId
-      required: true
+      required: false
       schema:
         type: string
       description: |
@@ -61,16 +61,16 @@ components:
       required: false
       schema:
         type: string
-      description: | 
+      description: |
         The human-readable name in the frontend system for the application/client that will 
         receive the data.
     BlueButton-UserId-header:
       in: header
       name: BlueButton-UserId
-      required: true
+      required: false
       schema:
         type: string
-      description: | 
+      description: |
         The unique ID in the frontend system for the user (e.g. beneficiary) that data is being requested 
         on behalf of.
     BlueButton-User-header:
@@ -79,7 +79,7 @@ components:
       required: false
       schema:
         type: string
-      description: | 
+      description: |
         The human-readable login ID (e.g. email address) in the frontend system for the user (e.g. beneficiary) 
         that the data is being requested on behalf of.
     BlueButton-BeneficiaryId-header:

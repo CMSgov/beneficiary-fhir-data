@@ -218,10 +218,19 @@ public class OpenApiDocs {
       if (!"/metadata".equals(path)) {
         var pathMap = (Map<String, Object>) paths.get(path);
         var headerRefs = new ArrayList<>();
+        headerRefs.add(createRef("#/components/parameters/BULK-CLIENTID-header"));
+        headerRefs.add(createRef("#/components/parameters/BULK-CLIENTNAME-header"));
+        headerRefs.add(createRef("#/components/parameters/BULK-JOBID-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryCounter-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryTimestamp-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-Developer-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-Application-header"));
         headerRefs.add(createRef("#/components/parameters/BlueButton-UserId-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-User-header"));
+        headerRefs.add(createRef("#/components/parameters/BlueButton-BeneficiaryId-header"));
 
         // add ref for IncludeIdentifiers header for V1 Patient endpoints
         if (path.contains("/Patient") && apiVersion.equals("V1")) {
