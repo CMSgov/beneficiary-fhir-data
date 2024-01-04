@@ -7,6 +7,7 @@ import gov.cms.bfd.server.war.adapters.Coding;
 import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
+import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -157,6 +158,18 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link SupportingInfoComponent} list contains any SAMHSA data.
+   *
+   * @param supportingInformationComponents the supporting information components
+   * @return {@code true} if any of the specified {@link SupportingInfoComponent}s match any of the
+   *     {@link AbstractSamhsaMatcher#drgCodes}, {@code false} if they all do not
+   */
+  protected boolean containsSamhsaSupportingInfo(
+      List<SupportingInfoComponent> supportingInformationComponents) {
+    return supportingInformationComponents.stream().anyMatch(this::isSamhsaSupportingInfo);
+  }
+
+  /**
    * Checks if the given {@link DiagnosisComponent} list contains any SAMHSA data.
    *
    * @param diagnoses the {@link DiagnosisComponent}s to check
@@ -220,6 +233,24 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
        * This will only be thrown if the DiagnosisComponent doesn't have a
        * CodeableConcept, which isn't how we build ours.
        */
+      throw new BadCodeMonkeyException(e);
+    }
+  }
+
+  /**
+   * Checks if the given {@link SupportingInfoComponent} contains SAMHSA data.
+   *
+   * @param supportingInfo the {@link SupportingInfoComponent} to check
+   * @return {@code true} if the specified {@link SupportingInfoComponent} matches one of the {@link
+   *     AbstractSamhsaMatcher#drgCodes} entries, <code>false</code> if it does not
+   */
+  @VisibleForTesting
+  boolean isSamhsaSupportingInfo(SupportingInfoComponent supportingInfo) {
+    try {
+      return supportingInfo.getSupportingInfoCodeableConcept().getCoding().stream()
+          .filter(s -> s.getSystem().equals(AbstractSamhsaMatcher.DRG))
+          .anyMatch(this::isSamhsaDrgCode);
+    } catch (FHIRException e) {
       throw new BadCodeMonkeyException(e);
     }
   }
