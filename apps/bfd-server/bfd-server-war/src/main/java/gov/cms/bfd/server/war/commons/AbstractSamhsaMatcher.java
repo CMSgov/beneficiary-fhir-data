@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r5.model.Claim;
 
 /**
  * Common SAMHSA check logic that can be used by all current FHIR resources and resource verions.
@@ -158,7 +157,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     return procedure.stream().anyMatch(this::isSamhsaIcdProcedure);
   }
 
-  protected boolean containsSamhsaSupportingInfo(List<SupportingInfoComponent> supportingInformationComponents) {
+  protected boolean containsSamhsaSupportingInfo(
+      List<SupportingInfoComponent> supportingInformationComponents) {
     return supportingInformationComponents.stream().anyMatch(this::isSamhsaSupportingInfo);
   }
 
@@ -241,7 +241,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   boolean isSamhsaSupportingInfo(SupportingInfoComponent supportingInfo) {
     try {
       return supportingInfo.getSupportingInfoCodeableConcept().getCoding().stream()
-              .filter(s -> s.getSystem().equals(AbstractSamhsaMatcher.DRG)).anyMatch(this::isSamhsaDrgCode);
+          .filter(s -> s.getSystem().equals(AbstractSamhsaMatcher.DRG))
+          .anyMatch(this::isSamhsaDrgCode);
     } catch (FHIRException e) {
       throw new BadCodeMonkeyException(e);
     }

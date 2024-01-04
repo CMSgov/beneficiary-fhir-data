@@ -6,10 +6,9 @@ import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
+import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Adapter for creating R4 FHIR resources from an {@link ExplanationOfBenefit}. */
@@ -51,7 +50,9 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
 
   /** {@inheritDoc} */
   public List<SupportingInfoComponent> getSupportingInfo() {
-    return eob.getSupportingInfo().stream().map(SupportingInfoAdapter::new).collect(Collectors.toList());
+    return eob.getSupportingInfo().stream()
+        .map(SupportingInfoAdapter::new)
+        .collect(Collectors.toList());
   }
 
   /** Adapter for creating R4 FHIR procedure components. */
@@ -65,7 +66,8 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
      *
      * @param supportingInfoComponent the supporting info component
      */
-    public SupportingInfoAdapter(ExplanationOfBenefit.SupportingInformationComponent supportingInfoComponent) {
+    public SupportingInfoAdapter(
+        ExplanationOfBenefit.SupportingInformationComponent supportingInfoComponent) {
       this.supportingInfoComponent = supportingInfoComponent;
     }
 

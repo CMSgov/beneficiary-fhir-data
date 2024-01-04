@@ -6,12 +6,10 @@ import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
-
+import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
 /**
