@@ -147,7 +147,7 @@ components:
       description:  |
         When set to true, BFD will include all of the detailed address data for the requested beneficiary. When set to 
         false, BFD will not include detailed address data for the requested beneficiary. Please note that, even when 
-        false county and ZIP/postal codes will still be included for the specified beneficiary.
+        false state and ZIP/postal codes will still be included for the specified beneficiary.
     IncludeTaxNumbers-header:
       in: header
       name: IncludeTaxNumbers
