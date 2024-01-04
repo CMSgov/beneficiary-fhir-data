@@ -132,7 +132,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @return a {@link List} of values from the specified column of the specified CSV file
    */
   @VisibleForTesting
-  static List<String> resourceCsvColumnToList(String csvResourceName, String columnToReturn) {
+  public static List<String> resourceCsvColumnToList(
+      String csvResourceName, String columnToReturn) {
     try (InputStream csvStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(csvResourceName);
         InputStreamReader csvReader = new InputStreamReader(csvStream, StandardCharsets.UTF_8);
@@ -591,7 +592,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @return the specified DRG code, but with the "MS-DRG" prefix and space removed.
    */
   @VisibleForTesting
-  static String normalizeDrgCode(String code) {
+  public static String normalizeDrgCode(String code) {
     code = code.trim();
     code = code.replace("MS-DRG ", "");
     return code;
@@ -605,7 +606,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *     decimal point removed, and converted to all-caps
    */
   @VisibleForTesting
-  static String normalizeIcdCode(String icdCode) {
+  public static String normalizeIcdCode(String icdCode) {
     icdCode = icdCode.trim();
     icdCode = icdCode.replaceFirst("\\.", "");
     icdCode = icdCode.toUpperCase();
@@ -620,7 +621,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @return the specified HCPCS code, but with whitespace trimmed and converted to all-caps
    */
   @VisibleForTesting
-  static String normalizeHcpcsCode(String hcpcsCode) {
+  public static String normalizeHcpcsCode(String hcpcsCode) {
     hcpcsCode = hcpcsCode.trim();
     hcpcsCode = hcpcsCode.toUpperCase();
 
