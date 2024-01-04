@@ -260,12 +260,12 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_s3_bucket_notification" "bucket_notifications" {
-  count = length(concat([
+  count = length(concat(
     local.eft_partners_with_inbound_received_notifs,
     local.eft_partners_with_outbound_enabled,
     local.eft_partners_with_outbound_sent_notifs,
     local.eft_partners_with_outbound_failed_notifs
-  ])) > 0 ? 1 : 0
+  )) > 0 ? 1 : 0
 
   bucket = aws_s3_bucket.this.id
 
