@@ -40,11 +40,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <!-- Used to interact with AWS' SSM service -->
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>sqs</artifactId>
-        </dependency>
-        <dependency>
             <!-- An implementation of the Log4J API that routes everything through to SLF4J,
                  instead. -->
             <groupId>org.slf4j</groupId>

@@ -15,7 +15,8 @@ import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.sqs.model.SqsException;
 
 /**
- * Uses an {@link SqsDao} to post JSON messages to an SQS queue for each {@link MigratorProgress}.
+ * Uses an {@link EventPublisher} to post JSON messages to an SQS queue for each {@link
+ * MigratorProgress}.
  */
 @RequiredArgsConstructor
 public class MigratorProgressReporter {

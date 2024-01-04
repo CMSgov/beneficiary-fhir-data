@@ -53,6 +53,11 @@
             <artifactId>sts</artifactId>
         </dependency>
         <dependency>
+            <!-- Used to interact with AWS' SSM service -->
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+        </dependency>
+        <dependency>
             <!-- Provides a sane facade for the giant mess of incompatible logging frameworks in Java. -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -132,6 +137,12 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Used to write fluent assertions in unit tests. -->
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

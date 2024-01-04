@@ -1,5 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
+import static gov.cms.bfd.SqsTestUtils.createSqsClientForLocalStack;
 import static gov.cms.bfd.migrator.app.AppConfiguration.SSM_PATH_SQS_QUEUE_NAME;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_BAD_CONFIG;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_HIBERNATE_VALIDATION;
@@ -26,6 +27,7 @@ import gov.cms.bfd.FileBasedAssertionHelper;
 import gov.cms.bfd.json.JsonConverter;
 import gov.cms.bfd.migrator.app.MigratorProgressReporter.SqsProgressMessage;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.sqs.SqsDao;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -126,7 +128,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   /** Create our progress queue in the localstack SQS service before each test. */
   @BeforeEach
   void createQueue() {
-    sqsDao = new SqsDao(SqsDaoIT.createSqsClientForLocalStack(localstack));
+    sqsDao = new SqsDao(createSqsClientForLocalStack(localstack));
     sqsDao.createQueue(SQS_QUEUE_NAME);
   }
 

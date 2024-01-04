@@ -1,5 +1,6 @@
-package gov.cms.bfd.migrator.app;
+package gov.cms.bfd.sharedutils.sqs;
 
+import static gov.cms.bfd.SqsTestUtils.createSqsClientForLocalStack;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -9,10 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
@@ -64,22 +61,5 @@ class SqsDaoIT extends AbstractLocalStackTest {
         .isInstanceOf(QueueDoesNotExistException.class);
     assertThatThrownBy(() -> dao.nextMessage("no-such-queue-exists"))
         .isInstanceOf(QueueDoesNotExistException.class);
-  }
-
-  /**
-   * Create a {@link SqsClient} configured for the SQS service in the provided {@link
-   * LocalStackContainer}.
-   *
-   * @param localstack the container info
-   * @return the client
-   */
-  static SqsClient createSqsClientForLocalStack(LocalStackContainer localstack) {
-    return SqsClient.builder()
-        .region(Region.of(localstack.getRegion()))
-        .endpointOverride(localstack.getEndpoint())
-        .credentialsProvider(
-            StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))
-        .build();
   }
 }

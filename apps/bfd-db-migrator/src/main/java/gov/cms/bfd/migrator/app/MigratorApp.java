@@ -20,6 +20,8 @@ import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
+import gov.cms.bfd.sharedutils.sqs.SqsDao;
+import gov.cms.bfd.sharedutils.sqs.SqsEventPublisher;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;

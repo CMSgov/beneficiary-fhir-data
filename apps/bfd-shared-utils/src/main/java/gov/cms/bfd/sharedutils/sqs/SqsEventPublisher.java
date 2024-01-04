@@ -1,4 +1,4 @@
-package gov.cms.bfd.migrator.app;
+package gov.cms.bfd.sharedutils.sqs;
 
 import gov.cms.bfd.events.EventPublisher;
 import gov.cms.bfd.json.JsonConverter;
