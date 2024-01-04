@@ -8,6 +8,8 @@ import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Adapter for creating R4 FHIR resources from an {@link ExplanationOfBenefit}. */
@@ -45,6 +47,33 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
   @Override
   public List<ItemComponent> getItem() {
     return eob.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
+  }
+
+  /** {@inheritDoc} */
+  public List<SupportingInfoComponent> getSupportingInfo() {
+    return eob.getSupportingInfo().stream().map(SupportingInfoAdapter::new).collect(Collectors.toList());
+  }
+
+  /** Adapter for creating R4 FHIR procedure components. */
+  public static class SupportingInfoAdapter implements SupportingInfoComponent {
+
+    /** The eob's supporting information component. */
+    private final ExplanationOfBenefit.SupportingInformationComponent supportingInfoComponent;
+
+    /**
+     * Instantiates a new SupportingInfo component adapter.
+     *
+     * @param supportingInfoComponent the supporting info component
+     */
+    public SupportingInfoAdapter(ExplanationOfBenefit.SupportingInformationComponent supportingInfoComponent) {
+      this.supportingInfoComponent = supportingInfoComponent;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public CodeableConcept getSupportingInfoCodeableConcept() {
+      return new CodeableConceptAdapter(supportingInfoComponent.getCode());
+    }
   }
 
   /** Adapter for creating R4 FHIR procedure components. */
