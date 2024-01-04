@@ -6,5 +6,5 @@
 ${logic.psql-only}  CREATE INDEX CONCURRENTLY IF NOT EXISTS beneficiaries_history_mbi_idx
 ${logic.psql-only}      ON beneficiaries_history (mbi_num);
 
-${logic.psql-only}  CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS beneficiaries_mbi_idx
+${logic.psql-only}  CREATE INDEX CONCURRENTLY IF NOT EXISTS beneficiaries_mbi_idx
 ${logic.psql-only}      ON beneficiaries (mbi_num);
