@@ -162,7 +162,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param supportingInformationComponents the supporting information components
    * @return {@code true} if any of the specified {@link SupportingInfoComponent}s match any of the
-   * {@link AbstractSamhsaMatcher#drgCodes}, {@code false} if they all do not
+   *     {@link AbstractSamhsaMatcher#drgCodes}, {@code false} if they all do not
    */
   protected boolean containsSamhsaSupportingInfo(
       List<SupportingInfoComponent> supportingInformationComponents) {
@@ -241,8 +241,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * Checks if the given {@link SupportingInfoComponent} contains SAMHSA data.
    *
    * @param supportingInfo the {@link SupportingInfoComponent} to check
-   * @return {@code true} if the specified {@link SupportingInfoComponent} matches one of the
-   * {@link AbstractSamhsaMatcher#drgCodes} entries, <code>false</code> if it does not
+   * @return {@code true} if the specified {@link SupportingInfoComponent} matches one of the {@link
+   *     AbstractSamhsaMatcher#drgCodes} entries, <code>false</code> if it does not
    */
   @VisibleForTesting
   boolean isSamhsaSupportingInfo(SupportingInfoComponent supportingInfo) {
