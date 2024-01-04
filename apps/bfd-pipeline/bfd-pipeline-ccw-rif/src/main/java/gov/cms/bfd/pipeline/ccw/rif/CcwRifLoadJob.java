@@ -158,6 +158,8 @@ public final class CcwRifLoadJob implements PipelineJob {
   /** Time between runs of the {@link CcwRifLoadJob}. Empty means to run exactly once. */
   private final Optional<Duration> runInterval;
 
+  private final CcwRifLoadJobStatusReporter statusReporter;
+
   /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
@@ -178,7 +180,8 @@ public final class CcwRifLoadJob implements PipelineJob {
       S3TaskManager s3TaskManager,
       DataSetMonitorListener listener,
       boolean isIdempotentMode,
-      Optional<Duration> runInterval) {
+      Optional<Duration> runInterval,
+      CcwRifLoadJobStatusReporter statusReporter) {
     this.appState = appState;
     this.appMetrics = appState.getMetrics();
     this.options = options;
@@ -186,6 +189,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     this.listener = listener;
     this.isIdempotentMode = isIdempotentMode;
     this.runInterval = runInterval;
+    this.statusReporter = statusReporter;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
@@ -211,12 +215,14 @@ public final class CcwRifLoadJob implements PipelineJob {
     LOGGER.debug("Scanning for data sets to process...");
 
     // Update the queue from S3.
+    statusReporter.reportCheckingBucketForManifest();
     dataSetQueue.updatePendingDataSets();
 
     // If no manifest was found, we're done (until next time).
     if (dataSetQueue.isEmpty()) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
       listener.noDataAvailable();
+      statusReporter.reportIdle();
       return PipelineJobOutcome.NOTHING_TO_DO;
     }
 
@@ -241,6 +247,7 @@ public final class CcwRifLoadJob implements PipelineJob {
        * pause between each iteration. TODO should eventually time out,
        * once we know how long transfers might take
        */
+      statusReporter.reportAwaitingManifestData(manifestToProcess.getManifestKeyIncomingLocation());
       if (!alreadyLoggedWaitingEvent) {
         LOGGER.info("Data set not ready. Waiting for it to finish uploading...");
         alreadyLoggedWaitingEvent = true;
