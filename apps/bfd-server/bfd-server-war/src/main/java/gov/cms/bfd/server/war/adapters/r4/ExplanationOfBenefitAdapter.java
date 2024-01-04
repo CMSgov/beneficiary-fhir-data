@@ -55,7 +55,7 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
         .collect(Collectors.toList());
   }
 
-  /** Adapter for creating R4 FHIR procedure components. */
+  /** Adapter for creating R4 FHIR supporting info components. */
   public static class SupportingInfoAdapter implements SupportingInfoComponent {
 
     /** The eob's supporting information component. */

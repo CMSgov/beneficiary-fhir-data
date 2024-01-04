@@ -157,6 +157,13 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     return procedure.stream().anyMatch(this::isSamhsaIcdProcedure);
   }
 
+  /**
+   * Checks if the given {@link SupportingInfoComponent} list contains any SAMHSA data.
+   *
+   * @param supportingInformationComponents the supporting information components
+   * @return {@code true} if any of the specified {@link SupportingInfoComponent}s match any of the
+   * {@link AbstractSamhsaMatcher#drgCodes}, {@code false} if they all do not
+   */
   protected boolean containsSamhsaSupportingInfo(
       List<SupportingInfoComponent> supportingInformationComponents) {
     return supportingInformationComponents.stream().anyMatch(this::isSamhsaSupportingInfo);
@@ -234,8 +241,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * Checks if the given {@link SupportingInfoComponent} contains SAMHSA data.
    *
    * @param supportingInfo the {@link SupportingInfoComponent} to check
-   * @return <code>true</code> if the specified {@link SupportingInfoComponent} matches one of the {@link
-   *     {@link AbstractSamhsaMatcher#drgCodes} entries, <code>false</code> if it does not
+   * @return {@code true} if the specified {@link SupportingInfoComponent} matches one of the
+   * {@link AbstractSamhsaMatcher#drgCodes} entries, <code>false</code> if it does not
    */
   @VisibleForTesting
   boolean isSamhsaSupportingInfo(SupportingInfoComponent supportingInfo) {
