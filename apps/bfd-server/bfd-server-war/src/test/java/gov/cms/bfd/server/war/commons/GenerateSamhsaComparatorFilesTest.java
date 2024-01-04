@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 /** Generates files needed for SAMHSA filtering tests using the SAMHSA code files. */
 public class GenerateSamhsaComparatorFilesTest {
@@ -16,12 +17,8 @@ public class GenerateSamhsaComparatorFilesTest {
    * generated with a claim per samhsa code to comprehensively test that we will properly filter
    * each claim that has a samhsa code that applies to that claim type. To run this test, execute
    * the following Maven Command: mvn clean install -DgenerateTestData=true.
-   *
-   * <p>Note this is in the V2 test class so it doesnt get run twice (as it would if it were in the
-   * base class). These files are used for both the V1 and V2 tests since they are just generating
-   * RIF files to be loaded.
    */
-  // @EnabledIfSystemProperty(named = "generateTestData", matches = "true")
+  @EnabledIfSystemProperty(named = "generateTestData", matches = "true")
   @Test
   public void generateSamhsaSampleFiles() {
 
@@ -144,15 +141,15 @@ public class GenerateSamhsaComparatorFilesTest {
   /**
    * Creates a new SAMHSA test sample file using the existing SAMHSA codes.
    *
-   * @param claimType c
-   * @param drgCodes c
-   * @param cptCodes c
-   * @param icd9ProcedureCodes c
-   * @param icd10ProcedureCodes c
-   * @param icd9DiagnosisCodes c
-   * @param icd10DiagnosisCodes c
-   * @param claimId c
-   * @return c
+   * @param claimType the claimtype to create the file for
+   * @param drgCodes the list of DRG codes from the codes file
+   * @param cptCodes the list of CPT codes from the codes file
+   * @param icd9ProcedureCodes the list of ICD9 procedure codes from the codes file
+   * @param icd10ProcedureCodes the list of ICD10 procedure codes from the codes file
+   * @param icd9DiagnosisCodes the list of ICD9 diagnosis codes from the codes file
+   * @param icd10DiagnosisCodes the list of ICD10 diagnosis codes from the codes file
+   * @param claimId claimId counter (so we don't have any duplicate claim IDs)
+   * @return the updated claimId counter
    */
   private int createSamhsaSampleFile(
       ClaimType claimType,
@@ -365,13 +362,14 @@ public class GenerateSamhsaComparatorFilesTest {
   }
 
   /**
-   * Adds lines to the existing line array.
+   * Adds lines to the existing line array (representing the lines in the claim file).
    *
-   * @param linesToAddTo c
-   * @param claimId c
-   * @param codes c
-   * @param sampleLine c
-   * @return c
+   * @param linesToAddTo the existing line array to add to
+   * @param claimId the claimId start point
+   * @param codes the list of codes to add to the list
+   * @param sampleLine the sample line to copy from for each line (will replace the claimId and code
+   *     location)
+   * @return the updated claim id after adding all lines
    */
   private int addLines(
       List<String> linesToAddTo, int claimId, List<String> codes, String sampleLine) {
@@ -391,8 +389,8 @@ public class GenerateSamhsaComparatorFilesTest {
   /**
    * Gets the SAMHSA samples file path.
    *
-   * @param filename x
-   * @return x
+   * @param filename the filename to get a path for
+   * @return the Path to the sample SAMHSA file
    */
   private Path getSamhsaSamplesFilePath(String filename) {
     Path samhsaFilesDir =
