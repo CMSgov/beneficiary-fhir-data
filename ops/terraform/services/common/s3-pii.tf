@@ -1,16 +1,16 @@
 ## S3 bucket, policy, and KMS key for medicare opt out data
 
 locals {
-  name         = "medicare-opt-out"
-  log_bucket   = "bfd-${local.env}-${name}-${local.account_id}"
-  read_arns    = data.aws_ssm_parameter.medicare_opt_out_config_read_roles.value
-  write_accts  = data.aws_ssm_parameter.medicare_opt_out_config_write_accts.value
-  admins_users = data.aws_ssm_parameter.medicare_opt_out_config_admin_users.value
+  name        = "medicare-opt-out"
+  log_bucket  = "bfd-${local.env}-${local.name}-${local.account_id}"
+  read_arns   = split(" ", data.aws_ssm_parameter.medicare_opt_out_config_read_roles.value)
+  write_accts = split(" ", data.aws_ssm_parameter.medicare_opt_out_config_write_accts.value)
+  admin_users = split(" ", data.aws_ssm_parameter.medicare_opt_out_config_admin_users.value)
 }
 
 module "medicare_opt_out" {
   count  = local.is_ephemeral_env ? 0 : 1
-  source = "../modules/resources/s3_pii"
+  source = "../../modules/resources/s3_pii"
   env    = local.env
 
   pii_bucket_config = {

@@ -84,10 +84,3 @@ data "aws_ssm_parameter" medicare_opt_out_config_admin_users {
   name            = "/bfd/${local.env}/common/sensitive/medicare_opt_out_config_admin_users"
   with_decryption = true
 }
-
-data "aws_vpc" "main" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-${local.env}-vpc"]
-  }
-}
