@@ -242,6 +242,20 @@ try {
 				}
 			}
 
+			stage('Deploy EFT to TEST') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_test_eft_start')
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/eft"
+						)
+					}
+				}
+			}
+
 			stage('Deploy Migrator to TEST') {
 				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
@@ -536,6 +550,20 @@ try {
 					}
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
+
+			stage('Deploy EFT to PROD') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_prod_eft_start')
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/eft"
+						)
+					}
 				}
 			}
 
