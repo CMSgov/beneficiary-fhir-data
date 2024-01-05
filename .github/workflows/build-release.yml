@@ -35,18 +35,7 @@ defaults:
     shell: bash
 
 jobs:
-  build-docker-images:
-    uses: ./.github/workflows/build-docker-images.yml
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      branch: ${{ inputs.releaseBranch }}
-      versionTag: ${{ inputs.releaseVersion }}
-      awsRegion: ${{ inputs.awsRegion }}
-    secrets: inherit
-
-  mvn-release:
+  run-mvn-release:
     runs-on: ubuntu-latest
     steps:
       - name: Validate Inputs
@@ -66,7 +55,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: build-release
+          role-session-name: run-mvn-release
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
@@ -165,6 +154,29 @@ jobs:
         run: mvn release:rollback
         working-directory: ./apps
 
+  build-docker-images:
+    uses: ./.github/workflows/build-docker-images.yml
+    needs: run-mvn-release
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      branch: ${{ inputs.releaseBranch }}
+      versionTag: ${{ inputs.releaseVersion }}
+      awsRegion: ${{ inputs.awsRegion }}
+    secrets: inherit
+
+  create-gh-release:
+    runs-on: ubuntu-latest
+    needs: run-mvn-release
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: create-gh-release
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Pull Release Files
         # Naively, only pull artifacts for purported non-prerelease versions
         if: ${{ !contains(inputs.releaseVersion, '-') }}
@@ -191,7 +203,7 @@ jobs:
             filename=$(basename -- "$item")
             extension="${filename##*.}"
             filename="$(echo "${filename%.*}" | sed -E 's/^v([0-9]+.*)$/V\1/')"
-            
+
             mv "$item" "$filename-${{ inputs.releaseVersion }}.$extension"
           done
         env:
