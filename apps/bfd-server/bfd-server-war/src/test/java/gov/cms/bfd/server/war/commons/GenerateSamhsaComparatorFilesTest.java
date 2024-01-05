@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 /** Generates files needed for SAMHSA filtering tests using the SAMHSA code files. */
 public class GenerateSamhsaComparatorFilesTest {
@@ -17,7 +18,7 @@ public class GenerateSamhsaComparatorFilesTest {
    * each claim that has a samhsa code that applies to that claim type. To run this test, execute
    * the following Maven Command: mvn clean install -DgenerateTestData=true.
    */
-  // @EnabledIfSystemProperty(named = "generateTestData", matches = "true")
+  @EnabledIfSystemProperty(named = "generateTestData", matches = "true")
   @Test
   public void generateSamhsaSampleFiles() {
 
