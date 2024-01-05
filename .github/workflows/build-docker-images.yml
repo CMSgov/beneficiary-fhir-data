@@ -1,14 +1,33 @@
 ---
 name: "Build Docker Images"
 on:
+  # GHA does not support "shared_inputs" or some other form of workflow_call and workflow_dispatch
+  # input consolidation; instead, we must duplicate the input definitions for each event
+  # FUTURE: Consolidate the input definitions whenever possible
   workflow_call:
-  workflow_dispatch:
     inputs:
-      releaseBranch:
-        description: "The branch on which a release is based"
+      branch:
+        description: "The branch from which images will be built from"
+        type: string
         required: false
         default: master
-      releaseVersion:
+      versionTag:
+        description: "Version to be used as tag for built images"
+        type: string
+        required: true
+        default: X.Y.Z
+      awsRegion:
+        description: "AWS Region to push images to"
+        type: string
+        required: true
+        default: us-east-1
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "The branch from which images will be built from"
+        required: false
+        default: master
+      versionTag:
         description: "Version to be used as tag for built images"
         required: true
         default: X.Y.Z
@@ -44,13 +63,13 @@ jobs:
       - name: Validate Inputs
         run: |
           echo "Validating inputs to ensure they conform to expected formats..."
-          echo "${{ inputs.releaseVersion }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
 
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.releaseBranch }}
+          ref: ${{ inputs.branch }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -85,6 +104,6 @@ jobs:
           push: true
           tags: |
             ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:latest
-            ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.releaseVersion }}
+            ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
         env:
           DOCKER_BUILDKIT: 1
