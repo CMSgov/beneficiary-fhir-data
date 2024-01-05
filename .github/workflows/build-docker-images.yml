@@ -96,7 +96,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push
+      - name: Build and Push with Latest Tag
+        # Naively, only build and push with latest if the versionTag is a release version
+        if: ${{ !contains(inputs.versionTag, '-') }}
         uses: docker/build-push-action@v5
         with:
           file: ${{ matrix.image.dockerfile }}
@@ -104,6 +106,19 @@ jobs:
           push: true
           tags: |
             ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:latest
+            ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
+        env:
+          DOCKER_BUILDKIT: 1
+
+      - name: Build and Push without Latest Tag
+        # Naively, build and push without latest tag if the versionTag is not a release version
+        if: ${{ contains(inputs.versionTag, '-') }}
+        uses: docker/build-push-action@v5
+        with:
+          file: ${{ matrix.image.dockerfile }}
+          context: ${{ matrix.image.contextDir }}
+          push: true
+          tags: |
             ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
         env:
           DOCKER_BUILDKIT: 1
