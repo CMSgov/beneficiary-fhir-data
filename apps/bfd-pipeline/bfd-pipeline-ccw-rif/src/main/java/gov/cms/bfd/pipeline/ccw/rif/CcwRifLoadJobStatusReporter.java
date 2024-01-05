@@ -1,62 +1,90 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
-import gov.cms.bfd.events.EventPublisher;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.CcwRifLoadJobStatusEventBuilder;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.AwaitingManifestDataFiles;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.Idle;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles;
-import static java.time.ZoneOffset.UTC;
+
+import gov.cms.bfd.events.EventPublisher;
+import java.time.Clock;
+import java.time.Instant;
+import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 
-import java.time.Clock;
-import java.time.ZonedDateTime;
-
+/**
+ * An object that publishes status updates to external systems about current stage of {@link
+ * CcwRifLoadJob} processing.
+ */
 @RequiredArgsConstructor
 public class CcwRifLoadJobStatusReporter {
+  /** Uses to publish the status events. */
   private final EventPublisher publisher;
+
+  /** Used to obtain current time. */
   private final Clock clock;
-  private String lastCompletedManifestKey;
-  private ZonedDateTime lastCompletedTimestamp;
 
+  /** Null or the S3 key of the most recently completed manifest. */
+  @Nullable private String lastCompletedManifestKey;
+
+  /** Null or the timestamp when most recently completed manifest was reported. */
+  @Nullable private Instant lastCompletedTimestamp;
+
+  /** Send a status event when bucket is about to be scanned. */
   public void reportCheckingBucketForManifest() {
-    final var event = createEvent().jobStage(CheckingBucketForManifest).build();
+    final var event = createEvent(CheckingBucketForManifest);
     publisher.publishEvent(event);
   }
 
+  /**
+   * Send a status event when waiting for data files for a manifest to become available in S3.
+   *
+   * @param manifestKey S3 key of the manifest
+   */
   public void reportAwaitingManifestData(String manifestKey) {
-    final var event =
-        createEvent().jobStage(AwaitingManifestDataFiles).currentManifestKey(manifestKey).build();
+    final var event = createEvent(AwaitingManifestDataFiles).withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
 
+  /**
+   * Send a status event when processing of a manifest's data files starts.
+   *
+   * @param manifestKey S3 key of the manifest
+   */
   public void reportProcessingManifestData(String manifestKey) {
-    final var event =
-        createEvent().jobStage(ProcessingManifestDataFiles).currentManifestKey(manifestKey).build();
+    final var event = createEvent(ProcessingManifestDataFiles).withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
 
+  /**
+   * Send a status event when processing of a manifest's data files has been completed successfully.
+   *
+   * @param manifestKey S3 key of the manifest
+   */
   public void reportCompletedManifest(String manifestKey) {
     lastCompletedManifestKey = manifestKey;
-    lastCompletedTimestamp = currentTimestamp();
-    final var event =
-        createEvent().jobStage(AwaitingManifestDataFiles).currentManifestKey(manifestKey).build();
+    lastCompletedTimestamp = clock.instant();
+    final var event = createEvent(AwaitingManifestDataFiles).withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
 
+  /** Send a status event when no manifest is available to be processed. */
   public void reportIdle() {
-    final var event = createEvent().jobStage(Idle).build();
+    final var event = createEvent(Idle);
     publisher.publishEvent(event);
   }
 
-  private ZonedDateTime currentTimestamp() {
-    return clock.instant().atZone(UTC);
-  }
-
-  private CcwRifLoadJobStatusEventBuilder createEvent() {
+  /**
+   * Creates a bare event based on the given stage and our current field values.
+   *
+   * @param jobStage stage to include in the event
+   * @return the event
+   */
+  private CcwRifLoadJobStatusEvent createEvent(CcwRifLoadJobStatusEvent.JobStage jobStage) {
     return CcwRifLoadJobStatusEvent.builder()
-        .currentTimestamp(currentTimestamp())
+        .jobStage(jobStage)
+        .currentTimestamp(clock.instant())
         .lastCompletedManifestKey(lastCompletedManifestKey)
-        .lastCompletedTimestamp(lastCompletedTimestamp);
+        .lastCompletedTimestamp(lastCompletedTimestamp)
+        .build();
   }
 }

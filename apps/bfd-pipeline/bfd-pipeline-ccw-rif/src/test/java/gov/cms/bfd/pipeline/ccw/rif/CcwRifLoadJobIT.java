@@ -2,8 +2,11 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -15,19 +18,28 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for {@link CcwRifLoadJob}. */
+@ExtendWith(MockitoExtension.class)
 final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
+
+  /** Used to capture status updates from the job. */
+  @Mock private CcwRifLoadJobStatusReporter statusReporter;
 
   /**
    * Tests {@link CcwRifLoadJob} when run against an empty bucket.
@@ -59,13 +71,20 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               s3TaskManager,
               listener,
               false,
-              Optional.empty())) {
+              Optional.empty(),
+              statusReporter)) {
         ccwJob.call();
       }
 
       // Verify that no data sets were generated.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
+
+      // verifies that status events were published in the correct order
+      final var statusOrder = Mockito.inOrder(statusReporter);
+      statusOrder.verify(statusReporter).reportCheckingBucketForManifest();
+      statusOrder.verify(statusReporter).reportIdle();
+      statusOrder.verifyNoMoreInteractions();
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -143,18 +162,20 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               new DataSetManifestEntry("inpatient.rif", RifFileType.INPATIENT));
 
       // Add files to each location the test wants them in
-      putSampleFilesInTestBucket(
-          bucket,
-          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-          manifest,
-          List.of(StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
-      putSampleFilesInTestBucket(
-          bucket,
-          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-          manifestSynthetic,
-          List.of(
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl(),
-              StaticRifResource.SAMPLE_A_INPATIENT.getResourceUrl()));
+      final String manifest1Key =
+          putSampleFilesInTestBucket(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              manifest,
+              List.of(StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
+      final String manifest2Key =
+          putSampleFilesInTestBucket(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+              manifestSynthetic,
+              List.of(
+                  StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl(),
+                  StaticRifResource.SAMPLE_A_INPATIENT.getResourceUrl()));
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
@@ -171,7 +192,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               s3TaskManager,
               listener,
               false,
-              Optional.empty())) {
+              Optional.empty(),
+              statusReporter)) {
         // Process both sets
         ccwJob.call();
         ccwJob.call();
@@ -180,6 +202,18 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(2, listener.getDataEvents().size());
+
+      // verifies that status events were published
+      verify(statusReporter, times(2)).reportCheckingBucketForManifest();
+      verify(statusReporter, atLeast(1)).reportAwaitingManifestData(manifest1Key);
+      verify(statusReporter).reportProcessingManifestData(manifest1Key);
+      verify(statusReporter).reportCompletedManifest(manifest1Key);
+      verify(statusReporter, atLeast(1)).reportAwaitingManifestData(manifest2Key);
+      verify(statusReporter).reportProcessingManifestData(manifest2Key);
+      verify(statusReporter).reportCompletedManifest(manifest2Key);
+      verify(statusReporter, times(2)).reportCheckingBucketForManifest();
+      verify(statusReporter, times(2)).reportIdle();
+      verifyNoMoreInteractions(statusReporter);
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -253,7 +287,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   }
 
   /**
-   * Tests {@link CcwRifLoadJob} when run against an empty bucket.
+   * Tests {@link CcwRifLoadJob} when run once against a bucket with three non-synthetic data sets
+   * the job processes the first one and exits.
    *
    * @throws Exception (exceptions indicate test failure)
    */
@@ -277,12 +312,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
-      DataSetTestUtilities.putObject(s3Dao, bucket, manifestA);
+      final String manifestAKey = DataSetTestUtilities.putObject(s3Dao, bucket, manifestA);
       DataSetTestUtilities.putObject(
           s3Dao,
           bucket,
           manifestA,
-          manifestA.getEntries().get(0),
+          manifestA.getEntries().getFirst(),
           StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
       DataSetManifest manifestB =
           new DataSetManifest(
@@ -292,12 +327,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
               CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("pde.rif", RifFileType.PDE));
-      DataSetTestUtilities.putObject(s3Dao, bucket, manifestB);
+      final String manifestBKey = DataSetTestUtilities.putObject(s3Dao, bucket, manifestB);
       DataSetTestUtilities.putObject(
           s3Dao,
           bucket,
           manifestB,
-          manifestB.getEntries().get(0),
+          manifestB.getEntries().getFirst(),
           StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
       DataSetManifest manifestC =
           new DataSetManifest(
@@ -312,7 +347,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           s3Dao,
           bucket,
           manifestC,
-          manifestC.getEntries().get(0),
+          manifestC.getEntries().getFirst(),
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
@@ -330,8 +365,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               s3TaskManager,
               listener,
               false,
-              Optional.empty())) {
-        ccwJob.call();
+              Optional.empty(),
+              statusReporter)) {
+        // process only the first data set
+        assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
       }
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -340,6 +377,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
       assertEquals(
           manifestA.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
+
+      // verifies that status events were published
+      verify(statusReporter).reportCheckingBucketForManifest();
+      verify(statusReporter, atLeast(1)).reportAwaitingManifestData(manifestAKey);
+      verify(statusReporter, atLeast(1)).reportAwaitingManifestData(manifestBKey);
+      verify(statusReporter).reportProcessingManifestData(manifestAKey);
+      verify(statusReporter).reportCompletedManifest(manifestAKey);
+      verify(statusReporter).reportIdle();
+      verifyNoMoreInteractions(statusReporter);
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -422,13 +468,20 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               s3TaskManager,
               listener,
               false,
-              Optional.empty())) {
+              Optional.empty(),
+              statusReporter)) {
         ccwJob.call();
       }
 
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
+
+      // verifies that status events were published in the correct order
+      final var statusOrder = Mockito.inOrder(statusReporter);
+      statusOrder.verify(statusReporter).reportCheckingBucketForManifest();
+      statusOrder.verify(statusReporter).reportIdle();
+      statusOrder.verifyNoMoreInteractions();
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -507,13 +560,20 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               s3TaskManager,
               listener,
               false,
-              Optional.empty())) {
+              Optional.empty(),
+              statusReporter)) {
         ccwJob.call();
       }
 
       // Verify what was handed off to the DataSetMonitorListener.
       assertEquals(1, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
+
+      // verifies that status events were published in the correct order
+      final var statusOrder = Mockito.inOrder(statusReporter);
+      statusOrder.verify(statusReporter).reportCheckingBucketForManifest();
+      statusOrder.verify(statusReporter).reportIdle();
+      statusOrder.verifyNoMoreInteractions();
 
       // verifies that close called shutdown on the task manager
       verify(s3TaskManager).shutdownSafely();
@@ -587,7 +647,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               s3TaskManager,
               listener,
               false,
-              Optional.empty())) {
+              Optional.empty(),
+              statusReporter)) {
         ccwJob.call();
       }
 
@@ -624,15 +685,17 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
    * @param manifest the manifest to use for the load files
    * @param resourcesToAdd the resource URLs to add to the bucket, see {@link StaticRifResource} for
    *     resource lists, should be in the order of the manifest
+   * @return the uploaded manifest's S3 key
    */
-  private void putSampleFilesInTestBucket(
+  private String putSampleFilesInTestBucket(
       String bucket, String location, DataSetManifest manifest, List<URL> resourcesToAdd) {
-    DataSetTestUtilities.putObject(s3Dao, bucket, manifest, location);
+    String manifestKey = DataSetTestUtilities.putObject(s3Dao, bucket, manifest, location);
     int index = 0;
     for (URL resource : resourcesToAdd) {
       DataSetTestUtilities.putObject(
           s3Dao, bucket, manifest, manifest.getEntries().get(index), resource, location);
       index++;
     }
+    return manifestKey;
   }
 }

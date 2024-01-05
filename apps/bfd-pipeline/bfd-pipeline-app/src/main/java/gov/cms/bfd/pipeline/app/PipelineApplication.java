@@ -15,7 +15,9 @@ import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariProxyConnection;
+import gov.cms.bfd.events.DoNothingEventPublisher;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
@@ -520,7 +522,8 @@ public final class PipelineApplication {
             s3TaskManager,
             dataSetMonitorListener,
             loadOptions.getLoadOptions().isIdempotencyRequired(),
-            loadOptions.getRunInterval());
+            loadOptions.getRunInterval(),
+            new CcwRifLoadJobStatusReporter(new DoNothingEventPublisher(), Clock.systemUTC()));
 
     return ccwRifLoadJob;
   }
