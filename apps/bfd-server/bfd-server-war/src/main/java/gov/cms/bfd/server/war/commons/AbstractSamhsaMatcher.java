@@ -7,6 +7,7 @@ import gov.cms.bfd.server.war.adapters.Coding;
 import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
+import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,7 +132,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @return a {@link List} of values from the specified column of the specified CSV file
    */
   @VisibleForTesting
-  static List<String> resourceCsvColumnToList(String csvResourceName, String columnToReturn) {
+  public static List<String> resourceCsvColumnToList(
+      String csvResourceName, String columnToReturn) {
     try (InputStream csvStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(csvResourceName);
         InputStreamReader csvReader = new InputStreamReader(csvStream, StandardCharsets.UTF_8);
@@ -154,6 +156,18 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   protected boolean containsSamhsaIcdProcedureCode(List<ProcedureComponent> procedure) {
     return procedure.stream().anyMatch(this::isSamhsaIcdProcedure);
+  }
+
+  /**
+   * Checks if the given {@link SupportingInfoComponent} list contains any SAMHSA data.
+   *
+   * @param supportingInformationComponents the supporting information components
+   * @return {@code true} if any of the specified {@link SupportingInfoComponent}s match any of the
+   *     {@link AbstractSamhsaMatcher#drgCodes}, {@code false} if they all do not
+   */
+  protected boolean containsSamhsaSupportingInfo(
+      List<SupportingInfoComponent> supportingInformationComponents) {
+    return supportingInformationComponents.stream().anyMatch(this::isSamhsaSupportingInfo);
   }
 
   /**
@@ -220,6 +234,24 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
        * This will only be thrown if the DiagnosisComponent doesn't have a
        * CodeableConcept, which isn't how we build ours.
        */
+      throw new BadCodeMonkeyException(e);
+    }
+  }
+
+  /**
+   * Checks if the given {@link SupportingInfoComponent} contains SAMHSA data.
+   *
+   * @param supportingInfo the {@link SupportingInfoComponent} to check
+   * @return {@code true} if the specified {@link SupportingInfoComponent} matches one of the {@link
+   *     AbstractSamhsaMatcher#drgCodes} entries, <code>false</code> if it does not
+   */
+  @VisibleForTesting
+  boolean isSamhsaSupportingInfo(SupportingInfoComponent supportingInfo) {
+    try {
+      return supportingInfo.getSupportingInfoCodeableConcept().getCoding().stream()
+          .filter(s -> s.getSystem().equals(AbstractSamhsaMatcher.DRG))
+          .anyMatch(this::isSamhsaDrgCode);
+    } catch (FHIRException e) {
       throw new BadCodeMonkeyException(e);
     }
   }
@@ -560,7 +592,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @return the specified DRG code, but with the "MS-DRG" prefix and space removed.
    */
   @VisibleForTesting
-  static String normalizeDrgCode(String code) {
+  public static String normalizeDrgCode(String code) {
     code = code.trim();
     code = code.replace("MS-DRG ", "");
     return code;
@@ -574,7 +606,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *     decimal point removed, and converted to all-caps
    */
   @VisibleForTesting
-  static String normalizeIcdCode(String icdCode) {
+  public static String normalizeIcdCode(String icdCode) {
     icdCode = icdCode.trim();
     icdCode = icdCode.replaceFirst("\\.", "");
     icdCode = icdCode.toUpperCase();
@@ -589,7 +621,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @return the specified HCPCS code, but with whitespace trimmed and converted to all-caps
    */
   @VisibleForTesting
-  static String normalizeHcpcsCode(String hcpcsCode) {
+  public static String normalizeHcpcsCode(String hcpcsCode) {
     hcpcsCode = hcpcsCode.trim();
     hcpcsCode = hcpcsCode.toUpperCase();
 
