@@ -601,8 +601,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   public void testEobByPatientIdForNonSamhsaEobsWithExcludeSamhsaTrueExpectNoError() {
 
     // dont load samhsa data
-    List<Object> samhsaFiles = testUtils.loadSampleASamhsaData();
-    String patientId = testUtils.getPatientId(samhsaFiles);
+    String patientId = testUtils.getPatientId(testUtils.loadSampleASamhsaData());
     // call samhsa filter, but it shouldn't do anything since there is nothing to filter
     String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
 
