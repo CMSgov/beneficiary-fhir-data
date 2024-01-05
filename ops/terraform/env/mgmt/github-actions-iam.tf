@@ -60,6 +60,7 @@ resource "aws_iam_policy" "github_actions_ecr" {
         {
           Action = [
             "ecr:GetAuthorizationToken",
+            "ecr-public:GetAuthorizationToken"
           ]
           Effect   = "Allow"
           Resource = "*"
@@ -80,6 +81,7 @@ resource "aws_iam_policy" "github_actions_ecr" {
             "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-db-migrator",
             "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-server",
             "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-pipeline-app",
+            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-mgmt-eft-sftp-outbound-transfer-lambda",
           ]
           Sid = "AllowPushPull"
         },
