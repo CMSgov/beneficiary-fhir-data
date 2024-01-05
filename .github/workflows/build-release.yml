@@ -35,6 +35,17 @@ defaults:
     shell: bash
 
 jobs:
+  build-docker-images:
+    uses: ./.github/workflows/build-docker-images.yml
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      branch: ${{ inputs.releaseBranch }}
+      versionTag: ${{ inputs.releaseVersion }}
+      awsRegion: ${{ inputs.awsRegion }}
+    secrets: inherit
+
   mvn-release:
     runs-on: ubuntu-latest
     steps:
