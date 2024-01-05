@@ -75,7 +75,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: build-release
+          role-session-name: build-images
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
