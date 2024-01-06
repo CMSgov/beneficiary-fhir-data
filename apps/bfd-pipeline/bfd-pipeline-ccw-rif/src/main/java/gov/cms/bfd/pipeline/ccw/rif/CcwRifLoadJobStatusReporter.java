@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.AwaitingManifestDataFiles;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest;
-import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.Idle;
+import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.NothingToDo;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles;
 
 import gov.cms.bfd.events.EventPublisher;
@@ -27,10 +27,14 @@ public class CcwRifLoadJobStatusReporter {
   @Nullable private String lastCompletedManifestKey;
 
   /** Null or the timestamp when most recently completed manifest was reported. */
-  @Nullable private Instant lastCompletedTimestamp;
+  @Nullable private Instant lastCompletedTime;
+
+  /** Null or the timestamp when job first reported that it was idle. */
+  @Nullable private Instant nothingToDoStartTime;
 
   /** Send a status event when bucket is about to be scanned. */
   public void reportCheckingBucketForManifest() {
+    nothingToDoStartTime = null;
     final var event = createEvent(CheckingBucketForManifest);
     publisher.publishEvent(event);
   }
@@ -41,6 +45,7 @@ public class CcwRifLoadJobStatusReporter {
    * @param manifestKey S3 key of the manifest
    */
   public void reportAwaitingManifestData(String manifestKey) {
+    nothingToDoStartTime = null;
     final var event = createEvent(AwaitingManifestDataFiles).withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
@@ -51,6 +56,7 @@ public class CcwRifLoadJobStatusReporter {
    * @param manifestKey S3 key of the manifest
    */
   public void reportProcessingManifestData(String manifestKey) {
+    nothingToDoStartTime = null;
     final var event = createEvent(ProcessingManifestDataFiles).withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
@@ -62,14 +68,18 @@ public class CcwRifLoadJobStatusReporter {
    */
   public void reportCompletedManifest(String manifestKey) {
     lastCompletedManifestKey = manifestKey;
-    lastCompletedTimestamp = clock.instant();
+    lastCompletedTime = clock.instant();
+    nothingToDoStartTime = null;
     final var event = createEvent(AwaitingManifestDataFiles).withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
 
   /** Send a status event when no manifest is available to be processed. */
-  public void reportIdle() {
-    final var event = createEvent(Idle);
+  public void reportNothingToDo() {
+    if (nothingToDoStartTime == null) {
+      nothingToDoStartTime = clock.instant();
+    }
+    final var event = createEvent(NothingToDo);
     publisher.publishEvent(event);
   }
 
@@ -84,7 +94,7 @@ public class CcwRifLoadJobStatusReporter {
         .jobStage(jobStage)
         .currentTimestamp(clock.instant())
         .lastCompletedManifestKey(lastCompletedManifestKey)
-        .lastCompletedTimestamp(lastCompletedTimestamp)
+        .lastCompletedTimestamp(lastCompletedTime)
         .build();
   }
 }

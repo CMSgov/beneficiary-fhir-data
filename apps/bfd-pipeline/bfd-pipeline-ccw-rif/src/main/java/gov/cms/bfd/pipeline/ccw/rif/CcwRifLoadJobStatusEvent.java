@@ -43,6 +43,6 @@ public class CcwRifLoadJobStatusEvent {
     /** Processing of a manifest and its data files is now complete. */
     CompletedManifest,
     /** Nothing available to process at the moment. */
-    Idle
+    NothingToDo
   }
 }

@@ -83,7 +83,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that status events were published in the correct order
       final var statusOrder = Mockito.inOrder(statusReporter);
       statusOrder.verify(statusReporter).reportCheckingBucketForManifest();
-      statusOrder.verify(statusReporter).reportIdle();
+      statusOrder.verify(statusReporter).reportNothingToDo();
       statusOrder.verifyNoMoreInteractions();
 
       // verifies that close called shutdown on the task manager
@@ -212,7 +212,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(statusReporter).reportProcessingManifestData(manifest2Key);
       verify(statusReporter).reportCompletedManifest(manifest2Key);
       verify(statusReporter, times(2)).reportCheckingBucketForManifest();
-      verify(statusReporter, times(2)).reportIdle();
       verifyNoMoreInteractions(statusReporter);
 
       // verifies that close called shutdown on the task manager
@@ -384,7 +383,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(statusReporter, atLeast(1)).reportAwaitingManifestData(manifestBKey);
       verify(statusReporter).reportProcessingManifestData(manifestAKey);
       verify(statusReporter).reportCompletedManifest(manifestAKey);
-      verify(statusReporter).reportIdle();
       verifyNoMoreInteractions(statusReporter);
 
       // verifies that close called shutdown on the task manager
@@ -480,7 +478,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that status events were published in the correct order
       final var statusOrder = Mockito.inOrder(statusReporter);
       statusOrder.verify(statusReporter).reportCheckingBucketForManifest();
-      statusOrder.verify(statusReporter).reportIdle();
+      statusOrder.verify(statusReporter).reportNothingToDo();
       statusOrder.verifyNoMoreInteractions();
 
       // verifies that close called shutdown on the task manager
@@ -572,7 +570,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that status events were published in the correct order
       final var statusOrder = Mockito.inOrder(statusReporter);
       statusOrder.verify(statusReporter).reportCheckingBucketForManifest();
-      statusOrder.verify(statusReporter).reportIdle();
+      statusOrder.verify(statusReporter).reportNothingToDo();
       statusOrder.verifyNoMoreInteractions();
 
       // verifies that close called shutdown on the task manager

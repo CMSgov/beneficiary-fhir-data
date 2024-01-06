@@ -232,7 +232,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     if (manifestToProcess == null) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
       listener.noDataAvailable();
-      statusReporter.reportIdle();
+      statusReporter.reportNothingToDo();
       return PipelineJobOutcome.NOTHING_TO_DO;
     }
 
@@ -358,17 +358,14 @@ public final class CcwRifLoadJob implements PipelineJob {
     } else {
       /*
        * If here, Synthea pre-validation has failed; we want to move the S3 incoming
-       * files
-       * to a failed folder; so instead of moving files to a done folder we'll just
-       * replace
-       * the manifest's notion of its Done folder to a Failed folder.
+       * files to a failed folder; so instead of moving files to a done folder we'll just
+       * replace the manifest's notion of its Done folder to a Failed folder.
        */
       manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);
     }
     dataSetQueue.markProcessed(manifestToProcess);
     s3TaskManager.submit(new DataSetMoveTask(s3TaskManager, options, manifestToProcess));
 
-    statusReporter.reportIdle();
     return PipelineJobOutcome.WORK_DONE;
   }
 
