@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.AwaitingManifestDataFiles;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest;
+import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.CompletedManifest;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.NothingToDo;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles;
 
@@ -30,12 +31,12 @@ public class CcwRifLoadJobStatusReporter {
   @Nullable private Instant lastCompletedTime;
 
   /** Null or the timestamp when job first reported that it was idle. */
-  @Nullable private Instant nothingToDoStartTime;
+  @Nullable private Instant nothingToDoSinceTime;
 
   /** Send a status event when bucket is about to be scanned. */
   public void reportCheckingBucketForManifest() {
-    nothingToDoStartTime = null;
-    final var event = createEvent(CheckingBucketForManifest);
+    nothingToDoSinceTime = null;
+    final var event = createEvent(CheckingBucketForManifest, clock.instant());
     publisher.publishEvent(event);
   }
 
@@ -45,8 +46,9 @@ public class CcwRifLoadJobStatusReporter {
    * @param manifestKey S3 key of the manifest
    */
   public void reportAwaitingManifestData(String manifestKey) {
-    nothingToDoStartTime = null;
-    final var event = createEvent(AwaitingManifestDataFiles).withCurrentManifestKey(manifestKey);
+    nothingToDoSinceTime = null;
+    final var event =
+        createEvent(AwaitingManifestDataFiles, clock.instant()).withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
 
@@ -56,8 +58,10 @@ public class CcwRifLoadJobStatusReporter {
    * @param manifestKey S3 key of the manifest
    */
   public void reportProcessingManifestData(String manifestKey) {
-    nothingToDoStartTime = null;
-    final var event = createEvent(ProcessingManifestDataFiles).withCurrentManifestKey(manifestKey);
+    nothingToDoSinceTime = null;
+    final var event =
+        createEvent(ProcessingManifestDataFiles, clock.instant())
+            .withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
 
@@ -67,19 +71,22 @@ public class CcwRifLoadJobStatusReporter {
    * @param manifestKey S3 key of the manifest
    */
   public void reportCompletedManifest(String manifestKey) {
+    final Instant currentTime = clock.instant();
     lastCompletedManifestKey = manifestKey;
-    lastCompletedTime = clock.instant();
-    nothingToDoStartTime = null;
-    final var event = createEvent(AwaitingManifestDataFiles).withCurrentManifestKey(manifestKey);
+    lastCompletedTime = currentTime;
+    nothingToDoSinceTime = null;
+    final var event =
+        createEvent(CompletedManifest, currentTime).withCurrentManifestKey(manifestKey);
     publisher.publishEvent(event);
   }
 
   /** Send a status event when no manifest is available to be processed. */
   public void reportNothingToDo() {
-    if (nothingToDoStartTime == null) {
-      nothingToDoStartTime = clock.instant();
+    final Instant currentTime = clock.instant();
+    if (nothingToDoSinceTime == null) {
+      nothingToDoSinceTime = currentTime;
     }
-    final var event = createEvent(NothingToDo);
+    final var event = createEvent(NothingToDo, currentTime);
     publisher.publishEvent(event);
   }
 
@@ -87,14 +94,17 @@ public class CcwRifLoadJobStatusReporter {
    * Creates a bare event based on the given stage and our current field values.
    *
    * @param jobStage stage to include in the event
+   * @param currentTime value for current timestamp
    * @return the event
    */
-  private CcwRifLoadJobStatusEvent createEvent(CcwRifLoadJobStatusEvent.JobStage jobStage) {
+  private CcwRifLoadJobStatusEvent createEvent(
+      CcwRifLoadJobStatusEvent.JobStage jobStage, Instant currentTime) {
     return CcwRifLoadJobStatusEvent.builder()
         .jobStage(jobStage)
-        .currentTimestamp(clock.instant())
+        .currentTimestamp(currentTime)
         .lastCompletedManifestKey(lastCompletedManifestKey)
         .lastCompletedTimestamp(lastCompletedTime)
+        .nothingToDoSinceTimestamp(nothingToDoSinceTime)
         .build();
   }
 }
