@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
+import gov.cms.bfd.json.JsonConverter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage;
 import java.time.Clock;
 import java.time.Instant;
@@ -93,11 +94,17 @@ public class CcwRifLoadJobStatusReporterTest {
    */
   @Test
   void testIdleThenBusyThenIdleAgain() {
+    currentMillis = 30_000;
+
     reporter.reportNothingToDo();
     checkLatestEvent(JobStage.NothingToDo, null);
     checkLatestEventInvariants();
 
-    for (String manifestKey : List.of("1", "2", "3")) {
+    final var baseKey = "Incoming/2022-02-11T01:03:33Z";
+
+    for (int sequenceNumber : List.of(0, 1, 2)) {
+      final var manifestKey = String.format("%s/%d_manifest.xml", baseKey, sequenceNumber);
+
       incrementTheClock();
       reporter.reportCheckingBucketForManifest();
       checkLatestEvent(JobStage.CheckingBucketForManifest, null);
@@ -128,6 +135,18 @@ public class CcwRifLoadJobStatusReporterTest {
     reporter.reportNothingToDo();
     checkLatestEvent(JobStage.NothingToDo, null);
     checkLatestEventInvariants();
+
+    printEvents();
+  }
+
+  /**
+   * During development this can be used to print all events to verify the JSON looks correct.
+   */
+  private void printEvents() {
+    final var converter = JsonConverter.prettyInstance();
+    for (CcwRifLoadJobStatusEvent event : publishedEvents) {
+      System.out.println(converter.objectToJson(event));
+    }
   }
 
   /** Bumps the simulated clock by one second. */
