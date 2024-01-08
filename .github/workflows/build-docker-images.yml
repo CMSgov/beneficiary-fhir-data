@@ -104,9 +104,9 @@ jobs:
           # and the "latest" tag should not be pushed.
           image_tags=""
           if [[ "${{ inputs.versionTag }}" == *"-"* ]]; then
-            image_tags="[\"$IMAGE_VERSIONED_TAG\"]"
+            image_tags="$IMAGE_VERSIONED_TAG"
           else
-            image_tags="[\"$IMAGE_VERSIONED_TAG\", \"$IMAGE_LATEST_TAG\"]"
+            image_tags="$IMAGE_VERSIONED_TAG,$IMAGE_LATEST_TAG"
           fi
           echo image_tags=$image_tags >> $GITHUB_OUTPUT
         env:
@@ -119,6 +119,6 @@ jobs:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
           push: true
-          tags: ${{ fromJson(steps.setup_tags.outputs.image_tags) }}
+          tags: ${{ steps.setup_tags.outputs.image_tags }}
         env:
           DOCKER_BUILDKIT: 1
