@@ -102,6 +102,7 @@ jobs:
         run: |
           # Naively, if version tag does not contain a "-" we assume the version is not a release
           # and the "latest" tag should not be pushed.
+          image_tags=""
           if [[ "${{ inputs.versionTag }}" == *"-"* ]]; then
             image_tags="[\"$IMAGE_VERSIONED_TAG\"]"
           else
