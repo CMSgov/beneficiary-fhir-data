@@ -28,6 +28,7 @@ spec:
 
   options {
     skipDefaultCheckout()
+    buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
   }
 
   stages {

@@ -61,6 +61,9 @@ spec:
 """
         }
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+    }
 
     environment {
         SONAR_PROJECT_KEY = 'bfd-parent'
