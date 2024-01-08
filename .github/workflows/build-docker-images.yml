@@ -51,13 +51,14 @@ jobs:
   build-images:
     strategy:
       matrix:
-        image: [
-          {
-            name: "bfd-mgmt-eft-sftp-outbound-transfer-lambda", 
-            dockerfile: "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile", 
-            contextDir: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer"
-          }
-        ]
+        image:
+          [
+            {
+              name: "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
+              dockerfile: "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
+              contextDir: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
+            },
+          ]
     runs-on: ubuntu-latest
     steps:
       - name: Validate Inputs
@@ -80,7 +81,7 @@ jobs:
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
-          
+
       - name: Login to Amazon ECR Public
         id: login-ecr-public
         uses: aws-actions/amazon-ecr-login@v2
@@ -96,29 +97,27 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push with Latest Tag
-        # Naively, only build and push with latest if the versionTag is a release version
-        if: ${{ !contains(inputs.versionTag, '-') }}
-        uses: docker/build-push-action@v5
-        with:
-          file: ${{ matrix.image.dockerfile }}
-          context: ${{ matrix.image.contextDir }}
-          push: true
-          tags: |
-            ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:latest
-            ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
+      - name: Setup tags
+        id: setup_tags
+        run: |
+          # Naively, if version tag does not contain a "-" we assume the version is not a release
+          # and the "latest" tag should not be pushed.
+          if [[ "${{ inputs.versionTag }}" == *"-"* ]]; then
+            image_tags="[\"$IMAGE_VERSIONED_TAG\"]"
+          else
+            image_tags="[\"$IMAGE_VERSIONED_TAG\", \"$IMAGE_LATEST_TAG\"]"
+          fi
+          echo image_tags=$image_tags >> $GITHUB_OUTPUT
         env:
-          DOCKER_BUILDKIT: 1
+          IMAGE_VERSIONED_TAG: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
+          IMAGE_LATEST_TAG: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:latest
 
-      - name: Build and Push without Latest Tag
-        # Naively, build and push without latest tag if the versionTag is not a release version
-        if: ${{ contains(inputs.versionTag, '-') }}
+      - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
           push: true
-          tags: |
-            ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
+          tags: ${{ fromJson(steps.setup_tags.outputs.image_tags) }}
         env:
           DOCKER_BUILDKIT: 1
