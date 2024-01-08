@@ -42,12 +42,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   /** The base eob endpoint. */
   protected String eobEndpoint;
 
-  /** The SAMHSA ICD9 diagnosis code. */
-  protected static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
-
-  /** The SAMHSA CPT code. */
-  protected static final String SAMPLE_SAMHSA_CPT_CODE = "G0137";
-
   /**
    * Verifies that an EOB Carrier claim can be requested using the read endpoint, successfully
    * returns a 200 response, and has the claim id and a couple other EOB details present in the
@@ -582,9 +576,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   @Test
   public void testEobByPatientIdWithExcludeSamhsaTrueExpectFiltering() {
 
-    // Adjust the sampleA data that was loaded to include some samhsa data
-    // We could also just keep a samhsa set, or have the default set have samhsa
-    // so that we don't need a separate set or modification
+    // Load the SAMHSA sample data, which contains a claim entry for EVERY filterable code
     String patientId = testUtils.getPatientId(testUtils.loadSampleASamhsaData());
     String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
 
@@ -621,6 +613,34 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
         .body("total", equalTo(8))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is not
+   * set, as we default to false. The server call takes a long time with the amount of exhaustive
+   * SAMHSA data, so the explicit tests to test the setting set to false and the default were
+   * combined for the sake of saving 25 seconds of test execution time.
+   */
+  @Test
+  public void testEobByPatientIdWithExcludeSamhsaFalseByDefaultAndExpectNoFiltering() {
+    // Adjust the sampleA data that was loaded to include some samhsa data by passing true
+    List<Object> samhsaFiles = testUtils.loadSampleASamhsaData();
+    String patientId = testUtils.getPatientId(samhsaFiles);
+    String requestString = eobEndpoint + "?patient=" + patientId;
+    // This number will change if we update any the SAMHSA filter lists
+    // Num claims = loaded -6 (1 for bene, 5 for bene history) meaning the rest are claims to return
+    int numSamhsaClaims = samhsaFiles.size() - 6;
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // Check nothing is filtered; we should see tons of claims as we load 1 claim per SAMHSA
+        // code for each type
+        .body("total", equalTo(numSamhsaClaims))
         .statusCode(200)
         .when()
         .get(requestString);
