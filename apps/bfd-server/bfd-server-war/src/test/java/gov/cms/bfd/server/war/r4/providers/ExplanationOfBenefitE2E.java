@@ -156,7 +156,6 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
 
     List<Object> loadedData = testUtils.loadSampleAData();
     String patientId = testUtils.getPatientId(loadedData);
-    // _search needed to distinguish the POST version of the endpoint (HAPI-FHIR)
     String requestString =
         eobEndpoint + "?patient=" + patientId + "&_elements=extension.url,identifier.system";
 
