@@ -323,7 +323,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
           Set<String> elements,
       RequestDetails requestDetails) {
 
-    if (!requestDetails.getRequestType().equals(RequestTypeEnum.POST)
+    if (RequestTypeEnum.POST != requestDetails.getRequestType()
         && elements != null
         && elements.size() > 0) {
       throw new InvalidRequestException("_elements tag is only supported via POST request");
