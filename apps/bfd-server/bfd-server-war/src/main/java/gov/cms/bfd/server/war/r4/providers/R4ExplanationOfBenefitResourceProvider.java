@@ -3,12 +3,15 @@ package gov.cms.bfd.server.war.r4.providers;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -62,6 +65,9 @@ import org.springframework.stereotype.Component;
  * This FHIR {@link IResourceProvider} adds support for R4 {@link ExplanationOfBenefit} resources,
  * derived from the CCW claims.
  */
+@ResourceDef(
+    name = "ExplanationOfBenefit",
+    profile = "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit")
 @Component
 public final class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
     implements IResourceProvider {
@@ -250,6 +256,9 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * There may be many different methods annotated with this {@link Search} annotation, to support
    * many different search criteria.
    *
+   * <p>This method supports both HTTP GET with URL parameters, and HTTP POST with parameters
+   * specified within the POST body.
+   *
    * @param patient a {@link ReferenceParam} for the {@link ExplanationOfBenefit#getPatient()} to
    *     try and find matches for {@link ExplanationOfBenefit}s
    * @param type a list of {@link ClaimType} to include in the result. Defaults to all types.
@@ -262,6 +271,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
    *     ExplanationOfBenefit}s that completed
    * @param taxNumbers an {@link OptionalParam} for whether to include tax numbers in the response
+   * @param elements a {@link String} of client-specified FHIR elements to be included in each EOB.
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
@@ -305,7 +315,19 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
               shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
               value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
           String taxNumbers,
+      @Elements
+          @OptionalParam(name = "_elements")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_CLIENT_ELEMENTS_SHORT,
+              value = OpenAPIContentProvider.EOB_CLIENT_ELEMENTS_VALUE)
+          Set<String> elements,
       RequestDetails requestDetails) {
+
+    if (RequestTypeEnum.POST != requestDetails.getRequestType()
+        && elements != null
+        && elements.size() > 0) {
+      throw new InvalidRequestException("_elements tag is only supported via POST request");
+    }
 
     /*
      * startIndex is an optional parameter here because it must be declared in the

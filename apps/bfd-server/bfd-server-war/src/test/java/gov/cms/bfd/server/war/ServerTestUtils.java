@@ -412,8 +412,7 @@ public final class ServerTestUtils {
    * @return the loaded records
    */
   public List<Object> loadSampleAData() {
-    return ServerTestUtils.get()
-        .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    return loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
   }
 
   /**
@@ -422,8 +421,7 @@ public final class ServerTestUtils {
    * @return the loaded records
    */
   public List<Object> loadSampleASamhsaData() {
-    return ServerTestUtils.get()
-        .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources()));
+    return loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources()));
   }
 
   /**
