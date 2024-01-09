@@ -139,9 +139,7 @@ public class CcwRifLoadJobStatusReporterTest {
     printEvents();
   }
 
-  /**
-   * During development this can be used to print all events to verify the JSON looks correct.
-   */
+  /** During development this can be used to print all events to verify the JSON looks correct. */
   private void printEvents() {
     final var converter = JsonConverter.prettyInstance();
     for (CcwRifLoadJobStatusEvent event : publishedEvents) {

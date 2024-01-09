@@ -16,6 +16,7 @@ import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.events.DoNothingEventPublisher;
+import gov.cms.bfd.events.EventPublisher;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
@@ -29,12 +30,15 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
+import gov.cms.bfd.sharedutils.sqs.SqsDao;
+import gov.cms.bfd.sharedutils.sqs.SqsEventPublisher;
 import io.micrometer.cloudwatch2.CloudWatchMeterRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -306,16 +310,18 @@ public final class PipelineApplication {
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource)
       throws FatalAppException {
+    final var clock = Clock.systemUTC();
+
     /*
      * Create all jobs and run their smoke tests.
      */
-    final var jobs = createAllJobs(appConfig, appMeters, appMetrics, pooledDataSource);
+    final var jobs = createAllJobs(appConfig, appMeters, appMetrics, pooledDataSource, clock);
     if (anySmokeTestFailed(jobs)) {
       LOGGER.info("Pipeline terminating due to smoke test failure.");
       throw new FatalAppException("Pipeline smoke test failure", EXIT_CODE_SMOKE_TEST_FAILURE);
     }
 
-    final var pipelineManager = new PipelineManager(Thread::sleep, Clock.systemUTC(), jobs);
+    final var pipelineManager = new PipelineManager(Thread::sleep, clock, jobs);
     registerShutdownHook(appMetrics, pipelineManager);
 
     pipelineManager.start();
@@ -424,6 +430,7 @@ public final class PipelineApplication {
    * @param appMeters the app meters
    * @param appMetrics our {@link MetricRegistry} for metrics reporting
    * @param pooledDataSource our {@link javax.sql.DataSource}
+   * @param clock used to get current time
    * @return list of {@link PipelineJob}s to be registered
    */
   @VisibleForTesting
@@ -431,7 +438,8 @@ public final class PipelineApplication {
       AppConfiguration appConfig,
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
-      HikariDataSource pooledDataSource) {
+      HikariDataSource pooledDataSource,
+      Clock clock) {
     final var jobs = new ArrayList<PipelineJob>();
 
     /*
@@ -446,9 +454,12 @@ public final class PipelineApplication {
               appMetrics,
               pooledDataSource,
               PipelineApplicationState.PERSISTENCE_UNIT_NAME,
-              Clock.systemUTC());
+              clock);
 
-      jobs.add(createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
+      final var loadOptions = appConfig.getCcwRifLoadOptions().get();
+      AwsClientConfig awsClientConfig = appConfig.getAwsClientConfig();
+      final var job = createCcwRifLoadJob(loadOptions, appState, awsClientConfig, clock);
+      jobs.add(job);
       LOGGER.info("Registered CcwRifLoadJob.");
     } else {
       LOGGER.warn("CcwRifLoadJob is disabled in app configuration.");
@@ -464,7 +475,7 @@ public final class PipelineApplication {
               appMetrics,
               pooledDataSource,
               PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
-              Clock.systemUTC());
+              clock);
 
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
 
@@ -493,10 +504,15 @@ public final class PipelineApplication {
    *
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
+   * @param awsClientConfig AWS client configuration
+   * @param clock used to get current time
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private PipelineJob createCcwRifLoadJob(
-      CcwRifLoadOptions loadOptions, PipelineApplicationState appState) {
+      CcwRifLoadOptions loadOptions,
+      PipelineApplicationState appState,
+      AwsClientConfig awsClientConfig,
+      Clock clock) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.  The task manager will be automatically closed by the job.
@@ -515,6 +531,7 @@ public final class PipelineApplication {
      */
     DataSetMonitorListener dataSetMonitorListener =
         new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
+    var statusReporter = createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, clock);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState,
@@ -523,9 +540,34 @@ public final class PipelineApplication {
             dataSetMonitorListener,
             loadOptions.getLoadOptions().isIdempotencyRequired(),
             loadOptions.getRunInterval(),
-            new CcwRifLoadJobStatusReporter(new DoNothingEventPublisher(), Clock.systemUTC()));
+            statusReporter);
 
     return ccwRifLoadJob;
+  }
+
+  /**
+   * Creates a {@link CcwRifLoadJobStatusReporter} that either sends progress updates to SQS or
+   * simply ignores them depending on the configuration settings.
+   *
+   * @param loadOptions contains the SQS configuration settings
+   * @param awsClientConfig AWS client configuration
+   * @param clock used to get current time
+   * @return the reporter
+   */
+  private CcwRifLoadJobStatusReporter createCcwRifLoadJobStatusReporter(
+      CcwRifLoadOptions loadOptions, AwsClientConfig awsClientConfig, Clock clock) {
+    EventPublisher eventPublisher;
+    final var sqsQueueUrl = loadOptions.getSqsQueueName().orElse(null);
+    if (sqsQueueUrl == null) {
+      eventPublisher = new DoNothingEventPublisher();
+      LOGGER.info("CCW SQS progress reporting is disabled");
+    } else {
+      final var sqsClient = AppConfiguration.createSqsClient(awsClientConfig);
+      final var sqsDao = new SqsDao(sqsClient);
+      eventPublisher = new SqsEventPublisher(sqsDao, sqsQueueUrl);
+      LOGGER.info("CCW SQS progress reporting is enabled: queue={}", sqsQueueUrl);
+    }
+    return new CcwRifLoadJobStatusReporter(eventPublisher, clock);
   }
 
   /**

@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import java.util.Optional;
 import lombok.Getter;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 /**
  * Models the common configuration options for BFD applications, should be extended by a specific
@@ -216,5 +217,17 @@ public abstract class BaseAppConfiguration {
         .accessKey(config.stringValue(ENV_VAR_AWS_ACCESS_KEY, null))
         .secretKey(config.stringValue(ENV_VAR_AWS_SECRET_KEY, null))
         .build();
+  }
+
+  /**
+   * Creates a {@link SqsClient} instance using settings from the provided {@link AwsClientConfig}.
+   *
+   * @param awsClientConfig used to configure AWS services
+   * @return the {@link SqsClient}
+   */
+  public static SqsClient createSqsClient(AwsClientConfig awsClientConfig) {
+    final var clientBuilder = SqsClient.builder();
+    awsClientConfig.configureAwsService(clientBuilder);
+    return clientBuilder.build();
   }
 }

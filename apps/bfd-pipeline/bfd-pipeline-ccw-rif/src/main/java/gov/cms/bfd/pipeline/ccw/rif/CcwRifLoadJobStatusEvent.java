@@ -1,21 +1,50 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
 import java.time.Instant;
+import java.util.Comparator;
 import javax.annotation.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.With;
 
 /**
  * Java bean published using an {@link gov.cms.bfd.events.EventPublisher} to inform external systems
  * of the pipeline's status.
  */
-@Data
+@Getter
 @Builder
 @With
 public class CcwRifLoadJobStatusEvent {
+  /**
+   * {@link Comparator} that can be used to sort status events by ascending {@link
+   * #currentTimestamp}.
+   */
+  public static final Comparator<? super CcwRifLoadJobStatusEvent> SORT_BY_TIMESTAMP =
+      Comparator.comparing(CcwRifLoadJobStatusEvent::getCurrentTimestamp)
+          .thenComparing(CcwRifLoadJobStatusEvent::getJobStage);
+
   /** Current stage of processing. */
   private final JobStage jobStage;
+
+  public CcwRifLoadJobStatusEvent(@JsonProperty("jobStage") JobStage jobStage,
+                                  @Nullable @JsonProperty("lastCompletedManifestKey") String lastCompletedManifestKey,
+                                  @Nullable @JsonProperty("lastCompletedTimestamp") Instant lastCompletedTimestamp,
+                                  @Nullable @JsonProperty("currentManifestKey") String currentManifestKey,
+                                  @Nullable @JsonProperty("nothingToDoSinceTimestamp") Instant nothingToDoSinceTimestamp,
+                                  @JsonProperty("currentTimestamp") Instant currentTimestamp)
+  {
+    this.jobStage = jobStage;
+    this.lastCompletedManifestKey = lastCompletedManifestKey;
+    this.lastCompletedTimestamp = lastCompletedTimestamp;
+    this.currentManifestKey = currentManifestKey;
+    this.nothingToDoSinceTimestamp = nothingToDoSinceTimestamp;
+    this.currentTimestamp = currentTimestamp;
+  }
 
   /**
    * Optional S3 key of most recently completed manifest. Once present it maintains the same value

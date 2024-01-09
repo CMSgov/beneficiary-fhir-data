@@ -106,16 +106,4 @@ public class AppConfiguration extends BaseAppConfiguration {
         sqsClient,
         sqsQueueName);
   }
-
-  /**
-   * Creates a {@link SqsClient} instance using settings from the provided {@link AwsClientConfig}.
-   *
-   * @param awsClientConfig used to configure AWS services
-   * @return the {@link SqsClient}
-   */
-  static SqsClient createSqsClient(AwsClientConfig awsClientConfig) {
-    final var clientBuilder = SqsClient.builder();
-    awsClientConfig.configureAwsService(clientBuilder);
-    return clientBuilder.build();
-  }
 }

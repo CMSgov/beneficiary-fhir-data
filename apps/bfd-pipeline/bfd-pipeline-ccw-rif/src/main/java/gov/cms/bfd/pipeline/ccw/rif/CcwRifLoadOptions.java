@@ -19,20 +19,26 @@ public final class CcwRifLoadOptions {
   /** Time between runs of the {@link CcwRifLoadJob}. Empty means to run exactly once. */
   private final Optional<Duration> runInterval;
 
+  /** Optional SQS queue to receive progress messages. */
+  private final Optional<String> sqsQueueName;
+
   /**
    * Constructs a new {@link CcwRifLoadOptions} instance.
    *
    * @param extractionOptions the value to use for {@link #extractionOptions}
    * @param loadOptions the value to use for {@link #loadOptions}
    * @param runInterval used to construct the job schedule
+   * @param sqsQueueName SQS queue to receive progress messages
    */
   public CcwRifLoadOptions(
       ExtractionOptions extractionOptions,
       LoadAppOptions loadOptions,
-      Optional<Duration> runInterval) {
+      Optional<Duration> runInterval,
+      Optional<String> sqsQueueName) {
     this.extractionOptions = extractionOptions;
     this.loadOptions = loadOptions;
     this.runInterval = runInterval;
+    this.sqsQueueName = sqsQueueName;
   }
 
   @Override
@@ -44,6 +50,8 @@ public final class CcwRifLoadOptions {
     builder.append(loadOptions);
     builder.append(", runInterval=");
     builder.append(runInterval);
+    builder.append(", sqsQueueName=");
+    builder.append(sqsQueueName);
     builder.append("]");
     return builder.toString();
   }
