@@ -1,4 +1,4 @@
-package gov.cms.bfd.json;
+package gov.cms.bfd.sharedutils.json;
 
 /** Interface for objects that can convert JSON strings into java beans and vice versa. */
 public interface JsonConverter {

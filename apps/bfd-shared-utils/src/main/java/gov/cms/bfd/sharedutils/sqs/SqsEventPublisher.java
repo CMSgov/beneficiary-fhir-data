@@ -1,7 +1,7 @@
 package gov.cms.bfd.sharedutils.sqs;
 
-import gov.cms.bfd.events.EventPublisher;
-import gov.cms.bfd.json.JsonConverter;
+import gov.cms.bfd.sharedutils.events.EventPublisher;
+import gov.cms.bfd.sharedutils.json.JsonConverter;
 
 /**
  * Implementation of {@link EventPublisher} that publishes events to an SQS queue as JSON strings.

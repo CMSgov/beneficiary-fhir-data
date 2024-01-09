@@ -1,4 +1,4 @@
-package gov.cms.bfd.events;
+package gov.cms.bfd.sharedutils.events;
 
 /**
  * An object capable of publishing events to some external event system. Implementations might

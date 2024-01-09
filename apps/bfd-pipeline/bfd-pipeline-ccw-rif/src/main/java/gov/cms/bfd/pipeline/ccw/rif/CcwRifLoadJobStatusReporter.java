@@ -6,7 +6,7 @@ import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.Com
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.NothingToDo;
 import static gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles;
 
-import gov.cms.bfd.events.EventPublisher;
+import gov.cms.bfd.sharedutils.events.EventPublisher;
 import java.time.Clock;
 import java.time.Instant;
 import javax.annotation.Nullable;

@@ -20,7 +20,7 @@ public final class CcwRifLoadOptions {
   private final Optional<Duration> runInterval;
 
   /** Optional SQS queue to receive progress messages. */
-  private final Optional<String> sqsQueueName;
+  private final Optional<String> sqsQueueUrl;
 
   /**
    * Constructs a new {@link CcwRifLoadOptions} instance.
@@ -28,17 +28,17 @@ public final class CcwRifLoadOptions {
    * @param extractionOptions the value to use for {@link #extractionOptions}
    * @param loadOptions the value to use for {@link #loadOptions}
    * @param runInterval used to construct the job schedule
-   * @param sqsQueueName SQS queue to receive progress messages
+   * @param sqsQueueUrl SQS queue to receive progress messages
    */
   public CcwRifLoadOptions(
       ExtractionOptions extractionOptions,
       LoadAppOptions loadOptions,
       Optional<Duration> runInterval,
-      Optional<String> sqsQueueName) {
+      Optional<String> sqsQueueUrl) {
     this.extractionOptions = extractionOptions;
     this.loadOptions = loadOptions;
     this.runInterval = runInterval;
-    this.sqsQueueName = sqsQueueName;
+    this.sqsQueueUrl = sqsQueueUrl;
   }
 
   @Override
@@ -50,8 +50,8 @@ public final class CcwRifLoadOptions {
     builder.append(loadOptions);
     builder.append(", runInterval=");
     builder.append(runInterval);
-    builder.append(", sqsQueueName=");
-    builder.append(sqsQueueName);
+    builder.append(", sqsQueueUrl=");
+    builder.append(sqsQueueUrl);
     builder.append("]");
     return builder.toString();
   }

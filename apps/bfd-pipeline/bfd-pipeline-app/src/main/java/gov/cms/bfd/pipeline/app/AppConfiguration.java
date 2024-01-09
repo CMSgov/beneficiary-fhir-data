@@ -170,7 +170,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
   /**
    * Path of the SSM parameter containing name of SQS queue to which progress messages can be sent.
    */
-  public static final String SSM_PATH_SQS_QUEUE_NAME = "ccw/job/sqs/queue_name";
+  public static final String CCW_JOB_SQS_STATUS_QUEUE_NAME = "ccw/job/sqs/status_queue_name";
 
   /**
    * The path of the SSM parameter that should be used to indicate whether or not to configure the
@@ -639,7 +639,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
         config
             .positiveIntOptionZeroOK(SSM_PATH_CCW_RIF_JOB_INTERVAL_SECONDS)
             .map(Duration::ofSeconds);
-    final Optional<String> sqsQueueName = config.stringOption(SSM_PATH_SQS_QUEUE_NAME);
+    final Optional<String> sqsQueueName = config.stringOption(CCW_JOB_SQS_STATUS_QUEUE_NAME);
     return new CcwRifLoadOptions(extractionOptions, loadOptions, runInterval, sqsQueueName);
   }
 

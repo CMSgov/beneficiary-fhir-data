@@ -1,4 +1,4 @@
-package gov.cms.bfd.events;
+package gov.cms.bfd.sharedutils.events;
 
 /**
  * Implementation of {@link EventPublisher} that does nothing when called. Useful when event

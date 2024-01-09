@@ -1,4 +1,4 @@
-package gov.cms.bfd.json;
+package gov.cms.bfd.sharedutils.json;
 
 /** Exception thrown by {@link JsonConverter} if conversion fails. */
 public class JsonConversionException extends RuntimeException {

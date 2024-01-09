@@ -1,9 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
 import static gov.cms.bfd.SqsTestUtils.createSqsClientForLocalStack;
-import gov.cms.bfd.json.JsonConverter;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent;
-import gov.cms.bfd.sharedutils.sqs.SqsDao;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +17,7 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
@@ -33,6 +31,8 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.json.JsonConverter;
+import gov.cms.bfd.sharedutils.sqs.SqsDao;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.AfterEach;
@@ -522,7 +521,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     environment.put(AppConfiguration.SSM_PATH_CCW_RIF_JOB_INTERVAL_SECONDS, "0");
 
     // enable sending status messages to an SQS queue
-    environment.put(AppConfiguration.SSM_PATH_SQS_QUEUE_NAME, SQS_QUEUE_NAME);
+    environment.put(AppConfiguration.CCW_JOB_SQS_STATUS_QUEUE_NAME, SQS_QUEUE_NAME);
 
     return AppConfiguration.createConfigLoaderForTesting(environment);
   }

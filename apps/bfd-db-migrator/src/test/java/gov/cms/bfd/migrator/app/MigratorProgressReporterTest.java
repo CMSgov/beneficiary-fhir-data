@@ -4,9 +4,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import gov.cms.bfd.events.EventPublisher;
 import gov.cms.bfd.migrator.app.MigratorProgressReporter.SqsProgressMessage;
 import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
+import gov.cms.bfd.sharedutils.events.EventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

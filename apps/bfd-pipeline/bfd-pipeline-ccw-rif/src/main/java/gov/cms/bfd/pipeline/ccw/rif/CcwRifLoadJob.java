@@ -39,21 +39,21 @@ import org.slf4j.LoggerFactory;
  * follows:
  *
  * <ul>
- *   <li>Amazon S3 Bucket: {@code <s3-bucket-name>}
+ *   <li>Amazon S3 Bucket: <code>&lt;s3-bucket-name&gt;</code>
  *       <ul>
- *         <li>{@code 1997-07-16T19:20:30Z}
+ *         <li><code>1997-07-16T19:20:30Z</code>
  *             <ul>
- *               <li>{@code Incoming}
+ *               <li><code>Incoming</code>
  *                   <ul>
- *                     <li>{@code 23_manifest.xml}
- *                     <li>{@code beneficiaries_42.rif}
- *                     <li>{@code bcarrier_58.rif}
- *                     <li>{@code pde_93.rif}
+ *                     <li><code>23_manifest.xml</code>
+ *                     <li><code>beneficiaries_42.rif</code>
+ *                     <li><code>bcarrier_58.rif</code>
+ *                     <li><code>pde_93.rif</code>
  *                   </ul>
- *               <li>{@code Done}
+ *               <li><code>Done</code>
  *                   <ul>
- *                     <li>{@code 64_manifest.xml}
- *                     <li>{@code beneficiaries_45.rif}
+ *                     <li><code>64_manifest.xml</code>
+ *                     <li><code>beneficiaries_45.rif</code>
  *                   </ul>
  *             </ul>
  *       </ul>
@@ -384,7 +384,7 @@ public final class CcwRifLoadJob implements PipelineJob {
    * Determines if all the objects listed in the specified manifest can be found in S3.
    *
    * @param manifest the {@link DataSetManifest} that lists the objects to verify the presence of
-   * @return {@code true} if all the objects listed can be found in S3
+   * @return <code>true</code> if all the objects listed can be found in S3
    */
   private boolean dataSetIsAvailable(DataSetManifest manifest) {
     statusReporter.reportAwaitingManifestData(manifest.getIncomingS3Key());
@@ -436,8 +436,8 @@ public final class CcwRifLoadJob implements PipelineJob {
    * {@link DataSetManifest} have content that can be used for pre-validation.
    *
    * @param manifest the {@link DataSetManifest} that lists pre-validation properties to verify
-   * @return {@code true} if all of the pre-validation parameters listed in the manifest do not
-   *     introduce potential data loading issues, {@code false} if not
+   * @return <code>true</code> if all of the pre-validation parameters listed in the manifest do not
+   *     introduce potential data loading issues, <code>false</code> if not
    */
   private boolean checkPreValidationProperties(DataSetManifest manifest) throws Exception {
     LOGGER.info(

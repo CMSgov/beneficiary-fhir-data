@@ -15,8 +15,6 @@ import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariProxyConnection;
-import gov.cms.bfd.events.DoNothingEventPublisher;
-import gov.cms.bfd.events.EventPublisher;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
@@ -36,6 +34,8 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
+import gov.cms.bfd.sharedutils.events.DoNothingEventPublisher;
+import gov.cms.bfd.sharedutils.events.EventPublisher;
 import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
 import gov.cms.bfd.sharedutils.sqs.SqsDao;
 import gov.cms.bfd.sharedutils.sqs.SqsEventPublisher;
@@ -457,7 +457,7 @@ public final class PipelineApplication {
               clock);
 
       final var loadOptions = appConfig.getCcwRifLoadOptions().get();
-      AwsClientConfig awsClientConfig = appConfig.getAwsClientConfig();
+      final var awsClientConfig = appConfig.getAwsClientConfig();
       final var job = createCcwRifLoadJob(loadOptions, appState, awsClientConfig, clock);
       jobs.add(job);
       LOGGER.info("Registered CcwRifLoadJob.");
@@ -557,7 +557,7 @@ public final class PipelineApplication {
   private CcwRifLoadJobStatusReporter createCcwRifLoadJobStatusReporter(
       CcwRifLoadOptions loadOptions, AwsClientConfig awsClientConfig, Clock clock) {
     EventPublisher eventPublisher;
-    final var sqsQueueUrl = loadOptions.getSqsQueueName().orElse(null);
+    final var sqsQueueUrl = loadOptions.getSqsQueueUrl().orElse(null);
     if (sqsQueueUrl == null) {
       eventPublisher = new DoNothingEventPublisher();
       LOGGER.info("CCW SQS progress reporting is disabled");

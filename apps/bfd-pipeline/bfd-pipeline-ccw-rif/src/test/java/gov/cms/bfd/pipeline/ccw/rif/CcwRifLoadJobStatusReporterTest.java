@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
-import gov.cms.bfd.json.JsonConverter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent.JobStage;
+import gov.cms.bfd.sharedutils.json.JsonConverter;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -135,8 +135,6 @@ public class CcwRifLoadJobStatusReporterTest {
     reporter.reportNothingToDo();
     checkLatestEvent(JobStage.NothingToDo, null);
     checkLatestEventInvariants();
-
-    printEvents();
   }
 
   /** During development this can be used to print all events to verify the JSON looks correct. */

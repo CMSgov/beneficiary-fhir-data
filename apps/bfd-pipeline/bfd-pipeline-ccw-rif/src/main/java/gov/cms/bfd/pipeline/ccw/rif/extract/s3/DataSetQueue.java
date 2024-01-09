@@ -271,7 +271,19 @@ public final class DataSetQueue {
 
       return manifest;
 
-    } catch (SdkServiceException | SdkClientException | IOException e) {
+    } catch (SdkServiceException e) {
+      /*
+       * This could likely be retried, but we don't currently support
+       * that. For now, just go boom.
+       */
+      throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
+    } catch (SdkClientException e) {
+      /*
+       * This could likely be retried, but we don't currently support
+       * that. For now, just go boom.
+       */
+      throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
+    } catch (IOException e) {
       /*
        * This could likely be retried, but we don't currently support
        * that. For now, just go boom.

@@ -1,4 +1,4 @@
-package gov.cms.bfd.json;
+package gov.cms.bfd.sharedutils.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MapperFeature;
