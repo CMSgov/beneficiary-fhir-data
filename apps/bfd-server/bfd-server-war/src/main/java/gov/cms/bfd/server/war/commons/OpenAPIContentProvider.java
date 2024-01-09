@@ -310,4 +310,18 @@ public final class OpenAPIContentProvider {
        - `service-date=gt2023-01-02&service-date=lt2023-05-01`
        - `service-date=gt2023-01-02`
        - `service-date=lt2023-05-01`""";
+
+  /** Open API short description for /ExplanationOfBenefit's _elements parameter. */
+  public static final String EOB_CLIENT_ELEMENTS_SHORT =
+      "A comma-separated list of strings with which to filter the FHIR response by element/path.";
+
+  /** Open API content value for /ExplanationOfBenefit's _elements parameter. */
+  public static final String EOB_CLIENT_ELEMENTS_VALUE =
+      """
+          The _elements parameter consists of a comma-separated list of base element names. Only elements that are listed are to be returned.
+           Clients SHOULD list desired elements in a resource as part of
+          the list of elements. The list of elements does not apply to included resources.
+           Servers are not obliged to return just the requested elements; mandatory elements are returned whether
+           they are requested or not. Each value of the list may also be a period-separated path to a specified element.
+           """;
 }

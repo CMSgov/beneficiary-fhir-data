@@ -440,7 +440,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
         NumberFormatException.class,
         () ->
             eobProvider.findByPatient(
-                patientParam, null, null, null, null, null, null, requestDetails));
+                patientParam, null, null, null, null, null, null, null, requestDetails));
   }
 
   /**
@@ -452,7 +452,8 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(mockQuery.getResultList()).thenReturn(List.of(0));
 
     Bundle response =
-        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(
+            patientParam, null, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertNull(response.getLink(Constants.LINK_NEXT));
@@ -477,7 +478,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
         InvalidRequestException.class,
         () ->
             eobProvider.findByPatient(
-                patientParam, null, null, null, null, null, null, requestDetails));
+                patientParam, null, null, null, null, null, null, null, requestDetails));
   }
 
   /**
@@ -491,7 +492,8 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(mockQuery.getResultList()).thenReturn(List.of(0));
 
     Bundle response =
-        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(
+            patientParam, null, null, null, null, null, null, null, requestDetails);
 
     assertEquals(0, response.getTotal());
   }
@@ -507,7 +509,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
     Bundle response =
         eobProvider.findByPatient(
-            patientParam, listParam, null, null, null, null, null, requestDetails);
+            patientParam, listParam, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertEquals(0, response.getTotal());
@@ -520,7 +522,8 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   @Test
   void testFindByPatientSupportsNullClaimTypeV2() {
     Bundle response =
-        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(
+            patientParam, null, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertEquals(0, response.getTotal());
