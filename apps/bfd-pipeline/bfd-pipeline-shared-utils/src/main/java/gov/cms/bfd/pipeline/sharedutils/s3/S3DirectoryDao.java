@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.server;
+package gov.cms.bfd.pipeline.sharedutils.s3;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -8,8 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
+import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary;
 import java.io.FileNotFoundException;

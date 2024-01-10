@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.server;
+package gov.cms.bfd.pipeline.sharedutils.s3;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
-import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
+import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary;
 import java.io.FileNotFoundException;
@@ -17,10 +17,36 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.regions.Region;
 
 /** Integration test for {@link S3DirectoryDao}. */
-class S3DirectoryDaoIT extends AbstractLocalStackS3Test {
+class S3DirectoryDaoIT extends AbstractLocalStackTest {
+  /** Provides S3 access during testing. */
+  private S3Dao s3Dao;
+
+  /** Creates the {@link S3Dao} and a bucket for use in tests. */
+  @BeforeEach
+  void createDao() {
+    s3Dao =
+        new AwsS3ClientFactory(
+                S3ClientConfig.s3Builder()
+                    .region(Region.of(localstack.getRegion()))
+                    .endpointOverride(localstack.getEndpoint())
+                    .accessKey(localstack.getAccessKey())
+                    .secretKey(localstack.getSecretKey())
+                    .build())
+            .createS3Dao();
+  }
+
+  /** Deletes bucket and closes the {@link S3Dao} after each test. */
+  @AfterEach
+  void closeDao() {
+    s3Dao.close();
+  }
+
   /**
    * Tests all basic operations of the {@link S3DirectoryDao}. Uploads and accesses data to a bucket
    * and verifies that cached files are managed as expected.
