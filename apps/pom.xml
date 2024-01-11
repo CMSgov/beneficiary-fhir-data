@@ -65,7 +65,7 @@
         <!-- The version of Java that we'll use for everything. -->
         <javaSourceVersion>21</javaSourceVersion>
 
-        <project.build.outputTimestamp>2024-01-03T21:29:01Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2024-01-10T17:15:29Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
