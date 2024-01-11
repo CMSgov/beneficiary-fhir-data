@@ -12,12 +12,17 @@ import org.flywaydb.core.api.MigrationState;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.flywaydb.core.internal.sqlscript.FlywaySqlScriptException;
 import org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A copy of DatabaseSchemaManager for testing purposes, to eliminate dependencies between util
  * packages.
  */
 public class DatabaseTestSchemaManager {
+
+  /** Logger for writing information out. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseTestSchemaManager.class);
 
   /**
    * Creates or updates, as appropriate, the backend database schema for the specified database.
@@ -42,16 +47,16 @@ public class DatabaseTestSchemaManager {
    */
   public static boolean createOrUpdateSchema(
       DataSource dataSource, String flywayScriptLocationOverride) {
-    Flyway flyway;
+    Flyway flyway = null;
     try {
       flyway = createFlyway(dataSource, flywayScriptLocationOverride);
       flyway.migrate();
     } catch (FlywaySqlScriptException sqlException) {
-      throw new RuntimeException("SQL Exception when running migration: ", sqlException);
+      handleException("SQL Exception when running migration: ", sqlException);
     } catch (FlywayException flywayException) {
-      throw new RuntimeException("Flyway Exception when running migration: ", flywayException);
+      handleException("Flyway Exception when running migration: ", flywayException);
     } catch (Exception ex) {
-      throw new RuntimeException("Unexpected Exception when running migration: ", ex);
+      handleException("Unexpected Exception when running migration: ", ex);
     }
 
     // Ensure the final migration was a success to return true
@@ -59,6 +64,17 @@ public class DatabaseTestSchemaManager {
     return flywayInfo != null
         && flywayInfo.current() != null
         && flywayInfo.current().getState() == MigrationState.SUCCESS;
+  }
+
+  /**
+   * Private method to handle Exceptions that are thrown.
+   *
+   * @param message Error message for exception.
+   * @param exception Exception that is being logged.
+   */
+  private static void handleException(String message, Exception exception) {
+    LOGGER.error(message, exception);
+    exception.printStackTrace();
   }
 
   /**
