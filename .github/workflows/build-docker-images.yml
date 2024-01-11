@@ -1,0 +1,124 @@
+---
+name: "Build Docker Images"
+on:
+  # GHA does not support "shared_inputs" or some other form of workflow_call and workflow_dispatch
+  # input consolidation; instead, we must duplicate the input definitions for each event
+  # FUTURE: Consolidate the input definitions whenever possible
+  workflow_call:
+    inputs:
+      branch:
+        description: "The branch from which images will be built from"
+        type: string
+        required: false
+        default: master
+      versionTag:
+        description: "Version to be used as tag for built images"
+        type: string
+        required: true
+        default: X.Y.Z
+      awsRegion:
+        description: "AWS Region to push images to"
+        type: string
+        required: true
+        default: us-east-1
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "The branch from which images will be built from"
+        required: false
+        default: master
+      versionTag:
+        description: "Version to be used as tag for built images"
+        required: true
+        default: X.Y.Z
+      awsRegion:
+        description: "AWS Region to push images to"
+        required: true
+        default: us-east-1
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: read # This is required for actions/checkout
+
+env:
+  AWS_REGION: ${{ inputs.awsRegion }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-images:
+    strategy:
+      matrix:
+        image:
+          [
+            {
+              name: "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
+              dockerfile: "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
+              contextDir: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
+            },
+          ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Inputs
+        run: |
+          echo "Validating inputs to ensure they conform to expected formats..."
+          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.branch }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: build-images
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Get ECR Registry Namespace
+        run: |
+          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
+          echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
+          echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Setup tags
+        id: setup_tags
+        run: |
+          # Naively, if version tag does not contain a "-" we assume the version is not a release
+          # and the "latest" tag should not be pushed.
+          image_tags=""
+          if [[ "${{ inputs.versionTag }}" == *"-"* ]]; then
+            image_tags="$IMAGE_VERSIONED_TAG"
+          else
+            image_tags="$IMAGE_VERSIONED_TAG,$IMAGE_LATEST_TAG"
+          fi
+          echo image_tags=$image_tags >> $GITHUB_OUTPUT
+        env:
+          IMAGE_VERSIONED_TAG: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
+          IMAGE_LATEST_TAG: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:latest
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          file: ${{ matrix.image.dockerfile }}
+          context: ${{ matrix.image.contextDir }}
+          push: true
+          tags: ${{ steps.setup_tags.outputs.image_tags }}
+        env:
+          DOCKER_BUILDKIT: 1
