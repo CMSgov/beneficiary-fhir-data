@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
@@ -70,23 +69,17 @@ public class CommonQueries {
    * (beneficiaries) and historical (beneficiaries_history) data for a match.
    *
    * @param entityManager {@link EntityManager} used to query database.
-   * @param metricRegistry {@link MetricRegistry} used to capture performance metrics.
+   * @param timerContext {@link Timer.Context} used to capture performance metrics.
    * @param searchType used to denote what the searchValue represents; values are: mbi, mbi-hash,
    *     hich-hash.
    * @param searchValue identifier value used to search for a ENE_ID.
-   * @param queryIdentifierName {@link String} MDC query identifier.
    * @return long BENE_ID for a beneficiary or zero if not found.
    */
   public static long findBeneficiaryIdentifier(
       EntityManager entityManager,
-      MetricRegistry metricRegistry,
+      Timer.Context timerContext,
       String searchType,
-      String searchValue,
-      String queryIdentifierName) {
-
-    Timer.Context timerBeneQuery =
-        CommonTransformerUtils.createMetricsTimer(
-            metricRegistry, "CommonQueries", "query", "find_beneficiary_identifier");
+      String searchValue) {
 
     /*
      * the function returns a String with comma-delimited values; done this way to avoid having
@@ -101,6 +94,14 @@ public class CommonQueries {
               .setParameter("searchIdValue", searchValue)
               .getResultList();
 
+      // the db function returns a string that ostensibly could contain
+      // comma-seperated BENE_ID values due to the possibility of 'hash
+      // collisions' for either MBI or HICN. This anomaly will eventually
+      // go away and the function will simply return a long (bigint) when
+      // support for hashed MBI and hashed HICN lookups are retired. At that
+      // point only actual MBI value lookups will be supported and if we have
+      // more than one BENE_ID per MBI_NUM then Medicare has a BIG problem!
+
       if (rawValues != null && rawValues.get(0) != null) {
         String arrayVals = (String) rawValues.get(0);
         values =
@@ -110,11 +111,9 @@ public class CommonQueries {
                 .collect(Collectors.toList());
       }
     } finally {
-      long queryNanoSeconds = timerBeneQuery.stop();
+      long queryNanoSeconds = timerContext.stop();
       CommonTransformerUtils.recordQueryInMdc(
-          String.format(
-              "bene_by_%s_bene_by_%s_or_id_include_%s",
-              searchType, searchType, queryIdentifierName),
+          "bene_by_" + searchType + "_" + searchType + "s_from_beneficiarieshistory",
           queryNanoSeconds,
           values != null ? values.size() : 0);
     }
@@ -137,24 +136,23 @@ public class CommonQueries {
    * fetch a Beneficiary model object from the database for a BENE_ID (primary key).
    *
    * @param entityManager {@link EntityManager} used to query database.
-   * @param metricRegistry {@link MetricRegistry} used to capture performance metrics.
+   * @param timerContext {@link Timer.Context} used to capture performance metrics.
    * @param beneId primary key identifier.
    * @param includeIdentifiers boolean denoting whether to include historical identifiers
-   * @param callerClassName {@link String} calling classname identifier.
-   * @param queryIdentifierName {@link String} MDC query identifier. BeneficiaryHistory objects.
+   * @param queryIdentifier {@link String} MDC query identifier.
    * @return {@link Beneficiary}.
    * @throws ResourceNotFoundException if record not found.
    */
   public static Beneficiary findBeneficiary(
       EntityManager entityManager,
-      MetricRegistry metricRegistry,
+      Timer.Context timerContext,
       long beneId,
       boolean includeIdentifiers,
-      String callerClassName,
-      String queryIdentifierName) {
+      String queryIdentifier) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
-    Root<Beneficiary> root = criteria.from(Beneficiary.class);
+    CriteriaQuery<Beneficiary> criteriaQuery = builder.createQuery(Beneficiary.class);
+    Root<Beneficiary> root = criteriaQuery.from(Beneficiary.class);
+
     if (includeIdentifiers) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     }
@@ -162,15 +160,12 @@ public class CommonQueries {
     // cleanup
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
-    criteria.select(root);
-    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
-    Beneficiary beneficiary = null;
-    Timer.Context timerBeneQuery =
-        CommonTransformerUtils.createMetricsTimer(
-            metricRegistry, callerClassName, "query", "bene_by_id");
+    criteriaQuery.select(root);
+    criteriaQuery.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
 
+    Beneficiary beneficiary = null;
     try {
-      beneficiary = entityManager.createQuery(criteria).getSingleResult();
+      beneficiary = entityManager.createQuery(criteriaQuery).getSingleResult();
       // Add bene_id to MDC logs
       LoggingUtils.logBeneIdToMdc(beneId);
       // Add number of resources to MDC logs
@@ -180,10 +175,10 @@ public class CommonQueries {
       LoggingUtils.logResourceCountToMdc(0);
       throw new ResourceNotFoundException("Unknown beneficiaryId: " + beneId);
     } finally {
-      long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+      long queryNanoSeconds = timerContext.stop();
 
       CommonTransformerUtils.recordQueryInMdc(
-          queryIdentifierName, beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
+          queryIdentifier, queryNanoSeconds, beneficiary == null ? 0 : 1);
     }
     return beneficiary;
   }
