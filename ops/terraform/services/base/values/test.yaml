@@ -368,7 +368,15 @@ dpc:
         # each filename pattern in this list, and if any match, will be sent via CMS EFT SWEEPS SFTP
         # 2.0 to the corresponding, specified destination folder. If there are no matches, the file
         # will be moved to the "failed_dir", and corresponding S3 Event Notifications will be
-        # generated
+        # generated. 
+        # A recognized file object takes the following form, in JSON:
+        # {
+        #   "filename_pattern": "<regex string matching filename pattern>",
+        #   "destination_folder": "<path to place file on destination SFTP server>"
+        # }
+        # Note that backslashes ("\") must be escaped _twice_, such that a single "\" becomes
+        # "\\\\". This is because jq interprets this file, and unescapes the all escape characters,
+        # and then Python unescapes it again when reading this array
         recognized_files_json: >-
           <<CIPHER>>AgV4hsrM9LplJjXDSNo3ctbtHkQdpiUWzCX3CN3-DV0GVHMAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEyNnJoWU9VMGlnNGZsSnp1UDNDcmszZHBiM2p6N0g2elJDeVNqTUhCRUxvYkV5RmdqdzViekk2SUJsR2RzMURjZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEJakG_bsoNvN1j2fyKz1NRAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMtCHBDMQaJaYIuKHzAgEQgDuK7uhNTBIwb2PkLS6iBvWOX2NNGXvlZuvin0Iz5wZyzL4_0lr-TC6Xe0ZJyiKy9tD_Bc23p_AQoNzW8wIAABAAtjzZMaD-v_gNvdEfJ5lA9jFAtj__uzu2g-HNEiuth_qHA1cLR81d23KS3QfUuBkp_____wAAAAEAAAAAAAAAAAAAAAEAAAANJLSmxPlDV7LFN4e27V9hgEld4oYfwV4tCmH-SL0AZzBlAjEA8xJor7jIfOSGh_bK0SSh-LUvj3vY87poCqwfs370ImNXXxWG_t_EAeHUHpWG5ma4AjAG1PgJsJMpsIxLJlkbGZz69jCXhDG-2dd1MXorat1vOovuZaUOkJrHJPYxsJWkTLE=<</CIPHER>>
         s3_notifications:
@@ -425,7 +433,15 @@ bcda:
         # each filename pattern in this list, and if any match, will be sent via CMS EFT SWEEPS SFTP
         # 2.0 to the corresponding, specified destination folder. If there are no matches, the file
         # will be moved to the "failed_dir", and corresponding S3 Event Notifications will be
-        # generated
+        # generated. 
+        # A recognized file object takes the following form, in JSON:
+        # {
+        #   "filename_pattern": "<regex string matching filename pattern>",
+        #   "destination_folder": "<path to place file on destination SFTP server>"
+        # }
+        # Note that backslashes ("\") must be escaped _twice_, such that a single "\" becomes
+        # "\\\\". This is because jq interprets this file, and unescapes the all escape characters,
+        # and then Python unescapes it again when reading this array
         recognized_files_json: >-
           <<CIPHER>>AgV4hsrM9LplJjXDSNo3ctbtHkQdpiUWzCX3CN3-DV0GVHMAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEyNnJoWU9VMGlnNGZsSnp1UDNDcmszZHBiM2p6N0g2elJDeVNqTUhCRUxvYkV5RmdqdzViekk2SUJsR2RzMURjZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEJakG_bsoNvN1j2fyKz1NRAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMtCHBDMQaJaYIuKHzAgEQgDuK7uhNTBIwb2PkLS6iBvWOX2NNGXvlZuvin0Iz5wZyzL4_0lr-TC6Xe0ZJyiKy9tD_Bc23p_AQoNzW8wIAABAAtjzZMaD-v_gNvdEfJ5lA9jFAtj__uzu2g-HNEiuth_qHA1cLR81d23KS3QfUuBkp_____wAAAAEAAAAAAAAAAAAAAAEAAAANJLSmxPlDV7LFN4e27V9hgEld4oYfwV4tCmH-SL0AZzBlAjEA8xJor7jIfOSGh_bK0SSh-LUvj3vY87poCqwfs370ImNXXxWG_t_EAeHUHpWG5ma4AjAG1PgJsJMpsIxLJlkbGZz69jCXhDG-2dd1MXorat1vOovuZaUOkJrHJPYxsJWkTLE=<</CIPHER>>
         s3_notifications:
@@ -489,7 +505,15 @@ ab2d:
         # each filename pattern in this list, and if any match, will be sent via CMS EFT SWEEPS SFTP
         # 2.0 to the corresponding, specified destination folder. If there are no matches, the file
         # will be moved to the "failed_dir", and corresponding S3 Event Notifications will be
-        # generated.
+        # generated. 
+        # A recognized file object takes the following form, in JSON:
+        # {
+        #   "filename_pattern": "<regex string matching filename pattern>",
+        #   "destination_folder": "<path to place file on destination SFTP server>"
+        # }
+        # Note that backslashes ("\") must be escaped _twice_, such that a single "\" becomes
+        # "\\\\". This is because jq interprets this file, and unescapes the all escape characters,
+        # and then Python unescapes it again when reading this array
         recognized_files_json: >-
           <<CIPHER>>AgV4hsrM9LplJjXDSNo3ctbtHkQdpiUWzCX3CN3-DV0GVHMAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEyNnJoWU9VMGlnNGZsSnp1UDNDcmszZHBiM2p6N0g2elJDeVNqTUhCRUxvYkV5RmdqdzViekk2SUJsR2RzMURjZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEJakG_bsoNvN1j2fyKz1NRAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMtCHBDMQaJaYIuKHzAgEQgDuK7uhNTBIwb2PkLS6iBvWOX2NNGXvlZuvin0Iz5wZyzL4_0lr-TC6Xe0ZJyiKy9tD_Bc23p_AQoNzW8wIAABAAtjzZMaD-v_gNvdEfJ5lA9jFAtj__uzu2g-HNEiuth_qHA1cLR81d23KS3QfUuBkp_____wAAAAEAAAAAAAAAAAAAAAEAAAANJLSmxPlDV7LFN4e27V9hgEld4oYfwV4tCmH-SL0AZzBlAjEA8xJor7jIfOSGh_bK0SSh-LUvj3vY87poCqwfs370ImNXXxWG_t_EAeHUHpWG5ma4AjAG1PgJsJMpsIxLJlkbGZz69jCXhDG-2dd1MXorat1vOovuZaUOkJrHJPYxsJWkTLE=<</CIPHER>>
         s3_notifications:
