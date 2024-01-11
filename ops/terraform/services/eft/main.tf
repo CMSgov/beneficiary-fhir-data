@@ -614,7 +614,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
     filter {}
 
     expiration {
-      days = 3 # This bucket has no versioning and so objects will be permanently deleted on expiry
+      days = 7 # This bucket has no versioning and so objects will be permanently deleted on expiry
     }
 
     status = "Enabled"
