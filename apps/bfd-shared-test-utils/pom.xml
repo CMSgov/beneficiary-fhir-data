@@ -65,6 +65,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <!-- Used to interact with AWS' SSM service -->
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
             <version>${testcontainers.version}</version>
