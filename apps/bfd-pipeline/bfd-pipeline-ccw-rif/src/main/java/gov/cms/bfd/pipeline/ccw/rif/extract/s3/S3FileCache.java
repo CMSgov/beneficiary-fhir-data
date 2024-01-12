@@ -15,7 +15,9 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -33,6 +35,32 @@ public class S3FileCache {
     this.s3Dao = s3Dao;
     this.s3Bucket = s3Bucket;
     s3KeyToLocalFile = new HashMap<>();
+  }
+
+  public static String extractPrefixFromS3Key(String s3Key) {
+    int lastSlashOffset = s3Key.lastIndexOf('/');
+    if (lastSlashOffset < 0) {
+      return "/";
+    } else {
+      return s3Key.substring(0, lastSlashOffset + 1);
+    }
+  }
+
+  public static String extractNameFromS3Key(String s3Key) {
+    int lastSlashOffset = s3Key.lastIndexOf('/');
+    if (lastSlashOffset < 0) {
+      return s3Key;
+    } else {
+      return s3Key.substring(lastSlashOffset + 1);
+    }
+  }
+
+  public Set<String> fetchFileNamesWithPrefix(String s3Prefix) {
+    return s3Dao
+        .listObjects(s3Bucket, s3Prefix)
+        .map(S3Dao.S3ObjectSummary::getKey)
+        .map(S3FileCache::extractNameFromS3Key)
+        .collect(Collectors.toUnmodifiableSet());
   }
 
   public DownloadedFile downloadFile(String s3Key) throws IOException {

@@ -50,7 +50,7 @@ public class S3FilesDao {
           final var records =
               entityManager
                   .createQuery(
-                      "select m.s3Path from S3ManifestFile m where (m.discoveryTimestamp >= :minTimestamp) and (m.status not in :okStatus)",
+                      "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >= :minTimestamp) and (m.status not in :okStatus)",
                       String.class)
                   .setParameter("minTimestamp", minTimestamp)
                   .setParameter(
@@ -63,23 +63,13 @@ public class S3FilesDao {
         });
   }
 
-  private static String extractPrefixFromS3Key(String s3Key) {
-    int lastSlashOffset = s3Key.lastIndexOf('/');
-    if (lastSlashOffset < 0) {
-      return "/";
-    } else {
-      return s3Key.substring(0, lastSlashOffset + 1);
-    }
-  }
-
   @Nullable
   private S3ManifestFile readS3ManifestAndDataFilesImpl(
       String manifestS3Key, EntityManager entityManager) {
     final var records =
         entityManager
-            .createQuery(
-                "select m from S3ManifestFile m where s3Path=:s3Path", S3ManifestFile.class)
-            .setParameter("s3Path", manifestS3Key)
+            .createQuery("select m from S3ManifestFile m where s3Key=:s3Key", S3ManifestFile.class)
+            .setParameter("s3Key", manifestS3Key)
             .getResultList();
     if (records.isEmpty()) {
       return null;
@@ -91,17 +81,17 @@ public class S3FilesDao {
   private S3ManifestFile createNewManifestAndFiles(
       String manifestS3Key, DataSetManifest manifestFileData, Instant now) {
     var manifest = new S3ManifestFile();
-    manifest.setS3Path(manifestS3Key);
+    manifest.setS3Key(manifestS3Key);
     manifest.setStatus(S3ManifestFile.ManifestStatus.DISCOVERED);
     manifest.setDiscoveryTimestamp(now);
     List<S3DataFile> dataFiles = manifest.getDataFiles();
-    final String dataFileS3KeyPrefix = extractPrefixFromS3Key(manifestS3Key);
+    final String dataFileS3KeyPrefix = S3FileCache.extractPrefixFromS3Key(manifestS3Key);
     short index = 0;
     for (var entry : manifestFileData.getEntries()) {
       var dataFile = new S3DataFile();
       dataFile.setParentManifest(manifest);
       dataFile.setIndex(index);
-      dataFile.setS3Path(dataFileS3KeyPrefix + entry.getName());
+      dataFile.setS3Key(dataFileS3KeyPrefix + entry.getName());
       dataFile.setFileName(entry.getName());
       dataFile.setFileType(entry.getType().toString());
       dataFile.setStatus(S3DataFile.FileStatus.DISCOVERED);

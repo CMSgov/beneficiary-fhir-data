@@ -4,6 +4,7 @@ import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetMan
 import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache.MD5Result.MISMATCH;
 
 import com.google.common.io.ByteSource;
+import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
@@ -29,17 +30,17 @@ public class NewDataSetQueue {
   private final S3FilesDao s3Records;
   private final S3FileCache s3Files;
 
-  public List<EligibleManifest> readEligibleManifests(
+  public List<Manifest> readEligibleManifests(
       Instant currentTime,
       Instant minTime,
       Instant maxTime,
-      ThrowingFunction<Boolean, EligibleManifest, IOException> acceptanceCriteria,
+      ThrowingFunction<Boolean, Manifest, IOException> acceptanceCriteria,
       int maxToRead)
       throws IOException {
     final List<ParsedManifestId> possiblyEligibleManifestIds = scanS3ForManifests(minTime, maxTime);
-    final List<EligibleManifest> eligibleManifests = new ArrayList<>();
+    final List<Manifest> manifests = new ArrayList<>();
     for (ParsedManifestId manifestId : possiblyEligibleManifestIds) {
-      if (eligibleManifests.size() >= maxToRead) {
+      if (manifests.size() >= maxToRead) {
         break;
       }
       final var s3Key = manifestId.getS3Key();
@@ -48,13 +49,27 @@ public class NewDataSetQueue {
       final var manifestRecord =
           s3Records.insertOrReadManifestAndDataFiles(s3Key, dataSetManifest, currentTime);
       final var manifest =
-          new EligibleManifest(
-              s3Key, manifestId.getManifestId(), manifestFile, dataSetManifest, manifestRecord);
+          new Manifest(manifestId.getManifestId(), manifestFile, dataSetManifest, manifestRecord);
       if (acceptanceCriteria.apply(manifest)) {
-        eligibleManifests.add(manifest);
+        manifests.add(manifest);
       }
     }
-    return eligibleManifests;
+    return manifests;
+  }
+
+  public ManifestEntry downloadManifestEntry(S3DataFile record) throws IOException {
+    final var s3Key = record.getS3Key();
+    final var downloadedFile = downloadAndCheckMD5(s3Key);
+    return new ManifestEntry(record, downloadedFile);
+  }
+
+  public boolean allEntriesExistInS3(S3ManifestFile record) {
+    final var manifestS3Prefix = S3FileCache.extractPrefixFromS3Key(record.getS3Key());
+    final var namesAtPrefix = s3Files.fetchFileNamesWithPrefix(manifestS3Prefix);
+    return record.getDataFiles().stream()
+        .map(S3DataFile::getS3Key)
+        .map(S3FileCache::extractNameFromS3Key)
+        .allMatch(namesAtPrefix::contains);
   }
 
   private S3FileCache.DownloadedFile downloadAndCheckMD5(String s3Key) throws IOException {
@@ -124,11 +139,16 @@ public class NewDataSetQueue {
   }
 
   @Data
-  public static class EligibleManifest {
-    private final String s3Key;
+  public static class Manifest {
     private final DataSetManifest.DataSetManifestId manifestId;
-    private final S3FileCache.DownloadedFile manifestFile;
+    private final S3FileCache.DownloadedFile fileData;
     private final DataSetManifest manifest;
     private final S3ManifestFile record;
+  }
+
+  @Data
+  public static class ManifestEntry {
+    private final S3DataFile record;
+    private final S3FileCache.DownloadedFile fileData;
   }
 }
