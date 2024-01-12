@@ -198,7 +198,8 @@ locals {
       local.outbound_sftp_host_key,
       local.outbound_sftp_username,
       local.outbound_sftp_user_priv_key
-    ] : trimspace(coalesce(x, "INVALID")) != "INVALID"]) ? [
+    ] : trimspace(coalesce(x, "INVALID")) != "INVALID"]
+    ) ? [
     for partner, _ in local.eft_partners_config :
     partner
     if contains(local.outbound_eft_partners, partner) && length(
@@ -259,12 +260,12 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_s3_bucket_notification" "bucket_notifications" {
-  count = length(concat([
+  count = length(concat(
     local.eft_partners_with_inbound_received_notifs,
     local.eft_partners_with_outbound_enabled,
     local.eft_partners_with_outbound_sent_notifs,
     local.eft_partners_with_outbound_failed_notifs
-  ])) > 0 ? 1 : 0
+  )) > 0 ? 1 : 0
 
   bucket = aws_s3_bucket.this.id
 
@@ -614,7 +615,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
     filter {}
 
     expiration {
-      days = 3 # This bucket has no versioning and so objects will be permanently deleted on expiry
+      days = 7 # This bucket has no versioning and so objects will be permanently deleted on expiry
     }
 
     status = "Enabled"
