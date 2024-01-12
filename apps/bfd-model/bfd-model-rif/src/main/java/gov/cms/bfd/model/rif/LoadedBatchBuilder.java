@@ -3,6 +3,7 @@ package gov.cms.bfd.model.rif;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 
 /** Class to build a LoadedBatch. Thread safe. */
 public class LoadedBatchBuilder {
@@ -12,8 +13,8 @@ public class LoadedBatchBuilder {
   /** The loaded file's identifier. */
   private final long loadedFileId;
 
-  /** The batch creation timestamp. */
-  private final Instant timestamp;
+  /** The batch creation timestamp. -- GETTER -- Gets the timestamp of the batch */
+  @Getter private final Instant timestamp;
 
   /**
    * Create a builder from a particular file event.
@@ -50,14 +51,5 @@ public class LoadedBatchBuilder {
     loadedBatch.setBeneficiaries(beneficiaries);
     loadedBatch.setCreated(timestamp);
     return loadedBatch;
-  }
-
-  /**
-   * Gets the {@link #timestamp}.
-   *
-   * @return the timestamp of the batch
-   */
-  public Instant getTimestamp() {
-    return timestamp;
   }
 }
