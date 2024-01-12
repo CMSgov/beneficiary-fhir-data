@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +69,11 @@ import org.slf4j.LoggerFactory;
 public final class CcwRifLoadJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
 
-  /** Shortcut for calculating GIGA (filesize). */
-  private static final int GIGA = 1000 * 1000 * 1000;
+  /**
+   * Minimum amount of free disk space (in bytes) to allow pre-fetch of second data set while
+   * current one is being processed.
+   */
+  public static final long MIN_BYTES_FOR_SECOND_DATA_SET_DOWNLOAD = 50 * FileUtils.ONE_GB;
 
   /** The directory name that pending/incoming RIF data sets will be pulled from in S3. */
   public static final String S3_PREFIX_PENDING_DATA_SETS = "Incoming";
@@ -90,8 +95,8 @@ public final class CcwRifLoadJob implements PipelineJob {
   public static final String S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS = "Synthetic/Done";
 
   /**
-   * The directory name that failed RIF data sets are moved to {@link
-   * #S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS} will be moved to in S3.
+   * The directory name that failed RIF data sets loaded from {@link
+   * #S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS} will be moved to in S3.
    */
   public static final String S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS = "Synthetic/Failed";
 
@@ -158,12 +163,15 @@ public final class CcwRifLoadJob implements PipelineJob {
   /** Time between runs of the {@link CcwRifLoadJob}. Empty means to run exactly once. */
   private final Optional<Duration> runInterval;
 
+  /** Used to send status updates to external processes. */
+  private final CcwRifLoadJobStatusReporter statusReporter;
+
   /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
   /**
-   * Constructs a new {@link CcwRifLoadJob} instance. The {@link S3TaskManager} will be
-   * automatically shut down when this job's {@link #close} method is called.
+   * Constructs a new instance. The {@link S3TaskManager} will be automatically shut down when this
+   * job's {@link #close} method is called.
    *
    * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
@@ -171,6 +179,7 @@ public final class CcwRifLoadJob implements PipelineJob {
    * @param listener the {@link DataSetMonitorListener} to send events to
    * @param isIdempotentMode the {@link boolean} TRUE if running in idempotent mode
    * @param runInterval used to construct the job schedule
+   * @param statusReporter used to update external processes with our latest status
    */
   public CcwRifLoadJob(
       PipelineApplicationState appState,
@@ -178,7 +187,8 @@ public final class CcwRifLoadJob implements PipelineJob {
       S3TaskManager s3TaskManager,
       DataSetMonitorListener listener,
       boolean isIdempotentMode,
-      Optional<Duration> runInterval) {
+      Optional<Duration> runInterval,
+      CcwRifLoadJobStatusReporter statusReporter) {
     this.appState = appState;
     this.appMetrics = appState.getMetrics();
     this.options = options;
@@ -186,6 +196,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     this.listener = listener;
     this.isIdempotentMode = isIdempotentMode;
     this.runInterval = runInterval;
+    this.statusReporter = statusReporter;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
@@ -211,23 +222,27 @@ public final class CcwRifLoadJob implements PipelineJob {
     LOGGER.debug("Scanning for data sets to process...");
 
     // Update the queue from S3.
+    statusReporter.reportCheckingBucketForManifest();
     dataSetQueue.updatePendingDataSets();
 
+    // Grab the first manifest or null if we did not find one.
+    final DataSetManifest manifestToProcess = dataSetQueue.getNextDataSetToProcess().orElse(null);
+
     // If no manifest was found, we're done (until next time).
-    if (dataSetQueue.isEmpty()) {
+    if (manifestToProcess == null) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
       listener.noDataAvailable();
+      statusReporter.reportNothingToDo();
       return PipelineJobOutcome.NOTHING_TO_DO;
     }
 
     // We've found the oldest manifest.
-    DataSetManifest manifestToProcess = dataSetQueue.getNextDataSetToProcess().get();
     LOGGER.info(
         "Found data set to process: '{}'."
             + " There were '{}' total pending data sets and '{}' completed ones.",
-        manifestToProcess.toString(),
+        manifestToProcess,
         dataSetQueue.getPendingManifestsCount(),
-        dataSetQueue.getCompletedManifestsCount().get());
+        dataSetQueue.getCompletedManifestsCount().orElse(0));
 
     /*
      * We've got a data set to process. However, it might still be uploading
@@ -245,7 +260,7 @@ public final class CcwRifLoadJob implements PipelineJob {
         LOGGER.info("Data set not ready. Waiting for it to finish uploading...");
         alreadyLoggedWaitingEvent = true;
       }
-      Thread.sleep(1000 * 1);
+      Thread.sleep(TimeUnit.SECONDS.toMillis(1));
     }
 
     /*
@@ -254,9 +269,7 @@ public final class CcwRifLoadJob implements PipelineJob {
      * of asynchronously-downloading S3RifFiles.
      */
     LOGGER.info(LOG_MESSAGE_DATA_SET_READY);
-    LOGGER.info(
-        "Data set syntheticData indicator is: {}",
-        String.valueOf(manifestToProcess.isSyntheticData()));
+    LOGGER.info("Data set syntheticData indicator is: {}", manifestToProcess.isSyntheticData());
 
     /*
      * The {@link DataSetManifest} can have an optional element {@link
@@ -292,7 +305,7 @@ public final class CcwRifLoadJob implements PipelineJob {
                   manifestEntry ->
                       new S3RifFile(
                           appMetrics, manifestEntry, s3TaskManager.downloadAsync(manifestEntry)))
-              .collect(Collectors.toList());
+              .toList();
 
       RifFilesEvent rifFilesEvent =
           new RifFilesEvent(
@@ -316,9 +329,8 @@ public final class CcwRifLoadJob implements PipelineJob {
           throw new UncheckedIOException(e);
         }
 
-        if (usableFreeTempSpace >= (50 * GIGA)) {
-          secondManifestToProcess.get().getEntries().stream()
-              .forEach(manifestEntry -> s3TaskManager.downloadAsync(manifestEntry));
+        if (usableFreeTempSpace >= MIN_BYTES_FOR_SECOND_DATA_SET_DOWNLOAD) {
+          secondManifestToProcess.get().getEntries().forEach(s3TaskManager::downloadAsync);
         }
       }
 
@@ -329,7 +341,9 @@ public final class CcwRifLoadJob implements PipelineJob {
        * processing multiple data sets in parallel (which would lead to data
        * consistency problems).
        */
+      statusReporter.reportProcessingManifestData(manifestToProcess.getIncomingS3Key());
       listener.dataAvailable(rifFilesEvent);
+      statusReporter.reportCompletedManifest(manifestToProcess.getIncomingS3Key());
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
@@ -340,14 +354,12 @@ public final class CcwRifLoadJob implements PipelineJob {
        * deletes/moves are only *eventually* consistent, so #2 may not take
        * effect right away.)
        */
-      rifFiles.stream().forEach(f -> f.cleanupTempFile());
+      rifFiles.forEach(S3RifFile::cleanupTempFile);
     } else {
       /*
        * If here, Synthea pre-validation has failed; we want to move the S3 incoming
-       * files
-       * to a failed folder; so instead of moving files to a done folder we'll just
-       * replace
-       * the manifest's notion of its Done folder to a Failed folder.
+       * files to a failed folder; so instead of moving files to a done folder we'll just
+       * replace the manifest's notion of its Done folder to a Failed folder.
        */
       manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);
     }
@@ -375,6 +387,8 @@ public final class CcwRifLoadJob implements PipelineJob {
    * @return <code>true</code> if all the objects listed can be found in S3
    */
   private boolean dataSetIsAvailable(DataSetManifest manifest) {
+    statusReporter.reportAwaitingManifestData(manifest.getIncomingS3Key());
+
     /*
      * There are two ways to do this: 1) list all the objects in the data
      * set and verify the ones we're looking for are there after, or 2) try
