@@ -333,7 +333,7 @@ public class PatientResourceProviderTest {
         assertThrows(
             InvalidRequestException.class,
             () -> patientProvider.searchByIdentifier(identifier, null, null, requestDetails));
-    assertEquals("Hash value cannot be null/empty", exception.getLocalizedMessage());
+    assertEquals("lookup value cannot be null/empty", exception.getLocalizedMessage());
   }
 
   /**
