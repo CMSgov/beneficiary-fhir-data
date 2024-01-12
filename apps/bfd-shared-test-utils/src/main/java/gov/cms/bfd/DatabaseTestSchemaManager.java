@@ -47,16 +47,19 @@ public class DatabaseTestSchemaManager {
    */
   public static boolean createOrUpdateSchema(
       DataSource dataSource, String flywayScriptLocationOverride) {
-    Flyway flyway = null;
+    Flyway flyway;
     try {
       flyway = createFlyway(dataSource, flywayScriptLocationOverride);
       flyway.migrate();
     } catch (FlywaySqlScriptException sqlException) {
       handleException("SQL Exception when running migration: ", sqlException);
+      return false;
     } catch (FlywayException flywayException) {
       handleException("Flyway Exception when running migration: ", flywayException);
+      return false;
     } catch (Exception ex) {
       handleException("Unexpected Exception when running migration: ", ex);
+      return false;
     }
 
     // Ensure the final migration was a success to return true
