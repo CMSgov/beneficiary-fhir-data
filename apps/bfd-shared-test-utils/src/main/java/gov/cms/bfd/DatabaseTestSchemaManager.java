@@ -74,7 +74,6 @@ public class DatabaseTestSchemaManager {
    */
   private static void handleException(String message, Exception exception) {
     LOGGER.error(message, exception);
-    exception.printStackTrace();
   }
 
   /**
