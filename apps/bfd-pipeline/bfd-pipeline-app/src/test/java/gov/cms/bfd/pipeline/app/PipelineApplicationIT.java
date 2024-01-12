@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
+import static gov.cms.bfd.SqsTestUtils.createSqsClientForLocalStack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,6 +17,7 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
@@ -29,8 +31,11 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.json.JsonConverter;
+import gov.cms.bfd.sharedutils.sqs.SqsDao;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +70,12 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   private static final FileBasedAssertionHelper LOG_FILE =
       new FileBasedAssertionHelper(Path.of(LOG_FILE_PATH));
 
+  /** Name of SQS queue created in localstack to receive progress messages via SQS. */
+  private static final String SQS_QUEUE_NAME = "ccw-pipeline-progress";
+
+  /** Used to communicate with the localstack SQS service. */
+  private SqsDao sqsDao;
+
   /**
    * Locks and truncates the log file so that each test case can read only its own messages from the
    * file when making assertions about log output.
@@ -80,6 +91,13 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   @AfterEach
   public void releaseLogFile() {
     LOG_FILE.endTest();
+  }
+
+  /** Create our progress queue in the localstack SQS service before each test. */
+  @BeforeEach
+  void createQueue() {
+    sqsDao = new SqsDao(createSqsClientForLocalStack(localstack));
+    sqsDao.createQueue(SQS_QUEUE_NAME);
   }
 
   /**
@@ -140,6 +158,13 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       // Verify the results match expectations
       assertEquals(PipelineApplication.EXIT_CODE_SUCCESS, exitCode);
       assertCcwRifLoadJobCompleted(logLines);
+
+      // Verify we successfully posted the expected events to the SQS queue.
+      assertEquals(
+          List.of(
+              CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest,
+              CcwRifLoadJobStatusEvent.JobStage.NothingToDo),
+          readStatusEventsFromSQSQueue());
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -210,6 +235,15 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               .map(key -> key.substring(keyPrefix.length()))
               .collect(ImmutableSet.toImmutableSet());
       assertEquals(Set.of("0_manifest.xml", "beneficiaries.rif", "carrier.rif"), completedFiles);
+
+      // Verify we successfully posted the expected events to the SQS queue.
+      assertEquals(
+          List.of(
+              CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest,
+              CcwRifLoadJobStatusEvent.JobStage.AwaitingManifestDataFiles,
+              CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles,
+              CcwRifLoadJobStatusEvent.JobStage.CompletedManifest),
+          readStatusEventsFromSQSQueue());
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -326,7 +360,9 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       PipelineApplication app = createApplicationForTest(configLoader);
 
       // Override normal job creation to ensure our mock job is created instead of real one.
-      doReturn(List.of(smokeTestFailureJob)).when(app).createAllJobs(any(), any(), any(), any());
+      doReturn(List.of(smokeTestFailureJob))
+          .when(app)
+          .createAllJobs(any(), any(), any(), any(), any());
 
       // Run the app and collect its output.
       final int exitCode = app.runPipelineAndHandleExceptions();
@@ -484,6 +520,9 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     // ensure the job runs only once so the app doesn't loop forever
     environment.put(AppConfiguration.SSM_PATH_CCW_RIF_JOB_INTERVAL_SECONDS, "0");
 
+    // enable sending status messages to an SQS queue
+    environment.put(AppConfiguration.CCW_JOB_SQS_STATUS_QUEUE_NAME, SQS_QUEUE_NAME);
+
     return AppConfiguration.createConfigLoaderForTesting(environment);
   }
 
@@ -525,5 +564,27 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     // we don't actually want to register a shutdown hook
     doNothing().when(app).registerShutdownHook(any(), any());
     return app;
+  }
+
+  /**
+   * Read back all of the {@link CcwRifLoadJobStatusEvent.JobStage} values (JSON strings) from the
+   * SQS event queue in localstack. Stages are listed in chronological order based on timestamps of
+   * the events and duplicates are removed to ensure test stability.
+   *
+   * @return the list
+   */
+  private List<CcwRifLoadJobStatusEvent.JobStage> readStatusEventsFromSQSQueue() {
+    final JsonConverter jsonConverter = JsonConverter.minimalInstance();
+    final var queueUrl = sqsDao.lookupQueueUrl(SQS_QUEUE_NAME);
+    var messages = new ArrayList<CcwRifLoadJobStatusEvent>();
+    sqsDao.processAllMessages(
+        queueUrl,
+        messageJson ->
+            messages.add(jsonConverter.jsonToObject(messageJson, CcwRifLoadJobStatusEvent.class)));
+    return messages.stream()
+        .sorted(CcwRifLoadJobStatusEvent.SORT_BY_TIMESTAMP)
+        .map(CcwRifLoadJobStatusEvent::getJobStage)
+        .distinct()
+        .toList();
   }
 }
