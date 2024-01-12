@@ -8,11 +8,16 @@ mappings:
     - parentManifest
     - fileName
     columns:
-    - dbName: manifest_id
+    - comment: Foreign key to manifest that contains this file.
+      dbName: manifest_id
       name: manifestId
       sqlType: bigint
       nullable: false
       dbOnly: true
+    - comment: Index (zero based) of file within the manifest.
+      name: index
+      sqlType: smallint
+      nullable: false
     - comment: Name of file as defined in manifest.
       dbName: file_name
       name: fileName

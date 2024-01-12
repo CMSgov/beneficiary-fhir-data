@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -352,6 +353,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      *     </code> if the key doesn't seem to point to a {@link DataSetManifest} ready for
      *     processing
      */
+    @Nullable
     public static DataSetManifestId parseManifestIdFromS3Key(String s3ManifestKey) {
       Matcher manifestKeyMatcher = CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3ManifestKey);
       boolean keyMatchesRegex = manifestKeyMatcher.matches();
@@ -387,7 +389,15 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      * @return {@code true} if the manifest has a future date
      */
     public boolean isFutureManifest() {
-      return Instant.now().compareTo(timestamp) <= 0;
+      return isAfter(Instant.now());
+    }
+
+    public boolean isAfter(Instant now) {
+      return now.compareTo(timestamp) <= 0;
+    }
+
+    public boolean isBefore(Instant now) {
+      return now.compareTo(timestamp) >= 0;
     }
 
     /** {@inheritDoc} */

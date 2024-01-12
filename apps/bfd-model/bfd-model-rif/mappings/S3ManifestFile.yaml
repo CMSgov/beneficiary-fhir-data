@@ -44,7 +44,7 @@ mappings:
       fieldName: dataFiles
       mappedBy: parentManifest
       fetchType: EAGER
-      orderBy: file_name ASC
+      orderBy: index ASC
   enumTypes:
   - name: ManifestStatus
     values:

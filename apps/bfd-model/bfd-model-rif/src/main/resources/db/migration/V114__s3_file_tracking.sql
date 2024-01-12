@@ -23,6 +23,7 @@ create unique index s3_manifest_files_s3_path on s3_manifest_files(s3_path);
 CREATE TABLE s3_data_files (
     manifest_id bigint NOT NULL,
     file_name varchar(128) NOT NULL,
+    index smallint NOT NULL,
     file_type varchar(50) NOT NULL,
     s3_path varchar(1024) NOT NULL,
     status varchar(24) NOT NULL,
