@@ -133,7 +133,9 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
 
       Matcher matcher = PATIENT_REQUEST_REGEX.matcher(servletRequest.getRequestURI());
       // Only /Patient supports us-mbi identifier
-      if (matcher.find()) {
+      if (matcher.find()
+          && servletRequest.getQueryString() != null
+          && servletRequest.getQueryString().length() > 0) {
         // protect vs. logging an MBI_NUM
         matcher = MBI_REGEX.matcher(servletRequest.getQueryString());
         String uriString =

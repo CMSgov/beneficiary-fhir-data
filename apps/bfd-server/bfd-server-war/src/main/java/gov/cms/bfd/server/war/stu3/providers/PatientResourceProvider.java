@@ -39,7 +39,6 @@ import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
@@ -170,25 +169,25 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
-    // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
+    boolean includeIdentifiers =
+        (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers());
 
-    String queryIdentifier =
-        String.format(
-            "bene_by_id_include_%s",
-            String.join(
-                "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS)));
+    Timer.Context timerContext =
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
 
     Beneficiary beneficiary =
         CommonQueries.findBeneficiary(
             entityManager,
-            metricRegistry,
+            timerContext,
             beneficiaryId,
-            (requestHeader.isHICNinIncludeIdentifiers()
-                || requestHeader.isMBIinIncludeIdentifiers()),
-            getClass().getSimpleName(),
-            queryIdentifier);
+            includeIdentifiers,
+            String.format(
+                "bene_by_id_include_%s",
+                String.join(
+                    "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))));
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
     if (!requestHeader.isHICNinIncludeIdentifiers()) {
@@ -199,8 +198,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient = beneficiaryTransformer.transform(beneficiary, requestHeader);
-    return patient;
+    return beneficiaryTransformer.transform(beneficiary, requestHeader);
   }
 
   /**
@@ -295,34 +293,65 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
               value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
-    if (logicalId.getQueryParameterQualifier() != null)
+
+    if (logicalId.getQueryParameterQualifier() != null) {
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
-    if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty())
+    }
+    if (logicalId.getValueNotNull().isEmpty()) {
+      throw new InvalidRequestException("Missing required id value");
+    }
+    /*
+     * Only allow a system identifer for http://hl7.org/fhir/sid/us-mbi; while we
+     * can support HTTP GET here because we'll obfuscate the MBI_NUM prior to any
+     * logging, we may want to throw an Exception if not a POST request.
+     */
+    if (logicalId.getSystem() != null
+        && !logicalId.getSystem().isEmpty()
+        && !logicalId
+            .getSystem()
+            .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
       throw new InvalidRequestException(
           "System is unsupported here and should not be set (" + logicalId.getSystem() + ")");
-    if (logicalId.getValueNotNull().isEmpty())
-      throw new InvalidRequestException("Missing required id value");
+    }
 
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
+    long beneId = 0;
     List<IBaseResource> patients;
-    if (loadedFilterManager.isResultSetEmpty(Long.parseLong(logicalId.getValue()), lastUpdated)) {
-      // Add bene_id to MDC logs when _lastUpdated filter is in effect
-      LoggingUtils.logBeneIdToMdc(logicalId.getValue());
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(0);
-
-      patients = Collections.emptyList();
+    if (logicalId.getSystem() != null
+        && logicalId
+            .getSystem()
+            .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
+      patients = fetchPatientResourceByIdentifer(logicalId, lastUpdated, requestHeader);
+      if (!patients.isEmpty()) {
+        Patient patient = (Patient) patients.get(0);
+        Optional<Identifier> id =
+            patient.getIdentifier().stream()
+                .filter(i -> TransformerConstants.CODING_BBAPI_BENE_ID.equals(i.getSystem()))
+                .findFirst();
+        beneId = id.isPresent() ? Long.parseLong(id.get().getValue()) : 0;
+      }
     } else {
-      try {
-        patients =
-            Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
-                .filter(
-                    p ->
-                        QueryUtils.isInRange(p.getMeta().getLastUpdated().toInstant(), lastUpdated))
-                .map(p -> Collections.singletonList((IBaseResource) p))
-                .orElse(Collections.emptyList());
-      } catch (ResourceNotFoundException e) {
+      beneId = Long.parseLong(logicalId.getValue());
+      if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdated)) {
+        // Add bene_id to MDC logs when _lastUpdated filter is in effect
+        LoggingUtils.logBeneIdToMdc(beneId);
+        // Add number of resources to MDC logs
+        LoggingUtils.logResourceCountToMdc(0);
         patients = Collections.emptyList();
+      } else {
+        try {
+          patients =
+              Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
+                  .filter(
+                      p ->
+                          QueryUtils.isInRange(
+                              p.getMeta().getLastUpdated().toInstant(), lastUpdated))
+                  .map(p -> Collections.singletonList((IBaseResource) p))
+                  .orElse(Collections.emptyList());
+        } catch (ResourceNotFoundException e) {
+          patients = Collections.emptyList();
+        }
       }
     }
 
@@ -331,7 +360,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
      * to override the operation name that was published by the possible call to read(...), above.
      */
 
-    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
     // track all api hdrs
@@ -711,18 +739,46 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
     }
-    if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
-      throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
-    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
+    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "identifier");
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
 
-    List<IBaseResource> patients;
+    List<IBaseResource> patients =
+        fetchPatientResourceByIdentifer(identifier, lastUpdated, requestHeader);
+
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
+    Bundle bundle =
+        TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
+
+    // Add bene_id to MDC logs
+    LoggingUtils.logBenesToMdc(bundle);
+    return bundle;
+  }
+
+  /**
+   * Handle processing for FHIR "search" operation for {@link Patient}s; allows users to search by
+   * {@link Patient#getIdentifier()}. Specifically, the following criteria are supported:
+   *
+   * @param identifier a {@link TokenParam} for the {@link Patient#getIdentifier()} to try and find
+   *     a matching {@link Patient} for
+   * @param lastUpdated an {@link DateRangeParam} to filter the results based on the passed date
+   *     range
+   * @param requestHeader the {@link RequestHeaders} from the service call.
+   * @return Returns a {@link List} of {@link Patient}s, which may contain multiple matching
+   *     resources, or may also be empty.
+   */
+  private List<IBaseResource> fetchPatientResourceByIdentifer(
+      TokenParam identifier, DateRangeParam lastUpdated, RequestHeaders requestHeader) {
+
+    if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem())) {
+      throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
+    }
+    List<IBaseResource> patients = null;
     try {
       Patient patient;
       switch (identifier.getSystem()) {
@@ -766,15 +822,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
-
-    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
-    Bundle bundle =
-        TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
-
-    // Add bene_id to MDC logs
-    LoggingUtils.logBenesToMdc(bundle);
-
-    return bundle;
+    return patients;
   }
 
   /**
@@ -798,28 +846,39 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryField,
       RequestHeaders requestHeader) {
     if (lookupValue == null || lookupValue.trim().isEmpty()) {
-      throw new InvalidRequestException("lookupValue value cannot be null/empty");
+      throw new InvalidRequestException("lookup value cannot be null/empty");
     }
-    String queryIdentifierName =
-        String.format(
-            "bene_by_id_include_%s",
-            String.join(
-                "_",
-                (List<String>)
-                    requestHeader.getValue(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)));
+
+    Timer.Context queryContextTimer =
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            getClass().getSimpleName(),
+            "query",
+            "bene_by_" + lookupType,
+            lookupType + "s_from_beneficiarieshistory");
 
     long beneId =
         CommonQueries.findBeneficiaryIdentifier(
-            entityManager, metricRegistry, lookupType, lookupValue, queryIdentifierName);
+            entityManager, queryContextTimer, lookupType, lookupValue);
+
+    queryContextTimer =
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            getClass().getSimpleName(),
+            "query",
+            "bene_by_" + lookupType,
+            lookupType + "s_from_beneficiarieshistory");
 
     Beneficiary beneficiary =
         CommonQueries.findBeneficiary(
             entityManager,
-            metricRegistry,
+            queryContextTimer,
             beneId,
-            true, // for v2, always include historical idnetifiers
-            getClass().getSimpleName(),
-            queryIdentifierName);
+            true, // for v2, always include historical identifiers
+            String.format(
+                "bene_by_id_include_%s",
+                String.join(
+                    "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))));
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
     if (!requestHeader.isHICNinIncludeIdentifiers()) {
@@ -831,36 +890,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
 
     return beneficiaryTransformer.transform(beneficiary, requestHeader);
-  }
-
-  /**
-   * Returns the Beneficiary that has the most recent rfrnc_yr since the hicn points to more than
-   * one bene id in the Beneficiaries table.
-   *
-   * @param duplicateBenes of matching Beneficiary records the {@link
-   *     Beneficiary#getBeneficiaryId()} value to match
-   * @return a FHIR {@link Beneficiary} for the CCW {@link Beneficiary} that matches the specified
-   *     {@link Beneficiary#getHicn()} hash value
-   */
-  @Trace
-  private Beneficiary selectBeneWithLatestReferenceYear(List<Beneficiary> duplicateBenes) {
-    BigDecimal maxReferenceYear = new BigDecimal(-0001);
-    String maxReferenceYearMatchingBeneficiaryId = null;
-
-    // loop through matching bene ids looking for max rfrnc_yr
-    for (Beneficiary duplicateBene : duplicateBenes) {
-      // bene record found but reference year is null - still process
-      if (!duplicateBene.getBeneEnrollmentReferenceYear().isPresent()) {
-        duplicateBene.setBeneEnrollmentReferenceYear(Optional.of(new BigDecimal(0)));
-      }
-      // bene reference year is > than prior reference year
-      if (duplicateBene.getBeneEnrollmentReferenceYear().get().compareTo(maxReferenceYear) > 0) {
-        maxReferenceYear = duplicateBene.getBeneEnrollmentReferenceYear().get();
-        maxReferenceYearMatchingBeneficiaryId = String.valueOf(duplicateBene.getBeneficiaryId());
-      }
-    }
-
-    return entityManager.find(Beneficiary.class, maxReferenceYearMatchingBeneficiaryId);
   }
 
   /**
@@ -887,39 +916,20 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
     String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
-    if (Strings.isNullOrEmpty(headerValues)) return Arrays.asList("");
-    else
-      // Return values split on a comma with any whitespace, valid, distict, and sort
-      return Arrays.asList(splitOnCommas(headerValues.toLowerCase())).stream()
-          .peek(
-              c -> {
-                if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
-                  throw new InvalidRequestException(
-                      "Unsupported " + HEADER_NAME_INCLUDE_IDENTIFIERS + " header value: " + c);
-              })
-          .distinct()
-          .sorted()
-          .collect(Collectors.toList());
-  }
-
-  /**
-   * Check if HICN is in {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
-   *
-   * @param includeIdentifiersValues a list of header values.
-   * @return Returns true if includes unhashed hicn
-   */
-  public static boolean hasHICN(List<String> includeIdentifiersValues) {
-    return includeIdentifiersValues.contains("hicn") || includeIdentifiersValues.contains("true");
-  }
-
-  /**
-   * Check if MBI is in {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
-   *
-   * @param includeIdentifiersValues a list of header values.
-   * @return Returns true if includes unhashed mbi
-   */
-  public static boolean hasMBI(List<String> includeIdentifiersValues) {
-    return includeIdentifiersValues.contains("mbi") || includeIdentifiersValues.contains("true");
+    if (Strings.isNullOrEmpty(headerValues)) {
+      return Arrays.asList("");
+    }
+    // Return values split on a comma with any whitespace, valid, distict, and sort
+    return Arrays.asList(splitOnCommas(headerValues.toLowerCase())).stream()
+        .peek(
+            c -> {
+              if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
+                throw new InvalidRequestException(
+                    "Unsupported " + HEADER_NAME_INCLUDE_IDENTIFIERS + " header value: " + c);
+            })
+        .distinct()
+        .sorted()
+        .collect(Collectors.toList());
   }
 
   /**
@@ -929,9 +939,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    * @throws InvalidRequestException if invalid coverageId
    */
   public static void checkCoverageId(TokenParam coverageId) {
-    if (coverageId.getQueryParameterQualifier() != null)
+    if (coverageId.getQueryParameterQualifier() != null) {
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
+    }
     if (coverageId.getValueNotNull().length() != EXPECTED_COVERAGE_ID_LENGTH) {
       throw new InvalidRequestException(
           String.format(
