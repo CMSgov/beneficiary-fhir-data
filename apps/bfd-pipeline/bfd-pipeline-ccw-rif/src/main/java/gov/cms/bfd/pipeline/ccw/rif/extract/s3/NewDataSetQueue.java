@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,17 +28,17 @@ public class NewDataSetQueue {
   private final S3Dao s3Dao;
   private final String s3Bucket;
   private final String incomingS3KeyPrefix;
+  private final String syntheticS3KeyPrefix;
   private final S3FilesDao s3Records;
   private final S3FileCache s3Files;
 
   public List<Manifest> readEligibleManifests(
       Instant currentTime,
       Instant minTime,
-      Instant maxTime,
       ThrowingFunction<Boolean, Manifest, IOException> acceptanceCriteria,
       int maxToRead)
       throws IOException {
-    final List<ParsedManifestId> possiblyEligibleManifestIds = scanS3ForManifests(minTime, maxTime);
+    final List<ParsedManifestId> possiblyEligibleManifestIds = scanS3ForManifests(minTime);
     final List<Manifest> manifests = new ArrayList<>();
     for (ParsedManifestId manifestId : possiblyEligibleManifestIds) {
       if (manifests.size() >= maxToRead) {
@@ -72,6 +73,16 @@ public class NewDataSetQueue {
         .allMatch(namesAtPrefix::contains);
   }
 
+  public void markProcessed(S3ManifestFile manifestFile) {
+    manifestFile.setStatus(S3ManifestFile.ManifestStatus.COMPLETED);
+    s3Records.updateS3ManifestAndDataFiles(manifestFile);
+  }
+
+  public void markRejected(S3ManifestFile manifestFile) {
+    manifestFile.setStatus(S3ManifestFile.ManifestStatus.REJECTED);
+    s3Records.updateS3ManifestAndDataFiles(manifestFile);
+  }
+
   private S3FileCache.DownloadedFile downloadAndCheckMD5(String s3Key) throws IOException {
     final var manifestFile = s3Files.downloadFile(s3Key);
     if (s3Files.checkMD5(manifestFile, MD5ChecksumMetaDataField) == MISMATCH) {
@@ -81,14 +92,14 @@ public class NewDataSetQueue {
     return manifestFile;
   }
 
-  private List<ParsedManifestId> scanS3ForManifests(Instant minTimestamp, Instant maxTimestamp) {
+  private List<ParsedManifestId> scanS3ForManifests(Instant minTimestamp) {
     final var ineligibleS3Keys = s3Records.readIneligibleManifestS3Keys(minTimestamp);
-    return s3Dao
-        .listObjects(s3Bucket, incomingS3KeyPrefix)
+    return Stream.concat(
+            s3Dao.listObjects(s3Bucket, incomingS3KeyPrefix),
+            s3Dao.listObjects(s3Bucket, syntheticS3KeyPrefix))
         .filter(s3Summary -> !ineligibleS3Keys.contains(s3Summary.getKey()))
         .flatMap(s3Summary -> parseManifestEntryFromS3Key(s3Summary).stream())
         .filter(parsedManifestId -> parsedManifestId.manifestId.isAfter(minTimestamp))
-        .filter(parsedManifestId -> parsedManifestId.manifestId.isBefore(maxTimestamp))
         .sorted()
         .toList();
   }

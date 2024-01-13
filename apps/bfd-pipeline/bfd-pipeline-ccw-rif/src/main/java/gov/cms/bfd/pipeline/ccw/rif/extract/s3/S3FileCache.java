@@ -163,7 +163,7 @@ public class S3FileCache {
   private String suffixFromS3Key(String s3Key) {
     final var matcher = KEY_SUFFIX_REGEX.matcher(s3Key);
     if (matcher.find()) {
-      return matcher.group(1).toLowerCase();
+      return matcher.group(0).toLowerCase();
     } else {
       return DEFAULT_TEMP_FILE_SUFFIX;
     }
@@ -205,6 +205,10 @@ public class S3FileCache {
 
     public void delete() throws IOException {
       deleteFile(s3Key);
+    }
+
+    public String getAbsolutePath() {
+      return path.toAbsolutePath().toString();
     }
   }
 }

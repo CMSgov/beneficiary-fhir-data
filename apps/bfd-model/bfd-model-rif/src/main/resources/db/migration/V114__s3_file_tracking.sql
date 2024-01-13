@@ -4,7 +4,7 @@
  */
 CREATE TABLE s3_manifest_files (
     manifest_id bigint NOT NULL,
-    s3_path varchar(1024) NOT NULL,
+    s3_key varchar(1024) NOT NULL,
     status varchar(24) NOT NULL,
     discovery_timestamp timestamp with time zone NOT NULL,
     completion_timestamp timestamp with time zone,
@@ -15,7 +15,7 @@ CREATE TABLE s3_manifest_files (
 create sequence s3_manifest_files_manifest_id_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 1;
 
 -- used when checking status of a file from S3 bucket
-create unique index s3_manifest_files_s3_path on s3_manifest_files(s3_path);
+create unique index s3_manifest_files_s3_path on s3_manifest_files(s3_key);
 
 /*
  * Table to track CCW S3 data files in database.
@@ -25,7 +25,7 @@ CREATE TABLE s3_data_files (
     file_name varchar(128) NOT NULL,
     index smallint NOT NULL,
     file_type varchar(50) NOT NULL,
-    s3_path varchar(1024) NOT NULL,
+    s3_key varchar(1024) NOT NULL,
     status varchar(24) NOT NULL,
     discovery_timestamp timestamp with time zone NOT NULL,
     completion_timestamp timestamp with time zone,

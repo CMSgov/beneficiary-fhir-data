@@ -16,12 +16,12 @@ public class S3FilesDao {
   private final TransactionManager transactionManager;
 
   @Nullable
-  S3ManifestFile readS3ManifestAndDataFiles(String manifestS3Key) {
+  public S3ManifestFile readS3ManifestAndDataFiles(String manifestS3Key) {
     return transactionManager.executeFunction(
         entityManager -> readS3ManifestAndDataFilesImpl(manifestS3Key, entityManager));
   }
 
-  S3ManifestFile insertOrReadManifestAndDataFiles(
+  public S3ManifestFile insertOrReadManifestAndDataFiles(
       String manifestS3Key, DataSetManifest manifestFileData, Instant now) {
     return transactionManager.executeFunction(
         entityManager -> {
@@ -36,15 +36,11 @@ public class S3FilesDao {
         });
   }
 
-  void insertS3ManifestAndDataFiles(S3ManifestFile manifestFile) {
-    transactionManager.executeProcedure(entityManager -> entityManager.persist(manifestFile));
-  }
-
-  void updateS3ManifestAndDataFiles(S3ManifestFile manifestFile) {
+  public void updateS3ManifestAndDataFiles(S3ManifestFile manifestFile) {
     transactionManager.executeProcedure(entityManager -> entityManager.merge(manifestFile));
   }
 
-  Set<String> readIneligibleManifestS3Keys(Instant minTimestamp) {
+  public Set<String> readIneligibleManifestS3Keys(Instant minTimestamp) {
     return transactionManager.executeFunction(
         entityManager -> {
           final var records =

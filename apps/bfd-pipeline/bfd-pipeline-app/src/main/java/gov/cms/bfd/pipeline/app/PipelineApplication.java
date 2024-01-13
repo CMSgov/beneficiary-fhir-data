@@ -20,12 +20,15 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.NewDataSetQueue;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FilesDao;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
@@ -517,11 +520,6 @@ public final class PipelineApplication {
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.  The task manager will be automatically closed by the job.
      */
-    final var s3TaskManager =
-        new S3TaskManager(
-            appState.getMetrics(),
-            loadOptions.getExtractionOptions(),
-            new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig()));
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
@@ -531,12 +529,27 @@ public final class PipelineApplication {
      */
     DataSetMonitorListener dataSetMonitorListener =
         new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
+    final var s3Factory =
+        new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
+    final var transactionManager = new TransactionManager(appState.getEntityManagerFactory());
+    final var s3Dao = s3Factory.createS3Dao();
+    final var s3FilesDao = new S3FilesDao(transactionManager);
+    final var bucket = loadOptions.getExtractionOptions().getS3BucketName();
+    final var s3FileCache = new S3FileCache(s3Dao, bucket);
+    final var dataSetQueue =
+        new NewDataSetQueue(
+            s3Dao,
+            bucket,
+            CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+            CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+            s3FilesDao,
+            s3FileCache);
     var statusReporter = createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, clock);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState,
             loadOptions.getExtractionOptions(),
-            s3TaskManager,
+            dataSetQueue,
             dataSetMonitorListener,
             loadOptions.getLoadOptions().isIdempotencyRequired(),
             loadOptions.getRunInterval(),
