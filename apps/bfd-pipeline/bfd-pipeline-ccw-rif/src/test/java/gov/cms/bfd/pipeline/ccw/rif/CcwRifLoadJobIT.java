@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,7 +19,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.NewDataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FilesDao;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.net.URL;
@@ -66,16 +65,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3FilesDao(transactionManager);
-      final var s3FileCache = new S3FileCache(s3Dao, bucket);
+      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
           new NewDataSetQueue(
-              s3Dao,
-              bucket,
-              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-              s3FilesDao,
-              s3FileCache);
+              pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -192,16 +186,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3FilesDao(transactionManager);
-      final var s3FileCache = new S3FileCache(s3Dao, bucket);
+      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
           new NewDataSetQueue(
-              s3Dao,
-              bucket,
-              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-              s3FilesDao,
-              s3FileCache);
+              pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -307,16 +296,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3FilesDao(transactionManager);
-      final var s3FileCache = new S3FileCache(s3Dao, bucket);
+      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
           new NewDataSetQueue(
-              s3Dao,
-              bucket,
-              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-              s3FilesDao,
-              s3FileCache);
+              pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -398,16 +382,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3FilesDao(transactionManager);
-      final var s3FileCache = new S3FileCache(s3Dao, bucket);
+      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
           new NewDataSetQueue(
-              s3Dao,
-              bucket,
-              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-              s3FilesDao,
-              s3FileCache);
+              pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -482,16 +461,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3FilesDao(transactionManager);
-      final var s3FileCache = new S3FileCache(s3Dao, bucket);
+      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
           new NewDataSetQueue(
-              s3Dao,
-              bucket,
-              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-              s3FilesDao,
-              s3FileCache);
+              pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -514,10 +488,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       statusOrder.verify(statusReporter).reportNothingToDo();
       statusOrder.verifyNoMoreInteractions();
 
-      // Verify that the data set was not renamed.
-      assertNull(
-          s3FilesDao.readS3ManifestAndDataFiles(manifestKey),
-          "future manifest should not be present in the database");
+      // Verify that the data set was not processed.
+      verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.DISCOVERED);
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -564,16 +536,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3FilesDao(transactionManager);
-      final var s3FileCache = new S3FileCache(s3Dao, bucket);
+      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
           new NewDataSetQueue(
-              s3Dao,
-              bucket,
-              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-              s3FilesDao,
-              s3FileCache);
+              pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -600,8 +567,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   }
 
   private void verifyManifestFileStatus(
-      S3FilesDao s3FilesDao, String s3ManifestKey, S3ManifestFile.ManifestStatus expectedStatus) {
-    S3ManifestFile manifestRecord = s3FilesDao.readS3ManifestAndDataFiles(s3ManifestKey);
+      S3ManifestDbDao s3ManifestDbDao,
+      String s3ManifestKey,
+      S3ManifestFile.ManifestStatus expectedStatus) {
+    S3ManifestFile manifestRecord = s3ManifestDbDao.readS3ManifestAndDataFiles(s3ManifestKey);
     assertNotNull(manifestRecord, "no record in database for manifest: key=" + s3ManifestKey);
     assertEquals(expectedStatus, manifestRecord.getStatus());
   }

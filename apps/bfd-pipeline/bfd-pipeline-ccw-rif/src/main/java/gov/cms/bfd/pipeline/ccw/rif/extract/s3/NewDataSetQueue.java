@@ -1,8 +1,9 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId.parseManifestIdFromS3Key;
-import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache.MD5Result.MISMATCH;
+import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache.Md5Result.MISMATCH;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.io.ByteSource;
 import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
@@ -24,12 +25,21 @@ import lombok.Data;
 @AllArgsConstructor
 public class NewDataSetQueue {
   public static final String MD5ChecksumMetaDataField = "md5chksum";
+  static final String TIMER_READ_MANIFESTS =
+      MetricRegistry.name(NewDataSetQueue.class, "readEligibleManifests");
+  static final String TIMER_DOWNLOAD_MANIFEST =
+      MetricRegistry.name(NewDataSetQueue.class, "downloadManifest");
+  static final String TIMER_DOWNLOAD_ENTRY =
+      MetricRegistry.name(NewDataSetQueue.class, "downloadEntry");
+  static final String TIMER_MANIFEST_DB_UPDATE =
+      MetricRegistry.name(NewDataSetQueue.class, "updateManifestInDb");
+
+  /** The metric registry. */
+  private final MetricRegistry appMetrics;
 
   private final S3Dao s3Dao;
   private final String s3Bucket;
-  private final String incomingS3KeyPrefix;
-  private final String syntheticS3KeyPrefix;
-  private final S3FilesDao s3Records;
+  private final S3ManifestDbDao s3Records;
   private final S3FileCache s3Files;
 
   public List<Manifest> readEligibleManifests(
@@ -38,30 +48,41 @@ public class NewDataSetQueue {
       ThrowingFunction<Boolean, Manifest, IOException> acceptanceCriteria,
       int maxToRead)
       throws IOException {
-    final List<ParsedManifestId> possiblyEligibleManifestIds = scanS3ForManifests(minTime);
-    final List<Manifest> manifests = new ArrayList<>();
-    for (ParsedManifestId manifestId : possiblyEligibleManifestIds) {
-      if (manifests.size() >= maxToRead) {
-        break;
+    try (var ignored1 = appMetrics.timer(TIMER_READ_MANIFESTS).time()) {
+      final List<ParsedManifestId> possiblyEligibleManifestIds = scanS3ForManifests(minTime);
+      final List<Manifest> manifests = new ArrayList<>();
+      for (ParsedManifestId manifestId : possiblyEligibleManifestIds) {
+        if (manifests.size() >= maxToRead) {
+          break;
+        }
+        final var s3Key = manifestId.getS3Key();
+        final S3FileCache.DownloadedFile manifestFile;
+        final DataSetManifest dataSetManifest;
+        try (var ignored2 = appMetrics.timer(TIMER_DOWNLOAD_MANIFEST).time()) {
+          manifestFile = downloadAndCheckMD5(s3Key);
+          dataSetManifest = parseManifestFile(s3Key, manifestFile.getBytes());
+        }
+        final S3ManifestFile manifestRecord;
+        try (var ignored3 = appMetrics.timer(TIMER_MANIFEST_DB_UPDATE).time()) {
+          manifestRecord =
+              s3Records.insertOrReadManifestAndDataFiles(s3Key, dataSetManifest, currentTime);
+        }
+        final var manifest =
+            new Manifest(manifestId.getManifestId(), manifestFile, dataSetManifest, manifestRecord);
+        if (acceptanceCriteria.apply(manifest)) {
+          manifests.add(manifest);
+        }
       }
-      final var s3Key = manifestId.getS3Key();
-      final var manifestFile = downloadAndCheckMD5(s3Key);
-      final var dataSetManifest = parseManifestFile(s3Key, manifestFile.getBytes());
-      final var manifestRecord =
-          s3Records.insertOrReadManifestAndDataFiles(s3Key, dataSetManifest, currentTime);
-      final var manifest =
-          new Manifest(manifestId.getManifestId(), manifestFile, dataSetManifest, manifestRecord);
-      if (acceptanceCriteria.apply(manifest)) {
-        manifests.add(manifest);
-      }
+      return manifests;
     }
-    return manifests;
   }
 
   public ManifestEntry downloadManifestEntry(S3DataFile record) throws IOException {
-    final var s3Key = record.getS3Key();
-    final var downloadedFile = downloadAndCheckMD5(s3Key);
-    return new ManifestEntry(record, downloadedFile);
+    try (var ignored = appMetrics.timer(TIMER_DOWNLOAD_ENTRY).time()) {
+      final var s3Key = record.getS3Key();
+      final var downloadedFile = downloadAndCheckMD5(s3Key);
+      return new ManifestEntry(record, downloadedFile);
+    }
   }
 
   public boolean allEntriesExistInS3(S3ManifestFile record) {
@@ -95,8 +116,8 @@ public class NewDataSetQueue {
   private List<ParsedManifestId> scanS3ForManifests(Instant minTimestamp) {
     final var ineligibleS3Keys = s3Records.readIneligibleManifestS3Keys(minTimestamp);
     return Stream.concat(
-            s3Dao.listObjects(s3Bucket, incomingS3KeyPrefix),
-            s3Dao.listObjects(s3Bucket, syntheticS3KeyPrefix))
+            s3Dao.listObjects(s3Bucket, CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS),
+            s3Dao.listObjects(s3Bucket, CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS))
         .filter(s3Summary -> !ineligibleS3Keys.contains(s3Summary.getKey()))
         .flatMap(s3Summary -> parseManifestEntryFromS3Key(s3Summary).stream())
         .filter(parsedManifestId -> parsedManifestId.manifestId.isAfter(minTimestamp))

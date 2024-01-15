@@ -10,9 +10,9 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
-/** Data access object for working with S3 file entities. */
+/** Data access object for working with S3 manifest database entities. */
 @RequiredArgsConstructor
-public class S3FilesDao {
+public class S3ManifestDbDao {
   private final TransactionManager transactionManager;
 
   @Nullable
@@ -22,17 +22,17 @@ public class S3FilesDao {
   }
 
   public S3ManifestFile insertOrReadManifestAndDataFiles(
-      String manifestS3Key, DataSetManifest manifestFileData, Instant now) {
+      String manifestS3Key, DataSetManifest xmlManifest, Instant now) {
     return transactionManager.executeFunction(
         entityManager -> {
-          S3ManifestFile existingFile =
-              readS3ManifestAndDataFilesImpl(manifestS3Key, entityManager);
-          if (existingFile != null) {
-            return existingFile;
+          S3ManifestFile dbManifest = readS3ManifestAndDataFilesImpl(manifestS3Key, entityManager);
+          if (dbManifest != null) {
+            verifyExistingRecordMatchesDataSetManifest(xmlManifest, dbManifest);
+            return dbManifest;
           }
-          S3ManifestFile newFile = createNewManifestAndFiles(manifestS3Key, manifestFileData, now);
-          entityManager.persist(newFile);
-          return newFile;
+          dbManifest = createNewManifestAndFiles(manifestS3Key, xmlManifest, now);
+          entityManager.persist(dbManifest);
+          return dbManifest;
         });
   }
 
@@ -71,6 +71,37 @@ public class S3FilesDao {
       return null;
     } else {
       return records.getFirst();
+    }
+  }
+
+  private void verifyExistingRecordMatchesDataSetManifest(
+      DataSetManifest xmlManifest, S3ManifestFile dbManifest) throws DataSetOutOfSyncException {
+    if (xmlManifest.getEntries().size() != dbManifest.getDataFiles().size()) {
+      throw new DataSetOutOfSyncException(
+          "number of entries do not match: db=%d xml=%d",
+          dbManifest.getDataFiles().size(), xmlManifest.getEntries().size());
+    }
+
+    int index = 0;
+    while (index < xmlManifest.getEntries().size()) {
+      final var xmlEntry = xmlManifest.getEntries().get(index);
+      final var dbEntry = dbManifest.getDataFiles().get(index);
+      if (!xmlEntry.getName().equals(dbEntry.getFileName())) {
+        throw new DataSetOutOfSyncException(
+            "entry name mismatch: index=%d db=%s xml=%s",
+            index, xmlEntry.getName(), dbEntry.getFileName());
+      } else if (!xmlEntry.getType().name().equals(dbEntry.getFileType())) {
+        throw new DataSetOutOfSyncException(
+            "entry type mismatch: index=%d name=%s db=%s xml=%s",
+            index, xmlEntry.getName(), xmlEntry.getType(), dbEntry.getFileType());
+      }
+      index += 1;
+    }
+  }
+
+  public static class DataSetOutOfSyncException extends RuntimeException {
+    public DataSetOutOfSyncException(String message, Object... args) {
+      super(String.format(message, args));
     }
   }
 

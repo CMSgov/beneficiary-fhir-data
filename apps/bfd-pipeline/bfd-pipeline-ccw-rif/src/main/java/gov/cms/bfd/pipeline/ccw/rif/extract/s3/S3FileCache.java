@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
@@ -22,16 +23,22 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 public class S3FileCache {
-  static final String TEMP_FILE_PREFIX = "S3Download-";
-  static final String DEFAULT_TEMP_FILE_SUFFIX = ".dat";
   private static final Pattern KEY_SUFFIX_REGEX =
       Pattern.compile("\\.[a-z]+$", Pattern.CASE_INSENSITIVE);
+  static final String TEMP_FILE_PREFIX = "S3Download-";
+  static final String DEFAULT_TEMP_FILE_SUFFIX = ".dat";
+  static final String TIMER_DOWNLOAD_FILE = MetricRegistry.name(S3FileCache.class, "downloadFile");
+  static final String TIMER_COMPUTE_MD5 = MetricRegistry.name(S3FileCache.class, "computeMd5");
+
+  /** The metric registry. */
+  private final MetricRegistry appMetrics;
 
   private final S3Dao s3Dao;
   private final String s3Bucket;
   private final Map<String, DownloadedFile> s3KeyToLocalFile;
 
-  public S3FileCache(S3Dao s3Dao, String s3Bucket) {
+  public S3FileCache(MetricRegistry appMetrics, S3Dao s3Dao, String s3Bucket) {
+    this.appMetrics = appMetrics;
     this.s3Dao = s3Dao;
     this.s3Bucket = s3Bucket;
     s3KeyToLocalFile = new HashMap<>();
@@ -40,7 +47,7 @@ public class S3FileCache {
   public static String extractPrefixFromS3Key(String s3Key) {
     int lastSlashOffset = s3Key.lastIndexOf('/');
     if (lastSlashOffset < 0) {
-      return "/";
+      return "";
     } else {
       return s3Key.substring(0, lastSlashOffset + 1);
     }
@@ -64,24 +71,26 @@ public class S3FileCache {
   }
 
   public DownloadedFile downloadFile(String s3Key) throws IOException {
-    final DownloadedFile existingFile = getFileForS3Key(s3Key);
-    if (existingFile != null) {
-      return existingFile;
+    try (var ignored = appMetrics.timer(TIMER_DOWNLOAD_FILE).time()) {
+      final DownloadedFile existingFile = getFileForS3Key(s3Key);
+      if (existingFile != null) {
+        return existingFile;
+      }
+
+      final Path downloadPath = tempPathForS3Key(s3Key);
+      final var s3Details = s3Dao.downloadObject(s3Bucket, s3Key, downloadPath);
+      final var downloadedFile = new DownloadedFile(s3Key, s3Details, downloadPath);
+
+      // The added file might be different if the file has already been registered by another
+      // thread while we were downloading the file.  If that happens simply delete our download
+      // and use the existing file instead.
+      final DownloadedFile addedFile = addFileForS3Key(s3Key, downloadedFile);
+      if (addedFile != downloadedFile) {
+        Files.delete(downloadPath);
+      }
+
+      return addedFile;
     }
-
-    final Path downloadPath = tempPathForS3Key(s3Key);
-    final var s3Details = s3Dao.downloadObject(s3Bucket, s3Key, downloadPath);
-    final var downloadedFile = new DownloadedFile(s3Key, s3Details, downloadPath);
-
-    // The added file might be different if the file has already been registered by another
-    // thread while we were downloading the file.  If that happens simply delete our download
-    // and use the existing file instead.
-    final DownloadedFile addedFile = addFileForS3Key(s3Key, downloadedFile);
-    if (addedFile != downloadedFile) {
-      Files.delete(downloadPath);
-    }
-
-    return addedFile;
   }
 
   public void deleteFile(String s3Key) throws IOException {
@@ -99,7 +108,7 @@ public class S3FileCache {
   }
 
   /** Result returned by {@link #checkMD5}. */
-  public enum MD5Result {
+  public enum Md5Result {
     /** Computed MD5 matches meta data value. */
     MATCH,
     /** Computed MD5 does not match meta data value. */
@@ -117,16 +126,16 @@ public class S3FileCache {
    * @return result of the check
    * @throws IOException error encountered while reading file
    */
-  public MD5Result checkMD5(DownloadedFile file, String md5MetaDataField) throws IOException {
+  public Md5Result checkMD5(DownloadedFile file, String md5MetaDataField) throws IOException {
     final String metaDataMD5Checksum = file.getS3Details().getMetaData().get(md5MetaDataField);
     if (Strings.isNullOrEmpty(metaDataMD5Checksum)) {
-      return MD5Result.NONE;
+      return Md5Result.NONE;
     }
     final String computedMD5Checksum = computeMD5CheckSum(file.getBytes());
     if (metaDataMD5Checksum.equals(computedMD5Checksum)) {
-      return MD5Result.MATCH;
+      return Md5Result.MATCH;
     } else {
-      return MD5Result.MISMATCH;
+      return Md5Result.MISMATCH;
     }
   }
 
@@ -138,7 +147,8 @@ public class S3FileCache {
    * @throws IOException if there is an issue reading or closing the downloaded file
    */
   public String computeMD5CheckSum(ByteSource fileToCheck) throws IOException {
-    try (var inputStream = fileToCheck.openStream()) {
+    try (var ignored = appMetrics.timer(TIMER_COMPUTE_MD5).time();
+        var inputStream = fileToCheck.openStream()) {
       final MessageDigest md5Digest = MessageDigest.getInstance("MD5");
 
       byte[] buffer = new byte[8192];

@@ -72,6 +72,8 @@ import org.slf4j.LoggerFactory;
 public final class CcwRifLoadJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
 
+  public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(30);
+
   /**
    * Minimum amount of free disk space (in bytes) to allow pre-fetch of second data set while
    * current one is being processed.
@@ -241,16 +243,20 @@ public final class CcwRifLoadJob implements PipelineJob {
         && !dataSetManifest.getId().isFutureManifest();
   }
 
+  private List<NewDataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
+    final Instant minEligibleTime = now.minus(MAX_MANIFEST_AGE);
+    return dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
+  }
+
   @Override
   public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
 
+    final Instant startTime = Instant.now();
+
     // Get list of eligible manifests from database.
     statusReporter.reportCheckingBucketForManifest();
-    final Instant now = Instant.now();
-    final Instant minEligibleTime = now.minus(30, ChronoUnit.DAYS);
-    final var eligibleManifests =
-        dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
+    final var eligibleManifests = readEligibleManifests(startTime);
 
     // If no manifest was found, we're done (until next time).
     if (eligibleManifests.isEmpty()) {

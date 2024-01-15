@@ -22,7 +22,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.NewDataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FilesDao;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
@@ -461,7 +461,7 @@ public final class PipelineApplication {
 
       final var loadOptions = appConfig.getCcwRifLoadOptions().get();
       final var awsClientConfig = appConfig.getAwsClientConfig();
-      final var job = createCcwRifLoadJob(loadOptions, appState, awsClientConfig, clock);
+      final var job = createCcwRifLoadJob(loadOptions, appState, awsClientConfig);
       jobs.add(job);
       LOGGER.info("Registered CcwRifLoadJob.");
     } else {
@@ -508,14 +508,12 @@ public final class PipelineApplication {
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
    * @param awsClientConfig AWS client configuration
-   * @param clock used to get current time
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private PipelineJob createCcwRifLoadJob(
       CcwRifLoadOptions loadOptions,
       PipelineApplicationState appState,
-      AwsClientConfig awsClientConfig,
-      Clock clock) {
+      AwsClientConfig awsClientConfig) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.  The task manager will be automatically closed by the job.
@@ -533,18 +531,13 @@ public final class PipelineApplication {
         new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
     final var transactionManager = new TransactionManager(appState.getEntityManagerFactory());
     final var s3Dao = s3Factory.createS3Dao();
-    final var s3FilesDao = new S3FilesDao(transactionManager);
+    final var s3FilesDao = new S3ManifestDbDao(transactionManager);
     final var bucket = loadOptions.getExtractionOptions().getS3BucketName();
-    final var s3FileCache = new S3FileCache(s3Dao, bucket);
+    final var s3FileCache = new S3FileCache(appState.getMetrics(), s3Dao, bucket);
     final var dataSetQueue =
-        new NewDataSetQueue(
-            s3Dao,
-            bucket,
-            CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-            CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-            s3FilesDao,
-            s3FileCache);
-    var statusReporter = createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, clock);
+        new NewDataSetQueue(appState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+    var statusReporter =
+        createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, appState.getClock());
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState,
