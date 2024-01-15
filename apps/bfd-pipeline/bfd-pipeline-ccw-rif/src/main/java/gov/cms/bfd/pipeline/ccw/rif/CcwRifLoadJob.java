@@ -252,7 +252,7 @@ public final class CcwRifLoadJob implements PipelineJob {
   public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
 
-    final Instant startTime = Instant.now();
+    final Instant startTime = appState.getClock().instant();
 
     // Get list of eligible manifests from database.
     statusReporter.reportCheckingBucketForManifest();
