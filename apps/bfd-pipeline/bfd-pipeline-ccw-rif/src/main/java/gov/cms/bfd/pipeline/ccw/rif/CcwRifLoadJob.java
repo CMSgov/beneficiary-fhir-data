@@ -384,8 +384,10 @@ public final class CcwRifLoadJob implements PipelineJob {
        * consistency problems).
        */
       statusReporter.reportProcessingManifestData(manifestToProcess.getIncomingS3Key());
+      dataSetQueue.markAsStarted(manifestRecord);
       listener.dataAvailable(rifFilesEvent);
       statusReporter.reportCompletedManifest(manifestToProcess.getIncomingS3Key());
+      dataSetQueue.markAsProcessed(manifestRecord);
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
@@ -397,14 +399,13 @@ public final class CcwRifLoadJob implements PipelineJob {
        * effect right away.)
        */
       rifFiles.forEach(S3RifFile::cleanupTempFile);
-      dataSetQueue.markProcessed(manifestRecord);
     } else {
       /*
        * If here, Synthea pre-validation has failed; we want to move the S3 incoming
        * files to a failed folder; so instead of moving files to a done folder we'll just
        * replace the manifest's notion of its Done folder to a Failed folder.
        */
-      dataSetQueue.markRejected(manifestRecord);
+      dataSetQueue.markAsRejected(manifestRecord);
     }
 
     return PipelineJobOutcome.WORK_DONE;

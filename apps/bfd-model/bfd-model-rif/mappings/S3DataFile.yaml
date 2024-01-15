@@ -58,6 +58,5 @@ mappings:
   - name: FileStatus
     values:
     - DISCOVERED
-    - REJECTED
     - STARTED
     - COMPLETED

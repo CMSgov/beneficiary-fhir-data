@@ -162,6 +162,21 @@ public final class S3RifFile implements RifFile {
     LOGGER.debug("Cleaned up '{}'.", this);
   }
 
+  @Override
+  public boolean requiresProcessing() {
+    return waitForDownload().isIncomplete();
+  }
+
+  @Override
+  public void markAsStarted() {
+    waitForDownload().markAsStarted();
+  }
+
+  @Override
+  public void markAsProcessed() {
+    waitForDownload().markAsCompleted();
+  }
+
   /** {@inheritDoc} */
   @Override
   public String toString() {

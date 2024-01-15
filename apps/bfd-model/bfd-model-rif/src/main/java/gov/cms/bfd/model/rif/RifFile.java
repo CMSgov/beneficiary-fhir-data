@@ -32,4 +32,19 @@ public interface RifFile {
    * @return a new {@link InputStream}
    */
   InputStream open();
+
+  /**
+   * Returns true if the file has not been fully processed yet.
+   *
+   * @return true if needs processing
+   */
+  default boolean requiresProcessing() {
+    return true;
+  }
+
+  /** Marks the file as having started processing. */
+  default void markAsStarted() {}
+
+  /** Marks the file as fully processed. */
+  default void markAsProcessed() {}
 }

@@ -94,12 +94,19 @@ public class NewDataSetQueue {
         .allMatch(namesAtPrefix::contains);
   }
 
-  public void markProcessed(S3ManifestFile manifestFile) {
+  public void markAsStarted(S3ManifestFile manifestFile) {
+    if (manifestFile.getStatus() == S3ManifestFile.ManifestStatus.DISCOVERED) {
+      manifestFile.setStatus(S3ManifestFile.ManifestStatus.STARTED);
+      s3Records.updateS3ManifestAndDataFiles(manifestFile);
+    }
+  }
+
+  public void markAsProcessed(S3ManifestFile manifestFile) {
     manifestFile.setStatus(S3ManifestFile.ManifestStatus.COMPLETED);
     s3Records.updateS3ManifestAndDataFiles(manifestFile);
   }
 
-  public void markRejected(S3ManifestFile manifestFile) {
+  public void markAsRejected(S3ManifestFile manifestFile) {
     manifestFile.setStatus(S3ManifestFile.ManifestStatus.REJECTED);
     s3Records.updateS3ManifestAndDataFiles(manifestFile);
   }
@@ -179,8 +186,28 @@ public class NewDataSetQueue {
   }
 
   @Data
-  public static class ManifestEntry {
+  public class ManifestEntry {
     private final S3DataFile record;
     private final S3FileCache.DownloadedFile fileData;
+
+    public void deleteFile() throws IOException {
+      fileData.delete();
+    }
+
+    public boolean isIncomplete() {
+      return record.getStatus() != S3DataFile.FileStatus.COMPLETED;
+    }
+
+    public void markAsStarted() {
+      if (record.getStatus() == S3DataFile.FileStatus.DISCOVERED) {
+        record.setStatus(S3DataFile.FileStatus.STARTED);
+        s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
+      }
+    }
+
+    public void markAsCompleted() {
+      record.setStatus(S3DataFile.FileStatus.COMPLETED);
+      s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
+    }
   }
 }
