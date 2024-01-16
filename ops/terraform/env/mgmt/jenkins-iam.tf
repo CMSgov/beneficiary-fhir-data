@@ -70,6 +70,7 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
             "athena:*",
             "application-autoscaling:*",
             "scheduler:*",
+            "transfer:*"
           ],
           "Effect" : "Allow",
           "Resource" : "*",
