@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.sharedutils.s3;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
 import gov.cms.bfd.AbstractLocalStackTest;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.regions.Region;
@@ -48,8 +46,8 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
   }
 
   /**
-   * Tests all basic operations of the {@link S3DirectoryDao}. Uploads and accesses data to a bucket
-   * and verifies that cached files are managed as expected.
+   * Tests all basic operations of the {@link S3DirectoryDao} when operating without recursion.
+   * Uploads and accesses data to a bucket and verifies that cached files are managed as expected.
    *
    * @throws Exception pass through
    */
@@ -62,7 +60,8 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
       s3Bucket = s3Dao.createTestBucket();
       final String s3Directory = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      directoryDao = new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, true);
+      directoryDao =
+          new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, true, false);
 
       // no files in the bucket yet
       assertEquals(List.of(), directoryDao.readFileNames());
@@ -70,6 +69,10 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
       // add a couple of files
       String aTag1 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-1");
       String bTag1 = uploadFileToBucket(s3Bucket, s3Directory + "b.txt", "BBB-1");
+
+      // these files will be ignored because recursive flag was false
+      uploadFileToBucket(s3Bucket, s3Directory + "x/c.txt", "CCC-1");
+      uploadFileToBucket(s3Bucket, s3Directory + "x/y/d.txt", "DDD-1");
 
       // now the files show up in the list
       assertEquals(
@@ -125,6 +128,109 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
   }
 
   /**
+   * Tests all basic operations of the {@link S3DirectoryDao} when operating in recursive mode.
+   * Uploads and accesses data to a bucket and verifies that cached files are managed as expected.
+   *
+   * @throws Exception pass through
+   */
+  @Test
+  public void testRecursiveOperations() throws Exception {
+    String s3Bucket = null;
+    S3DirectoryDao directoryDao = null;
+    Path cacheDirectoryPath;
+    try {
+      s3Bucket = s3Dao.createTestBucket();
+      final String s3Directory = "files-go-here/";
+      cacheDirectoryPath = Files.createTempDirectory("test");
+      directoryDao =
+          new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, true, true);
+
+      // no files in the bucket yet
+      assertEquals(List.of(), directoryDao.readFileNames());
+
+      final String xcName = "x/c.txt";
+      final String xydName = "x/y/d.txt";
+
+      // add a couple of files
+      String aTag1 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-1");
+      String bTag1 = uploadFileToBucket(s3Bucket, s3Directory + "b.txt", "BBB-1");
+      String xcTag1 = uploadFileToBucket(s3Bucket, s3Directory + xcName, "CCC-1");
+      String xydTag1 = uploadFileToBucket(s3Bucket, s3Directory + xydName, "DDD-1");
+
+      // now the files show up in the list
+      assertEquals(
+          List.of("a.txt", "b.txt", xcName, xydName),
+          directoryDao.readFileNames().stream().sorted().collect(Collectors.toList()));
+
+      // no files in cache yet because we have not downloaded the files
+      assertDoesNotExist(directoryDao.cacheFilePath("a.txt", aTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath("b.txt", bTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath(xcName, xcTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath(xydName, xydTag1));
+
+      // download and verify the file contents
+      assertEquals(
+          "AAA-1", directoryDao.downloadFile("a.txt").asCharSource(StandardCharsets.UTF_8).read());
+      assertEquals(
+          "BBB-1", directoryDao.downloadFile("b.txt").asCharSource(StandardCharsets.UTF_8).read());
+      assertEquals(
+          "CCC-1", directoryDao.downloadFile(xcName).asCharSource(StandardCharsets.UTF_8).read());
+      assertEquals(
+          "DDD-1", directoryDao.downloadFile(xydName).asCharSource(StandardCharsets.UTF_8).read());
+
+      // now that we've download the files we should see them in the cache
+      assertFileExists(directoryDao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(directoryDao.cacheFilePath("b.txt", bTag1));
+
+      // update two of the files so it has new contents and new eTag
+      String aTag2 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-2");
+      assertNotEquals(aTag2, aTag1);
+      String xydTag2 = uploadFileToBucket(s3Bucket, s3Directory + xydName, "DDD-2");
+      assertNotEquals(xydTag2, xydTag1);
+
+      // download and verify the updated file contents
+      assertEquals(
+          "AAA-2", directoryDao.downloadFile("a.txt").asCharSource(StandardCharsets.UTF_8).read());
+      assertEquals(
+          "BBB-1", directoryDao.downloadFile("b.txt").asCharSource(StandardCharsets.UTF_8).read());
+      assertEquals(
+          "CCC-1", directoryDao.downloadFile(xcName).asCharSource(StandardCharsets.UTF_8).read());
+      assertEquals(
+          "DDD-2", directoryDao.downloadFile(xydName).asCharSource(StandardCharsets.UTF_8).read());
+
+      // now we have two files for a.txt
+      assertFileExists(directoryDao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(directoryDao.cacheFilePath("a.txt", aTag2));
+      assertFileExists(directoryDao.cacheFilePath("b.txt", bTag1));
+      assertFileExists(directoryDao.cacheFilePath(xcName, xcTag1));
+      assertFileExists(directoryDao.cacheFilePath(xydName, xydTag2));
+
+      // delete obsolete files and verify the first version of a.txt is now gone
+      assertEquals(2, directoryDao.deleteObsoleteFiles());
+      assertDoesNotExist(directoryDao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(directoryDao.cacheFilePath("a.txt", aTag2));
+      assertFileExists(directoryDao.cacheFilePath("b.txt", bTag1));
+      assertFileExists(directoryDao.cacheFilePath(xcName, xcTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath(xydName, xydTag1));
+      assertFileExists(directoryDao.cacheFilePath(xydName, xydTag2));
+
+      // delete all files and verify that they no longer exist
+      assertEquals(4, directoryDao.deleteAllFiles());
+      assertDoesNotExist(directoryDao.cacheFilePath("a.txt", aTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath("a.txt", aTag2));
+      assertDoesNotExist(directoryDao.cacheFilePath("b.txt", bTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath(xcName, xcTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath(xydName, xydTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath(xydName, xydTag2));
+    } finally {
+      s3Dao.deleteTestBucket(s3Bucket);
+      if (directoryDao != null) {
+        directoryDao.close();
+      }
+    }
+  }
+
+  /**
    * Verify that closing a {@link S3DirectoryDao} deletes the cache directory and its contents when
    * delete on close is set and dao is closed.
    *
@@ -141,7 +247,8 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
       s3Bucket = s3Dao.createTestBucket();
       final String s3Directory = "";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      directoryDao = new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, true);
+      directoryDao =
+          new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, true, false);
 
       // add a couple of files
       aTag1 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-1");
@@ -187,7 +294,8 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
       s3Bucket = s3Dao.createTestBucket();
       final String s3Directory = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      directoryDao = new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, false);
+      directoryDao =
+          new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, false, false);
 
       // add a couple of files
       aTag1 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-1");
@@ -234,8 +342,12 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
       final String s3Directory = "";
       try (var directoryDao =
           new S3DirectoryDao(
-              s3Dao, s3Bucket, s3Directory, Files.createTempDirectory("test"), true)) {
-        assertThrows(FileNotFoundException.class, () -> directoryDao.downloadFile("a.txt"));
+              s3Dao, s3Bucket, s3Directory, Files.createTempDirectory("test"), true, false)) {
+        assertThrows(
+            FileNotFoundException.class,
+            () -> {
+              directoryDao.downloadFile("a.txt");
+            });
       }
     } finally {
       s3Dao.deleteTestBucket(s3Bucket);
@@ -251,11 +363,11 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
    * @return eTag assigned to the file by S3
    */
   private String uploadFileToBucket(String bucket, String objectKey, String fileData) {
-    S3ObjectSummary putResponse =
+    S3Dao.S3ObjectSummary putResponse =
         s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8), Map.of());
-    assertFalse("eTag should be non-empty", Strings.isNullOrEmpty(putResponse.getETag()));
+    Assertions.assertFalse(Strings.isNullOrEmpty(putResponse.getETag()), "eTag should be non-empty");
 
-    S3ObjectDetails readResponse = s3Dao.readObjectMetaData(bucket, objectKey);
+    S3Dao.S3ObjectDetails readResponse = s3Dao.readObjectMetaData(bucket, objectKey);
     assertEquals(putResponse.getETag(), readResponse.getETag());
     return readResponse.getETag();
   }

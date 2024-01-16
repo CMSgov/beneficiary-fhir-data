@@ -136,7 +136,7 @@ public class RdaServerJobIT extends AbstractLocalStackS3Test {
       bucket = s3Dao.createTestBucket();
       final String directoryPath = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3DirDao = new S3DirectoryDao(s3Dao, bucket, directoryPath, cacheDirectoryPath, true);
+      s3DirDao = new S3DirectoryDao(s3Dao, bucket, directoryPath, cacheDirectoryPath, true, false);
       final RdaServerJob.Config config =
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)

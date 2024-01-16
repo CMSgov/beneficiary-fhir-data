@@ -160,7 +160,8 @@ public interface RdaMessageSourceFactory extends AutoCloseable {
               s3Bucket,
               directory,
               cacheDirectory,
-              useTempDirectoryForCache);
+              useTempDirectoryForCache,
+              false);
       log.info(
           "serving claims using {} with data from S3 bucket {}",
           RdaS3JsonMessageSourceFactory.class.getSimpleName(),
