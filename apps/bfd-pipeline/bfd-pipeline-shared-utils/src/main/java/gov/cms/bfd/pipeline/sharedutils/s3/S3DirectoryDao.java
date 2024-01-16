@@ -9,6 +9,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.MoreFiles;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +23,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
@@ -64,7 +67,7 @@ public class S3DirectoryDao implements AutoCloseable {
    * string to build the final regex. Used when recursive flag is false to prevent inclusion of
    * files within sub-directories.
    */
-  private static final String S3FileNameRegex = "[_a-z0-9][-._a-zA-Z0-9]*";
+  private static final String S3FileNameRegex = "[_a-z0-9][-._:a-zA-Z0-9]*";
 
   /**
    * Base regex to match valid S3 keys. The {@link #s3DirectoryPath} is added to the start of this
@@ -143,8 +146,23 @@ public class S3DirectoryDao implements AutoCloseable {
    * @throws IOException various exceptions might be thrown by the Java or AWS API
    */
   public ByteSource downloadFile(String fileName) throws IOException {
+    return fetchFile(fileName).getBytes();
+  }
+
+  /**
+   * Look for an object in our S3 bucket/directory that corresponds to the given simple file name
+   * (as returned by {@link #readFileNames}. If one is found downloads it and returns a {@link
+   * DownloadedFile} that can be used to read the file. If no such object exists or the object could
+   * not be successfully downloaded, this method will throw an exception.
+   *
+   * @param fileName simple file name as returned in previous call to {@link #readFileNames}
+   * @return {@link ByteSource} for reading the file from local directory
+   * @throws IOException various exceptions might be thrown by the Java or AWS API
+   */
+  public DownloadedFile fetchFile(String fileName) throws IOException {
     final String s3Key = s3DirectoryPath + fileName;
-    String eTag = readS3ObjectMetaData(fileName, s3Key).getETag();
+    S3Dao.S3ObjectDetails objectDetails = readS3ObjectMetaData(fileName, s3Key);
+    String eTag = objectDetails.getETag();
 
     Path cacheFile = cacheFilePath(fileName, eTag);
     Files.createDirectories(cacheFile.getParent());
@@ -154,7 +172,7 @@ public class S3DirectoryDao implements AutoCloseable {
           fileName,
           s3Key,
           cacheFile.getFileName());
-      return createByteSourceForCachedFile(fileName, cacheFile);
+      return new DownloadedFile(fileName, objectDetails, cacheFile);
     }
 
     final Path tempDataFile = Files.createTempFile(cacheDirectory, TempPrefix, null);
@@ -167,7 +185,8 @@ public class S3DirectoryDao implements AutoCloseable {
 
       // It is possible that the eTag changed between the time we fetched meta data and the
       // time we downloaded the object.
-      eTag = downloadS3Object(s3Key, tempDataFile).getETag();
+      objectDetails = downloadS3Object(s3Key, tempDataFile);
+      eTag = objectDetails.getETag();
       cacheFile = cacheFilePath(fileName, eTag);
 
       try {
@@ -189,7 +208,7 @@ public class S3DirectoryDao implements AutoCloseable {
           fileName,
           s3Key,
           cacheFile.getFileName());
-      return createByteSourceForCachedFile(fileName, cacheFile);
+      return new DownloadedFile(fileName, objectDetails, cacheFile);
     } finally {
       // Ensure temp file is deleted if the rename was not performed for any reason.
       Files.deleteIfExists(tempDataFile);
@@ -214,6 +233,27 @@ public class S3DirectoryDao implements AutoCloseable {
       closer.close(() -> Files.deleteIfExists(cacheDirectory));
       closer.finish();
     }
+  }
+
+  /**
+   * Delete all cached files for the given object file name and return number of files actually
+   * deleted. This is a purely local operation. It does not affect S3.
+   *
+   * @param fileName simple file name as returned in previous call to {@link #readFileNames}
+   * @return number of cached files actually deleted
+   * @throws IOException various exceptions might be thrown by the Java
+   */
+  public int deleteCachedFiles(String fileName) throws IOException {
+    var wildcardPath = cacheFilePath(fileName, "*");
+    var matchingPaths = cacheFilePaths(wildcardPath);
+    int count = 0;
+    for (Path path : matchingPaths) {
+      final var deleted = Files.deleteIfExists(path);
+      if (deleted) {
+        count += 1;
+      }
+    }
+    return count;
   }
 
   /**
@@ -398,6 +438,8 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   @VisibleForTesting
   Path cacheFilePath(String fileName, String eTag) {
+    // ':' is not compatible with windows so convert it into something that should work everywhere
+    fileName = fileName.replace(":", "_--_");
     var lastSepOffset = fileName.lastIndexOf('/');
     var dirName = lastSepOffset < 0 ? "" : fileName.substring(0, lastSepOffset + 1);
     var baseName = lastSepOffset < 0 ? fileName : fileName.substring(lastSepOffset + 1);
@@ -410,13 +452,21 @@ public class S3DirectoryDao implements AutoCloseable {
    * correspond to that file.
    *
    * @param wildcardPath path containing wildcards that should match local files
-   * @return list of matching files private List<Path> cacheFilePaths(Path wildcardPath) { final var
-   *     directory = wildcardPath.getParent().toFile(); final FileFilter fileFilter = new
-   *     WildcardFileFilter(wildcardPath.getFileName().toString()); final var matchingFiles =
-   *     directory.listFiles(fileFilter); if (matchingFiles == null || matchingFiles.length == 0) {
-   *     return ImmutableList.of(); } else { return Stream.of(matchingFiles) .map(f ->
-   *     Path.of(directory.toString(), f.getName())) .collect(ImmutableList.toImmutableList()); } }
+   * @return list of matching files
    */
+  private List<Path> cacheFilePaths(Path wildcardPath) {
+    final var directory = wildcardPath.getParent().toFile();
+    final FileFilter fileFilter =
+        WildcardFileFilter.builder().setWildcards(wildcardPath.getFileName().toString()).get();
+    final var matchingFiles = directory.listFiles(fileFilter);
+    if (matchingFiles == null || matchingFiles.length == 0) {
+      return ImmutableList.of();
+    } else {
+      return Stream.of(matchingFiles)
+          .map(f -> Path.of(directory.toString(), f.getName()))
+          .collect(ImmutableList.toImmutableList());
+    }
+  }
 
   /**
    * Convert an {@link S3Dao.S3ObjectSummary} into a {@link Path} referencing a file in our cache
@@ -522,6 +572,25 @@ public class S3DirectoryDao implements AutoCloseable {
         throw fileNotFound;
       }
       throw e;
+    }
+  }
+
+  @AllArgsConstructor
+  public class DownloadedFile {
+    @Getter private final String s3Key;
+    @Getter private final S3Dao.S3ObjectDetails s3Details;
+    private final Path path;
+
+    public ByteSource getBytes() {
+      return createByteSourceForCachedFile(s3Key, path);
+    }
+
+    public void delete() throws IOException {
+      deleteCachedFiles(s3Key);
+    }
+
+    public String getAbsolutePath() {
+      return path.toAbsolutePath().toString();
     }
   }
 }

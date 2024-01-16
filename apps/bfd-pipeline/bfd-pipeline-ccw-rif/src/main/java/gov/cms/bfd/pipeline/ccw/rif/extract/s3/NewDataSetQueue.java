@@ -10,6 +10,7 @@ import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +57,7 @@ public class NewDataSetQueue {
           break;
         }
         final var s3Key = manifestId.getS3Key();
-        final S3FileCache.DownloadedFile manifestFile;
+        final DownloadedFile manifestFile;
         final DataSetManifest dataSetManifest;
         try (var ignored2 = appMetrics.timer(TIMER_DOWNLOAD_MANIFEST).time()) {
           manifestFile = downloadAndCheckMD5(s3Key);
@@ -90,7 +91,6 @@ public class NewDataSetQueue {
     final var namesAtPrefix = s3Files.fetchFileNamesWithPrefix(manifestS3Prefix);
     return record.getDataFiles().stream()
         .map(S3DataFile::getS3Key)
-        .map(S3FileCache::extractNameFromS3Key)
         .allMatch(namesAtPrefix::contains);
   }
 
@@ -111,7 +111,7 @@ public class NewDataSetQueue {
     s3Records.updateS3ManifestAndDataFiles(manifestFile);
   }
 
-  private S3FileCache.DownloadedFile downloadAndCheckMD5(String s3Key) throws IOException {
+  private DownloadedFile downloadAndCheckMD5(String s3Key) throws IOException {
     final var manifestFile = s3Files.downloadFile(s3Key);
     if (s3Files.checkMD5(manifestFile, MD5ChecksumMetaDataField) == MISMATCH) {
       throw new IOException(
@@ -180,7 +180,7 @@ public class NewDataSetQueue {
   @Data
   public static class Manifest {
     private final DataSetManifest.DataSetManifestId manifestId;
-    private final S3FileCache.DownloadedFile fileData;
+    private final DownloadedFile fileData;
     private final DataSetManifest manifest;
     private final S3ManifestFile record;
   }
@@ -188,7 +188,7 @@ public class NewDataSetQueue {
   @Data
   public class ManifestEntry {
     private final S3DataFile record;
-    private final S3FileCache.DownloadedFile fileData;
+    private final DownloadedFile fileData;
 
     public void deleteFile() throws IOException {
       fileData.delete();

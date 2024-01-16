@@ -3,45 +3,33 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
-import com.google.common.io.MoreFiles;
-import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
+@AllArgsConstructor
 public class S3FileCache {
-  private static final Pattern KEY_SUFFIX_REGEX =
-      Pattern.compile("\\.[a-z]+$", Pattern.CASE_INSENSITIVE);
-  static final String TEMP_FILE_PREFIX = "S3Download-";
-  static final String DEFAULT_TEMP_FILE_SUFFIX = ".dat";
   static final String TIMER_DOWNLOAD_FILE = MetricRegistry.name(S3FileCache.class, "downloadFile");
   static final String TIMER_COMPUTE_MD5 = MetricRegistry.name(S3FileCache.class, "computeMd5");
 
   /** The metric registry. */
   private final MetricRegistry appMetrics;
 
-  private final S3Dao s3Dao;
-  private final String s3Bucket;
-  private final Map<String, DownloadedFile> s3KeyToLocalFile;
+  private final S3DirectoryDao s3DirectoryDao;
 
-  public S3FileCache(MetricRegistry appMetrics, S3Dao s3Dao, String s3Bucket) {
+  public S3FileCache(MetricRegistry appMetrics, S3Dao s3Dao, String s3Bucket) throws IOException {
     this.appMetrics = appMetrics;
-    this.s3Dao = s3Dao;
-    this.s3Bucket = s3Bucket;
-    s3KeyToLocalFile = new HashMap<>();
+    final Path cacheDirectory = java.nio.file.Files.createTempDirectory("s3cache");
+    s3DirectoryDao = new S3DirectoryDao(s3Dao, s3Bucket, "", cacheDirectory, true, true);
   }
 
   public static String extractPrefixFromS3Key(String s3Key) {
@@ -53,58 +41,16 @@ public class S3FileCache {
     }
   }
 
-  public static String extractNameFromS3Key(String s3Key) {
-    int lastSlashOffset = s3Key.lastIndexOf('/');
-    if (lastSlashOffset < 0) {
-      return s3Key;
-    } else {
-      return s3Key.substring(lastSlashOffset + 1);
-    }
-  }
-
   public Set<String> fetchFileNamesWithPrefix(String s3Prefix) {
-    return s3Dao
-        .listObjects(s3Bucket, s3Prefix)
-        .map(S3Dao.S3ObjectSummary::getKey)
-        .map(S3FileCache::extractNameFromS3Key)
+    return s3DirectoryDao.readFileNames().stream()
+        .filter(s -> s.startsWith(s3Prefix))
         .collect(Collectors.toUnmodifiableSet());
   }
 
   public DownloadedFile downloadFile(String s3Key) throws IOException {
     try (var ignored = appMetrics.timer(TIMER_DOWNLOAD_FILE).time()) {
-      final DownloadedFile existingFile = getFileForS3Key(s3Key);
-      if (existingFile != null) {
-        return existingFile;
-      }
-
-      final Path downloadPath = tempPathForS3Key(s3Key);
-      final var s3Details = s3Dao.downloadObject(s3Bucket, s3Key, downloadPath);
-      final var downloadedFile = new DownloadedFile(s3Key, s3Details, downloadPath);
-
-      // The added file might be different if the file has already been registered by another
-      // thread while we were downloading the file.  If that happens simply delete our download
-      // and use the existing file instead.
-      final DownloadedFile addedFile = addFileForS3Key(s3Key, downloadedFile);
-      if (addedFile != downloadedFile) {
-        Files.delete(downloadPath);
-      }
-
-      return addedFile;
+      return s3DirectoryDao.fetchFile(s3Key);
     }
-  }
-
-  public void deleteFile(String s3Key) throws IOException {
-    DownloadedFile file = removeFileForS3Key(s3Key);
-    if (file != null) {
-      Files.deleteIfExists(file.path);
-    }
-  }
-
-  public void deleteAllFiles() throws Exception {
-    var files = removeAllFiles();
-    MultiCloser closer = new MultiCloser();
-    files.forEach(file -> closer.close(() -> Files.deleteIfExists(file.path)));
-    closer.finish();
   }
 
   /** Result returned by {@link #checkMD5}. */
@@ -163,62 +109,6 @@ public class S3FileCache {
     } catch (NoSuchAlgorithmException e) {
       // this should never happen so convert it to an unchecked exception
       throw new BadCodeMonkeyException("No MessageDigest instance for MD5", e);
-    }
-  }
-
-  private Path tempPathForS3Key(String s3Key) throws IOException {
-    return Files.createTempFile(TEMP_FILE_PREFIX, suffixFromS3Key(s3Key));
-  }
-
-  private String suffixFromS3Key(String s3Key) {
-    final var matcher = KEY_SUFFIX_REGEX.matcher(s3Key);
-    if (matcher.find()) {
-      return matcher.group(0).toLowerCase();
-    } else {
-      return DEFAULT_TEMP_FILE_SUFFIX;
-    }
-  }
-
-  private synchronized DownloadedFile getFileForS3Key(String s3Key) {
-    return s3KeyToLocalFile.get(s3Key);
-  }
-
-  private synchronized DownloadedFile addFileForS3Key(String s3Key, DownloadedFile newFile) {
-    final var oldFile = s3KeyToLocalFile.get(s3Key);
-    if (oldFile != null) {
-      return oldFile;
-    } else {
-      s3KeyToLocalFile.put(s3Key, newFile);
-      return newFile;
-    }
-  }
-
-  private synchronized DownloadedFile removeFileForS3Key(String s3Key) {
-    return s3KeyToLocalFile.remove(s3Key);
-  }
-
-  private synchronized List<DownloadedFile> removeAllFiles() {
-    final var files = List.copyOf(s3KeyToLocalFile.values());
-    s3KeyToLocalFile.clear();
-    return files;
-  }
-
-  @AllArgsConstructor
-  public class DownloadedFile {
-    @Getter private final String s3Key;
-    @Getter private final S3Dao.S3ObjectDetails s3Details;
-    private final Path path;
-
-    public ByteSource getBytes() {
-      return MoreFiles.asByteSource(path);
-    }
-
-    public void delete() throws IOException {
-      deleteFile(s3Key);
-    }
-
-    public String getAbsolutePath() {
-      return path.toAbsolutePath().toString();
     }
   }
 }

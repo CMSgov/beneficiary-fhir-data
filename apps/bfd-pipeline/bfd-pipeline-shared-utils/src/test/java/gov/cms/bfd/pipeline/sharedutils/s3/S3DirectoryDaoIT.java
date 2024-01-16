@@ -365,7 +365,8 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
   private String uploadFileToBucket(String bucket, String objectKey, String fileData) {
     S3Dao.S3ObjectSummary putResponse =
         s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8), Map.of());
-    Assertions.assertFalse(Strings.isNullOrEmpty(putResponse.getETag()), "eTag should be non-empty");
+    Assertions.assertFalse(
+        Strings.isNullOrEmpty(putResponse.getETag()), "eTag should be non-empty");
 
     S3Dao.S3ObjectDetails readResponse = s3Dao.readObjectMetaData(bucket, objectKey);
     assertEquals(putResponse.getETag(), readResponse.getETag());

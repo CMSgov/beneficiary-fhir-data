@@ -312,7 +312,7 @@ public final class PipelineApplication {
       CompositeMeterRegistry appMeters,
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource)
-      throws FatalAppException {
+      throws FatalAppException, IOException {
     final var clock = Clock.systemUTC();
 
     /*
@@ -442,7 +442,8 @@ public final class PipelineApplication {
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource,
-      Clock clock) {
+      Clock clock)
+      throws IOException {
     final var jobs = new ArrayList<PipelineJob>();
 
     /*
@@ -513,7 +514,8 @@ public final class PipelineApplication {
   private PipelineJob createCcwRifLoadJob(
       CcwRifLoadOptions loadOptions,
       PipelineApplicationState appState,
-      AwsClientConfig awsClientConfig) {
+      AwsClientConfig awsClientConfig)
+      throws IOException {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.  The task manager will be automatically closed by the job.
