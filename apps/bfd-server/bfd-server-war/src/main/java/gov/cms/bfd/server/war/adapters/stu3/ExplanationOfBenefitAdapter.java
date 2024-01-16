@@ -6,6 +6,8 @@ import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
+import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -48,6 +50,12 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
   @Override
   public List<ItemComponent> getItem() {
     return eob.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
+  }
+
+  /** {@inheritDoc} */
+  public List<SupportingInfoComponent> getSupportingInfo() {
+    // V1 doesn't have supportingInfo, so return an empty list
+    return new ArrayList<>();
   }
 
   /** Adapter for creating stu3 FHIR procedure components. */

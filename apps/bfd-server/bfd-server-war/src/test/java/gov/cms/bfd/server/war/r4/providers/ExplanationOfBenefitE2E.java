@@ -3,10 +3,13 @@ package gov.cms.bfd.server.war.r4.providers;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.server.war.ExplanationOfBenefitE2EBase;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
@@ -69,91 +72,99 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
   }
 
   /**
-   * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is set
-   * to false.
+   * Verifies that the EOB returns a 200 with the expected DD paths for each claim type returned
+   * when searching via POST.
    */
   @Test
-  public void testEobByPatientIdWithExcludeSamhsaFalseExpectNoFiltering() {
+  public void testEobPostByPatientIdWithValidPatientIdExpect200() {
 
-    // Adjust the sampleA data that was loaded to include some samhsa data by passing true
-    String patientId = testUtils.getPatientId(testUtils.loadSampleASamhsaData());
-    String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=false";
+    List<Object> loadedData = testUtils.loadSampleAData();
+    String patientId = testUtils.getPatientId(loadedData);
+    // _search needed to distinguish the POST version of the endpoint (HAPI-FHIR)
+    String requestString = eobEndpoint + "_search";
+    OutpatientClaim expectedOutpatientClaim =
+        ServerTestUtils.getClaim(loadedData, OutpatientClaim.class);
+
+    String formParams = "patient=" + patientId;
 
     given()
+        .header("Content-Type", "application/x-www-form-urlencoded")
         .spec(requestAuth)
+        .body(formParams)
         .expect()
         .body("resourceType", equalTo("Bundle"))
+        // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
-        // Check nothing is filtered and samhsa data is returned
+        .body("total", equalTo(8))
+        // the claim types of these entries should all be ExplanationOfBenefit
+        .body("entry.resource.resourceType", everyItem(equalTo("ExplanationOfBenefit")))
+        // Check our response has the various claim types by checking their metadata ids for
+        // each claim type
         .body(
-            "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
+            "entry.resource.id",
+            hasItems(
+                containsString("hha"),
+                containsString("inpatient"),
+                containsString("carrier"),
+                containsString("dme"),
+                containsString("snf"),
+                containsString("pde"),
+                containsString("hospice"),
+                containsString("hha")))
+        // Find the outpatient claim, then find the extension for fi_doc_clm_cntl_num, then get the
+        // value, compare to the loaded data value. This validates we added our extension with the
+        // right path, with the right value.
         .body(
-            "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('dme') }.resource.item.productOrService.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_CPT_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        // Make sure pde is there too
-        .body("entry.resource.id", hasItem(containsString("pde")))
+            "entry.find { it.resource.id.contains('outpatient') }.resource.extension.find { it.url == 'https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num' }.valueIdentifier.value",
+            equalTo(expectedOutpatientClaim.getFiDocumentClaimControlNumber().orElseThrow()))
         .statusCode(200)
         .when()
-        .get(requestString);
+        .post(requestString);
   }
 
   /**
-   * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is not
-   * explicitly set (should default to false internally).
+   * Verifies that the EOB returns a 200 when passing in _elements and searching via POST. (FUTURE:
+   * Expand to verify _elements functionality in BFD-3046).
    */
   @Test
-  public void testEobByPatientIdWithExcludeSamhsaDefaultExpectNoFiltering() {
+  public void testEobPostByPatientIdWithElementsExpect200() {
 
-    // Adjust the sampleA data that was loaded to include some samhsa data by passing true
-    String patientId = testUtils.getPatientId(testUtils.loadSampleASamhsaData());
-    String requestString = eobEndpoint + "?patient=" + patientId;
+    List<Object> loadedData = testUtils.loadSampleAData();
+    String patientId = testUtils.getPatientId(loadedData);
+    // _search needed to distinguish the POST version of the endpoint (HAPI-FHIR)
+    String requestString = eobEndpoint + "_search";
+
+    String formParams = "patient=" + patientId + "&_elements=extension.url,identifier.system";
+
+    given()
+        // Needed POST header for passing the params in the POST body
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .spec(requestAuth)
+        .body(formParams)
+        .expect()
+        .log()
+        .ifError()
+        .body("resourceType", equalTo("Bundle"))
+        .statusCode(200)
+        .when()
+        .post(requestString);
+  }
+
+  /** Verifies that the EOB returns a 400 when passing in _elements and searching via GET. */
+  @Test
+  public void testEobGetByPatientIdWithElementsExpect400() {
+
+    List<Object> loadedData = testUtils.loadSampleAData();
+    String patientId = testUtils.getPatientId(loadedData);
+    String requestString =
+        eobEndpoint + "?patient=" + patientId + "&_elements=extension.url,identifier.system";
 
     given()
         .spec(requestAuth)
         .expect()
-        .body("resourceType", equalTo("Bundle"))
-        .body("entry.size()", equalTo(8))
-        // Check nothing is filtered and samhsa data is returned
-        .body(
-            "entry.find { it.resource.id.contains('carrier') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('hha') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('dme') }.resource.item.productOrService.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_CPT_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('hospice') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('inpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('outpatient') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        .body(
-            "entry.find { it.resource.id.contains('snf') }.resource.diagnosis.diagnosisCodeableConcept.coding.code.flatten()",
-            hasItem(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE))
-        // Make sure pde is there too
-        .body("entry.resource.id", hasItem(containsString("pde")))
-        .statusCode(200)
+        .statusCode(400)
+        .body("issue.severity", hasItem("error"))
+        .body("issue.diagnostics", hasItem("_elements tag is only supported via POST request"))
         .when()
         .get(requestString);
   }

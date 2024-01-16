@@ -49,22 +49,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
-      - name: 'Generate maven toolchain config'
-        run: |
-          cat << EOF > ~/.m2/toolchains.xml
-          <toolchains>
-            <toolchain>
-              <type>jdk</type>
-              <provides>
-                <version>21</version>
-                <vendor>OpenJDK</vendor>
-              </provides>
-              <configuration>
-                <jdkHome>$JAVA_HOME</jdkHome>
-              </configuration>
-            </toolchain>
-          </toolchains>
-          EOF
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
         run: mvn com.spotify.fmt:fmt-maven-plugin:check
         working-directory: ./apps
@@ -83,22 +67,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
-      - name: 'Generate Maven Config'
-        run: |
-          cat << EOF > ~/.m2/toolchains.xml
-          <toolchains>
-            <toolchain>
-              <type>jdk</type>
-              <provides>
-                <version>21</version>
-                <vendor>OpenJDK</vendor>
-              </provides>
-              <configuration>
-                <jdkHome>$JAVA_HOME</jdkHome>
-              </configuration>
-            </toolchain>
-          </toolchains>
-          EOF
 
       - name: 'Run Maven Build'
         run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false verify
