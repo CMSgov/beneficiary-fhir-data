@@ -36,7 +36,7 @@ public final class S3RifFile implements RifFile {
   private final DataSetManifestEntry manifestEntry;
 
   /** The manifest download result. */
-  private final Future<NewDataSetQueue.ManifestEntry> manifestEntryDownload;
+  private final Future<DataSetQueue.ManifestEntry> manifestEntryDownload;
 
   /**
    * Constructs a new {@link S3RifFile} instance.
@@ -50,7 +50,7 @@ public final class S3RifFile implements RifFile {
   public S3RifFile(
       MetricRegistry appMetrics,
       DataSetManifestEntry manifestEntry,
-      Future<NewDataSetQueue.ManifestEntry> manifestEntryDownload) {
+      Future<DataSetQueue.ManifestEntry> manifestEntryDownload) {
     Objects.requireNonNull(appMetrics);
     Objects.requireNonNull(manifestEntry);
     Objects.requireNonNull(manifestEntryDownload);
@@ -85,7 +85,7 @@ public final class S3RifFile implements RifFile {
   /** {@inheritDoc} */
   @Override
   public InputStream open() {
-    NewDataSetQueue.ManifestEntry fileDownloadResult = waitForDownload();
+    DataSetQueue.ManifestEntry fileDownloadResult = waitForDownload();
 
     // Open a stream for the file.
     InputStream fileDownloadStream;
@@ -103,7 +103,7 @@ public final class S3RifFile implements RifFile {
    *
    * @return the completed {@link ManifestEntryDownloadResult} for {@link #manifestEntryDownload}
    */
-  private NewDataSetQueue.ManifestEntry waitForDownload() {
+  private DataSetQueue.ManifestEntry waitForDownload() {
     Timer.Context downloadWaitTimer = null;
     if (!manifestEntryDownload.isDone()) {
       downloadWaitTimer =
@@ -114,7 +114,7 @@ public final class S3RifFile implements RifFile {
     }
 
     // Get the file download result, blocking and waiting if necessary.
-    NewDataSetQueue.ManifestEntry fileDownloadResult;
+    DataSetQueue.ManifestEntry fileDownloadResult;
     try {
       fileDownloadResult = manifestEntryDownload.get(2, TimeUnit.HOURS);
     } catch (InterruptedException e) {
@@ -152,7 +152,7 @@ public final class S3RifFile implements RifFile {
      * wait for completion.
      */
     try {
-      NewDataSetQueue.ManifestEntry fileDownloadResult = waitForDownload();
+      DataSetQueue.ManifestEntry fileDownloadResult = waitForDownload();
       fileDownloadResult.getFileData().delete();
     } catch (IOException e) {
       throw new UncheckedIOException(e);

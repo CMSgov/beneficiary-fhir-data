@@ -5,7 +5,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.OldDataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.TaskExecutor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
@@ -93,7 +93,7 @@ public final class S3TaskManager {
   }
 
   /**
-   * The {@link DataSetQueue} needs to call this method as it discovers that {@link
+   * The {@link OldDataSetQueue} needs to call this method as it discovers that {@link
    * DataSetManifest}s are no longer present in the "Incoming" queue in S3 -- most likely because
    * they've been successfully processed and moved elsewhere. This gives {@link S3TaskManager} a
    * chance to remove any dangling references to the {@link DataSetManifest}, preventing memory

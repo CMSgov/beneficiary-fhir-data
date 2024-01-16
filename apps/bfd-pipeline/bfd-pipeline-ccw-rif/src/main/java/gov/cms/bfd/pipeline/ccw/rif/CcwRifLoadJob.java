@@ -9,7 +9,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.NewDataSetQueue;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -169,7 +169,7 @@ public final class CcwRifLoadJob implements PipelineJob {
   private final CcwRifLoadJobStatusReporter statusReporter;
 
   /** The queue of S3 data to be processed. */
-  private final NewDataSetQueue dataSetQueue;
+  private final DataSetQueue dataSetQueue;
 
   private final ExecutorService downloadService;
 
@@ -179,7 +179,7 @@ public final class CcwRifLoadJob implements PipelineJob {
    *
    * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
-   * @param dataSetQueue the {@link NewDataSetQueue} to use
+   * @param dataSetQueue the {@link DataSetQueue} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
    * @param isIdempotentMode the {@link boolean} TRUE if running in idempotent mode
    * @param runInterval used to construct the job schedule
@@ -188,7 +188,7 @@ public final class CcwRifLoadJob implements PipelineJob {
   public CcwRifLoadJob(
       PipelineApplicationState appState,
       ExtractionOptions options,
-      NewDataSetQueue dataSetQueue,
+      DataSetQueue dataSetQueue,
       DataSetMonitorListener listener,
       boolean isIdempotentMode,
       Optional<Duration> runInterval,
@@ -237,13 +237,13 @@ public final class CcwRifLoadJob implements PipelineJob {
         String.format("no data file found for entry name: name=%s", entry.getName()));
   }
 
-  private boolean isEligibleManifest(NewDataSetQueue.Manifest manifest) {
+  private boolean isEligibleManifest(DataSetQueue.Manifest manifest) {
     final var dataSetManifest = manifest.getManifest();
     return options.getDataSetFilter().test(dataSetManifest)
         && !dataSetManifest.getId().isFutureManifest();
   }
 
-  private List<NewDataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
+  private List<DataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
     final Instant minEligibleTime = now.minus(MAX_MANIFEST_AGE);
     return dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
   }
@@ -356,7 +356,7 @@ public final class CcwRifLoadJob implements PipelineJob {
        * background.
        */
       if (eligibleManifests.size() > 1) {
-        NewDataSetQueue.Manifest secondManifestToProcess = eligibleManifests.get(1);
+        DataSetQueue.Manifest secondManifestToProcess = eligibleManifests.get(1);
         Path tmpdir = Paths.get(System.getProperty("java.io.tmpdir"));
         long usableFreeTempSpace;
         try {

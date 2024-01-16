@@ -8,6 +8,7 @@ import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -28,7 +29,7 @@ public class S3FileCache {
 
   public S3FileCache(MetricRegistry appMetrics, S3Dao s3Dao, String s3Bucket) throws IOException {
     this.appMetrics = appMetrics;
-    final Path cacheDirectory = java.nio.file.Files.createTempDirectory("s3cache");
+    final Path cacheDirectory = Files.createTempDirectory("s3cache");
     s3DirectoryDao = new S3DirectoryDao(s3Dao, s3Bucket, "", cacheDirectory, true, true);
   }
 

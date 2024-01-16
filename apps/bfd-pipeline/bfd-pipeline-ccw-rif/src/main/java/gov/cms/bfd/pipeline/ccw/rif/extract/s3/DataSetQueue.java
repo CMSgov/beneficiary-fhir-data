@@ -1,266 +1,153 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
+import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId.parseManifestIdFromS3Key;
+import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache.Md5Result.MISMATCH;
+
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
+import com.google.common.io.ByteSource;
+import gov.cms.bfd.model.rif.entities.S3DataFile;
+import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
-import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary;
-import jakarta.xml.bind.JAXBException;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
-import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.core.exception.SdkServiceException;
+import javax.annotation.Nonnull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-/** Represents and manages the queue of data sets in S3 to be processed. */
-public final class DataSetQueue {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetQueue.class);
+@AllArgsConstructor
+public class DataSetQueue {
+  public static final String MD5ChecksumMetaDataField = "md5chksum";
+  static final String TIMER_READ_MANIFESTS =
+      MetricRegistry.name(DataSetQueue.class, "readEligibleManifests");
+  static final String TIMER_DOWNLOAD_MANIFEST =
+      MetricRegistry.name(DataSetQueue.class, "downloadManifest");
+  static final String TIMER_DOWNLOAD_ENTRY =
+      MetricRegistry.name(DataSetQueue.class, "downloadEntry");
+  static final String TIMER_MANIFEST_DB_UPDATE =
+      MetricRegistry.name(DataSetQueue.class, "updateManifestInDb");
 
   /** The metric registry. */
   private final MetricRegistry appMetrics;
 
-  /** The extraction options. */
-  private final ExtractionOptions options;
+  private final S3Dao s3Dao;
+  private final String s3Bucket;
+  private final S3ManifestDbDao s3Records;
+  private final S3FileCache s3Files;
 
-  /** The S3 task manager. */
-  private final S3TaskManager s3TaskManager;
-
-  /**
-   * The {@link DataSetManifest}s waiting to be processed, ordered by their {@link
-   * DataSetManifestId} in ascending order such that the first element represents the {@link
-   * DataSetManifest} that should be processed next.
-   */
-  private final SortedSet<DataSetManifest> manifestsToProcess;
-
-  /**
-   * Tracks the {@link DataSetManifest#getId()} values of the most recently processed data sets, to
-   * ensure that the same data set isn't processed more than once.
-   */
-  private final Set<DataSetManifestId> recentlyProcessedManifests;
-
-  /**
-   * Tracks the {@link DataSetManifestId}s of data sets that are known to be invalid. Typically,
-   * these are data sets from a new schema version that aren't supported yet. This may seem
-   * unnecessary (i.e. "don't let admins push things until they're supported"), but it's proven to
-   * be very useful, operationally.
-   */
-  private final Set<DataSetManifestId> knownInvalidManifests;
-
-  /** The number of completed manifests. */
-  private Integer completedManifestsCount;
-
-  /**
-   * Constructs a new {@link DataSetQueue} instance.
-   *
-   * @param appMetrics the {@link MetricRegistry} for the overall application
-   * @param options the {@link ExtractionOptions} to use
-   * @param s3TaskManager the {@link S3TaskManager} to use
-   */
-  public DataSetQueue(
-      MetricRegistry appMetrics, ExtractionOptions options, S3TaskManager s3TaskManager) {
-    this.appMetrics = appMetrics;
-    this.options = options;
-    this.s3TaskManager = s3TaskManager;
-
-    this.manifestsToProcess = new TreeSet<>();
-    this.recentlyProcessedManifests = new HashSet<>();
-    this.knownInvalidManifests = new HashSet<>();
-  }
-
-  /**
-   * Updates {@link #manifestsToProcess}, listing the manifests available in S3 right now, then
-   * adding those that weren't found before and removing those that are no longer pending.
-   */
-  public void updatePendingDataSets() {
-    // Find the pending manifests.
-    Set<DataSetManifestId> manifestIdsPendingNow = listPendingManifests();
-
-    /*
-     * Add any newly discovered manifests to the list of those to be
-     * processed. Ignore those that are already known to be invalid or
-     * complete, and watch out for newly-discovered-to-be-invalid ones.
-     */
-    Set<DataSetManifestId> newManifests = new HashSet<>(manifestIdsPendingNow);
-    newManifests.removeAll(knownInvalidManifests);
-    newManifests.removeAll(recentlyProcessedManifests);
-    newManifests.removeAll(
-        manifestsToProcess.stream().map(DataSetManifest::getId).collect(Collectors.toSet()));
-    // Add manifests from Incoming
-    newManifests.forEach(
-        manifestId ->
-            addManifestToList(
-                manifestId, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)));
-    // Add manifests from Synthetic/Incoming
-    newManifests.forEach(
-        manifestId ->
-            addManifestToList(
-                manifestId,
-                manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)));
-
-    /*
-     * Any manifests that weren't found have presumably been processed and
-     * we should clean up the state that relates to them, to prevent memory
-     * leaks.
-     */
-    for (Iterator<DataSetManifest> manifestsToProcessIterator = manifestsToProcess.iterator();
-        manifestsToProcessIterator.hasNext(); ) {
-      DataSetManifestId manifestId = manifestsToProcessIterator.next().getId();
-      if (!manifestIdsPendingNow.contains(manifestId)) {
-        manifestsToProcessIterator.remove();
-        knownInvalidManifests.remove(manifestId);
-        recentlyProcessedManifests.remove(manifestId);
-        s3TaskManager.cleanupOldDataSet(manifestId);
+  public List<Manifest> readEligibleManifests(
+      Instant currentTime,
+      Instant minTime,
+      ThrowingFunction<Boolean, Manifest, IOException> acceptanceCriteria,
+      int maxToRead)
+      throws IOException {
+    try (var ignored1 = appMetrics.timer(TIMER_READ_MANIFESTS).time()) {
+      final List<ParsedManifestId> possiblyEligibleManifestIds = scanS3ForManifests(minTime);
+      final List<Manifest> manifests = new ArrayList<>();
+      for (ParsedManifestId manifestId : possiblyEligibleManifestIds) {
+        if (manifests.size() >= maxToRead) {
+          break;
+        }
+        final var s3Key = manifestId.getS3Key();
+        final DownloadedFile manifestFile;
+        final DataSetManifest dataSetManifest;
+        try (var ignored2 = appMetrics.timer(TIMER_DOWNLOAD_MANIFEST).time()) {
+          manifestFile = downloadAndCheckMD5(s3Key);
+          dataSetManifest = parseManifestFile(s3Key, manifestFile.getBytes());
+        }
+        final S3ManifestFile manifestRecord;
+        try (var ignored3 = appMetrics.timer(TIMER_MANIFEST_DB_UPDATE).time()) {
+          manifestRecord =
+              s3Records.insertOrReadManifestAndDataFiles(s3Key, dataSetManifest, currentTime);
+        }
+        final var manifest =
+            new Manifest(manifestId.getManifestId(), manifestFile, dataSetManifest, manifestRecord);
+        if (acceptanceCriteria.apply(manifest)) {
+          manifests.add(manifest);
+        }
       }
+      return manifests;
     }
   }
 
-  /**
-   * Adds a manifest to the list of manifests to load if it meets filtering criteria and is not a
-   * future manifest.
-   *
-   * @param manifestId the manifest id
-   * @param manifestS3Key the manifest s3 key
-   */
-  private void addManifestToList(
-      DataSetManifest.DataSetManifestId manifestId, String manifestS3Key) {
-    /*
-     * If the keyspace we're scanning doesnt exist, bail early (This can happen if
-     * we're loading synthetic data,
-     * as it checks the regular incoming folder for the manifest first.)
-     */
-    if (!s3TaskManager.getS3Dao().objectExists(options.getS3BucketName(), manifestS3Key)) {
-      LOGGER.debug(
-          "Unable to find keyspace {} in bucket {} while scanning for manifests.",
-          manifestS3Key,
-          options.getS3BucketName());
-      return;
+  public ManifestEntry downloadManifestEntry(S3DataFile record) throws IOException {
+    try (var ignored = appMetrics.timer(TIMER_DOWNLOAD_ENTRY).time()) {
+      final var s3Key = record.getS3Key();
+      final var downloadedFile = downloadAndCheckMD5(s3Key);
+      return new ManifestEntry(record, downloadedFile);
     }
-
-    DataSetManifest manifest;
-    try {
-      manifest = readManifest(s3TaskManager.getS3Dao(), options, manifestS3Key);
-    } catch (JAXBException | SAXException e) {
-      /*
-       * We want to terminate the ETL load process if an invalid manifest was found
-       * such as a incorrect version number
-       */
-      LOGGER.error(
-          "Found data set with invalid manifest at '{}'. Load service will terminating. Error: {}",
-          manifestS3Key,
-          e.toString());
-      knownInvalidManifests.add(manifestId);
-      throw new RuntimeException(e);
-    }
-
-    // Skip future dates, so we can hold (synthetic) data to load in the future
-    if (manifestId.isFutureManifest()) {
-      // Don't log to avoid noise from hundreds of skipped pending future files
-      return;
-    }
-
-    // Finally, ensure that the manifest passes the options filter.
-    if (!options.getDataSetFilter().test(manifest)) {
-      LOGGER.debug("Skipping data set that doesn't pass filter: {}", manifest.toString());
-      return;
-    }
-
-    // Everything checks out. Add it to the list!
-    manifestsToProcess.add(manifest);
   }
 
-  /**
-   * Lists the pending manifests.
-   *
-   * @return the {@link DataSetManifestId}s for the manifests that are found in S3 under the {@value
-   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} key prefix, sorted in expected processing order.
-   */
-  private Set<DataSetManifestId> listPendingManifests() {
-    Timer.Context timerS3Scanning =
-        appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "s3Scanning")).time();
-    LOGGER.debug("Scanning for data sets in S3...");
-    Set<DataSetManifestId> manifestIds = new HashSet<>();
-
-    /*
-     * Loop through all of the pages, looking for manifests.
-     */
-    AtomicInteger completedManifestsCount = new AtomicInteger();
-    Consumer<S3ObjectSummary> addToManifest =
-        s3Object -> {
-          if (CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3Object.getKey()).matches()) {
-            /*
-             * We've got an object that *looks like* it might be a
-             * manifest file. But we need to parse the key to ensure
-             * that it starts with a valid timestamp.
-             */
-            DataSetManifestId manifestId =
-                DataSetManifestId.parseManifestIdFromS3Key(s3Object.getKey());
-            if (manifestId != null) {
-              manifestIds.add(manifestId);
-            }
-          } else if (CcwRifLoadJob.REGEX_COMPLETED_MANIFEST.matcher(s3Object.getKey()).matches()) {
-            completedManifestsCount.incrementAndGet();
-          }
-        };
-    /*
-     * Request a list of all objects in the configured bucket and directory.
-     * (In the results, we'll be looking for the oldest manifest file, if
-     * any.)
-     */
-    s3TaskManager
-        .getS3Dao()
-        .listObjects(options.getS3BucketName(), Optional.empty(), options.getS3ListMaxKeys())
-        .forEach(addToManifest);
-
-    this.completedManifestsCount = completedManifestsCount.get();
-
-    LOGGER.debug("Scanned for data sets in S3. Found '{}'.", manifestsToProcess.size());
-    timerS3Scanning.close();
-
-    return manifestIds;
+  public boolean allEntriesExistInS3(S3ManifestFile record) {
+    final var manifestS3Prefix = S3FileCache.extractPrefixFromS3Key(record.getS3Key());
+    final var namesAtPrefix = s3Files.fetchFileNamesWithPrefix(manifestS3Prefix);
+    return record.getDataFiles().stream()
+        .map(S3DataFile::getS3Key)
+        .allMatch(namesAtPrefix::contains);
   }
 
-  /**
-   * Reads the {@link DataSetManifest} that was contained in the specified S3 object.
-   *
-   * @param s3Dao the {@link S3Dao} client to use
-   * @param options the {@link ExtractionOptions} to use
-   * @param manifestToProcessKey the {@link S3ObjectSummary#getKey()} of the S3 object for the
-   *     manifest to be read
-   * @return the {@link DataSetManifest} that was contained in the specified S3 object
-   * @throws JAXBException Any {@link JAXBException}s that are encountered will be bubbled up. These
-   *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
-   *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
-   *     production, and care should be taken to account for its possibility.
-   * @throws SAXException Any {@link SAXException}s that are encountered will be bubbled up. These
-   *     generally indicate that the {@link DataSetManifest} could not be parsed because its content
-   *     was invalid in some way. Note: As of 2017-03-24, this has been observed multiple times in
-   *     production, and care should be taken to account for its possibility.
-   */
-  public DataSetManifest readManifest(
-      S3Dao s3Dao, ExtractionOptions options, String manifestToProcessKey)
-      throws JAXBException, SAXException {
-    try (InputStream dataManifestStream =
-        s3Dao.readObject(options.getS3BucketName(), manifestToProcessKey)) {
+  public void markAsStarted(S3ManifestFile manifestFile) {
+    if (manifestFile.getStatus() == S3ManifestFile.ManifestStatus.DISCOVERED) {
+      manifestFile.setStatus(S3ManifestFile.ManifestStatus.STARTED);
+      s3Records.updateS3ManifestAndDataFiles(manifestFile);
+    }
+  }
+
+  public void markAsProcessed(S3ManifestFile manifestFile) {
+    manifestFile.setStatus(S3ManifestFile.ManifestStatus.COMPLETED);
+    s3Records.updateS3ManifestAndDataFiles(manifestFile);
+  }
+
+  public void markAsRejected(S3ManifestFile manifestFile) {
+    manifestFile.setStatus(S3ManifestFile.ManifestStatus.REJECTED);
+    s3Records.updateS3ManifestAndDataFiles(manifestFile);
+  }
+
+  private DownloadedFile downloadAndCheckMD5(String s3Key) throws IOException {
+    final var manifestFile = s3Files.downloadFile(s3Key);
+    if (s3Files.checkMD5(manifestFile, MD5ChecksumMetaDataField) == MISMATCH) {
+      throw new IOException(
+          String.format("MD5 checksum mismatch for file %s", manifestFile.getS3Key()));
+    }
+    return manifestFile;
+  }
+
+  private List<ParsedManifestId> scanS3ForManifests(Instant minTimestamp) {
+    final var ineligibleS3Keys = s3Records.readIneligibleManifestS3Keys(minTimestamp);
+    return Stream.concat(
+            s3Dao.listObjects(s3Bucket, CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS),
+            s3Dao.listObjects(s3Bucket, CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS))
+        .filter(s3Summary -> !ineligibleS3Keys.contains(s3Summary.getKey()))
+        .flatMap(s3Summary -> parseManifestEntryFromS3Key(s3Summary).stream())
+        .filter(parsedManifestId -> parsedManifestId.manifestId.isAfter(minTimestamp))
+        .sorted()
+        .toList();
+  }
+
+  private Optional<ParsedManifestId> parseManifestEntryFromS3Key(S3Dao.S3ObjectSummary s3Summary) {
+    DataSetManifest.DataSetManifestId manifestId = parseManifestIdFromS3Key(s3Summary.getKey());
+    if (manifestId == null) {
+      return Optional.empty();
+    } else {
+      return Optional.of(new ParsedManifestId(s3Summary, manifestId));
+    }
+  }
+
+  private DataSetManifest parseManifestFile(String manifestS3Key, ByteSource fileBytes) {
+    try (InputStream dataManifestStream = fileBytes.openBufferedStream()) {
       DataSetManifest manifest =
           DataSetManifestFactory.newInstance().parseManifest(dataManifestStream);
+
       // Setup the manifest incoming/outgoing location
-      if (manifestToProcessKey.contains(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)) {
+      if (manifestS3Key.contains(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)) {
         manifest.setManifestKeyIncomingLocation(
             CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS);
         manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS);
@@ -270,99 +157,57 @@ public final class DataSetQueue {
       }
 
       return manifest;
-
-    } catch (SdkServiceException e) {
-      /*
-       * This could likely be retried, but we don't currently support
-       * that. For now, just go boom.
-       */
-      throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
-    } catch (SdkClientException e) {
-      /*
-       * This could likely be retried, but we don't currently support
-       * that. For now, just go boom.
-       */
-      throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
-    } catch (IOException e) {
-      /*
-       * This could likely be retried, but we don't currently support
-       * that. For now, just go boom.
-       */
-      throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
+    } catch (Exception e) {
+      throw new RuntimeException("Error reading manifest: " + manifestS3Key, e);
     }
   }
 
-  /**
-   * Gets the manifests to process.
-   *
-   * @return the {@link Stream} that QueuedDataSets should be pulled from, when requested
-   */
-  private Stream<DataSetManifest> getManifestsToProcess() {
-    return manifestsToProcess.stream()
-        .filter(manifest -> !recentlyProcessedManifests.contains(manifest.getId()));
+  @Data
+  public static class ParsedManifestId implements Comparable<ParsedManifestId> {
+    private final S3Dao.S3ObjectSummary s3Summary;
+    private final DataSetManifest.DataSetManifestId manifestId;
+
+    public String getS3Key() {
+      return s3Summary.getKey();
+    }
+
+    @Override
+    public int compareTo(@Nonnull ParsedManifestId o) {
+      return manifestId.compareTo(o.manifestId);
+    }
   }
 
-  /**
-   * Determines if there are no remaining manifests to process.
-   *
-   * @return <code>false</code> if there is at least one pending {@link DataSetManifest} to process,
-   *     <code>true</code> if not
-   */
-  public boolean isEmpty() {
-    return getManifestsToProcess().count() == 0;
+  @Data
+  public static class Manifest {
+    private final DataSetManifest.DataSetManifestId manifestId;
+    private final DownloadedFile fileData;
+    private final DataSetManifest manifest;
+    private final S3ManifestFile record;
   }
 
-  /**
-   * Gets the next data set to process.
-   *
-   * @return the {@link DataSetManifest} for the next data set that should be processed, if any
-   */
-  public Optional<DataSetManifest> getNextDataSetToProcess() {
-    return getManifestsToProcess().findFirst();
-  }
+  @Data
+  public class ManifestEntry {
+    private final S3DataFile record;
+    private final DownloadedFile fileData;
 
-  /**
-   * Gets the second data set to process.
-   *
-   * @return the {@link DataSetManifest} for the next-but-one data set that should be processed, if
-   *     any
-   */
-  public Optional<DataSetManifest> getSecondDataSetToProcess() {
-    return getManifestsToProcess().skip(1).findFirst();
-  }
+    public void deleteFile() throws IOException {
+      fileData.delete();
+    }
 
-  /**
-   * Gets the pending manifests count.
-   *
-   * @return the count of {@link DataSetManifest}s found for data sets that need to be processed
-   *     (including those known to be invalid)
-   */
-  public int getPendingManifestsCount() {
-    return manifestsToProcess.size()
-        + knownInvalidManifests.size()
-        - recentlyProcessedManifests.size();
-  }
+    public boolean isIncomplete() {
+      return record.getStatus() != S3DataFile.FileStatus.COMPLETED;
+    }
 
-  /**
-   * Gets the completed manifests count.
-   *
-   * @return the count of {@link DataSetManifest}s found for data sets that have already been
-   *     processed
-   */
-  public Optional<Integer> getCompletedManifestsCount() {
-    return completedManifestsCount == null
-        ? Optional.empty()
-        : Optional.of(recentlyProcessedManifests.size() + completedManifestsCount);
-  }
+    public void markAsStarted() {
+      if (record.getStatus() == S3DataFile.FileStatus.DISCOVERED) {
+        record.setStatus(S3DataFile.FileStatus.STARTED);
+        s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
+      }
+    }
 
-  /**
-   * Marks the specified {@link DataSetManifest} as processed, removing it from the list of pending
-   * data sets in this {@link DataSetQueue}.
-   *
-   * @param manifest the {@link DataSetManifest} for the data set that has been successfully
-   *     processed
-   */
-  public void markProcessed(DataSetManifest manifest) {
-    this.recentlyProcessedManifests.add(manifest.getId());
+    public void markAsCompleted() {
+      record.setStatus(S3DataFile.FileStatus.COMPLETED);
+      s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
+    }
   }
 }

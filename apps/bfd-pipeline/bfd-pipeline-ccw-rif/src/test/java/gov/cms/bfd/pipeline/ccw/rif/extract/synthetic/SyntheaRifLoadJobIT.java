@@ -20,9 +20,9 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.NewDataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
@@ -153,8 +153,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
       final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
-          new NewDataSetQueue(
-              pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -258,8 +257,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
       final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
-          new NewDataSetQueue(
-              pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
       CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
