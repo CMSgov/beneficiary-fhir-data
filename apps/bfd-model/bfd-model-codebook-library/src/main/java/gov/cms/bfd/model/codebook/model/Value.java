@@ -7,6 +7,7 @@ import jakarta.xml.bind.annotation.XmlValue;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Each {@link Value} instance in a {@link ValueGroup} represents one of the allowed coded values
@@ -18,6 +19,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public final class Value {
 
@@ -49,17 +51,5 @@ public final class Value {
   @XmlValue
   public String getDescription() {
     return description;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("Value [code=");
-    builder.append(code);
-    builder.append(", description=");
-    builder.append(description);
-    builder.append("]");
-    return builder.toString();
   }
 }
