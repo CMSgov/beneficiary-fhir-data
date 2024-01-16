@@ -17,11 +17,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Represents the <code>manifest.xml</code> files that detail which specific files are included in a
  * transfer from the CMS Chronic Conditions Warehouse to the Blue Button API backend.
  */
+@NoArgsConstructor(force = true)
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "",
@@ -29,33 +33,38 @@ import java.util.regex.Matcher;
 @XmlRootElement(name = "dataSetManifest")
 public final class DataSetManifest implements Comparable<DataSetManifest> {
   /** A timestamp {@link String} that maps to an S3 bucket folder. */
+  @Getter
   @XmlAttribute(name = "timestamp", required = true)
   private final String timestampText;
 
   /** A numeric sequence identifier as provided by CCW for this batch of data. */
+  @Getter
   @XmlAttribute(name = "sequenceId", required = true)
   private int sequenceId;
 
   /** A boolean denoting if this is synthetic data (true) or not (false}. */
+  @Getter
   @XmlAttribute(name = "syntheticData", required = false)
   private boolean syntheticData = false;
 
   /** A list of {@link DataSetManifestEntry} elements that identify a RIF file. */
+  @Getter
   @XmlElement(name = "entry")
   private final List<DataSetManifestEntry> entries;
 
   /** A {@link PreValidationProperties} optional element that provides pre-validation meta-data. */
+  @Setter
   @XmlElement(name = "preValidationProperties", required = false)
   protected PreValidationProperties preValidationProperties;
 
   /** Denotes the s3 key where the manifest was located when it was first read. */
-  @XmlTransient private String manifestKeyIncomingLocation;
+  @Getter @Setter @XmlTransient private String manifestKeyIncomingLocation;
 
   /**
    * Denotes the s3 key where the manifest and its files should be placed when it's processing is
    * complete.
    */
-  @XmlTransient private String manifestKeyDoneLocation;
+  @Getter @Setter @XmlTransient private String manifestKeyDoneLocation;
 
   /**
    * Denotes the s3 key where the manifest and its files should be placed when it's processing is
@@ -66,12 +75,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
-   * @param timestampText the value to use for {@link #getTimestampText()}
-   * @param sequenceId the value to use for {@link #getSequenceId()}
-   * @param syntheticData the value to use for {@link #isSyntheticData()}
+   * @param timestampText the value to use for getTimestampText()
+   * @param sequenceId the value to use for getSequenceId()
+   * @param syntheticData the value to use for isSyntheticData()
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
    * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
-   * @param entries the value to use for {@link #getEntries()}
+   * @param entries the value to use for getEntries()
    */
   public DataSetManifest(
       String timestampText,
@@ -92,10 +101,10 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
-   * @param timestamp the value to use for {@link #getTimestampText()}
-   * @param sequenceId the value to use for {@link #getSequenceId()}
-   * @param syntheticData the value to use for {@link #isSyntheticData()}
-   * @param entries the value to use for {@link #getEntries()}
+   * @param timestamp the value to use for getTimestampText()
+   * @param sequenceId the value to use for getSequenceId()
+   * @param syntheticData the value to use for isSyntheticData()
+   * @param entries the value to use for getEntries()
    */
   public DataSetManifest(
       Instant timestamp,
@@ -116,12 +125,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
-   * @param timestampText the value to use for {@link #getTimestampText()}
-   * @param sequenceId the value to use for {@link #getSequenceId()}
-   * @param syntheticData the value to use for {@link #isSyntheticData()}
+   * @param timestampText the value to use for getTimestampText()
+   * @param sequenceId the value to use for getSequenceId()
+   * @param syntheticData the value to use for isSyntheticData()
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
    * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
-   * @param entries the value to use for {@link #getEntries()}
+   * @param entries the value to use for getEntries()
    */
   public DataSetManifest(
       String timestampText,
@@ -142,12 +151,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
-   * @param timestamp the value to use for {@link #getTimestampText()}
-   * @param sequenceId the value to use for {@link #getSequenceId()}
-   * @param syntheticData the value to use for {@link #isSyntheticData()}
+   * @param timestamp the value to use for getTimestampText()
+   * @param sequenceId the value to use for getSequenceId()
+   * @param syntheticData the value to use for isSyntheticData()
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
    * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
-   * @param entries the value to use for {@link #getEntries()}
+   * @param entries the value to use for getEntries()
    */
   public DataSetManifest(
       Instant timestamp,
@@ -165,14 +174,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
         Arrays.asList(entries));
   }
 
-  /** This default constructor is required by JAX-B, and should not otherwise be used. */
-  @SuppressWarnings("unused")
-  private DataSetManifest() {
-    this.timestampText = null;
-    this.entries = null;
-    this.sequenceId = 0;
-  }
-
   /**
    * Returns the original S3 key for this manifest.
    *
@@ -183,48 +184,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   }
 
   /**
-   * Gets the timestamp text.
-   *
-   * @return the {@link String} representation of {@link #getTimestamp()} used to identify this
-   *     {@link DataSetManifest} in S3 and elsewhere
-   */
-  public String getTimestampText() {
-    /*
-     * Design note: As discovered in CBBD-298, Java's DateTimeFormatter and
-     * Instant classes don't always preserve the precision of parsed
-     * timestamps. Accordingly, we need to store this value as a String to
-     * ensure that the S3 key of the manifest isn't mangled.
-     */
-
-    return timestampText;
-  }
-
-  /**
    * Gets the timestamp as an {@link Instant}.
    *
    * @return the date and time that the represented data set was created/prepared at
    */
   public Instant getTimestamp() {
     return Instant.parse(timestampText.trim());
-  }
-
-  /**
-   * Gets the {@link #sequenceId}.
-   *
-   * @return the {@link int} sequence number of the file represented by this {@link DataSetManifest}
-   */
-  public int getSequenceId() {
-    return sequenceId;
-  }
-
-  /**
-   * Determines if this is synthetic data.
-   *
-   * @return the {@link boolean} denoting if the data is synthetic based on the {@link
-   *     DataSetManifest}
-   */
-  public boolean isSyntheticData() {
-    return syntheticData;
   }
 
   /**
@@ -238,51 +203,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   }
 
   /**
-   * Gets the {@link #entries}.
-   *
-   * @return the list of {@link DataSetManifestEntry} included in this {@link DataSetManifest}
-   */
-  public List<DataSetManifestEntry> getEntries() {
-    return entries;
-  }
-
-  /**
-   * Sets the {@link #manifestKeyIncomingLocation}.
-   *
-   * @param location the location
-   */
-  public void setManifestKeyIncomingLocation(String location) {
-    this.manifestKeyIncomingLocation = location;
-  }
-
-  /**
-   * Sets the {@link #manifestKeyDoneLocation}.
-   *
-   * @param location the location
-   */
-  public void setManifestKeyDoneLocation(String location) {
-    this.manifestKeyDoneLocation = location;
-  }
-
-  /**
-   * Gets the {@link #manifestKeyIncomingLocation}.
-   *
-   * @return the incoming location key
-   */
-  public String getManifestKeyIncomingLocation() {
-    return manifestKeyIncomingLocation;
-  }
-
-  /**
-   * Gets the {@link #manifestKeyDoneLocation}.
-   *
-   * @return the done location key
-   */
-  public String getManifestKeyDoneLocation() {
-    return manifestKeyDoneLocation;
-  }
-
-  /**
    * Gets the value of the syntheaEndStateProperties property.
    *
    * @return possible object is {@link PreValidationProperties }
@@ -291,15 +211,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     return preValidationProperties != null
         ? Optional.of(preValidationProperties)
         : Optional.empty();
-  }
-
-  /**
-   * Sets the {@link #preValidationProperties}.
-   *
-   * @param value allowed object is {@link PreValidationProperties }
-   */
-  public void setPreValidationProperties(PreValidationProperties value) {
-    this.preValidationProperties = value;
   }
 
   /** {@inheritDoc} */
@@ -332,6 +243,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * Each {@link DataSetManifestEntry} instance represents a single file included in a {@link
    * DataSetManifest}.
    */
+  @Getter
+  @NoArgsConstructor(force = true)
   @XmlAccessorType(XmlAccessType.FIELD)
   public static final class DataSetManifestEntry {
     /** The parent {@link DataSetManifest} of this element {@link DataSetManifestEntry}. */
@@ -349,8 +262,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Constructs a new {@link DataSetManifestEntry} instance.
      *
-     * @param name the value to use for {@link #getName()}
-     * @param type the value to use for {@link #getType()}
+     * @param name the value to use for getName()
+     * @param type the value to use for getType()
      */
     public DataSetManifestEntry(String name, RifFileType type) {
       this.parentManifest = null;
@@ -359,50 +272,13 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       this.exportType = null;
     }
 
-    /** This default constructor is required by JAX-B, and should not otherwise be used. */
-    @SuppressWarnings("unused")
-    private DataSetManifestEntry() {
-      this.name = null;
-      this.type = null;
-      this.exportType = null;
-    }
-
-    /**
-     * Gets the {@link #parentManifest}.
-     *
-     * @return the {@link DataSetManifest} that this {@link DataSetManifestEntry} is a part of
-     */
-    public DataSetManifest getParentManifest() {
-      return parentManifest;
-    }
-
-    /**
-     * Gets the {@link #name}.
-     *
-     * @return the name of the S3 object/file that is represented by this {@link
-     *     DataSetManifestEntry}, which is effectively a relative S3 key (relative to this <code>
-     *      manifest.xml</code> object's key, that is)
-     */
-    public String getName() {
-      return name;
-    }
-
-    /**
-     * Gets the {@link #type}.
-     *
-     * @return the {@link RifFileType} of the file represented by this {@link DataSetManifestEntry}
-     */
-    public RifFileType getType() {
-      return type;
-    }
-
     /**
      * Per the {@link Unmarshaller} JavaDocs, when unmarshalling {@link DataSetManifestEntry}
      * instances from XML via JAX-B, this method is called after all the properties (except IDREF)
      * are unmarshalled for this object, but before this object is set to the parent object.
      *
      * @param unmarshaller the {@link Unmarshaller} that created this instance
-     * @param parent the value to use for {@link #getParentManifest()}
+     * @param parent the value to use for getParentManifest()
      */
     void afterUnmarshal(Unmarshaller unmarshaller, Object parent) {
       this.parentManifest = (DataSetManifest) parent;
@@ -431,21 +307,21 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * can be determined.
    */
   public static final class DataSetManifestId implements Comparable<DataSetManifestId> {
-    /** a {@link String} derived {@link DataSetManifest#getTimestamp()} value. */
+    /** a {@link String} derived DataSetManifest.getTimestamp() value. */
     private final String timestampText;
 
     /** an {@link Instant} object derived timestampText {@link String} value. */
     private final Instant timestamp;
 
-    /** an integer value derived from {@link DataSetManifest#getSequenceId()} value. */
+    /** an integer value derived from DataSetManifest.getSequenceId() value. */
     private final int sequenceId;
 
     /**
      * Constructs a new {@link DataSetManifestId}.
      *
-     * @param timestampText a {@link String} representation of the {@link
-     *     DataSetManifest#getTimestamp()} value
-     * @param sequenceId the {@link DataSetManifest#getSequenceId()} value
+     * @param timestampText a {@link String} representation of the DataSetManifest.getTimestamp()
+     *     value
+     * @param sequenceId the DataSetManifest.getSequenceId() value
      */
     private DataSetManifestId(String timestampText, int sequenceId) {
       this.timestampText = timestampText;

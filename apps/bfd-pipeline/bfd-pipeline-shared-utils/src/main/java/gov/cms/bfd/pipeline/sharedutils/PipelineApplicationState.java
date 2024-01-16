@@ -12,13 +12,14 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
+import lombok.Getter;
 import org.hibernate.tool.schema.Action;
 
 /**
  * Stores the shared state needed by the Pipeline application. Note that it implements {@link
- * AutoCloseable} as it owns expensive resources that need to be closed, e.g. {@link
- * #getPooledDataSource()}.
+ * AutoCloseable} as it owns expensive resources that need to be closed, e.g. getPooledDataSource().
  */
+@Getter
 public final class PipelineApplicationState implements AutoCloseable {
   /** The persistence unit name for the adjudicated pipeline. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
@@ -46,8 +47,8 @@ public final class PipelineApplicationState implements AutoCloseable {
    * DataSource. This is the standard constructor used by PipelineApplication.
    *
    * @param meters the meters
-   * @param metrics the value to use for {@link #getMetrics()}
-   * @param pooledDataSource the value to use for {@link #getPooledDataSource()}
+   * @param metrics the value to use for getMetrics()
+   * @param pooledDataSource the value to use for getPooledDataSource()
    * @param persistenceUnitName the persistence unit name
    * @param clock the clock
    */
@@ -71,9 +72,9 @@ public final class PipelineApplicationState implements AutoCloseable {
    * unit tests.
    *
    * @param meters the meters
-   * @param metrics the value to use for {@link #getMetrics()}
-   * @param pooledDataSource the value to use for {@link #getPooledDataSource()}
-   * @param entityManagerFactory the value to use for {@link #getEntityManagerFactory()}
+   * @param metrics the value to use for getMetrics()
+   * @param pooledDataSource the value to use for getPooledDataSource()
+   * @param entityManagerFactory the value to use for getEntityManagerFactory()
    * @param clock the clock
    */
   @VisibleForTesting
@@ -94,7 +95,7 @@ public final class PipelineApplicationState implements AutoCloseable {
    * Create pooled data source used to communicate with the database.
    *
    * @param dataSourceFactory the {@link DataSourceFactory} to use for the application's DB (which
-   *     this will use to create {@link #getPooledDataSource()})
+   *     this will use to create getPooledDataSource())
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
@@ -143,51 +144,6 @@ public final class PipelineApplicationState implements AutoCloseable {
     EntityManagerFactory entityManagerFactory =
         Persistence.createEntityManagerFactory(persistenceUnitName, hibernateProperties);
     return entityManagerFactory;
-  }
-
-  /**
-   * Gets the {@link #meters}.
-   *
-   * @return the {@link MeterRegistry} for the application
-   */
-  public MeterRegistry getMeters() {
-    return meters;
-  }
-
-  /**
-   * Gets the {@link #metrics}.
-   *
-   * @return the {@link MetricRegistry} for the application
-   */
-  public MetricRegistry getMetrics() {
-    return metrics;
-  }
-
-  /**
-   * Gets the {@link #pooledDataSource}.
-   *
-   * @return the {@link HikariDataSource} that holds the application's database connection pool
-   */
-  public HikariDataSource getPooledDataSource() {
-    return pooledDataSource;
-  }
-
-  /**
-   * Gets the {@link #entityManagerFactory}.
-   *
-   * @return the {@link EntityManagerFactory} for the application
-   */
-  public EntityManagerFactory getEntityManagerFactory() {
-    return entityManagerFactory;
-  }
-
-  /**
-   * Gets the {@link #clock}.
-   *
-   * @return the Clock to use within the application
-   */
-  public Clock getClock() {
-    return clock;
   }
 
   /** {@inheritDoc} */
