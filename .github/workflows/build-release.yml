@@ -204,14 +204,11 @@ jobs:
       - name: Release
         # Naively, only create GitHub Release object for purported non-prerelease versions
         if: ${{ !contains(inputs.releaseVersion, '-') }}
-        uses: softprops/action-gh-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          prerelease: true
-          generate_release_notes: true
-          fail_on_unmatched_files: true
-          tag_name: "${{ inputs.releaseVersion }}"
+          makeLatest: true
+          generateReleaseNotes: true
+          artifactErrorsFailBuild: true
+          tag: "${{ inputs.releaseVersion }}"
           name: "v${{ inputs.releaseVersion }}"
-          files: |
-            *.csv
-            *.json
-            *.xlsx
+          artifacts: "*.csv,*.json,*.xlsx"
