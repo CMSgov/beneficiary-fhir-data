@@ -9,6 +9,8 @@ import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
@@ -39,11 +41,22 @@ public class DataSetQueue implements AutoCloseable {
   private final MetricRegistry appMetrics;
 
   private final S3ManifestDbDao s3Records;
+
   private final S3FileManager s3Files;
+
+  /**
+   * Used only for the soon to be obsolete S3 file move task.
+   *
+   * <p>TODO Remove this when file moves are no longer necessary.
+   */
+  private final S3TaskManager s3TaskManager;
 
   @Override
   public void close() throws Exception {
-    s3Files.close();
+    final var closer = new MultiCloser();
+    closer.close(s3Files::close);
+    closer.close(s3TaskManager::close);
+    closer.finish();
   }
 
   public List<Manifest> readEligibleManifests(
@@ -123,6 +136,19 @@ public class DataSetQueue implements AutoCloseable {
    */
   public long getAvailableDiskSpaceInBytes() throws IOException {
     return s3Files.getAvailableDiskSpaceInBytes();
+  }
+
+  /**
+   * Starts a background thread that moves all of the files associated with the specified manifest
+   * from the Incoming tree to the Done tree.
+   *
+   * <p>TODO Remove this method (and {@link #s3TaskManager} once S3 file movement is no longer
+   * necessary
+   *
+   * @param manifest the manifest to move
+   */
+  public void moveManifestFilesInS3(DataSetManifest manifest) {
+    s3TaskManager.moveManifestFilesInS3(manifest);
   }
 
   private DownloadedFile downloadAndCheckMD5(String s3Key) throws IOException {

@@ -388,13 +388,24 @@ public final class CcwRifLoadJob implements PipelineJob {
        */
       rifFiles.forEach(S3RifFile::cleanupTempFile);
     } else {
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
       /*
        * If here, Synthea pre-validation has failed; we want to move the S3 incoming
        * files to a failed folder; so instead of moving files to a done folder we'll just
        * replace the manifest's notion of its Done folder to a Failed folder.
        */
+      manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);
+      // TODO END remove once S3 file moves are no longer necessary.
+
+      /*
+       * If here, Synthea pre-validation has failed; we want to mark the data set as rejected int he database.
+       */
       dataSetQueue.markAsRejected(manifestRecord);
     }
+
+    // TODO BEGIN remove once S3 file moves are no longer necessary.
+    dataSetQueue.moveManifestFilesInS3(manifestToProcess);
+    // TODO END remove once S3 file moves are no longer necessary.
 
     return PipelineJobOutcome.WORK_DONE;
   }

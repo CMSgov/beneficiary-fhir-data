@@ -125,7 +125,6 @@ public final class OldDataSetQueue {
         manifestsToProcessIterator.remove();
         knownInvalidManifests.remove(manifestId);
         recentlyProcessedManifests.remove(manifestId);
-        s3TaskManager.cleanupOldDataSet(manifestId);
       }
     }
   }

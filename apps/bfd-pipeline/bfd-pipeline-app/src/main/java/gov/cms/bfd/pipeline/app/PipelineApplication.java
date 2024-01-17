@@ -19,10 +19,10 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
@@ -519,7 +519,12 @@ public final class PipelineApplication {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.  The task manager will be automatically closed by the job.
+     * TODO The task manager should be removed once s3 file movement is no longer necessary.
      */
+    final var s3TaskManager =
+        new S3TaskManager(
+            loadOptions.getExtractionOptions(),
+            new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig()));
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
@@ -527,7 +532,7 @@ public final class PipelineApplication {
      * Create the DataSetMonitorListener that will glue those stages together and run them all for
      * each data set that is found.
      */
-    DataSetMonitorListener dataSetMonitorListener =
+    final var dataSetMonitorListener =
         new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
     final var s3Factory =
         new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
@@ -536,7 +541,8 @@ public final class PipelineApplication {
     final var s3FilesDao = new S3ManifestDbDao(transactionManager);
     final var bucket = loadOptions.getExtractionOptions().getS3BucketName();
     final var s3FileCache = new S3FileManager(appState.getMetrics(), s3Dao, bucket);
-    final var dataSetQueue = new DataSetQueue(appState.getMetrics(), s3FilesDao, s3FileCache);
+    final var dataSetQueue =
+        new DataSetQueue(appState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
     var statusReporter =
         createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, appState.getClock());
     CcwRifLoadJob ccwRifLoadJob =

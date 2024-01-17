@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.ccw.rif;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -20,6 +21,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.net.URL;
@@ -60,15 +62,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -91,6 +93,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       statusOrder.verify(statusReporter).reportNothingToDo();
       statusOrder.verifyNoMoreInteractions();
 
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -181,14 +186,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
                   StaticRifResource.SAMPLE_A_INPATIENT.getResourceUrl()));
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -220,6 +226,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       verifyManifestFileStatus(s3FilesDao, manifest1Key, S3ManifestFile.ManifestStatus.COMPLETED);
       verifyManifestFileStatus(s3FilesDao, manifest2Key, S3ManifestFile.ManifestStatus.COMPLETED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -290,14 +300,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -327,6 +338,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       verifyManifestFileStatus(s3FilesDao, manifestAKey, S3ManifestFile.ManifestStatus.COMPLETED);
       verifyManifestFileStatus(s3FilesDao, manifestBKey, S3ManifestFile.ManifestStatus.DISCOVERED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -375,14 +390,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -406,6 +422,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       statusOrder.verifyNoMoreInteractions();
 
       verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.DISCOVERED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -453,14 +473,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -485,6 +506,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // Verify that the data set was not processed.
       verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.DISCOVERED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -527,14 +552,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       var manifestS3Key = putSampleFilesInTestBucket(bucket, inputLocation, manifest, fileList);
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -555,6 +581,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           manifest.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
 
       verifyManifestFileStatus(s3FilesDao, manifestS3Key, S3ManifestFile.ManifestStatus.COMPLETED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }

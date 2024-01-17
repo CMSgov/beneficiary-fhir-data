@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.synthetic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.RifFileEvent;
@@ -25,6 +27,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
@@ -147,14 +150,15 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // Run the job.
       final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
-      CcwRifLoadJob ccwJob =
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
               options,
@@ -162,9 +166,10 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               false,
               Optional.empty(),
-              statusReporter);
-      // Process dataset
-      ccwJob.call();
+              statusReporter)) {
+        // Process dataset
+        ccwJob.call();
+      }
 
       // Verify what was handed off to the DataSetMonitorListener; there should
       // be no events since the pre-validation failure short-circuits everything.
@@ -172,6 +177,10 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(0, listener.getDataEvents().size());
 
       verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.REJECTED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -251,14 +260,15 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
       // Run the job.
       final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
-      CcwRifLoadJob ccwJob =
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
               options,
@@ -266,9 +276,10 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               true, // run in idempotent mode
               Optional.empty(),
-              statusReporter);
-      // Process dataset
-      ccwJob.call();
+              statusReporter)) {
+        // Process dataset
+        ccwJob.call();
+      }
 
       // Verify what was handed off to the DataSetMonitorListener; there should be
       // no failure events since the pre-validation ran in idempotent mode which
@@ -277,6 +288,10 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(1, listener.getDataEvents().size());
 
       verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.COMPLETED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
