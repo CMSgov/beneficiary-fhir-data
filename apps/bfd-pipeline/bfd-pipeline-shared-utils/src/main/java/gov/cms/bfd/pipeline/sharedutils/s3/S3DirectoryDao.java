@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletionException;
@@ -38,7 +39,7 @@ import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
  * The prefix, name, and etag are separated from each other using a dash.
  *
  * <p>This DAO imposes restrictions on S3 keys. In order to be accessed using this DAO an S3 object
- * must have a key consisting solely of alpha, numeric, dash, underscore, or period.
+ * must have a key consisting solely of alpha, numeric, dash, underscore, colon, or period.
  *
  * <p>The class is intended to be as thread safe as file operations allow. Files are downloaded
  * using unique temporary names and then renamed (atomically if file system allows, as linux
@@ -171,7 +172,7 @@ public class S3DirectoryDao implements AutoCloseable {
           "serving existing file from cache: fileName={} s3Key={} cachedFile={}",
           fileName,
           s3Key,
-          cacheFile.getFileName());
+          cacheDirectory.relativize(cacheFile));
       return new DownloadedFile(fileName, objectDetails, cacheFile);
     }
 
@@ -194,7 +195,7 @@ public class S3DirectoryDao implements AutoCloseable {
             "adding downloaded file to cache: fileName={} s3Key={} cacheFile={}",
             fileName,
             s3Key,
-            cacheFile.getFileName());
+            cacheDirectory.relativize(cacheFile));
         // In linux renaming a file in a local (not network shared) directory is atomic and will
         // replace any existing file with same name.
         Files.move(tempDataFile, cacheFile);
@@ -207,7 +208,7 @@ public class S3DirectoryDao implements AutoCloseable {
           "serving downloaded file from cache: fileName={} s3Key={} cachedFile={}",
           fileName,
           s3Key,
-          cacheFile.getFileName());
+          cacheDirectory.relativize(cacheFile));
       return new DownloadedFile(fileName, objectDetails, cacheFile);
     } finally {
       // Ensure temp file is deleted if the rename was not performed for any reason.
@@ -243,6 +244,7 @@ public class S3DirectoryDao implements AutoCloseable {
    * @return number of cached files actually deleted
    * @throws IOException various exceptions might be thrown by the Java
    */
+  @CanIgnoreReturnValue
   public int deleteCachedFiles(String fileName) throws IOException {
     var wildcardPath = cacheFilePath(fileName, "*");
     var matchingPaths = cacheFilePaths(wildcardPath);
@@ -395,7 +397,7 @@ public class S3DirectoryDao implements AutoCloseable {
       return filesStream
           .filter(Files::isDirectory)
           .map(Path::toString)
-          .sorted((a, b) -> a.length() > b.length() ? -1 : 1)
+          .sorted(Comparator.comparingInt(String::length).reversed())
           .collect(ImmutableList.toImmutableList());
     }
   }
