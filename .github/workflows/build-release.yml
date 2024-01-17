@@ -150,6 +150,8 @@ jobs:
     secrets: inherit
 
   create-gh-release:
+    # Naively, only generate GitHub Releases for purported non-release versions
+    if: ${{ !contains(inputs.releaseVersion, '-') }}
     runs-on: ubuntu-latest
     needs: build-docker-images
     steps:
@@ -161,8 +163,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Pull Release Files
-        # Naively, only pull artifacts for purported non-prerelease versions
-        if: ${{ !contains(inputs.releaseVersion, '-') }}
         run: |
           readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -r -c '.[]')
           for asset in "${assets[@]}"
@@ -202,8 +202,6 @@ jobs:
             ]
 
       - name: Release
-        # Naively, only create GitHub Release object for purported non-prerelease versions
-        if: ${{ !contains(inputs.releaseVersion, '-') }}
         uses: ncipollo/release-action@v1
         with:
           makeLatest: true
