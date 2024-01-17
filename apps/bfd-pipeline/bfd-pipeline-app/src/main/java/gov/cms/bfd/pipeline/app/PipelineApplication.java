@@ -21,7 +21,7 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
@@ -535,9 +535,8 @@ public final class PipelineApplication {
     final var s3Dao = s3Factory.createS3Dao();
     final var s3FilesDao = new S3ManifestDbDao(transactionManager);
     final var bucket = loadOptions.getExtractionOptions().getS3BucketName();
-    final var s3FileCache = new S3FileCache(appState.getMetrics(), s3Dao, bucket);
-    final var dataSetQueue =
-        new DataSetQueue(appState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+    final var s3FileCache = new S3FileManager(appState.getMetrics(), s3Dao, bucket);
+    final var dataSetQueue = new DataSetQueue(appState.getMetrics(), s3FilesDao, s3FileCache);
     var statusReporter =
         createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, appState.getClock());
     CcwRifLoadJob ccwRifLoadJob =

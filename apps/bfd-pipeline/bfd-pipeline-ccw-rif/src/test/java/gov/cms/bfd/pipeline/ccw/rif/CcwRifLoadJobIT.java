@@ -18,7 +18,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
@@ -66,9 +66,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -186,9 +186,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -295,9 +295,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -380,9 +380,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -458,9 +458,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -532,9 +532,9 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var transactionManager =
           new TransactionManager(pipelineAppState.getEntityManagerFactory());
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-      final var s3FileCache = new S3FileCache(pipelineAppState.getMetrics(), s3Dao, bucket);
+      final var s3FileCache = new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket);
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3Dao, bucket, s3FilesDao, s3FileCache);
+          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,

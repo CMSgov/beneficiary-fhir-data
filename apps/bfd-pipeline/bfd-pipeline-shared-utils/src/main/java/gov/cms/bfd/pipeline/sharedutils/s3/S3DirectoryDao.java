@@ -438,6 +438,7 @@ public class S3DirectoryDao implements AutoCloseable {
    */
   @VisibleForTesting
   Path cacheFilePath(String fileName, String eTag) {
+    eTag = normalizeEtag(eTag);
     // ':' is not compatible with windows so convert it into something that should work everywhere
     fileName = fileName.replace(":", "_--_");
     var lastSepOffset = fileName.lastIndexOf('/');
@@ -572,6 +573,15 @@ public class S3DirectoryDao implements AutoCloseable {
         throw fileNotFound;
       }
       throw e;
+    }
+  }
+
+  @VisibleForTesting
+  static String normalizeEtag(String eTag) {
+    if (eTag.startsWith("\"")) {
+      return eTag.substring(1, eTag.length() - 1);
+    } else {
+      return eTag;
     }
   }
 

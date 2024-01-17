@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId.parseManifestIdFromS3Key;
-import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileCache.Md5Result.MISMATCH;
+import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager.Md5Result.MISMATCH;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.io.ByteSource;
@@ -24,7 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @AllArgsConstructor
-public class DataSetQueue {
+public class DataSetQueue implements AutoCloseable {
   public static final String MD5ChecksumMetaDataField = "md5chksum";
   static final String TIMER_READ_MANIFESTS =
       MetricRegistry.name(DataSetQueue.class, "readEligibleManifests");
@@ -38,10 +38,13 @@ public class DataSetQueue {
   /** The metric registry. */
   private final MetricRegistry appMetrics;
 
-  private final S3Dao s3Dao;
-  private final String s3Bucket;
   private final S3ManifestDbDao s3Records;
-  private final S3FileCache s3Files;
+  private final S3FileManager s3Files;
+
+  @Override
+  public void close() throws Exception {
+    s3Files.close();
+  }
 
   public List<Manifest> readEligibleManifests(
       Instant currentTime,
@@ -87,7 +90,7 @@ public class DataSetQueue {
   }
 
   public boolean allEntriesExistInS3(S3ManifestFile record) {
-    final var manifestS3Prefix = S3FileCache.extractPrefixFromS3Key(record.getS3Key());
+    final var manifestS3Prefix = S3FileManager.extractPrefixFromS3Key(record.getS3Key());
     final var namesAtPrefix = s3Files.fetchFileNamesWithPrefix(manifestS3Prefix);
     return record.getDataFiles().stream()
         .map(S3DataFile::getS3Key)
@@ -123,8 +126,8 @@ public class DataSetQueue {
   private List<ParsedManifestId> scanS3ForManifests(Instant minTimestamp) {
     final var ineligibleS3Keys = s3Records.readIneligibleManifestS3Keys(minTimestamp);
     return Stream.concat(
-            s3Dao.listObjects(s3Bucket, CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS),
-            s3Dao.listObjects(s3Bucket, CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS))
+            s3Files.scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS),
+            s3Files.scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS))
         .filter(s3Summary -> !ineligibleS3Keys.contains(s3Summary.getKey()))
         .flatMap(s3Summary -> parseManifestEntryFromS3Key(s3Summary).stream())
         .filter(parsedManifestId -> parsedManifestId.manifestId.isAfter(minTimestamp))

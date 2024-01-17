@@ -45,6 +45,16 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
     s3Dao.close();
   }
 
+  /** Verify that quotes are stripped properly from eTag value. */
+  @Test
+  void testETagNormalization() {
+    assertEquals("a", S3DirectoryDao.normalizeEtag("a"));
+    assertEquals("a", S3DirectoryDao.normalizeEtag("\"a\""));
+
+    assertEquals("abc-1", S3DirectoryDao.normalizeEtag("abc-1"));
+    assertEquals("abc-1", S3DirectoryDao.normalizeEtag("\"abc-1\""));
+  }
+
   /**
    * Tests all basic operations of the {@link S3DirectoryDao} when operating without recursion.
    * Uploads and accesses data to a bucket and verifies that cached files are managed as expected.

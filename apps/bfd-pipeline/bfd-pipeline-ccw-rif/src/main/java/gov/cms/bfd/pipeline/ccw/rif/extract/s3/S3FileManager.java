@@ -15,22 +15,43 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
-public class S3FileCache {
-  static final String TIMER_DOWNLOAD_FILE = MetricRegistry.name(S3FileCache.class, "downloadFile");
-  static final String TIMER_COMPUTE_MD5 = MetricRegistry.name(S3FileCache.class, "computeMd5");
+public class S3FileManager implements AutoCloseable {
+  static final String TIMER_DOWNLOAD_FILE =
+      MetricRegistry.name(S3FileManager.class, "downloadFile");
+  static final String TIMER_COMPUTE_MD5 = MetricRegistry.name(S3FileManager.class, "computeMd5");
 
   /** The metric registry. */
   private final MetricRegistry appMetrics;
 
+  /** The DAO for interacting with AWS S3 buckets and files. */
+  private final S3Dao s3Dao;
+
+  /** The S3 bucket containing source files. */
+  @Getter private final String s3BucketName;
+
+  /** Used to manage file download and caching. */
   private final S3DirectoryDao s3DirectoryDao;
 
-  public S3FileCache(MetricRegistry appMetrics, S3Dao s3Dao, String s3Bucket) throws IOException {
+  public S3FileManager(MetricRegistry appMetrics, S3Dao s3Dao, String s3Bucket) throws IOException {
     this.appMetrics = appMetrics;
+    this.s3Dao = s3Dao;
+    this.s3BucketName = s3Bucket;
     final Path cacheDirectory = Files.createTempDirectory("s3cache");
     s3DirectoryDao = new S3DirectoryDao(s3Dao, s3Bucket, "", cacheDirectory, true, true);
+  }
+
+  @Override
+  public void close() throws Exception {
+    s3DirectoryDao.close();
+  }
+
+  public Stream<S3Dao.S3ObjectSummary> scanS3ForFiles(String s3KeyPrefix) {
+    return s3Dao.listObjects(s3BucketName, s3KeyPrefix);
   }
 
   public static String extractPrefixFromS3Key(String s3Key) {

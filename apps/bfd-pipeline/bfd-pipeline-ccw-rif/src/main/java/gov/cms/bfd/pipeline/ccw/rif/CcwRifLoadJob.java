@@ -12,6 +12,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
@@ -412,15 +413,21 @@ public final class CcwRifLoadJob implements PipelineJob {
   }
 
   /**
-   * Shuts down our {@link S3TaskManager}. If any download or move tasks are still running this
-   * method will wait for them to complete before returning.
+   * Shuts down our {@link S3TaskManager} and clears our S3 files cache. If any download or move
+   * tasks are still running this method will wait for them to complete before returning.
    *
    * <p>{@inheritDoc}
    */
   @Override
   public void close() throws Exception {
-    downloadService.shutdown();
-    downloadService.awaitTermination(1, TimeUnit.HOURS);
+    final var closer = new MultiCloser();
+    closer.close(
+        () -> {
+          downloadService.shutdown();
+          downloadService.awaitTermination(1, TimeUnit.HOURS);
+        });
+    closer.close(dataSetQueue::close);
+    closer.finish();
   }
 
   /**
