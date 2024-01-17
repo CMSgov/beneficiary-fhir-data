@@ -28,6 +28,11 @@ mappings:
       nullable: false
       sqlType: varchar(24)
       enumType: ManifestStatus
+    - comment: Timestamp encoded into S3 manifest file directory path.
+      dbName: manifest_timestamp
+      name: manifestTimestamp
+      nullable: false
+      sqlType: timestamp with time zone
     - comment: When the file was first discovered in S3.
       dbName: discovery_timestamp
       name: discoveryTimestamp

@@ -6,6 +6,7 @@ CREATE TABLE s3_manifest_files (
     manifest_id bigint NOT NULL,
     s3_key varchar(1024) NOT NULL,
     status varchar(24) NOT NULL,
+    manifest_timestamp timestamp with time zone NOT NULL,
     discovery_timestamp timestamp with time zone NOT NULL,
     completion_timestamp timestamp with time zone,
     CONSTRAINT s3_manifest_files_key PRIMARY KEY (manifest_id)

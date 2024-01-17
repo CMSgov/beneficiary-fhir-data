@@ -110,6 +110,7 @@ public class S3ManifestDbDao {
     var manifest = new S3ManifestFile();
     manifest.setS3Key(manifestS3Key);
     manifest.setStatus(S3ManifestFile.ManifestStatus.DISCOVERED);
+    manifest.setManifestTimestamp(manifestFileData.getTimestamp());
     manifest.setDiscoveryTimestamp(now);
     List<S3DataFile> dataFiles = manifest.getDataFiles();
     final String dataFileS3KeyPrefix = S3FileManager.extractPrefixFromS3Key(manifestS3Key);
