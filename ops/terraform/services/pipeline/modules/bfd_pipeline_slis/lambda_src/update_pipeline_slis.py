@@ -1,7 +1,9 @@
 import calendar
 import json
+import logging
 import os
 import re
+import sys
 from datetime import datetime
 from enum import Enum
 from typing import Any, Type
@@ -33,6 +35,21 @@ BOTO_CONFIG = Config(
         "mode": "adaptive",
     },
 )
+
+logging.basicConfig(level=logging.INFO, force=True)
+logger = logging.getLogger()
+try:
+    cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
+    s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
+    sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)  # type: ignore
+    sentinel_queue = sqs_resource.get_queue_by_name(QueueName=SENTINEL_QUEUE_NAME)
+    etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
+except Exception:
+    logger.error(
+        "Unrecoverable exception occurred when attempting to create boto3 clients/resources: ",
+        exc_info=True,
+    )
+    sys.exit(0)
 
 
 class S3EventType(str, Enum):
@@ -99,20 +116,7 @@ def _is_incoming_folder_empty(bucket: Any, group_timestamp: str) -> bool:
 
 def handler(event: Any, context: Any):
     if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, SENTINEL_QUEUE_NAME]):
-        print("Not all necessary environment variables were defined, exiting...")
-        return
-
-    try:
-        cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
-        s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
-        sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)  # type: ignore
-        sentinel_queue = sqs_resource.get_queue_by_name(QueueName=SENTINEL_QUEUE_NAME)
-        etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
-    except Exception as exc:
-        print(
-            "Unrecoverable exception occurred when attempting to create boto3 clients/resources:"
-            f" {exc}"
-        )
+        logger.error("Not all necessary environment variables were defined, exiting...")
         return
 
     common_unrecoverable_exceptions: list[Type[BaseException]] = [
@@ -124,30 +128,30 @@ def handler(event: Any, context: Any):
 
     try:
         record: dict[str, Any] = event["Records"][0]
-    except KeyError as exc:
-        print(f"The incoming event was invalid: {exc}")
+    except KeyError:
+        logger.error("The incoming event was invalid", exc_info=True)
         return
     except IndexError:
-        print("Invalid event notification, no records found")
+        logger.error("Invalid event notification, no records found: ", exc_info=True)
         return
 
     try:
         sns_message_json: str = record["Sns"]["Message"]
         sns_message = json.loads(sns_message_json)
     except KeyError:
-        print("No message found in SNS notification")
+        logger.error("No message found in SNS notification: ", exc_info=True)
         return
     except json.JSONDecodeError:
-        print("SNS message body was not valid JSON")
+        logger.error("SNS message body was not valid JSON: ", exc_info=True)
         return
 
     try:
         s3_event = sns_message["Records"][0]
     except KeyError:
-        print("Invalid S3 event, no records found")
+        logger.error("Invalid S3 event, no records found: ", exc_info=True)
         return
     except IndexError:
-        print("Invalid event notification, no records found")
+        logger.error("Invalid event notification, no records found: ", exc_info=True)
         return
 
     try:
@@ -156,33 +160,35 @@ def handler(event: Any, context: Any):
         if S3EventType.OBJECT_CREATED in event_type_str:
             event_type = S3EventType.OBJECT_CREATED
         else:
-            print(f"Event type {event_type_str} is unsupported. Exiting...")
+            logger.error("Event type %s is unsupported. Exiting...", event_type_str)
             return
-    except KeyError as ex:
-        print(f"The incoming event record did not contain the type of S3 event: {ex}")
+    except KeyError:
+        logger.error(
+            "The incoming event record did not contain the type of S3 event: ", exc_info=True
+        )
         return
 
     try:
         event_time_iso: str = s3_event["eventTime"]
         event_timestamp = datetime.fromisoformat(event_time_iso.removesuffix("Z"))
-    except KeyError as exc:
-        print(f'Record did not contain any key with "eventTime": {exc}')
+    except KeyError:
+        logger.error('Record did not contain any key with "eventTime": ', exc_info=True)
         return
-    except ValueError as exc:
-        print(f"Event timestamp was not in valid ISO format: {exc}")
+    except ValueError:
+        logger.error("Event timestamp was not in valid ISO format: ", exc_info=True)
         return
 
     try:
         file_key: str = s3_event["s3"]["object"]["key"]
         decoded_file_key = unquote(file_key)
-    except KeyError as exc:
-        print(f"No bucket file found in event notification: {exc}")
+    except KeyError:
+        logger.error("No bucket file found in event notification: ", exc_info=True)
         return
 
     # Log the various bits of data extracted from the invoking event to aid debugging:
-    print(f"Invoked at: {datetime.utcnow().isoformat()} UTC")
-    print(f"S3 Object Key: {decoded_file_key}")
-    print(f"S3 Event Type: {event_type.name}, Specific Event Name: {event_type_str}")
+    logger.info("Invoked at: %s UTC", datetime.utcnow().isoformat())
+    logger.info("S3 Object Key: %s", decoded_file_key)
+    logger.info("S3 Event Type: %s, Specific Event Name: %s", event_type.name, event_type_str)
 
     status_group_str = "|".join([e.value for e in PipelineDataStatus])
     rif_types_group_str = "|".join([e.value for e in RifFileType])
@@ -195,7 +201,9 @@ def handler(event: Any, context: Any):
             re.IGNORECASE,
         )
     ):
-        print(f"ETL file or path does not match expected format, skipping: {decoded_file_key}")
+        logger.error(
+            "ETL file or path does not match expected format, skipping: %s", decoded_file_key
+        )
         return
 
     pipeline_data_status = PipelineDataStatus(match.group(1).lower())
@@ -204,9 +212,9 @@ def handler(event: Any, context: Any):
 
     # Log data extracted from S3 object key now that we know this is a valid RIF file within a
     # valid data load
-    print(f"RIF type: {rif_file_type.name}")
-    print(f"Load Status: {pipeline_data_status.name}")
-    print(f"Data Load: {group_timestamp}")
+    logger.info("RIF type: %s", rif_file_type.name)
+    logger.info("Load Status: %s", pipeline_data_status.name)
+    logger.info("Data Load: %s", group_timestamp)
 
     rif_type_dimension = {"data_type": rif_file_type.name.lower()}
     group_timestamp_dimension = {"group_timestamp": group_timestamp}
@@ -220,9 +228,10 @@ def handler(event: Any, context: Any):
     utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
 
     try:
-        print(
-            f'Putting data timestamp metrics "{timestamp_metric.full_name()}" up'
-            f" to CloudWatch with unix timestamp value {utc_timestamp}"
+        logger.info(
+            'Putting data timestamp metrics "%s" up to CloudWatch with unix timestamp value %s',
+            timestamp_metric.full_name(),
+            utc_timestamp,
         )
         backoff_retry(
             # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
@@ -240,25 +249,29 @@ def handler(event: Any, context: Any):
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
-        print(f'Successfully put metrics to "{timestamp_metric.full_name()}"')
-    except Exception as exc:
-        print(
-            "An unrecoverable error occurred when trying to call PutMetricData for metric"
-            f" {METRICS_NAMESPACE}/{timestamp_metric}: {exc}"
+        logger.info('Successfully put metrics to "%s"', timestamp_metric.full_name())
+    except Exception:
+        logger.error(
+            "An unrecoverable error occurred when trying to call PutMetricData for metric %s: ",
+            timestamp_metric.full_name(),
+            exc_info=True,
         )
         return
 
     if pipeline_data_status == PipelineDataStatus.INCOMING:
-        print(
+        logger.info(
             "RIF file location indicates data has been made available to load to the ETL"
             " pipeline. Checking if this is the first time data is available for group"
-            f' "{group_timestamp}"...'
+            ' "%s"...',
+            group_timestamp,
         )
 
         try:
-            print(
-                f"Checking if the {SENTINEL_QUEUE_NAME} queue contains any sentinel messages"
-                f" for the current group ({group_timestamp})..."
+            logger.info(
+                "Checking if the %s queue contains any sentinel messages"
+                " for the current group (%s)...",
+                SENTINEL_QUEUE_NAME,
+                group_timestamp,
             )
             queue_is_empty = backoff_retry(
                 func=lambda: len(
@@ -271,30 +284,33 @@ def handler(event: Any, context: Any):
                 == 0,
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-        except Exception as exc:
-            print(
-                "An unrecoverable error occurred when trying to check the"
-                f" {SENTINEL_QUEUE_NAME} queue; err: {exc}"
+        except Exception:
+            logger.error(
+                "An unrecoverable error occurred when trying to check the %s queue; err: ",
+                SENTINEL_QUEUE_NAME,
+                exc_info=True,
             )
             return
 
         if queue_is_empty:
-            print(
-                f"No sentinel message was received from queue {SENTINEL_QUEUE_NAME} for current"
-                f" group {group_timestamp}, this indicates that the incoming file is the start"
-                f" of a new data load for group {group_timestamp}. Putting data to metric"
-                f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" and corresponding'
-                f' metric "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()}"'
-                f" with value {utc_timestamp}"
+            logger.info(
+                "No sentinel message was received from queue %s for current group %s, this"
+                " indicates that the incoming file is the start of a new data load for group %s."
+                ' Putting data to metric "%s" and corresponding metric "%s" with value %s',
+                SENTINEL_QUEUE_NAME,
+                group_timestamp,
+                group_timestamp,
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+                utc_timestamp,
             )
 
             try:
-                print(
-                    "Putting time metric data to"
-                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" and'
-                    " corresponding"
-                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()}" with'
-                    f" value {utc_timestamp}..."
+                logger.info(
+                    'Putting time metric data to "%s" and corresponding "%s" with value %s...',
+                    PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+                    PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+                    utc_timestamp,
                 )
                 backoff_retry(
                     func=lambda: put_metric_data(
@@ -318,23 +334,25 @@ def handler(event: Any, context: Any):
                     ),
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
-                print(
-                    "Metrics put to"
-                    f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()} and"
-                    f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()} successfully"
+                logger.info(
+                    "Metrics put to %s and %s successfully",
+                    PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+                    PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
                 )
-            except Exception as exc:
-                print(
-                    f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
+            except Exception:
+                logger.error(
+                    "An unrecoverable error occurred when trying to call PutMetricData; err: ",
+                    exc_info=True,
                 )
                 return
 
-            print(
-                f"Posting sentinel message to {SENTINEL_QUEUE_NAME} SQS queue to indicate that"
-                f" data load has begun for group {group_timestamp} and that no additional data"
-                " should be put to the"
-                f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()} metric for this"
-                " group"
+            logger.info(
+                "Posting sentinel message to %s SQS queue to indicate that data load has begun for"
+                " group %s and that no additional data should be put to the %s metric for this"
+                " group",
+                SENTINEL_QUEUE_NAME,
+                group_timestamp,
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
             )
 
             try:
@@ -349,37 +367,42 @@ def handler(event: Any, context: Any):
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
 
-                print(f"Sentinel message posted to {SENTINEL_QUEUE_NAME} successfully")
-            except Exception as exc:
-                print(
-                    "An unrecoverable error occurred when trying to post message to the"
-                    f" {SENTINEL_QUEUE_NAME} SQS queue: {exc}"
+                logger.info("Sentinel message posted to %s successfully", SENTINEL_QUEUE_NAME)
+            except Exception:
+                logger.error(
+                    "An unrecoverable error occurred when trying to post message to the %s SQS"
+                    " queue: ",
+                    SENTINEL_QUEUE_NAME,
+                    exc_info=True,
                 )
         else:
-            print(
-                f"Sentinel value was received from queue {SENTINEL_QUEUE_NAME} for current"
-                f" group {group_timestamp}. Incoming file is part of an ongoing, existing data"
-                f" load for group {group_timestamp}, and therefore does not indicate the time"
-                " of the first data load for this group. Stopping..."
+            logger.info(
+                "Sentinel value was received from queue %s for current group %s. Incoming file is"
+                " part of an ongoing, existing data load for group %s, and therefore does not"
+                " indicate the time of the first data load for this group. Stopping...",
+                SENTINEL_QUEUE_NAME,
+                group_timestamp,
+                group_timestamp,
             )
     elif pipeline_data_status == PipelineDataStatus.DONE:
-        print(
+        logger.info(
             "Incoming file indicates data has been loaded. Calculating time deltas and checking"
             " if the incoming file was the last loaded file..."
         )
-
-        print(
-            "Putting time delta metrics for the time taken between the current"
-            f" {rif_file_type.name} RIF file being made available and now (when it has been"
-            " loaded)..."
+        logger.info(
+            "Putting time delta metrics for the time taken between the current %s RIF file being"
+            " made available and now (when it has been loaded)...",
+            rif_file_type.name,
         )
 
         try:
-            print(
-                f'Getting corresponding "{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}"'
-                f' time metric for the current RIF file type "{rif_file_type.name}" and'
-                f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" time metric in'
-                f' group "{group_timestamp}"...'
+            logger.info(
+                'Getting corresponding "%s" time metric for the current RIF file type "%s" and "%s"'
+                ' time metric in group "%s"...',
+                PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
+                rif_file_type.name,
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+                group_timestamp,
             )
             # We get both the last available metric for the current RIF file type _and_ the
             # current load's first available time metric to reduce the number of API calls. The
@@ -405,14 +428,18 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions + [KeyError],
             )
-            print(
-                f'"{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}" with dimensions'
-                f" {rif_type_dimension | group_timestamp_dimension} and"
-                f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
-                f" {group_timestamp_dimension} retrieved successfully"
+            logger.info(
+                '"%s" with dimensions %s and "%s" with dimensions %s retrieved successfully',
+                PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
+                rif_type_dimension | group_timestamp_dimension,
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+                group_timestamp_dimension,
             )
-        except Exception as exc:
-            print(f"An unrecoverable error occurred when trying to call GetMetricData; err: {exc}")
+        except Exception:
+            logger.error(
+                "An unrecoverable error occurred when trying to call GetMetricData; err: ",
+                exc_info=True,
+            )
             return
 
         try:
@@ -429,12 +456,12 @@ def handler(event: Any, context: Any):
                 for x in result
                 if x.label == PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
             ][0]
-        except IndexError as exc:
-            print(
-                "No metric data result was found for metric"
-                f' "{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}" or'
-                f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}", no time delta(s)'
-                " can be computed. Stopping..."
+        except IndexError:
+            logger.info(
+                'No metric data result was found for metric "%s" or "%s", no time delta(s) can be'
+                " computed. Stopping...",
+                PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
             )
             return
 
@@ -450,21 +477,21 @@ def handler(event: Any, context: Any):
             last_available = datetime.utcfromtimestamp(
                 data_available_metric_data.values[latest_value_index]
             )
-        except ValueError as exc:
-            print(
-                "No values were returned for metric"
-                f" {PipelineMetric.TIME_DATA_AVAILABLE.full_name()}, no time delta can be"
-                " computed. Stopping..."
+        except ValueError:
+            logger.error(
+                "No values were returned for metric %s, no time delta can be computed. Stopping...",
+                PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
+                exc_info=True,
             )
             return
 
         load_time_delta = event_timestamp.replace(tzinfo=last_available.tzinfo) - last_available
 
         try:
-            print(
-                "Putting time delta metrics to"
-                f' "{PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}" with value'
-                f" {load_time_delta.seconds} s..."
+            logger.info(
+                'Putting time delta metrics to "%s" with value %s s...',
+                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+                load_time_delta.seconds,
             )
             backoff_retry(
                 func=lambda: put_metric_data(
@@ -480,34 +507,38 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-            print(
-                f'Metrics put to "{PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}"'
-                " successfully"
+            logger.info(
+                'Metrics put to "%s" successfully',
+                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
             )
-        except Exception as exc:
-            print(
-                "An unrecoverable error occurred when trying to call PutMetricData for metric"
-                f" {PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}: {exc}"
+        except Exception:
+            logger.error(
+                "An unrecoverable error occurred when trying to call PutMetricData for metric %s: ",
+                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+                exc_info=True,
             )
             return
 
-        print("Checking if the pipeline load has completed...")
+        logger.error("Checking if the pipeline load has completed...")
         if not _is_pipeline_load_complete(
             bucket=etl_bucket, group_timestamp=group_timestamp
         ) or not _is_incoming_folder_empty(bucket=etl_bucket, group_timestamp=group_timestamp):
-            print(
-                f"Not all files have yet to be loaded for group {group_timestamp}. Data load is"
-                " not complete. Stopping..."
+            logger.info(
+                "Not all files have yet to be loaded for group %s. Data load is not complete."
+                " Stopping...",
+                group_timestamp,
             )
             return
 
         try:
-            print(
-                f"All files have been loaded for group {group_timestamp}. This indicates that"
-                " the data load has been completed for this group. Putting data to metric"
-                f' "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}" and corresponding'
-                f' metric "{PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name()}" with'
-                f" value {utc_timestamp}"
+            logger.info(
+                "All files have been loaded for group %s. This indicates that the data load has"
+                ' been completed for this group. Putting data to metric "%s" and corresponding'
+                ' metric "%s" with value %s',
+                group_timestamp,
+                PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
+                PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
+                utc_timestamp,
             )
             backoff_retry(
                 func=lambda: put_metric_data(
@@ -531,12 +562,16 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-            print(
-                f'Data put to "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}" and'
-                f' "{PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name()}" successfully'
+            logger.info(
+                'Data put to "%s" and "%s" successfully',
+                PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
+                PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
             )
-        except Exception as exc:
-            print(f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}")
+        except Exception:
+            logger.error(
+                "An unrecoverable error occurred when trying to call PutMetricData; err: ",
+                exc_info=True,
+            )
 
         # There should only ever be one single data point for the first available metric for the
         # current group, so we don't need to sort or otherwise filter the list of values
@@ -546,10 +581,12 @@ def handler(event: Any, context: Any):
         )
 
         try:
-            print(
-                f'Putting to "{PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" the'
-                f" total time delta ({full_load_time_delta.seconds} s) from start to finish for"
-                f" the current pipeline load for group {group_timestamp}"
+            logger.info(
+                'Putting to "%s" the total time delta (%s s) from start to finish for the current'
+                " pipeline load for group %s",
+                PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
+                full_load_time_delta.seconds,
+                group_timestamp,
             )
             backoff_retry(
                 func=lambda: put_metric_data(
@@ -565,9 +602,12 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-            print(
-                "Data put to metric"
-                f' "{PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" successfully'
+            logger.info(
+                'Data put to metric "%s" successfully',
+                PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
             )
-        except Exception as exc:
-            print(f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}")
+        except Exception:
+            logger.error(
+                "An unrecoverable error occurred when trying to call PutMetricData; err: ",
+                exc_info=True,
+            )
