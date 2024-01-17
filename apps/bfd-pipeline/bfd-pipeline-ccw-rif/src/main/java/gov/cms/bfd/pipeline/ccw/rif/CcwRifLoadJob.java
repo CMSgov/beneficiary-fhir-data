@@ -19,18 +19,16 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
@@ -123,6 +121,10 @@ public final class CcwRifLoadJob implements PipelineJob {
    * the processing of a data set.
    */
   public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set processing complete.";
+
+  /** Set of status values that indicate a data file requires processing. */
+  public static final Set<S3DataFile.FileStatus> REQUIRED_PROCESSING_STATUS_VALUES =
+      Set.of(S3DataFile.FileStatus.DISCOVERED, S3DataFile.FileStatus.STARTED);
 
   /**
    * A regex for {@link DataSetManifest} keys in S3. Provides capturing groups for the {@link
@@ -333,16 +335,9 @@ public final class CcwRifLoadJob implements PipelineJob {
     if (preValidationOK) {
       List<S3RifFile> rifFiles =
           manifestToProcess.getEntries().stream()
-              .map(
-                  manifestEntry -> {
-                    final var entryRecord =
-                        selectS3DataRecordForEntry(manifestRecord, manifestEntry);
-                    return new S3RifFile(
-                        appMetrics,
-                        manifestEntry,
-                        downloadService.submit(
-                            () -> dataSetQueue.downloadManifestEntry(entryRecord)));
-                  })
+              .flatMap(
+                  manifestEntry ->
+                      convertManifestEntryToS3RifFile(manifestRecord, manifestEntry).stream())
               .toList();
 
       RifFilesEvent rifFilesEvent =
@@ -358,18 +353,10 @@ public final class CcwRifLoadJob implements PipelineJob {
        */
       if (eligibleManifests.size() > 1) {
         DataSetQueue.Manifest secondManifestToProcess = eligibleManifests.get(1);
-        Path tmpdir = Paths.get(System.getProperty("java.io.tmpdir"));
-        long usableFreeTempSpace;
-        try {
-          usableFreeTempSpace = Files.getFileStore(tmpdir).getUsableSpace();
-        } catch (IOException e) {
-          throw new UncheckedIOException(e);
-        }
-
+        final long usableFreeTempSpace = dataSetQueue.getAvailableDiskSpaceInBytes();
         if (usableFreeTempSpace >= MIN_BYTES_FOR_SECOND_DATA_SET_DOWNLOAD) {
-          secondManifestToProcess
-              .getRecord()
-              .getDataFiles()
+          secondManifestToProcess.getRecord().getDataFiles().stream()
+              .filter(this::isProcessingRequired)
               .forEach(
                   s3DataFile -> {
                     downloadService.submit(() -> dataSetQueue.downloadManifestEntry(s3DataFile));
@@ -458,5 +445,29 @@ public final class CcwRifLoadJob implements PipelineJob {
     LOGGER.info(
         "Synthea pre-validation being performed by: {}...", preValInterface.getClass().getName());
     return preValInterface.isValid(manifest);
+  }
+
+  private Optional<S3RifFile> convertManifestEntryToS3RifFile(
+      S3ManifestFile manifestRecord, DataSetManifestEntry manifestEntry) {
+    final var dataFileRecord = selectS3DataRecordForEntry(manifestRecord, manifestEntry);
+    if (!isProcessingRequired(dataFileRecord)) {
+      return Optional.empty();
+    }
+
+    final Future<DataSetQueue.ManifestEntry> downloadResult =
+        downloadService.submit(() -> dataSetQueue.downloadManifestEntry(dataFileRecord));
+    return Optional.of(new S3RifFile(appMetrics, manifestEntry, downloadResult));
+  }
+
+  private boolean isProcessingRequired(S3DataFile dataFileRecord) {
+    if (REQUIRED_PROCESSING_STATUS_VALUES.contains(dataFileRecord.getStatus())) {
+      return true;
+    }
+    LOGGER.info(
+        "Skipping already processed data file: index={} type={} name={}",
+        dataFileRecord.getIndex(),
+        dataFileRecord.getFileType(),
+        dataFileRecord.getFileName());
+    return false;
   }
 }

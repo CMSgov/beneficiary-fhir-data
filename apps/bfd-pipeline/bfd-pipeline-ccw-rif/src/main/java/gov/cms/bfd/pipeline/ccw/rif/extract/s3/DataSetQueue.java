@@ -114,6 +114,17 @@ public class DataSetQueue implements AutoCloseable {
     s3Records.updateS3ManifestAndDataFiles(manifestFile);
   }
 
+  /**
+   * Gets the number of bytes of usable disk space from the file system containing our cache
+   * directory.
+   *
+   * @return number of bytes
+   * @throws IOException pass through from file system check
+   */
+  public long getAvailableDiskSpaceInBytes() throws IOException {
+    return s3Files.getAvailableDiskSpaceInBytes();
+  }
+
   private DownloadedFile downloadAndCheckMD5(String s3Key) throws IOException {
     final var manifestFile = s3Files.downloadFile(s3Key);
     if (s3Files.checkMD5(manifestFile, MD5ChecksumMetaDataField) == MISMATCH) {

@@ -329,6 +329,17 @@ public class S3DirectoryDao implements AutoCloseable {
   }
 
   /**
+   * Gets the number of bytes of usable disk space from the file system containing our cache
+   * directory.
+   *
+   * @return number of bytes
+   * @throws IOException pass through from file system check
+   */
+  public long getAvailableDiskSpaceInBytes() throws IOException {
+    return Files.getFileStore(cacheDirectory).getUsableSpace();
+  }
+
+  /**
    * Produce a {@link List} containing an equivalent simple file name for every valid object in our
    * S3 bucket/directory. The simple file name is everything after the S3 directory portion of the
    * object key.

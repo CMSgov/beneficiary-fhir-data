@@ -75,6 +75,17 @@ public class S3FileManager implements AutoCloseable {
     }
   }
 
+  /**
+   * Gets the number of bytes of usable disk space from the file system containing our cache
+   * directory.
+   *
+   * @return number of bytes
+   * @throws IOException pass through from file system check
+   */
+  public long getAvailableDiskSpaceInBytes() throws IOException {
+    return s3DirectoryDao.getAvailableDiskSpaceInBytes();
+  }
+
   /** Result returned by {@link #checkMD5}. */
   public enum Md5Result {
     /** Computed MD5 matches meta data value. */
