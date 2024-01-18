@@ -15,16 +15,12 @@ from botocore.config import Config
 
 from backoff_retry import backoff_retry
 from common import METRICS_NAMESPACE, PipelineMetric, RifFileType
-from cw_metrics import (
-    MetricData,
-    MetricDataQuery,
-    gen_all_dimensioned_metrics,
-    get_metric_data,
-    put_metric_data,
-)
+from cw_metrics import MetricData, gen_all_dimensioned_metrics, put_metric_data
 from sqs import (
+    MessageFailedToDeleteException,
     PipelineLoadEvent,
     PipelineLoadEventType,
+    delete_load_msg_from_queue,
     post_load_event,
     retrieve_load_event_msgs,
 )
@@ -80,8 +76,8 @@ class PipelineDataStatus(str, Enum):
     DONE = "done"
 
 
-def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
-    done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group_timestamp}/"
+def _is_pipeline_load_complete(bucket: Any, group: str) -> bool:
+    done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group}/"
     # Returns the file names of all text files within the "done" folder for the current bucket
     finished_rifs = [
         str(object.key).removeprefix(done_prefix)
@@ -102,8 +98,8 @@ def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
     )
 
 
-def _is_incoming_folder_empty(bucket: Any, group_timestamp: str) -> bool:
-    incoming_key_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{group_timestamp}/"
+def _is_incoming_folder_empty(bucket: Any, group: str) -> bool:
+    incoming_key_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{group}/"
     incoming_objects = list(bucket.objects.filter(Prefix=incoming_key_prefix))
 
     return len(incoming_objects) == 0
@@ -432,134 +428,134 @@ def handler(event: Any, context: Any):
         )
 
         logger.info(
-            'Getting corresponding "%s" time metric for the current RIF file type "%s" and "%s"'
-            ' time metric in group "%s"...',
-            PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
+            "Retrieving %s message from %s queue for %s RIF in %s group...",
+            PipelineLoadEventType.RIF_AVAILABLE.value,
+            EVENTS_QUEUE_NAME,
             rif_file_type.name,
-            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
             group_iso_str,
         )
         try:
-            # We get both the last available metric for the current RIF file type _and_ the
-            # current load's first available time metric to reduce the number of API calls. The
-            # first available time metric is only used if the load has finished (the
-            # notification that started this lambda was for the last-loaded file), otherwise
-            # it's discarded
-            result = backoff_retry(
-                func=lambda: get_metric_data(
-                    cw_client=cw_client,
-                    metric_data_queries=[
-                        MetricDataQuery(
-                            metric_namespace=METRICS_NAMESPACE,
-                            metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                            dimensions=rif_type_dimension | group_timestamp_dimension,
-                        ),
-                        MetricDataQuery(
-                            metric_namespace=METRICS_NAMESPACE,
-                            metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                            dimensions=group_timestamp_dimension,
-                        ),
-                    ],
-                    statistic="Maximum",
-                ),
-                ignored_exceptions=common_unrecoverable_exceptions + [KeyError],
-            )
-        except Exception:
-            logger.error(
-                "An unrecoverable error occurred when trying to call GetMetricData; err: ",
-                exc_info=True,
-            )
-            return
-        logger.info(
-            '"%s" with dimensions %s and "%s" with dimensions %s retrieved successfully',
-            PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
-            rif_type_dimension | group_timestamp_dimension,
-            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-            group_timestamp_dimension,
-        )
-
-        try:
-            data_available_metric_data = [
-                x
-                for x in result
-                if x.label == PipelineMetric.TIME_DATA_AVAILABLE.full_name() and x.values
-            ][0]
-            # As explained above, this metric's data will only be used if this lambda was
-            # invoked for the last-loaded file (thus, the pipeline load has finished).
-            # Otherwise, this metric data is discarded
-            data_first_available_metric_data = [
-                x
-                for x in result
-                if x.label == PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
-            ][0]
-        except IndexError:
-            logger.error(
-                'No metric data result was found for metric "%s" or "%s", no time delta(s) can be'
-                " computed. Stopping...",
-                PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-                exc_info=True,
-            )
-            return
-
-        # Get the the unix time (in UTC) of the most recent point in time when the now-loaded
-        # file that invoked this Lambda was made available in order to calculate the time it
-        # took to load said file in the ETL pipeline. We take the value (unix timestamp) instead
-        # of the point's timestamp as it will be a higher resolution and more accurate since
-        # CloudWatch truncates and reduces the precision of data timestamps over time
-        try:
-            latest_value_index = data_available_metric_data.timestamps.index(
-                max(data_available_metric_data.timestamps)
-            )
-            last_available = datetime.utcfromtimestamp(
-                data_available_metric_data.values[latest_value_index]
-            )
-        except ValueError:
-            logger.error(
-                "No values were returned for metric %s, no time delta can be computed. Stopping...",
-                PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
-                exc_info=True,
-            )
-            return
-
-        load_time_delta = event_datetime.replace(tzinfo=last_available.tzinfo) - last_available
-
-        logger.info(
-            'Putting time delta metrics to "%s" with value %s s...',
-            PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
-            load_time_delta.seconds,
-        )
-        try:
-            backoff_retry(
-                func=lambda: put_metric_data(
-                    cw_client=cw_client,
-                    metric_namespace=METRICS_NAMESPACE,
-                    metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                        dimensions=[rif_type_dimension, group_timestamp_dimension],
-                        value=round(load_time_delta.total_seconds()),
-                        datetime=event_datetime,
-                        unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+            rif_available_msg = backoff_retry(
+                func=lambda: next(
+                    (
+                        message
+                        for message in retrieve_load_event_msgs(
+                            queue=events_queue,
+                            timeout=10,
+                            type_filter=[PipelineLoadEventType.RIF_AVAILABLE],
+                        )
+                        if message.event.group_iso_str == group_iso_str
+                        and message.event.rif_type == rif_file_type
                     ),
+                    None,
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
         except Exception:
             logger.error(
-                "An unrecoverable error occurred when trying to call PutMetricData for metric %s: ",
-                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+                "An unrecoverable error occurred when trying to check the %s queue; err: ",
+                EVENTS_QUEUE_NAME,
                 exc_info=True,
             )
             return
-        logger.info(
-            'Metrics put to "%s" successfully',
-            PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
-        )
+
+        if rif_available_msg:
+            logger.info(
+                "%s message retrieved successfully for %s RIF in %s group; value: %s",
+                PipelineLoadEventType.RIF_AVAILABLE.value,
+                rif_file_type,
+                group_iso_str,
+                rif_available_msg,
+            )
+
+            rif_last_available = rif_available_msg.event.datetime
+            load_time_delta = event_datetime - rif_last_available
+
+            logger.info(
+                'Putting time delta metrics to "%s" with value %s s...',
+                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+                load_time_delta.seconds,
+            )
+            try:
+                backoff_retry(
+                    func=lambda: put_metric_data(
+                        cw_client=cw_client,
+                        metric_namespace=METRICS_NAMESPACE,
+                        metrics=gen_all_dimensioned_metrics(
+                            metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                            dimensions=[rif_type_dimension, group_timestamp_dimension],
+                            value=round(load_time_delta.total_seconds()),
+                            datetime=event_datetime,
+                            unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                        ),
+                    ),
+                    ignored_exceptions=common_unrecoverable_exceptions,
+                )
+            except Exception:
+                logger.error(
+                    "An unrecoverable error occurred when trying to call PutMetricData for metric"
+                    " %s: ",
+                    PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+                    exc_info=True,
+                )
+                return
+            logger.info(
+                'Metrics put to "%s" successfully',
+                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+            )
+
+            logger.info(
+                "Removing %s message for %s RIF with group %s from %s queue...",
+                PipelineLoadEventType.RIF_AVAILABLE.value,
+                rif_file_type,
+                group_iso_str,
+                EVENTS_QUEUE_NAME,
+            )
+            try:
+                backoff_retry(
+                    func=lambda: delete_load_msg_from_queue(
+                        queue=events_queue, message=rif_available_msg
+                    ),
+                    ignored_exceptions=common_unrecoverable_exceptions,
+                )
+            except MessageFailedToDeleteException:
+                logger.error(
+                    "%s message for %s RIF with group %s was NOT removed from %s queue;"
+                    " reason(s): ",
+                    PipelineLoadEventType.RIF_AVAILABLE.value,
+                    rif_file_type,
+                    group_iso_str,
+                    EVENTS_QUEUE_NAME,
+                    exc_info=True,
+                )
+            except Exception:
+                logger.error(
+                    "An unrecoverable error ocurred when attempting to delete message from %s"
+                    " queue: ",
+                    EVENTS_QUEUE_NAME,
+                    exc_info=True,
+                )
+                return
+            logger.info(
+                "%s message for %s RIF with group %s removed from %s queue successfully",
+                PipelineLoadEventType.RIF_AVAILABLE.value,
+                rif_file_type,
+                group_iso_str,
+                EVENTS_QUEUE_NAME,
+            )
+        else:
+            logger.error(
+                "No corresponding messages found for %s RIF in group %s in queue %s; no time delta"
+                " metrics can be computed for this RIF. Continuing...",
+                rif_file_type.value,
+                group_iso_str,
+                EVENTS_QUEUE_NAME,
+            )
 
         logger.info("Checking if the pipeline load has completed...")
         if not _is_pipeline_load_complete(
-            bucket=etl_bucket, group_timestamp=group_iso_str
-        ) or not _is_incoming_folder_empty(bucket=etl_bucket, group_timestamp=group_iso_str):
+            bucket=etl_bucket, group=group_iso_str
+        ) or not _is_incoming_folder_empty(bucket=etl_bucket, group=group_iso_str):
             logger.info(
                 "Not all files have yet to be loaded for group %s. Data load is not complete."
                 " Stopping...",
@@ -610,41 +606,112 @@ def handler(event: Any, context: Any):
             PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
         )
 
-        # There should only ever be one single data point for the first available metric for the
-        # current group, so we don't need to sort or otherwise filter the list of values
-        first_available_time = datetime.utcfromtimestamp(data_first_available_metric_data.values[0])
-        full_load_time_delta = (
-            event_datetime.replace(tzinfo=first_available_time.tzinfo) - first_available_time
-        )
-
         logger.info(
-            'Putting to "%s" the total time delta (%s s) from start to finish for the current'
-            " pipeline load for group %s",
-            PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
-            full_load_time_delta.seconds,
+            "Retrieving %s message from %s queue for %s group...",
+            PipelineLoadEventType.LOAD_AVAILABLE.value,
+            EVENTS_QUEUE_NAME,
             group_iso_str,
         )
         try:
-            backoff_retry(
-                func=lambda: put_metric_data(
-                    cw_client=cw_client,
-                    metric_namespace=METRICS_NAMESPACE,
-                    metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
-                        dimensions=[group_timestamp_dimension],
-                        datetime=event_datetime,
-                        value=round(full_load_time_delta.total_seconds()),
-                        unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+            load_available_msg = backoff_retry(
+                func=lambda: next(
+                    (
+                        message
+                        for message in retrieve_load_event_msgs(
+                            queue=events_queue,
+                            timeout=10,
+                            type_filter=[PipelineLoadEventType.LOAD_AVAILABLE],
+                        )
+                        if message.event.group_iso_str == group_iso_str
                     ),
+                    None,
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
         except Exception:
             logger.error(
-                "An unrecoverable error occurred when trying to call PutMetricData; err: ",
+                "An unrecoverable error occurred when trying to check the %s queue; err: ",
+                EVENTS_QUEUE_NAME,
                 exc_info=True,
             )
-        logger.info(
-            'Data put to metric "%s" successfully',
-            PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
-        )
+            return
+
+        if load_available_msg:
+            first_available_time = load_available_msg.event.datetime
+            full_load_time_delta = event_datetime - first_available_time
+
+            logger.info(
+                'Putting to "%s" the total time delta (%s s) from start to finish for the current'
+                " pipeline load for group %s",
+                PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
+                full_load_time_delta.seconds,
+                group_iso_str,
+            )
+            try:
+                backoff_retry(
+                    func=lambda: put_metric_data(
+                        cw_client=cw_client,
+                        metric_namespace=METRICS_NAMESPACE,
+                        metrics=gen_all_dimensioned_metrics(
+                            metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                            dimensions=[group_timestamp_dimension],
+                            datetime=event_datetime,
+                            value=round(full_load_time_delta.total_seconds()),
+                            unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+                        ),
+                    ),
+                    ignored_exceptions=common_unrecoverable_exceptions,
+                )
+            except Exception:
+                logger.error(
+                    "An unrecoverable error occurred when trying to call PutMetricData; err: ",
+                    exc_info=True,
+                )
+            logger.info(
+                'Data put to metric "%s" successfully',
+                PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
+            )
+
+            logger.info(
+                "Removing %s message for group %s from %s queue...",
+                PipelineLoadEventType.LOAD_AVAILABLE.value,
+                group_iso_str,
+                EVENTS_QUEUE_NAME,
+            )
+            try:
+                backoff_retry(
+                    func=lambda: delete_load_msg_from_queue(
+                        queue=events_queue, message=load_available_msg
+                    ),
+                    ignored_exceptions=common_unrecoverable_exceptions,
+                )
+            except MessageFailedToDeleteException:
+                logger.error(
+                    "%s message for group %s was NOT removed from %s queue; reason(s): ",
+                    PipelineLoadEventType.RIF_AVAILABLE.value,
+                    group_iso_str,
+                    EVENTS_QUEUE_NAME,
+                    exc_info=True,
+                )
+            except Exception:
+                logger.error(
+                    "An unrecoverable error ocurred when attempting to delete message from %s"
+                    " queue: ",
+                    EVENTS_QUEUE_NAME,
+                    exc_info=True,
+                )
+                return
+            logger.info(
+                "%s message for group %s removed from %s queue successfully",
+                PipelineLoadEventType.RIF_AVAILABLE.value,
+                group_iso_str,
+                EVENTS_QUEUE_NAME,
+            )
+        else:
+            logger.error(
+                "No corresponding %s message found for group %s in queue %s; no time delta"
+                " metrics can be computed for this data load",
+                PipelineLoadEventType.LOAD_AVAILABLE.value,
+                group_iso_str,
+                EVENTS_QUEUE_NAME,
+            )

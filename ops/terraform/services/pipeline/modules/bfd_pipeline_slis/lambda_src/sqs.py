@@ -1,6 +1,7 @@
 import calendar
 import json
-from dataclasses import dataclass
+import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Optional, Union
@@ -27,6 +28,13 @@ class PipelineLoadEvent:
 class PipelineLoadEventMessage:
     receipt_handle: str
     event: PipelineLoadEvent
+
+    def __str__(self) -> str:
+        return json.dumps(asdict(self))
+
+
+class MessageFailedToDeleteException(Exception):
+    pass
 
 
 def retrieve_load_event_msgs(
@@ -95,3 +103,22 @@ def post_load_event(queue: Queue, message: PipelineLoadEvent):
             }
         )
     )
+
+
+def delete_load_msg_from_queue(queue: Queue, message: PipelineLoadEventMessage):
+    request_uuid = str(uuid.uuid4())
+    delete_response = queue.delete_messages(
+        Entries=[
+            {
+                "Id": request_uuid,
+                "ReceiptHandle": message.receipt_handle,
+            }
+        ]
+    )
+
+    if failed_response := next(
+        (resp for resp in delete_response["Failed"] if resp["Id"] == request_uuid), None
+    ):
+        raise MessageFailedToDeleteException(
+            f"Failed to delete {str(message)}; reason: {json.dumps(failed_response)}"
+        )
