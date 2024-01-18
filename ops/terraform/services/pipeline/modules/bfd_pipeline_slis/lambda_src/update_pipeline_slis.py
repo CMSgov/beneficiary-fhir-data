@@ -14,7 +14,7 @@ from botocore import exceptions as botocore_exceptions
 from botocore.config import Config
 
 from backoff_retry import backoff_retry
-from common import METRICS_NAMESPACE, PipelineMetric
+from common import METRICS_NAMESPACE, PipelineMetric, RifFileType
 from cw_metrics import (
     MetricData,
     MetricDataQuery,
@@ -22,11 +22,16 @@ from cw_metrics import (
     get_metric_data,
     put_metric_data,
 )
-from sqs import check_sentinel_queue, post_sentinel_message
+from sqs import (
+    PipelineLoadEvent,
+    PipelineLoadEventType,
+    post_load_event,
+    retrieve_load_events,
+)
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
-SENTINEL_QUEUE_NAME = os.environ.get("SENTINEL_QUEUE_NAME", "")
+EVENTS_QUEUE_NAME = os.environ.get("SENTINEL_QUEUE_NAME", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -42,7 +47,7 @@ try:
     cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
     s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
     sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)  # type: ignore
-    sentinel_queue = sqs_resource.get_queue_by_name(QueueName=SENTINEL_QUEUE_NAME)
+    events_queue = sqs_resource.get_queue_by_name(QueueName=EVENTS_QUEUE_NAME)
     etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
 except Exception:
     logger.error(
@@ -67,22 +72,6 @@ class PipelineDataStatus(str, Enum):
 
     INCOMING = "incoming"
     DONE = "done"
-
-
-class RifFileType(str, Enum):
-    """Represents all of the possible RIF file types that can be loaded by the BFD ETL Pipeline. The
-    value of each enum is a specific substring that is used to match on each type of file"""
-
-    BENEFICIARY_HISTORY = "beneficiary_history"
-    BENEFICIARY = "bene"
-    CARRIER = "carrier"
-    DME = "dme"
-    HHA = "hha"
-    HOSPICE = "hospice"
-    INPATIENT = "inpatient"
-    OUTPATIENT = "outpatient"
-    PDE = "pde"
-    SNF = "snf"
 
 
 def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
@@ -115,7 +104,7 @@ def _is_incoming_folder_empty(bucket: Any, group_timestamp: str) -> bool:
 
 
 def handler(event: Any, context: Any):
-    if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, SENTINEL_QUEUE_NAME]):
+    if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, EVENTS_QUEUE_NAME]):
         logger.error("Not all necessary environment variables were defined, exiting...")
         return
 
@@ -268,36 +257,41 @@ def handler(event: Any, context: Any):
 
         try:
             logger.info(
-                "Checking if the %s queue contains any sentinel messages"
-                " for the current group (%s)...",
-                SENTINEL_QUEUE_NAME,
+                "Retrieving the %s event for the current group/load, %s, from the %s queue... ",
+                PipelineLoadEventType.LOAD_AVAILABLE.value,
                 group_timestamp,
+                EVENTS_QUEUE_NAME,
             )
-            queue_is_empty = backoff_retry(
-                func=lambda: len(
-                    [
-                        msg
-                        for msg in check_sentinel_queue(sentinel_queue=sentinel_queue, timeout=10)
-                        if msg.group_timestamp == group_timestamp
-                    ]
-                )
-                == 0,
+            group_available_event = backoff_retry(
+                func=lambda: next(
+                    (
+                        event
+                        for event in retrieve_load_events(
+                            queue=events_queue,
+                            timeout=10,
+                            type_filter=[PipelineLoadEventType.LOAD_AVAILABLE],
+                        )
+                        if event.group_timestamp == group_timestamp
+                    ),
+                    None,
+                ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
         except Exception:
             logger.error(
                 "An unrecoverable error occurred when trying to check the %s queue; err: ",
-                SENTINEL_QUEUE_NAME,
+                EVENTS_QUEUE_NAME,
                 exc_info=True,
             )
             return
 
-        if queue_is_empty:
+        if not group_available_event:
             logger.info(
-                "No sentinel message was received from queue %s for current group %s, this"
+                "No %s event was retrieved from queue %s for current group %s, this"
                 " indicates that the incoming file is the start of a new data load for group %s."
                 ' Putting data to metric "%s" and corresponding metric "%s" with value %s',
-                SENTINEL_QUEUE_NAME,
+                PipelineLoadEventType.LOAD_AVAILABLE.value,
+                EVENTS_QUEUE_NAME,
                 group_timestamp,
                 group_timestamp,
                 PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
@@ -347,40 +341,48 @@ def handler(event: Any, context: Any):
                 return
 
             logger.info(
-                "Posting sentinel message to %s SQS queue to indicate that data load has begun for"
+                "Posting %s event to %s SQS queue to indicate that data load has begun for"
                 " group %s and that no additional data should be put to the %s metric for this"
                 " group",
-                SENTINEL_QUEUE_NAME,
+                PipelineLoadEventType.LOAD_AVAILABLE.value,
+                EVENTS_QUEUE_NAME,
                 group_timestamp,
                 PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
             )
 
             try:
                 backoff_retry(
-                    func=sentinel_queue.purge,
-                    ignored_exceptions=common_unrecoverable_exceptions,
-                )
-                backoff_retry(
-                    func=lambda: post_sentinel_message(
-                        sentinel_queue=sentinel_queue, group_timestamp=group_timestamp
+                    func=lambda: post_load_event(
+                        queue=events_queue,
+                        message=PipelineLoadEvent(
+                            event_type=PipelineLoadEventType.LOAD_AVAILABLE,
+                            timestamp=event_timestamp,
+                            group_timestamp=group_timestamp,
+                            rif_type=rif_file_type,
+                        ),
                     ),
                     ignored_exceptions=common_unrecoverable_exceptions,
                 )
 
-                logger.info("Sentinel message posted to %s successfully", SENTINEL_QUEUE_NAME)
+                logger.info(
+                    "%s event posted to %s successfully",
+                    PipelineLoadEventType.LOAD_AVAILABLE.value,
+                    EVENTS_QUEUE_NAME,
+                )
             except Exception:
                 logger.error(
                     "An unrecoverable error occurred when trying to post message to the %s SQS"
                     " queue: ",
-                    SENTINEL_QUEUE_NAME,
+                    EVENTS_QUEUE_NAME,
                     exc_info=True,
                 )
         else:
             logger.info(
-                "Sentinel value was received from queue %s for current group %s. Incoming file is"
+                "%s event was received from queue %s for current group %s. Incoming file is"
                 " part of an ongoing, existing data load for group %s, and therefore does not"
                 " indicate the time of the first data load for this group. Stopping...",
-                SENTINEL_QUEUE_NAME,
+                PipelineLoadEventType.LOAD_AVAILABLE.value,
+                EVENTS_QUEUE_NAME,
                 group_timestamp,
                 group_timestamp,
             )
