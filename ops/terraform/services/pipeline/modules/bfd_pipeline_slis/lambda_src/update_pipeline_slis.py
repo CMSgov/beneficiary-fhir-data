@@ -4,7 +4,7 @@ import logging
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Type
 from urllib.parse import unquote
@@ -158,7 +158,9 @@ def handler(event: Any, context: Any):
 
     try:
         event_time_iso: str = s3_event["eventTime"]
-        event_timestamp = datetime.fromisoformat(event_time_iso.removesuffix("Z"))
+        event_datetime = datetime.fromisoformat(event_time_iso.removesuffix("Z")).astimezone(
+            tz=timezone.utc
+        )
     except KeyError:
         logger.error('Record did not contain any key with "eventTime": ', exc_info=True)
         return
@@ -195,17 +197,17 @@ def handler(event: Any, context: Any):
         return
 
     pipeline_data_status = PipelineDataStatus(match.group(1).lower())
-    group_timestamp = match.group(2)
+    group_iso_str = match.group(2)
     rif_file_type = RifFileType(match.group(3).lower())
 
     # Log data extracted from S3 object key now that we know this is a valid RIF file within a
     # valid data load
     logger.info("RIF type: %s", rif_file_type.name)
     logger.info("Load Status: %s", pipeline_data_status.name)
-    logger.info("Data Load: %s", group_timestamp)
+    logger.info("Data Load: %s", group_iso_str)
 
     rif_type_dimension = {"data_type": rif_file_type.name.lower()}
-    group_timestamp_dimension = {"group_timestamp": group_timestamp}
+    group_timestamp_dimension = {"group_timestamp": group_iso_str}
 
     timestamp_metric = (
         PipelineMetric.TIME_DATA_AVAILABLE
@@ -213,7 +215,7 @@ def handler(event: Any, context: Any):
         else PipelineMetric.TIME_DATA_LOADED
     )
 
-    utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
+    utc_timestamp = calendar.timegm(event_datetime.utctimetuple())
 
     logger.info(
         'Putting data timestamp metrics "%s" up to CloudWatch with unix timestamp value %s',
@@ -229,7 +231,7 @@ def handler(event: Any, context: Any):
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=gen_all_dimensioned_metrics(
                     metric_name=timestamp_metric.metric_name,
-                    timestamp=event_timestamp,
+                    datetime=event_datetime,
                     value=utc_timestamp,
                     unit=timestamp_metric.unit,
                     dimensions=[rif_type_dimension, group_timestamp_dimension],
@@ -253,7 +255,7 @@ def handler(event: Any, context: Any):
             PipelineLoadEventType.RIF_AVAILABLE.value,
             EVENTS_QUEUE_NAME,
             rif_file_type,
-            group_timestamp,
+            group_iso_str,
         )
         try:
             backoff_retry(
@@ -261,8 +263,8 @@ def handler(event: Any, context: Any):
                     queue=events_queue,
                     message=PipelineLoadEvent(
                         event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                        timestamp=event_timestamp,
-                        group_timestamp=group_timestamp,
+                        datetime=event_datetime,
+                        group_iso_str=group_iso_str,
                         rif_type=rif_file_type,
                     ),
                 ),
@@ -281,18 +283,18 @@ def handler(event: Any, context: Any):
             PipelineLoadEventType.RIF_AVAILABLE.value,
             EVENTS_QUEUE_NAME,
             rif_file_type,
-            group_timestamp,
+            group_iso_str,
         )
 
         logger.info(
             'Checking if this is the first time data load was discovered for group "%s"...',
-            group_timestamp,
+            group_iso_str,
         )
 
         logger.info(
             "Retrieving the %s event for the current group/load, %s, from the %s queue... ",
             PipelineLoadEventType.LOAD_AVAILABLE.value,
-            group_timestamp,
+            group_iso_str,
             EVENTS_QUEUE_NAME,
         )
         try:
@@ -305,7 +307,7 @@ def handler(event: Any, context: Any):
                             timeout=10,
                             type_filter=[PipelineLoadEventType.LOAD_AVAILABLE],
                         )
-                        if message.event.group_timestamp == group_timestamp
+                        if message.event.group_iso_str == group_iso_str
                     ),
                     None,
                 ),
@@ -326,8 +328,8 @@ def handler(event: Any, context: Any):
                 " indicate the time of the first data load for this group. Stopping...",
                 PipelineLoadEventType.LOAD_AVAILABLE.value,
                 EVENTS_QUEUE_NAME,
-                group_timestamp,
-                group_timestamp,
+                group_iso_str,
+                group_iso_str,
             )
             return
 
@@ -337,8 +339,8 @@ def handler(event: Any, context: Any):
             ' Putting data to metric "%s" and corresponding metric "%s" with value %s',
             PipelineLoadEventType.LOAD_AVAILABLE.value,
             EVENTS_QUEUE_NAME,
-            group_timestamp,
-            group_timestamp,
+            group_iso_str,
+            group_iso_str,
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
             utc_timestamp,
@@ -358,7 +360,7 @@ def handler(event: Any, context: Any):
                     metrics=gen_all_dimensioned_metrics(
                         metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
                         dimensions=[group_timestamp_dimension],
-                        timestamp=event_timestamp,
+                        datetime=event_datetime,
                         value=utc_timestamp,
                         unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
                     )
@@ -367,7 +369,7 @@ def handler(event: Any, context: Any):
                             metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
                             value=utc_timestamp,
                             unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
-                            timestamp=event_timestamp,
+                            datetime=event_datetime,
                         )
                     ],
                 ),
@@ -391,7 +393,7 @@ def handler(event: Any, context: Any):
             " group",
             PipelineLoadEventType.LOAD_AVAILABLE.value,
             EVENTS_QUEUE_NAME,
-            group_timestamp,
+            group_iso_str,
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
         )
         try:
@@ -400,8 +402,8 @@ def handler(event: Any, context: Any):
                     queue=events_queue,
                     message=PipelineLoadEvent(
                         event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                        timestamp=event_timestamp,
-                        group_timestamp=group_timestamp,
+                        datetime=event_datetime,
+                        group_iso_str=group_iso_str,
                         rif_type=rif_file_type,
                     ),
                 ),
@@ -435,7 +437,7 @@ def handler(event: Any, context: Any):
             PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
             rif_file_type.name,
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-            group_timestamp,
+            group_iso_str,
         )
         try:
             # We get both the last available metric for the current RIF file type _and_ the
@@ -520,7 +522,7 @@ def handler(event: Any, context: Any):
             )
             return
 
-        load_time_delta = event_timestamp.replace(tzinfo=last_available.tzinfo) - last_available
+        load_time_delta = event_datetime.replace(tzinfo=last_available.tzinfo) - last_available
 
         logger.info(
             'Putting time delta metrics to "%s" with value %s s...',
@@ -536,7 +538,7 @@ def handler(event: Any, context: Any):
                         metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
                         dimensions=[rif_type_dimension, group_timestamp_dimension],
                         value=round(load_time_delta.total_seconds()),
-                        timestamp=event_timestamp,
+                        datetime=event_datetime,
                         unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
                     ),
                 ),
@@ -554,14 +556,14 @@ def handler(event: Any, context: Any):
             PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
         )
 
-        logger.error("Checking if the pipeline load has completed...")
+        logger.info("Checking if the pipeline load has completed...")
         if not _is_pipeline_load_complete(
-            bucket=etl_bucket, group_timestamp=group_timestamp
-        ) or not _is_incoming_folder_empty(bucket=etl_bucket, group_timestamp=group_timestamp):
+            bucket=etl_bucket, group_timestamp=group_iso_str
+        ) or not _is_incoming_folder_empty(bucket=etl_bucket, group_timestamp=group_iso_str):
             logger.info(
                 "Not all files have yet to be loaded for group %s. Data load is not complete."
                 " Stopping...",
-                group_timestamp,
+                group_iso_str,
             )
             return
 
@@ -569,7 +571,7 @@ def handler(event: Any, context: Any):
             "All files have been loaded for group %s. This indicates that the data load has"
             ' been completed for this group. Putting data to metric "%s" and corresponding'
             ' metric "%s" with value %s',
-            group_timestamp,
+            group_iso_str,
             PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
             PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
             utc_timestamp,
@@ -582,7 +584,7 @@ def handler(event: Any, context: Any):
                     metrics=gen_all_dimensioned_metrics(
                         metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
                         dimensions=[group_timestamp_dimension],
-                        timestamp=event_timestamp,
+                        datetime=event_datetime,
                         value=utc_timestamp,
                         unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
                     )
@@ -591,7 +593,7 @@ def handler(event: Any, context: Any):
                             metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
                             value=utc_timestamp,
                             unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
-                            timestamp=event_timestamp,
+                            datetime=event_datetime,
                         )
                     ],
                 ),
@@ -612,7 +614,7 @@ def handler(event: Any, context: Any):
         # current group, so we don't need to sort or otherwise filter the list of values
         first_available_time = datetime.utcfromtimestamp(data_first_available_metric_data.values[0])
         full_load_time_delta = (
-            event_timestamp.replace(tzinfo=first_available_time.tzinfo) - first_available_time
+            event_datetime.replace(tzinfo=first_available_time.tzinfo) - first_available_time
         )
 
         logger.info(
@@ -620,7 +622,7 @@ def handler(event: Any, context: Any):
             " pipeline load for group %s",
             PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
             full_load_time_delta.seconds,
-            group_timestamp,
+            group_iso_str,
         )
         try:
             backoff_retry(
@@ -630,7 +632,7 @@ def handler(event: Any, context: Any):
                     metrics=gen_all_dimensioned_metrics(
                         metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
                         dimensions=[group_timestamp_dimension],
-                        timestamp=event_timestamp,
+                        datetime=event_datetime,
                         value=round(full_load_time_delta.total_seconds()),
                         unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
                     ),

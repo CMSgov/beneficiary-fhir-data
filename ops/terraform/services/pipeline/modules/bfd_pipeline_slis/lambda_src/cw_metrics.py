@@ -15,7 +15,7 @@ class MetricData:
     (timestamp, value)"""
 
     metric_name: str
-    timestamp: datetime
+    datetime: datetime
     value: float
     unit: str
     dimensions: dict[str, str] = field(default_factory=dict)
@@ -59,7 +59,7 @@ def _powerset(items: list[T]) -> chain[Tuple[T]]:
 
 
 def gen_all_dimensioned_metrics(
-    metric_name: str, timestamp: datetime, value: float, unit: str, dimensions: list[dict[str, str]]
+    metric_name: str, datetime: datetime, value: float, unit: str, dimensions: list[dict[str, str]]
 ) -> list[MetricData]:
     """Generates all of the possible dimensioned (and single undimensioned) metrics from the
     powerset of the list of dimensions passed-in. Useful as all metrics created by this Lambda
@@ -80,7 +80,7 @@ def gen_all_dimensioned_metrics(
     return [
         MetricData(
             metric_name=metric_name,
-            timestamp=timestamp,
+            datetime=datetime,
             value=value,
             # Merge the chain/generator of dimensions of arbitrary size using the "|" operator
             dimensions=reduce(operator.ior, x, {}),
@@ -104,7 +104,7 @@ def put_metric_data(cw_client: Any, metric_namespace: str, metrics: list[MetricD
     metrics_dict_list = [
         {
             "MetricName": m.metric_name,
-            "Timestamp": m.timestamp,
+            "Timestamp": m.datetime,
             "Value": m.value,
             "Unit": m.unit,
             "Dimensions": [

@@ -135,7 +135,7 @@ def handler(event: Any, context: Any):
                         metric_name=SOURCE_TO_REPEATING_METRICS[v.pipeline_metric].metric_name,
                         value=v.latest_value,
                         unit=SOURCE_TO_REPEATING_METRICS[v.pipeline_metric].unit,
-                        timestamp=datetime.utcnow(),
+                        datetime=datetime.utcnow(),
                     )
                     for v in latest_values
                 ],
