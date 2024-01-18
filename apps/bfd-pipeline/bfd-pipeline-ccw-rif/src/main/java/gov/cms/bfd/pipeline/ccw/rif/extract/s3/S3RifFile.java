@@ -38,13 +38,13 @@ public final class S3RifFile implements RifFile {
   private final Future<DataSetQueue.ManifestEntry> manifestEntryDownload;
 
   /**
-   * Constructs a new {@link S3RifFile} instance.
+   * Initializes an instance.
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param manifestEntry the specific {@link DataSetManifestEntry} represented by this {@link
    *     S3RifFile}
-   * @param manifestEntryDownload a {@link Future} for the {@link ManifestEntryDownloadResult} with
-   *     a local download of the RIF file's contents
+   * @param manifestEntryDownload a {@link Future} for the {@link DataSetQueue.ManifestEntry} with a
+   *     local download of the RIF file's contents
    */
   public S3RifFile(
       MetricRegistry appMetrics,
@@ -59,13 +59,11 @@ public final class S3RifFile implements RifFile {
     this.manifestEntryDownload = manifestEntryDownload;
   }
 
-  /** {@inheritDoc} */
   @Override
   public RifFileType getFileType() {
     return manifestEntry.getType();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDisplayName() {
     return String.format(
@@ -75,13 +73,11 @@ public final class S3RifFile implements RifFile {
         manifestEntry.getName());
   }
 
-  /** {@inheritDoc} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** {@inheritDoc} */
   @Override
   public InputStream open() {
     DataSetQueue.ManifestEntry fileDownloadResult = waitForDownload();
@@ -100,7 +96,7 @@ public final class S3RifFile implements RifFile {
   /**
    * Downloads the manifest entry and waits for its completion before returning.
    *
-   * @return the completed {@link ManifestEntryDownloadResult} for {@link #manifestEntryDownload}
+   * @return the completed {@link DataSetQueue.ManifestEntry} for {@link #manifestEntryDownload}
    */
   private DataSetQueue.ManifestEntry waitForDownload() {
     Timer.Context downloadWaitTimer = null;
@@ -176,7 +172,6 @@ public final class S3RifFile implements RifFile {
     waitForDownload().markAsCompleted();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     String localDownloadPath;
