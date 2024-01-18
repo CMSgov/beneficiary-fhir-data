@@ -215,12 +215,12 @@ def handler(event: Any, context: Any):
 
     utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
 
+    logger.info(
+        'Putting data timestamp metrics "%s" up to CloudWatch with unix timestamp value %s',
+        timestamp_metric.full_name(),
+        utc_timestamp,
+    )
     try:
-        logger.info(
-            'Putting data timestamp metrics "%s" up to CloudWatch with unix timestamp value %s',
-            timestamp_metric.full_name(),
-            utc_timestamp,
-        )
         backoff_retry(
             # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
             # dimensions of the given metric based upon the powerset of the dimensions):
@@ -237,7 +237,6 @@ def handler(event: Any, context: Any):
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
-        logger.info('Successfully put metrics to "%s"', timestamp_metric.full_name())
     except Exception:
         logger.error(
             "An unrecoverable error occurred when trying to call PutMetricData for metric %s: ",
@@ -245,6 +244,7 @@ def handler(event: Any, context: Any):
             exc_info=True,
         )
         return
+    logger.info('Successfully put metrics to "%s"', timestamp_metric.full_name())
 
     if pipeline_data_status == PipelineDataStatus.INCOMING:
         logger.info(
@@ -289,13 +289,13 @@ def handler(event: Any, context: Any):
             group_timestamp,
         )
 
+        logger.info(
+            "Retrieving the %s event for the current group/load, %s, from the %s queue... ",
+            PipelineLoadEventType.LOAD_AVAILABLE.value,
+            group_timestamp,
+            EVENTS_QUEUE_NAME,
+        )
         try:
-            logger.info(
-                "Retrieving the %s event for the current group/load, %s, from the %s queue... ",
-                PipelineLoadEventType.LOAD_AVAILABLE.value,
-                group_timestamp,
-                EVENTS_QUEUE_NAME,
-            )
             group_available_msg = backoff_retry(
                 func=lambda: next(
                     (
@@ -344,13 +344,13 @@ def handler(event: Any, context: Any):
             utc_timestamp,
         )
 
+        logger.info(
+            'Putting time metric data to "%s" and corresponding "%s" with value %s...',
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+            utc_timestamp,
+        )
         try:
-            logger.info(
-                'Putting time metric data to "%s" and corresponding "%s" with value %s...',
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
-                utc_timestamp,
-            )
             backoff_retry(
                 func=lambda: put_metric_data(
                     cw_client=cw_client,
@@ -373,17 +373,17 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-            logger.info(
-                "Metrics put to %s and %s successfully",
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
-            )
         except Exception:
             logger.error(
                 "An unrecoverable error occurred when trying to call PutMetricData; err: ",
                 exc_info=True,
             )
             return
+        logger.info(
+            "Metrics put to %s and %s successfully",
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+        )
 
         logger.info(
             "Posting %s event to %s SQS queue to indicate that data load has begun for"
@@ -394,7 +394,6 @@ def handler(event: Any, context: Any):
             group_timestamp,
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
         )
-
         try:
             backoff_retry(
                 func=lambda: post_load_event(
@@ -408,18 +407,17 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-
-            logger.info(
-                "%s event posted to %s successfully",
-                PipelineLoadEventType.LOAD_AVAILABLE.value,
-                EVENTS_QUEUE_NAME,
-            )
         except Exception:
             logger.error(
                 "An unrecoverable error occurred when trying to post message to the %s SQS queue: ",
                 EVENTS_QUEUE_NAME,
                 exc_info=True,
             )
+        logger.info(
+            "%s event posted to %s successfully",
+            PipelineLoadEventType.LOAD_AVAILABLE.value,
+            EVENTS_QUEUE_NAME,
+        )
     elif pipeline_data_status == PipelineDataStatus.DONE:
         logger.info(
             "Incoming file indicates data has been loaded. Calculating time deltas and checking"
@@ -431,15 +429,15 @@ def handler(event: Any, context: Any):
             rif_file_type.name,
         )
 
+        logger.info(
+            'Getting corresponding "%s" time metric for the current RIF file type "%s" and "%s"'
+            ' time metric in group "%s"...',
+            PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
+            rif_file_type.name,
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+            group_timestamp,
+        )
         try:
-            logger.info(
-                'Getting corresponding "%s" time metric for the current RIF file type "%s" and "%s"'
-                ' time metric in group "%s"...',
-                PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
-                rif_file_type.name,
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-                group_timestamp,
-            )
             # We get both the last available metric for the current RIF file type _and_ the
             # current load's first available time metric to reduce the number of API calls. The
             # first available time metric is only used if the load has finished (the
@@ -464,19 +462,19 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions + [KeyError],
             )
-            logger.info(
-                '"%s" with dimensions %s and "%s" with dimensions %s retrieved successfully',
-                PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
-                rif_type_dimension | group_timestamp_dimension,
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-                group_timestamp_dimension,
-            )
         except Exception:
             logger.error(
                 "An unrecoverable error occurred when trying to call GetMetricData; err: ",
                 exc_info=True,
             )
             return
+        logger.info(
+            '"%s" with dimensions %s and "%s" with dimensions %s retrieved successfully',
+            PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
+            rif_type_dimension | group_timestamp_dimension,
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+            group_timestamp_dimension,
+        )
 
         try:
             data_available_metric_data = [
@@ -493,11 +491,12 @@ def handler(event: Any, context: Any):
                 if x.label == PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
             ][0]
         except IndexError:
-            logger.info(
+            logger.error(
                 'No metric data result was found for metric "%s" or "%s", no time delta(s) can be'
                 " computed. Stopping...",
                 PipelineMetric.TIME_DATA_AVAILABLE.full_name(),
                 PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+                exc_info=True,
             )
             return
 
@@ -523,12 +522,12 @@ def handler(event: Any, context: Any):
 
         load_time_delta = event_timestamp.replace(tzinfo=last_available.tzinfo) - last_available
 
+        logger.info(
+            'Putting time delta metrics to "%s" with value %s s...',
+            PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+            load_time_delta.seconds,
+        )
         try:
-            logger.info(
-                'Putting time delta metrics to "%s" with value %s s...',
-                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
-                load_time_delta.seconds,
-            )
             backoff_retry(
                 func=lambda: put_metric_data(
                     cw_client=cw_client,
@@ -543,10 +542,6 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-            logger.info(
-                'Metrics put to "%s" successfully',
-                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
-            )
         except Exception:
             logger.error(
                 "An unrecoverable error occurred when trying to call PutMetricData for metric %s: ",
@@ -554,6 +549,10 @@ def handler(event: Any, context: Any):
                 exc_info=True,
             )
             return
+        logger.info(
+            'Metrics put to "%s" successfully',
+            PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+        )
 
         logger.error("Checking if the pipeline load has completed...")
         if not _is_pipeline_load_complete(
@@ -566,16 +565,16 @@ def handler(event: Any, context: Any):
             )
             return
 
+        logger.info(
+            "All files have been loaded for group %s. This indicates that the data load has"
+            ' been completed for this group. Putting data to metric "%s" and corresponding'
+            ' metric "%s" with value %s',
+            group_timestamp,
+            PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
+            PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
+            utc_timestamp,
+        )
         try:
-            logger.info(
-                "All files have been loaded for group %s. This indicates that the data load has"
-                ' been completed for this group. Putting data to metric "%s" and corresponding'
-                ' metric "%s" with value %s',
-                group_timestamp,
-                PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
-                PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
-                utc_timestamp,
-            )
             backoff_retry(
                 func=lambda: put_metric_data(
                     cw_client=cw_client,
@@ -598,16 +597,16 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-            logger.info(
-                'Data put to "%s" and "%s" successfully',
-                PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
-                PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
-            )
         except Exception:
             logger.error(
                 "An unrecoverable error occurred when trying to call PutMetricData; err: ",
                 exc_info=True,
             )
+        logger.info(
+            'Data put to "%s" and "%s" successfully',
+            PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
+            PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
+        )
 
         # There should only ever be one single data point for the first available metric for the
         # current group, so we don't need to sort or otherwise filter the list of values
@@ -616,14 +615,14 @@ def handler(event: Any, context: Any):
             event_timestamp.replace(tzinfo=first_available_time.tzinfo) - first_available_time
         )
 
+        logger.info(
+            'Putting to "%s" the total time delta (%s s) from start to finish for the current'
+            " pipeline load for group %s",
+            PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
+            full_load_time_delta.seconds,
+            group_timestamp,
+        )
         try:
-            logger.info(
-                'Putting to "%s" the total time delta (%s s) from start to finish for the current'
-                " pipeline load for group %s",
-                PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
-                full_load_time_delta.seconds,
-                group_timestamp,
-            )
             backoff_retry(
                 func=lambda: put_metric_data(
                     cw_client=cw_client,
@@ -638,12 +637,12 @@ def handler(event: Any, context: Any):
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-            logger.info(
-                'Data put to metric "%s" successfully',
-                PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
-            )
         except Exception:
             logger.error(
                 "An unrecoverable error occurred when trying to call PutMetricData; err: ",
                 exc_info=True,
             )
+        logger.info(
+            'Data put to metric "%s" successfully',
+            PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
+        )
