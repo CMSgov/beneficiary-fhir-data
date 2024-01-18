@@ -285,98 +285,7 @@ def handler(event: Any, context: Any):
             )
             return
 
-        if not group_available_event:
-            logger.info(
-                "No %s event was retrieved from queue %s for current group %s, this"
-                " indicates that the incoming file is the start of a new data load for group %s."
-                ' Putting data to metric "%s" and corresponding metric "%s" with value %s',
-                PipelineLoadEventType.LOAD_AVAILABLE.value,
-                EVENTS_QUEUE_NAME,
-                group_timestamp,
-                group_timestamp,
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
-                utc_timestamp,
-            )
-
-            try:
-                logger.info(
-                    'Putting time metric data to "%s" and corresponding "%s" with value %s...',
-                    PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-                    PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
-                    utc_timestamp,
-                )
-                backoff_retry(
-                    func=lambda: put_metric_data(
-                        cw_client=cw_client,
-                        metric_namespace=METRICS_NAMESPACE,
-                        metrics=gen_all_dimensioned_metrics(
-                            metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                            dimensions=[group_timestamp_dimension],
-                            timestamp=event_timestamp,
-                            value=utc_timestamp,
-                            unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
-                        )
-                        + [
-                            MetricData(
-                                metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
-                                value=utc_timestamp,
-                                unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
-                                timestamp=event_timestamp,
-                            )
-                        ],
-                    ),
-                    ignored_exceptions=common_unrecoverable_exceptions,
-                )
-                logger.info(
-                    "Metrics put to %s and %s successfully",
-                    PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-                    PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
-                )
-            except Exception:
-                logger.error(
-                    "An unrecoverable error occurred when trying to call PutMetricData; err: ",
-                    exc_info=True,
-                )
-                return
-
-            logger.info(
-                "Posting %s event to %s SQS queue to indicate that data load has begun for"
-                " group %s and that no additional data should be put to the %s metric for this"
-                " group",
-                PipelineLoadEventType.LOAD_AVAILABLE.value,
-                EVENTS_QUEUE_NAME,
-                group_timestamp,
-                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
-            )
-
-            try:
-                backoff_retry(
-                    func=lambda: post_load_event(
-                        queue=events_queue,
-                        message=PipelineLoadEvent(
-                            event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                            timestamp=event_timestamp,
-                            group_timestamp=group_timestamp,
-                            rif_type=rif_file_type,
-                        ),
-                    ),
-                    ignored_exceptions=common_unrecoverable_exceptions,
-                )
-
-                logger.info(
-                    "%s event posted to %s successfully",
-                    PipelineLoadEventType.LOAD_AVAILABLE.value,
-                    EVENTS_QUEUE_NAME,
-                )
-            except Exception:
-                logger.error(
-                    "An unrecoverable error occurred when trying to post message to the %s SQS"
-                    " queue: ",
-                    EVENTS_QUEUE_NAME,
-                    exc_info=True,
-                )
-        else:
+        if group_available_event:
             logger.info(
                 "%s event was received from queue %s for current group %s. Incoming file is"
                 " part of an ongoing, existing data load for group %s, and therefore does not"
@@ -385,6 +294,97 @@ def handler(event: Any, context: Any):
                 EVENTS_QUEUE_NAME,
                 group_timestamp,
                 group_timestamp,
+            )
+            return
+
+        logger.info(
+            "No %s event was retrieved from queue %s for current group %s, this"
+            " indicates that the incoming file is the start of a new data load for group %s."
+            ' Putting data to metric "%s" and corresponding metric "%s" with value %s',
+            PipelineLoadEventType.LOAD_AVAILABLE.value,
+            EVENTS_QUEUE_NAME,
+            group_timestamp,
+            group_timestamp,
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+            utc_timestamp,
+        )
+
+        try:
+            logger.info(
+                'Putting time metric data to "%s" and corresponding "%s" with value %s...',
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+                utc_timestamp,
+            )
+            backoff_retry(
+                func=lambda: put_metric_data(
+                    cw_client=cw_client,
+                    metric_namespace=METRICS_NAMESPACE,
+                    metrics=gen_all_dimensioned_metrics(
+                        metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                        dimensions=[group_timestamp_dimension],
+                        timestamp=event_timestamp,
+                        value=utc_timestamp,
+                        unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
+                    )
+                    + [
+                        MetricData(
+                            metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
+                            value=utc_timestamp,
+                            unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
+                            timestamp=event_timestamp,
+                        )
+                    ],
+                ),
+                ignored_exceptions=common_unrecoverable_exceptions,
+            )
+            logger.info(
+                "Metrics put to %s and %s successfully",
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+                PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+            )
+        except Exception:
+            logger.error(
+                "An unrecoverable error occurred when trying to call PutMetricData; err: ",
+                exc_info=True,
+            )
+            return
+
+        logger.info(
+            "Posting %s event to %s SQS queue to indicate that data load has begun for"
+            " group %s and that no additional data should be put to the %s metric for this"
+            " group",
+            PipelineLoadEventType.LOAD_AVAILABLE.value,
+            EVENTS_QUEUE_NAME,
+            group_timestamp,
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+        )
+
+        try:
+            backoff_retry(
+                func=lambda: post_load_event(
+                    queue=events_queue,
+                    message=PipelineLoadEvent(
+                        event_type=PipelineLoadEventType.LOAD_AVAILABLE,
+                        timestamp=event_timestamp,
+                        group_timestamp=group_timestamp,
+                        rif_type=rif_file_type,
+                    ),
+                ),
+                ignored_exceptions=common_unrecoverable_exceptions,
+            )
+
+            logger.info(
+                "%s event posted to %s successfully",
+                PipelineLoadEventType.LOAD_AVAILABLE.value,
+                EVENTS_QUEUE_NAME,
+            )
+        except Exception:
+            logger.error(
+                "An unrecoverable error occurred when trying to post message to the %s SQS queue: ",
+                EVENTS_QUEUE_NAME,
+                exc_info=True,
             )
     elif pipeline_data_status == PipelineDataStatus.DONE:
         logger.info(
