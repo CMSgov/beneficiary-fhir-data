@@ -6,9 +6,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /** JPA class for the loaded_batches table. */
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "loaded_batches")
 public class LoadedBatch {
   /** Separator for joining and splitting data. */
@@ -36,25 +44,6 @@ public class LoadedBatch {
   @Column(name = "created", nullable = false)
   private Instant created;
 
-  /** Default constructor. */
-  public LoadedBatch() {}
-
-  /**
-   * Creates a new LoadedBatch with known values.
-   *
-   * @param loadedBatchId unique sequence id
-   * @param loadedFileId associated file
-   * @param beneficiaries to associate
-   * @param created batch creation date
-   */
-  public LoadedBatch(long loadedBatchId, long loadedFileId, String beneficiaries, Instant created) {
-    this();
-    this.loadedBatchId = loadedBatchId;
-    this.loadedFileId = loadedFileId;
-    this.beneficiaries = beneficiaries;
-    this.created = created;
-  }
-
   /**
    * Creates a new LoadedBatch with known values.
    *
@@ -69,78 +58,6 @@ public class LoadedBatch {
     this.loadedBatchId = loadedBatchId;
     this.loadedFileId = loadedFileId;
     this.beneficiaries = convertToString(beneficiaries);
-    this.created = created;
-  }
-
-  /**
-   * Gets the {@link #loadedBatchId}.
-   *
-   * @return the loadedBatchId
-   */
-  public long getLoadedBatchId() {
-    return loadedBatchId;
-  }
-
-  /**
-   * Sets the {@link #loadedBatchId}.
-   *
-   * @param loadedBatchId the identifier to set
-   */
-  public void setLoadedBatchId(long loadedBatchId) {
-    this.loadedBatchId = loadedBatchId;
-  }
-
-  /**
-   * Gets the {@link #loadedFileId}.
-   *
-   * @return the loadedFileId
-   */
-  public long getLoadedFileId() {
-    return loadedFileId;
-  }
-
-  /**
-   * Sets the {@link #loadedFileId}.
-   *
-   * @param loadedFileId the identifier to set
-   */
-  public void setLoadedFileId(long loadedFileId) {
-    this.loadedFileId = loadedFileId;
-  }
-
-  /**
-   * Gets the {@link #beneficiaries}.
-   *
-   * @return the beneficiaries
-   */
-  public String getBeneficiaries() {
-    return beneficiaries;
-  }
-
-  /**
-   * Sets the {@link #beneficiaries}.
-   *
-   * @param beneficiaries the beneficiaryId to set
-   */
-  public void setBeneficiaries(String beneficiaries) {
-    this.beneficiaries = beneficiaries;
-  }
-
-  /**
-   * Gets the {@link #created}.
-   *
-   * @return the creation time stamp
-   */
-  public Instant getCreated() {
-    return created;
-  }
-
-  /**
-   * Sets the {@link #created}.
-   *
-   * @param created time stamp to set
-   */
-  public void setCreated(Instant created) {
     this.created = created;
   }
 

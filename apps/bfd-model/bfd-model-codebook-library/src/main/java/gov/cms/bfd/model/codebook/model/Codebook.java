@@ -7,12 +7,14 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 
 /**
  * Represents the data contained in a <a
  * href="https://www.ccwdata.org/web/guest/data-dictionaries">CMS Chronic Conditions Warehouse (CCW)
  * data dictionary</a> codebook.
  */
+@Getter
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class Codebook {
@@ -52,44 +54,6 @@ public final class Codebook {
     this.name = null;
     this.version = null;
     this.variables = new ArrayList<>();
-  }
-
-  /**
-   * Gets the {@link #id}.
-   *
-   * @return the short identifier for this {@link Codebook}, for use in debugging
-   */
-  public String getId() {
-    return id;
-  }
-
-  /**
-   * Gets the {@link #name}.
-   *
-   * @return the descriptive English name for this {@link Codebook}
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Gets the {@link #version}.
-   *
-   * @return a human-readable {@link String} that identifies which version of the data is
-   *     represented by this {@link Codebook}, typically something like "<code>
-   *     December 2042, Version 42.0</code>"
-   */
-  public String getVersion() {
-    return version;
-  }
-
-  /**
-   * Gets the {@link #variables}.
-   *
-   * @return the mutable {@link List} of {@link Variable}s in the {@link Codebook}
-   */
-  public List<Variable> getVariables() {
-    return variables;
   }
 
   /** {@inheritDoc} */

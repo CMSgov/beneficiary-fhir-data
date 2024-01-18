@@ -1,6 +1,7 @@
 package gov.cms.bfd.model.rif;
 
 import java.util.List;
+import lombok.Getter;
 import org.apache.commons.csv.CSVRecord;
 
 /**
@@ -10,6 +11,7 @@ import org.apache.commons.csv.CSVRecord;
  *
  * @param <R> the record type stored in this {@link RifRecordEvent}
  */
+@Getter
 public final class RifRecordEvent<R extends RifRecordBase> {
   /** The {@link RifFileEvent} that this is a child of. */
   private final RifFileEvent fileEvent;
@@ -17,7 +19,7 @@ public final class RifRecordEvent<R extends RifRecordBase> {
   /** The {@link CSVRecord}s that this was built from / represents. */
   private final List<CSVRecord> rawCsvRecords;
 
-  /** The RIF {@link RecordAction} indicated for the {@link #getRecord()}. */
+  /** The RIF {@link RecordAction} indicated for the getRecord(). */
   private final RecordAction recordAction;
 
   /** The beneficiary id for this record event. */
@@ -29,11 +31,11 @@ public final class RifRecordEvent<R extends RifRecordBase> {
   /**
    * Constructs a new {@link RifRecordEvent} instance.
    *
-   * @param fileEvent the value to use for {@link #getFileEvent()}
-   * @param rawCsvRecords the value to use for {@link #getRawCsvRecords()}
-   * @param recordAction the value to use for {@link #getRecordAction()}
-   * @param beneficiaryId the beneficiary id to use for {@link #getBeneficiaryId()}
-   * @param record the value to use for {@link #getRecord()}
+   * @param fileEvent the value to use for getFileEvent()
+   * @param rawCsvRecords the value to use for getRawCsvRecords()
+   * @param recordAction the value to use for getRecordAction()
+   * @param beneficiaryId the beneficiary id to use for getBeneficiaryId()
+   * @param record the value to use for getRecord()
    */
   public RifRecordEvent(
       RifFileEvent fileEvent,
@@ -52,51 +54,6 @@ public final class RifRecordEvent<R extends RifRecordBase> {
     this.recordAction = recordAction;
     this.beneficiaryId = beneficiaryId;
     this.record = record;
-  }
-
-  /**
-   * Gets the {@link #fileEvent}.
-   *
-   * @return the {@link RifFileEvent} that this is a child of
-   */
-  public RifFileEvent getFileEvent() {
-    return fileEvent;
-  }
-
-  /**
-   * Gets the {@link #rawCsvRecords}.
-   *
-   * @return the {@link CSVRecord}s that this was built from / represents
-   */
-  public List<CSVRecord> getRawCsvRecords() {
-    return rawCsvRecords;
-  }
-
-  /**
-   * Gets the {@link #recordAction}.
-   *
-   * @return the RIF {@link RecordAction} indicated for the {@link #getRecord()}
-   */
-  public RecordAction getRecordAction() {
-    return recordAction;
-  }
-
-  /**
-   * Gets the {@link #beneficiaryId}.
-   *
-   * @return the beneficiaryId
-   */
-  public Long getBeneficiaryId() {
-    return beneficiaryId;
-  }
-
-  /**
-   * Gets the {@link #record}.
-   *
-   * @return the actual RIF data that the {@link RifRecordEvent} represents
-   */
-  public R getRecord() {
-    return record;
   }
 
   /** {@inheritDoc} */
