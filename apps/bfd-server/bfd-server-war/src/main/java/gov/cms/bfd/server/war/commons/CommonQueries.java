@@ -110,6 +110,8 @@ public class CommonQueries {
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
       }
+    } catch (Exception e) {
+      throw e;
     } finally {
       long queryNanoSeconds = timerContext.stop();
       CommonTransformerUtils.recordQueryInMdc(
@@ -119,7 +121,7 @@ public class CommonQueries {
     }
 
     if (values == null || values.size() < 1) {
-      throw new ResourceNotFoundException("Failed to find BENE_ID for: " + searchType);
+      throw new NoResultException("Failed to find BENE_ID for: " + searchType);
     } else if (values.size() > 1) {
       BfdMDC.put(
           "database_query_by_hash_collision_distinct_bene_ids", Long.toString(values.size()));

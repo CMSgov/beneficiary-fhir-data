@@ -735,6 +735,17 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
 
+    // CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED
+
+    if (SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem())) {
+      throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
+    }
+    if (identifier
+        .getSystem()
+        .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
+      throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
+    }
+
     if (identifier.getQueryParameterQualifier() != null) {
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());

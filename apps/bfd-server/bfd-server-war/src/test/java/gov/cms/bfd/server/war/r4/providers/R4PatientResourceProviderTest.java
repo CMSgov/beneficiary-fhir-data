@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
@@ -97,6 +98,9 @@ public class R4PatientResourceProviderTest {
 
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
+
+  /** The mock query, for mocking native function call. */
+  @Mock TypedQuery mockQueryFunction;
 
   /** The test data bene. */
   private Beneficiary testBene;
@@ -195,10 +199,16 @@ public class R4PatientResourceProviderTest {
     when(mockQuery.setMaxResults(anyInt())).thenReturn(mockQuery);
     when(mockQuery.getResultList()).thenReturn(List.of(testBene));
     when(mockQuery.getSingleResult()).thenReturn(testBene);
+    when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
     when(mockCriteria.subquery(any())).thenReturn(mockSubquery);
     when(mockCriteria.distinct(anyBoolean())).thenReturn(mockCriteria);
     when(mockSubquery.select(any())).thenReturn(mockSubquery);
     when(mockSubquery.from(any(Class.class))).thenReturn(root);
+
+    when(entityManager.createNativeQuery(anyString())).thenReturn(mockQueryFunction);
+    when(mockQueryFunction.setHint(any(), any())).thenReturn(mockQueryFunction);
+    // when(mockQueryFunction.setMaxResults(anyString())).thenReturn(mockQueryFunction);
+    when(mockQueryFunction.setParameter(anyString(), anyString())).thenReturn(mockQueryFunction);
   }
 
   /**
@@ -665,8 +675,8 @@ public class R4PatientResourceProviderTest {
   @Test
   public void testSearchByIdentifierIdWhenBeneDoesntExistExpectEmptyBundle() {
     when(loadedFilterManager.getTransactionTime()).thenReturn(Instant.now());
-    when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
-    when(mockQuery.getResultList()).thenReturn(new ArrayList());
+    when(mockQueryFunction.getSingleResult()).thenThrow(NoResultException.class);
+    // when(mockQuery.getResultList()).thenReturn(new ArrayList());
 
     Bundle bundle =
         patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);

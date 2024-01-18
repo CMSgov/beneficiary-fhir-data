@@ -270,29 +270,29 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     long beneId = 0;
     List<IBaseResource> patients;
-    if (logicalId.getSystem() != null
-        && logicalId
-            .getSystem()
-            .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
-      patients = fetchPatientResourceByIdentifer(logicalId, lastUpdated, requestHeader);
-      if (!patients.isEmpty()) {
-        Patient patient = (Patient) patients.get(0);
-        Optional<Identifier> id =
-            patient.getIdentifier().stream()
-                .filter(i -> TransformerConstants.CODING_BBAPI_BENE_ID.equals(i.getSystem()))
-                .findFirst();
-        beneId = id.isPresent() ? Long.parseLong(id.get().getValue()) : 0;
-      }
-    } else {
-      beneId = Long.parseLong(logicalId.getValue());
-      if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdated)) {
-        // Add bene_id to MDC logs when _lastUpdated filter is in effect
-        LoggingUtils.logBeneIdToMdc(beneId);
-        // Add number of resources to MDC logs
-        LoggingUtils.logResourceCountToMdc(0);
-        patients = Collections.emptyList();
+    try {
+      if (logicalId.getSystem() != null
+          && logicalId
+              .getSystem()
+              .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
+        patients = fetchPatientResourceByIdentifer(logicalId, lastUpdated, requestHeader);
+        if (!patients.isEmpty()) {
+          Patient patient = (Patient) patients.get(0);
+          Optional<Identifier> id =
+              patient.getIdentifier().stream()
+                  .filter(i -> TransformerConstants.CODING_BBAPI_BENE_ID.equals(i.getSystem()))
+                  .findFirst();
+          beneId = id.isPresent() ? Long.parseLong(id.get().getValue()) : 0;
+        }
       } else {
-        try {
+        beneId = Long.parseLong(logicalId.getValue());
+        if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdated)) {
+          // Add bene_id to MDC logs when _lastUpdated filter is in effect
+          LoggingUtils.logBeneIdToMdc(beneId);
+          // Add number of resources to MDC logs
+          LoggingUtils.logResourceCountToMdc(0);
+          patients = Collections.emptyList();
+        } else {
           patients =
               Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
                   .filter(
@@ -301,10 +301,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                               p.getMeta().getLastUpdated().toInstant(), lastUpdated))
                   .map(p -> Collections.singletonList((IBaseResource) p))
                   .orElse(Collections.emptyList());
-        } catch (ResourceNotFoundException e) {
-          patients = Collections.emptyList();
         }
       }
+    } catch (ResourceNotFoundException e) {
+      patients = Collections.emptyList();
     }
 
     /*
@@ -773,7 +773,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)
               ? Collections.singletonList(patient)
               : Collections.emptyList();
-    } catch (NoResultException e) {
+
+    } catch (ResourceNotFoundException e) {
       patients = new LinkedList<>();
     }
     return patients;
