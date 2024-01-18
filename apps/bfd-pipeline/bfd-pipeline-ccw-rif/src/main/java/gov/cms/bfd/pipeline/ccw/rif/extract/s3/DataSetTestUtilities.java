@@ -1,9 +1,8 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
+import com.google.common.io.Resources;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedJaxbException;
 import jakarta.xml.bind.JAXBContext;
@@ -13,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -145,7 +143,7 @@ public class DataSetTestUtilities {
       URL objectContentsUrl,
       String incomingLocation) {
     String keyPrefix = String.format("%s/%s", incomingLocation, manifest.getTimestampText());
-    return putObject(s3Dao, bucket, keyPrefix, manifest, manifestEntry, objectContentsUrl);
+    return putObject(s3Dao, bucket, keyPrefix, manifestEntry, objectContentsUrl);
   }
 
   /**
@@ -154,7 +152,6 @@ public class DataSetTestUtilities {
    * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param keyPrefix the S3 key prefix to store the new object under
-   * @param manifest the {@link DataSetManifest} to create an object for
    * @param manifestEntry the {@link DataSetManifestEntry} to create an object for
    * @param objectContentsUrl a {@link URL} to the data to push as the new object's content
    * @return the uploaded object's s3 key
@@ -163,25 +160,18 @@ public class DataSetTestUtilities {
       S3Dao s3Dao,
       String bucket,
       String keyPrefix,
-      DataSetManifest manifest,
       DataSetManifestEntry manifestEntry,
       URL objectContentsUrl) {
     String objectKey = String.format("%s/%s", keyPrefix, manifestEntry.getName());
 
     try {
-      String md5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream());
+      String md5ChkSum =
+          S3FileManager.computeMD5CheckSum(Resources.asByteSource(objectContentsUrl));
       Map<String, String> metaData = Map.of("md5chksum", md5ChkSum);
       s3Dao.putObject(bucket, objectKey, objectContentsUrl, metaData);
       return objectKey;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
-    } catch (NoSuchAlgorithmException e) {
-      throw new ChecksumException(
-          "NoSuchAlgorithmException on file "
-              + manifest.getTimestampText()
-              + manifestEntry.getName()
-              + "trying to build md5chksum",
-          e);
     }
   }
 

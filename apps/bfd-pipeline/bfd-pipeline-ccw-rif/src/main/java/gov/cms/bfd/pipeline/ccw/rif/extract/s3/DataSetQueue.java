@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId.parseManifestIdFromS3Key;
-import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager.Md5Result.MISMATCH;
+import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager.MD5Result.MISMATCH;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.io.ByteSource;
@@ -104,7 +104,7 @@ public class DataSetQueue implements AutoCloseable {
 
   public boolean allEntriesExistInS3(S3ManifestFile record) {
     final var manifestS3Prefix = S3FileManager.extractPrefixFromS3Key(record.getS3Key());
-    final var namesAtPrefix = s3Files.fetchFileNamesWithPrefix(manifestS3Prefix);
+    final var namesAtPrefix = s3Files.fetchKeysWithPrefix(manifestS3Prefix);
     return record.getDataFiles().stream()
         .map(S3DataFile::getS3Key)
         .allMatch(namesAtPrefix::contains);

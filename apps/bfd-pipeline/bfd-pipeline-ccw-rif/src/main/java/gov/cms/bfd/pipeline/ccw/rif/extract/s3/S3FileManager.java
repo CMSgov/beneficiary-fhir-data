@@ -7,6 +7,7 @@ import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,10 +17,11 @@ import java.util.Base64;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@AllArgsConstructor
+/**
+ * Manages the interactions between S3 and a local disk cache of files. Internally uses a {@link
+ * S3DirectoryDao} to download and cache files from S3.
+ */
 public class S3FileManager implements AutoCloseable {
   static final String TIMER_DOWNLOAD_FILE =
       MetricRegistry.name(S3FileManager.class, "downloadFile");
@@ -32,11 +34,19 @@ public class S3FileManager implements AutoCloseable {
   private final S3Dao s3Dao;
 
   /** The S3 bucket containing source files. */
-  @Getter private final String s3BucketName;
+  private final String s3BucketName;
 
-  /** Used to manage file download and caching. */
+  /** Used to download files and cache them locally. */
   private final S3DirectoryDao s3DirectoryDao;
 
+  /**
+   * Initializes an instance.
+   *
+   * @param appMetrics used to post metrics
+   * @param s3Dao used to interact with S3
+   * @param s3Bucket name of S3 the bucket we work with
+   * @throws IOException pass through in case of errors
+   */
   public S3FileManager(MetricRegistry appMetrics, S3Dao s3Dao, String s3Bucket) throws IOException {
     this.appMetrics = appMetrics;
     this.s3Dao = s3Dao;
@@ -45,30 +55,47 @@ public class S3FileManager implements AutoCloseable {
     s3DirectoryDao = new S3DirectoryDao(s3Dao, s3Bucket, "", cacheDirectory, true, true);
   }
 
+  /**
+   * Deletes all cached files.
+   *
+   * @throws Exception pass through in case of errrors
+   */
   @Override
   public void close() throws Exception {
     s3DirectoryDao.close();
   }
 
+  /**
+   * Scans the S3 bucket for all files having the given key prefix and yields a {@link
+   * S3Dao.S3ObjectSummary} for each file.
+   *
+   * @param s3KeyPrefix prefix to search for
+   * @return stream of the summaries
+   */
   public Stream<S3Dao.S3ObjectSummary> scanS3ForFiles(String s3KeyPrefix) {
     return s3Dao.listObjects(s3BucketName, s3KeyPrefix);
   }
 
-  public static String extractPrefixFromS3Key(String s3Key) {
-    int lastSlashOffset = s3Key.lastIndexOf('/');
-    if (lastSlashOffset < 0) {
-      return "";
-    } else {
-      return s3Key.substring(0, lastSlashOffset + 1);
-    }
-  }
-
-  public Set<String> fetchFileNamesWithPrefix(String s3Prefix) {
-    return s3DirectoryDao.readFileNames().stream()
-        .filter(s -> s.startsWith(s3Prefix))
+  /**
+   * Scan S3 bucket for all keys that start with the given prefix and return them in a {@link Set}.
+   *
+   * @param s3KeyPrefix prefix to search for
+   * @return the keys
+   */
+  public Set<String> fetchKeysWithPrefix(String s3KeyPrefix) {
+    return scanS3ForFiles(s3KeyPrefix)
+        .map(S3Dao.S3ObjectSummary::getKey)
         .collect(Collectors.toUnmodifiableSet());
   }
 
+  /**
+   * Download a file with the given key and cache its file data.
+   *
+   * @param s3Key identifies the file to download
+   * @return download result
+   * @throws IOException thrown if download fails
+   * @throws FileNotFoundException if no file exists in S3 for the given key
+   */
   public DownloadedFile downloadFile(String s3Key) throws IOException {
     try (var ignored = appMetrics.timer(TIMER_DOWNLOAD_FILE).time()) {
       return s3DirectoryDao.fetchFile(s3Key);
@@ -87,7 +114,7 @@ public class S3FileManager implements AutoCloseable {
   }
 
   /** Result returned by {@link #checkMD5}. */
-  public enum Md5Result {
+  public enum MD5Result {
     /** Computed MD5 matches meta data value. */
     MATCH,
     /** Computed MD5 does not match meta data value. */
@@ -105,29 +132,47 @@ public class S3FileManager implements AutoCloseable {
    * @return result of the check
    * @throws IOException error encountered while reading file
    */
-  public Md5Result checkMD5(DownloadedFile file, String md5MetaDataField) throws IOException {
-    final String metaDataMD5Checksum = file.getS3Details().getMetaData().get(md5MetaDataField);
-    if (Strings.isNullOrEmpty(metaDataMD5Checksum)) {
-      return Md5Result.NONE;
+  public MD5Result checkMD5(DownloadedFile file, String md5MetaDataField) throws IOException {
+    try (var ignored = appMetrics.timer(TIMER_COMPUTE_MD5).time()) {
+      final String metaDataMD5Checksum = file.getS3Details().getMetaData().get(md5MetaDataField);
+      if (Strings.isNullOrEmpty(metaDataMD5Checksum)) {
+        return MD5Result.NONE;
+      }
+      final String computedMD5Checksum = computeMD5CheckSum(file.getBytes());
+      if (metaDataMD5Checksum.equals(computedMD5Checksum)) {
+        return MD5Result.MATCH;
+      } else {
+        return MD5Result.MISMATCH;
+      }
     }
-    final String computedMD5Checksum = computeMD5CheckSum(file.getBytes());
-    if (metaDataMD5Checksum.equals(computedMD5Checksum)) {
-      return Md5Result.MATCH;
+  }
+
+  /**
+   * Extracts the full prefix of the s3 key. The prefix is all characters preceding the right most /
+   * character plus the slash itself. The prefix for a string containing no slash character is empty
+   * string.
+   *
+   * @param s3Key key to extract prefix from
+   * @return the prefix
+   */
+  public static String extractPrefixFromS3Key(String s3Key) {
+    int lastSlashOffset = s3Key.lastIndexOf('/');
+    if (lastSlashOffset < 0) {
+      return "";
     } else {
-      return Md5Result.MISMATCH;
+      return s3Key.substring(0, lastSlashOffset + 1);
     }
   }
 
   /**
    * Calculates and returns a Base64 encoded MD5 checksum value for a file.
    *
-   * @param fileToCheck the {@link ByteSource} of the file just downloaded from S3
+   * @param bytesToCheck the {@link ByteSource} of the file just downloaded from S3
    * @return Base64 encoded md5 value
    * @throws IOException if there is an issue reading or closing the downloaded file
    */
-  public String computeMD5CheckSum(ByteSource fileToCheck) throws IOException {
-    try (var ignored = appMetrics.timer(TIMER_COMPUTE_MD5).time();
-        var inputStream = fileToCheck.openStream()) {
+  public static String computeMD5CheckSum(ByteSource bytesToCheck) throws IOException {
+    try (var inputStream = bytesToCheck.openStream()) {
       final MessageDigest md5Digest = MessageDigest.getInstance("MD5");
 
       byte[] buffer = new byte[8192];
