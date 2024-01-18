@@ -55,6 +55,12 @@ except Exception:
         exc_info=True,
     )
     sys.exit(0)
+common_unrecoverable_exceptions: list[Type[BaseException]] = [
+    cw_client.exceptions.InvalidParameterValueException,
+    cw_client.exceptions.MissingRequiredParameterException,
+    cw_client.exceptions.InvalidParameterCombinationException,
+    botocore_exceptions.ParamValidationError,
+]
 
 
 class S3EventType(str, Enum):
@@ -107,13 +113,6 @@ def handler(event: Any, context: Any):
     if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, EVENTS_QUEUE_NAME]):
         logger.error("Not all necessary environment variables were defined, exiting...")
         return
-
-    common_unrecoverable_exceptions: list[Type[BaseException]] = [
-        cw_client.exceptions.InvalidParameterValueException,
-        cw_client.exceptions.MissingRequiredParameterException,
-        cw_client.exceptions.InvalidParameterCombinationException,
-        botocore_exceptions.ParamValidationError,
-    ]
 
     try:
         record: dict[str, Any] = event["Records"][0]
