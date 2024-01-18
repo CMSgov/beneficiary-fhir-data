@@ -26,7 +26,7 @@ from sqs import (
     PipelineLoadEvent,
     PipelineLoadEventType,
     post_load_event,
-    retrieve_load_events,
+    retrieve_load_event_msgs,
 )
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
@@ -296,16 +296,16 @@ def handler(event: Any, context: Any):
                 group_timestamp,
                 EVENTS_QUEUE_NAME,
             )
-            group_available_event = backoff_retry(
+            group_available_msg = backoff_retry(
                 func=lambda: next(
                     (
-                        event
-                        for event in retrieve_load_events(
+                        message
+                        for message in retrieve_load_event_msgs(
                             queue=events_queue,
                             timeout=10,
                             type_filter=[PipelineLoadEventType.LOAD_AVAILABLE],
                         )
-                        if event.group_timestamp == group_timestamp
+                        if message.event.group_timestamp == group_timestamp
                     ),
                     None,
                 ),
@@ -319,7 +319,7 @@ def handler(event: Any, context: Any):
             )
             return
 
-        if group_available_event:
+        if group_available_msg:
             logger.info(
                 "%s event was received from queue %s for current group %s. Incoming file is"
                 " part of an ongoing, existing data load for group %s, and therefore does not"

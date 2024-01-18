@@ -3,7 +3,9 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Optional, Union
+
+from mypy_boto3_sqs.service_resource import Queue
 
 from common import RifFileType
 
@@ -21,11 +23,17 @@ class PipelineLoadEvent:
     rif_type: RifFileType
 
 
-def retrieve_load_events(
-    queue: Any,
+@dataclass
+class PipelineLoadEventMessage:
+    receipt_handle: str
+    event: PipelineLoadEvent
+
+
+def retrieve_load_event_msgs(
+    queue: Queue,
     timeout: int = 3,
     type_filter: list[PipelineLoadEventType] = list(PipelineLoadEventType),
-) -> list[PipelineLoadEvent]:
+) -> list[PipelineLoadEventMessage]:
     """Checks the sentinel SQS queue for messages and returns their values
 
     Args:
@@ -44,27 +52,32 @@ def retrieve_load_events(
         except TypeError:
             return None
 
-    raw_messages = [load_json_safe(response.body) for response in responses]
-    load_events = [
-        PipelineLoadEvent(
-            event_type=PipelineLoadEventType(str(message["event_type"])),
-            timestamp=datetime.utcfromtimestamp(int(message["timestamp"])),
-            group_timestamp=str(message["group_timestamp"]),
-            rif_type=RifFileType(str(message["rif_type"])),
+    raw_messages = (
+        (response.receipt_handle, load_json_safe(response.body)) for response in responses
+    )
+    messages = (
+        PipelineLoadEventMessage(
+            receipt_handle=receipt_handle,
+            event=PipelineLoadEvent(
+                event_type=PipelineLoadEventType(str(message["event_type"])),
+                timestamp=datetime.utcfromtimestamp(int(message["timestamp"])),
+                group_timestamp=str(message["group_timestamp"]),
+                rif_type=RifFileType(str(message["rif_type"])),
+            ),
         )
-        for message in raw_messages
+        for (receipt_handle, message) in raw_messages
         if message is not None
         and "event" in message
         and "timestamp" in message
         and "group_timestamp" in message
         and "rif_type" in message
-    ]
-    filtered_events = [event for event in load_events if event.event_type in type_filter]
+    )
+    filtered_messages = [message for message in messages if message.event.event_type in type_filter]
 
-    return filtered_events
+    return filtered_messages
 
 
-def post_load_event(queue: Any, message: PipelineLoadEvent):
+def post_load_event(queue: Queue, message: PipelineLoadEvent):
     """Posts a sentinel message to the provided queue indicating that the given group has started
     to load data
 
