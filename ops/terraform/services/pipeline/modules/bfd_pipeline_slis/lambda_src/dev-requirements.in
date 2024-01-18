@@ -1,0 +1,9 @@
+# Yes, boto3 _is_ a dev-requirement as this Lambda is not a Docker-based Lambda. Python Lambdas
+# using the default runtime run in an environment that already has boto3 installed, so this is
+# declared explicitly for developers working on this Lambda locally
+boto3
+boto3-stubs
+boto3-stubs[sqs,cloudwatch,s3]
+isort
+black
+pylint
