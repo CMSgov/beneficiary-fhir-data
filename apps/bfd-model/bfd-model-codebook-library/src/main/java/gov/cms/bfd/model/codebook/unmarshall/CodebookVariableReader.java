@@ -60,9 +60,8 @@ public final class CodebookVariableReader {
   }
 
   /**
-   * Builds a {@link Map} of the known {@link Codebook} {@link Variable}s, keyed by {@link
-   * Variable#getId()} (with duplicates removed safely). Reads all values from XML already defined
-   * as a resource.
+   * Builds a {@link Map} of the known {@link Codebook} {@link Variable}s, keyed by Variable.getId()
+   * (with duplicates removed safely). Reads all values from XML already defined as a resource.
    *
    * @return the de-duped map of {@link Variable}s
    */
