@@ -250,8 +250,43 @@ def handler(event: Any, context: Any):
     if pipeline_data_status == PipelineDataStatus.INCOMING:
         logger.info(
             "RIF file location indicates data has been made available to load to the ETL"
-            " pipeline. Checking if this is the first time data is available for group"
-            ' "%s"...',
+            " pipeline. Posting %s event to %s for %s RIF in group %s...",
+            PipelineLoadEventType.RIF_AVAILABLE.value,
+            EVENTS_QUEUE_NAME,
+            rif_file_type,
+            group_timestamp,
+        )
+        try:
+            backoff_retry(
+                func=lambda: post_load_event(
+                    queue=events_queue,
+                    message=PipelineLoadEvent(
+                        event_type=PipelineLoadEventType.RIF_AVAILABLE,
+                        timestamp=event_timestamp,
+                        group_timestamp=group_timestamp,
+                        rif_type=rif_file_type,
+                    ),
+                ),
+                ignored_exceptions=common_unrecoverable_exceptions,
+            )
+        except Exception:
+            logger.error(
+                "An unrecoverable error occurred when trying to post an event to the %s queue;"
+                " err: ",
+                EVENTS_QUEUE_NAME,
+                exc_info=True,
+            )
+            return
+        logger.info(
+            "%s event posted to %s for %s RIF in group %s successfully",
+            PipelineLoadEventType.RIF_AVAILABLE.value,
+            EVENTS_QUEUE_NAME,
+            rif_file_type,
+            group_timestamp,
+        )
+
+        logger.info(
+            'Checking if this is the first time data load was discovered for group "%s"...',
             group_timestamp,
         )
 
