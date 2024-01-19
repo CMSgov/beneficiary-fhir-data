@@ -167,7 +167,7 @@ public class DataSetTestUtilities {
     try {
       String md5ChkSum =
           S3FileManager.computeMD5CheckSum(Resources.asByteSource(objectContentsUrl));
-      Map<String, String> metaData = Map.of("md5chksum", md5ChkSum);
+      Map<String, String> metaData = Map.of(DataSetQueue.MD5_CHECKSUM_META_DATA_FIELD, md5ChkSum);
       s3Dao.putObject(bucket, objectKey, objectContentsUrl, metaData);
       return objectKey;
     } catch (IOException e) {
