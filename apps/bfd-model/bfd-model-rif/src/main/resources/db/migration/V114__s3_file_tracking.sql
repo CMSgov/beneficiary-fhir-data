@@ -6,9 +6,9 @@ CREATE TABLE s3_manifest_files (
     manifest_id bigint NOT NULL,
     s3_key varchar(1024) NOT NULL,
     status varchar(24) NOT NULL,
+    status_timestamp timestamp with time zone,
     manifest_timestamp timestamp with time zone NOT NULL,
     discovery_timestamp timestamp with time zone NOT NULL,
-    completion_timestamp timestamp with time zone,
     CONSTRAINT s3_manifest_files_key PRIMARY KEY (manifest_id)
 );
 
@@ -28,8 +28,8 @@ CREATE TABLE s3_data_files (
     file_type varchar(50) NOT NULL,
     s3_key varchar(1024) NOT NULL,
     status varchar(24) NOT NULL,
+    status_timestamp timestamp with time zone,
     discovery_timestamp timestamp with time zone NOT NULL,
-    completion_timestamp timestamp with time zone,
     CONSTRAINT s3_data_files_key PRIMARY KEY (manifest_id, file_name),
     CONSTRAINT "fk_s3_data_files_manifest_id" FOREIGN KEY (manifest_id) REFERENCES s3_manifest_files(manifest_id)
 );

@@ -16,6 +16,7 @@ import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,8 @@ public class DataSetQueue implements AutoCloseable {
       MetricRegistry.name(DataSetQueue.class, "downloadEntry");
   static final String TIMER_MANIFEST_DB_UPDATE =
       MetricRegistry.name(DataSetQueue.class, "updateManifestInDb");
+
+  private final Clock clock;
 
   /** The metric registry. */
   private final MetricRegistry appMetrics;
@@ -113,17 +116,20 @@ public class DataSetQueue implements AutoCloseable {
   public void markAsStarted(S3ManifestFile manifestFile) {
     if (manifestFile.getStatus() == S3ManifestFile.ManifestStatus.DISCOVERED) {
       manifestFile.setStatus(S3ManifestFile.ManifestStatus.STARTED);
+      manifestFile.setStatusTimestamp(clock.instant());
       s3Records.updateS3ManifestAndDataFiles(manifestFile);
     }
   }
 
   public void markAsProcessed(S3ManifestFile manifestFile) {
     manifestFile.setStatus(S3ManifestFile.ManifestStatus.COMPLETED);
+    manifestFile.setStatusTimestamp(clock.instant());
     s3Records.updateS3ManifestAndDataFiles(manifestFile);
   }
 
   public void markAsRejected(S3ManifestFile manifestFile) {
     manifestFile.setStatus(S3ManifestFile.ManifestStatus.REJECTED);
+    manifestFile.setStatusTimestamp(clock.instant());
     s3Records.updateS3ManifestAndDataFiles(manifestFile);
   }
 
@@ -247,6 +253,7 @@ public class DataSetQueue implements AutoCloseable {
 
     public void markAsCompleted() {
       record.setStatus(S3DataFile.FileStatus.COMPLETED);
+      record.setStatusTimestamp(clock.instant());
       s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
     }
   }

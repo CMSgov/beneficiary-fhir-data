@@ -542,7 +542,8 @@ public final class PipelineApplication {
     final var bucket = loadOptions.getExtractionOptions().getS3BucketName();
     final var s3FileCache = new S3FileManager(appState.getMetrics(), s3Dao, bucket);
     final var dataSetQueue =
-        new DataSetQueue(appState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+        new DataSetQueue(
+            appState.getClock(), appState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
     var statusReporter =
         createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, appState.getClock());
     CcwRifLoadJob ccwRifLoadJob =

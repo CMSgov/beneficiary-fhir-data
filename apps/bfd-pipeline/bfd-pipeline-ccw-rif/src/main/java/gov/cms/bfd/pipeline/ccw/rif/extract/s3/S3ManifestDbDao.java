@@ -178,6 +178,7 @@ public class S3ManifestDbDao {
     var manifest = new S3ManifestFile();
     manifest.setS3Key(manifestS3Key);
     manifest.setStatus(S3ManifestFile.ManifestStatus.DISCOVERED);
+    manifest.setStatusTimestamp(now);
     manifest.setManifestTimestamp(manifestFileData.getTimestamp());
     manifest.setDiscoveryTimestamp(now);
     List<S3DataFile> dataFiles = manifest.getDataFiles();
@@ -191,6 +192,7 @@ public class S3ManifestDbDao {
       dataFile.setFileName(entry.getName());
       dataFile.setFileType(entry.getType().toString());
       dataFile.setStatus(S3DataFile.FileStatus.DISCOVERED);
+      dataFile.setStatusTimestamp(now);
       dataFile.setDiscoveryTimestamp(now);
       dataFiles.add(dataFile);
       index += 1;

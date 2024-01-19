@@ -44,10 +44,10 @@ mappings:
       name: discoveryTimestamp
       nullable: false
       sqlType: timestamp with time zone
-    - comment: When the file was fully processed or rejected.
-      dbName: completion_timestamp
-      name: completionTimestamp
-      nullable: true
+    - comment: When the status was last updated.
+      dbName: status_timestamp
+      name: statusTimestamp
+      nullable: false
       sqlType: timestamp with time zone
     joins:
     - class: child

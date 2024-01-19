@@ -189,6 +189,7 @@ public class S3ManifestDbDaoIT extends AbstractLocalStackS3Test {
     manifest.setManifestId(1);
     manifest.setS3Key(baseS3Key + "0_manifest.xml");
     manifest.setStatus(S3ManifestFile.ManifestStatus.DISCOVERED);
+    manifest.setStatusTimestamp(DISCOVERY_TIMESTAMP);
     manifest.setManifestTimestamp(MANIFEST_TIMESTAMP);
     manifest.setDiscoveryTimestamp(DISCOVERY_TIMESTAMP);
 
@@ -199,6 +200,7 @@ public class S3ManifestDbDaoIT extends AbstractLocalStackS3Test {
     entry.setFileName("beneficiary.csv");
     entry.setFileType(RifFileType.BENEFICIARY.name());
     entry.setStatus(S3DataFile.FileStatus.DISCOVERED);
+    entry.setStatusTimestamp(DISCOVERY_TIMESTAMP);
     entry.setDiscoveryTimestamp(DISCOVERY_TIMESTAMP);
     manifest.getDataFiles().add(entry);
 
@@ -209,6 +211,7 @@ public class S3ManifestDbDaoIT extends AbstractLocalStackS3Test {
     entry.setFileName("pde.csv");
     entry.setFileType(RifFileType.PDE.name());
     entry.setStatus(S3DataFile.FileStatus.DISCOVERED);
+    entry.setStatusTimestamp(DISCOVERY_TIMESTAMP);
     entry.setDiscoveryTimestamp(DISCOVERY_TIMESTAMP);
     manifest.getDataFiles().add(entry);
 

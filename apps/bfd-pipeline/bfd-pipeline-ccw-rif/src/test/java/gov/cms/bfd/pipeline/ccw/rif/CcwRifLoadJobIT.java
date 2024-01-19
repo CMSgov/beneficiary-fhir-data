@@ -70,7 +70,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -194,7 +199,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -308,7 +318,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -398,7 +413,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -481,7 +501,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
@@ -560,7 +585,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var s3FilesDao = new S3ManifestDbDao(transactionManager);
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
-          new DataSetQueue(pipelineAppState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
       try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
               pipelineAppState,
