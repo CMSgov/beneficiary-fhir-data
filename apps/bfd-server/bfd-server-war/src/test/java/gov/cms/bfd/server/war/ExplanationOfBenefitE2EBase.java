@@ -626,13 +626,13 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
    */
   @Test
   public void testEobByPatientIdWithExcludeSamhsaFalseByDefaultAndExpectNoFiltering() {
-
     // Adjust the sampleA data that was loaded to include some samhsa data by passing true
-    String patientId = testUtils.getPatientId(testUtils.loadSampleASamhsaData());
+    List<Object> samhsaFiles = testUtils.loadSampleASamhsaData();
+    String patientId = testUtils.getPatientId(samhsaFiles);
     String requestString = eobEndpoint + "?patient=" + patientId;
     // This number will change if we update any the SAMHSA filter lists
-    // Pipeline loads 4437 (1 for bene, 5 for bene history) meaning the rest are claims to return
-    int numSamhsaClaims = 4431;
+    // Num claims = loaded -6 (1 for bene, 5 for bene history) meaning the rest are claims to return
+    int numSamhsaClaims = samhsaFiles.size() - 6;
 
     given()
         .spec(requestAuth)

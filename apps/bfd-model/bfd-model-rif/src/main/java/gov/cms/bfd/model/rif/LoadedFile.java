@@ -4,9 +4,17 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /** Represents a loaded RIF file. */
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "loaded_files")
 public class LoadedFile {
   /** The file identifier. */
@@ -35,9 +43,6 @@ public class LoadedFile {
       cascade = CascadeType.ALL)
   private Set<LoadedBatch> batches = new HashSet<>();
 
-  /** Default constructor. */
-  public LoadedFile() {}
-
   /**
    * Creates a LoadedFile.
    *
@@ -60,77 +65,5 @@ public class LoadedFile {
   public LoadedFile(String rifType) {
     this();
     this.rifType = rifType;
-  }
-
-  /**
-   * Gets the {@link #loadedFileId}.
-   *
-   * @return the identifier
-   */
-  public long getLoadedFileId() {
-    return loadedFileId;
-  }
-
-  /**
-   * Sets the {@link #loadedFileId}.
-   *
-   * @param loadedFileId the identifier to set
-   */
-  public void setLoadedFileId(long loadedFileId) {
-    this.loadedFileId = loadedFileId;
-  }
-
-  /**
-   * Gets the {@link #rifType}.
-   *
-   * @return the rifType
-   */
-  public String getRifType() {
-    return rifType;
-  }
-
-  /**
-   * Sets the {@link #rifType}.
-   *
-   * @param rifType the rifType to set
-   */
-  public void setRifType(String rifType) {
-    this.rifType = rifType;
-  }
-
-  /**
-   * Gets the {@link #created}.
-   *
-   * @return the creation time stamp
-   */
-  public Instant getCreated() {
-    return created;
-  }
-
-  /**
-   * Sets the {@link #created}.
-   *
-   * @param created time stamp to set
-   */
-  public void setCreated(Instant created) {
-    this.created = created;
-  }
-
-  /**
-   * Gets the {@link #batches}.
-   *
-   * @return the batches associated with this file
-   */
-  public Set<LoadedBatch> getBatches() {
-    return batches;
-  }
-
-  /**
-   * Sets the {@link #batches}.
-   *
-   * @param batches associated with this file
-   */
-  public void setBatches(Set<LoadedBatch> batches) {
-    this.batches = batches;
   }
 }

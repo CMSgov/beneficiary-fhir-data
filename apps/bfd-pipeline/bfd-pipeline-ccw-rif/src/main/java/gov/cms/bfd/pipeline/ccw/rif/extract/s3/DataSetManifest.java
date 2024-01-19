@@ -174,6 +174,15 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   }
 
   /**
+   * Returns the original S3 key for this manifest.
+   *
+   * @return original S3 key
+   */
+  public String getIncomingS3Key() {
+    return getId().computeS3Key(manifestKeyIncomingLocation);
+  }
+
+  /**
    * Gets the timestamp text.
    *
    * @return the {@link String} representation of {@link #getTimestamp()} used to identify this
