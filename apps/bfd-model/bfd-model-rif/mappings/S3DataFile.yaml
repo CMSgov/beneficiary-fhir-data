@@ -39,14 +39,14 @@ mappings:
       nullable: false
       sqlType: varchar(24)
       enumType: FileStatus
-    - comment: When the file was first discovered in S3.
-      dbName: discovery_timestamp
-      name: discoveryTimestamp
-      nullable: false
-      sqlType: timestamp with time zone
     - comment: When the status was last updated.
       dbName: status_timestamp
       name: statusTimestamp
+      nullable: false
+      sqlType: timestamp with time zone
+    - comment: When the file was first discovered in S3.
+      dbName: discovery_timestamp
+      name: discoveryTimestamp
       nullable: false
       sqlType: timestamp with time zone
     joins:

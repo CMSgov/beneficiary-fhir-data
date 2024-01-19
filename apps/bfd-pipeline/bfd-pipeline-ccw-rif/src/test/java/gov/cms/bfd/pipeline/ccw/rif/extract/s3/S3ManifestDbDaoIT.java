@@ -150,6 +150,9 @@ public class S3ManifestDbDaoIT extends AbstractLocalStackS3Test {
     int valueToMakeS3KeysUnique = 1;
     for (S3ManifestFile manifest : allManifests) {
       manifest.setS3Key(manifest.getS3Key() + valueToMakeS3KeysUnique);
+      for (S3DataFile dataFile : manifest.getDataFiles()) {
+        dataFile.setS3Key(dataFile.getS3Key() + valueToMakeS3KeysUnique);
+      }
       dbDao.updateS3ManifestAndDataFiles(manifest);
       valueToMakeS3KeysUnique += 1;
     }
@@ -230,11 +233,13 @@ public class S3ManifestDbDaoIT extends AbstractLocalStackS3Test {
       S3ManifestFile expected, @Nullable S3ManifestFile actual, boolean copyManifestId) {
     assertThat(actual).isNotNull();
 
-    // Copies manifestIds because in the database they are assigned by a sequence and can change
-    // as tests are run.
+    // Copies manifestId and recordId values because in the database they are assigned by a sequence
+    // and can change as tests are run.
     if (copyManifestId) {
+      // manifestId is easy because there is only the one field
       expected.setManifestId(actual.getManifestId());
     }
+
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
   }
 }

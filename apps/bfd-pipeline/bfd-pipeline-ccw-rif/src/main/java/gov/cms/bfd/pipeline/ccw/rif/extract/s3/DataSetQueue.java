@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.IOException;
 import java.io.InputStream;
@@ -236,22 +237,23 @@ public class DataSetQueue implements AutoCloseable {
     private final S3DataFile record;
     private final DownloadedFile fileData;
 
-    public void deleteFile() throws IOException {
-      fileData.delete();
-    }
-
     public boolean isIncomplete() {
       return record.getStatus() != S3DataFile.FileStatus.COMPLETED;
     }
 
     public void markAsStarted() {
-      if (record.getStatus() == S3DataFile.FileStatus.DISCOVERED) {
-        record.setStatus(S3DataFile.FileStatus.STARTED);
-        s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
+      if (!isIncomplete()) {
+        throw new BadCodeMonkeyException("Attempting to start processing a completed data file.");
       }
+      record.setStatus(S3DataFile.FileStatus.STARTED);
+      record.setStatusTimestamp(clock.instant());
+      s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
     }
 
     public void markAsCompleted() {
+      if (!isIncomplete()) {
+        throw new BadCodeMonkeyException("Attempting to mark a completed data file as completed.");
+      }
       record.setStatus(S3DataFile.FileStatus.COMPLETED);
       record.setStatusTimestamp(clock.instant());
       s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());

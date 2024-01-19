@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -155,6 +156,12 @@ public final class S3RifFile implements RifFile {
       LOGGER.debug("Download was cancelled and can't be cleaned up.");
     }
     LOGGER.debug("Cleaned up '{}'.", this);
+  }
+
+  @Override
+  public RecordId getRecordId() {
+    final S3DataFile record = waitForDownload().getRecord();
+    return new RecordId(record.getParentManifest().getManifestId(), record.getIndex());
   }
 
   @Override

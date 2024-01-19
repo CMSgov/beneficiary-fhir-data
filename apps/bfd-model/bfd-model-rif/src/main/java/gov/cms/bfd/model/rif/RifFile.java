@@ -2,6 +2,7 @@ package gov.cms.bfd.model.rif;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import javax.annotation.Nullable;
 
 /** Represents a RIF file that can be read and deleted. */
 public interface RifFile {
@@ -40,6 +41,25 @@ public interface RifFile {
    */
   default boolean requiresProcessing() {
     return true;
+  }
+
+  /**
+   * Record used by {@link #getRecordId} to return primary key information for {@link
+   * gov.cms.bfd.model.rif.entities.S3DataFile} corresponding to this file.
+   *
+   * @param manifestId unique id for {@link gov.cms.bfd.model.rif.entities.S3ManifestFile} record
+   * @param index index of data file within the manifest
+   */
+  record RecordId(long manifestId, short index) {}
+
+  /**
+   * Gets an optional unique id for a record in the database for the data file.
+   *
+   * @return null or a unique record id
+   */
+  @Nullable
+  default RecordId getRecordId() {
+    return null;
   }
 
   /** Marks the file as having started processing. */
