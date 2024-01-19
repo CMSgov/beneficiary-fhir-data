@@ -27,7 +27,7 @@ from sqs import (
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
-EVENTS_QUEUE_NAME = os.environ.get("SENTINEL_QUEUE_NAME", "")
+EVENTS_QUEUE_NAME = os.environ.get("EVENTS_QUEUE_NAME", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -39,24 +39,6 @@ BOTO_CONFIG = Config(
 
 logging.basicConfig(level=logging.INFO, force=True)
 logger = logging.getLogger()
-try:
-    cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
-    s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
-    sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)  # type: ignore
-    events_queue = sqs_resource.get_queue_by_name(QueueName=EVENTS_QUEUE_NAME)
-    etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
-except Exception:
-    logger.error(
-        "Unrecoverable exception occurred when attempting to create boto3 clients/resources: ",
-        exc_info=True,
-    )
-    sys.exit(0)
-common_unrecoverable_exceptions: list[Type[BaseException]] = [
-    cw_client.exceptions.InvalidParameterValueException,
-    cw_client.exceptions.MissingRequiredParameterException,
-    cw_client.exceptions.InvalidParameterCombinationException,
-    botocore_exceptions.ParamValidationError,
-]
 
 
 class S3EventType(str, Enum):
@@ -112,7 +94,7 @@ def handler(event: Any, context: Any):
 
     try:
         record: dict[str, Any] = event["Records"][0]
-    except KeyError:
+    except (KeyError, TypeError):
         logger.error("The incoming event was invalid", exc_info=True)
         return
     except IndexError:
@@ -122,6 +104,9 @@ def handler(event: Any, context: Any):
     try:
         sns_message_json: str = record["Sns"]["Message"]
         sns_message = json.loads(sns_message_json)
+    except TypeError:
+        logger.error("Event record or SNS Message invalid: ", exc_info=True)
+        return
     except KeyError:
         logger.error("No message found in SNS notification: ", exc_info=True)
         return
@@ -167,9 +152,28 @@ def handler(event: Any, context: Any):
     try:
         file_key: str = s3_event["s3"]["object"]["key"]
         decoded_file_key = unquote(file_key)
-    except KeyError:
+    except (KeyError, TypeError):
         logger.error("No bucket file found in event notification: ", exc_info=True)
         return
+
+    try:
+        cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
+        s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
+        sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)  # type: ignore
+        events_queue = sqs_resource.get_queue_by_name(QueueName=EVENTS_QUEUE_NAME)
+        etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
+    except Exception:
+        logger.error(
+            "Unrecoverable exception occurred when attempting to create boto3 clients/resources: ",
+            exc_info=True,
+        )
+        sys.exit(0)
+    common_unrecoverable_exceptions: list[Type[BaseException]] = [
+        cw_client.exceptions.InvalidParameterValueException,
+        cw_client.exceptions.MissingRequiredParameterException,
+        cw_client.exceptions.InvalidParameterCombinationException,
+        botocore_exceptions.ParamValidationError,
+    ]
 
     # Log the various bits of data extracted from the invoking event to aid debugging:
     logger.info("Invoked at: %s UTC", datetime.utcnow().isoformat())
@@ -227,7 +231,7 @@ def handler(event: Any, context: Any):
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=gen_all_dimensioned_metrics(
                     metric_name=timestamp_metric.metric_name,
-                    datetime=event_datetime,
+                    date_time=event_datetime,
                     value=utc_timestamp,
                     unit=timestamp_metric.unit,
                     dimensions=[rif_type_dimension, group_timestamp_dimension],
@@ -259,7 +263,7 @@ def handler(event: Any, context: Any):
                     queue=events_queue,
                     message=PipelineLoadEvent(
                         event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                        datetime=event_datetime,
+                        date_time=event_datetime,
                         group_iso_str=group_iso_str,
                         rif_type=rif_file_type,
                     ),
@@ -356,7 +360,7 @@ def handler(event: Any, context: Any):
                     metrics=gen_all_dimensioned_metrics(
                         metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
                         dimensions=[group_timestamp_dimension],
-                        datetime=event_datetime,
+                        date_time=event_datetime,
                         value=utc_timestamp,
                         unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
                     )
@@ -365,7 +369,7 @@ def handler(event: Any, context: Any):
                             metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
                             value=utc_timestamp,
                             unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
-                            datetime=event_datetime,
+                            date_time=event_datetime,
                         )
                     ],
                 ),
@@ -398,7 +402,7 @@ def handler(event: Any, context: Any):
                     queue=events_queue,
                     message=PipelineLoadEvent(
                         event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                        datetime=event_datetime,
+                        date_time=event_datetime,
                         group_iso_str=group_iso_str,
                         rif_type=rif_file_type,
                     ),
@@ -468,7 +472,7 @@ def handler(event: Any, context: Any):
                 rif_available_msg,
             )
 
-            rif_last_available = rif_available_msg.event.datetime
+            rif_last_available = rif_available_msg.event.date_time
             load_time_delta = event_datetime - rif_last_available
 
             logger.info(
@@ -485,7 +489,7 @@ def handler(event: Any, context: Any):
                             metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
                             dimensions=[rif_type_dimension, group_timestamp_dimension],
                             value=round(load_time_delta.total_seconds()),
-                            datetime=event_datetime,
+                            date_time=event_datetime,
                             unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
                         ),
                     ),
@@ -580,7 +584,7 @@ def handler(event: Any, context: Any):
                     metrics=gen_all_dimensioned_metrics(
                         metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
                         dimensions=[group_timestamp_dimension],
-                        datetime=event_datetime,
+                        date_time=event_datetime,
                         value=utc_timestamp,
                         unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
                     )
@@ -589,7 +593,7 @@ def handler(event: Any, context: Any):
                             metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
                             value=utc_timestamp,
                             unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
-                            datetime=event_datetime,
+                            date_time=event_datetime,
                         )
                     ],
                 ),
@@ -637,7 +641,7 @@ def handler(event: Any, context: Any):
             return
 
         if load_available_msg:
-            first_available_time = load_available_msg.event.datetime
+            first_available_time = load_available_msg.event.date_time
             full_load_time_delta = event_datetime - first_available_time
 
             logger.info(
@@ -655,7 +659,7 @@ def handler(event: Any, context: Any):
                         metrics=gen_all_dimensioned_metrics(
                             metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
                             dimensions=[group_timestamp_dimension],
-                            datetime=event_datetime,
+                            date_time=event_datetime,
                             value=round(full_load_time_delta.total_seconds()),
                             unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
                         ),

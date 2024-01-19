@@ -19,7 +19,7 @@ class PipelineLoadEventType(str, Enum):
 @dataclass
 class PipelineLoadEvent:
     event_type: PipelineLoadEventType
-    datetime: datetime
+    date_time: datetime
     group_iso_str: str
     rif_type: RifFileType
 
@@ -68,7 +68,7 @@ def retrieve_load_event_msgs(
             receipt_handle=receipt_handle,
             event=PipelineLoadEvent(
                 event_type=PipelineLoadEventType(str(message["event_type"])),
-                datetime=datetime.utcfromtimestamp(int(message["timestamp"])),
+                date_time=datetime.utcfromtimestamp(int(message["date_time"])),
                 group_iso_str=str(message["group_iso_str"]),
                 rif_type=RifFileType(str(message["rif_type"])),
             ),
@@ -76,7 +76,7 @@ def retrieve_load_event_msgs(
         for (receipt_handle, message) in raw_messages
         if message is not None
         and "event" in message
-        and "timestamp" in message
+        and "date_time" in message
         and "group_iso_str" in message
         and "rif_type" in message
     )
@@ -97,7 +97,7 @@ def post_load_event(queue: Queue, message: PipelineLoadEvent):
         MessageBody=json.dumps(
             {
                 "event_type": message.event_type.value,
-                "timestamp": calendar.timegm(message.datetime.utctimetuple()),
+                "date_time": calendar.timegm(message.date_time.utctimetuple()),
                 "group_iso_str": message.group_iso_str,
                 "rif_type": message.rif_type.value,
             }
