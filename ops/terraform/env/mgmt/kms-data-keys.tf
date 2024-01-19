@@ -29,6 +29,30 @@ resource "aws_kms_alias" "data_keys" {
   target_key_id = aws_kms_key.data_keys[each.key].arn
 }
 
+resource "aws_kms_key" "bfd_mgmt_cmk" {
+
+  description                        = "Data key for the ${local.region} mgmt environment."
+  enable_key_rotation                = true
+  bypass_policy_lockout_safety_check = false
+  deletion_window_in_days            = local.kms_default_deletion_window_days
+
+  policy = data.aws_iam_policy_document.primary_data_key_policy_combined.json
+
+  tags = {
+    env = mgmt
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# alias
+resource "aws_kms_alias" "bfd_mgmt_cmk" {
+  name          = "alias/bfd-mgmt-cmk"
+  target_key_id = aws_kms_key.bfd_mgmt_cmk["mgmt"].arn
+}
+
 # Alt region keys. Note: These keys were originally created by the CPM team during the initial setup of BFD. We imported
 # them into our terraform state (12/2023) so we can manage them going forward.
 resource "aws_kms_key" "data_keys_alt" {
