@@ -23,8 +23,11 @@ import java.util.stream.Stream;
  * S3DirectoryDao} to download and cache files from S3.
  */
 public class S3FileManager implements AutoCloseable {
+  /** Name of timer used to report S3 file download times. */
   static final String TIMER_DOWNLOAD_FILE =
       MetricRegistry.name(S3FileManager.class, "downloadFile");
+
+  /** Name of timer used to report MD5 computation times. */
   static final String TIMER_COMPUTE_MD5 = MetricRegistry.name(S3FileManager.class, "computeMd5");
 
   /** The metric registry. */

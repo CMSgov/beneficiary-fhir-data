@@ -384,6 +384,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
    * @param manifest the manifest to use for the load files
    * @param resourcesToAdd the resource URLs to add to the bucket, see {@link StaticRifResource} for
    *     resource lists, should be in the order of the manifest
+   * @return the S3 key of the uploaded manifest file
    */
   private String putSampleFilesInTestBucket(
       String bucket, String location, DataSetManifest manifest, List<URL> resourcesToAdd) {
@@ -397,6 +398,13 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
     return manifestKey;
   }
 
+  /**
+   * Queries database for manifest record and verifies that its status matches the expected value.
+   *
+   * @param s3ManifestDbDao used to query the database
+   * @param s3ManifestKey s3 key of the manifest
+   * @param expectedStatus expected status value
+   */
   private void verifyManifestFileStatus(
       S3ManifestDbDao s3ManifestDbDao,
       String s3ManifestKey,

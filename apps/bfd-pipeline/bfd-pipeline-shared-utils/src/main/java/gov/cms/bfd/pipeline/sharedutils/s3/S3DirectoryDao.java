@@ -589,6 +589,12 @@ public class S3DirectoryDao implements AutoCloseable {
     }
   }
 
+  /**
+   * Strips quotes from around an etag to keep cached file paths clean.
+   *
+   * @param eTag e-tag value as returned by S3
+   * @return e-tag without quotes
+   */
   @VisibleForTesting
   static String normalizeEtag(String eTag) {
     if (eTag.startsWith("\"")) {
@@ -598,20 +604,45 @@ public class S3DirectoryDao implements AutoCloseable {
     }
   }
 
+  /**
+   * Contains all of the data for a cache file. Provides helper methods to allow callers to interact
+   * with the file without actually having a handle to it.
+   */
   @AllArgsConstructor
   public class DownloadedFile {
+    /** The S3 key from which file was downloaded. */
     @Getter private final String s3Key;
+
+    /** Details reported by S3 when the file was downloaded. Includes meta data key-value pairs. */
     @Getter private final S3Dao.S3ObjectDetails s3Details;
+
+    /** Path to the file in our cache. */
     private final Path path;
 
+    /**
+     * Returns a {@link ByteSource} that can be used to read data from the cached file.
+     *
+     * @return the byte source
+     */
     public ByteSource getBytes() {
       return createByteSourceForCachedFile(s3Key, path);
     }
 
+    /**
+     * Deletes the file from the cache.
+     *
+     * @throws IOException pass through if deletion fails
+     */
     public void delete() throws IOException {
       deleteCachedFiles(s3Key);
     }
 
+    /**
+     * Absolute path to the file within the cache. Intended for use in logging NOT to allow a
+     * backdoor to modifying the file itself.
+     *
+     * @return the absolute path
+     */
     public String getAbsolutePath() {
       return path.toAbsolutePath().toString();
     }

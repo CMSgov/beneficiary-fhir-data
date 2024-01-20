@@ -7,13 +7,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
 import gov.cms.bfd.AbstractLocalStackTest;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPOutputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -241,6 +244,71 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
   }
 
   /**
+   * Verify that helper methods in {@link S3DirectoryDao.DownloadedFile} work correctly.
+   *
+   * @throws Exception pass through
+   */
+  @Test
+  void testDownloadedFileMethods() throws Exception {
+    String s3Bucket = null;
+    S3DirectoryDao directoryDao = null;
+    Path cacheDirectoryPath;
+    String aTag1;
+    String aTag2;
+    String bTag1;
+    try {
+      s3Bucket = s3Dao.createTestBucket();
+      final String s3Directory = "";
+      cacheDirectoryPath = Files.createTempDirectory("test");
+      directoryDao =
+          new S3DirectoryDao(s3Dao, s3Bucket, s3Directory, cacheDirectoryPath, true, false);
+
+      // add two versions of one file and one version of a second file
+      aTag1 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-1");
+      final var downloadedA1 = directoryDao.fetchFile("a.txt");
+
+      aTag2 = uploadFileToBucket(s3Bucket, s3Directory + "a.txt", "AAA-2");
+      final var downloadedA2 = directoryDao.fetchFile("a.txt");
+
+      bTag1 = uploadGzippedFileToBucket(s3Bucket, s3Directory + "b.txt.gz", "BBB-1");
+      final var downloadedB = directoryDao.fetchFile("b.txt.gz");
+
+      // verify the file contents
+      assertEquals("AAA-1", downloadedA1.getBytes().asCharSource(StandardCharsets.UTF_8).read());
+      assertEquals("AAA-2", downloadedA2.getBytes().asCharSource(StandardCharsets.UTF_8).read());
+      assertEquals("BBB-1", downloadedB.getBytes().asCharSource(StandardCharsets.UTF_8).read());
+
+      // now that we've download the files we should see them in the cache
+      assertFileExists(directoryDao.cacheFilePath("a.txt", aTag1));
+      assertFileExists(directoryDao.cacheFilePath("a.txt", aTag2));
+      assertFileExists(directoryDao.cacheFilePath("b.txt.gz", bTag1));
+
+      // deleting either A deletes both but leaves b unharmed
+      downloadedA2.delete();
+      assertDoesNotExist(directoryDao.cacheFilePath("a.txt", aTag1));
+      assertDoesNotExist(directoryDao.cacheFilePath("a.txt", aTag2));
+      assertFileExists(directoryDao.cacheFilePath("b.txt.gz", bTag1));
+
+      // deleting B deletes B, shock!
+      downloadedB.delete();
+      assertDoesNotExist(directoryDao.cacheFilePath("b.txt.gz", bTag1));
+
+      // deleting a file multiple times does no harm
+      downloadedA1.delete();
+      downloadedA2.delete();
+      downloadedB.delete();
+    } finally {
+      s3Dao.deleteTestBucket(s3Bucket);
+      if (directoryDao != null) {
+        directoryDao.close();
+      }
+    }
+
+    // close should have deleted the directory
+    assertDoesNotExist(cacheDirectoryPath);
+  }
+
+  /**
    * Verify that closing a {@link S3DirectoryDao} deletes the cache directory and its contents when
    * delete on close is set and dao is closed.
    *
@@ -375,6 +443,32 @@ class S3DirectoryDaoIT extends AbstractLocalStackTest {
   private String uploadFileToBucket(String bucket, String objectKey, String fileData) {
     S3Dao.S3ObjectSummary putResponse =
         s3Dao.putObject(bucket, objectKey, fileData.getBytes(StandardCharsets.UTF_8), Map.of());
+    Assertions.assertFalse(
+        Strings.isNullOrEmpty(putResponse.getETag()), "eTag should be non-empty");
+
+    S3Dao.S3ObjectDetails readResponse = s3Dao.readObjectMetaData(bucket, objectKey);
+    assertEquals(putResponse.getETag(), readResponse.getETag());
+    return readResponse.getETag();
+  }
+
+  /**
+   * Upload the string as a "file" to the s3 bucket and return the ETag assigned to it by S3.
+   *
+   * @param bucket the bucket to receive the file
+   * @param objectKey the key for the object
+   * @param fileData a string uploaded as a file
+   * @return eTag assigned to the file by S3
+   */
+  private String uploadGzippedFileToBucket(String bucket, String objectKey, String fileData)
+      throws IOException {
+    final byte[] normalBytes = fileData.getBytes(StandardCharsets.UTF_8);
+    final ByteArrayOutputStream compressedBytes = new ByteArrayOutputStream();
+    try (var compressedStream = new GZIPOutputStream(compressedBytes)) {
+      compressedStream.write(normalBytes);
+      compressedStream.flush();
+    }
+    S3Dao.S3ObjectSummary putResponse =
+        s3Dao.putObject(bucket, objectKey, compressedBytes.toByteArray(), Map.of());
     Assertions.assertFalse(
         Strings.isNullOrEmpty(putResponse.getETag()), "eTag should be non-empty");
 

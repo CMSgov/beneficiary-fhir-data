@@ -212,7 +212,7 @@ public class S3ManifestDbDao {
     @Getter private final S3ManifestFile dbManifest;
 
     /**
-     * Initializes an instance with an error message formed using {@link String@format} and the
+     * Initializes an instance with an error message formed using {@link String#format} and the
      * provided format string and optional arguments.
      *
      * @param xmlManifest manifest as loaded from S3 XML file

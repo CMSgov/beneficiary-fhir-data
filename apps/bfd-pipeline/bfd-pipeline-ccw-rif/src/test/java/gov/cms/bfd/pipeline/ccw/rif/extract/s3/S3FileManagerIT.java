@@ -24,7 +24,10 @@ import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link S3FileManager}. */
 public class S3FileManagerIT extends AbstractLocalStackS3Test {
+  /** Name of the temporary S3 bucket used in test. */
   private String bucketName;
+
+  /** The file manager being tested. */
   private S3FileManager fileManager;
 
   /**

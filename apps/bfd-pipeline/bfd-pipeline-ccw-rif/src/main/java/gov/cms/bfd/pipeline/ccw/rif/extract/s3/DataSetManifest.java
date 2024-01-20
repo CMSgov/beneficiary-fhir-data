@@ -392,12 +392,14 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return isAfter(Instant.now());
     }
 
+    /**
+     * Checks if the timestamp of this manifest is on or after the provided timestamp.
+     *
+     * @param now timestamp to check
+     * @return true this manifest timestamp is on or after provided one
+     */
     public boolean isAfter(Instant now) {
       return now.compareTo(timestamp) <= 0;
-    }
-
-    public boolean isBefore(Instant now) {
-      return now.compareTo(timestamp) >= 0;
     }
 
     /** {@inheritDoc} */

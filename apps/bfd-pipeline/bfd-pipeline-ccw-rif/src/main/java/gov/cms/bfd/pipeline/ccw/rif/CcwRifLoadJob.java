@@ -71,7 +71,11 @@ import org.slf4j.LoggerFactory;
 public final class CcwRifLoadJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
 
-  public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(30);
+  /**
+   * Maximum age of a manifest for it to be considered for processing. Intended to keep database
+   * queries reasonable.
+   */
+  public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(90);
 
   /**
    * Minimum amount of free disk space (in bytes) to allow pre-fetch of second data set while
@@ -174,6 +178,7 @@ public final class CcwRifLoadJob implements PipelineJob {
   /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
+  /** Maintains the background thread used to download files asynchronously. */
   private final ExecutorService downloadService;
 
   /**
@@ -223,6 +228,16 @@ public final class CcwRifLoadJob implements PipelineJob {
     return false;
   }
 
+  /**
+   * Finds and returns the {@link S3DataFile} from {@link S3ManifestFile#dataFiles} that corresponds
+   * to the provided {@link DataSetManifestEntry}. This should never fail.
+   *
+   * @param manifest the manifest record
+   * @param entry the entry to search for
+   * @return the entry that was found
+   * @throws BadCodeMonkeyException if the manifest record is out of sync with the manifest it
+   *     represents
+   */
   private S3DataFile selectS3DataRecordForEntry(
       S3ManifestFile manifest, DataSetManifestEntry entry) {
     if (manifest.getDataFiles().size() != entry.getParentManifest().getEntries().size()) {
@@ -240,11 +255,26 @@ public final class CcwRifLoadJob implements PipelineJob {
         String.format("no data file found for entry name: name=%s", entry.getName()));
   }
 
+  /**
+   * Used as a lambda when calling {@link DataSetQueue#readEligibleManifests} to ensure that only
+   * manifests that pass our filter criteria and are not intended to be loaded in the future will be
+   * processed.
+   *
+   * @param dataSetManifest the manifest to test
+   * @return true if manifest passes our filter criteria and is not a future manifest
+   */
   private boolean isEligibleManifest(DataSetManifest dataSetManifest) {
     return options.getDataSetFilter().test(dataSetManifest)
         && !dataSetManifest.getId().isFutureManifest();
   }
 
+  /**
+   * Reads all manifests that are currently eligible for processing.
+   *
+   * @param now current time used in search
+   * @return list of eligible manifests
+   * @throws IOException pass through if lookup fails
+   */
   private List<DataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
     final Instant minEligibleTime = now.minus(MAX_MANIFEST_AGE);
     return dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
@@ -457,6 +487,14 @@ public final class CcwRifLoadJob implements PipelineJob {
     return preValInterface.isValid(manifest);
   }
 
+  /**
+   * Adds a task to the download queue to download the data file from S3 and returns a {@link
+   * S3RifFile} containing a {@link Future} to access the result.
+   *
+   * @param manifestRecord database record for the manifest
+   * @param manifestEntry manifest entry for the data file
+   * @return empty if file does not require processing, the {@link S3RifFile} if it does
+   */
   private Optional<S3RifFile> convertManifestEntryToS3RifFile(
       S3ManifestFile manifestRecord, DataSetManifestEntry manifestEntry) {
     final var dataFileRecord = selectS3DataRecordForEntry(manifestRecord, manifestEntry);
@@ -469,6 +507,13 @@ public final class CcwRifLoadJob implements PipelineJob {
     return Optional.of(new S3RifFile(appMetrics, manifestEntry, downloadResult));
   }
 
+  /**
+   * Returns true if the status of this data file indicates that it has not yet been fully
+   * processed.
+   *
+   * @param dataFileRecord data file to check
+   * @return true if the file requires processing
+   */
   private boolean isProcessingRequired(S3DataFile dataFileRecord) {
     if (REQUIRED_PROCESSING_STATUS_VALUES.contains(dataFileRecord.getStatus())) {
       return true;

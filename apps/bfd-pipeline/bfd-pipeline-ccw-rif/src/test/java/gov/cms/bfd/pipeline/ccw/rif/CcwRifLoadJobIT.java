@@ -620,6 +620,13 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
     }
   }
 
+  /**
+   * Queries database for manifest record and verifies that its status matches the expected value.
+   *
+   * @param s3ManifestDbDao used to query the database
+   * @param s3ManifestKey s3 key of the manifest
+   * @param expectedStatus expected status value
+   */
   private void verifyManifestFileStatus(
       S3ManifestDbDao s3ManifestDbDao,
       String s3ManifestKey,
