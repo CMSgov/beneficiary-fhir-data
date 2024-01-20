@@ -4,6 +4,7 @@ import static gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager.MD5Result.MI
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.io.ByteSource;
+import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
@@ -25,8 +26,11 @@ import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 
+/**
+ * Represents a queue of data sets (manifest file plus entry files) by combining the current
+ * contents of an S3 bucket and records in the database reflecting the status of those files.
+ */
 @AllArgsConstructor
 public class DataSetQueue implements AutoCloseable {
   /**
@@ -36,19 +40,19 @@ public class DataSetQueue implements AutoCloseable {
   public static final String MD5_CHECKSUM_META_DATA_FIELD = "md5chksum";
 
   /** Name used for read list of eligible manifests timer. */
-  static final String TIMER_READ_MANIFESTS =
+  private static final String TIMER_READ_MANIFESTS =
       MetricRegistry.name(DataSetQueue.class, "readEligibleManifests");
 
   /** Name used for download one manifest timer. */
-  static final String TIMER_DOWNLOAD_MANIFEST =
+  private static final String TIMER_DOWNLOAD_MANIFEST =
       MetricRegistry.name(DataSetQueue.class, "downloadManifest");
 
   /** Name used for download one manifest entry timer. */
-  static final String TIMER_DOWNLOAD_ENTRY =
+  private static final String TIMER_DOWNLOAD_ENTRY =
       MetricRegistry.name(DataSetQueue.class, "downloadEntry");
 
   /** Name used for updating one manifest in database timer. */
-  static final String TIMER_MANIFEST_DB_UPDATE =
+  private static final String TIMER_MANIFEST_DB_UPDATE =
       MetricRegistry.name(DataSetQueue.class, "updateManifestInDb");
 
   /** Statuses that indicate that processing is allowed on a {@link S3ManifestFile}. */
@@ -101,33 +105,40 @@ public class DataSetQueue implements AutoCloseable {
   public List<Manifest> readEligibleManifests(
       Instant currentTime,
       Instant minimumAllowedManifestTimestamp,
-      ThrowingFunction<Boolean, Manifest, IOException> acceptanceCriteria,
+      ThrowingFunction<Boolean, DataSetManifest, IOException> acceptanceCriteria,
       int maxToReturn)
       throws IOException {
     try (var ignored1 = appMetrics.timer(TIMER_READ_MANIFESTS).time()) {
+      // scan the S3 bucket and get a sorted list of manifests that might be eligible
       final List<ParsedManifestId> possiblyEligibleManifestIds =
           scanS3ForManifests(minimumAllowedManifestTimestamp);
+
       final List<Manifest> manifests = new ArrayList<>();
       for (ParsedManifestId manifestId : possiblyEligibleManifestIds) {
+        // enforce the size limit
         if (manifests.size() >= maxToReturn) {
           break;
         }
-        final var s3Key = manifestId.getS3Key();
+
+        // download the manifest XML file from S3 and parse it
+        final var s3Key = manifestId.manifestS3Key();
         final DownloadedFile manifestFile;
         final DataSetManifest dataSetManifest;
         try (var ignored2 = appMetrics.timer(TIMER_DOWNLOAD_MANIFEST).time()) {
-          manifestFile = downloadAndCheckMD5(s3Key);
+          manifestFile = downloadFileAndCheckMD5(s3Key);
           dataSetManifest = parseManifestFile(s3Key, manifestFile.getBytes());
         }
+
+        // ensure manifest is represented in our database and get its record
         final S3ManifestFile manifestRecord;
         try (var ignored3 = appMetrics.timer(TIMER_MANIFEST_DB_UPDATE).time()) {
           manifestRecord =
               s3Records.insertOrReadManifestAndDataFiles(s3Key, dataSetManifest, currentTime);
         }
-        final var manifest =
-            new Manifest(manifestId.getManifestId(), manifestFile, dataSetManifest, manifestRecord);
-        if (acceptanceCriteria.apply(manifest)) {
-          manifests.add(manifest);
+
+        // add the manifest to our result list only if caller approves it
+        if (acceptanceCriteria.apply(dataSetManifest)) {
+          manifests.add(new Manifest(dataSetManifest, manifestRecord));
         }
       }
       return manifests;
@@ -144,14 +155,14 @@ public class DataSetQueue implements AutoCloseable {
   public ManifestEntry downloadManifestEntry(S3DataFile record) throws IOException {
     try (var ignored = appMetrics.timer(TIMER_DOWNLOAD_ENTRY).time()) {
       final var s3Key = record.getS3Key();
-      final var downloadedFile = downloadAndCheckMD5(s3Key);
+      final var downloadedFile = downloadFileAndCheckMD5(s3Key);
       return new ManifestEntry(record, downloadedFile);
     }
   }
 
   /**
-   * Checks the S3 bucket to see if all of the files referenced in manifest entries exist in the
-   * bucket. Does not download any files.
+   * Checks the S3 bucket to see if all of the files corresponding to the manifest's entries exist
+   * in the bucket. Does not download any files.
    *
    * @param record database record corresponding to the manifest
    * @return true if bucket contains a file for all of the manifest's entries
@@ -169,6 +180,7 @@ public class DataSetQueue implements AutoCloseable {
    * been started.
    *
    * @param record database record corresponding to the manifest
+   * @throws BadCodeMonkeyException if the entry has already been completely processed
    */
   public void markAsStarted(S3ManifestFile record) {
     if (!STARTABLE_MANIFEST_STATUSES.contains(record.getStatus())) {
@@ -235,7 +247,7 @@ public class DataSetQueue implements AutoCloseable {
    * @return object containing information about downloaded file
    * @throws IOException pass through in case of error
    */
-  private DownloadedFile downloadAndCheckMD5(String s3Key) throws IOException {
+  private DownloadedFile downloadFileAndCheckMD5(String s3Key) throws IOException {
     final var manifestFile = s3Files.downloadFile(s3Key);
     if (s3Files.checkMD5(manifestFile, MD5_CHECKSUM_META_DATA_FIELD) == MISMATCH) {
       throw new IOException(
@@ -257,8 +269,9 @@ public class DataSetQueue implements AutoCloseable {
     return Stream.concat(
             s3Files.scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS),
             s3Files.scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS))
-        .filter(s3Summary -> !ineligibleS3Keys.contains(s3Summary.getKey()))
-        .flatMap(s3Summary -> parseManifestIdFromS3Key(s3Summary).stream())
+        .map(S3Dao.S3ObjectSummary::getKey)
+        .filter(s3Key -> !ineligibleS3Keys.contains(s3Key))
+        .flatMap(s3Key -> parseManifestIdFromS3Key(s3Key).stream())
         .filter(
             parsedManifestId ->
                 parsedManifestId.manifestId.isAfter(minimumAllowedManifestTimestamp))
@@ -270,19 +283,27 @@ public class DataSetQueue implements AutoCloseable {
    * Parses S3 key in the provided {@link gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectSummary}
    * to extract a valid {@link ParsedManifestId}.
    *
-   * @param s3Summary summary of object with key to parse
+   * @param manifestS3Key key to the manifest file in S3 bucket
    * @return empty if parsing fails, otherwise the parsed id
    */
-  private Optional<ParsedManifestId> parseManifestIdFromS3Key(S3Dao.S3ObjectSummary s3Summary) {
+  private Optional<ParsedManifestId> parseManifestIdFromS3Key(String manifestS3Key) {
     DataSetManifest.DataSetManifestId manifestId =
-        DataSetManifest.DataSetManifestId.parseManifestIdFromS3Key(s3Summary.getKey());
+        DataSetManifest.DataSetManifestId.parseManifestIdFromS3Key(manifestS3Key);
     if (manifestId == null) {
       return Optional.empty();
     } else {
-      return Optional.of(new ParsedManifestId(s3Summary, manifestId));
+      return Optional.of(new ParsedManifestId(manifestS3Key, manifestId));
     }
   }
 
+  /**
+   * Parse the manifest XML file represented by the {@link ByteSource} into a {#link
+   * DataSetManifest} object.
+   *
+   * @param manifestS3Key key to the manifest file in S3 bucket
+   * @param fileBytes the contents of the XML file downloaded from S3
+   * @return the parsed manifest
+   */
   private DataSetManifest parseManifestFile(String manifestS3Key, ByteSource fileBytes) {
     try (InputStream dataManifestStream = fileBytes.openBufferedStream()) {
       DataSetManifest manifest =
@@ -304,38 +325,92 @@ public class DataSetQueue implements AutoCloseable {
     }
   }
 
-  @Data
-  public static class ParsedManifestId implements Comparable<ParsedManifestId> {
-    private final S3Dao.S3ObjectSummary s3Summary;
-    private final DataSetManifest.DataSetManifestId manifestId;
-
-    public String getS3Key() {
-      return s3Summary.getKey();
-    }
-
+  /**
+   * Parsed manifest id along with its S3 key. Natural order is by ascending {@link #manifestId}.
+   *
+   * @param manifestS3Key key to the manifest file in S3 bucket
+   * @param manifestId timestamp and sequence number that identify a manifest file in S3
+   */
+  public record ParsedManifestId(String manifestS3Key, DataSetManifest.DataSetManifestId manifestId)
+      implements Comparable<ParsedManifestId> {
+    /** Provides a natural ordering for objects by ascending {@link #manifestId}. {@inheritDoc} */
     @Override
     public int compareTo(@Nonnull ParsedManifestId o) {
       return manifestId.compareTo(o.manifestId);
     }
   }
 
-  @Data
-  public static class Manifest {
-    private final DataSetManifest.DataSetManifestId manifestId;
-    private final DownloadedFile fileData;
-    private final DataSetManifest manifest;
-    private final S3ManifestFile record;
-  }
+  /**
+   * Data regarding a manifest file that has been downloaded from S3 and tracked in the database.
+   *
+   * @param manifest the manifest itself parsed from XML
+   * @param record database record that tracks status of the manifest
+   */
+  public record Manifest(DataSetManifest manifest, S3ManifestFile record) {}
 
-  @Data
+  /**
+   * Representation of a manifest entry (data file) that has been downloaded from S3 and tracked in
+   * the database. Provides helper methods to interact with the file and its contents without
+   * exposing them to other classes.
+   */
+  @AllArgsConstructor
   public class ManifestEntry {
+    /** The database record for the data file itself. */
     private final S3DataFile record;
+
+    /** The cached file. */
     private final DownloadedFile fileData;
 
+    /**
+     * Extracts the manifest id and index in the form of a {@link RifFile.RecordId}.
+     *
+     * @return the record id
+     */
+    public RifFile.RecordId getRifFileRecordId() {
+      return new RifFile.RecordId(record.getParentManifest().getManifestId(), record.getIndex());
+    }
+
+    /**
+     * Returns a {@link ByteSource} that can be used to read the cached data.
+     *
+     * @return the byte source
+     */
+    public ByteSource getBytes() {
+      return fileData.getBytes();
+    }
+
+    /**
+     * Deletes the data file from the cache.
+     *
+     * @throws IOException pass through if delete fails
+     */
+    public void delete() throws IOException {
+      fileData.delete();
+    }
+
+    /**
+     * Returns the absolute path of the cached file for use in logging.
+     *
+     * @return the path
+     */
+    public String getCachedFilePath() {
+      return fileData.getAbsolutePath();
+    }
+
+    /**
+     * Returns true if the entry is still eligible for processing.
+     *
+     * @return true if the entry can be processed, false otherwise
+     */
     public boolean isIncomplete() {
       return STARTABLE_ENTRY_STATUSES.contains(record.getStatus());
     }
 
+    /**
+     * Updates the entry's record in the database to mark it as started.
+     *
+     * @throws BadCodeMonkeyException if the entry has already been completely processed
+     */
     public void markAsStarted() {
       if (!isIncomplete()) {
         throw new BadCodeMonkeyException("Attempting to start processing a completed data file.");
@@ -345,6 +420,11 @@ public class DataSetQueue implements AutoCloseable {
       s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
     }
 
+    /**
+     * Updates the entry's record in the database to mark it as completed.
+     *
+     * @throws BadCodeMonkeyException if the entry has already been completely processed
+     */
     public void markAsCompleted() {
       if (!isIncomplete()) {
         throw new BadCodeMonkeyException("Attempting to mark a completed data file as completed.");

@@ -240,8 +240,7 @@ public final class CcwRifLoadJob implements PipelineJob {
         String.format("no data file found for entry name: name=%s", entry.getName()));
   }
 
-  private boolean isEligibleManifest(DataSetQueue.Manifest manifest) {
-    final var dataSetManifest = manifest.getManifest();
+  private boolean isEligibleManifest(DataSetManifest dataSetManifest) {
     return options.getDataSetFilter().test(dataSetManifest)
         && !dataSetManifest.getId().isFutureManifest();
   }
@@ -270,8 +269,8 @@ public final class CcwRifLoadJob implements PipelineJob {
     }
 
     // We've found the oldest manifest.
-    S3ManifestFile manifestRecord = eligibleManifests.getFirst().getRecord();
-    DataSetManifest manifestToProcess = eligibleManifests.getFirst().getManifest();
+    S3ManifestFile manifestRecord = eligibleManifests.getFirst().record();
+    DataSetManifest manifestToProcess = eligibleManifests.getFirst().manifest();
     LOGGER.info(
         "Found data set to process: '{}'." + " There were '{}' total pending data sets.",
         manifestToProcess.toString(),
@@ -355,7 +354,7 @@ public final class CcwRifLoadJob implements PipelineJob {
         DataSetQueue.Manifest secondManifestToProcess = eligibleManifests.get(1);
         final long usableFreeTempSpace = dataSetQueue.getAvailableDiskSpaceInBytes();
         if (usableFreeTempSpace >= MIN_BYTES_FOR_SECOND_DATA_SET_DOWNLOAD) {
-          secondManifestToProcess.getRecord().getDataFiles().stream()
+          secondManifestToProcess.record().getDataFiles().stream()
               .filter(this::isProcessingRequired)
               .forEach(
                   s3DataFile -> {

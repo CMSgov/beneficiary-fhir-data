@@ -4,7 +4,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -86,7 +85,7 @@ public final class S3RifFile implements RifFile {
     // Open a stream for the file.
     InputStream fileDownloadStream;
     try {
-      fileDownloadStream = fileDownloadResult.getFileData().getBytes().openBufferedStream();
+      fileDownloadStream = fileDownloadResult.getBytes().openBufferedStream();
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -149,7 +148,7 @@ public final class S3RifFile implements RifFile {
      */
     try {
       DataSetQueue.ManifestEntry fileDownloadResult = waitForDownload();
-      fileDownloadResult.getFileData().delete();
+      fileDownloadResult.delete();
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (CancellationException e) {
@@ -160,8 +159,7 @@ public final class S3RifFile implements RifFile {
 
   @Override
   public RecordId getRecordId() {
-    final S3DataFile record = waitForDownload().getRecord();
-    return new RecordId(record.getParentManifest().getManifestId(), record.getIndex());
+    return waitForDownload().getRifFileRecordId();
   }
 
   @Override
@@ -185,7 +183,7 @@ public final class S3RifFile implements RifFile {
     try {
       localDownloadPath =
           manifestEntryDownload.isDone()
-              ? manifestEntryDownload.get().getFileData().getAbsolutePath()
+              ? manifestEntryDownload.get().getCachedFilePath()
               : "(not downloaded)";
     } catch (InterruptedException e) {
       // We're not expecting interrupts here, so go boom.
