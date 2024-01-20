@@ -228,58 +228,6 @@ public final class CcwRifLoadJob implements PipelineJob {
     return false;
   }
 
-  /**
-   * Finds and returns the {@link S3DataFile} from {@link S3ManifestFile#dataFiles} that corresponds
-   * to the provided {@link DataSetManifestEntry}. This should never fail.
-   *
-   * @param manifest the manifest record
-   * @param entry the entry to search for
-   * @return the entry that was found
-   * @throws BadCodeMonkeyException if the manifest record is out of sync with the manifest it
-   *     represents
-   */
-  private S3DataFile selectS3DataRecordForEntry(
-      S3ManifestFile manifest, DataSetManifestEntry entry) {
-    if (manifest.getDataFiles().size() != entry.getParentManifest().getEntries().size()) {
-      throw new BadCodeMonkeyException(
-          String.format(
-              "mismatch in number of entries: database=%d xml=%d",
-              entry.getParentManifest().getEntries().size(), manifest.getDataFiles().size()));
-    }
-    for (S3DataFile dataFile : manifest.getDataFiles()) {
-      if (dataFile.getFileName().equals(entry.getName())) {
-        return dataFile;
-      }
-    }
-    throw new BadCodeMonkeyException(
-        String.format("no data file found for entry name: name=%s", entry.getName()));
-  }
-
-  /**
-   * Used as a lambda when calling {@link DataSetQueue#readEligibleManifests} to ensure that only
-   * manifests that pass our filter criteria and are not intended to be loaded in the future will be
-   * processed.
-   *
-   * @param dataSetManifest the manifest to test
-   * @return true if manifest passes our filter criteria and is not a future manifest
-   */
-  private boolean isEligibleManifest(DataSetManifest dataSetManifest) {
-    return options.getDataSetFilter().test(dataSetManifest)
-        && !dataSetManifest.getId().isFutureManifest();
-  }
-
-  /**
-   * Reads all manifests that are currently eligible for processing.
-   *
-   * @param now current time used in search
-   * @return list of eligible manifests
-   * @throws IOException pass through if lookup fails
-   */
-  private List<DataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
-    final Instant minEligibleTime = now.minus(MAX_MANIFEST_AGE);
-    return dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
-  }
-
   @Override
   public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
@@ -485,6 +433,58 @@ public final class CcwRifLoadJob implements PipelineJob {
     LOGGER.info(
         "Synthea pre-validation being performed by: {}...", preValInterface.getClass().getName());
     return preValInterface.isValid(manifest);
+  }
+
+  /**
+   * Finds and returns the {@link S3DataFile} from {@link S3ManifestFile#dataFiles} that corresponds
+   * to the provided {@link DataSetManifestEntry}. This should never fail.
+   *
+   * @param manifest the manifest record
+   * @param entry the entry to search for
+   * @return the entry that was found
+   * @throws BadCodeMonkeyException if the manifest record is out of sync with the manifest it
+   *     represents
+   */
+  private S3DataFile selectS3DataRecordForEntry(
+      S3ManifestFile manifest, DataSetManifestEntry entry) {
+    if (manifest.getDataFiles().size() != entry.getParentManifest().getEntries().size()) {
+      throw new BadCodeMonkeyException(
+          String.format(
+              "mismatch in number of entries: database=%d xml=%d",
+              entry.getParentManifest().getEntries().size(), manifest.getDataFiles().size()));
+    }
+    for (S3DataFile dataFile : manifest.getDataFiles()) {
+      if (dataFile.getFileName().equals(entry.getName())) {
+        return dataFile;
+      }
+    }
+    throw new BadCodeMonkeyException(
+        String.format("no data file found for entry name: name=%s", entry.getName()));
+  }
+
+  /**
+   * Used as a lambda when calling {@link DataSetQueue#readEligibleManifests} to ensure that only
+   * manifests that pass our filter criteria and are not intended to be loaded in the future will be
+   * processed.
+   *
+   * @param dataSetManifest the manifest to test
+   * @return true if manifest passes our filter criteria and is not a future manifest
+   */
+  private boolean isEligibleManifest(DataSetManifest dataSetManifest) {
+    return options.getDataSetFilter().test(dataSetManifest)
+        && !dataSetManifest.getId().isFutureManifest();
+  }
+
+  /**
+   * Reads all manifests that are currently eligible for processing.
+   *
+   * @param now current time used in search
+   * @return list of eligible manifests
+   * @throws IOException pass through if lookup fails
+   */
+  private List<DataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
+    final Instant minEligibleTime = now.minus(MAX_MANIFEST_AGE);
+    return dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
   }
 
   /**

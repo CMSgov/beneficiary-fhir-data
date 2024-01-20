@@ -223,15 +223,6 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       assertCcwRifLoadJobCompleted(logLines);
       assertADataSetBeenProcessed(logLines);
 
-      // Verify we successfully posted the expected events to the SQS queue.
-      assertEquals(
-          List.of(
-              CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest,
-              CcwRifLoadJobStatusEvent.JobStage.AwaitingManifestDataFiles,
-              CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles,
-              CcwRifLoadJobStatusEvent.JobStage.CompletedManifest),
-          readStatusEventsFromSQSQueue());
-
       // Verify all files were moved into the done "folder".
       final String keyPrefix =
           DataSetTestUtilities.keyPrefixForManifest(
@@ -244,6 +235,15 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               .map(key -> key.substring(keyPrefix.length()))
               .collect(ImmutableSet.toImmutableSet());
       assertEquals(Set.of("0_manifest.xml", "beneficiaries.rif", "carrier.rif"), completedFiles);
+
+      // Verify we successfully posted the expected events to the SQS queue.
+      assertEquals(
+          List.of(
+              CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest,
+              CcwRifLoadJobStatusEvent.JobStage.AwaitingManifestDataFiles,
+              CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles,
+              CcwRifLoadJobStatusEvent.JobStage.CompletedManifest),
+          readStatusEventsFromSQSQueue());
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
