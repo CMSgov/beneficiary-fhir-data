@@ -12,28 +12,49 @@ from common import RifFileType
 
 
 class PipelineLoadEventType(str, Enum):
+    """Represents the type of an event in time that occurred for a particular pipeline load"""
+
     LOAD_AVAILABLE = "LOAD_AVAILABLE"
+    """An event indicating that a particular Pipeline load (or group) was made available; in other
+    words, this type of event represents when the first RIF of a load was made available"""
     RIF_AVAILABLE = "RIF_AVAILABLE"
+    """An event indicating when a particular RIF file in a particular load (or group) was made
+    available"""
 
 
 @dataclass(frozen=True, eq=True)
 class PipelineLoadEvent:
+    """Object that encodes metadata about a particular event for a particular load. Used to compute
+    delta times per-RIF and per-load"""
+
     event_type: PipelineLoadEventType
+    """The type of event this encodes metadata for"""
     date_time: datetime
+    """The time at which this event occurred"""
     group_iso_str: str
+    """The load/group that this event is associated with"""
     rif_type: RifFileType
+    """The RIF that generated this event"""
 
 
 @dataclass(frozen=True, eq=True)
 class PipelineLoadEventMessage:
+    """Object that represents a retrieved SQS message for a PipelineLoadEvent"""
+
     receipt_handle: str
+    """A unique string that corresponds to the raw SQS message's receipt handle. Used to delete the
+    message when processed"""
     event: PipelineLoadEvent
+    """The inner event encoded in the raw SQS message"""
 
     def __str__(self) -> str:
         return json.dumps(asdict(self), default=str)
 
 
 class MessageFailedToDeleteException(Exception):
+    """An exception indicating that there was a failure when trying to delete a
+    PipelineLoadEventMessage from the SQS events queue"""
+
     pass
 
 
@@ -42,13 +63,19 @@ def retrieve_load_event_msgs(
     timeout: int = 3,
     type_filter: list[PipelineLoadEventType] = list(PipelineLoadEventType),
 ) -> list[PipelineLoadEventMessage]:
-    """Checks the sentinel SQS queue for messages and returns their values
+    """Retrieves a list of PipelineLoadEventMessages from the event queue, filtering upon the types
+    of events desired.
 
     Args:
-        timeout (int, optional): Amount of time to poll for messages in queue. Defaults to 1 second
+        queue (Queue): boto3 Queue corresponding to event queue
+        timeout (int, optional): Timeout for how long to poll for messages. Defaults to 3.
+        type_filter (list[PipelineLoadEventType], optional): List of event types to filter upon.
+        Event types that are not specified will not be returned. Defaults to
+        list(PipelineLoadEventType).
 
     Returns:
-        list[SentinelMessage]: The list of sentinel messages in the queue
+        list[PipelineLoadEventMessage]: A list of PipelineLoadEventMessages, filtered by
+        type_filter, that exist in the event queue
     """
     responses = queue.receive_messages(WaitTimeSeconds=timeout)
 
@@ -86,12 +113,11 @@ def retrieve_load_event_msgs(
 
 
 def post_load_event(queue: Queue, message: PipelineLoadEvent):
-    """Posts a sentinel message to the provided queue indicating that the given group has started
-    to load data
+    """Posts a PipelineLoadEvent to the provided SQS event queue
 
     Args:
-        sentinel_queue (Any): boto3 SQS Queue
-        group_timestamp (str): The timestamp of the pipeline data load
+        queue (Queue): boto3 Queue object representing the events queue
+        message (PipelineLoadEvent): The event to post to the queue
     """
     queue.send_message(
         MessageBody=json.dumps(
@@ -106,6 +132,16 @@ def post_load_event(queue: Queue, message: PipelineLoadEvent):
 
 
 def delete_load_msg_from_queue(queue: Queue, message: PipelineLoadEventMessage):
+    """Deletes a PipelineLoadEventMessage from the provided SQS event queue
+
+    Args:
+        queue (Queue): boto3 Queue object representing the events queue
+        message (PipelineLoadEventMessage): The message to delete from the queue
+
+    Raises:
+        MessageFailedToDeleteException: If the message fails to delete. Message indicates the
+        reason for failure
+    """
     request_uuid = str(uuid.uuid4())
     delete_response = queue.delete_messages(
         Entries=[
