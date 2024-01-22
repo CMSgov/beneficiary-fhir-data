@@ -9,6 +9,8 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlTransient;
 import java.util.List;
 import java.util.Optional;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Each {@link Variable} instance represents one of the CCW variables/fields documented in a {@link
@@ -17,9 +19,11 @@ import java.util.Optional;
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class Variable {
   /** The parent {@link Codebook} that this {@link Variable} is part of. */
-  @XmlTransient private Codebook codebook;
+  @Getter @XmlTransient private Codebook codebook;
 
   /** The unique-within-a-{@link Codebook} identifier for this {@link Variable}. */
+  @Getter
+  @Setter
   @XmlAttribute(required = true)
   private String id;
 
@@ -27,6 +31,8 @@ public final class Variable {
    * A short description for this {@link Variable}, typically no more than a few (English) words
    * long.
    */
+  @Setter
+  @Getter
   @XmlAttribute(required = true)
   private String label;
 
@@ -34,6 +40,7 @@ public final class Variable {
    * A longer description for this {@link Variable}, typically one or more (English) paragraphs
    * long, with one {@link List} entry per paragraph.
    */
+  @Setter
   @XmlElementWrapper(required = false)
   @XmlElement(name = "p")
   private List<String> description;
@@ -43,6 +50,7 @@ public final class Variable {
    * and to identify it by some systems. Will be {@code null} if that information is unknown for
    * this {@link Variable}.
    */
+  @Setter
   @XmlAttribute(required = false)
   private String shortName;
 
@@ -50,6 +58,8 @@ public final class Variable {
    * The "long" name for this {@link Variable}, which will be unique-within-this-{@link Codebook}
    * and to identify it by some systems.
    */
+  @Setter
+  @Getter
   @XmlAttribute(required = true)
   private String longName;
 
@@ -57,10 +67,13 @@ public final class Variable {
    * The {@link VariableType} that constrains values of this {@link Variable}. Will be {@code null}
    * if that information is unknown for this {@link Variable}.
    */
+  @Setter
   @XmlAttribute(required = false)
   private VariableType type;
 
   /** The maximum length that constrains values of this {@link Variable}. */
+  @Setter
+  @Getter
   @XmlAttribute(required = true)
   private Integer length;
 
@@ -68,6 +81,7 @@ public final class Variable {
    * The source system that this {@link Variable}'s data was extracted and/or derived from. Will be
    * {@code null} if that information is unknown for this {@link Variable}.
    */
+  @Setter
   @XmlAttribute(required = false)
   private String source;
 
@@ -76,6 +90,7 @@ public final class Variable {
    * "The value in this field is between '00' through '12'.". Will be {@code null} if no such
    * description is available.
    */
+  @Setter
   @XmlAttribute(required = false)
   private String valueFormat;
 
@@ -84,6 +99,7 @@ public final class Variable {
    * Variable}. Will be {@code null} if this {@link Variable}'s values aren't constrained in that
    * way.
    */
+  @Setter
   @XmlElementWrapper(required = false)
   @XmlElement(name = "valueGroup")
   private List<ValueGroup> valueGroups;
@@ -93,6 +109,7 @@ public final class Variable {
    * (English) paragraphs long, with one {@link List} entry per paragraph. Will be {@code null} if
    * that information is unknown for this {@link Variable}.
    */
+  @Setter
   @XmlElementWrapper(required = false)
   @XmlElement(name = "p")
   private List<String> comment;
@@ -100,7 +117,7 @@ public final class Variable {
   /**
    * Constructs a new {@link Variable} instance.
    *
-   * @param codebook the value to use for {@link #getCodebook()}
+   * @param codebook the value to use for getCodebook()
    */
   public Variable(Codebook codebook) {
     this.codebook = codebook;
@@ -196,52 +213,6 @@ public final class Variable {
   }
 
   /**
-   * Gets the {@link #codebook}.
-   *
-   * @return the parent {@link Codebook} that this {@link Variable} is part of
-   */
-  public Codebook getCodebook() {
-    return codebook;
-  }
-
-  /**
-   * Gets the {@link #id}.
-   *
-   * @return the unique-within-a-{@link Codebook} identifier for this {@link Variable}
-   */
-  public String getId() {
-    return id;
-  }
-
-  /**
-   * Sets the {@link #id}.
-   *
-   * @param id the new value for {@link #getId()}
-   */
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   * Gets the {@link #label}.
-   *
-   * @return a short description for this {@link Variable}, typically no more than a few (English)
-   *     words long
-   */
-  public String getLabel() {
-    return label;
-  }
-
-  /**
-   * Sets the {@link #label}.
-   *
-   * @param label the new value for {@link #getLabel()}
-   */
-  public void setLabel(String label) {
-    this.label = label;
-  }
-
-  /**
    * Gets the {@link #description}.
    *
    * @return a longer description for this {@link Variable}, typically one or more (English)
@@ -249,15 +220,6 @@ public final class Variable {
    */
   public Optional<List<String>> getDescription() {
     return Optional.ofNullable(description);
-  }
-
-  /**
-   * Sets the {@link #description}.
-   *
-   * @param description the new value for {@link #getDescription()}
-   */
-  public void setDescription(List<String> description) {
-    this.description = description;
   }
 
   /**
@@ -272,34 +234,6 @@ public final class Variable {
   }
 
   /**
-   * Sets the {@link #shortName}.
-   *
-   * @param shortName the new value for {@link #getShortName()}
-   */
-  public void setShortName(String shortName) {
-    this.shortName = shortName;
-  }
-
-  /**
-   * Gets the {@link #longName}.
-   *
-   * @return the "long" name for this {@link Variable}, which will be unique-within-this-{@link
-   *     Codebook} and to identify it by some systems
-   */
-  public String getLongName() {
-    return longName;
-  }
-
-  /**
-   * Sets the {@link #longName}.
-   *
-   * @param longName the new value for {@link #getLongName()}
-   */
-  public void setLongName(String longName) {
-    this.longName = longName;
-  }
-
-  /**
    * Gets the {@link #type}.
    *
    * @return the {@link VariableType} that constrains values of this {@link Variable}, or <code>
@@ -310,33 +244,6 @@ public final class Variable {
   }
 
   /**
-   * Sets the {@link #type}.
-   *
-   * @param type the new value for {@link #getType()}
-   */
-  public void setType(VariableType type) {
-    this.type = type;
-  }
-
-  /**
-   * Gets the {@link #length}.
-   *
-   * @return the maximum length that constrains values of this {@link Variable}
-   */
-  public Integer getLength() {
-    return length;
-  }
-
-  /**
-   * Sets the {@link #length}.
-   *
-   * @param length the new value for {@link #getLength()}
-   */
-  public void setLength(Integer length) {
-    this.length = length;
-  }
-
-  /**
    * Gets the {@link #source}.
    *
    * @return the source system that this {@link Variable}'s data was extracted and/or derived from,
@@ -344,15 +251,6 @@ public final class Variable {
    */
   public Optional<String> getSource() {
     return Optional.ofNullable(source);
-  }
-
-  /**
-   * Sets the {@link #source}.
-   *
-   * @param source the new value for {@link #getSource()}
-   */
-  public void setSource(String source) {
-    this.source = source;
   }
 
   /**
@@ -367,15 +265,6 @@ public final class Variable {
   }
 
   /**
-   * Sets the {@link #valueFormat}.
-   *
-   * @param valueFormat the new value for {@link #getValueFormat()}
-   */
-  public void setValueFormat(String valueFormat) {
-    this.valueFormat = valueFormat;
-  }
-
-  /**
    * Gets the {@link #valueGroups}.
    *
    * @return the {@link List} of {@link ValueGroup}s that constrains the allowed coded values of
@@ -387,15 +276,6 @@ public final class Variable {
   }
 
   /**
-   * Sets the {@link #valueGroups}.
-   *
-   * @param valueGroups the new value for {@link #getValueGroups()}
-   */
-  public void setValueGroups(List<ValueGroup> valueGroups) {
-    this.valueGroups = valueGroups;
-  }
-
-  /**
    * Gets the {@link #comment}.
    *
    * @return a comment providing more detail on this {@link Variable}'s purpose and/or history, zero
@@ -404,15 +284,6 @@ public final class Variable {
    */
   public Optional<List<String>> getComment() {
     return Optional.ofNullable(comment);
-  }
-
-  /**
-   * Sets the {@link #comment}.
-   *
-   * @param comment the new value for {@link #getComment()}
-   */
-  public void setComment(List<String> comment) {
-    this.comment = comment;
   }
 
   /** {@inheritDoc} */

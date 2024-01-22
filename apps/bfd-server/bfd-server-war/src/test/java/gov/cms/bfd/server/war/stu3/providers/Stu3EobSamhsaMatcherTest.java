@@ -58,7 +58,7 @@ public final class Stu3EobSamhsaMatcherTest {
   public static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
 
   /** The SAMHSA DRG code. */
-  public static final String SAMPLE_SAMHSA_DRG_CODE = "522";
+  public static final String SAMPLE_SAMHSA_DRG_CODE = "895";
 
   /** The DRG reference url. */
   private static final String DRG =
