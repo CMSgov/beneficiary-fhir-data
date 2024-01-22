@@ -82,9 +82,9 @@ resource "aws_lambda_function" "this" {
   timeout          = 300
   environment {
     variables = {
-      METRICS_NAMESPACE   = local.metrics_namespace
-      ETL_BUCKET_ID       = data.aws_s3_bucket.etl.id
-      SENTINEL_QUEUE_NAME = aws_sqs_queue.this.name
+      METRICS_NAMESPACE = local.metrics_namespace
+      ETL_BUCKET_ID     = data.aws_s3_bucket.etl.id
+      EVENTS_QUEUE_NAME = aws_sqs_queue.this.name
     }
   }
 
