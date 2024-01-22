@@ -23,11 +23,11 @@ DEFAULT_MOCK_BUCKET = "mock-bucket"
 DEFAULT_MOCK_QUEUE = "mock-queue"
 DEFAULT_MOCK_NAMESPACE = "mock-namespace"
 
-MockBoto3Client = mock.Mock()
-MockBoto3Resource = mock.Mock()
+mock_boto3_client = mock.Mock()
+mock_boto3_resource = mock.Mock()
 
 
-def _generate_event(
+def generate_event(
     key: str,
     event_time_iso: str = DEFAULT_MOCK_EVENT_TIME_ISO,
     event_name: str = DEFAULT_MOCK_EVENT_NAME,
@@ -53,7 +53,7 @@ def _generate_event(
     }
 
 
-def _gen_log_regex(log_msg_regex: str, log_level: str = "ERROR") -> str:
+def gen_log_regex(log_msg_regex: str, log_level: str = "ERROR") -> str:
     return rf"(?m){log_level}:\w+:{log_msg_regex}"
 
 
@@ -63,7 +63,7 @@ class MockedRetrieveLoadMsgs(Protocol):
     ) -> list[PipelineLoadEventMessage]: ...
 
 
-def _gen_mocked_retrieve_load_msgs_side_effect(
+def gen_mocked_retrieve_load_msgs_side_effect(
     mocked_queue_contents: list[PipelineLoadEventMessage],
 ) -> "MockedRetrieveLoadMsgs":
     def _generated_func(type_filter: list[PipelineLoadEventType], *_: Any, **__: dict[str, Any]):
@@ -76,7 +76,7 @@ def _gen_mocked_retrieve_load_msgs_side_effect(
     return _generated_func
 
 
-def _get_mocked_put_metrics(mock_put_metric_data: mock.Mock) -> list[MetricData]:
+def get_mocked_put_metrics(mock_put_metric_data: mock.Mock) -> list[MetricData]:
     # We're only testing the behavior of the handler, so we don't care about what put_metric_data
     # _actually_ does (and especially not what boto3 does), so we just extract the list of metrics
     # passed to the mocked function by the handler to use in assertions
@@ -85,25 +85,25 @@ def _get_mocked_put_metrics(mock_put_metric_data: mock.Mock) -> list[MetricData]
     ]
 
 
-def _get_mocked_put_events(mock_post_load_event: mock.Mock) -> list[PipelineLoadEvent]:
+def get_mocked_put_events(mock_post_load_event: mock.Mock) -> list[PipelineLoadEvent]:
     # Similar to the above helper function, we don't care about the behavior of the
     # "post_load_event" function, only what the Lambda handler calls it with. We extract those calls
     # out for assertions
     return [x.kwargs["message"] for x in mock_post_load_event.call_args_list]
 
 
-def _get_mocked_deleted_msgs(
+def get_mocked_deleted_msgs(
     mock_delete_load_msg: mock.Mock,
 ) -> list[PipelineLoadEventMessage]:
     return [x.kwargs["message"] for x in mock_delete_load_msg.call_args_list]
 
 
-def _utc_timestamp(date_time: datetime) -> int:
+def utc_timestamp(date_time: datetime) -> int:
     return calendar.timegm(date_time.utctimetuple())
 
 
-@mock.patch("update_pipeline_slis.boto3.client", new=MockBoto3Client)
-@mock.patch("update_pipeline_slis.boto3.resource", new=MockBoto3Resource)
+@mock.patch("update_pipeline_slis.boto3.client", new=mock_boto3_client)
+@mock.patch("update_pipeline_slis.boto3.resource", new=mock_boto3_resource)
 @mock.patch("update_pipeline_slis.ETL_BUCKET_ID", DEFAULT_MOCK_BUCKET)
 @mock.patch("update_pipeline_slis.EVENTS_QUEUE_NAME", DEFAULT_MOCK_QUEUE)
 @mock.patch("update_pipeline_slis.METRICS_NAMESPACE", DEFAULT_MOCK_NAMESPACE)
@@ -123,7 +123,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), _gen_log_regex("The incoming event was invalid"))
+        self.assertRegex(" ".join(cm.output), gen_log_regex("The incoming event was invalid"))
 
     def test_it_fails_if_event_is_wrong_type(self):
         # Arrange
@@ -137,7 +137,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), _gen_log_regex("The incoming event was invalid"))
+        self.assertRegex(" ".join(cm.output), gen_log_regex("The incoming event was invalid"))
 
     def test_it_fails_if_event_has_no_records(self):
         # Arrange
@@ -152,7 +152,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), _gen_log_regex("Invalid event notification, no records found")
+            " ".join(cm.output), gen_log_regex("Invalid event notification, no records found")
         )
 
     def test_it_fails_if_event_records_is_wrong_type(self):
@@ -168,7 +168,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), _gen_log_regex("Invalid event notification, no records found")
+            " ".join(cm.output), gen_log_regex("Invalid event notification, no records found")
         )
 
     def test_it_fails_if_event_records_is_str_list(self):
@@ -183,7 +183,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), _gen_log_regex("Event record or SNS Message invalid"))
+        self.assertRegex(" ".join(cm.output), gen_log_regex("Event record or SNS Message invalid"))
 
     def test_it_fails_if_event_records_sns_missing(self):
         # Arrange
@@ -197,9 +197,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output), _gen_log_regex("No message found in SNS notification")
-        )
+        self.assertRegex(" ".join(cm.output), gen_log_regex("No message found in SNS notification"))
 
     def test_it_fails_if_event_records_sns_message_missing(self):
         # Arrange
@@ -213,9 +211,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output), _gen_log_regex("No message found in SNS notification")
-        )
+        self.assertRegex(" ".join(cm.output), gen_log_regex("No message found in SNS notification"))
 
     def test_it_fails_if_event_records_sns_message_invalid_json(self):
         # Arrange
@@ -229,7 +225,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), _gen_log_regex("SNS message body was not valid JSON"))
+        self.assertRegex(" ".join(cm.output), gen_log_regex("SNS message body was not valid JSON"))
 
     def test_it_fails_if_event_records_sns_message_wrong_type(self):
         # Arrange
@@ -243,7 +239,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), _gen_log_regex("Event record or SNS Message invalid"))
+        self.assertRegex(" ".join(cm.output), gen_log_regex("Event record or SNS Message invalid"))
 
     def test_it_fails_if_event_records_sns_message_records_missing(self):
         # Arrange
@@ -257,7 +253,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), _gen_log_regex("Invalid S3 event, no records found"))
+        self.assertRegex(" ".join(cm.output), gen_log_regex("Invalid S3 event, no records found"))
 
     def test_it_fails_if_event_records_sns_message_records_empty(self):
         # Arrange
@@ -272,7 +268,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), _gen_log_regex("Invalid event notification, no records found")
+            " ".join(cm.output), gen_log_regex("Invalid event notification, no records found")
         )
 
     def test_it_fails_if_event_records_sns_message_records_wrong_type(self):
@@ -288,7 +284,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), _gen_log_regex("Invalid event notification, no records found")
+            " ".join(cm.output), gen_log_regex("Invalid event notification, no records found")
         )
 
     def test_it_fails_if_s3_event_missing(self):
@@ -305,7 +301,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex("The incoming event record did not contain the type of S3 event"),
+            gen_log_regex("The incoming event record did not contain the type of S3 event"),
         )
 
     def test_it_fails_if_s3_event_is_unknown(self):
@@ -316,14 +312,14 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Act
         with self.assertLogs(level="ERROR") as cm:
             handler(
-                event=_generate_event(key=key, event_name=invalid_event_name),
+                event=generate_event(key=key, event_name=invalid_event_name),
                 context=None,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex(f"Event type {invalid_event_name} is unsupported. Exiting..."),
+            gen_log_regex(f"Event type {invalid_event_name} is unsupported. Exiting..."),
         )
 
     def test_it_fails_if_s3_event_time_missing(self):
@@ -348,7 +344,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex('Record did not contain any key with "eventTime"'),
+            gen_log_regex('Record did not contain any key with "eventTime"'),
         )
 
     def test_it_fails_if_s3_event_time_is_invalid(self):
@@ -359,13 +355,13 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Act
         with self.assertLogs(level="ERROR") as cm:
             handler(
-                event=_generate_event(key=key, event_time_iso=invalid_event_time),
+                event=generate_event(key=key, event_time_iso=invalid_event_time),
                 context=None,
             )
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), _gen_log_regex("Event timestamp was not in valid ISO format")
+            " ".join(cm.output), gen_log_regex("Event timestamp was not in valid ISO format")
         )
 
     def test_it_fails_if_s3_object_key_is_missing(self):
@@ -400,7 +396,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex("No bucket file found in event notification"),
+            gen_log_regex("No bucket file found in event notification"),
         )
 
     def test_it_fails_if_key_not_incoming_or_done(self):
@@ -409,13 +405,13 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Act
         with self.assertLogs(level="ERROR") as cm:
             handler(
-                event=_generate_event(key=invalid_key),
+                event=generate_event(key=invalid_key),
                 context=None,
             )
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex(
+            gen_log_regex(
                 f"ETL file or path does not match expected format, skipping: {invalid_key}"
             ),
         )
@@ -427,14 +423,14 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Act
         with self.assertLogs(level="ERROR") as cm:
             handler(
-                event=_generate_event(key=invalid_key),
+                event=generate_event(key=invalid_key),
                 context=None,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex(
+            gen_log_regex(
                 f"ETL file or path does not match expected format, skipping: {invalid_key}"
             ),
         )
@@ -455,7 +451,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_retrieve_load_event_msgs.return_value = []
 
         # Act
-        handler(event=_generate_event(key=key), context=None)
+        handler(event=generate_event(key=key), context=None)
 
         # Assert
         # We put metrics for the RIF dimensioned by group and its data type, metrics for the
@@ -464,7 +460,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # it actually ensures all elements are equal regardless of order whereas "assertEquals"
         # requires lists are in exact order
         self.assertCountEqual(
-            _get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
+            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
@@ -523,7 +519,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # We put events indicating when this RIF file was loaded as well as when the load was made
         # first available to compute deltas later
         self.assertCountEqual(
-            _get_mocked_put_events(mock_post_load_event=mock_post_load_event),
+            get_mocked_put_events(mock_post_load_event=mock_post_load_event),
             [
                 PipelineLoadEvent(
                     event_type=PipelineLoadEventType.RIF_AVAILABLE,
@@ -554,7 +550,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         event_time = DEFAULT_MOCK_EVENT_TIME_DATETIME + timedelta(hours=1)
         folder = "Incoming"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        mock_retrieve_load_event_msgs.side_effect = _gen_mocked_retrieve_load_msgs_side_effect(
+        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
             mocked_queue_contents=[
                 PipelineLoadEventMessage(
                     receipt_handle="1",
@@ -578,40 +574,40 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         )
 
         # Act
-        handler(event=_generate_event(key=key, event_time_iso=event_time.isoformat()), context=None)
+        handler(event=generate_event(key=key, event_time_iso=event_time.isoformat()), context=None)
 
         # Assert
         # We put metrics for the RIF dimensioned by group and its data type. No metrics
         # should be put for the load, as the mocked queue indicates the load has already begun and
         # those metrics have already been processed
         self.assertCountEqual(
-            _get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
+            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
                     date_time=event_time,
-                    value=_utc_timestamp(event_time),
+                    value=utc_timestamp(event_time),
                     unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
                     dimensions={},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
                     date_time=event_time,
-                    value=_utc_timestamp(event_time),
+                    value=utc_timestamp(event_time),
                     unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
                     dimensions={"data_type": rif.name.lower()},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
                     date_time=event_time,
-                    value=_utc_timestamp(event_time),
+                    value=utc_timestamp(event_time),
                     unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
                     dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
                     date_time=event_time,
-                    value=_utc_timestamp(event_time),
+                    value=utc_timestamp(event_time),
                     unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
                     dimensions={
                         "data_type": rif.name.lower(),
@@ -624,7 +620,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # posted for the load itself, as the mocked queue indicates that has already happened and
         # the load was made available with the BENEFICIARY rif first
         self.assertCountEqual(
-            _get_mocked_put_events(mock_post_load_event=mock_post_load_event),
+            get_mocked_put_events(mock_post_load_event=mock_post_load_event),
             [
                 PipelineLoadEvent(
                     event_type=PipelineLoadEventType.RIF_AVAILABLE,
@@ -675,7 +671,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 ),
             ),
         ]
-        mock_retrieve_load_event_msgs.side_effect = _gen_mocked_retrieve_load_msgs_side_effect(
+        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
             mocked_queue_contents=mocked_queued_events
         )
         mock_load_complete.return_value = False
@@ -684,13 +680,13 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Act
         with self.assertLogs(level="INFO") as cm:
             handler(
-                event=_generate_event(key=key, event_time_iso=event_time.isoformat()), context=None
+                event=generate_event(key=key, event_time_iso=event_time.isoformat()), context=None
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex(
+            gen_log_regex(
                 log_level="INFO",
                 log_msg_regex=(
                     f"Not all files have yet to be loaded for group {DEFAULT_MOCK_GROUP_ISO_STR}."
@@ -699,33 +695,33 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             ),
         )
         self.assertCountEqual(
-            _get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
+            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=event_time,
-                    value=_utc_timestamp(event_time),
+                    value=utc_timestamp(event_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=event_time,
-                    value=_utc_timestamp(event_time),
+                    value=utc_timestamp(event_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={"data_type": rif.name.lower()},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=event_time,
-                    value=_utc_timestamp(event_time),
+                    value=utc_timestamp(event_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=event_time,
-                    value=_utc_timestamp(event_time),
+                    value=utc_timestamp(event_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={
                         "data_type": rif.name.lower(),
@@ -766,7 +762,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             ],
         )
         self.assertCountEqual(
-            _get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
+            get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
             [
                 x
                 for x in mocked_queued_events
@@ -806,7 +802,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 ),
             ),
         ]
-        mock_retrieve_load_event_msgs.side_effect = _gen_mocked_retrieve_load_msgs_side_effect(
+        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
             mocked_queue_contents=mocked_queued_events
         )
         mock_load_complete.return_value = False
@@ -815,14 +811,14 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Act
         with self.assertLogs(level="ERROR") as cm:
             handler(
-                event=_generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
+                event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
                 context=None,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex(
+            gen_log_regex(
                 log_level="ERROR",
                 log_msg_regex=(
                     f"No corresponding messages found for {rif.value} RIF in group"
@@ -834,33 +830,33 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
 
         # Assert
         self.assertCountEqual(
-            _get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
+            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={"data_type": rif.name.lower()},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={
                         "data_type": rif.name.lower(),
@@ -914,7 +910,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 ),
             ),
         ]
-        mock_retrieve_load_event_msgs.side_effect = _gen_mocked_retrieve_load_msgs_side_effect(
+        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
             mocked_queue_contents=mocked_queued_events
         )
         mock_load_complete.return_value = True
@@ -922,39 +918,39 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
 
         # Act
         handler(
-            event=_generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
+            event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
             context=None,
         )
 
         # Assert
         self.assertCountEqual(
-            _get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
+            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={"data_type": rif.name.lower()},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={
                         "data_type": rif.name.lower(),
@@ -995,21 +991,21 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
                     dimensions={},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
                     dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
                     dimensions={},
                 ),
@@ -1030,7 +1026,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             ],
         )
         self.assertCountEqual(
-            _get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
+            get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
             mocked_queued_events,
         )
 
@@ -1068,7 +1064,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 ),
             ),
         ]
-        mock_retrieve_load_event_msgs.side_effect = _gen_mocked_retrieve_load_msgs_side_effect(
+        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
             mocked_queue_contents=mocked_queued_events
         )
         mock_load_complete.return_value = True
@@ -1077,14 +1073,14 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Act
         with self.assertLogs(level="ERROR") as cm:
             handler(
-                event=_generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
+                event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
                 context=None,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            _gen_log_regex(
+            gen_log_regex(
                 log_level="ERROR",
                 log_msg_regex=(
                     f"No corresponding messages found for {rif.value} RIF in group"
@@ -1096,33 +1092,33 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
 
         # Assert
         self.assertCountEqual(
-            _get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
+            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={"data_type": rif.name.lower()},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_LOADED.unit,
                     dimensions={
                         "data_type": rif.name.lower(),
@@ -1132,21 +1128,21 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
                     dimensions={},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
                     dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
                 ),
                 MetricData(
                     metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
                     date_time=rif_done_time,
-                    value=_utc_timestamp(rif_done_time),
+                    value=utc_timestamp(rif_done_time),
                     unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
                     dimensions={},
                 ),
@@ -1167,6 +1163,6 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
             ],
         )
         self.assertCountEqual(
-            _get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
+            get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
             mocked_queued_events,
         )
