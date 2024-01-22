@@ -9,14 +9,22 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import lombok.AllArgsConstructor;
+import javax.persistence.EntityManagerFactory;
 import lombok.Getter;
 
 /** Data access object for working with S3 manifest database entities. */
-@AllArgsConstructor
 public class S3ManifestDbDao {
   /** Used to run transactions. */
   private final TransactionManager transactionManager;
+
+  /**
+   * Initializes an instance using the provided {@link EntityManagerFactory} to access the database.
+   *
+   * @param entityManagerFactory used to access the database
+   */
+  public S3ManifestDbDao(EntityManagerFactory entityManagerFactory) {
+    transactionManager = new TransactionManager(entityManagerFactory);
+  }
 
   /**
    * Checks for an already existing record for the provided manifest. If one is found check it for

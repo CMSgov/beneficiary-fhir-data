@@ -10,7 +10,6 @@ import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -37,8 +36,7 @@ public class S3ManifestDbDaoIT extends AbstractLocalStackS3Test {
   void setUp() {
     var entityManagerFactory =
         PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
-    var transactionManager = new TransactionManager(entityManagerFactory);
-    dbDao = new S3ManifestDbDao(transactionManager);
+    dbDao = new S3ManifestDbDao(entityManagerFactory);
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 

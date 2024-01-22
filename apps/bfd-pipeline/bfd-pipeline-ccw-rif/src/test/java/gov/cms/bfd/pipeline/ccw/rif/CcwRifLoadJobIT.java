@@ -24,7 +24,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
-import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -67,9 +66,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var listener = new MockDataSetMonitorListener();
       final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
-      final var transactionManager =
-          new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
           new DataSetQueue(
@@ -196,9 +193,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var listener = new MockDataSetMonitorListener();
       final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
-      final var transactionManager =
-          new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
           new DataSetQueue(
@@ -315,9 +310,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var listener = new MockDataSetMonitorListener();
       final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
-      final var transactionManager =
-          new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
           new DataSetQueue(
@@ -410,9 +403,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var listener = new MockDataSetMonitorListener();
       final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
-      final var transactionManager =
-          new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
           new DataSetQueue(
@@ -498,9 +489,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var listener = new MockDataSetMonitorListener();
       final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
-      final var transactionManager =
-          new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
           new DataSetQueue(
@@ -582,9 +571,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       final var listener = new MockDataSetMonitorListener();
       final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
       final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
-      final var transactionManager =
-          new TransactionManager(pipelineAppState.getEntityManagerFactory());
-      final var s3FilesDao = new S3ManifestDbDao(transactionManager);
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
       final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
       final var dataSetQueue =
           new DataSetQueue(

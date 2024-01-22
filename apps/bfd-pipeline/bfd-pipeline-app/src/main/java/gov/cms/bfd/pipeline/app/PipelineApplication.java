@@ -19,6 +19,7 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
@@ -28,7 +29,6 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
@@ -462,7 +462,7 @@ public final class PipelineApplication {
 
       final var loadOptions = appConfig.getCcwRifLoadOptions().get();
       final var awsClientConfig = appConfig.getAwsClientConfig();
-      final var job = createCcwRifLoadJob(loadOptions, appState, awsClientConfig);
+      final var job = createCcwRifLoadJob(loadOptions, appState, awsClientConfig, clock);
       jobs.add(job);
       LOGGER.info("Registered CcwRifLoadJob.");
     } else {
@@ -509,12 +509,14 @@ public final class PipelineApplication {
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
    * @param awsClientConfig AWS client configuration
+   * @param clock used to get current time
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private PipelineJob createCcwRifLoadJob(
       CcwRifLoadOptions loadOptions,
       PipelineApplicationState appState,
-      AwsClientConfig awsClientConfig)
+      AwsClientConfig awsClientConfig,
+      Clock clock)
       throws IOException {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
@@ -532,20 +534,20 @@ public final class PipelineApplication {
      * Create the DataSetMonitorListener that will glue those stages together and run them all for
      * each data set that is found.
      */
-    final var dataSetMonitorListener =
+    DataSetMonitorListener dataSetMonitorListener =
         new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
-    final var s3Factory =
-        new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
-    final var transactionManager = new TransactionManager(appState.getEntityManagerFactory());
-    final var s3Dao = s3Factory.createS3Dao();
-    final var s3FilesDao = new S3ManifestDbDao(transactionManager);
-    final var bucket = loadOptions.getExtractionOptions().getS3BucketName();
-    final var s3FileCache = new S3FileManager(appState.getMetrics(), s3Dao, bucket);
-    final var dataSetQueue =
+    var s3Factory = new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
+    var dataSetQueue =
         new DataSetQueue(
-            appState.getClock(), appState.getMetrics(), s3FilesDao, s3FileCache, s3TaskManager);
-    var statusReporter =
-        createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, appState.getClock());
+            clock,
+            appState.getMetrics(),
+            new S3ManifestDbDao(appState.getEntityManagerFactory()),
+            new S3FileManager(
+                appState.getMetrics(),
+                s3Factory.createS3Dao(),
+                loadOptions.getExtractionOptions().getS3BucketName()),
+            s3TaskManager);
+    var statusReporter = createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, clock);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState,
