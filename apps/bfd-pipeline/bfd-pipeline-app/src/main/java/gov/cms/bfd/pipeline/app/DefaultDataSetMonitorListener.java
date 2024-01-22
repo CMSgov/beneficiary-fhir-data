@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class DefaultDataSetMonitorListener implements DataSetMonitorListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetMonitorListener.class);
+
+  /** Name of timer used to track processing time. */
   public static final String TIMER_PROCESSING =
       MetricRegistry.name(PipelineApplication.class.getSimpleName(), "dataSet", "processed");
 
@@ -56,7 +58,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       final RifFile rifFile = rifFileEvent.getFile();
       if (!rifFile.requiresProcessing()) {
-        LOGGER.info("Skipped previously processed file {}", rifFile.getDisplayName());
+        LOGGER.info("Skipping previously processed file {}", rifFile.getDisplayName());
         continue;
       }
 

@@ -9,7 +9,7 @@ CREATE TABLE s3_manifest_files (
     status_timestamp timestamp with time zone,
     manifest_timestamp timestamp with time zone NOT NULL,
     discovery_timestamp timestamp with time zone NOT NULL,
-    CONSTRAINT pk_s3_manifest_files_manifest_id PRIMARY KEY (manifest_id)
+    CONSTRAINT pk_s3_manifest_files PRIMARY KEY (manifest_id)
 );
 
 /*
@@ -20,7 +20,7 @@ create sequence s3_manifest_files_manifest_id_seq ${logic.sequence-start} 1 ${lo
 /*
  * Index used when checking status of a file from S3 bucket
  */
-create unique index s3_manifest_files_s3_key on s3_manifest_files(s3_key);
+create unique index idx_s3_manifest_files_s3_key on s3_manifest_files(s3_key);
 
 /*
  * Table to track CCW S3 data files in database.
@@ -34,14 +34,14 @@ CREATE TABLE s3_data_files (
     status varchar(24) NOT NULL,
     status_timestamp timestamp with time zone,
     discovery_timestamp timestamp with time zone NOT NULL,
-    CONSTRAINT pk_s3_data_files_key PRIMARY KEY (manifest_id, file_name),
-    CONSTRAINT fk_s3_data_files_manifest_id FOREIGN KEY (manifest_id) REFERENCES s3_manifest_files(manifest_id)
+    CONSTRAINT pk_s3_data_files PRIMARY KEY (manifest_id, file_name),
+    CONSTRAINT fk_s3_data_files_s3_manifest_files FOREIGN KEY (manifest_id) REFERENCES s3_manifest_files(manifest_id)
 );
 
 /*
  * Index used when checking status of a file from S3 bucket
  */
-create unique index s3_data_files_s3_key on s3_data_files(s3_key);
+create unique index idx_s3_data_files_s3_key on s3_data_files(s3_key);
 
 /*
  * Columns used to relate a record back the s3_data_files record it came from.

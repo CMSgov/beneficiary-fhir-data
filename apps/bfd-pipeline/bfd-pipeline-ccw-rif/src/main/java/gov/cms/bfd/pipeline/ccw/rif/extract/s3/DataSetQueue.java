@@ -92,10 +92,11 @@ public class DataSetQueue implements AutoCloseable {
 
   /**
    * Scan the S3 bucket for available manifests, filter any that database indicates have already
-   * been processed or rejected, and return the resulting list. Any newly discovered maniests will
-   * be added to the database for tracking.
+   * been processed or rejected, and return the resulting list. Any newly discovered manifests will
+   * be added to the database for tracking. Manifests with future timestamps or timestamps before
+   * the minimum allowed value are ignored.
    *
-   * @param currentTime timestamp to use for current time
+   * @param currentTimestamp timestamp to use for current time
    * @param minimumAllowedManifestTimestamp oldest allowed timestamp for manifests to be returned
    * @param acceptanceCriteria function to allow caller to evaluate manifests
    * @param maxToReturn maximum number of eligible manifests to return
@@ -103,7 +104,7 @@ public class DataSetQueue implements AutoCloseable {
    * @throws IOException pass through in case of error
    */
   public List<Manifest> readEligibleManifests(
-      Instant currentTime,
+      Instant currentTimestamp,
       Instant minimumAllowedManifestTimestamp,
       ThrowingFunction<Boolean, DataSetManifest, IOException> acceptanceCriteria,
       int maxToReturn)
@@ -111,7 +112,7 @@ public class DataSetQueue implements AutoCloseable {
     try (var ignored1 = appMetrics.timer(TIMER_READ_MANIFESTS).time()) {
       // scan the S3 bucket and get a sorted list of manifests that might be eligible
       final List<ParsedManifestId> possiblyEligibleManifestIds =
-          scanS3ForManifests(minimumAllowedManifestTimestamp);
+          scanS3ForManifests(minimumAllowedManifestTimestamp, currentTimestamp);
 
       final List<Manifest> manifests = new ArrayList<>();
       for (ParsedManifestId manifestId : possiblyEligibleManifestIds) {
@@ -133,7 +134,7 @@ public class DataSetQueue implements AutoCloseable {
         final S3ManifestFile manifestRecord;
         try (var ignored3 = appMetrics.timer(TIMER_MANIFEST_DB_UPDATE).time()) {
           manifestRecord =
-              s3Records.insertOrReadManifestAndDataFiles(s3Key, dataSetManifest, currentTime);
+              s3Records.insertOrReadManifestAndDataFiles(s3Key, dataSetManifest, currentTimestamp);
         }
 
         // add the manifest to our result list only if caller approves it
@@ -258,12 +259,15 @@ public class DataSetQueue implements AutoCloseable {
 
   /**
    * Scans S3 bucket for all manifests that are eligible for processing and have a timestamp greater
-   * than or equal to the provided one.
+   * than or equal to the provided minimum and less than or equal to the provided maximum.
    *
    * @param minimumAllowedManifestTimestamp oldest allowed timestamp for manifests to be returned
+   * @param maximumAllowedManifestTimestamp current time used to filter out manifests meant for
+   *     processing in the future
    * @return list of manifest ids
    */
-  private List<ParsedManifestId> scanS3ForManifests(Instant minimumAllowedManifestTimestamp) {
+  private List<ParsedManifestId> scanS3ForManifests(
+      Instant minimumAllowedManifestTimestamp, Instant maximumAllowedManifestTimestamp) {
     final var ineligibleS3Keys =
         s3Records.readIneligibleManifestS3Keys(minimumAllowedManifestTimestamp);
     return Stream.concat(
@@ -272,6 +276,9 @@ public class DataSetQueue implements AutoCloseable {
         .map(S3Dao.S3ObjectSummary::getKey)
         .filter(s3Key -> !ineligibleS3Keys.contains(s3Key))
         .flatMap(s3Key -> parseManifestIdFromS3Key(s3Key).stream())
+        .filter(
+            parsedManifestId ->
+                parsedManifestId.manifestId.isBefore(maximumAllowedManifestTimestamp))
         .filter(
             parsedManifestId ->
                 parsedManifestId.manifestId.isAfter(minimumAllowedManifestTimestamp))

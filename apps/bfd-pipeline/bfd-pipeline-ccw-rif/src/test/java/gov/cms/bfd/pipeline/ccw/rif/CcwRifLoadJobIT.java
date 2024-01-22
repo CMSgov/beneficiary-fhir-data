@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -530,7 +532,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       statusOrder.verifyNoMoreInteractions();
 
       // Verify that the data set was not processed.
-      verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.DISCOVERED);
+      verifyManifestFileStatus(s3FilesDao, manifestKey, null);
 
       // verifies that close called close on AutoCloseable dependencies
       verify(s3TaskManager).close();
@@ -630,10 +632,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   private void verifyManifestFileStatus(
       S3ManifestDbDao s3ManifestDbDao,
       String s3ManifestKey,
-      S3ManifestFile.ManifestStatus expectedStatus) {
+      @Nullable S3ManifestFile.ManifestStatus expectedStatus) {
     S3ManifestFile manifestRecord = s3ManifestDbDao.readS3ManifestAndDataFiles(s3ManifestKey);
-    assertNotNull(manifestRecord, "no record in database for manifest: key=" + s3ManifestKey);
-    assertEquals(expectedStatus, manifestRecord.getStatus());
+    if (expectedStatus == null) {
+      assertNull(
+          manifestRecord, "expected no record in database for manifest: key=" + s3ManifestKey);
+    } else {
+      assertNotNull(manifestRecord, "no record in database for manifest: key=" + s3ManifestKey);
+      assertEquals(expectedStatus, manifestRecord.getStatus());
+    }
   }
 
   /**
