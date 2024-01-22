@@ -402,12 +402,14 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
     def test_it_fails_if_key_not_incoming_or_done(self):
         # Arrange
         invalid_key = f"{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt"
+
         # Act
         with self.assertLogs(level="ERROR") as cm:
             handler(
                 event=generate_event(key=invalid_key),
                 context=None,
             )
+
         # Assert
         self.assertRegex(
             " ".join(cm.output),
@@ -826,8 +828,6 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 ),
             ),
         )
-
-        # Assert
         self.assertCountEqual(
             get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
@@ -1089,8 +1089,6 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 ),
             ),
         )
-
-        # Assert
         self.assertCountEqual(
             get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
@@ -1244,8 +1242,6 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 ),
             ),
         )
-
-        # Assert
         self.assertCountEqual(
             get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
             [
