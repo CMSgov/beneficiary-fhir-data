@@ -32,7 +32,12 @@ import lombok.Setter;
     propOrder = {"entries", "preValidationProperties"})
 @XmlRootElement(name = "dataSetManifest")
 public final class DataSetManifest implements Comparable<DataSetManifest> {
-  /** A timestamp {@link String} that maps to an S3 bucket folder. */
+  /**
+   * A timestamp {@link String} that maps to an S3 bucket folder. Design note: As discovered in
+   * CBBD-298, Java's DateTimeFormatter and Instant classes don't always preserve the precision of
+   * parsed timestamps. Accordingly, we need to store this value as a String to ensure that the S3
+   * key of the manifest isn't mangled.
+   */
   @Getter
   @XmlAttribute(name = "timestamp", required = true)
   private final String timestampText;
@@ -75,12 +80,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
-   * @param timestampText the value to use for getTimestampText()
-   * @param sequenceId the value to use for getSequenceId()
-   * @param syntheticData the value to use for isSyntheticData()
+   * @param timestampText the value to use for {@link #timestampText}
+   * @param sequenceId the value to use for {@link #sequenceId}
+   * @param syntheticData the value to use for {@link #syntheticData}
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
    * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
-   * @param entries the value to use for getEntries()
+   * @param entries the value to use for {@link #entries}
    */
   public DataSetManifest(
       String timestampText,
@@ -101,10 +106,10 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
-   * @param timestamp the value to use for getTimestampText()
-   * @param sequenceId the value to use for getSequenceId()
-   * @param syntheticData the value to use for isSyntheticData()
-   * @param entries the value to use for getEntries()
+   * @param timestamp the value to use for {@link #timestampText}
+   * @param sequenceId the value to use for {@link #sequenceId}
+   * @param syntheticData the value to use for {@link #syntheticData}
+   * @param entries the value to use for {@link #entries}
    */
   public DataSetManifest(
       Instant timestamp,
@@ -125,12 +130,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
-   * @param timestampText the value to use for getTimestampText()
-   * @param sequenceId the value to use for getSequenceId()
-   * @param syntheticData the value to use for isSyntheticData()
+   * @param timestampText the value to use for {@link #timestampText}
+   * @param sequenceId the value to use for {@link #sequenceId}
+   * @param syntheticData the value to use for {@link #syntheticData}
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
    * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
-   * @param entries the value to use for getEntries()
+   * @param entries the value to use for {@link #entries}
    */
   public DataSetManifest(
       String timestampText,
@@ -151,12 +156,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   /**
    * Constructs a new {@link DataSetManifest} instance.
    *
-   * @param timestamp the value to use for getTimestampText()
-   * @param sequenceId the value to use for getSequenceId()
-   * @param syntheticData the value to use for isSyntheticData()
+   * @param timestamp the value to use for {@link #timestampText}
+   * @param sequenceId the value to use for {@link #sequenceId}
+   * @param syntheticData the value to use for {@link #syntheticData}
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
    * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
-   * @param entries the value to use for getEntries()
+   * @param entries the value to use for {@link #entries}
    */
   public DataSetManifest(
       Instant timestamp,
@@ -262,8 +267,8 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Constructs a new {@link DataSetManifestEntry} instance.
      *
-     * @param name the value to use for getName()
-     * @param type the value to use for getType()
+     * @param name the value to use for {@link #name}
+     * @param type the value to use for {@link #type}
      */
     public DataSetManifestEntry(String name, RifFileType type) {
       this.parentManifest = null;
@@ -278,7 +283,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      * are unmarshalled for this object, but before this object is set to the parent object.
      *
      * @param unmarshaller the {@link Unmarshaller} that created this instance
-     * @param parent the value to use for getParentManifest()
+     * @param parent the value to use for {@link #parentManifest}
      */
     void afterUnmarshal(Unmarshaller unmarshaller, Object parent) {
       this.parentManifest = (DataSetManifest) parent;
@@ -307,21 +312,21 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * can be determined.
    */
   public static final class DataSetManifestId implements Comparable<DataSetManifestId> {
-    /** a {@link String} derived DataSetManifest.getTimestamp() value. */
+    /** a {@link String} derived {@link DataSetManifest#getTimestamp()} value. */
     private final String timestampText;
 
-    /** an {@link Instant} object derived timestampText {@link String} value. */
+    /** an {@link Instant} object derived from timestampText {@link String} value. */
     private final Instant timestamp;
 
-    /** an integer value derived from DataSetManifest.getSequenceId() value. */
+    /** an integer value derived from {@link DataSetManifest#getSequenceId()} value. */
     private final int sequenceId;
 
     /**
      * Constructs a new {@link DataSetManifestId}.
      *
-     * @param timestampText a {@link String} representation of the DataSetManifest.getTimestamp()
-     *     value
-     * @param sequenceId the DataSetManifest.getSequenceId() value
+     * @param timestampText a {@link String} representation of the {@link
+     *     DataSetManifest#getTimestamp()} value
+     * @param sequenceId the {@link DataSetManifest#getSequenceId()} value
      */
     private DataSetManifestId(String timestampText, int sequenceId) {
       this.timestampText = timestampText;

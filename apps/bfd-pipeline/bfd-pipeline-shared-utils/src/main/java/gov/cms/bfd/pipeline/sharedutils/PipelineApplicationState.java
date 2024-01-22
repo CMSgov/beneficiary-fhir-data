@@ -17,7 +17,8 @@ import org.hibernate.tool.schema.Action;
 
 /**
  * Stores the shared state needed by the Pipeline application. Note that it implements {@link
- * AutoCloseable} as it owns expensive resources that need to be closed, e.g. getPooledDataSource().
+ * AutoCloseable} as it owns expensive resources that need to be closed, e.g. {@link
+ * #pooledDataSource}.
  */
 @Getter
 public final class PipelineApplicationState implements AutoCloseable {
@@ -47,8 +48,8 @@ public final class PipelineApplicationState implements AutoCloseable {
    * DataSource. This is the standard constructor used by PipelineApplication.
    *
    * @param meters the meters
-   * @param metrics the value to use for getMetrics()
-   * @param pooledDataSource the value to use for getPooledDataSource()
+   * @param metrics the value to use for {@link #metrics}
+   * @param pooledDataSource the value to use for {@link #pooledDataSource}
    * @param persistenceUnitName the persistence unit name
    * @param clock the clock
    */
@@ -72,9 +73,9 @@ public final class PipelineApplicationState implements AutoCloseable {
    * unit tests.
    *
    * @param meters the meters
-   * @param metrics the value to use for getMetrics()
-   * @param pooledDataSource the value to use for getPooledDataSource()
-   * @param entityManagerFactory the value to use for getEntityManagerFactory()
+   * @param metrics the value to use for {@link #metrics}
+   * @param pooledDataSource the value to use for {@link #pooledDataSource}
+   * @param entityManagerFactory the value to use for {@link #entityManagerFactory}
    * @param clock the clock
    */
   @VisibleForTesting
@@ -95,7 +96,7 @@ public final class PipelineApplicationState implements AutoCloseable {
    * Create pooled data source used to communicate with the database.
    *
    * @param dataSourceFactory the {@link DataSourceFactory} to use for the application's DB (which
-   *     this will use to create getPooledDataSource())
+   *     this will use to create {@link #pooledDataSource})
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
