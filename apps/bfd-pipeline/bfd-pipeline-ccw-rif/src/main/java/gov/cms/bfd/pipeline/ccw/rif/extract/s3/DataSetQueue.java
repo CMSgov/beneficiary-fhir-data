@@ -14,7 +14,6 @@ import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
@@ -34,7 +34,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class DataSetQueue implements AutoCloseable {
   /**
-   * Name of S3 meta data field used by CCW to comunicate an expected MD5 checksum value for every
+   * Name of S3 meta data field used by CCW to communicate an expected MD5 checksum value for every
    * file they upload to the S3 bucket for processing.
    */
   public static final String MD5_CHECKSUM_META_DATA_FIELD = "md5chksum";
@@ -106,7 +106,7 @@ public class DataSetQueue implements AutoCloseable {
   public List<Manifest> readEligibleManifests(
       Instant currentTimestamp,
       Instant minimumAllowedManifestTimestamp,
-      ThrowingFunction<Boolean, DataSetManifest, IOException> acceptanceCriteria,
+      Predicate<DataSetManifest> acceptanceCriteria,
       int maxToReturn)
       throws IOException {
     try (var ignored1 = appMetrics.timer(TIMER_READ_MANIFESTS).time()) {
@@ -138,7 +138,7 @@ public class DataSetQueue implements AutoCloseable {
         }
 
         // add the manifest to our result list only if caller approves it
-        if (acceptanceCriteria.apply(dataSetManifest)) {
+        if (acceptanceCriteria.test(dataSetManifest)) {
           manifests.add(new Manifest(dataSetManifest, manifestRecord));
         }
       }
@@ -149,15 +149,15 @@ public class DataSetQueue implements AutoCloseable {
   /**
    * Downloads the data file from S3 and confirms its MD5 checksum.
    *
-   * @param record database record corresponding to the entry
+   * @param manifestRecord database record corresponding to the entry
    * @return object containing information about the downloaded file
    * @throws IOException pass through in case of error
    */
-  public ManifestEntry downloadManifestEntry(S3DataFile record) throws IOException {
+  public ManifestEntry downloadManifestEntry(S3DataFile manifestRecord) throws IOException {
     try (var ignored = appMetrics.timer(TIMER_DOWNLOAD_ENTRY).time()) {
-      final var s3Key = record.getS3Key();
+      final var s3Key = manifestRecord.getS3Key();
       final var downloadedFile = downloadFileAndCheckMD5(s3Key);
-      return new ManifestEntry(record, downloadedFile);
+      return new ManifestEntry(manifestRecord, downloadedFile);
     }
   }
 
@@ -165,13 +165,13 @@ public class DataSetQueue implements AutoCloseable {
    * Checks the S3 bucket to see if all of the files corresponding to the manifest's entries exist
    * in the bucket. Does not download any files.
    *
-   * @param record database record corresponding to the manifest
+   * @param manifestRecord database record corresponding to the manifest
    * @return true if bucket contains a file for all of the manifest's entries
    */
-  public boolean allEntriesExistInS3(S3ManifestFile record) {
-    final var manifestS3Prefix = S3FileManager.extractPrefixFromS3Key(record.getS3Key());
+  public boolean allEntriesExistInS3(S3ManifestFile manifestRecord) {
+    final var manifestS3Prefix = S3FileManager.extractPrefixFromS3Key(manifestRecord.getS3Key());
     final var namesAtPrefix = s3Files.fetchKeysWithPrefix(manifestS3Prefix);
-    return record.getDataFiles().stream()
+    return manifestRecord.getDataFiles().stream()
         .map(S3DataFile::getS3Key)
         .allMatch(namesAtPrefix::contains);
   }
@@ -180,40 +180,40 @@ public class DataSetQueue implements AutoCloseable {
    * Updates this manifest's record in the database to reflect that processing of the manifest has
    * been started.
    *
-   * @param record database record corresponding to the manifest
+   * @param manifestRecord database record corresponding to the manifest
    * @throws BadCodeMonkeyException if the entry has already been completely processed
    */
-  public void markAsStarted(S3ManifestFile record) {
-    if (!STARTABLE_MANIFEST_STATUSES.contains(record.getStatus())) {
+  public void markAsStarted(S3ManifestFile manifestRecord) {
+    if (!STARTABLE_MANIFEST_STATUSES.contains(manifestRecord.getStatus())) {
       throw new BadCodeMonkeyException("Attempting to start processing a completed manifest.");
     }
-    record.setStatus(S3ManifestFile.ManifestStatus.STARTED);
-    record.setStatusTimestamp(clock.instant());
-    s3Records.updateS3ManifestAndDataFiles(record);
+    manifestRecord.setStatus(S3ManifestFile.ManifestStatus.STARTED);
+    manifestRecord.setStatusTimestamp(clock.instant());
+    s3Records.updateS3ManifestAndDataFiles(manifestRecord);
   }
 
   /**
    * Updates this manifest's record in the database to reflect that processing of the manifest has
    * been completed successfully.
    *
-   * @param record database record corresponding to the manifest
+   * @param manifestRecord database record corresponding to the manifest
    */
-  public void markAsProcessed(S3ManifestFile record) {
-    record.setStatus(S3ManifestFile.ManifestStatus.COMPLETED);
-    record.setStatusTimestamp(clock.instant());
-    s3Records.updateS3ManifestAndDataFiles(record);
+  public void markAsProcessed(S3ManifestFile manifestRecord) {
+    manifestRecord.setStatus(S3ManifestFile.ManifestStatus.COMPLETED);
+    manifestRecord.setStatusTimestamp(clock.instant());
+    s3Records.updateS3ManifestAndDataFiles(manifestRecord);
   }
 
   /**
    * Updates this manifest's record in the database to reflect that the manifest has been rejected
    * and will not be processed.
    *
-   * @param record database record corresponding to the manifest
+   * @param manifestRecord database record corresponding to the manifest
    */
-  public void markAsRejected(S3ManifestFile record) {
-    record.setStatus(S3ManifestFile.ManifestStatus.REJECTED);
-    record.setStatusTimestamp(clock.instant());
-    s3Records.updateS3ManifestAndDataFiles(record);
+  public void markAsRejected(S3ManifestFile manifestRecord) {
+    manifestRecord.setStatus(S3ManifestFile.ManifestStatus.REJECTED);
+    manifestRecord.setStatusTimestamp(clock.instant());
+    s3Records.updateS3ManifestAndDataFiles(manifestRecord);
   }
 
   /**
@@ -351,9 +351,9 @@ public class DataSetQueue implements AutoCloseable {
    * Data regarding a manifest file that has been downloaded from S3 and tracked in the database.
    *
    * @param manifest the manifest itself parsed from XML
-   * @param record database record that tracks status of the manifest
+   * @param manifestRecord database record that tracks status of the manifest
    */
-  public record Manifest(DataSetManifest manifest, S3ManifestFile record) {}
+  public record Manifest(DataSetManifest manifest, S3ManifestFile manifestRecord) {}
 
   /**
    * Representation of a manifest entry (data file) that has been downloaded from S3 and tracked in
@@ -363,7 +363,7 @@ public class DataSetQueue implements AutoCloseable {
   @AllArgsConstructor
   public class ManifestEntry {
     /** The database record for the data file itself. */
-    private final S3DataFile record;
+    private final S3DataFile dataFileRecord;
 
     /** The cached file. */
     private final DownloadedFile fileData;
@@ -374,7 +374,8 @@ public class DataSetQueue implements AutoCloseable {
      * @return the record id
      */
     public RifFile.RecordId getRifFileRecordId() {
-      return new RifFile.RecordId(record.getParentManifest().getManifestId(), record.getIndex());
+      return new RifFile.RecordId(
+          dataFileRecord.getParentManifest().getManifestId(), dataFileRecord.getIndex());
     }
 
     /**
@@ -410,7 +411,7 @@ public class DataSetQueue implements AutoCloseable {
      * @return true if the entry can be processed, false otherwise
      */
     public boolean isIncomplete() {
-      return STARTABLE_ENTRY_STATUSES.contains(record.getStatus());
+      return STARTABLE_ENTRY_STATUSES.contains(dataFileRecord.getStatus());
     }
 
     /**
@@ -422,9 +423,9 @@ public class DataSetQueue implements AutoCloseable {
       if (!isIncomplete()) {
         throw new BadCodeMonkeyException("Attempting to start processing a completed data file.");
       }
-      record.setStatus(S3DataFile.FileStatus.STARTED);
-      record.setStatusTimestamp(clock.instant());
-      s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
+      dataFileRecord.setStatus(S3DataFile.FileStatus.STARTED);
+      dataFileRecord.setStatusTimestamp(clock.instant());
+      s3Records.updateS3ManifestAndDataFiles(dataFileRecord.getParentManifest());
     }
 
     /**
@@ -436,9 +437,9 @@ public class DataSetQueue implements AutoCloseable {
       if (!isIncomplete()) {
         throw new BadCodeMonkeyException("Attempting to mark a completed data file as completed.");
       }
-      record.setStatus(S3DataFile.FileStatus.COMPLETED);
-      record.setStatusTimestamp(clock.instant());
-      s3Records.updateS3ManifestAndDataFiles(record.getParentManifest());
+      dataFileRecord.setStatus(S3DataFile.FileStatus.COMPLETED);
+      dataFileRecord.setStatusTimestamp(clock.instant());
+      s3Records.updateS3ManifestAndDataFiles(dataFileRecord.getParentManifest());
     }
   }
 }

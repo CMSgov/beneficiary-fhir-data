@@ -523,6 +523,8 @@ public final class PipelineApplication {
      * load process.  The task manager will be automatically closed by the job.
      * TODO The task manager should be removed once s3 file movement is no longer necessary.
      */
+    // Tell SQ it's ok not to use try-finally here since this will be closed by the DataSetQueue.
+    @SuppressWarnings("java:S2095")
     final var s3TaskManager =
         new S3TaskManager(
             loadOptions.getExtractionOptions(),
@@ -537,6 +539,8 @@ public final class PipelineApplication {
     DataSetMonitorListener dataSetMonitorListener =
         new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
     var s3Factory = new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
+    // Tell SQ it's ok not to use try-finally here since this will be closed by the CcwRifLoadJob.
+    @SuppressWarnings("java:S2095")
     var dataSetQueue =
         new DataSetQueue(
             clock,
