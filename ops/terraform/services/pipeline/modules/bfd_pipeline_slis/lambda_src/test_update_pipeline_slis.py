@@ -108,6 +108,9 @@ def _utc_timestamp(date_time: datetime) -> int:
 @mock.patch("update_pipeline_slis.EVENTS_QUEUE_NAME", DEFAULT_MOCK_QUEUE)
 @mock.patch("update_pipeline_slis.METRICS_NAMESPACE", DEFAULT_MOCK_NAMESPACE)
 class TestUpdatePipelineSlisHandler(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff = 10000
+
     def test_it_fails_if_event_is_empty(self):
         # Arrange
         invalid_event = {}
@@ -770,6 +773,103 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
                 if x.event.event_type == PipelineLoadEventType.RIF_AVAILABLE
             ],
         )
+
+    @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
+    @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
+    @mock.patch("update_pipeline_slis._is_pipeline_load_complete", autospec=True)
+    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
+    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
+    def test_it_handles_nonfinal_done_event_with_queue_missing_rif_available_event(
+        self,
+        mock_retrieve_load_event_msgs: mock.Mock,
+        mock_put_metric_data: mock.Mock,
+        mock_load_complete: mock.Mock,
+        mock_incoming_empty: mock.Mock,
+        mock_delete_load_msg: mock.Mock,
+    ):
+        # Arrange
+        rif = RifFileType.DME
+        rif_done_time = DEFAULT_MOCK_EVENT_TIME_DATETIME + timedelta(hours=12)
+        folder = "Done"
+        key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
+        # Queue is intentionally missing RIF_AVAILABLE event indicating when the DME RIF was made
+        # available. This is invalid state, as we should never run into this situation, but _if_ we
+        # do then the Lambda should be able to still generate "data loaded" metrics
+        mocked_queued_events = [
+            PipelineLoadEventMessage(
+                receipt_handle="1",
+                event=PipelineLoadEvent(
+                    event_type=PipelineLoadEventType.LOAD_AVAILABLE,
+                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
+                    rif_type=RifFileType.BENEFICIARY,
+                ),
+            ),
+        ]
+        mock_retrieve_load_event_msgs.side_effect = _gen_mocked_retrieve_load_msgs_side_effect(
+            mocked_queue_contents=mocked_queued_events
+        )
+        mock_load_complete.return_value = False
+        mock_incoming_empty.return_value = False
+
+        # Act
+        with self.assertLogs(level="ERROR") as cm:
+            handler(
+                event=_generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
+                context=None,
+            )
+
+        # Assert
+        self.assertRegex(
+            " ".join(cm.output),
+            _gen_log_regex(
+                log_level="ERROR",
+                log_msg_regex=(
+                    f"No corresponding messages found for {rif.value} RIF in group"
+                    f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
+                    " metrics can be computed for this RIF. Continuing..."
+                ),
+            ),
+        )
+
+        # Assert
+        self.assertCountEqual(
+            _get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
+            [
+                MetricData(
+                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                    date_time=rif_done_time,
+                    value=_utc_timestamp(rif_done_time),
+                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                    dimensions={},
+                ),
+                MetricData(
+                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                    date_time=rif_done_time,
+                    value=_utc_timestamp(rif_done_time),
+                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                    dimensions={"data_type": rif.name.lower()},
+                ),
+                MetricData(
+                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                    date_time=rif_done_time,
+                    value=_utc_timestamp(rif_done_time),
+                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+                ),
+                MetricData(
+                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                    date_time=rif_done_time,
+                    value=_utc_timestamp(rif_done_time),
+                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                    dimensions={
+                        "data_type": rif.name.lower(),
+                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                    },
+                ),
+            ],
+        )
+        self.assertEqual(mock_delete_load_msg.call_count, 0)
 
     @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
     @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
