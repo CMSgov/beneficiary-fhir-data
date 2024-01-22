@@ -16,7 +16,7 @@ class PipelineLoadEventType(str, Enum):
     RIF_AVAILABLE = "RIF_AVAILABLE"
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class PipelineLoadEvent:
     event_type: PipelineLoadEventType
     date_time: datetime
@@ -24,13 +24,13 @@ class PipelineLoadEvent:
     rif_type: RifFileType
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class PipelineLoadEventMessage:
     receipt_handle: str
     event: PipelineLoadEvent
 
     def __str__(self) -> str:
-        return json.dumps(asdict(self))
+        return json.dumps(asdict(self), default=str)
 
 
 class MessageFailedToDeleteException(Exception):
