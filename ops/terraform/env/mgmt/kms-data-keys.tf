@@ -1,8 +1,10 @@
 # Environment data keys for the current region. Note: During a failover event, the alt keys and aliases will need to be
-# imported (`terraform import aws_kms_key.data_keys["test"] <key_arn>; terraform import aws_kms_alias.data_keys["prod"]
-# <key_arn>, etc..).
+# imported (`terraform import aws_kms_key.data_keys["test"] <key_arn>`, terraform import aws_kms_alias.data_keys["prod"]
+# <key_arn>, etc..).Alternatively you can import by  enclosing the resource address in single quotes imported
+# (`terraform import 'aws_kms_key.data_keys["test"]' <key_arn>`,
+# terraform import 'aws_kms_alias.data_keys["prod"]' <key_arn>, etc..).
 resource "aws_kms_key" "data_keys" {
-  for_each = toset(local.established_envs)
+  for_each = toset(concat(local.established_envs, ["mgmt"]))
 
   description                        = "Data key for the ${local.region} ${each.key} environment."
   enable_key_rotation                = true
@@ -23,34 +25,10 @@ resource "aws_kms_key" "data_keys" {
 
 # alias
 resource "aws_kms_alias" "data_keys" {
-  for_each = toset(local.established_envs)
+  for_each = toset(concat(local.established_envs, ["mgmt"]))
 
   name          = "alias/bfd-${each.key}-cmk"
   target_key_id = aws_kms_key.data_keys[each.key].arn
-}
-
-resource "aws_kms_key" "bfd_mgmt_cmk" {
-
-  description                        = "Data key for the ${local.region} mgmt environment."
-  enable_key_rotation                = true
-  bypass_policy_lockout_safety_check = false
-  deletion_window_in_days            = local.kms_default_deletion_window_days
-
-  policy = data.aws_iam_policy_document.primary_data_key_policy_combined.json
-
-  tags = {
-    env = mgmt
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-# alias
-resource "aws_kms_alias" "bfd_mgmt_cmk" {
-  name          = "alias/bfd-mgmt-cmk"
-  target_key_id = aws_kms_key.bfd_mgmt_cmk["mgmt"].arn
 }
 
 # Alt region keys. Note: These keys were originally created by the CPM team during the initial setup of BFD. We imported
