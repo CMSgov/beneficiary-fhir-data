@@ -1,5 +1,8 @@
+# pylint: disable=missing-class-docstring,missing-function-docstring,missing-module-docstring
+# pylint: disable=too-many-lines,too-many-arguments,too-many-public-methods
 import calendar
 import json
+import logging
 import unittest
 from datetime import datetime, timedelta, timezone
 from typing import Any, Protocol
@@ -25,6 +28,7 @@ DEFAULT_MOCK_NAMESPACE = "mock-namespace"
 
 mock_boto3_client = mock.Mock()
 mock_boto3_resource = mock.Mock()
+mock_lambda_context = mock.Mock()
 
 
 def generate_event(
@@ -53,8 +57,8 @@ def generate_event(
     }
 
 
-def gen_log_regex(log_msg_regex: str, log_level: str = "ERROR") -> str:
-    return rf"(?m){log_level}:\w+:{log_msg_regex}"
+def gen_log_regex(log_msg_regex: str) -> str:
+    return rf"(?m)(DEBUG|INFO|WARNING|ERROR):\w+:{log_msg_regex}"
 
 
 class MockedRetrieveLoadMsgs(Protocol):
@@ -109,6 +113,7 @@ def utc_timestamp(date_time: datetime) -> int:
 @mock.patch("update_pipeline_slis.METRICS_NAMESPACE", DEFAULT_MOCK_NAMESPACE)
 class TestUpdatePipelineSlisHandler(unittest.TestCase):
     def setUp(self):
+        # pylint: disable=invalid-name
         self.maxDiff = 10000
 
     def test_it_fails_if_event_is_empty(self):
@@ -116,43 +121,50 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_event = {}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), gen_log_regex("The incoming event was invalid"))
+        self.assertRegex(
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
+        )
 
     def test_it_fails_if_event_is_wrong_type(self):
         # Arrange
         invalid_event = ""
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
-                event=invalid_event,
-                context=None,
+                event=invalid_event,  # type: ignore
+                context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), gen_log_regex("The incoming event was invalid"))
+        self.assertRegex(
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
+        )
 
     def test_it_fails_if_event_has_no_records(self):
         # Arrange
         invalid_event: dict[str, list[Any]] = {"Records": []}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), gen_log_regex("Invalid event notification, no records found")
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_event_records_is_wrong_type(self):
@@ -160,15 +172,16 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_event = {"Records": ""}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), gen_log_regex("Invalid event notification, no records found")
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_event_records_is_str_list(self):
@@ -176,99 +189,118 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_event = {"Records": [""]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), gen_log_regex("Event record or SNS Message invalid"))
+        self.assertRegex(
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
+        )
 
     def test_it_fails_if_event_records_sns_missing(self):
         # Arrange
         invalid_event = {"Records": [{"OtherKey": ""}]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), gen_log_regex("No message found in SNS notification"))
+        self.assertRegex(
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
+        )
 
     def test_it_fails_if_event_records_sns_message_missing(self):
         # Arrange
         invalid_event = {"Records": [{"Sns": {"OtherKey": ""}}]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), gen_log_regex("No message found in SNS notification"))
+        self.assertRegex(
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
+        )
 
     def test_it_fails_if_event_records_sns_message_invalid_json(self):
         # Arrange
         invalid_event = {"Records": [{"Sns": {"Message": "invalid"}}]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), gen_log_regex("SNS message body was not valid JSON"))
+        self.assertRegex(
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
+        )
 
     def test_it_fails_if_event_records_sns_message_wrong_type(self):
         # Arrange
         invalid_event = {"Records": [{"Sns": {"Message": {"NotJsonStr": ""}}}]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), gen_log_regex("Event record or SNS Message invalid"))
+        self.assertRegex(
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
+        )
 
     def test_it_fails_if_event_records_sns_message_records_missing(self):
         # Arrange
         invalid_event = {"Records": [{"Sns": {"Message": "{}"}}]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(" ".join(cm.output), gen_log_regex("Invalid S3 event, no records found"))
+        self.assertRegex(
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
+        )
 
     def test_it_fails_if_event_records_sns_message_records_empty(self):
         # Arrange
         invalid_event = {"Records": [{"Sns": {"Message": '{"Records":[]}'}}]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), gen_log_regex("Invalid event notification, no records found")
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_event_records_sns_message_records_wrong_type(self):
@@ -276,15 +308,16 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_event = {"Records": [{"Sns": {"Message": '{"Records":""}'}}]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), gen_log_regex("Invalid event notification, no records found")
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_s3_event_missing(self):
@@ -292,16 +325,16 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_event = {"Records": [{"Sns": {"Message": '{"Records":[{}]}'}}]}
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            gen_log_regex("The incoming event record did not contain the type of S3 event"),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_s3_event_is_unknown(self):
@@ -310,16 +343,16 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_event_name = "invalid"
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=generate_event(key=key, event_name=invalid_event_name),
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            gen_log_regex(f"Event type {invalid_event_name} is unsupported. Exiting..."),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_s3_event_time_missing(self):
@@ -335,16 +368,16 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         }
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            gen_log_regex('Record did not contain any key with "eventTime"'),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_s3_event_time_is_invalid(self):
@@ -353,15 +386,16 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_event_time = "24-01-19T00:00:00Z"
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=generate_event(key=key, event_time_iso=invalid_event_time),
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
-            " ".join(cm.output), gen_log_regex("Event timestamp was not in valid ISO format")
+            " ".join(cm.output),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_s3_object_key_is_missing(self):
@@ -387,16 +421,16 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         }
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.ERROR) as cm:
             handler(
                 event=invalid_event,
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
-            gen_log_regex("No bucket file found in event notification"),
+            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
         )
 
     def test_it_fails_if_key_not_incoming_or_done(self):
@@ -404,10 +438,10 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_key = f"{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt"
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.WARNING) as cm:
             handler(
                 event=generate_event(key=invalid_key),
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
@@ -423,10 +457,10 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         invalid_key = f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/unknown_1234.txt"
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.WARNING) as cm:
             handler(
                 event=generate_event(key=invalid_key),
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
@@ -453,7 +487,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_retrieve_load_event_msgs.return_value = []
 
         # Act
-        handler(event=generate_event(key=key), context=None)
+        handler(event=generate_event(key=key), context=mock_lambda_context)
 
         # Assert
         # We put metrics for the RIF dimensioned by group and its data type, metrics for the
@@ -576,7 +610,10 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         )
 
         # Act
-        handler(event=generate_event(key=key, event_time_iso=event_time.isoformat()), context=None)
+        handler(
+            event=generate_event(key=key, event_time_iso=event_time.isoformat()),
+            context=mock_lambda_context,
+        )
 
         # Assert
         # We put metrics for the RIF dimensioned by group and its data type. No metrics
@@ -679,20 +716,18 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = False
 
         # Act
-        with self.assertLogs(level="INFO") as cm:
+        with self.assertLogs(level=logging.INFO) as cm:
             handler(
-                event=generate_event(key=key, event_time_iso=event_time.isoformat()), context=None
+                event=generate_event(key=key, event_time_iso=event_time.isoformat()),
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
             gen_log_regex(
-                log_level="INFO",
-                log_msg_regex=(
-                    f"Not all files have yet to be loaded for group {DEFAULT_MOCK_GROUP_ISO_STR}."
-                    " Data load is not complete. Stopping..."
-                ),
+                f"Not all files have yet to be loaded for group {DEFAULT_MOCK_GROUP_ISO_STR}."
+                " Data load is not complete. Stopping...",
             ),
         )
         self.assertCountEqual(
@@ -810,22 +845,19 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = False
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level="WARNING") as cm:
             handler(
                 event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
             gen_log_regex(
-                log_level="ERROR",
-                log_msg_regex=(
-                    f"No corresponding messages found for {rif.value} RIF in group"
-                    f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
-                    " metrics can be computed for this RIF. Continuing..."
-                ),
+                f"No corresponding messages found for {rif.value} RIF in group"
+                f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
+                " metrics can be computed for this RIF. Continuing..."
             ),
         )
         self.assertCountEqual(
@@ -918,7 +950,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Act
         handler(
             event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
-            context=None,
+            context=mock_lambda_context,
         )
 
         # Assert
@@ -1071,22 +1103,19 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = True
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.WARNING) as cm:
             handler(
                 event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
             gen_log_regex(
-                log_level="ERROR",
-                log_msg_regex=(
-                    f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found"
-                    f" for group {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no"
-                    " time delta metrics can be computed for this data load"
-                ),
+                f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found"
+                f" for group {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no"
+                " time delta metrics can be computed for this data load",
             ),
         )
         self.assertCountEqual(
@@ -1224,22 +1253,19 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = True
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.WARNING) as cm:
             handler(
                 event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
             gen_log_regex(
-                log_level="ERROR",
-                log_msg_regex=(
-                    f"No corresponding messages found for {rif.value} RIF in group"
-                    f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
-                    " metrics can be computed for this RIF. Continuing..."
-                ),
+                f"No corresponding messages found for {rif.value} RIF in group"
+                f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
+                " metrics can be computed for this RIF. Continuing...",
             ),
         )
         self.assertCountEqual(
@@ -1346,33 +1372,27 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = True
 
         # Act
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level=logging.WARNING) as cm:
             handler(
                 event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
-                context=None,
+                context=mock_lambda_context,
             )
 
         # Assert
         self.assertRegex(
             " ".join(cm.output),
             gen_log_regex(
-                log_level="ERROR",
-                log_msg_regex=(
-                    f"No corresponding messages found for {rif.value} RIF in group"
-                    f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
-                    " metrics can be computed for this RIF. Continuing..."
-                ),
+                f"No corresponding messages found for {rif.value} RIF in group"
+                f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
+                " metrics can be computed for this RIF. Continuing...",
             ),
         )
         self.assertRegex(
             " ".join(cm.output),
             gen_log_regex(
-                log_level="ERROR",
-                log_msg_regex=(
-                    f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found"
-                    f" for group {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no"
-                    " time delta metrics can be computed for this data load"
-                ),
+                f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found"
+                f" for group {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no"
+                " time delta metrics can be computed for this data load",
             ),
         )
         self.assertCountEqual(
