@@ -79,6 +79,7 @@ resource "aws_lambda_function" "this" {
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
+  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:60"]
   timeout          = 300
   environment {
     variables = {
@@ -89,6 +90,14 @@ resource "aws_lambda_function" "this" {
   }
 
   role = aws_iam_role.lambda[local.lambda_update_slis].arn
+}
+
+resource "aws_lambda_function_event_invoke_config" "this" {
+  function_name = aws_lambda_function.this.function_name
+  # This Lambda is invoked by SNS, which invokes the Lambda asynchronously. By default, AWS Lambda
+  # retries failing Functions twice before dropping the event, but because this Lambda has side
+  # effects (creates metrics, posts events to a queue, etc.) we don't want to retry if it fails.
+  maximum_retry_attempts = 0
 }
 
 resource "aws_sqs_queue" "this" {

@@ -8,6 +8,10 @@ boto3-stubs[sqs,cloudwatch,s3]
 # respect to developing Lambda functions. It is not included in the default runtime, but Amazon
 # provides a Lambda Layer in all Regions that the update-pipeline-slis Lambda uses that includes it
 aws-lambda-powertools[all]
+# While Python has built-in support for unit testing via unittest, pytest is far "pythonic", has
+# better assertion messages, and has better support for common testing patterns like 
+# parameterization
+pytest
 isort
 black
 pylint

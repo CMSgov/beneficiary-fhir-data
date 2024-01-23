@@ -560,34 +560,37 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
 
 
 def handler(event: dict[Any, Any], context: LambdaContext):
-    try:
-        if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, EVENTS_QUEUE_NAME]):
-            raise RuntimeError("Not all necessary environment variables were defined")
+    # The Lambda this handler is defined for is invoked asynchronously, so by default AWS retries
+    # any failing invocations twice before dropping the event. This handler has side effects, so
+    # this default has been lowered to 0 such that if the function fails it does not attempt to
+    # retry. This is why this handler, and the functions it calls, raise exceptions that are not
+    # explicitly handled.
+    # See https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html#invocation-async-errors
+    if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, EVENTS_QUEUE_NAME]):
+        raise RuntimeError("Not all necessary environment variables were defined")
 
-        sns_event = SNSEvent(event)
-        if next(sns_event.records, None) is None:
-            raise ValueError(f"Invalid SNS event {sns_event.raw_event}; empty records")
+    sns_event = SNSEvent(event)
+    if next(sns_event.records, None) is None:
+        raise ValueError(f"Invalid SNS event {sns_event.raw_event}; empty records")
 
-        for sns_record in sns_event.records:
-            s3_event = S3Event(json.loads(sns_record.sns.message))
-            if next(s3_event.records, None) is None:
-                raise ValueError(f"Invalid inner S3 event {s3_event.raw_event}; empty records")
+    for sns_record in sns_event.records:
+        s3_event = S3Event(json.loads(sns_record.sns.message))
+        if next(s3_event.records, None) is None:
+            raise ValueError(f"Invalid inner S3 event {s3_event.raw_event}; empty records")
 
-            for s3_record in s3_event.records:
-                s3_event_time = datetime.fromisoformat(
-                    s3_record.event_time.removesuffix("Z")
-                ).astimezone(tz=timezone.utc)
-                s3_object_key = unquote(s3_record.s3.get_object.key)
+        for s3_record in s3_event.records:
+            s3_event_time = datetime.fromisoformat(
+                s3_record.event_time.removesuffix("Z")
+            ).astimezone(tz=timezone.utc)
+            s3_object_key = unquote(s3_record.s3.get_object.key)
 
-                # Log the various bits of data extracted from the invoking event to aid debugging:
-                logger.info("Invoked at: %s UTC", datetime.utcnow().isoformat())
-                logger.info("S3 Object Key: %s", s3_object_key)
-                logger.info(
-                    "S3 Event Type: %s, Specific Event Name: %s",
-                    S3EventType.from_event_name(s3_record.event_name).name,
-                    s3_record.event_name,
-                )
+            # Log the various bits of data extracted from the invoking event to aid debugging:
+            logger.info("Invoked at: %s UTC", datetime.utcnow().isoformat())
+            logger.info("S3 Object Key: %s", s3_object_key)
+            logger.info(
+                "S3 Event Type: %s, Specific Event Name: %s",
+                S3EventType.from_event_name(s3_record.event_name).name,
+                s3_record.event_name,
+            )
 
-                _handle_s3_event(s3_event_time=s3_event_time, s3_object_key=s3_object_key)
-    except Exception:
-        logger.error("An unrecoverable exception occurred upon Lambda invocation", exc_info=True)
+            _handle_s3_event(s3_event_time=s3_event_time, s3_object_key=s3_object_key)

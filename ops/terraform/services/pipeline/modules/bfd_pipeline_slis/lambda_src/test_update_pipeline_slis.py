@@ -116,73 +116,51 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # pylint: disable=invalid-name
         self.maxDiff = 10000
 
+    @parameterized.expand([(None, TypeError), ("", TypeError), ({"Records": []}, ValueError)])
+    def test_it_raises_exception_if_event_is_invalid(self, event: Any, expected_error: Exception):
+        with self.assertRaises(expected_error):
+            handler(event=event, context=mock_lambda_context)
+
     def test_it_fails_if_event_is_empty(self):
         # Arrange
         invalid_event = {}
 
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
+        # Act & Assert
+        with self.assertRaises(KeyError):
+            handler(event=invalid_event, context=mock_lambda_context)
 
     def test_it_fails_if_event_is_wrong_type(self):
         # Arrange
         invalid_event = ""
 
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
+        # Act & Assert
+        with self.assertRaises(TypeError):
             handler(
                 event=invalid_event,  # type: ignore
                 context=mock_lambda_context,
             )
 
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
     def test_it_fails_if_event_has_no_records(self):
         # Arrange
         invalid_event: dict[str, list[Any]] = {"Records": []}
 
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
+        # Act & Assert
+        with self.assertRaises(ValueError):
             handler(
                 event=invalid_event,
                 context=mock_lambda_context,
             )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
 
     def test_it_fails_if_event_records_is_wrong_type(self):
         # Arrange
         invalid_event = {"Records": ""}
 
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
+        # Act & Assert
+        with self.assertRaises(ValueError):
             handler(
                 event=invalid_event,
                 context=mock_lambda_context,
             )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
 
     def test_it_fails_if_event_records_is_str_list(self):
         # Arrange
