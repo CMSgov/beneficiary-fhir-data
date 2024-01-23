@@ -16,6 +16,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.spark.util.sketch.BloomFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public class LoadedFilterManager {
   private EntityManager entityManager;
 
   /** The filter set. */
-  private List<LoadedFileFilter> filters;
+  @Getter private List<LoadedFileFilter> filters;
 
   /** The latest transaction time from the LoadedBatch files. */
   private Instant transactionTime;
@@ -52,6 +54,8 @@ public class LoadedFilterManager {
    * A tuple of values: LoadedFile.loadedFileid, LoadedFile.created, max(LoadedBatch.created). Used
    * for an optimized query that includes only what is needed to refresh filters.
    */
+  @Getter
+  @AllArgsConstructor
   public static class LoadedTuple {
     /** The id for the loaded file. */
     private long loadedFileId;
@@ -61,60 +65,11 @@ public class LoadedFilterManager {
 
     /** The load end time for the loaded file. */
     private Instant lastUpdated;
-
-    /**
-     * Instantiates a new loaded tuple.
-     *
-     * @param loadedFileId the loaded file id
-     * @param firstUpdated the load start time
-     * @param lastUpdated the load end time
-     */
-    public LoadedTuple(long loadedFileId, Instant firstUpdated, Instant lastUpdated) {
-      this.loadedFileId = loadedFileId;
-      this.firstUpdated = firstUpdated;
-      this.lastUpdated = lastUpdated;
-    }
-
-    /**
-     * Gets the {@link #loadedFileId}.
-     *
-     * @return the loaded file id
-     */
-    public long getLoadedFileId() {
-      return loadedFileId;
-    }
-
-    /**
-     * Gets the {@link #firstUpdated}.
-     *
-     * @return the first updated
-     */
-    public Instant getFirstUpdated() {
-      return firstUpdated;
-    }
-
-    /**
-     * Gets the {@link #lastUpdated}.
-     *
-     * @return the last updated
-     */
-    public Instant getLastUpdated() {
-      return lastUpdated;
-    }
   }
 
   /** Create a manager for {@link LoadedFileFilter}s. */
   public LoadedFilterManager() {
     this.filters = new ArrayList<>();
-  }
-
-  /**
-   * Gets the {@link #filters}.
-   *
-   * @return the list of current filters. Newest first.
-   */
-  public List<LoadedFileFilter> getFilters() {
-    return filters;
   }
 
   /**
