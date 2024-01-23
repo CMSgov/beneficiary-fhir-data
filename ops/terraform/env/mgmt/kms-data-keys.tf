@@ -13,10 +13,11 @@ resource "aws_kms_key" "data_keys" {
 
   policy = data.aws_iam_policy_document.primary_data_key_policy_combined.json
 
-  tags = {
+  # Ensure mgmt definition doesn't conflict with identical default_tags with conditional
+  tags = each.key != "mgmt" ? {
     Environment = each.key
     stack       = each.key
-  }
+  } : {}
 
   lifecycle {
     prevent_destroy = true
