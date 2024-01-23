@@ -166,10 +166,10 @@ try {
 					migratorScripts = load('ops/terraform/services/migrator/deploy.groovy')
 					serverScripts = load('ops/terraform/services/server/deploy.groovy')
 
-					awsAuth.assumeRole()
+					/* awsAuth.assumeRole()
 
 					// Find the most current AMI IDs (if any).
-					amiIds = scriptForDeploys.findAmis(gitBranchName)
+					amiIds = scriptForDeploys.findAmis(gitBranchName) */
 
 					// This variables track our decision on whether or not to deploy to prod-like envs.
 					canDeployToProdEnvs = false
@@ -180,18 +180,18 @@ try {
 					}
 					willDeployToProdEnvs = false
 
-					// Get the current commit id
+					/* // Get the current commit id
 					gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
 					// Get the remote repo url. This assumes we are using git+https not git+ssh.
 					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
 					// Send notifications that the build has started
-					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl) */
 				}
 			}
 
-			stage('Fetch Apps') {
+			/* stage('Fetch Apps') {
 				if (!params.use_latest_images) {
 					currentStage = env.STAGE_NAME
 					milestone(label: 'stage_fetch_app_start')
@@ -211,10 +211,10 @@ try {
 						amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appFetchResults)
 					}
 				}
-			}
+			} */
 
 			bfdEnv = 'test'
-			stage('Deploy Base to TEST') {
+			/*stage('Deploy Base to TEST') {
 				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_base_start')
@@ -254,9 +254,9 @@ try {
 						)
 					}
 				}
-			}
+			} */
 
-			stage('Deploy Migrator to TEST') {
+			/* stage('Deploy Migrator to TEST') {
 				currentStage = env.STAGE_NAME
 				lock(resource: 'env_test') {
 					milestone(label: 'stage_deploy_test_migration_start')
@@ -294,7 +294,7 @@ try {
 						)
 					}
 				}
-			}
+			} */
 
 			stage('Deploy Server to TEST') {
 				currentStage = env.STAGE_NAME
@@ -302,7 +302,7 @@ try {
 					milestone(label: 'stage_deploy_test_start')
 
 					container('bfd-cbc-build') {
-						awsAuth.assumeRole()
+						/* awsAuth.assumeRole()
 						terraform.deployTerraservice(
 							env: bfdEnv,
 							directory: "ops/terraform/services/server",
@@ -325,13 +325,13 @@ try {
 						terraform.deployTerraservice(
 							env: bfdEnv,
 							directory: "ops/terraform/services/server/insights/api-requests"
-						)
+						) */
 
 						awsAuth.assumeRole()
 						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
 							gitBranchName: gitBranchName,
-							isRelease: canDeployToProdEnvs
+							isRelease: true
 						)
 
 						if (hasRegressionRunSucceeded) {
@@ -377,7 +377,7 @@ try {
 			}
 
 			bfdEnv = 'prod-sbx'
-			stage('Deploy Base to PROD-SBX') {
+			/* stage('Deploy Base to PROD-SBX') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod_sbx') {
@@ -460,7 +460,7 @@ try {
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
 				}
-			}
+			} */
 
 			stage('Deploy Server to PROD-SBX') {
 				currentStage = env.STAGE_NAME
@@ -468,7 +468,7 @@ try {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_start')
 						container('bfd-cbc-build') {
-							awsAuth.assumeRole()
+							/* awsAuth.assumeRole()
 							terraform.deployTerraservice(
 								env: bfdEnv,
 								directory: "ops/terraform/services/server",
@@ -491,13 +491,13 @@ try {
 							terraform.deployTerraservice(
 								env: bfdEnv,
 								directory: "ops/terraform/services/server/insights/api-requests"
-							)
+							) */
 
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
 								gitBranchName: gitBranchName,
-								isRelease: canDeployToProdEnvs
+								isRelease: true
 							)
 
 							if (hasRegressionRunSucceeded) {
@@ -519,7 +519,7 @@ try {
 
 
 			bfdEnv = 'prod'
-			stage('Deploy Base to PROD') {
+			/* stage('Deploy Base to PROD') {
 				currentStage = env.STAGE_NAME
 				if (willDeployToProdEnvs) {
 					lock(resource: 'env_prod') {
@@ -617,7 +617,7 @@ try {
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 				}
-			}
+			} */
 
 
 			stage('Deploy Server to PROD') {
@@ -627,7 +627,7 @@ try {
 						milestone(label: 'stage_deploy_prod_start')
 
 						container('bfd-cbc-build') {
-							awsAuth.assumeRole()
+							/* awsAuth.assumeRole()
 							terraform.deployTerraservice(
 								env: bfdEnv,
 								directory: "ops/terraform/services/server",
@@ -650,13 +650,13 @@ try {
 							terraform.deployTerraservice(
 								env: bfdEnv,
 								directory: "ops/terraform/services/server/insights/api-requests"
-							)
+							) */
 
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
 								gitBranchName: gitBranchName,
-								isRelease: canDeployToProdEnvs
+								isRelease: true
 							)
 
 							if (hasRegressionRunSucceeded) {
