@@ -78,7 +78,7 @@ bfd:
           logs: /opt/bfd-db-migrator
           tmp: /opt/bfd-db-migrator/tmp
         files:
-          launcher_script: /opt/bfd-db-migrator/bfd-db-migrator-1.0.0-SNAPSHOT/bfd-db-migrator.sh
+          launcher_script: UNDEFINED
           launcher_log: /opt/bfd-db-migrator/migrator-log.json
       java:
         app_main_class: "gov.cms.bfd.migrator.app.MigratorApp"
@@ -121,7 +121,7 @@ bfd:
       env_name: *env_name
       paths:
         files:
-          launcher_script: /bluebutton-data-pipeline/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh
+          launcher_script: UNDEFINED
           launcher_log: /bluebutton-data-pipeline/bluebutton-data-pipeline.log
         dirs:
           tmp: /bluebutton-data-pipeline/tmp
@@ -291,8 +291,8 @@ bfd:
         files:
           keystore: /usr/local/bfd-server/bluebutton-appserver-keystore.pfx
           truststore: /usr/local/bfd-server/bluebutton-appserver-truststore.pfx
-          war: /usr/local/bfd-server/basename('bfd-server-war-1.0.0-SNAPSHOT.war')
-          launcher_script: "bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh"
+          war: UNDEFINED
+          launcher_script: UNDEFINED
           new_relic_agent_jar: /usr/local/bfd-server/newrelic/newrelic.jar
           launcher_log: /usr/local/bfd-server/bluebutton-server-app-log.json
       jboss:
@@ -508,7 +508,7 @@ dpc:
         # each filename pattern in this list, and if any match, will be sent via CMS EFT SWEEPS SFTP
         # 2.0 to the corresponding, specified destination folder. If there are no matches, the file
         # will be moved to the "failed_dir", and corresponding S3 Event Notifications will be
-        # generated. 
+        # generated.
         # A recognized file object takes the following form, in JSON:
         # {
         #   "filename_pattern": "<regex string matching filename pattern>",
@@ -573,7 +573,7 @@ bcda:
         # each filename pattern in this list, and if any match, will be sent via CMS EFT SWEEPS SFTP
         # 2.0 to the corresponding, specified destination folder. If there are no matches, the file
         # will be moved to the "failed_dir", and corresponding S3 Event Notifications will be
-        # generated. 
+        # generated.
         # A recognized file object takes the following form, in JSON:
         # {
         #   "filename_pattern": "<regex string matching filename pattern>",
@@ -645,7 +645,7 @@ ab2d:
         # each filename pattern in this list, and if any match, will be sent via CMS EFT SWEEPS SFTP
         # 2.0 to the corresponding, specified destination folder. If there are no matches, the file
         # will be moved to the "failed_dir", and corresponding S3 Event Notifications will be
-        # generated. 
+        # generated.
         # A recognized file object takes the following form, in JSON:
         # {
         #   "filename_pattern": "<regex string matching filename pattern>",
