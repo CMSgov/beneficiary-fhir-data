@@ -62,6 +62,11 @@ spec:
         }
     }
 
+    // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
+    triggers {
+        cron('*/10 * * * *')
+    }
+
     environment {
         SONAR_PROJECT_KEY = 'bfd-parent'
         SONAR_HOST_URL = 'https://sonarqube.cloud.cms.gov'
