@@ -3,10 +3,11 @@
 import calendar
 import json
 import logging
-import unittest
 from datetime import datetime, timedelta, timezone
-from typing import Any, Protocol
+from typing import Any, Protocol, Type
 from unittest import mock
+
+import pytest
 
 from common import PipelineMetric, RifFileType
 from cw_metrics import MetricData
@@ -111,343 +112,107 @@ def utc_timestamp(date_time: datetime) -> int:
 @mock.patch("update_pipeline_slis.ETL_BUCKET_ID", DEFAULT_MOCK_BUCKET)
 @mock.patch("update_pipeline_slis.EVENTS_QUEUE_NAME", DEFAULT_MOCK_QUEUE)
 @mock.patch("update_pipeline_slis.METRICS_NAMESPACE", DEFAULT_MOCK_NAMESPACE)
-class TestUpdatePipelineSlisHandler(unittest.TestCase):
-    def setUp(self):
-        # pylint: disable=invalid-name
-        self.maxDiff = 10000
-
-    @parameterized.expand([(None, TypeError), ("", TypeError), ({"Records": []}, ValueError)])
-    def test_it_raises_exception_if_event_is_invalid(self, event: Any, expected_error: Exception):
-        with self.assertRaises(expected_error):
+class TestUpdatePipelineSlisHandler:
+    @pytest.mark.parametrize(
+        "event,expected_error",
+        [
+            (None, TypeError),
+            ("", TypeError),
+            ({"Records": []}, ValueError),
+            ({"Records": ""}, ValueError),
+            ({"Records": [""]}, TypeError),
+            ({"Records": [{"OtherKey": ""}]}, KeyError),
+            ({"Records": [{"Sns": {"OtherKey": ""}}]}, KeyError),
+            ({"Records": [{"Sns": {"Message": "invalid"}}]}, ValueError),
+            ({"Records": [{"Sns": {"Message": {"NotJsonStr": ""}}}]}, TypeError),
+            ({"Records": [{"Sns": {"Message": "{}"}}]}, KeyError),
+            ({"Records": [{"Sns": {"Message": '{"Records":[]}'}}]}, ValueError),
+            ({"Records": [{"Sns": {"Message": '{"Records":""}'}}]}, ValueError),
+            ({"Records": [{"Sns": {"Message": '{"Records":[{}]}'}}]}, KeyError),
+            (
+                generate_event(
+                    key=f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt", event_name="invalid"
+                ),
+                ValueError,
+            ),
+            (
+                {
+                    "Records": [
+                        {
+                            "Sns": {
+                                "Message": json.dumps(
+                                    {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
+                                )
+                            }
+                        }
+                    ]
+                },
+                KeyError,
+            ),
+            (
+                generate_event(
+                    key=f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt",
+                    event_time_iso="24-01-19T00:00:00Z",
+                ),
+                ValueError,
+            ),
+            (
+                {
+                    "Records": [
+                        {
+                            "Sns": {
+                                "Message": json.dumps(
+                                    {
+                                        "Records": [
+                                            {
+                                                "eventName": DEFAULT_MOCK_EVENT_NAME,
+                                                "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
+                                                "s3": {"object": {}},
+                                            }
+                                        ]
+                                    }
+                                )
+                            }
+                        }
+                    ]
+                },
+                KeyError,
+            ),
+        ],
+    )
+    def test_it_raises_exception_if_event_is_invalid(
+        self, event: Any, expected_error: Type[Exception]
+    ):
+        with pytest.raises(expected_error):
             handler(event=event, context=mock_lambda_context)
 
-    def test_it_fails_if_event_is_empty(self):
-        # Arrange
-        invalid_event = {}
-
-        # Act & Assert
-        with self.assertRaises(KeyError):
-            handler(event=invalid_event, context=mock_lambda_context)
-
-    def test_it_fails_if_event_is_wrong_type(self):
-        # Arrange
-        invalid_event = ""
-
-        # Act & Assert
-        with self.assertRaises(TypeError):
-            handler(
-                event=invalid_event,  # type: ignore
-                context=mock_lambda_context,
-            )
-
-    def test_it_fails_if_event_has_no_records(self):
-        # Arrange
-        invalid_event: dict[str, list[Any]] = {"Records": []}
-
-        # Act & Assert
-        with self.assertRaises(ValueError):
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-    def test_it_fails_if_event_records_is_wrong_type(self):
-        # Arrange
-        invalid_event = {"Records": ""}
-
-        # Act & Assert
-        with self.assertRaises(ValueError):
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-    def test_it_fails_if_event_records_is_str_list(self):
-        # Arrange
-        invalid_event = {"Records": [""]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_event_records_sns_missing(self):
-        # Arrange
-        invalid_event = {"Records": [{"OtherKey": ""}]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_event_records_sns_message_missing(self):
-        # Arrange
-        invalid_event = {"Records": [{"Sns": {"OtherKey": ""}}]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_event_records_sns_message_invalid_json(self):
-        # Arrange
-        invalid_event = {"Records": [{"Sns": {"Message": "invalid"}}]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_event_records_sns_message_wrong_type(self):
-        # Arrange
-        invalid_event = {"Records": [{"Sns": {"Message": {"NotJsonStr": ""}}}]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_event_records_sns_message_records_missing(self):
-        # Arrange
-        invalid_event = {"Records": [{"Sns": {"Message": "{}"}}]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_event_records_sns_message_records_empty(self):
-        # Arrange
-        invalid_event = {"Records": [{"Sns": {"Message": '{"Records":[]}'}}]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_event_records_sns_message_records_wrong_type(self):
-        # Arrange
-        invalid_event = {"Records": [{"Sns": {"Message": '{"Records":""}'}}]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_s3_event_missing(self):
-        # Arrange
-        invalid_event = {"Records": [{"Sns": {"Message": '{"Records":[{}]}'}}]}
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_s3_event_is_unknown(self):
-        # Arrange
-        key = f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt"
-        invalid_event_name = "invalid"
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=generate_event(key=key, event_name=invalid_event_name),
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_s3_event_time_missing(self):
-        # Arrange
-        invalid_event = {
-            "Records": [
-                {
-                    "Sns": {
-                        "Message": json.dumps({"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]})
-                    }
-                }
-            ]
-        }
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_s3_event_time_is_invalid(self):
-        # Arrange
-        key = f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt"
-        invalid_event_time = "24-01-19T00:00:00Z"
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=generate_event(key=key, event_time_iso=invalid_event_time),
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_s3_object_key_is_missing(self):
-        # Arrange
-        invalid_event = {
-            "Records": [
-                {
-                    "Sns": {
-                        "Message": json.dumps(
-                            {
-                                "Records": [
-                                    {
-                                        "eventName": DEFAULT_MOCK_EVENT_NAME,
-                                        "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
-                                        "s3": {"object": {}},
-                                    }
-                                ]
-                            }
-                        )
-                    }
-                }
-            ]
-        }
-
-        # Act
-        with self.assertLogs(level=logging.ERROR) as cm:
-            handler(
-                event=invalid_event,
-                context=mock_lambda_context,
-            )
-
-        # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex("An unrecoverable exception occurred upon Lambda invocation"),
-        )
-
-    def test_it_fails_if_key_not_incoming_or_done(self):
+    def test_it_fails_if_key_not_incoming_or_done(self, caplog: pytest.LogCaptureFixture):
         # Arrange
         invalid_key = f"{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt"
 
         # Act
-        with self.assertLogs(level=logging.WARNING) as cm:
+        with caplog.at_level(logging.WARNING):
             handler(
                 event=generate_event(key=invalid_key),
                 context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex(
-                f"ETL file or path does not match expected format, skipping: {invalid_key}"
-            ),
-        )
+        assert "ETL file or path does not match expected format, skipping" in caplog.text
 
-    def test_it_fails_if_key_not_known_rif(self):
+    def test_it_fails_if_key_not_known_rif(self, caplog: pytest.LogCaptureFixture):
         # Arrange
         invalid_key = f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/unknown_1234.txt"
 
         # Act
-        with self.assertLogs(level=logging.WARNING) as cm:
+        with caplog.at_level(logging.WARNING):
             handler(
                 event=generate_event(key=invalid_key),
                 context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex(
-                f"ETL file or path does not match expected format, skipping: {invalid_key}"
-            ),
-        )
+        assert "ETL file or path does not match expected format, skipping" in caplog.text
 
     @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
     @mock.patch("update_pipeline_slis.post_load_event", autospec=True)
@@ -470,85 +235,88 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # Assert
         # We put metrics for the RIF dimensioned by group and its data type, metrics for the
         # load becoming first available dimensioned by the group, and a repeating metrics for the
-        # first available load metric. Yes, this assertion method is named "assertCountEquals", but
-        # it actually ensures all elements are equal regardless of order whereas "assertEquals"
-        # requires lists are in exact order
-        self.assertCountEqual(
-            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
-            [
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
-                    unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
-                    unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
-                    unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
-                    unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
-                    unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
-                    unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
-                    unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
-                    dimensions={},
-                ),
-            ],
-        )
+        # first available load metric.
+        actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
+        expected_put_metrics = [
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
+                unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
+                unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
+                unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
+                unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
+                unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
+                unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                value=DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP,
+                unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
+                dimensions={},
+            ),
+        ]
+        # pytest doesn't have a built-in assertion helper for ensuring that two lists are the same
+        # ignoring order. We could sort the lists, but the MetricData dataclass cannot be ordered
+        # as-is due to its inner dict, so checking that both lists are of equal length and that all
+        # elements of the expected list are in the actual list is the best workaround
+        assert len(actual_put_metrics) == len(expected_put_metrics)
+        assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
+
         # We put events indicating when this RIF file was loaded as well as when the load was made
         # first available to compute deltas later
-        self.assertCountEqual(
-            get_mocked_put_events(mock_post_load_event=mock_post_load_event),
-            [
-                PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=rif,
-                ),
-                PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=rif,
-                ),
-            ],
-        )
+        actual_put_events = get_mocked_put_events(mock_post_load_event=mock_post_load_event)
+        expected_put_events = [
+            PipelineLoadEvent(
+                event_type=PipelineLoadEventType.RIF_AVAILABLE,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
+                rif_type=rif,
+            ),
+            PipelineLoadEvent(
+                event_type=PipelineLoadEventType.LOAD_AVAILABLE,
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
+                rif_type=rif,
+            ),
+        ]
+        assert len(actual_put_events) == len(expected_put_events)
+        assert all((expected in actual_put_events) for expected in expected_put_events)
 
     @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
     @mock.patch("update_pipeline_slis.post_load_event", autospec=True)
@@ -597,56 +365,57 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         # We put metrics for the RIF dimensioned by group and its data type. No metrics
         # should be put for the load, as the mocked queue indicates the load has already begun and
         # those metrics have already been processed
-        self.assertCountEqual(
-            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
-            [
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                    date_time=event_time,
-                    value=utc_timestamp(event_time),
-                    unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                    date_time=event_time,
-                    value=utc_timestamp(event_time),
-                    unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                    date_time=event_time,
-                    value=utc_timestamp(event_time),
-                    unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                    date_time=event_time,
-                    value=utc_timestamp(event_time),
-                    unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-            ],
-        )
+        actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
+        expected_put_metrics = [
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
+                date_time=event_time,
+                value=utc_timestamp(event_time),
+                unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
+                date_time=event_time,
+                value=utc_timestamp(event_time),
+                unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
+                date_time=event_time,
+                value=utc_timestamp(event_time),
+                unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
+                date_time=event_time,
+                value=utc_timestamp(event_time),
+                unit=PipelineMetric.TIME_DATA_AVAILABLE.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+        ]
+        assert len(actual_put_metrics) == len(expected_put_metrics)
+        assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
+
         # We put a single event indicating when this CARRIER rif was loaded. No event should be
         # posted for the load itself, as the mocked queue indicates that has already happened and
         # the load was made available with the BENEFICIARY rif first
-        self.assertCountEqual(
-            get_mocked_put_events(mock_post_load_event=mock_post_load_event),
-            [
-                PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                    date_time=event_time,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=rif,
-                ),
-            ],
-        )
+        actual_put_events = get_mocked_put_events(mock_post_load_event=mock_post_load_event)
+        expected_put_events = [
+            PipelineLoadEvent(
+                event_type=PipelineLoadEventType.RIF_AVAILABLE,
+                date_time=event_time,
+                group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
+                rif_type=rif,
+            ),
+        ]
+        assert len(actual_put_events) == len(expected_put_events)
+        assert all((expected in actual_put_events) for expected in expected_put_events)
 
     @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
     @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
@@ -660,6 +429,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
         mock_delete_load_msg: mock.Mock,
+        caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
         rif = RifFileType.BENEFICIARY
@@ -694,95 +464,95 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = False
 
         # Act
-        with self.assertLogs(level=logging.INFO) as cm:
+        with caplog.at_level(logging.INFO):
             handler(
                 event=generate_event(key=key, event_time_iso=event_time.isoformat()),
                 context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex(
-                f"Not all files have yet to be loaded for group {DEFAULT_MOCK_GROUP_ISO_STR}."
-                " Data load is not complete. Stopping...",
+        assert (
+            f"Not all files have yet to be loaded for group {DEFAULT_MOCK_GROUP_ISO_STR}. Data load"
+            " is not complete. Stopping..."
+            in caplog.text
+        )
+
+        actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
+        expected_put_metrics = [
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=event_time,
+                value=utc_timestamp(event_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={},
             ),
-        )
-        self.assertCountEqual(
-            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
-            [
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=event_time,
-                    value=utc_timestamp(event_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=event_time,
-                    value=utc_timestamp(event_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=event_time,
-                    value=utc_timestamp(event_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=event_time,
-                    value=utc_timestamp(event_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=event_time,
-                    value=event_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=event_time,
-                    value=event_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=event_time,
-                    value=event_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=event_time,
-                    value=event_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-            ],
-        )
-        self.assertCountEqual(
-            get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
-            [
-                x
-                for x in mocked_queued_events
-                if x.event.event_type == PipelineLoadEventType.RIF_AVAILABLE
-            ],
-        )
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=event_time,
+                value=utc_timestamp(event_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=event_time,
+                value=utc_timestamp(event_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=event_time,
+                value=utc_timestamp(event_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=event_time,
+                value=event_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=event_time,
+                value=event_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=event_time,
+                value=event_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=event_time,
+                value=event_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+        ]
+        assert len(actual_put_metrics) == len(expected_put_metrics)
+        assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
+
+        actual_deleted_msgs = get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg)
+        expected_deleted_msgs = [
+            x
+            for x in mocked_queued_events
+            if x.event.event_type == PipelineLoadEventType.RIF_AVAILABLE
+        ]
+        assert len(actual_deleted_msgs) == len(expected_deleted_msgs)
+        assert all((expected in actual_deleted_msgs) for expected in expected_deleted_msgs)
 
     @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
     @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
@@ -796,6 +566,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
         mock_delete_load_msg: mock.Mock,
+        caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
         rif = RifFileType.DME
@@ -823,58 +594,58 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = False
 
         # Act
-        with self.assertLogs(level="WARNING") as cm:
+        with caplog.at_level(logging.WARNING):
             handler(
                 event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
                 context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex(
-                f"No corresponding messages found for {rif.value} RIF in group"
-                f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
-                " metrics can be computed for this RIF. Continuing..."
+        assert (
+            f"No corresponding messages found for {rif.value} RIF in group"
+            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
+            " can be computed for this RIF. Continuing..."
+            in caplog.text
+        )
+
+        actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
+        expected_put_metrics = [
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={},
             ),
-        )
-        self.assertCountEqual(
-            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
-            [
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-            ],
-        )
-        self.assertEqual(mock_delete_load_msg.call_count, 0)
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+        ]
+        assert len(actual_put_metrics) == len(expected_put_metrics)
+        assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
+
+        assert mock_delete_load_msg.call_count == 0
 
     @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
     @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
@@ -932,112 +703,113 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         )
 
         # Assert
-        self.assertCountEqual(
-            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
-            [
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=rif_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=rif_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=rif_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=rif_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=load_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=load_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-            ],
-        )
-        self.assertCountEqual(
-            get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
-            mocked_queued_events,
-        )
+        actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
+        expected_put_metrics = [
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=rif_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=rif_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=rif_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=rif_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=load_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=load_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+        ]
+        assert len(actual_put_metrics) == len(expected_put_metrics)
+        assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
+
+        actual_deleted_msgs = get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg)
+        expected_deleted_msgs = mocked_queued_events
+        assert len(actual_deleted_msgs) == len(expected_deleted_msgs)
+        assert all((expected in actual_deleted_msgs) for expected in expected_deleted_msgs)
 
     @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
     @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
@@ -1051,6 +823,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
         mock_delete_load_msg: mock.Mock,
+        caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
         rif = RifFileType.DME
@@ -1081,113 +854,112 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = True
 
         # Act
-        with self.assertLogs(level=logging.WARNING) as cm:
+        with caplog.at_level(logging.WARNING):
             handler(
                 event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
                 context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex(
-                f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found"
-                f" for group {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no"
-                " time delta metrics can be computed for this data load",
+        assert (
+            f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found for group"
+            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
+            " can be computed for this data load"
+            in caplog.text
+        )
+        actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
+        expected_put_metrics = [
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={},
             ),
-        )
-        self.assertCountEqual(
-            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
-            [
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=rif_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=rif_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=rif_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=rif_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
-                    dimensions={},
-                ),
-            ],
-        )
-        self.assertCountEqual(
-            get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
-            mocked_queued_events,
-        )
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=rif_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=rif_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=rif_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=rif_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
+                dimensions={},
+            ),
+        ]
+        assert len(actual_put_metrics) == len(expected_put_metrics)
+        assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
+
+        actual_deleted_msgs = get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg)
+        expected_deleted_msgs = mocked_queued_events
+        assert len(actual_deleted_msgs) == len(expected_deleted_msgs)
+        assert all((expected in actual_deleted_msgs) for expected in expected_deleted_msgs)
 
     @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
     @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
@@ -1201,6 +973,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
         mock_delete_load_msg: mock.Mock,
+        caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
         rif = RifFileType.DME
@@ -1231,96 +1004,95 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = True
 
         # Act
-        with self.assertLogs(level=logging.WARNING) as cm:
+        with caplog.at_level(logging.WARNING):
             handler(
                 event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
                 context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex(
-                f"No corresponding messages found for {rif.value} RIF in group"
-                f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
-                " metrics can be computed for this RIF. Continuing...",
+        assert (
+            f"No corresponding messages found for {rif.value} RIF in group"
+            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
+            " can be computed for this RIF. Continuing..."
+            in caplog.text
+        )
+        actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
+        expected_put_metrics = [
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={},
             ),
-        )
-        self.assertCountEqual(
-            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
-            [
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=load_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
-                    date_time=rif_done_time,
-                    value=load_done_time_delta,
-                    unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-            ],
-        )
-        self.assertCountEqual(
-            get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg),
-            mocked_queued_events,
-        )
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"data_type": rif.name.lower()},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=load_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                date_time=rif_done_time,
+                value=load_done_time_delta,
+                unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+        ]
+        assert len(actual_put_metrics) == len(expected_put_metrics)
+        assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
+
+        actual_deleted_msgs = get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg)
+        expected_deleted_msgs = mocked_queued_events
+        assert len(actual_deleted_msgs) == len(expected_deleted_msgs)
+        assert all((expected in actual_deleted_msgs) for expected in expected_deleted_msgs)
 
     @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
     @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
@@ -1334,6 +1106,7 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
         mock_delete_load_msg: mock.Mock,
+        caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
         rif = RifFileType.DME
@@ -1350,84 +1123,81 @@ class TestUpdatePipelineSlisHandler(unittest.TestCase):
         mock_incoming_empty.return_value = True
 
         # Act
-        with self.assertLogs(level=logging.WARNING) as cm:
+        with caplog.at_level(logging.WARNING):
             handler(
                 event=generate_event(key=key, event_time_iso=rif_done_time.isoformat()),
                 context=mock_lambda_context,
             )
 
         # Assert
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex(
-                f"No corresponding messages found for {rif.value} RIF in group"
-                f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta"
-                " metrics can be computed for this RIF. Continuing...",
+        assert (
+            f"No corresponding messages found for {rif.value} RIF in group"
+            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
+            " can be computed for this RIF. Continuing..."
+            in caplog.text
+        )
+        assert (
+            f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found for group"
+            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
+            " can be computed for this data load"
+            in caplog.text
+        )
+        actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
+        expected_put_metrics = [
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={},
             ),
-        )
-        self.assertRegex(
-            " ".join(cm.output),
-            gen_log_regex(
-                f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found"
-                f" for group {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no"
-                " time delta metrics can be computed for this data load",
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"data_type": rif.name.lower()},
             ),
-        )
-        self.assertCountEqual(
-            get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data),
-            [
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"data_type": rif.name.lower()},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_LOADED.unit,
-                    dimensions={
-                        "data_type": rif.name.lower(),
-                        "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
-                    },
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                    dimensions={},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                    dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
-                ),
-                MetricData(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
-                    date_time=rif_done_time,
-                    value=utc_timestamp(rif_done_time),
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
-                    dimensions={},
-                ),
-            ],
-        )
-        self.assertEqual(mock_delete_load_msg.call_count, 0)
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_LOADED.unit,
+                dimensions={
+                    "data_type": rif.name.lower(),
+                    "group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR,
+                },
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                dimensions={},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                dimensions={"group_timestamp": DEFAULT_MOCK_GROUP_ISO_STR},
+            ),
+            MetricData(
+                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
+                date_time=rif_done_time,
+                value=utc_timestamp(rif_done_time),
+                unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
+                dimensions={},
+            ),
+        ]
+        assert len(actual_put_metrics) == len(expected_put_metrics)
+        assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
+
+        assert mock_delete_load_msg.call_count == 0
