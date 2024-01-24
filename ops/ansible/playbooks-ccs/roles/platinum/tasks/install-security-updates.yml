@@ -1,0 +1,5 @@
+- name: Apply security patches
+  become: yes
+  shell: yum update-minimal --security -y
+  args:
+    warn: no
