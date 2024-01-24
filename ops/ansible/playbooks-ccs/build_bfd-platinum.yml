@@ -1,6 +1,6 @@
 ---
 ##
-# Builds a 'Platinum' AMI (updates) and installs program specific dependencies
+# Builds a 'Platinum' AMI and installs program specific dependencies
 # from a base Gold Image in the CCS AWS Environment
 ##
 - name: Build Platinum AMI
@@ -13,10 +13,6 @@
     python3_version: '3.9.16'
 
   tasks:
-    - name: Apply latest host security patches
-      import_role:
-        name: base_patch
-
     - name: Apply Platinum Role
       import_role:
         name: platinum

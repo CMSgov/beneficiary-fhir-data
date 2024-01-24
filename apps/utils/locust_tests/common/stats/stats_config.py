@@ -78,7 +78,7 @@ class StatsConfiguration:
             "--stats-store-file",
             help="Specifies that stats will be written to a local file",
             dest="stats_store",
-            env_var="LOCUS_STATS_STORE_TO_FILE",
+            env_var="LOCUST_STATS_STORE_TO_FILE",
             action="store_const",
             const=StatsStorageType.FILE,
         )
@@ -86,7 +86,7 @@ class StatsConfiguration:
             "--stats-store-s3",
             help="Specifies that stats will be written to an S3 bucket",
             dest="stats_store",
-            env_var="LOCUS_STATS_STORE_TO_S3",
+            env_var="LOCUST_STATS_STORE_TO_S3",
             action="store_const",
             const=StatsStorageType.S3,
         )
@@ -106,7 +106,7 @@ class StatsConfiguration:
                 " specified multiple times"
             ),
             dest="stats_store_tags",
-            env_var="LOCUS_STATS_STORE_TAG",
+            env_var="LOCUST_STATS_STORE_TAG",
             action="append",
             default=[]
         )
@@ -118,7 +118,7 @@ class StatsConfiguration:
                 ' --stats-store is "FILE"'
             ),
             dest="stats_store_file_path",
-            env_var="LOCUS_STATS_STORE_FILE_PATH",
+            env_var="LOCUST_STATS_STORE_FILE_PATH",
             default="./",
         )
         stats_group.add_argument(
@@ -129,7 +129,7 @@ class StatsConfiguration:
                 ' --stats-store is "S3"'
             ),
             dest="stats_store_s3_bucket",
-            env_var="LOCUS_STATS_STORE_S3_BUCKET",
+            env_var="LOCUST_STATS_STORE_S3_BUCKET",
         )
         stats_group.add_argument(
             "--stats-store-s3-database",
@@ -139,7 +139,7 @@ class StatsConfiguration:
                 " used as part of the S3 key/path when storing stats to S3"
             ),
             dest="stats_store_s3_database",
-            env_var="LOCUS_STATS_STORE_S3_DATABASE",
+            env_var="LOCUST_STATS_STORE_S3_DATABASE",
         )
         stats_group.add_argument(
             "--stats-store-s3-table",
@@ -149,7 +149,7 @@ class StatsConfiguration:
                 " used as part of the S3 key/path when storing stats to S3"
             ),
             dest="stats_store_s3_table",
-            env_var="LOCUS_STATS_STORE_S3_TABLE",
+            env_var="LOCUST_STATS_STORE_S3_TABLE",
         )
 
         # Ensure that only one type of comparison can be chosen via arguments

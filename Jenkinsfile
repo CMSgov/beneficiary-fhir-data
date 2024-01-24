@@ -330,7 +330,8 @@ try {
 						awsAuth.assumeRole()
 						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
-							gitBranchName: gitBranchName
+							gitBranchName: gitBranchName,
+							isRelease: canDeployToProdEnvs
 						)
 
 						if (hasRegressionRunSucceeded) {
@@ -495,7 +496,8 @@ try {
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
-								gitBranchName: gitBranchName
+								gitBranchName: gitBranchName,
+								isRelease: canDeployToProdEnvs
 							)
 
 							if (hasRegressionRunSucceeded) {
@@ -653,7 +655,8 @@ try {
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
-								gitBranchName: gitBranchName
+								gitBranchName: gitBranchName,
+								isRelease: canDeployToProdEnvs
 							)
 
 							if (hasRegressionRunSucceeded) {
