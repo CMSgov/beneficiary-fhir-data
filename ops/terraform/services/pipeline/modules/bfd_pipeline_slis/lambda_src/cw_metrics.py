@@ -8,7 +8,7 @@ from typing import Any, Tuple, TypeVar
 T = TypeVar("T")
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class MetricData:
     """Dataclass representing the data needed to "put" a metric up to CloudWatch Metrics. Represents
     both the metric itself (name, dimensions, unit) and the value that is put to said metric
@@ -21,7 +21,7 @@ class MetricData:
     dimensions: dict[str, str] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class MetricDataQuery:
     """Dataclass representing the data needed to get a metric from CloudWatch Metrics. Metrics are
     identified by their namespace, name, and dimensions"""
@@ -31,7 +31,7 @@ class MetricDataQuery:
     dimensions: dict[str, str] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class MetricDataResult:
     """Dataclass representing the result of a successful GetMetricData operation"""
 
