@@ -101,9 +101,8 @@ resource "aws_lambda_function_event_invoke_config" "this" {
 }
 
 resource "aws_sqs_queue" "this" {
-  name                       = local.lambdas[local.lambda_update_slis].full_name
-  visibility_timeout_seconds = 0
-  kms_master_key_id          = local.kms_key_id
+  name              = local.lambdas[local.lambda_update_slis].full_name
+  kms_master_key_id = local.kms_key_id
 }
 
 resource "aws_scheduler_schedule_group" "repeater" {
