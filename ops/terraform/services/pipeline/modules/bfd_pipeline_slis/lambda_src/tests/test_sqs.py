@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest import mock
 
 from common import RifFileType
@@ -55,7 +55,7 @@ class TestSqsRetrieveLoadMsgs:
                 receipt_handle="1",
                 event=PipelineLoadEvent(
                     event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                    date_time=datetime.utcfromtimestamp(1706097600),
+                    date_time=datetime.utcfromtimestamp(1706097600).replace(tzinfo=timezone.utc),
                     group_iso_str="2024-01-24T13:00:00Z",
                     rif_type=RifFileType.BENEFICIARY,
                 ),
@@ -64,7 +64,7 @@ class TestSqsRetrieveLoadMsgs:
                 receipt_handle="2",
                 event=PipelineLoadEvent(
                     event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                    date_time=datetime.utcfromtimestamp(1706097600),
+                    date_time=datetime.utcfromtimestamp(1706097600).replace(tzinfo=timezone.utc),
                     group_iso_str="2024-01-24T13:00:00Z",
                     rif_type=RifFileType.BENEFICIARY,
                 ),

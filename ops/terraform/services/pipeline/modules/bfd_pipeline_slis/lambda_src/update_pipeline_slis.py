@@ -585,9 +585,9 @@ def handler(event: dict[Any, Any], context: LambdaContext):
             raise ValueError(f"Invalid inner S3 event {s3_event.raw_event}; empty records")
 
         for s3_record in s3_event.records:
-            s3_event_time = datetime.fromisoformat(
-                s3_record.event_time.removesuffix("Z")
-            ).astimezone(tz=timezone.utc)
+            s3_event_time = datetime.fromisoformat(s3_record.event_time.removesuffix("Z")).replace(
+                tzinfo=timezone.utc
+            )
             s3_object_key = unquote(s3_record.s3.get_object.key)
 
             # Log the various bits of data extracted from the invoking event to aid debugging:

@@ -18,7 +18,7 @@ DEFAULT_MOCK_GROUP_ISO_STR = "2024-01-12T00:00:00Z"
 DEFAULT_MOCK_EVENT_TIME_ISO = "2024-01-19T00:00:00Z"
 DEFAULT_MOCK_EVENT_TIME_DATETIME = datetime.fromisoformat(
     DEFAULT_MOCK_EVENT_TIME_ISO.removesuffix("Z")
-).astimezone(tz=timezone.utc)
+).replace(tzinfo=timezone.utc)
 DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP = calendar.timegm(
     DEFAULT_MOCK_EVENT_TIME_DATETIME.utctimetuple()
 )

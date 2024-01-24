@@ -2,7 +2,7 @@ import calendar
 import json
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -81,7 +81,7 @@ def retrieve_load_event_msgs(
         list[PipelineLoadEventMessage]: A list of PipelineLoadEventMessages, filtered by
         type_filter, that exist in the event queue
     """
-    responses = queue.receive_messages(WaitTimeSeconds=timeout)
+    responses = queue.receive_messages(WaitTimeSeconds=timeout, MaxNumberOfMessages=10)
 
     def load_json_safe(json_str: str) -> Optional[dict[str, Union[str, int, float, bool]]]:
         try:
@@ -99,7 +99,9 @@ def retrieve_load_event_msgs(
             receipt_handle=receipt_handle,
             event=PipelineLoadEvent(
                 event_type=PipelineLoadEventType(str(message["event_type"])),
-                date_time=datetime.utcfromtimestamp(int(message["date_time"])),
+                date_time=datetime.utcfromtimestamp(int(message["date_time"])).replace(
+                    tzinfo=timezone.utc
+                ),
                 group_iso_str=str(message["group_iso_str"]),
                 rif_type=RifFileType(str(message["rif_type"])),
             ),
