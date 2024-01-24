@@ -331,7 +331,7 @@ try {
 						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
 							gitBranchName: gitBranchName,
-							isRelease: true
+							isRelease: false
 						)
 
 						if (hasRegressionRunSucceeded) {
@@ -497,7 +497,7 @@ try {
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
 								gitBranchName: gitBranchName,
-								isRelease: true
+								isRelease: false
 							)
 
 							if (hasRegressionRunSucceeded) {
@@ -656,7 +656,7 @@ try {
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
 								gitBranchName: gitBranchName,
-								isRelease: true
+								isRelease: false
 							)
 
 							if (hasRegressionRunSucceeded) {
