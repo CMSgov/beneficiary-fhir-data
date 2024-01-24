@@ -14,7 +14,7 @@ def runServerRegression(Map args = [:]) {
     bfdEnv = args.bfdEnv
     gitBranchName = args.gitBranchName
     heartbeatInterval = args.heartbeatInterval ?: 15
-    isRelease = args.isRelease ?: true
+    isRelease = args.isRelease ?: false
 
     // This queue is used to trigger the lambda
     lambdaSqsQueueName = "bfd-${bfdEnv}-server-regression"
