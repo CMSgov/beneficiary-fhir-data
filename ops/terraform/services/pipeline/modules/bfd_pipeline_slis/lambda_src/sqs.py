@@ -106,7 +106,7 @@ def retrieve_load_event_msgs(
         )
         for (receipt_handle, message) in raw_messages
         if message is not None
-        and "event" in message
+        and "event_type" in message
         and "date_time" in message
         and "group_iso_str" in message
         and "rif_type" in message
