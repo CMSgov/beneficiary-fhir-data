@@ -5,7 +5,7 @@ import os
 import re
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Type
+from typing import TYPE_CHECKING, Any, Type
 from urllib.parse import unquote
 
 import boto3
@@ -13,7 +13,6 @@ from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore import exceptions as botocore_exceptions
 from botocore.config import Config
-from mypy_boto3_s3.service_resource import Bucket
 
 from backoff_retry import backoff_retry
 from common import METRICS_NAMESPACE, PipelineMetric, RifFileType
@@ -26,6 +25,13 @@ from sqs import (
     post_load_event,
     retrieve_load_event_msgs,
 )
+
+# Solve typing issues in Lambda as mypy_boto3 will not be included in the Lambda
+if TYPE_CHECKING:
+    from mypy_boto3_s3.service_resource import Bucket
+else:
+    Bucket = object
+
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")

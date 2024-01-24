@@ -4,11 +4,15 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Optional, Union
-
-from mypy_boto3_sqs.service_resource import Queue
+from typing import TYPE_CHECKING, Optional, Union
 
 from common import RifFileType
+
+# Solve typing issues in Lambda as mypy_boto3 is not included
+if TYPE_CHECKING:
+    from mypy_boto3_sqs.service_resource import Queue
+else:
+    Queue = object
 
 
 class PipelineLoadEventType(str, Enum):
