@@ -45,10 +45,11 @@ public class DataSetTestUtilities {
    * @param s3Dao the {@link S3Dao} client to use
    * @param bucket the name of the bucket to place the new object in
    * @param manifest the {@link DataSetManifest} to push as an object
+   * @return the uploaded object's s3 key
    */
-  public static void putObject(S3Dao s3Dao, String bucket, DataSetManifest manifest) {
+  public static String putObject(S3Dao s3Dao, String bucket, DataSetManifest manifest) {
     String keyPrefix = keyPrefixForManifest(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, manifest);
-    putObject(s3Dao, bucket, keyPrefix, manifest);
+    return putObject(s3Dao, bucket, keyPrefix, manifest);
   }
 
   /**
@@ -60,11 +61,12 @@ public class DataSetTestUtilities {
    * @param location the location to store the manifest, should be {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
+   * @return the uploaded object's s3 key
    */
-  public static void putObject(
+  public static String putObject(
       S3Dao s3Dao, String bucket, DataSetManifest manifest, String location) {
     String keyPrefix = keyPrefixForManifest(location, manifest);
-    putObject(s3Dao, bucket, keyPrefix, manifest);
+    return putObject(s3Dao, bucket, keyPrefix, manifest);
   }
 
   /**
@@ -74,8 +76,9 @@ public class DataSetTestUtilities {
    * @param bucket the name of the bucket to place the new object in
    * @param keyPrefix the key prefix of the object
    * @param manifest the {@link DataSetManifest} to push as an object
+   * @return the uploaded object's s3 key
    */
-  public static void putObject(
+  public static String putObject(
       S3Dao s3Dao, String bucket, String keyPrefix, DataSetManifest manifest) {
     String objectKey =
         String.format("%s/%d_%s", keyPrefix, manifest.getSequenceId(), "manifest.xml");
@@ -89,6 +92,7 @@ public class DataSetTestUtilities {
 
       byte[] manifestByteArray = manifestOutputStream.toByteArray();
       s3Dao.putObject(bucket, objectKey, manifestByteArray, Map.of());
+      return objectKey;
     } catch (JAXBException e) {
       throw new UncheckedJaxbException(e);
     }
@@ -103,14 +107,15 @@ public class DataSetTestUtilities {
    * @param manifest the {@link DataSetManifest} to create an object for
    * @param manifestEntry the {@link DataSetManifestEntry} to create an object for
    * @param objectContentsUrl a {@link URL} to the data to push as the new object's content
+   * @return the uploaded object's s3 key
    */
-  public static void putObject(
+  public static String putObject(
       S3Dao s3Dao,
       String bucket,
       DataSetManifest manifest,
       DataSetManifestEntry manifestEntry,
       URL objectContentsUrl) {
-    putObject(
+    return putObject(
         s3Dao,
         bucket,
         manifest,
@@ -130,8 +135,9 @@ public class DataSetTestUtilities {
    * @param incomingLocation the incoming location, should be {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
+   * @return the uploaded object's s3 key
    */
-  public static void putObject(
+  public static String putObject(
       S3Dao s3Dao,
       String bucket,
       DataSetManifest manifest,
@@ -139,7 +145,7 @@ public class DataSetTestUtilities {
       URL objectContentsUrl,
       String incomingLocation) {
     String keyPrefix = String.format("%s/%s", incomingLocation, manifest.getTimestampText());
-    putObject(s3Dao, bucket, keyPrefix, manifest, manifestEntry, objectContentsUrl);
+    return putObject(s3Dao, bucket, keyPrefix, manifest, manifestEntry, objectContentsUrl);
   }
 
   /**
@@ -151,8 +157,9 @@ public class DataSetTestUtilities {
    * @param manifest the {@link DataSetManifest} to create an object for
    * @param manifestEntry the {@link DataSetManifestEntry} to create an object for
    * @param objectContentsUrl a {@link URL} to the data to push as the new object's content
+   * @return the uploaded object's s3 key
    */
-  public static void putObject(
+  public static String putObject(
       S3Dao s3Dao,
       String bucket,
       String keyPrefix,
@@ -165,6 +172,7 @@ public class DataSetTestUtilities {
       String md5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream());
       Map<String, String> metaData = Map.of("md5chksum", md5ChkSum);
       s3Dao.putObject(bucket, objectKey, objectContentsUrl, metaData);
+      return objectKey;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (NoSuchAlgorithmException e) {

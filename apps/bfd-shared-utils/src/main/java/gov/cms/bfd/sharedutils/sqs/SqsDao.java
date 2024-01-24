@@ -1,4 +1,4 @@
-package gov.cms.bfd.migrator.app;
+package gov.cms.bfd.sharedutils.sqs;
 
 import java.util.List;
 import java.util.Optional;
