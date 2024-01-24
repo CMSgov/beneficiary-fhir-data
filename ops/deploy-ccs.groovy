@@ -129,20 +129,17 @@ def buildDockerHostAmi(String gitBranchName, String gitCommitId, String platinum
  * @param templateFile the relative path to the packer template file
  */
 def packerBuildAmis(String platinumAmiId, String gitBranchName, String gitCommitId, String templateFile) {
-	withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-		withEnv(["platinumAmiId=${platinumAmiId}", "gitBranchName=${gitBranchName}",
-				 "gitCommitId=${gitCommitId}", "templateFile=${templateFile}"]) {
-			// build AMIs in parallel
-			sh '''
+	withEnv(["platinumAmiId=${platinumAmiId}", "gitBranchName=${gitBranchName}",
+		 "gitCommitId=${gitCommitId}", "templateFile=${templateFile}"]) {
+	// build AMIs in parallel
+	sh '''
 packer build -color=false \
--var vault_password_file="$vaultPasswordFile" \
 -var source_ami="$platinumAmiId" \
 -var subnet_id=subnet-092c2a68bd18b34d1 \
 -var git_branch="$gitBranchName" \
 -var git_commit="$gitCommitId" \
 "$templateFile"
 '''
-		}
 	}
 }
 

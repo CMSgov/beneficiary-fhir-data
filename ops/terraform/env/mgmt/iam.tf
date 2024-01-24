@@ -1,29 +1,3 @@
-resource "aws_iam_policy" "ansible_vault_pw_ro_s3" {
-  description = "ansible vault pw read only S3 policy"
-  name        = "bfd-${local.env}-ansible-vault-pw-ro-s3"
-  path        = "/"
-  policy      = <<-POLICY
-{
-  "Statement": [
-    {
-      "Action": [
-        "kms:Decrypt",
-        "s3:GetObject"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "${data.aws_kms_key.cmk.arn}",
-        "${aws_s3_bucket.admin.arn}/ansible/vault.password"
-      ],
-      "Sid": "AnsibleVaultPwRO"
-    }
-  ],
-  "Version": "2012-10-17"
-}
-POLICY
-
-}
-
 #TODO: Determine if the bfd-packages sees continued use
 resource "aws_iam_policy" "packer_s3" {
   description = "packer S3 Policy"

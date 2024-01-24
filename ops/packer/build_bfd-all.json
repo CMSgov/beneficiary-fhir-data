@@ -1,8 +1,7 @@
 {
   "variables": {
     "source_ami": "",
-    "subnet_id": "",
-    "vault_password_file": ""
+    "subnet_id": ""
   },
   "builders": [
     {
@@ -109,8 +108,7 @@
         "pre-ami"
       ],
       "ansible_env_vars": [
-        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
-        "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
+        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"
       ]
     },
     {
@@ -129,8 +127,7 @@
         "pre-ami"
       ],
       "ansible_env_vars": [
-        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
-        "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
+        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"
       ]
     },
     {
@@ -149,8 +146,7 @@
         "pre-ami"
       ],
       "ansible_env_vars": [
-        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
-        "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
+        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"
       ]
     }
   ],

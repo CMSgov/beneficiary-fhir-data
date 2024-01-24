@@ -24,7 +24,7 @@ rif_job_queue_size_multiple_claims: 10
 data_pipeline_rda_job_enabled: false
 
 # Communication settings for RDA API server.
-# These are defined in the vault rather than plain text.
+# These are defined in ssm rather than plain text.
 data_pipeline_rda_grpc_host: undefined
 data_pipeline_rda_grpc_port: 443
 
@@ -40,7 +40,7 @@ data_pipeline_rda_job_write_threads: 1
 # How long to allow the RDA API stream to be idle before closing the connection.
 data_pipeline_rda_grpc_max_idle_seconds: 600
 
-# By default call the RDA API with no token.  Override this value in env specific vault
+# By default call the RDA API with no token.  Override this value in env specific ssm
 # to enable authentication.
 data_pipeline_rda_grpc_auth_token: ''
 
@@ -51,7 +51,7 @@ data_pipeline_rda_grpc_server_type: 'Remote'
 data_pipeline_rda_grpc_inproc_server_mode: ''
 
 # An InProcess server can serve data from NDJSON files in an S3 bucket.
-# These settings are defined in the vault rather than plain text but we 
+# These settings are defined in the ssm rather than plain text but we
 # provide empty string values here so the script has values for the
 # environment variables when the mock server is not in use.
 # Region containing S3 bucket.

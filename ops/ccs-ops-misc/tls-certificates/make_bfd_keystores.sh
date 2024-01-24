@@ -72,6 +72,6 @@ gen_keystore "cn=test.bfd.cms.gov" \
     "san=dns:test.bfd.cms.gov" \
     "test"
 
-# Encrypt
-echo "About to encrypt using ansible vault..."
-ansible-vault encrypt --ask-vault-pass prod-bluebutton-appserver-keystore.pfx prod-sbx-bluebutton-appserver-keystore.pfx test-bluebutton-appserver-keystore.pfx
+# Update SSM params in prod.yaml - bfd/prod/server/server_keystore_base64
+# cd ops/terraform/env/mgmt/base_config
+# ./scripts/edit-yaml.sh prod
