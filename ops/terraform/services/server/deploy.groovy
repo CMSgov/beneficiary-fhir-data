@@ -34,7 +34,7 @@ def runServerRegression(Map args = [:]) {
                                        .toLowerCase()
 
     compareTag = isRelease ? "release" : sanitizedBranchName
-    storeTags = isRelease ? ["release", sanitizedBranchName, "build${currentBuildId}__${sanitizedBranchName}"]
+    storeTags = isRelease ? [sanitizedBranchName, "release", "build${currentBuildId}__${sanitizedBranchName}"]
             : [sanitizedBranchName, "build${currentBuildId}__${sanitizedBranchName}"]
 
     if (canServerRegressionRunProceed(awsRegion, signalSqsQueueName, bfdEnv)) {
