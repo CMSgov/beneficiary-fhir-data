@@ -17,16 +17,17 @@ The script will prompt for all nessecary information.
 
 Database Failure Scenario Walkthrough
 -------------------------------------
-Lets say some data corruption has been introduced to the database after the latest ETL run and you want to get the FHIR servers on yesterdays copy of the data while you troubleshoot the issue.  That scenario might go like this:
+Let's say some data corruption has been introduced to the database after the latest ETL run and you want to get the FHIR servers on yesterday's copy of the data while you troubleshoot the issue.  That scenario might go like this:
 - Run the restore script to create a temporary restore cluster:
   - `cd ops/ccs-ops-misc/restore-aurora-snapshot`
   - `source .venv/bin/activate`
   - `python3 restore_aurora_snapshot.py`
-- Create a new branch with updated FHIR server databse config:
+- Create a new branch with updated FHIR server database config:
   - `git checkout -b myname/myhotfixbranch`
   - `cd ops/ansible/playbooks-ccs`
   - `source .venv/bin/activate`
-  - `ansible-vault edit vars/(env)/group_vars/all/vault.yml`
+  - `cd ops/terraform/env/mgmt/base_config`
+  - `./scripts/edit-yaml.sh (env)`
   - `git commit -a -m 'Emergency procedure configure FHIR servers in (env) to use temporary aurora cluster'`
 - Push your branch to github:
   - `git push -u origin myname/myhotfixbranch`
