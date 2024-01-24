@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.ccw.rif;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -237,6 +238,71 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that close called close on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      /*
+       * Verify that the datasets were moved to their respective locations.
+       */
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+          0,
+          java.time.Duration.ofSeconds(10));
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+          0,
+          java.time.Duration.ofSeconds(10));
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          1 + manifest.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
+          1 + manifestSynthetic.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+      assertTrue(
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifestSynthetic.getTimestampText()
+                  + "/0_manifest.xml"));
+      assertTrue(
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifestSynthetic.getTimestampText()
+                  + "/carrier.rif"));
+      assertTrue(
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
+                  + "/"
+                  + manifestSynthetic.getTimestampText()
+                  + "/inpatient.rif"));
+      assertTrue(
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/0_manifest.xml"));
+      assertTrue(
+          s3Dao.objectExists(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS
+                  + "/"
+                  + manifest.getTimestampText()
+                  + "/beneficiaries.rif"));
+      // TODO END remove once S3 file moves are no longer necessary.
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -352,6 +418,25 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that close called close on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      /*
+       * Verify that the first data set was renamed and the second is
+       * still there.
+       */
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+          1 + manifestB.getEntries().size() + 1 + manifestC.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          1 + manifestA.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+      // TODO END remove once S3 file moves are no longer necessary.
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -439,6 +524,22 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that close called close on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Verify that the data set was not renamed.
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+          1 + manifest.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          0,
+          java.time.Duration.ofSeconds(10));
+      // TODO END remove once S3 file moves are no longer necessary.
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -526,6 +627,22 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that close called close on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Verify that the data set was not renamed.
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+          1 + manifest.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          0,
+          java.time.Duration.ofSeconds(10));
+      // TODO END remove once S3 file moves are no longer necessary.
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
@@ -604,6 +721,19 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that close called close on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Verify that the data set was renamed.
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao, bucket, inputLocation, 0, java.time.Duration.ofSeconds(10));
+
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Dao,
+          bucket,
+          expectedOutputLocation,
+          1 + manifest.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+      // TODO END remove once S3 file moves are no longer necessary.
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
