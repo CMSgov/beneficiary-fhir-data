@@ -13,7 +13,7 @@ Example usage:
 
 ```
 module "asg" {
-  source = "../modules/resources/asg"
+  source = "../modules/bfd_server_asg"
 
   env_config    = {env = "test", tags={}, vpc_id =  }
   role          = "api"
