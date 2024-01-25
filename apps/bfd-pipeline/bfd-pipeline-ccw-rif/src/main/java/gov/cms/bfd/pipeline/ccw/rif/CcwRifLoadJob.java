@@ -223,7 +223,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     /*
      * TODO While the RIF pipeline itself is interruptable now, the S3 transfers are not.
      *  For now we will leave interrupts disabled and revisit the need for moving files
-     *  between S3 buckets in a later PR.
+     *  between S3 buckets in a later PR. Expected to be changed as part of BFD-3129.
      */
     return false;
   }
@@ -366,6 +366,7 @@ public final class CcwRifLoadJob implements PipelineJob {
       rifFiles.forEach(S3RifFile::cleanupTempFile);
     } else {
       // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       /*
        * If here, Synthea pre-validation has failed; we want to move the S3 incoming
        * files to a failed folder; so instead of moving files to a done folder we'll just
@@ -381,6 +382,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     }
 
     // TODO BEGIN remove once S3 file moves are no longer necessary.
+    // Expected to be changed as part of BFD-3129.
     dataSetQueue.moveManifestFilesInS3(manifestToProcess);
     // TODO END remove once S3 file moves are no longer necessary.
 

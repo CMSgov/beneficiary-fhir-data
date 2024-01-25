@@ -79,7 +79,8 @@ public class DataSetQueue implements AutoCloseable {
   /**
    * Used only for the soon to be obsolete S3 file move task.
    *
-   * <p>TODO Remove this when file moves are no longer necessary.
+   * <p>TODO Remove this when file moves are no longer necessary. Expected to be changed as part of
+   * BFD-3129.
    */
   private final S3TaskManager s3TaskManager;
 
@@ -263,7 +264,7 @@ public class DataSetQueue implements AutoCloseable {
    * from the Incoming tree to the Done tree.
    *
    * <p>TODO Remove this method (and {@link #s3TaskManager} once S3 file movement is no longer
-   * necessary
+   * necessary. Expected to be changed as part of BFD-3129.
    *
    * @param manifest the manifest to move
    */

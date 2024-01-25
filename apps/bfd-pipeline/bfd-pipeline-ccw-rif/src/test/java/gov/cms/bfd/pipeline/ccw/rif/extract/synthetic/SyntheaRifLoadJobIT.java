@@ -186,6 +186,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(s3FileCache).close();
 
       // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       // Verify that the datasets were moved to their respective 'failed' locations.
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Dao,
@@ -337,6 +338,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(s3FileCache).close();
 
       // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       // Verify that the datasets were moved to their respective 'completed'
       // locations.
       DataSetTestUtilities.waitForBucketObjectCount(

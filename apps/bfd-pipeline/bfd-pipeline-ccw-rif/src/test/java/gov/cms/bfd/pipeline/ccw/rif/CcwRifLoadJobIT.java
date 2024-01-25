@@ -240,6 +240,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(s3FileCache).close();
 
       // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       /*
        * Verify that the datasets were moved to their respective locations.
        */
@@ -420,6 +421,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(s3FileCache).close();
 
       // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       /*
        * Verify that the first data set was renamed and the second is
        * still there.
@@ -526,6 +528,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(s3FileCache).close();
 
       // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       // Verify that the data set was not renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Dao,
@@ -629,6 +632,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(s3FileCache).close();
 
       // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       // Verify that the data set was not renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Dao,
@@ -723,6 +727,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verify(s3FileCache).close();
 
       // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       // Verify that the data set was renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Dao, bucket, inputLocation, 0, java.time.Duration.ofSeconds(10));
