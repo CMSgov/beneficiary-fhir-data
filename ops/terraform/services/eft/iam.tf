@@ -120,7 +120,8 @@ resource "aws_iam_role" "partner_bucket_role" {
   assume_role_policy = jsonencode(
     {
       Statement = [
-        for assumer_arn in each.value.bucket_iam_assumer_arns : {
+        for index, assumer_arn in each.value.bucket_iam_assumer_arns : {
+          Sid    = "AllowAssumeRole${index}"
           Effect = "Allow"
           Action = "sts:AssumeRole"
           Principal = {
