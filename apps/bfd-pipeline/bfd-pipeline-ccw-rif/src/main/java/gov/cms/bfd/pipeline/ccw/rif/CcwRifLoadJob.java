@@ -75,7 +75,7 @@ public final class CcwRifLoadJob implements PipelineJob {
    * Maximum age of a manifest for it to be considered for processing. Intended to keep database
    * queries reasonable.
    */
-  public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(90);
+  public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(60);
 
   /**
    * Minimum amount of free disk space (in bytes) to allow pre-fetch of second data set while
