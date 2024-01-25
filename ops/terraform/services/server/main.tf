@@ -64,13 +64,13 @@ locals {
 
   ami_id = data.aws_ami.main.image_id
 
-  create_server_lb_alarms    = !local.is_ephemeral_env || var.force_create_server_lb_alarms
-  create_server_metrics      = !local.is_ephemeral_env || var.force_create_server_metrics
-  create_server_slo_alarms   = (local.create_server_metrics && !local.is_ephemeral_env) || var.force_create_server_slo_alarms
-  create_server_log_alarms   = !local.is_ephemeral_env || var.force_create_server_log_alarms
-  create_server_dashboards   = (local.create_server_metrics && !local.is_ephemeral_env) || var.force_create_server_dashboards
-  create_server_disk_alarms  = !local.is_ephemeral_env || var.force_create_server_disk_alarms
-  create_server_error_alerts = !local.is_ephemeral_env || var.force_create_server_error_alerts
+  create_server_lb_alarms    = ! local.is_ephemeral_env || var.force_create_server_lb_alarms
+  create_server_metrics      = ! local.is_ephemeral_env || var.force_create_server_metrics
+  create_server_slo_alarms   = (local.create_server_metrics && ! local.is_ephemeral_env) || var.force_create_server_slo_alarms
+  create_server_log_alarms   = ! local.is_ephemeral_env || var.force_create_server_log_alarms
+  create_server_dashboards   = (local.create_server_metrics && ! local.is_ephemeral_env) || var.force_create_server_dashboards
+  create_server_disk_alarms  = ! local.is_ephemeral_env || var.force_create_server_disk_alarms
+  create_server_error_alerts = ! local.is_ephemeral_env || var.force_create_server_error_alerts
 }
 
 ## IAM role for FHIR
@@ -185,6 +185,13 @@ module "fhir_asg" {
   }
 }
 
+## FHIR server logs
+module "bfd_server_logs" {
+  source = "./modules/bfd_server_logs"
+
+  env           = local.env
+  kms_key_alias = local.kms_key_alias
+}
 
 ## FHIR server metrics, per partner
 module "bfd_server_metrics" {
