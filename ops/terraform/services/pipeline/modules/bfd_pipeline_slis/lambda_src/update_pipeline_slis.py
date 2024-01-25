@@ -17,13 +17,13 @@ from botocore.config import Config
 from backoff_retry import backoff_retry
 from common import METRICS_NAMESPACE, PipelineMetric, RifFileType
 from cw_metrics import MetricData, gen_all_dimensioned_metrics, put_metric_data
-from sqs import (
-    MessageFailedToDeleteException,
-    PipelineLoadEvent,
-    PipelineLoadEventType,
-    delete_load_msg_from_queue,
-    post_load_event,
-    retrieve_load_event_msgs,
+from dynamo_db import (
+    LoadAvailableEvent,
+    RifAvailableEvent,
+    get_load_available_event,
+    get_rif_available_event,
+    put_load_available_event,
+    put_rif_available_event,
 )
 
 # Solve typing issues in Lambda as mypy_boto3 will not be included in the Lambda
@@ -35,7 +35,8 @@ else:
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
-EVENTS_QUEUE_NAME = os.environ.get("EVENTS_QUEUE_NAME", "")
+RIF_AVAILABLE_DDB_TBL = os.environ.get("RIF_AVAILABLE_DDB_TBL", "")
+LOAD_AVAILABLE_DDB_TBL = os.environ.get("LOAD_AVAILABLE_DDB_TBL", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -107,8 +108,9 @@ def _is_incoming_folder_empty(bucket: Bucket, group: str) -> bool:
 def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
     cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
     s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
-    sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)  # type: ignore
-    events_queue = sqs_resource.get_queue_by_name(QueueName=EVENTS_QUEUE_NAME)
+    dynamo_resource = boto3.resource("dynamodb", config=BOTO_CONFIG)  # type: ignore
+    load_available_tbl = dynamo_resource.Table(LOAD_AVAILABLE_DDB_TBL)
+    rif_available_tbl = dynamo_resource.Table(RIF_AVAILABLE_DDB_TBL)
     etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
     common_unrecoverable_exceptions: list[Type[BaseException]] = [
         cw_client.exceptions.InvalidParameterValueException,
@@ -179,29 +181,25 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
 
     if pipeline_data_status == PipelineDataStatus.INCOMING:
         logger.info(
-            "RIF file location indicates data has been made available to load to the ETL"
-            " pipeline. Posting %s event to %s for %s RIF in group %s...",
-            PipelineLoadEventType.RIF_AVAILABLE.value,
-            EVENTS_QUEUE_NAME,
+            "RIF file location indicates data has been made available to load to the ETL pipeline."
+            " Putting event to %s table for %s RIF in group %s indicating when RIF was made"
+            " available...",
+            RIF_AVAILABLE_DDB_TBL,
             rif_file_type,
             group_iso_str,
         )
         backoff_retry(
-            func=lambda: post_load_event(
-                queue=events_queue,
-                message=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                    date_time=s3_event_time,
-                    group_iso_str=group_iso_str,
-                    rif_type=rif_file_type,
+            func=lambda: put_rif_available_event(
+                table=rif_available_tbl,
+                event=RifAvailableEvent(
+                    date_time=s3_event_time, group_iso_str=group_iso_str, rif=rif_file_type
                 ),
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
         logger.info(
-            "%s event posted to %s for %s RIF in group %s successfully",
-            PipelineLoadEventType.RIF_AVAILABLE.value,
-            EVENTS_QUEUE_NAME,
+            "event put to %s table for %s RIF in group %s successfully",
+            RIF_AVAILABLE_DDB_TBL,
             rif_file_type,
             group_iso_str,
         )
@@ -212,44 +210,34 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
         )
 
         logger.info(
-            "Retrieving the %s event for the current group/load, %s, from the %s queue... ",
-            PipelineLoadEventType.LOAD_AVAILABLE.value,
+            "Attempting to retrieve the event indicating when the current load was first made"
+            " available for current group/load, %s, from the %s table, if it exists...",
             group_iso_str,
-            EVENTS_QUEUE_NAME,
+            LOAD_AVAILABLE_DDB_TBL,
         )
-        group_available_msg = backoff_retry(
-            func=lambda: next(
-                (
-                    message
-                    for message in retrieve_load_event_msgs(
-                        queue=events_queue,
-                        timeout=10,
-                        type_filter=[PipelineLoadEventType.LOAD_AVAILABLE],
-                    )
-                    if message.event.group_iso_str == group_iso_str
-                ),
-                None,
+        load_available_event = backoff_retry(
+            func=lambda: get_load_available_event(
+                table=load_available_tbl, group_iso_str=group_iso_str
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
-        if group_available_msg:
+        if load_available_event:
             logger.info(
-                "%s event was received from queue %s for current group %s. Incoming file is"
-                " part of an ongoing, existing data load for group %s, and therefore does not"
-                " indicate the time of the first data load for this group. Stopping...",
-                PipelineLoadEventType.LOAD_AVAILABLE.value,
-                EVENTS_QUEUE_NAME,
+                "Item indicating first availability of data load was received from table %s for"
+                " current group %s. Incoming file is part of an ongoing, existing data load for"
+                " group %s, and therefore does not indicate the time of the first data load for"
+                " this group. Stopping...",
+                LOAD_AVAILABLE_DDB_TBL,
                 group_iso_str,
                 group_iso_str,
             )
             return
 
         logger.info(
-            "No %s event was retrieved from queue %s for current group %s, this"
-            " indicates that the incoming file is the start of a new data load for group %s."
-            ' Putting data to metric "%s" and corresponding metric "%s" with value %s',
-            PipelineLoadEventType.LOAD_AVAILABLE.value,
-            EVENTS_QUEUE_NAME,
+            "No event indicating data load availability was retrieved from table %s for current"
+            " group %s. This indicates that the incoming file is the start of a new data load for"
+            ' group %s. Putting data to metric "%s" and corresponding metric "%s" with value %s',
+            LOAD_AVAILABLE_DDB_TBL,
             group_iso_str,
             group_iso_str,
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
@@ -292,31 +280,20 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
         )
 
         logger.info(
-            "Posting %s event to %s SQS queue to indicate that data load has begun for"
-            " group %s and that no additional data should be put to the %s metric for this"
-            " group",
-            PipelineLoadEventType.LOAD_AVAILABLE.value,
-            EVENTS_QUEUE_NAME,
+            "Putting event indicating that the current data load, %s, has been made available to %s"
+            " table. No additional data should be put to the %s metric for this group",
             group_iso_str,
+            LOAD_AVAILABLE_DDB_TBL,
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
         )
         backoff_retry(
-            func=lambda: post_load_event(
-                queue=events_queue,
-                message=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                    date_time=s3_event_time,
-                    group_iso_str=group_iso_str,
-                    rif_type=rif_file_type,
-                ),
+            func=lambda: put_load_available_event(
+                table=load_available_tbl,
+                event=LoadAvailableEvent(date_time=s3_event_time, group_iso_str=group_iso_str),
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
-        logger.info(
-            "%s event posted to %s successfully",
-            PipelineLoadEventType.LOAD_AVAILABLE.value,
-            EVENTS_QUEUE_NAME,
-        )
+        logger.info("Event put to %s table successfully", LOAD_AVAILABLE_DDB_TBL)
     elif pipeline_data_status == PipelineDataStatus.DONE:
         logger.info(
             "Incoming file indicates data has been loaded. Calculating time deltas and checking"
@@ -329,38 +306,29 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
         )
 
         logger.info(
-            "Retrieving %s message from %s queue for %s RIF in %s group...",
-            PipelineLoadEventType.RIF_AVAILABLE.value,
-            EVENTS_QUEUE_NAME,
+            "Retrieving event indicating when %s RIF was loaded from %s table for current data load"
+            " %s...",
             rif_file_type.name,
+            RIF_AVAILABLE_DDB_TBL,
             group_iso_str,
         )
-        rif_available_msg = backoff_retry(
-            func=lambda: next(
-                (
-                    message
-                    for message in retrieve_load_event_msgs(
-                        queue=events_queue,
-                        timeout=10,
-                        type_filter=[PipelineLoadEventType.RIF_AVAILABLE],
-                    )
-                    if message.event.group_iso_str == group_iso_str
-                    and message.event.rif_type == rif_file_type
-                ),
-                None,
+        rif_available_event = backoff_retry(
+            func=lambda: get_rif_available_event(
+                table=rif_available_tbl, group_iso_str=group_iso_str, rif=rif_file_type
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
-        if rif_available_msg:
+        if rif_available_event:
             logger.info(
-                "%s message retrieved successfully for %s RIF in %s group; value: %s",
-                PipelineLoadEventType.RIF_AVAILABLE.value,
-                rif_file_type,
+                "Event indicating when %s RIF was first made available was retrieved successfully."
+                " %s RIF was made available to load for group %s at %s",
+                rif_file_type.name,
+                rif_file_type.name,
                 group_iso_str,
-                rif_available_msg,
+                str(rif_available_event.date_time),
             )
 
-            rif_last_available = rif_available_msg.event.date_time
+            rif_last_available = rif_available_event.date_time
             load_time_delta = s3_event_time - rif_last_available
 
             logger.info(
@@ -386,45 +354,13 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                 'Metrics put to "%s" successfully',
                 PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
             )
-
-            logger.info(
-                "Removing %s message for %s RIF with group %s from %s queue...",
-                PipelineLoadEventType.RIF_AVAILABLE.value,
-                rif_file_type,
-                group_iso_str,
-                EVENTS_QUEUE_NAME,
-            )
-            try:
-                backoff_retry(
-                    func=lambda: delete_load_msg_from_queue(
-                        queue=events_queue, message=rif_available_msg
-                    ),
-                    ignored_exceptions=common_unrecoverable_exceptions
-                    + [MessageFailedToDeleteException],
-                )
-                logger.info(
-                    "%s message for %s RIF with group %s removed from %s queue successfully",
-                    PipelineLoadEventType.RIF_AVAILABLE.value,
-                    rif_file_type,
-                    group_iso_str,
-                    EVENTS_QUEUE_NAME,
-                )
-            except MessageFailedToDeleteException:
-                logger.warning(
-                    "%s message for %s RIF with group %s was NOT removed from %s queue; ",
-                    PipelineLoadEventType.RIF_AVAILABLE.value,
-                    rif_file_type,
-                    group_iso_str,
-                    EVENTS_QUEUE_NAME,
-                    exc_info=True,
-                )
         else:
             logger.warning(
-                "No corresponding messages found for %s RIF in group %s in queue %s; no time delta"
+                "No corresponding event found for %s RIF in group %s in table %s; no time delta"
                 " metrics can be computed for this RIF. Continuing...",
-                rif_file_type.value,
+                rif_file_type.name,
                 group_iso_str,
-                EVENTS_QUEUE_NAME,
+                RIF_AVAILABLE_DDB_TBL,
             )
 
         logger.info("Checking if the pipeline load has completed...")
@@ -476,28 +412,19 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
         )
 
         logger.info(
-            "Retrieving %s message from %s queue for %s group...",
-            PipelineLoadEventType.LOAD_AVAILABLE.value,
-            EVENTS_QUEUE_NAME,
+            "Retrieving event indicating when current load/group, %s, was first made available to"
+            " load in S3 from %s table...",
             group_iso_str,
+            LOAD_AVAILABLE_DDB_TBL,
         )
-        load_available_msg = backoff_retry(
-            func=lambda: next(
-                (
-                    message
-                    for message in retrieve_load_event_msgs(
-                        queue=events_queue,
-                        timeout=10,
-                        type_filter=[PipelineLoadEventType.LOAD_AVAILABLE],
-                    )
-                    if message.event.group_iso_str == group_iso_str
-                ),
-                None,
+        load_available_event = backoff_retry(
+            func=lambda: get_load_available_event(
+                table=load_available_tbl, group_iso_str=group_iso_str
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
-        if load_available_msg:
-            first_available_time = load_available_msg.event.date_time
+        if load_available_event:
+            first_available_time = load_available_event.date_time
             full_load_time_delta = s3_event_time - first_available_time
 
             logger.info(
@@ -525,43 +452,12 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                 'Data put to metric "%s" successfully',
                 PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
             )
-
-            logger.info(
-                "Removing %s message for group %s from %s queue...",
-                PipelineLoadEventType.LOAD_AVAILABLE.value,
-                group_iso_str,
-                EVENTS_QUEUE_NAME,
-            )
-            try:
-                backoff_retry(
-                    func=lambda: delete_load_msg_from_queue(
-                        queue=events_queue, message=load_available_msg
-                    ),
-                    ignored_exceptions=common_unrecoverable_exceptions
-                    + [MessageFailedToDeleteException],
-                )
-                logger.info(
-                    "%s message for group %s removed from %s queue successfully",
-                    PipelineLoadEventType.RIF_AVAILABLE.value,
-                    group_iso_str,
-                    EVENTS_QUEUE_NAME,
-                )
-            except MessageFailedToDeleteException:
-                logger.warning(
-                    "%s message for %s RIF with group %s was NOT removed from %s queue; ",
-                    PipelineLoadEventType.LOAD_AVAILABLE.value,
-                    rif_file_type,
-                    group_iso_str,
-                    EVENTS_QUEUE_NAME,
-                    exc_info=True,
-                )
         else:
             logger.warning(
-                "No corresponding %s message found for group %s in queue %s; no time delta"
-                " metrics can be computed for this data load",
-                PipelineLoadEventType.LOAD_AVAILABLE.value,
+                "No event found for group %s in table %s; no time delta metrics can be computed for"
+                " this data load",
                 group_iso_str,
-                EVENTS_QUEUE_NAME,
+                LOAD_AVAILABLE_DDB_TBL,
             )
 
 
@@ -572,7 +468,9 @@ def handler(event: dict[Any, Any], context: LambdaContext):
     # retry. This is why this handler, and the functions it calls, raise exceptions that are not
     # explicitly handled.
     # See https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html#invocation-async-errors
-    if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, EVENTS_QUEUE_NAME]):
+    if not all(
+        [REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, RIF_AVAILABLE_DDB_TBL, LOAD_AVAILABLE_DDB_TBL]
+    ):
         raise RuntimeError("Not all necessary environment variables were defined")
 
     sns_event = SNSEvent(event)

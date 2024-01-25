@@ -44,7 +44,7 @@ boto3==1.34.21 \
     --hash=sha256:206e61ba1f8c830e5df0355606d178ad5bc970df12c4c318b021c71da410eb0c \
     --hash=sha256:88e3baeb53ae421aabd44bb49ebdd7122b74b53b0f437b0f3e17141f6744574a
     # via -r dev-requirements.in
-boto3-stubs[cloudwatch,s3,sqs]==1.34.21 \
+boto3-stubs[cloudwatch,dynamodb,s3]==1.34.21 \
     --hash=sha256:9e896da8dad7f7e19e1667d16821264f64d1fe9fea51f054095e5c58cd0f64d5 \
     --hash=sha256:b017b864614bde633a2a651a72750f74110b5210da2b71dd07ca49c38471be5b
     # via -r dev-requirements.in
@@ -99,13 +99,13 @@ mypy-boto3-cloudwatch==1.34.0 \
     --hash=sha256:be4a8c90446595c6970898682a5f6eedb4a6b1d2d0b0cbe57ed021c818c48e14 \
     --hash=sha256:cc18aa2b1a89eb4898a6c213db594abf62fe9afca6e8c6bd9aa04b9996193635
     # via boto3-stubs
+mypy-boto3-dynamodb==1.34.23 \
+    --hash=sha256:cb91ccdfce1bcf24e1cb1db82ab803302b3d6c7c2f2e94cdeba32f7b90cbe3e9 \
+    --hash=sha256:f87f595601120a3103a03a68437fffb2fba30adb1a963465cf2d8ae01e737d50
+    # via boto3-stubs
 mypy-boto3-s3==1.34.14 \
     --hash=sha256:71c39ab0623cdb442d225b71c1783f6a513cff4c4a13505a2efbb2e3aff2e965 \
     --hash=sha256:f9669ecd182d5bf3532f5f2dcc5e5237776afe157ad5a0b37b26d6bec5fcc432
-    # via boto3-stubs
-mypy-boto3-sqs==1.34.0 \
-    --hash=sha256:0bf8995f58919ab295398100e72eaa7da898adcfd9d339a42f3c48ce473419d5 \
-    --hash=sha256:94d8aea4ae75605f70e58e440d706e04d5c614101ddb2f0c73d306d776d10995
     # via boto3-stubs
 mypy-extensions==1.0.0 \
     --hash=sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d \
@@ -217,8 +217,8 @@ typing-extensions==4.9.0 \
     #   black
     #   boto3-stubs
     #   mypy-boto3-cloudwatch
+    #   mypy-boto3-dynamodb
     #   mypy-boto3-s3
-    #   mypy-boto3-sqs
     #   pydantic
     #   pylint
 urllib3==1.26.18 \

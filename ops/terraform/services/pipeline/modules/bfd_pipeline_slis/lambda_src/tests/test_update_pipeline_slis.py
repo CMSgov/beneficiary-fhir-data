@@ -4,14 +4,23 @@ import calendar
 import json
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Any, Protocol, Type
+from typing import Any, Type
 from unittest import mock
 
 import pytest
 
 from common import PipelineMetric, RifFileType
-from cw_metrics import MetricData
-from sqs import PipelineLoadEvent, PipelineLoadEventMessage, PipelineLoadEventType
+from cw_metrics import MetricData, put_metric_data
+from dynamo_db import (
+    LoadAvailableEvent,
+    RifAvailableEvent,
+    get_load_available_event,
+    get_rif_available_event,
+    put_load_available_event,
+    put_rif_available_event,
+)
+from update_pipeline_slis import _is_incoming_folder_empty  # type: ignore
+from update_pipeline_slis import _is_pipeline_load_complete  # type: ignore
 from update_pipeline_slis import handler
 
 DEFAULT_MOCK_GROUP_ISO_STR = "2024-01-12T00:00:00Z"
@@ -24,8 +33,17 @@ DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP = calendar.timegm(
 )
 DEFAULT_MOCK_EVENT_NAME = "ObjectCreated"
 DEFAULT_MOCK_BUCKET = "mock-bucket"
-DEFAULT_MOCK_QUEUE = "mock-queue"
 DEFAULT_MOCK_NAMESPACE = "mock-namespace"
+DEFAULT_MOCK_RIF_AVAIL_TBL = "mock-rif-available-tbl"
+DEFAULT_MOCK_LOAD_AVAIL_TBL = "mock-load-available-tbl"
+MODULE_UNDER_TEST = "update_pipeline_slis"
+IS_INCOMING_FOLDER_EMPTY_PATCH_PATH = f"{MODULE_UNDER_TEST}.{_is_incoming_folder_empty.__name__}"
+IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH = f"{MODULE_UNDER_TEST}.{_is_pipeline_load_complete.__name__}"
+PUT_METRIC_DATA_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_metric_data.__name__}"
+PUT_RIF_AVAILABLE_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_rif_available_event.__name__}"
+PUT_LOAD_AVAILABLE_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_load_available_event.__name__}"
+GET_RIF_AVAILABLE_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{get_rif_available_event.__name__}"
+GET_LOAD_AVAILABLE_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{get_load_available_event.__name__}"
 
 mock_boto3_client = mock.Mock()
 mock_boto3_resource = mock.Mock()
@@ -58,29 +76,6 @@ def generate_event(
     }
 
 
-def gen_log_regex(log_msg_regex: str) -> str:
-    return rf"(?m)(DEBUG|INFO|WARNING|ERROR):\w+:{log_msg_regex}"
-
-
-class MockedRetrieveLoadMsgs(Protocol):
-    def __call__(
-        self, type_filter: list[PipelineLoadEventType], *args: Any, **kwargs: dict[str, Any]
-    ) -> list[PipelineLoadEventMessage]: ...
-
-
-def gen_mocked_retrieve_load_msgs_side_effect(
-    mocked_queue_contents: list[PipelineLoadEventMessage],
-) -> "MockedRetrieveLoadMsgs":
-    def _generated_func(type_filter: list[PipelineLoadEventType], *_: Any, **__: dict[str, Any]):
-        return [
-            messages
-            for messages in mocked_queue_contents
-            if messages.event.event_type in type_filter
-        ]
-
-    return _generated_func
-
-
 def get_mocked_put_metrics(mock_put_metric_data: mock.Mock) -> list[MetricData]:
     # We're only testing the behavior of the handler, so we don't care about what put_metric_data
     # _actually_ does (and especially not what boto3 does), so we just extract the list of metrics
@@ -90,28 +85,31 @@ def get_mocked_put_metrics(mock_put_metric_data: mock.Mock) -> list[MetricData]:
     ]
 
 
-def get_mocked_put_events(mock_post_load_event: mock.Mock) -> list[PipelineLoadEvent]:
+def get_mocked_put_rif_avail_events(
+    mock_put_rif_available_event: mock.Mock,
+) -> list[RifAvailableEvent]:
     # Similar to the above helper function, we don't care about the behavior of the
     # "post_load_event" function, only what the Lambda handler calls it with. We extract those calls
     # out for assertions
-    return [x.kwargs["message"] for x in mock_post_load_event.call_args_list]
+    return [x.kwargs["event"] for x in mock_put_rif_available_event.call_args_list]
 
 
-def get_mocked_deleted_msgs(
-    mock_delete_load_msg: mock.Mock,
-) -> list[PipelineLoadEventMessage]:
-    return [x.kwargs["message"] for x in mock_delete_load_msg.call_args_list]
+def get_mocked_put_load_avail_events(
+    mock_put_load_available_event: mock.Mock,
+) -> list[LoadAvailableEvent]:
+    return [x.kwargs["event"] for x in mock_put_load_available_event.call_args_list]
 
 
 def utc_timestamp(date_time: datetime) -> int:
     return calendar.timegm(date_time.utctimetuple())
 
 
-@mock.patch("update_pipeline_slis.boto3.client", new=mock_boto3_client)
-@mock.patch("update_pipeline_slis.boto3.resource", new=mock_boto3_resource)
-@mock.patch("update_pipeline_slis.ETL_BUCKET_ID", DEFAULT_MOCK_BUCKET)
-@mock.patch("update_pipeline_slis.EVENTS_QUEUE_NAME", DEFAULT_MOCK_QUEUE)
-@mock.patch("update_pipeline_slis.METRICS_NAMESPACE", DEFAULT_MOCK_NAMESPACE)
+@mock.patch(f"{MODULE_UNDER_TEST}.boto3.client", new=mock_boto3_client)
+@mock.patch(f"{MODULE_UNDER_TEST}.boto3.resource", new=mock_boto3_resource)
+@mock.patch(f"{MODULE_UNDER_TEST}.ETL_BUCKET_ID", DEFAULT_MOCK_BUCKET)
+@mock.patch(f"{MODULE_UNDER_TEST}.METRICS_NAMESPACE", DEFAULT_MOCK_NAMESPACE)
+@mock.patch(f"{MODULE_UNDER_TEST}.RIF_AVAILABLE_DDB_TBL", DEFAULT_MOCK_RIF_AVAIL_TBL)
+@mock.patch(f"{MODULE_UNDER_TEST}.LOAD_AVAILABLE_DDB_TBL", DEFAULT_MOCK_LOAD_AVAIL_TBL)
 class TestUpdatePipelineSlisHandler:
     @pytest.mark.parametrize(
         "event,expected_error",
@@ -214,28 +212,27 @@ class TestUpdatePipelineSlisHandler:
         # Assert
         assert "ETL file or path does not match expected format, skipping" in caplog.text
 
-    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
-    @mock.patch("update_pipeline_slis.post_load_event", autospec=True)
-    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
+    @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(GET_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
     def test_it_handles_valid_first_incoming_event(
         self,
-        mock_retrieve_load_event_msgs: mock.Mock,
-        mock_post_load_event: mock.Mock,
+        mock_put_load_available_event: mock.Mock,
+        mock_get_load_available_event: mock.Mock,
+        mock_put_rif_available_event: mock.Mock,
         mock_put_metric_data: mock.Mock,
     ):
         # Arrange
         rif = RifFileType.BENEFICIARY
         folder = "Incoming"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        mock_retrieve_load_event_msgs.return_value = []
+        mock_get_load_available_event.return_value = None
 
         # Act
         handler(event=generate_event(key=key), context=mock_lambda_context)
 
         # Assert
-        # We put metrics for the RIF dimensioned by group and its data type, metrics for the
-        # load becoming first available dimensioned by the group, and a repeating metrics for the
-        # first available load metric.
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
         expected_put_metrics = [
             MetricData(
@@ -298,33 +295,40 @@ class TestUpdatePipelineSlisHandler:
         assert len(actual_put_metrics) == len(expected_put_metrics)
         assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
 
-        # We put events indicating when this RIF file was loaded as well as when the load was made
-        # first available to compute deltas later
-        actual_put_events = get_mocked_put_events(mock_post_load_event=mock_post_load_event)
-        expected_put_events = [
-            PipelineLoadEvent(
-                event_type=PipelineLoadEventType.RIF_AVAILABLE,
+        actual_put_rif_events = get_mocked_put_rif_avail_events(
+            mock_put_rif_available_event=mock_put_rif_available_event
+        )
+        expected_put_rif_events = [
+            RifAvailableEvent(
                 date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
                 group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                rif_type=rif,
-            ),
-            PipelineLoadEvent(
-                event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                rif_type=rif,
+                rif=rif,
             ),
         ]
-        assert len(actual_put_events) == len(expected_put_events)
-        assert all((expected in actual_put_events) for expected in expected_put_events)
+        assert len(actual_put_rif_events) == len(expected_put_rif_events)
+        assert all((expected in actual_put_rif_events) for expected in expected_put_rif_events)
 
-    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
-    @mock.patch("update_pipeline_slis.post_load_event", autospec=True)
-    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
+        actual_put_load_events = get_mocked_put_load_avail_events(
+            mock_put_load_available_event=mock_put_load_available_event
+        )
+        expected_put_load_events = [
+            LoadAvailableEvent(
+                date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+                group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
+            ),
+        ]
+        assert len(actual_put_load_events) == len(expected_put_load_events)
+        assert all((expected in actual_put_load_events) for expected in expected_put_load_events)
+
+    @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(GET_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
     def test_it_handles_valid_subsequent_incoming_events(
         self,
-        mock_retrieve_load_event_msgs: mock.Mock,
-        mock_post_load_event: mock.Mock,
+        mock_put_load_available_event: mock.Mock,
+        mock_get_load_available_event: mock.Mock,
+        mock_put_rif_available_event: mock.Mock,
         mock_put_metric_data: mock.Mock,
     ):
         # Arrange
@@ -332,27 +336,9 @@ class TestUpdatePipelineSlisHandler:
         event_time = DEFAULT_MOCK_EVENT_TIME_DATETIME + timedelta(hours=1)
         folder = "Incoming"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
-            mocked_queue_contents=[
-                PipelineLoadEventMessage(
-                    receipt_handle="1",
-                    event=PipelineLoadEvent(
-                        event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                        date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                        group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                        rif_type=RifFileType.BENEFICIARY,
-                    ),
-                ),
-                PipelineLoadEventMessage(
-                    receipt_handle="2",
-                    event=PipelineLoadEvent(
-                        event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                        date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                        group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                        rif_type=RifFileType.BENEFICIARY,
-                    ),
-                ),
-            ]
+        mock_get_load_available_event.return_value = LoadAvailableEvent(
+            date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+            group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
         )
 
         # Act
@@ -362,9 +348,6 @@ class TestUpdatePipelineSlisHandler:
         )
 
         # Assert
-        # We put metrics for the RIF dimensioned by group and its data type. No metrics
-        # should be put for the load, as the mocked queue indicates the load has already begun and
-        # those metrics have already been processed
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
         expected_put_metrics = [
             MetricData(
@@ -402,33 +385,33 @@ class TestUpdatePipelineSlisHandler:
         assert len(actual_put_metrics) == len(expected_put_metrics)
         assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
 
-        # We put a single event indicating when this CARRIER rif was loaded. No event should be
-        # posted for the load itself, as the mocked queue indicates that has already happened and
-        # the load was made available with the BENEFICIARY rif first
-        actual_put_events = get_mocked_put_events(mock_post_load_event=mock_post_load_event)
-        expected_put_events = [
-            PipelineLoadEvent(
-                event_type=PipelineLoadEventType.RIF_AVAILABLE,
+        actual_put_rif_events = get_mocked_put_rif_avail_events(
+            mock_put_rif_available_event=mock_put_rif_available_event
+        )
+        expected_put_rif_events = [
+            RifAvailableEvent(
                 date_time=event_time,
                 group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                rif_type=rif,
+                rif=rif,
             ),
         ]
-        assert len(actual_put_events) == len(expected_put_events)
-        assert all((expected in actual_put_events) for expected in expected_put_events)
+        assert len(actual_put_rif_events) == len(expected_put_rif_events)
+        assert all((expected in actual_put_rif_events) for expected in expected_put_rif_events)
 
-    @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
-    @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
-    @mock.patch("update_pipeline_slis._is_pipeline_load_complete", autospec=True)
-    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
-    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
+        assert mock_put_load_available_event.call_count == 0
+
+    @mock.patch(IS_INCOMING_FOLDER_EMPTY_PATCH_PATH, autospec=True)
+    @mock.patch(IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
+    @mock.patch(GET_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(GET_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
     def test_it_handles_nonfinal_done_event(
         self,
-        mock_retrieve_load_event_msgs: mock.Mock,
+        mock_get_load_available_event: mock.Mock,
+        mock_get_rif_available_event: mock.Mock,
         mock_put_metric_data: mock.Mock,
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
-        mock_delete_load_msg: mock.Mock,
         caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
@@ -437,28 +420,10 @@ class TestUpdatePipelineSlisHandler:
         event_time_delta = round((event_time - DEFAULT_MOCK_EVENT_TIME_DATETIME).total_seconds())
         folder = "Done"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        mocked_queued_events = [
-            PipelineLoadEventMessage(
-                receipt_handle="1",
-                event=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=rif,
-                ),
-            ),
-            PipelineLoadEventMessage(
-                receipt_handle="2",
-                event=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=rif,
-                ),
-            ),
-        ]
-        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
-            mocked_queue_contents=mocked_queued_events
+        mock_get_rif_available_event.return_value = RifAvailableEvent(
+            date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
+            group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
+            rif=rif,
         )
         mock_load_complete.return_value = False
         mock_incoming_empty.return_value = False
@@ -545,27 +510,20 @@ class TestUpdatePipelineSlisHandler:
         assert len(actual_put_metrics) == len(expected_put_metrics)
         assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
 
-        actual_deleted_msgs = get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg)
-        expected_deleted_msgs = [
-            x
-            for x in mocked_queued_events
-            if x.event.event_type == PipelineLoadEventType.RIF_AVAILABLE
-        ]
-        assert len(actual_deleted_msgs) == len(expected_deleted_msgs)
-        assert all((expected in actual_deleted_msgs) for expected in expected_deleted_msgs)
+        assert mock_get_load_available_event.call_count == 0
 
-    @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
-    @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
-    @mock.patch("update_pipeline_slis._is_pipeline_load_complete", autospec=True)
-    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
-    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
-    def test_it_handles_nonfinal_done_event_with_queue_missing_rif_available_event(
+    @mock.patch(IS_INCOMING_FOLDER_EMPTY_PATCH_PATH, autospec=True)
+    @mock.patch(IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
+    @mock.patch(GET_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(GET_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    def test_it_handles_nonfinal_done_event_with_table_missing_rif_available_event(
         self,
-        mock_retrieve_load_event_msgs: mock.Mock,
+        mock_get_load_available_event: mock.Mock,
+        mock_get_rif_available_event: mock.Mock,
         mock_put_metric_data: mock.Mock,
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
-        mock_delete_load_msg: mock.Mock,
         caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
@@ -573,23 +531,10 @@ class TestUpdatePipelineSlisHandler:
         rif_done_time = DEFAULT_MOCK_EVENT_TIME_DATETIME + timedelta(hours=12)
         folder = "Done"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        # Queue is intentionally missing RIF_AVAILABLE event indicating when the DME RIF was made
-        # available. This is invalid state, as we should never run into this situation, but _if_ we
-        # do then the Lambda should be able to still generate "data loaded" metrics
-        mocked_queued_events = [
-            PipelineLoadEventMessage(
-                receipt_handle="1",
-                event=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=RifFileType.BENEFICIARY,
-                ),
-            ),
-        ]
-        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
-            mocked_queue_contents=mocked_queued_events
-        )
+        # Table is intentionally missing event indicating when the DME RIF was made available. This
+        # is invalid state, as we should never run into this situation, but _if_ we do then the
+        # Lambda should be able to still generate "data loaded" metrics
+        mock_get_rif_available_event.return_value = None
         mock_load_complete.return_value = False
         mock_incoming_empty.return_value = False
 
@@ -602,9 +547,9 @@ class TestUpdatePipelineSlisHandler:
 
         # Assert
         assert (
-            f"No corresponding messages found for {rif.value} RIF in group"
-            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
-            " can be computed for this RIF. Continuing..."
+            f"No corresponding event found for {rif.name} RIF in group"
+            f" {DEFAULT_MOCK_GROUP_ISO_STR} in table {DEFAULT_MOCK_RIF_AVAIL_TBL}; no time delta"
+            " metrics can be computed for this RIF. Continuing..."
             in caplog.text
         )
 
@@ -645,20 +590,20 @@ class TestUpdatePipelineSlisHandler:
         assert len(actual_put_metrics) == len(expected_put_metrics)
         assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
 
-        assert mock_delete_load_msg.call_count == 0
+        assert mock_get_load_available_event.call_count == 0
 
-    @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
-    @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
-    @mock.patch("update_pipeline_slis._is_pipeline_load_complete", autospec=True)
-    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
-    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
+    @mock.patch(IS_INCOMING_FOLDER_EMPTY_PATCH_PATH, autospec=True)
+    @mock.patch(IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
+    @mock.patch(GET_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(GET_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
     def test_it_handles_final_done_event(
         self,
-        mock_retrieve_load_event_msgs: mock.Mock,
+        mock_get_load_available_event: mock.Mock,
+        mock_get_rif_available_event: mock.Mock,
         mock_put_metric_data: mock.Mock,
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
-        mock_delete_load_msg: mock.Mock,
     ):
         # Arrange
         rif = RifFileType.DME
@@ -670,28 +615,11 @@ class TestUpdatePipelineSlisHandler:
         )
         folder = "Done"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        mocked_queued_events = [
-            PipelineLoadEventMessage(
-                receipt_handle="1",
-                event=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=RifFileType.BENEFICIARY,
-                ),
-            ),
-            PipelineLoadEventMessage(
-                receipt_handle="2",
-                event=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                    date_time=rif_start_time,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=rif,
-                ),
-            ),
-        ]
-        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
-            mocked_queue_contents=mocked_queued_events
+        mock_get_rif_available_event.return_value = RifAvailableEvent(
+            date_time=rif_start_time, group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR, rif=rif
+        )
+        mock_get_load_available_event.return_value = LoadAvailableEvent(
+            date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME, group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR
         )
         mock_load_complete.return_value = True
         mock_incoming_empty.return_value = True
@@ -806,23 +734,18 @@ class TestUpdatePipelineSlisHandler:
         assert len(actual_put_metrics) == len(expected_put_metrics)
         assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
 
-        actual_deleted_msgs = get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg)
-        expected_deleted_msgs = mocked_queued_events
-        assert len(actual_deleted_msgs) == len(expected_deleted_msgs)
-        assert all((expected in actual_deleted_msgs) for expected in expected_deleted_msgs)
-
-    @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
-    @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
-    @mock.patch("update_pipeline_slis._is_pipeline_load_complete", autospec=True)
-    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
-    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
-    def test_it_handles_final_done_event_with_queue_missing_load_available_event(
+    @mock.patch(IS_INCOMING_FOLDER_EMPTY_PATCH_PATH, autospec=True)
+    @mock.patch(IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
+    @mock.patch(GET_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(GET_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    def test_it_handles_final_done_event_with_table_missing_load_available_event(
         self,
-        mock_retrieve_load_event_msgs: mock.Mock,
+        mock_get_load_available_event: mock.Mock,
+        mock_get_rif_available_event: mock.Mock,
         mock_put_metric_data: mock.Mock,
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
-        mock_delete_load_msg: mock.Mock,
         caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
@@ -832,24 +755,10 @@ class TestUpdatePipelineSlisHandler:
         rif_done_time_delta = round((rif_done_time - rif_start_time).total_seconds())
         folder = "Done"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        # Queue is intentionally missing RIF_AVAILABLE event indicating when the DME RIF was made
-        # available. This is invalid state, as we should never run into this situation, but _if_ we
-        # do then the Lambda should be able to still generate "fully loaded" metrics excluding any
-        # RIF-specific time delta metrics
-        mocked_queued_events = [
-            PipelineLoadEventMessage(
-                receipt_handle="1",
-                event=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.RIF_AVAILABLE,
-                    date_time=rif_start_time,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=rif,
-                ),
-            ),
-        ]
-        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
-            mocked_queue_contents=mocked_queued_events
+        mock_get_rif_available_event.return_value = RifAvailableEvent(
+            date_time=rif_start_time, group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR, rif=rif
         )
+        mock_get_load_available_event.return_value = None
         mock_load_complete.return_value = True
         mock_incoming_empty.return_value = True
 
@@ -862,11 +771,12 @@ class TestUpdatePipelineSlisHandler:
 
         # Assert
         assert (
-            f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found for group"
-            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
-            " can be computed for this data load"
+            f"No event found for group {DEFAULT_MOCK_GROUP_ISO_STR} in table"
+            f" {DEFAULT_MOCK_LOAD_AVAIL_TBL}; no time delta metrics can be computed for this data"
+            " load"
             in caplog.text
         )
+
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
         expected_put_metrics = [
             MetricData(
@@ -956,23 +866,18 @@ class TestUpdatePipelineSlisHandler:
         assert len(actual_put_metrics) == len(expected_put_metrics)
         assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
 
-        actual_deleted_msgs = get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg)
-        expected_deleted_msgs = mocked_queued_events
-        assert len(actual_deleted_msgs) == len(expected_deleted_msgs)
-        assert all((expected in actual_deleted_msgs) for expected in expected_deleted_msgs)
-
-    @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
-    @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
-    @mock.patch("update_pipeline_slis._is_pipeline_load_complete", autospec=True)
-    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
-    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
-    def test_it_handles_final_done_event_with_queue_missing_rif_available_event(
+    @mock.patch(IS_INCOMING_FOLDER_EMPTY_PATCH_PATH, autospec=True)
+    @mock.patch(IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
+    @mock.patch(GET_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(GET_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    def test_it_handles_final_done_event_with_table_missing_rif_available_event(
         self,
-        mock_retrieve_load_event_msgs: mock.Mock,
+        mock_get_load_available_event: mock.Mock,
+        mock_get_rif_available_event: mock.Mock,
         mock_put_metric_data: mock.Mock,
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
-        mock_delete_load_msg: mock.Mock,
         caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
@@ -983,22 +888,12 @@ class TestUpdatePipelineSlisHandler:
         )
         folder = "Done"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        # Queue is intentionally missing RIF_AVAILABLE event indicating when the DME RIF was made
-        # available. This is invalid state, as we should never run into this situation, but _if_ we
-        # do then the Lambda should be able to still generate "fully loaded" metrics
-        mocked_queued_events = [
-            PipelineLoadEventMessage(
-                receipt_handle="1",
-                event=PipelineLoadEvent(
-                    event_type=PipelineLoadEventType.LOAD_AVAILABLE,
-                    date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME,
-                    group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR,
-                    rif_type=RifFileType.BENEFICIARY,
-                ),
-            ),
-        ]
-        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
-            mocked_queue_contents=mocked_queued_events
+        # Table is intentionally missing event indicating when the DME RIF was made available. This
+        # is invalid state, as we should never run into this situation, but _if_ we do then the
+        # Lambda should be able to still generate "fully loaded" metrics
+        mock_get_rif_available_event.return_value = None
+        mock_get_load_available_event.return_value = LoadAvailableEvent(
+            date_time=DEFAULT_MOCK_EVENT_TIME_DATETIME, group_iso_str=DEFAULT_MOCK_GROUP_ISO_STR
         )
         mock_load_complete.return_value = True
         mock_incoming_empty.return_value = True
@@ -1012,11 +907,12 @@ class TestUpdatePipelineSlisHandler:
 
         # Assert
         assert (
-            f"No corresponding messages found for {rif.value} RIF in group"
-            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
-            " can be computed for this RIF. Continuing..."
+            f"No corresponding event found for {rif.name} RIF in group"
+            f" {DEFAULT_MOCK_GROUP_ISO_STR} in table {DEFAULT_MOCK_RIF_AVAIL_TBL}; no time delta"
+            " metrics can be computed for this RIF. Continuing..."
             in caplog.text
         )
+
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
         expected_put_metrics = [
             MetricData(
@@ -1089,23 +985,18 @@ class TestUpdatePipelineSlisHandler:
         assert len(actual_put_metrics) == len(expected_put_metrics)
         assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
 
-        actual_deleted_msgs = get_mocked_deleted_msgs(mock_delete_load_msg=mock_delete_load_msg)
-        expected_deleted_msgs = mocked_queued_events
-        assert len(actual_deleted_msgs) == len(expected_deleted_msgs)
-        assert all((expected in actual_deleted_msgs) for expected in expected_deleted_msgs)
-
-    @mock.patch("update_pipeline_slis.delete_load_msg_from_queue", autospec=True)
-    @mock.patch("update_pipeline_slis._is_incoming_folder_empty", autospec=True)
-    @mock.patch("update_pipeline_slis._is_pipeline_load_complete", autospec=True)
-    @mock.patch("update_pipeline_slis.put_metric_data", autospec=True)
-    @mock.patch("update_pipeline_slis.retrieve_load_event_msgs", autospec=True)
-    def test_it_handles_final_done_event_with_queue_missing_both_events(
+    @mock.patch(IS_INCOMING_FOLDER_EMPTY_PATCH_PATH, autospec=True)
+    @mock.patch(IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH, autospec=True)
+    @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
+    @mock.patch(GET_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    @mock.patch(GET_LOAD_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
+    def test_it_handles_final_done_event_with_table_missing_both_events(
         self,
-        mock_retrieve_load_event_msgs: mock.Mock,
+        mock_get_load_available_event: mock.Mock,
+        mock_get_rif_available_event: mock.Mock,
         mock_put_metric_data: mock.Mock,
         mock_load_complete: mock.Mock,
         mock_incoming_empty: mock.Mock,
-        mock_delete_load_msg: mock.Mock,
         caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
@@ -1113,12 +1004,11 @@ class TestUpdatePipelineSlisHandler:
         rif_done_time = DEFAULT_MOCK_EVENT_TIME_DATETIME + timedelta(hours=12)
         folder = "Done"
         key = f"{folder}/{DEFAULT_MOCK_GROUP_ISO_STR}/{rif.value}.txt"
-        # Queue is intentionally missing _both_ RIF_AVAILABLE and LOAD_AVAILABLE events. This is the
-        # worst-case scenario, and should never happen, but we should still see "data loaded" and
-        # "fully loaded" metrics be generated for CloudWatch
-        mock_retrieve_load_event_msgs.side_effect = gen_mocked_retrieve_load_msgs_side_effect(
-            mocked_queue_contents=[]
-        )
+        # Table is intentionally missing _both_ events. This is the worst-case scenario, and should
+        # never happen, but we should still see "data loaded" and "fully loaded" metrics be
+        # generated for CloudWatch
+        mock_get_rif_available_event.return_value = None
+        mock_get_load_available_event.return_value = None
         mock_load_complete.return_value = True
         mock_incoming_empty.return_value = True
 
@@ -1131,15 +1021,15 @@ class TestUpdatePipelineSlisHandler:
 
         # Assert
         assert (
-            f"No corresponding messages found for {rif.value} RIF in group"
-            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
-            " can be computed for this RIF. Continuing..."
+            f"No event found for group {DEFAULT_MOCK_GROUP_ISO_STR} in table"
+            f" {DEFAULT_MOCK_LOAD_AVAIL_TBL}; no time delta metrics can be computed for this data"
+            " load"
             in caplog.text
         )
         assert (
-            f"No corresponding {PipelineLoadEventType.LOAD_AVAILABLE.value} message found for group"
-            f" {DEFAULT_MOCK_GROUP_ISO_STR} in queue {DEFAULT_MOCK_QUEUE}; no time delta metrics"
-            " can be computed for this data load"
+            f"No corresponding event found for {rif.name} RIF in group"
+            f" {DEFAULT_MOCK_GROUP_ISO_STR} in table {DEFAULT_MOCK_RIF_AVAIL_TBL}; no time delta"
+            " metrics can be computed for this RIF. Continuing..."
             in caplog.text
         )
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
@@ -1199,5 +1089,3 @@ class TestUpdatePipelineSlisHandler:
         ]
         assert len(actual_put_metrics) == len(expected_put_metrics)
         assert all((expected in actual_put_metrics) for expected in expected_put_metrics)
-
-        assert mock_delete_load_msg.call_count == 0
