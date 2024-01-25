@@ -8,6 +8,7 @@ locals {
   admin_users = split(" ", data.aws_ssm_parameter.medicare_opt_out_config_admin_users.value)
 }
 
+/* TODO: Removed following BFD-3084 due to issues with KMS key policies
 module "medicare_opt_out" {
   count  = local.is_ephemeral_env ? 0 : 1
   source = "../../modules/resources/s3_pii"
@@ -22,3 +23,4 @@ module "medicare_opt_out" {
     account_id  = local.account_id
   }
 }
+*/
