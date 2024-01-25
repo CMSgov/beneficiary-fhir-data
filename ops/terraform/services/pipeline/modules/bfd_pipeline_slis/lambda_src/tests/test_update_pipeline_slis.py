@@ -89,8 +89,8 @@ def get_mocked_put_rif_avail_events(
     mock_put_rif_available_event: mock.Mock,
 ) -> list[RifAvailableEvent]:
     # Similar to the above helper function, we don't care about the behavior of the
-    # "post_load_event" function, only what the Lambda handler calls it with. We extract those calls
-    # out for assertions
+    # "put_rif_available_event" function, only what the Lambda handler calls it with. We extract
+    # those calls out for assertions
     return [x.kwargs["event"] for x in mock_put_rif_available_event.call_args_list]
 
 
