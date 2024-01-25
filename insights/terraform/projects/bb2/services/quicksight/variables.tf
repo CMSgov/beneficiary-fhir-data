@@ -28,6 +28,19 @@ variable "datasets_global_state_per_app_map" {
   }
 }
 
+variable "analysis_prod_applications_map" {
+  description = "BB2-PROD-APPLICAITONS analysis workspace vars map"
+
+  type = map(object({
+    id                    = string
+    name                  = string
+    first_app_name_select = string
+  }))
+
+  default = {
+  }
+}
+
 variable "quicksight_groupname_readers" {
   description = "Quicksight readers group name"
   type        = string

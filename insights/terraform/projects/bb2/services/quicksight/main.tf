@@ -28,6 +28,13 @@ locals {
       data_source_name      = ""
       physical_table_map_id = ""
   })
+  analysis_prod_applications_vars = lookup(var.analysis_prod_applications_map, terraform.workspace,
+    {
+      id                    = ""
+      name                  = ""
+      first_app_name_select = ""
+  })
+
 }
 
 module "quicksight-dataset-global-state" {
@@ -55,5 +62,17 @@ module "quicksight-dataset-global-state-per-app" {
   quicksight_groupname_readers = var.quicksight_groupname_readers
   quicksight_groupname_owners  = var.quicksight_groupname_owners
   quicksight_groupname_admins  = var.quicksight_groupname_admins
+
+}
+
+module "quicksight-analysis-prod-applications" {
+  source = "./modules/quicksight-analysis-prod-applications"
+
+  id                          = local.analysis_prod_applications_vars.id
+  name                        = local.analysis_prod_applications_vars.name
+  first_app_name_select       = local.analysis_prod_applications_vars.first_app_name_select
+  data_set_id                 = local.dataset_per_app_vars.id
+  quicksight_groupname_owners = var.quicksight_groupname_owners
+  quicksight_groupname_admins = var.quicksight_groupname_admins
 
 }
