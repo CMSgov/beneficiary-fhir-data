@@ -21,6 +21,8 @@ import java.util.Base64;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionException;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -29,6 +31,7 @@ import software.amazon.awssdk.core.exception.SdkClientException;
  * Represents an asynchronous operation to download the contents of a specific {@link
  * DataSetManifestEntry} from S3.
  */
+@AllArgsConstructor
 public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDownloadResult> {
   private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
@@ -43,25 +46,6 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 
   /** The manifest data. */
   private final DataSetManifestEntry manifestEntry;
-
-  /**
-   * Constructs a new {@link ManifestEntryDownloadTask}.
-   *
-   * @param s3TaskManager the {@link S3TaskManager} to use
-   * @param appMetrics the {@link MetricRegistry} for the overall application
-   * @param options the {@link ExtractionOptions} to use
-   * @param manifestEntry the {@link DataSetManifestEntry} to download the file for
-   */
-  public ManifestEntryDownloadTask(
-      S3TaskManager s3TaskManager,
-      MetricRegistry appMetrics,
-      ExtractionOptions options,
-      DataSetManifestEntry manifestEntry) {
-    this.s3TaskManager = s3TaskManager;
-    this.appMetrics = appMetrics;
-    this.options = options;
-    this.manifestEntry = manifestEntry;
-  }
 
   /** Performs the download and returns the result. {@inheritDoc} */
   @Override
@@ -146,6 +130,8 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
   }
 
   /** Represents the results of a {@link ManifestEntryDownloadTask}. */
+  @Getter
+  @AllArgsConstructor
   public static final class ManifestEntryDownloadResult {
     /** The {@link DataSetManifestEntry} whose file was downloaded. */
     private final DataSetManifestEntry manifestEntry;
@@ -155,34 +141,5 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
      * should be deleted once it is no longer needed, to prevent disk space usage leaks.
      */
     private final Path localDownload;
-
-    /**
-     * Constructs a new {@link ManifestEntryDownloadResult} instance.
-     *
-     * @param manifestEntry the value to use for {@link #getManifestEntry()}
-     * @param localDownload the value to use for {@link #getLocalDownload()}
-     */
-    public ManifestEntryDownloadResult(DataSetManifestEntry manifestEntry, Path localDownload) {
-      this.manifestEntry = manifestEntry;
-      this.localDownload = localDownload;
-    }
-
-    /**
-     * Gets the {@link #manifestEntry}.
-     *
-     * @return the manifest data
-     */
-    public DataSetManifestEntry getManifestEntry() {
-      return manifestEntry;
-    }
-
-    /**
-     * Gets the {@link #localDownload}.
-     *
-     * @return the path to the local manifest copy
-     */
-    public Path getLocalDownload() {
-      return localDownload;
-    }
   }
 }

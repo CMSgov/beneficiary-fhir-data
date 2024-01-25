@@ -5,5 +5,5 @@
   import_tasks: install-python3.yml
 - name: Install Utilities
   import_tasks: install-utilities.yml
-- name: Install DS Agent hotfix
-  import_tasks: install-ds-agent-hotfix.yml
+- name: Install security updates
+  import_tasks: install-security-updates.yml

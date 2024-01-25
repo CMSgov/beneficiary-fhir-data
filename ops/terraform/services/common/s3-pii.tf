@@ -15,7 +15,7 @@ module "medicare_opt_out" {
 
   pii_bucket_config = {
     name        = local.name
-    log_bucket  = local.logging_bucket
+    log_bucket  = local.log_bucket
     read_arns   = local.read_arns
     write_accts = local.write_accts
     admin_arns  = local.admin_users
