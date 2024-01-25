@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -77,7 +78,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
-
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    * NOTE: For v2, HICN no longer supported.
@@ -187,16 +187,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
-    Timer.Context timerContext =
-        CommonTransformerUtils.createMetricsTimer(
-            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
-
     Beneficiary beneficiary =
         CommonQueries.findBeneficiary(
             entityManager,
-            timerContext,
+            metricRegistry,
             beneId,
             true,
+            getClass().getSimpleName(),
             String.format(
                 "bene_by_id_include_%s",
                 String.join(
@@ -658,6 +655,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * There may be many different methods annotated with this {@link Search} annotation, to support
    * many different search criteria.
    *
+   * <p>This method supports both HTTP GET with URL parameters, and HTTP POST with parameters
+   * specified within the POST body.
+   *
    * @param identifier an {@link Identifier} {@link TokenParam} for the {@link
    *     Patient#getIdentifier()} to try and find a matching {@link Patient} for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
@@ -689,9 +689,26 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
 
-    if (identifier.getQueryParameterQualifier() != null) {
-      throw new InvalidRequestException(
-          "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
+    if (identifier != null) {
+      if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem())) {
+        throw new InvalidRequestException(
+            "Unsupported identifier system: " + identifier.getSystem());
+      }
+      // in theory, since we take measures to obfuscate the us-mbi value in our logging, we could
+      // support HTTP GET; however, we'll enforce only supporting POST to provide extra protection
+      // of any use of an MBI lookup.
+      if (identifier
+              .getSystem()
+              .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
+          && requestDetails.getRequestType() != RequestTypeEnum.POST) {
+        throw new InvalidRequestException(
+            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED
+                + " is only supported via POST request");
+      }
+      if (identifier.getQueryParameterQualifier() != null) {
+        throw new InvalidRequestException(
+            "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
+      }
     }
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
@@ -704,6 +721,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     List<IBaseResource> patients =
         fetchPatientResourceByIdentifer(identifier, lastUpdated, requestHeader);
+
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
@@ -774,7 +792,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
               ? Collections.singletonList(patient)
               : Collections.emptyList();
 
-    } catch (ResourceNotFoundException e) {
+    } catch (ResourceNotFoundException | NoResultException e) {
       patients = new LinkedList<>();
     }
     return patients;
@@ -804,32 +822,17 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       throw new InvalidRequestException("lookup value cannot be null/empty");
     }
 
-    Timer.Context queryContextTimer =
-        CommonTransformerUtils.createMetricsTimer(
-            metricRegistry,
-            getClass().getSimpleName(),
-            "query",
-            "bene_by_" + lookupType,
-            lookupType + "s_from_beneficiarieshistory");
-
     long beneId =
         CommonQueries.findBeneficiaryIdentifier(
-            entityManager, queryContextTimer, lookupType, lookupValue);
-
-    queryContextTimer =
-        CommonTransformerUtils.createMetricsTimer(
-            metricRegistry,
-            getClass().getSimpleName(),
-            "query",
-            "bene_by_" + lookupType,
-            lookupType + "s_from_beneficiarieshistory");
+            entityManager, metricRegistry, lookupType, lookupValue, getClass().getSimpleName());
 
     Beneficiary beneficiary =
         CommonQueries.findBeneficiary(
             entityManager,
-            queryContextTimer,
+            metricRegistry,
             beneId,
             true, // for v2, always include historical identifiers
+            getClass().getSimpleName(),
             String.format(
                 "bene_by_id_include_%s",
                 String.join(
