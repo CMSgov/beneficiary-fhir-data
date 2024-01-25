@@ -20,6 +20,8 @@ import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
+import gov.cms.bfd.sharedutils.sqs.SqsDao;
+import gov.cms.bfd.sharedutils.sqs.SqsEventPublisher;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -236,7 +238,8 @@ public final class MigratorApp {
     } else {
       final var sqsDao = new SqsDao(sqsClient);
       final var queueUrl = sqsDao.lookupQueueUrl(appConfig.getSqsQueueName());
-      final var sqsProgressReporter = new SqsProgressReporter(sqsDao, queueUrl);
+      final var eventPublisher = new SqsEventPublisher(sqsDao, queueUrl);
+      final var sqsProgressReporter = new MigratorProgressReporter(eventPublisher);
       progressConsumer = sqsProgressReporter::reportMigratorProgress;
     }
     return new MigratorProgressTracker(progressConsumer);

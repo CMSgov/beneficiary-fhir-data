@@ -68,7 +68,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
   private static final String NON_BLACKLISTED_IC_CODE = "111111";
 
   /** A blacklisted DRG diagnosis code. */
-  private static final String BLACKLISTED_DRG_DIAGNOSIS_CODE = "522";
+  private static final String BLACKLISTED_DRG_DIAGNOSIS_CODE = "895";
 
   /** A non-blacklisted DRG diagnosis code. */
   private static final String NON_BLACKLISTED_DRG_DIAGNOSIS_CODE = "1111111";

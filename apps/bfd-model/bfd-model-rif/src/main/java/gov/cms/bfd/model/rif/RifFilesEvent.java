@@ -7,10 +7,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import lombok.Getter;
 
 /**
  * Models a RIF file event, in which a new set of RIF files have been made available for processing.
  */
+@Getter
 public final class RifFilesEvent {
   /** The timestamp that this event was fired at. */
   private final Instant timestamp;
@@ -24,9 +26,9 @@ public final class RifFilesEvent {
   /**
    * Constructs a new {@link RifFilesEvent} instance.
    *
-   * @param timestamp the value to use for {@link #getTimestamp()}
-   * @param syntheticData the value to use for {@link #isSyntheticData()}
-   * @param files the value to use for {@link #getFileEvents()}
+   * @param timestamp the value to use for getTimestamp()
+   * @param syntheticData the value to use for isSyntheticData()
+   * @param files the value to use for getFileEvents()
    */
   public RifFilesEvent(Instant timestamp, boolean syntheticData, List<RifFile> files) {
     if (timestamp == null) throw new IllegalArgumentException();
@@ -77,39 +79,12 @@ public final class RifFilesEvent {
   /**
    * Constructs a new {@link RifFilesEvent} instance.
    *
-   * @param timestamp the value to use for {@link #getTimestamp()}
-   * @param syntheticData the value to use for {@link #isSyntheticData()}
-   * @param files the value to use for {@link #getFileEvents()}
+   * @param timestamp the value to use for getTimestamp()
+   * @param syntheticData the value to use for isSyntheticData()
+   * @param files the value to use for getFileEvents()
    */
   public RifFilesEvent(Instant timestamp, boolean syntheticData, RifFile... files) {
     this(timestamp, syntheticData, Arrays.asList(files));
-  }
-
-  /**
-   * Gets the {@link #timestamp}.
-   *
-   * @return the timestamp that this event was fired at
-   */
-  public Instant getTimestamp() {
-    return timestamp;
-  }
-
-  /**
-   * Gets the {@link #syntheticData}.
-   *
-   * @return the boolean denoting the data as synthetic (true) or not (false)
-   */
-  public boolean isSyntheticData() {
-    return syntheticData;
-  }
-
-  /**
-   * Gets the {@link #fileEvents}.
-   *
-   * @return the {@link RifFileEvent}s contained in this {@link RifFilesEvent}
-   */
-  public List<RifFileEvent> getFileEvents() {
-    return fileEvents;
   }
 
   /** {@inheritDoc} */

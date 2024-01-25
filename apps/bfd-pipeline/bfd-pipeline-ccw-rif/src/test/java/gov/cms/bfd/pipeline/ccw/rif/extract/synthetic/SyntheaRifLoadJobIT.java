@@ -12,6 +12,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
@@ -34,13 +35,20 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
+@ExtendWith(MockitoExtension.class)
 final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
+
+  /** Used to capture status updates from the job. */
+  @Mock private CcwRifLoadJobStatusReporter statusReporter;
 
   /**
    * Ensures that each test case here starts with a clean/empty database, with the right schema.
@@ -146,7 +154,8 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               s3TaskManager,
               listener,
               false,
-              Optional.empty());
+              Optional.empty(),
+              statusReporter);
       // Process dataset
       ccwJob.call();
 
@@ -279,7 +288,8 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               s3TaskManager,
               listener,
               true, // run in idempotent mode
-              Optional.empty());
+              Optional.empty(),
+              statusReporter);
       // Process dataset
       ccwJob.call();
 

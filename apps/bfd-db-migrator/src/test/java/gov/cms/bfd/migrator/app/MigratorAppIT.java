@@ -1,5 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
+import static gov.cms.bfd.SqsTestUtils.createSqsClientForLocalStack;
 import static gov.cms.bfd.migrator.app.AppConfiguration.SSM_PATH_SQS_QUEUE_NAME;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_BAD_CONFIG;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_HIBERNATE_VALIDATION;
@@ -23,8 +24,10 @@ import gov.cms.bfd.AbstractLocalStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.FileBasedAssertionHelper;
-import gov.cms.bfd.migrator.app.SqsProgressReporter.SqsProgressMessage;
+import gov.cms.bfd.migrator.app.MigratorProgressReporter.SqsProgressMessage;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.json.JsonConverter;
+import gov.cms.bfd.sharedutils.sqs.SqsDao;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -125,7 +128,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   /** Create our progress queue in the localstack SQS service before each test. */
   @BeforeEach
   void createQueue() {
-    sqsDao = new SqsDao(SqsDaoIT.createSqsClientForLocalStack(localstack));
+    sqsDao = new SqsDao(createSqsClientForLocalStack(localstack));
     sqsDao.createQueue(SQS_QUEUE_NAME);
   }
 
@@ -397,11 +400,13 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
    * @return the list
    */
   private List<SqsProgressMessage> readProgressMessagesFromSQSQueue() {
+    final JsonConverter jsonConverter = JsonConverter.minimalInstance();
     final var queueUrl = sqsDao.lookupQueueUrl(SQS_QUEUE_NAME);
     var messages = new ArrayList<SqsProgressMessage>();
     sqsDao.processAllMessages(
         queueUrl,
-        messageJson -> messages.add(SqsProgressReporter.convertJsonToMessage(messageJson)));
+        messageJson ->
+            messages.add(jsonConverter.jsonToObject(messageJson, SqsProgressMessage.class)));
     messages.sort(SqsProgressMessage.SORT_BY_IDS);
     return messages;
   }

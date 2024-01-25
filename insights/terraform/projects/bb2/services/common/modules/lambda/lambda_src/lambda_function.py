@@ -121,6 +121,8 @@ def transformLogEvent(log_event):
     message_dict = event_dict.get("message", None)
 
     if message_dict is None:
+        # This condition is generally caused by non-Django format logging,
+        #   like ngnix & uwsgi python exceptions.
         message_dict = {
             "type": "bfd-insights-log-lambda-error",
             "mesg": "Warning message_dict is None. Could not parse original JSON message.",
@@ -128,7 +130,15 @@ def transformLogEvent(log_event):
         }
 
     # Update with message fields
-    out_dict.update(message_dict)
+    try:
+        out_dict.update(message_dict)
+    except ValueError:
+        # BB2-1809: Log and skip record with value error
+        message_dict = {
+            "type": "bfd-insights-log-lambda-error",
+            "mesg": "Warning message_dict had a ValueError. Could not parse original JSON message.",
+        }
+        out_dict.update(message_dict)
 
     return json.dumps(out_dict) + "\n"
 

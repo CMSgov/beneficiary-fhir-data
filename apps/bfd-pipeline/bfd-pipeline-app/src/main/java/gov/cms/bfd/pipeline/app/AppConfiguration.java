@@ -168,6 +168,11 @@ public final class AppConfiguration extends BaseAppConfiguration {
       "ccw/job/claims/queue_size_multiple";
 
   /**
+   * Path of the SSM parameter containing name of SQS queue to which progress messages can be sent.
+   */
+  public static final String CCW_JOB_SQS_STATUS_QUEUE_NAME = "ccw/job/sqs/status_queue_name";
+
+  /**
    * The path of the SSM parameter that should be used to indicate whether or not to configure the
    * RDA GRPC data load job. Defaults to false to not run the job unless enabled.
    */
@@ -634,7 +639,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
         config
             .positiveIntOptionZeroOK(SSM_PATH_CCW_RIF_JOB_INTERVAL_SECONDS)
             .map(Duration::ofSeconds);
-    return new CcwRifLoadOptions(extractionOptions, loadOptions, runInterval);
+    final Optional<String> sqsQueueName = config.stringOption(CCW_JOB_SQS_STATUS_QUEUE_NAME);
+    return new CcwRifLoadOptions(extractionOptions, loadOptions, runInterval, sqsQueueName);
   }
 
   /**
