@@ -1,7 +1,9 @@
+# pylint: disable=missing-class-docstring,missing-function-docstring,missing-module-docstring
+# pylint: disable=too-many-lines,too-many-arguments,too-many-public-methods
 import calendar
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
-from typing import Any, Protocol
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -33,14 +35,12 @@ DEFAULT_DYNAMO_EXPIRATION_UTC_TIMESTAMP = calendar.timegm(
 DEFAULT_RIF_TYPE = RifFileType.BENEFICIARY
 
 
-class MockedTablePutItem(Protocol):
-    def __call__(self, Item: dict[str, Any], *args: Any, **kwargs: dict[str, Any]): ...
-
-
 def gen_mocked_put_item_side_effect(
     mocked_table_content: list[dict[str, Any]],
 ):
-    def _generated_func(Item: dict[str, Any], *_: Any, **__: dict[str, Any]):
+    def _generated_func(
+        Item: dict[str, Any], *_: Any, **__: dict[str, Any]
+    ):  # pylint: disable=invalid-name
         mocked_table_content.append(Item)
 
     return _generated_func
