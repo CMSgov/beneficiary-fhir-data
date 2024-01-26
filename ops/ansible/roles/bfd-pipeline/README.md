@@ -53,11 +53,11 @@ Here's an example of how to apply this role to the `etlbox` host in an Ansible p
           vars:
             data_pipeline_zip: /home/karlmdavis/workspaces/cms/beneficiary-fhir-data.git/apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-2.0.0-SNAPSHOT.zip
             data_pipeline_s3_bucket: name-of-the-s3-bucket-with-the-data-to-process
-            data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
-            data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
+            data_pipeline_hicn_hash_iterations: "{{ ssm_data_pipeline_hicn_hash_iterations }}"
+            data_pipeline_hicn_hash_pepper: "{{ ssm_data_pipeline_hicn_hash_pepper }}"
             data_pipeline_db_url: 'jdbc:postgresql://mydbserver.example.com:5432/mydb'
-            data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
-            data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
+            data_pipeline_db_username: "{{ ssm_data_pipeline_db_username }}"
+            data_pipeline_db_password: "{{ ssm_data_pipeline_db_password }}"
 
 Running the Tests
 -----------------
