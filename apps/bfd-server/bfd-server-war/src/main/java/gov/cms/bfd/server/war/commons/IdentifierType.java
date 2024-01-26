@@ -1,9 +1,14 @@
 package gov.cms.bfd.server.war.commons;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * Enumerates the identifier types of values that for different code sets and their corresponding
  * system, code, and display values.
  */
+@Getter
+@AllArgsConstructor
 public enum IdentifierType {
   /** Represents the NPI code set. */
   NPI(
@@ -44,44 +49,4 @@ public enum IdentifierType {
 
   /** The display for this code set. */
   public final String display;
-
-  /**
-   * Instantiates a new Identifier type.
-   *
-   * @param system the system
-   * @param code the code
-   * @param display the display
-   */
-  IdentifierType(String system, String code, String display) {
-    this.system = system;
-    this.code = code;
-    this.display = display;
-  }
-
-  /**
-   * Gets the {@link #system}.
-   *
-   * @return the string for the corresponding system for the enum value
-   */
-  public String getSystem() {
-    return system;
-  }
-
-  /**
-   * Gets the {@link #code}.
-   *
-   * @return the string for the corresponding code for the enum value
-   */
-  public String getCode() {
-    return code;
-  }
-
-  /**
-   * Gets the {@link #display}.
-   *
-   * @return the string for the corresponding display for the enum value
-   */
-  public String getDisplay() {
-    return display;
-  }
 }

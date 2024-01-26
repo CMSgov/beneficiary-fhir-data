@@ -15,6 +15,9 @@ spec:
 """
         }
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+    }
     triggers {
         cron('0 20 * * 1-5')
     }
