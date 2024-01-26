@@ -35,15 +35,10 @@ DEFAULT_DYNAMO_EXPIRATION_UTC_TIMESTAMP = calendar.timegm(
 DEFAULT_RIF_TYPE = RifFileType.BENEFICIARY
 
 
-def gen_mocked_put_item_side_effect(
-    mocked_table_content: list[dict[str, Any]],
-):
-    def _generated_func(
-        Item: dict[str, Any], *_: Any, **__: dict[str, Any]
-    ):  # pylint: disable=invalid-name
-        mocked_table_content.append(Item)
-
-    return _generated_func
+def get_mocked_put_item_items(
+    mock_put_item: mock.Mock,
+) -> list[dict[str, Any]]:
+    return [x.kwargs["Item"] for x in mock_put_item.call_args_list]
 
 
 @pytest.mark.parametrize(
@@ -107,10 +102,6 @@ def test_get_rif_available_event_returns_valid_event():
 def test_put_rif_available_event_puts_valid_event():
     # Arrange
     mock_table = mock.Mock()
-    actual_table_content = []
-    mock_table.put_item.side_effect = gen_mocked_put_item_side_effect(
-        mocked_table_content=actual_table_content
-    )
 
     # Act
     put_rif_available_event(
@@ -123,6 +114,7 @@ def test_put_rif_available_event_puts_valid_event():
     )
 
     # Assert
+    actual_table_content = get_mocked_put_item_items(mock_put_item=mock_table.put_item)
     expected_table_content = [
         asdict(
             RifAvailableEventItem(
@@ -162,10 +154,6 @@ def test_get_load_available_event_returns_valid_event():
 def test_put_load_available_event_puts_valid_event():
     # Arrange
     mock_table = mock.Mock()
-    actual_table_content = []
-    mock_table.put_item.side_effect = gen_mocked_put_item_side_effect(
-        mocked_table_content=actual_table_content
-    )
 
     # Act
     put_load_available_event(
@@ -177,6 +165,7 @@ def test_put_load_available_event_puts_valid_event():
     )
 
     # Assert
+    actual_table_content = get_mocked_put_item_items(mock_put_item=mock_table.put_item)
     expected_table_content = [
         asdict(
             LoadAvailableEventItem(
