@@ -116,6 +116,9 @@ spec:
 """
         }
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+    }
 
     stages {
         stage('Set Branch Name') {

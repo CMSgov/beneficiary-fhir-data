@@ -46,6 +46,9 @@ spec:
 """
     }
   }
+  options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+  }
 
   options {
     // This is an unfortunate hack that allows for toggling environment-locked builds of this

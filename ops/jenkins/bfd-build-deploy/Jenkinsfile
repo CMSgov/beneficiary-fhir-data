@@ -65,6 +65,9 @@ spec:
 """
         }
       }
+      options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+      }
 
   stages {
     /* This stage switches the gitBranchName (needed for our CCS downsream stages)

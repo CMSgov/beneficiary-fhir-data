@@ -36,6 +36,9 @@ spec:
 """
         }
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+    }
 
   parameters {
         booleanParam(name: 'verbose_mvn_logging',

@@ -68,10 +68,12 @@ spec:
     }
   }
 
+
   options {
     // Nothing within this repository is required for running this pipeline, so skipping the default
     // checkout saves us some time
     skipDefaultCheckout()
+    buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
   }
 
   stages {

@@ -32,6 +32,9 @@ spec:
 """
     }
   }
+  options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+  }
   stages {
     stage('Docker Build') {
       // Specified to enable Dockerfile local Dockerignore, see https://stackoverflow.com/a/57774684
