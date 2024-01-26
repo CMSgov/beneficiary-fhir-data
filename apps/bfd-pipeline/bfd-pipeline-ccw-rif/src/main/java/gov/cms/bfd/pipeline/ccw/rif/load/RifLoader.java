@@ -6,6 +6,7 @@ import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedBatchBuilder;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RecordAction;
+import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordBase;
@@ -943,6 +944,11 @@ public final class RifLoader {
     }
 
     final LoadedFile loadedFile = new LoadedFile();
+    RifFile.RecordId dataFileId = fileEvent.getFile().getRecordId();
+    if (dataFileId != null) {
+      loadedFile.setS3ManifestId(dataFileId.manifestId());
+      loadedFile.setS3FileIndex(dataFileId.index());
+    }
     loadedFile.setRifType(fileEvent.getFile().getFileType().toString());
     loadedFile.setCreated(Instant.now());
 

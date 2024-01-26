@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.app;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
@@ -21,6 +22,10 @@ import org.slf4j.LoggerFactory;
  */
 public final class DefaultDataSetMonitorListener implements DataSetMonitorListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetMonitorListener.class);
+
+  /** Name of timer used to track processing time. */
+  public static final String TIMER_PROCESSING =
+      MetricRegistry.name(PipelineApplication.class.getSimpleName(), "dataSet", "processed");
 
   /** Metrics for this class. */
   private final MetricRegistry appMetrics;
@@ -47,28 +52,33 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
 
   @Override
   public void dataAvailable(RifFilesEvent rifFilesEvent) throws Exception {
-    Timer.Context timerDataSet =
-        appMetrics
-            .timer(
-                MetricRegistry.name(
-                    PipelineApplication.class.getSimpleName(), "dataSet", "processed"))
-            .time();
+    Timer.Context timerDataSet = appMetrics.timer(TIMER_PROCESSING).time();
 
     Exception failure = null;
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+      final RifFile rifFile = rifFileEvent.getFile();
+      if (!rifFile.requiresProcessing()) {
+        LOGGER.info("Skipping previously processed file {}", rifFile.getDisplayName());
+        continue;
+      }
+
       Slf4jReporter dataSetFileMetricsReporter =
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
       dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
       try {
+        LOGGER.info("Processing file {}", rifFile.getDisplayName());
+        rifFile.markAsStarted();
+
         final RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
         final long processedCount = rifLoader.processBlocking(rifFileRecords);
+        rifFile.markAsProcessed();
         LOGGER.info(
             "Successfully processed {} records in file {}",
             processedCount,
-            rifFileEvent.getFile().getDisplayName());
+            rifFile.getDisplayName());
       } catch (Exception e) {
-        LOGGER.error("Exception while processing file {}", rifFileEvent.getFile().getDisplayName());
+        LOGGER.error("Exception while processing file {}", rifFile.getDisplayName());
         failure = e;
       }
 

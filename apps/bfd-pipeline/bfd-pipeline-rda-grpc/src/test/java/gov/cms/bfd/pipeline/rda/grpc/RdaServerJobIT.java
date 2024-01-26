@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaS3JsonMessageSourceFactory;
-import gov.cms.bfd.pipeline.rda.grpc.server.S3DirectoryDao;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
@@ -19,6 +18,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -136,7 +136,7 @@ public class RdaServerJobIT extends AbstractLocalStackS3Test {
       bucket = s3Dao.createTestBucket();
       final String directoryPath = "files-go-here/";
       cacheDirectoryPath = Files.createTempDirectory("test");
-      s3DirDao = new S3DirectoryDao(s3Dao, bucket, directoryPath, cacheDirectoryPath, true);
+      s3DirDao = new S3DirectoryDao(s3Dao, bucket, directoryPath, cacheDirectoryPath, true, false);
       final RdaServerJob.Config config =
           RdaServerJob.Config.builder()
               .serverMode(RdaServerJob.Config.ServerMode.S3)
