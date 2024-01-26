@@ -1,8 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import java.io.Closeable;
 import java.io.IOException;

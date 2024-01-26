@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;

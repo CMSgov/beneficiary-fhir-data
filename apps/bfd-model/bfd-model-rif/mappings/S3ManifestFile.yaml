@@ -1,0 +1,59 @@
+mappings:
+- entityClassName: gov.cms.bfd.model.rif.entities.S3ManifestFile
+  id: S3ManifestFile
+  nullableFieldAccessorType: Optional
+  table:
+    name: s3_manifest_files
+    primaryKeyColumns:
+    - manifestId
+    columns:
+    - comment: Primary key for record.
+      dbName: manifest_id
+      name: manifestId
+      sqlType: bigint
+      javaType: long
+      nullable: false
+      sequence:
+        allocationSize: 1
+        name: s3_manifest_files_manifest_id_seq
+      updatable: false
+    - comment: Key for the file within S3 bucket.
+      dbName: s3_key
+      name: s3Key
+      nullable: false
+      sqlType: varchar(1024)
+    - comment: Status of the file.  Updated by ETL pipeline during processing.
+      dbName: status
+      name: status
+      nullable: false
+      sqlType: varchar(24)
+      enumType: ManifestStatus
+    - comment: Timestamp encoded into S3 manifest file directory path.
+      dbName: manifest_timestamp
+      name: manifestTimestamp
+      nullable: false
+      sqlType: timestamp with time zone
+    - comment: When the file was first discovered in S3.
+      dbName: discovery_timestamp
+      name: discoveryTimestamp
+      nullable: false
+      sqlType: timestamp with time zone
+    - comment: When the status was last updated.
+      dbName: status_timestamp
+      name: statusTimestamp
+      nullable: false
+      sqlType: timestamp with time zone
+    joins:
+    - class: parent
+      entityMapping: S3DataFile
+      fieldName: dataFiles
+      mappedBy: parentManifest
+      fetchType: EAGER
+      orderBy: index ASC
+  enumTypes:
+  - name: ManifestStatus
+    values:
+    - DISCOVERED
+    - REJECTED
+    - STARTED
+    - COMPLETED

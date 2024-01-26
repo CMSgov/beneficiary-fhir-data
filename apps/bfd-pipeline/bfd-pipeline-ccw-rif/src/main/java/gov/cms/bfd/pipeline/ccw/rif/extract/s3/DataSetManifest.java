@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -352,6 +353,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      *     </code> if the key doesn't seem to point to a {@link DataSetManifest} ready for
      *     processing
      */
+    @Nullable
     public static DataSetManifestId parseManifestIdFromS3Key(String s3ManifestKey) {
       Matcher manifestKeyMatcher = CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3ManifestKey);
       boolean keyMatchesRegex = manifestKeyMatcher.matches();
@@ -387,10 +389,33 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      * @return {@code true} if the manifest has a future date
      */
     public boolean isFutureManifest() {
-      return Instant.now().compareTo(timestamp) <= 0;
+      return isAfter(Instant.now());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Checks if the timestamp of this manifest is on or after the provided timestamp.
+     *
+     * @param now timestamp to check
+     * @return true this manifest timestamp is on or after provided one
+     */
+    public boolean isAfter(Instant now) {
+      return timestamp.compareTo(now) >= 0;
+    }
+
+    /**
+     * Checks if the timestamp of this manifest is on or before the provided timestamp.
+     *
+     * @param now timestamp to check
+     * @return true this manifest timestamp is on or after provided one
+     */
+    public boolean isBefore(Instant now) {
+      return timestamp.compareTo(now) <= 0;
+    }
+
+    /**
+     * Use timestamp (ascending) and sequenceId (ascending) to compare manifests. No other fields
+     * are compared. {@inheritDoc}
+     */
     @Override
     public int compareTo(DataSetManifestId o) {
       if (o == null) throw new IllegalArgumentException();
@@ -406,7 +431,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return Integer.compare(sequenceId, o.sequenceId);
     }
 
-    /** {@inheritDoc} */
+    /** Uses timestamp and sequenceId to compute hash code. {@inheritDoc} */
     @Override
     public int hashCode() {
       final int prime = 31;
@@ -416,7 +441,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return result;
     }
 
-    /** {@inheritDoc} */
+    /** Uses timestamp and sequenceId to determine equality. {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
@@ -430,7 +455,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       return true;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String toString() {
       StringBuilder builder = new StringBuilder();
