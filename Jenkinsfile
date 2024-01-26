@@ -330,7 +330,8 @@ try {
 						awsAuth.assumeRole()
 						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
-							gitBranchName: gitBranchName
+							gitBranchName: gitBranchName,
+							isRelease: canDeployToProdEnvs
 						)
 
 						if (hasRegressionRunSucceeded) {
@@ -495,7 +496,8 @@ try {
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
-								gitBranchName: gitBranchName
+								gitBranchName: gitBranchName,
+								isRelease: canDeployToProdEnvs
 							)
 
 							if (hasRegressionRunSucceeded) {
@@ -555,14 +557,16 @@ try {
 
 			stage('Deploy EFT to PROD') {
 				currentStage = env.STAGE_NAME
-				lock(resource: 'env_test') {
-					milestone(label: 'stage_deploy_prod_eft_start')
-					container('bfd-cbc-build') {
-						awsAuth.assumeRole()
-						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/eft"
-						)
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod') {
+						milestone(label: 'stage_deploy_prod_eft_start')
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/eft"
+							)
+						}
 					}
 				}
 			}
@@ -653,7 +657,8 @@ try {
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
-								gitBranchName: gitBranchName
+								gitBranchName: gitBranchName,
+								isRelease: canDeployToProdEnvs
 							)
 
 							if (hasRegressionRunSucceeded) {

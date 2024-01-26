@@ -1,0 +1,116 @@
+#!/usr/bin/env groovy
+
+properties([
+  parameters([
+    booleanParam(name: 'verbose_mvn_logging', description: 'When true, `mvn` will produce verbose logs.',
+      defaultValue: false)
+  ])
+])
+
+// These variables are accessible throughout this file (except inside methods and classes).
+def verboseMaven
+if (params.verbose_mvn_logging != null) {
+    verboseMaven = params.verbose_mvn_logging
+} else {
+    verboseMaven = false
+}
+
+pipeline {
+    agent {
+        kubernetes {
+            defaultContainer 'bfd-cbc-build'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccount: bfd
+  volumes:
+  - name: docker-socket
+    emptyDir: {}
+  containers:
+  - name: docker-daemon
+    image: docker:20.10-dind
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: docker-socket
+      mountPath: /var/run
+    resources:
+      requests:
+        memory: '8192Mi'
+        cpu: '4000m'
+      limits:
+        memory: '8192Mi'
+        cpu: '4000m'
+  - name: bfd-cbc-build
+    image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk21-mvn3-tfenv3-kt1.9-latest'
+    volumeMounts:
+    - name: docker-socket
+      mountPath: /var/run
+    command:
+    - cat
+    tty: true
+    imagePullPolicy: Always
+    resources:
+      requests:
+        memory: '8192Mi'
+        cpu: '4000m'
+      limits:
+        memory: '8192Mi'
+        cpu: '4000m'
+"""
+        }
+    }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+    }
+
+    // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
+    triggers {
+        cron(env.BRANCH_NAME == 'master' ? '30 11 * * *' : '')
+    }
+
+    environment {
+        SONAR_PROJECT_KEY = 'bfd-parent'
+        SONAR_HOST_URL = 'https://sonarqube.cloud.cms.gov'
+    }
+    stages {
+        stage('Build Stage') {
+            // Build Step
+         steps {
+                script {
+                    // Address limitations resulting from CVE-2022-2476
+                    sh "git config --global --add safe.directory $WORKSPACE"
+                   // Load the child Jenkinsfiles.
+                   scriptForApps = load('apps/build.groovy')
+                   //Authentication of AWS to run Build.groovy
+                   awsAuth.assumeRole()
+                   // Perform Build steps
+                   scriptForApps.build(verboseMaven, true)
+                }
+            }
+        }
+        stage ('SonarQube Analysis') {
+            steps {
+                script {
+                    //Retrieve Sonar Token from AWS
+                    env.SONAR_TOKEN = awsSsm.getParameter(parameterName: "/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key")
+                    dir ('apps') {
+                    sh '''
+                    set +x
+                    mvn sonar:sonar \
+                      -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+                      -Dsonar.host.url="$SONAR_HOST_URL" \
+                      -Dsonar.login="$SONAR_TOKEN" \
+                      -Dmaven.build.cache.enabled=false \
+                      -DskipITs \
+                      -DskipTests \
+                      -Dsonar.exclusions='*.java' \
+                      -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml
+                    '''
+                    }
+                }
+            }
+        }
+    }
+}
