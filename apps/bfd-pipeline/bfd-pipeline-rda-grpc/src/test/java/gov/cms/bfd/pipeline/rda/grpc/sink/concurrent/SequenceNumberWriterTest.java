@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
+import gov.cms.bfd.pipeline.sharedutils.SequenceNumberTracker;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -22,7 +23,7 @@ public class SequenceNumberWriterTest {
   @Mock private RdaSink<Integer, Long> sink;
 
   /**
-   * Instance of {@link gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker} passed
+   * Instance of {@link SequenceNumberTracker} passed
    * to the {@link SequenceNumberWriter}.
    */
   private SequenceNumberTracker tracker;
