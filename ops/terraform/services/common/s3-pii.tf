@@ -1,13 +1,5 @@
 ## S3 bucket, policy, and KMS key for medicare opt out data
 
-locals {
-  name        = "medicare-opt-out"
-  log_bucket  = "bfd-${local.env}-${local.name}-${local.account_id}"
-  read_arns   = split(" ", data.aws_ssm_parameter.medicare_opt_out_config_read_roles.value)
-  write_accts = split(" ", data.aws_ssm_parameter.medicare_opt_out_config_write_accts.value)
-  admin_users = split(" ", data.aws_ssm_parameter.medicare_opt_out_config_admin_users.value)
-}
-
 /* TODO: Removed following BFD-3084 due to issues with KMS key policies
 module "medicare_opt_out" {
   count  = local.is_ephemeral_env ? 0 : 1

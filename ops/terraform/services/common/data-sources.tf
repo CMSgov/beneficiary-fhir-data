@@ -69,18 +69,3 @@ data "aws_kms_key" "cmk" {
 data "aws_iam_role" "monitoring" {
   name = "rds-monitoring-role"
 }
-
-data "aws_ssm_parameter" "medicare_opt_out_config_read_roles" {
-  name            = "/bfd/${local.env}/common/sensitive/medicare_opt_out_config_read_roles"
-  with_decryption = true
-}
-
-data "aws_ssm_parameter" "medicare_opt_out_config_write_accts" {
-  name            = "/bfd/${local.env}/common/sensitive/medicare_opt_out_config_write_accts"
-  with_decryption = true
-}
-
-data "aws_ssm_parameter" "medicare_opt_out_config_admin_users" {
-  name            = "/bfd/${local.env}/common/sensitive/medicare_opt_out_config_admin_users"
-  with_decryption = true
-}
