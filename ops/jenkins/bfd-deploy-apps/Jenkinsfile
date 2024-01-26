@@ -116,6 +116,9 @@ spec:
 """
         }
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+    }
 
     stages {
         stage('Set Branch Name') {
@@ -307,11 +310,19 @@ spec:
                                 directory: 'ops/terraform/services/server/insights/api-requests'
                             )
 
+                            canDeployToProdEnvs = false
+
+                            if (env.TAG_NAME != null && !env.TAG_NAME.contains("-")) {
+                            	canDeployToProdEnvs = true
+                            	echo "Tag name matched pattern"
+                            }
+
                             // Deploy the API regression suite
                             awsAuth.assumeRole()
                             hasRegressionRunSucceeded = serverScripts.runServerRegression(
                                 bfdEnv: trimmedEnv,
-                                gitBranchName: gitBranchName
+                                gitBranchName: gitBranchName,
+                                isRelease: canDeployToProdEnvs
                             )
                             if (hasRegressionRunSucceeded) {
                                 println 'Regression suite passed, proceeding to next stage...'

@@ -14,6 +14,7 @@ def runServerRegression(Map args = [:]) {
     bfdEnv = args.bfdEnv
     gitBranchName = args.gitBranchName
     heartbeatInterval = args.heartbeatInterval ?: 15
+    isRelease = args.isRelease ?: false
 
     // This queue is used to trigger the lambda
     lambdaSqsQueueName = "bfd-${bfdEnv}-server-regression"
@@ -32,6 +33,10 @@ def runServerRegression(Map args = [:]) {
                                        .replaceAll(/[\_]+/, '_')
                                        .toLowerCase()
 
+    compareTag = isRelease ? "release" : sanitizedBranchName
+    storeTags = isRelease ? [sanitizedBranchName, "release", "build${currentBuildId}__${sanitizedBranchName}"]
+            : [sanitizedBranchName, "build${currentBuildId}__${sanitizedBranchName}"]
+
     if (canServerRegressionRunProceed(awsRegion, signalSqsQueueName, bfdEnv)) {
         println "Proceeding to run bfd-${bfdEnv}-server-regression lambda..."
     } else {
@@ -46,8 +51,8 @@ def runServerRegression(Map args = [:]) {
         'spawn_rate': 10,
         'users': 10,
         'spawned_runtime': '30s',
-        'compare_tag': sanitizedBranchName,
-        'store_tags': [sanitizedBranchName, "build${currentBuildId}__${sanitizedBranchName}"]
+        'compare_tag': compareTag,
+        'store_tags': storeTags
     ])
     awsSqs.sendMessage(
         sqsQueueUrl: lamdaSqsQueueUrl,

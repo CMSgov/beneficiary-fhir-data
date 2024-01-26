@@ -1,6 +1,7 @@
-variable "env_config" {
-  description = "All high-level info for the whole vpc"
-  type        = object({ env = string, vpc_id = string, zone_id = string })
+variable "env" {
+  description = "The BFD SDLC environment to target"
+  type        = string
+  default     = "test"
 }
 
 variable "pii_bucket_config" {

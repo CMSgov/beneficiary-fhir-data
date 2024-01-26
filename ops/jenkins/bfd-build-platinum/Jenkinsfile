@@ -108,6 +108,9 @@ spec:
 """
         }
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
+    }
 
     // Run Every day at 7:30 AM Eastern / 11:30 AM UTC
     triggers {

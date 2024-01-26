@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +36,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.hamcrest.collection.IsEmptyCollection;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -52,7 +50,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -149,25 +146,6 @@ public final class BeneficiaryTransformerV2Test {
     // time() starts the timer
     verify(metricsTimer, times(1)).time();
     verify(metricsTimerContext, times(1)).stop();
-  }
-
-  /** 'Test' to output the json value of the test patient to the console for debugging. */
-  @Disabled("https://jira.cms.gov/browse/BFD-3011")
-  @Test
-  public void shouldOutputJSON() {
-    assertNotNull(patient);
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
-  }
-
-  /**
-   * 'Test' to output the json value of the test patient (with mbi data) to the console for
-   * debugging.
-   */
-  @Disabled("https://jira.cms.gov/browse/BFD-3011")
-  @Test
-  public void shouldOutputMbiHistory() {
-    assertNotNull(patient);
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
   }
 
   /**
@@ -624,17 +602,6 @@ public final class BeneficiaryTransformerV2Test {
                 new StringType("SURREY")));
     compare.setLine(lineList);
     assertTrue(compare.equalsDeep(addrList.get(0)));
-  }
-
-  /**
-   * Verifies that {@link BeneficiaryTransformerV2#transform(Beneficiary, RequestHeaders)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
-   */
-  @Disabled("https://jira.cms.gov/browse/BFD-3011")
-  @Test
-  public void transformSampleARecord() {
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
-    assertThat(patient.getIdentifier(), not(IsEmptyCollection.empty()));
   }
 
   /**
