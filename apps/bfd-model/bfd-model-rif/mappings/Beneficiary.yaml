@@ -15,6 +15,11 @@ mappings:
       nullable: false
       sqlType: bigint
       javaType: long
+    - comment: record number in original RIF source file for this record
+      name: recordNumber
+      nullable: false
+      javaType: long
+      fieldType: Transient
     - comment: State Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/state_cd.txt)
       dbName: state_code
       name: stateCode

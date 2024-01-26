@@ -42,7 +42,10 @@ public abstract class RifFileParser {
           // creates a CSVParser for new subscriber
           () -> RifParsingUtils.createCsvParser(rifFile),
           // creates flux for subscriber to receive parsed events
-          csvParser -> Flux.fromIterable(csvParser).map(FluxUtils.wrapFunction(parser)),
+          csvParser ->
+              Flux.fromIterable(csvParser)
+                  .map(FluxUtils.wrapFunction(parser))
+                  .map(new RecordNumberCounter()::count),
           // used in log message if closing the CSVParser fails
           rifFile.getDisplayName());
     }
@@ -71,7 +74,8 @@ public abstract class RifFileParser {
                   // joins consecutive records with same grouping column value
                   .bufferUntilChanged(csvRecord -> csvRecord.get(groupingColumn))
                   // parses the list of records
-                  .flatMap(this::parse),
+                  .flatMap(this::parse)
+                  .map(new RecordNumberCounter()::count),
           // used in log message if closing the CSVParser fails
           rifFile.getDisplayName());
     }
@@ -88,6 +92,18 @@ public abstract class RifFileParser {
       } catch (Exception ex) {
         return Flux.error(ex);
       }
+    }
+  }
+
+  /** Counts each record as it arrives and sets its record number field appropriately. */
+  @ThreadSafe
+  public static class RecordNumberCounter {
+    private long recordNumber;
+
+    public synchronized RifRecordEvent<?> count(RifRecordEvent<?> record) {
+      record.setRecordNumber(recordNumber);
+      recordNumber += 1;
+      return record;
     }
   }
 }

@@ -27,4 +27,18 @@ public interface RifRecordBase {
    * @param lastUpdated the last updated time
    */
   void setLastUpdated(Optional<Instant> lastUpdated);
+
+  /**
+   * Gets the record number of this object in its source RIF file.
+   *
+   * @return record number starting with 0
+   */
+  long getRecordNumber();
+
+  /**
+   * Sets the record number of this object in its source RIF file.
+   *
+   * @param recordNumber record number starting with 0
+   */
+  void setRecordNumber(long recordNumber);
 }
