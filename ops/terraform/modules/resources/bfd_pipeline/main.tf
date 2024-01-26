@@ -191,16 +191,6 @@ resource "aws_iam_role_policy_attachment" "bfd_pipeline_rif" {
   policy_arn = aws_iam_policy.bfd_pipeline_rif.arn
 }
 
-# Give the BFD Pipeline app read access to the Ansible Vault PW.
-data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
-  arn = "arn:aws:iam::${var.launch_config.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
-}
-
-resource "aws_iam_role_policy_attachment" "bfd_pipeline_iam_ansible_vault_pw_ro_s3" {
-  role       = module.iam_profile_bfd_pipeline.role
-  policy_arn = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
-}
-
 # Attach the amazon manged AmazonElasticFileSystemReadOnlyAccess policy to the instance role
 # This is needed to query EFT EFS file systems
 resource "aws_iam_role_policy_attachment" "aws_efs_read_only_access" {
