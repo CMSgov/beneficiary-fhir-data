@@ -1,12 +1,16 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.synthetic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
@@ -19,8 +23,11 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
@@ -132,38 +139,54 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       manifest.setPreValidationProperties(preValProps);
 
       // upload data to Synthea S3 bucket
-      putSampleFilesInTestBucket(
-          bucket,
-          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-          manifest,
-          List.of(
-              StaticRifResource.SAMPLE_SYNTHEA_BENES2021.getResourceUrl(),
-              StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
+      final var manifestKey =
+          putSampleFilesInTestBucket(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+              manifest,
+              List.of(
+                  StaticRifResource.SAMPLE_SYNTHEA_BENES2021.getResourceUrl(),
+                  StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              options,
-              s3ClientFactory);
-      CcwRifLoadJob ccwJob =
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
+      final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
+      final var dataSetQueue =
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState(),
+              pipelineAppState,
               options,
-              s3TaskManager,
+              dataSetQueue,
               listener,
               false,
               Optional.empty(),
-              statusReporter);
-      // Process dataset
-      ccwJob.call();
+              statusReporter)) {
+        // Process dataset
+        ccwJob.call();
+      }
 
       // Verify what was handed off to the DataSetMonitorListener; there should
       // be no events since the pre-validation failure short-circuits everything.
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(0, listener.getDataEvents().size());
 
+      verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.REJECTED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       // Verify that the datasets were moved to their respective 'failed' locations.
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Dao,
@@ -198,6 +221,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
                   + "/"
                   + manifest.getTimestampText()
                   + "/carrier.rif"));
+      // TODO END remove once S3 file moves are no longer necessary.
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -266,32 +290,40 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       manifest.setPreValidationProperties(preValProps);
 
       // upload data to Synthea S3 bucket
-      putSampleFilesInTestBucket(
-          bucket,
-          CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
-          manifest,
-          List.of(
-              StaticRifResource.SAMPLE_SYNTHEA_BENES2021.getResourceUrl(),
-              StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
+      final var manifestKey =
+          putSampleFilesInTestBucket(
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
+              manifest,
+              List.of(
+                  StaticRifResource.SAMPLE_SYNTHEA_BENES2021.getResourceUrl(),
+                  StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
 
       // Run the job.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager =
-          new S3TaskManager(
-              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
-              options,
-              s3ClientFactory);
-      CcwRifLoadJob ccwJob =
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
+      final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
+      final var dataSetQueue =
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
+      try (CcwRifLoadJob ccwJob =
           new CcwRifLoadJob(
-              PipelineTestUtils.get().getPipelineApplicationState(),
+              pipelineAppState,
               options,
-              s3TaskManager,
+              dataSetQueue,
               listener,
               true, // run in idempotent mode
               Optional.empty(),
-              statusReporter);
-      // Process dataset
-      ccwJob.call();
+              statusReporter)) {
+        // Process dataset
+        ccwJob.call();
+      }
 
       // Verify what was handed off to the DataSetMonitorListener; there should be
       // no failure events since the pre-validation ran in idempotent mode which
@@ -299,6 +331,14 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
       assertEquals(0, listener.getNoDataAvailableEvents());
       assertEquals(1, listener.getDataEvents().size());
 
+      verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.COMPLETED);
+
+      // verifies that close called close on AutoCloseable dependencies
+      verify(s3TaskManager).close();
+      verify(s3FileCache).close();
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       // Verify that the datasets were moved to their respective 'completed'
       // locations.
       DataSetTestUtilities.waitForBucketObjectCount(
@@ -335,7 +375,7 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
                   + "/"
                   + manifest.getTimestampText()
                   + "/carrier.rif"));
-
+      // TODO END remove once S3 file moves are no longer necessary.
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -418,15 +458,33 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
    * @param manifest the manifest to use for the load files
    * @param resourcesToAdd the resource URLs to add to the bucket, see {@link StaticRifResource} for
    *     resource lists, should be in the order of the manifest
+   * @return the S3 key of the uploaded manifest file
    */
-  private void putSampleFilesInTestBucket(
+  private String putSampleFilesInTestBucket(
       String bucket, String location, DataSetManifest manifest, List<URL> resourcesToAdd) {
-    DataSetTestUtilities.putObject(s3Dao, bucket, manifest, location);
+    var manifestKey = DataSetTestUtilities.putObject(s3Dao, bucket, manifest, location);
     int index = 0;
     for (URL resource : resourcesToAdd) {
       DataSetTestUtilities.putObject(
           s3Dao, bucket, manifest, manifest.getEntries().get(index), resource, location);
       index++;
     }
+    return manifestKey;
+  }
+
+  /**
+   * Queries database for manifest record and verifies that its status matches the expected value.
+   *
+   * @param s3ManifestDbDao used to query the database
+   * @param s3ManifestKey s3 key of the manifest
+   * @param expectedStatus expected status value
+   */
+  private void verifyManifestFileStatus(
+      S3ManifestDbDao s3ManifestDbDao,
+      String s3ManifestKey,
+      S3ManifestFile.ManifestStatus expectedStatus) {
+    S3ManifestFile manifestRecord = s3ManifestDbDao.readS3ManifestAndDataFiles(s3ManifestKey);
+    assertNotNull(manifestRecord, "no record in database for manifest: key=" + s3ManifestKey);
+    assertEquals(expectedStatus, manifestRecord.getStatus());
   }
 }

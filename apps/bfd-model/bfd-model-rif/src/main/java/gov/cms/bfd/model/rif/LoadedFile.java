@@ -35,6 +35,20 @@ public class LoadedFile {
   @Column(name = "created", nullable = false)
   private Instant created;
 
+  /**
+   * Optional {@link gov.cms.bfd.model.rif.entities.S3ManifestFile#manifestId}. Can be used to join
+   * with s3_manifest_files and s3_data_files.
+   */
+  @Column(name = "s3_manifest_id")
+  private Long s3ManifestId;
+
+  /**
+   * Optional {@link gov.cms.bfd.model.rif.entities.S3DataFile#index}. Can be used to join with
+   * s3_data_files.
+   */
+  @Column(name = "s3_file_index")
+  private Short s3FileIndex;
+
   /** The batches associated with this file. */
   @OneToMany(
       mappedBy = "loadedFileId",
@@ -55,15 +69,5 @@ public class LoadedFile {
     this.loadedFileId = loadedFileId;
     this.rifType = rifType;
     this.created = created;
-  }
-
-  /**
-   * Create a LoadedFile.
-   *
-   * @param rifType RifFileType
-   */
-  public LoadedFile(String rifType) {
-    this();
-    this.rifType = rifType;
   }
 }

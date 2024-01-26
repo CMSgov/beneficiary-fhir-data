@@ -4,10 +4,10 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
+import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.micrometer.core.instrument.MeterRegistry;
