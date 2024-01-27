@@ -49,6 +49,8 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
+      - name: Show maven version
+        run: mvn --version
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
         run: mvn com.spotify.fmt:fmt-maven-plugin:check
         working-directory: ./apps
