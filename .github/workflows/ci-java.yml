@@ -72,7 +72,7 @@ jobs:
           cache: 'maven'
 
       - name: 'Run Maven Build'
-        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false verify
+        run: mvn --threads 1.5C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false verify
         working-directory: ./apps
 
       - name: 'Install yq'
