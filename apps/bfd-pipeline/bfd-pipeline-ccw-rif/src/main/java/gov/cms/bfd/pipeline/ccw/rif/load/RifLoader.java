@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.RifFileProgressTracker;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.pipeline.sharedutils.FluxWaiter;
@@ -34,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.persistence.Entity;
@@ -109,7 +111,8 @@ public final class RifLoader {
    * @return the {@link Scheduler} to use for asynchronous load tasks
    */
   private Scheduler createScheduler(LoadAppOptions.PerformanceSettings settings) {
-    final int threadPoolSize = settings.getLoaderThreads();
+    // allow one extra thread for parsing and another for backgroun progress updates
+    final int threadPoolSize = settings.getLoaderThreads() + 2;
     final int batchSize = settings.getRecordBatchSize();
     final int taskQueueSize = settings.getLoaderThreads() * settings.getTaskQueueSizeMultiple();
 
@@ -171,7 +174,8 @@ public final class RifLoader {
       RifFileRecords dataToLoad, AtomicBoolean interrupted) {
     return FluxUtils.fromFluxFunction(
         () -> {
-          final RifFileType fileType = dataToLoad.getSourceEvent().getFile().getFileType();
+          final RifFile rifFile = dataToLoad.getSourceEvent().getFile();
+          final RifFileType fileType = rifFile.getFileType();
           final LoadAppOptions.PerformanceSettings performanceSettings =
               options.selectPerformanceSettingsForFileType(fileType);
           final int batchPrefetch =
@@ -196,8 +200,21 @@ public final class RifLoader {
           // Create and return a flux that asynchronously loads records in batches using a custom
           // scheduler.
           final Scheduler scheduler = createScheduler(performanceSettings);
+          final var progressTracker = new RifFileProgressTracker(rifFile);
+          final long startingRecordNumber = progressTracker.getStartingRecordNumber();
+          if (startingRecordNumber > 0) {
+            LOGGER.info("skipping to record number {} before processing", startingRecordNumber);
+          }
+          // Schedule task to update progress in database once per second.
+          final var progressUpdateSchedule =
+              scheduler.schedulePeriodically(
+                  progressTracker::writeProgress, 1L, 1L, TimeUnit.SECONDS);
           return dataToLoad
               .getRecords()
+              // Skip any records that we know have been processed before.
+              .filter(event -> event.getRecordNumber() > startingRecordNumber)
+              // Add active record number to progress tracker.
+              .doOnNext(event -> progressTracker.recordActive(event.getRecordNumber()))
               // Parse records on a thread from our scheduler.
               .subscribeOn(scheduler)
               // collect records into batches
@@ -216,9 +233,14 @@ public final class RifLoader {
                           // Stop processing if we have received an interrupt
                           .takeUntil(ignored -> interrupted.get()),
                   performanceSettings.getLoaderThreads())
+              // Mark active record as complete so progress can be updated.
+              .doOnNext(result -> progressTracker.recordComplete(result.getRecordNumber()))
+              // Update progress with final result when all records have been processed
+              .doOnComplete(() -> progressTracker.writeProgress())
               // clean up when the flux terminates (either by error or completion)
               .doFinally(
                   ignored -> {
+                    progressUpdateSchedule.dispose();
                     timerDataSetFile.stop();
                     logRecordCounts();
                     scheduler.dispose();

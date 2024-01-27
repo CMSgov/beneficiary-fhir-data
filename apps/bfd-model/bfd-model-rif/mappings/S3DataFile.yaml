@@ -49,7 +49,7 @@ mappings:
       name: discoveryTimestamp
       nullable: false
       sqlType: timestamp with time zone
-    - comment: Highest record number known to have been written to db from this file.
+    - comment: Highest record number for a record which has been written to the database and for which we know that all records with lower record numbers have also been written to the database from this file.
       dbName: last_record_number
       name: lastRecordNumber
       sqlType: bigint

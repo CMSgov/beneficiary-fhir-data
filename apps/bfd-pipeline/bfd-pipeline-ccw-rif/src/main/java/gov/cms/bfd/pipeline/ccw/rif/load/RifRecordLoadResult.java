@@ -40,6 +40,15 @@ public final class RifRecordLoadResult {
     return builder.toString();
   }
 
+  /**
+   * Gets the record number of the record that was loaded.
+   *
+   * @return the record number
+   */
+  public long getRecordNumber() {
+    return rifRecordEvent.getRecordNumber();
+  }
+
   /** Enumerates the types of actions that a load operation may have resulted in on the database. */
   public enum LoadAction {
     /** Indicates that the record(s) were successfully added to the database. */

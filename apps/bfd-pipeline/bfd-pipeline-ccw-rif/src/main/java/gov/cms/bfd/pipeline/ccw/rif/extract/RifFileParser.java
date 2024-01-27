@@ -95,14 +95,25 @@ public abstract class RifFileParser {
     }
   }
 
-  /** Counts each record as it arrives and sets its record number field appropriately. */
+  /**
+   * Counts each record as it arrives and sets its record number field appropriately. Record numbers
+   * are non-zero positive integers so that 0 can be used in the database to indicate no records
+   * have been processed.
+   */
   @ThreadSafe
   public static class RecordNumberCounter {
+    /** The current record number. */
     private long recordNumber;
 
+    /**
+     * Increment the record number and assign it to the record.
+     *
+     * @param record record to update
+     * @return the record
+     */
     public synchronized RifRecordEvent<?> count(RifRecordEvent<?> record) {
-      record.setRecordNumber(recordNumber);
       recordNumber += 1;
+      record.setRecordNumber(recordNumber);
       return record;
     }
   }
