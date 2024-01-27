@@ -67,6 +67,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
+          cache: maven
 
       - name: 'Run Maven Build'
         run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false verify
