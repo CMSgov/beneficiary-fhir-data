@@ -122,7 +122,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |-
           mvn --batch-mode --activate-profiles release \
-              -Darguments=--threads 2C \
+              -Darguments="--threads 2C" \
               -Dtag="$BFD_RELEASE" \
               -DreleaseVersion="$BFD_RELEASE" \
               -DdevelopmentVersion="$BFD_DEV_VERSION" \
