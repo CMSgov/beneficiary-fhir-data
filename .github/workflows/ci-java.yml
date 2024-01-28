@@ -56,8 +56,6 @@ jobs:
   mvn-verify:
     runs-on: ubuntu-20.04
     needs: workflow
-    outputs:
-      BFD_PARENT_VERSION: ${{ steps.bfd-parent-version.outputs.BFD_PARENT_VERSION }}
     if: needs.workflow.outputs.files
     steps:
       - name: 'Checkout repo'
@@ -72,36 +70,6 @@ jobs:
       - name: 'Run Maven Build'
         run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false verify
         working-directory: ./apps
-
-      - name: 'Install yq'
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
-
-      - name: Login to GitHub Container Registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" \
-          | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Determine the BFD Parent Version
-        id: bfd-parent-version
-        run: |
-          echo "BFD_PARENT_VERSION=$(yq '.project.version' apps/pom.xml)" >> "$GITHUB_OUTPUT"
-          echo "BFD_PARENT_VERSION=$(yq '.project.version' apps/pom.xml)" >> "$GITHUB_ENV"
-
-      - name: Build and Deliver Apps Container Image
-        run: |
-          SANITIZED_REF="${GITHUB_REF_NAME////-}"
-          IMAGE_NAME="ghcr.io/cmsgov/bfd-apps"
-          SHORT_SHA="$(git rev-parse --short HEAD)"
-          FULL_BRANCH_TAG="${IMAGE_NAME}:${SANITIZED_REF}" # human readable, branch name tag
-          FULL_COMMIT_TAG="${IMAGE_NAME}:${SHORT_SHA}"     # a short sha suffixed image tag
-          echo "Building ${BFD_PARENT_VERSION} Container"
-          docker build --tag "$FULL_BRANCH_TAG" --build-arg="BFD_VERSION=${BFD_PARENT_VERSION}" .
-          docker tag "$FULL_BRANCH_TAG" "$FULL_COMMIT_TAG"
-          docker push "$FULL_BRANCH_TAG"
-          docker push "$FULL_COMMIT_TAG"
-        working-directory: apps
 
   # NOTE: Temporarily disable fhir-validation in support of BFD-2198
   # TODO: Re-enable post BFD-2198 with more thoughtful implementation
@@ -161,24 +129,74 @@ jobs:
   #         printf "$output\n"
   #         if [ "$is_valid" = "false" ] ; then exit 1 ; fi
 
+  mvn-verify-system:
+    runs-on: ubuntu-20.04
+    needs: workflow
+    outputs:
+      BFD_PARENT_VERSION: ${{ steps.bfd-parent-version.outputs.BFD_PARENT_VERSION }}
+    if: needs.workflow.outputs.files
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v4
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: 'maven'
+
+      - name: 'Run Maven Build without Tests'
+        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -DskipTests -DskipITs verify
+        working-directory: ./apps
+
+      - name: 'Install yq'
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+          | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Determine the BFD Parent Version
+        id: bfd-parent-version
+        run: |
+          echo "BFD_PARENT_VERSION=$(yq '.project.version' apps/pom.xml)" >> "$GITHUB_OUTPUT"
+          echo "BFD_PARENT_VERSION=$(yq '.project.version' apps/pom.xml)" >> "$GITHUB_ENV"
+
+      - name: Build and Deliver Apps Container Image
+        run: |
+          SANITIZED_REF="${GITHUB_REF_NAME////-}"
+          IMAGE_NAME="ghcr.io/cmsgov/bfd-apps"
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          FULL_BRANCH_TAG="${IMAGE_NAME}:${SANITIZED_REF}" # human readable, branch name tag
+          FULL_COMMIT_TAG="${IMAGE_NAME}:${SHORT_SHA}"     # a short sha suffixed image tag
+          echo "Building ${BFD_PARENT_VERSION} Container"
+          docker build --tag "$FULL_BRANCH_TAG" --build-arg="BFD_VERSION=${BFD_PARENT_VERSION}" .
+          docker tag "$FULL_BRANCH_TAG" "$FULL_COMMIT_TAG"
+          docker push "$FULL_BRANCH_TAG"
+          docker push "$FULL_COMMIT_TAG"
+        working-directory: apps
+
   # ansible system testing
   ansible-role-bfd-pipeline:
-    needs: mvn-verify
+    needs: mvn-verify-system
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-pipeline
-      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}
+      bfd_version: ${{ needs.mvn-verify-system.outputs.BFD_PARENT_VERSION }}
 
   ansible-role-bfd-server:
-    needs: mvn-verify
+    needs: mvn-verify-system
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-server
-      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}
+      bfd_version: ${{ needs.mvn-verify-system.outputs.BFD_PARENT_VERSION }}
 
   ansible-role-bfd-db-migrator:
-    needs: mvn-verify
+    needs: mvn-verify-system
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-db-migrator
-      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}
+      bfd_version: ${{ needs.mvn-verify-system.outputs.BFD_PARENT_VERSION }}
