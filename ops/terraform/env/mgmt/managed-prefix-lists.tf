@@ -3,12 +3,17 @@
 ##
 
 # Cloudbees core jenkins subnet.
-module "cbc_jenkins" {
-  source         = "../../modules/resources/prefix_list"
+resource "aws_ec2_managed_prefix_list" "prefix_list" {
   name           = "bfd-cbc-jenkins"
-  max_entries    = 1
-  entries        = var.cbc_jenkins_prefix_list
   address_family = "IPv4"
+  max_entries    = 1
+  dynamic "entry" {
+    for_each = var.cbc_jenkins_prefix_list
+    content {
+      cidr = entry.key
+      description = entry.value
+    }
+  }
 }
 
 variable "cbc_jenkins_prefix_list" {
