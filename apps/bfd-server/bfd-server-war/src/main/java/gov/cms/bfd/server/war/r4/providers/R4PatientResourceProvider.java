@@ -187,21 +187,28 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
-    Beneficiary beneficiary =
-        CommonQueries.findBeneficiary(
-            entityManager,
-            metricRegistry,
-            beneId,
-            true,
-            getClass().getSimpleName(),
-            String.format(
-                "bene_by_id_include_%s",
-                String.join(
-                    "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))));
+    Beneficiary beneficiary = null;
+    try {
+      beneficiary =
+          CommonQueries.findBeneficiary(
+              entityManager,
+              metricRegistry,
+              beneId,
+              true,
+              getClass().getSimpleName(),
+              String.format(
+                  "bene_by_id_include_%s",
+                  String.join(
+                      "_",
+                      (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))));
 
-    // Null out the unhashed HICN; in v2 we are ignoring HICNs
-    beneficiary.setHicnUnhashed(Optional.empty());
-
+      // Null out the unhashed HICN; in v2 we are ignoring HICNs
+      beneficiary.setHicnUnhashed(Optional.empty());
+    } catch (NoResultException e) {
+      // Add number of resources to MDC logs
+      LoggingUtils.logResourceCountToMdc(0);
+      throw new ResourceNotFoundException(patientId);
+    }
     return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
   }
 
@@ -247,31 +254,37 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
     }
-    if (logicalId.getValueNotNull().isEmpty()) {
-      throw new InvalidRequestException("Missing required id value");
-    }
     /*
-     * Only allow a system identifer for http://hl7.org/fhir/sid/us-mbi; while we
+     * Only allow a system identifier for http://hl7.org/fhir/sid/us-mbi; while we
      * can support HTTP GET here because we'll obfuscate the MBI_NUM prior to any
      * logging, we may want to throw an Exception if not a POST request.
      */
-    if (logicalId.getSystem() != null
-        && !logicalId.getSystem().isEmpty()
-        && !logicalId
-            .getSystem()
-            .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
+    boolean unhashedMbiLookup =
+        (logicalId.getSystem() != null
+            && logicalId
+                .getSystem()
+                .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED));
+
+    if (unhashedMbiLookup) {
+      if (RequestTypeEnum.POST != requestDetails.getRequestType()) {
+        throw new InvalidRequestException(
+            String.format(
+                "Search query by '%s' is onlu supported in POST request",
+                TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED));
+      }
+    } else if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty()) {
       throw new InvalidRequestException(
           "System is unsupported here and should not be set (" + logicalId.getSystem() + ")");
+    }
+    if (logicalId.getValueNotNull().isEmpty()) {
+      throw new InvalidRequestException("Missing required id value");
     }
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     long beneId = 0;
     List<IBaseResource> patients;
     try {
-      if (logicalId.getSystem() != null
-          && logicalId
-              .getSystem()
-              .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
+      if (unhashedMbiLookup) {
         patients = fetchPatientResourceByIdentifer(logicalId, lastUpdated, requestHeader);
         if (!patients.isEmpty()) {
           Patient patient = (Patient) patients.get(0);
@@ -300,7 +313,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                   .orElse(Collections.emptyList());
         }
       }
-    } catch (ResourceNotFoundException e) {
+    } catch (NoResultException | ResourceNotFoundException e) {
       patients = Collections.emptyList();
     }
 
@@ -309,7 +322,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      * this, as we need to override the operation name that was published by the
      * possible call to read(...), above.
      */
-
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
     operation.setOption("by", "id");
     // track all api hdrs
@@ -324,7 +336,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     // Add bene_id to MDC logs
     LoggingUtils.logBeneIdToMdc(beneId);
-
     return bundle;
   }
 
@@ -672,7 +683,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Search
   @Trace
   public Bundle searchByIdentifier(
-      @OptionalParam(name = Patient.SP_IDENTIFIER)
+      @RequiredParam(name = Patient.SP_IDENTIFIER)
           @Description(
               shortDefinition = OpenAPIContentProvider.PATIENT_SP_IDENTIFIER_SHORT,
               value = OpenAPIContentProvider.PATIENT_SP_IDENTIFIER_VALUE)
@@ -689,26 +700,29 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
 
-    if (identifier != null) {
-      if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem())) {
-        throw new InvalidRequestException(
-            "Unsupported identifier system: " + identifier.getSystem());
-      }
-      // in theory, since we take measures to obfuscate the us-mbi value in our logging, we could
-      // support HTTP GET; however, we'll enforce only supporting POST to provide extra protection
-      // of any use of an MBI lookup.
-      if (identifier
-              .getSystem()
-              .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
-          && requestDetails.getRequestType() != RequestTypeEnum.POST) {
-        throw new InvalidRequestException(
-            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED
-                + " is only supported via POST request");
-      }
-      if (identifier.getQueryParameterQualifier() != null) {
-        throw new InvalidRequestException(
-            "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
-      }
+    if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem())) {
+      throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
+    }
+    /*
+     * Only allow a system identifier for http://hl7.org/fhir/sid/us-mbi; while we
+     * can support HTTP GET here because we'll obfuscate the MBI_NUM prior to any
+     * logging, we may want to throw an Exception if not a POST request.
+     */
+    boolean unhashedMbiLookup =
+        (identifier.getSystem() != null
+            && identifier
+                .getSystem()
+                .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED));
+
+    if (unhashedMbiLookup && RequestTypeEnum.POST != requestDetails.getRequestType()) {
+      throw new InvalidRequestException(
+          String.format(
+              "Search query by '%s' is only supported in POST request",
+              TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED));
+    }
+    if (identifier.getQueryParameterQualifier() != null) {
+      throw new InvalidRequestException(
+          "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
     }
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
@@ -792,7 +806,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
               ? Collections.singletonList(patient)
               : Collections.emptyList();
 
-    } catch (ResourceNotFoundException | NoResultException e) {
+    } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
     return patients;

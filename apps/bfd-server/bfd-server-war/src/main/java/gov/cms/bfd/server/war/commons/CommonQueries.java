@@ -90,8 +90,6 @@ public class CommonQueries {
     Timer.Context beneHistoryTimer =
         CommonTransformerUtils.createMetricsTimer(
             metricRegistry, callerClassName, "query", "bene_by_mbi", "bene_by_mbi_or_id");
-
-    System.out.print("beneHistoryTimer: " + beneHistoryTimer.toString());
     /*
      * the function returns a String with comma-delimited values; done this way to avoid having
      * to register a Hibernate custom data type handler for an Array of bigint values.
@@ -125,7 +123,6 @@ public class CommonQueries {
       throw e;
     } finally {
       long queryNanoSeconds = beneHistoryTimer.stop();
-
       CommonTransformerUtils.recordQueryInMdc(
           "bene_by_mbi.bene_by_mbi_or_id", queryNanoSeconds, values != null ? values.size() : 0);
     }
@@ -171,8 +168,7 @@ public class CommonQueries {
     if (includeIdentifiers) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     }
-    // TODO : the following left join of skippedRifRecords needs to be removed as part of final
-    // cleanup
+    // TODO : the following left join of skippedRifRecords needs to be removed as part of BFD-3241
     root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
     criteriaQuery.select(root);
@@ -192,7 +188,7 @@ public class CommonQueries {
     } catch (NoResultException e) {
       // Add number of resources to MDC logs
       LoggingUtils.logResourceCountToMdc(0);
-      throw new ResourceNotFoundException("Unknown beneficiaryId: " + beneId);
+      throw e;
     } finally {
       long queryNanoSeconds = timerContext.stop();
 
