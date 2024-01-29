@@ -153,10 +153,10 @@ bfd:
         slis_repeater_lambda_invoke_rate: 1 minutes
       rda:
         grpc:
-          host: &rda_grpc_host UNDEFINED
-          port: &rda_grpc_port UNDEFINED
+          host: UNDEFINED
+          port: UNDEFINED
           max_idle_seconds: &rda_grpc_idle_secs 600 # 60 minutes
-          auth_token: &rda_grpc_auth_token UNDEFINED
+          auth_token: UNDEFINED
           server_type: &rda_grpc_server_type "InProcess"
           inprocess_server:
             mode: &grpc_inprocess_mode "S3"
