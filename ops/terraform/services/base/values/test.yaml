@@ -77,20 +77,20 @@ bfd:
       paths:
         dirs:
           logs: *bfdMigratorDir
-          tmp: !Join [*bfdMigratorDir, /tmp]
+          tmp: /opt/bfd-db-migrator/tmp
           launcher_script: UNDEFINED
-          launcher_log: !Join [*bfdMigratorDir, /migrator-log.json]
+          launcher_log: /opt/bfd-db-migrator/migrator-log.json
       java:
         app_main_class: "gov.cms.bfd.migrator.app.MigratorApp"
       systemd:
         working_dir: *bfdMigratorDir
-        exec_start: !Join [*bfdMigratorDir, /bfd-db-migrator-service.sh]
+        exec_start: /opt/bfd-db-migrator/bfd-db-migrator-service.sh
         user: "bb-migrator"
       instance_type: m6i.large
       volume_size: 100
       sqs_queue_name: *sqs_name
       db_migrator_dir: *bfdMigratorDir
-      db_migrator_tmp_dir: !Join [*bfdMigratorDir, /tmp]
+      db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
       db_migrator_db_username: *migrator_db_username
       db_migrator_db_password: *migrator_db_password
     pipeline:
@@ -99,16 +99,16 @@ bfd:
       paths:
         files:
           launcher_script: UNDEFINED
-          launcher_log: !Join [*bfdPipelineDir, /bluebutton-data-pipeline.log]
+          launcher_log: /bluebutton-data-pipeline/bluebutton-data-pipeline.log
         dirs:
-          tmp: !Join [*bfdPipelineDir, /tmp]
+          tmp: /bluebutton-data-pipeline/tmp
       java:
         app_main_class: "gov.cms.bfd.pipeline.app.PipelineApplication"
         jboss:
           logging_provider: "slf4j"
       systemd:
         working_dir: *bfdPipelineDir
-        exec_start: !Join [*bfdPipelineDir, /bfd-pipeline-service.sh]
+        exec_start: /bluebutton-data-pipeline/bfd-pipeline-service.sh
         user: &bfdPipelineUser bb-etl
       hicn_hash:
         iterations: &hicn_iterations <<CIPHER>>AgV49qfRyVlowHzcj_xPEIdCdNvUMv1iMjv29xDOF96NYd8AdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF0NFEwbHJDZHByWDFZeFFPTjlsVVJkb1lmVzR1bTVxNVgvRVNyeDBsQUNwRWRydnZRY1JYL2ZyQ3R6NVVTKzJTdz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAHkIPj8KNYTSPCwVy3oAP0pAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMoCmJxylZuapH3B41AgEQgDtW6eO-cEUC4pb4t1_IXpkV7-jIj2bbylrmSFINFY3wXR6Hjy47I0DeSldgqxKQUkFyq5CTj9flTuTHKQIAABAAQ1-zvFWraLZqb_TX5JgKpr0slhEd1B_P2I8DoDJDMK0wJ6HeC6CQp-q9SnQyuMtr_____wAAAAEAAAAAAAAAAAAAAAEAAAAGY9IYFBJVtbMeSxUA3Kd-_O4X3aWjyQBnMGUCMHb59_SxjUA6XULnYtH7ftgXSVAae_KldjncYxjF-xOtmSsDQ4YvAtw4u1x0R6-LAgIxALLKUR80NUta4vbRLuOkTR-RVGP62Kk0zlV1dZd0zBFDrbEZhg-ZjTGWt6xAyedCsw==<</CIPHER>>
@@ -224,9 +224,9 @@ bfd:
         agent:
           license_key: &server_nr_license <<CIPHER>>AgV4BHM0H1MtPBtEzPpLtyhDz075DYM_2UDf6-YCylNdducAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE3Q1VQT0xlN3daYm92aXZiWnlsNGdoOHBtOTNzaTk2eHBGZ3B6YW92OWlyUmRweUpkVDBHV1E3U3J3cDNQWEJ5Zz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGZf6sD5qNVs6rKGze-wo1KAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMOWu24skeQ0ZSQ3poAgEQgDufMZYYxVmt35N706siwsPNNWFJwiahd6D6yunLp004c_zSZIPSvEzjhCg2fGgEVobpacBW7iTiXPKhQQIAABAAq9YP5-07Ayfa6DUuNHv14eU3sA4RIDF1NWvfUybXVYqpZgpOUDHh2grS-M3eP21______wAAAAEAAAAAAAAAAAAAAAEAAAAqTx7pbFdy6dEZBIdtG5fB0Zoevf8pqgrVXeNqSCUtP06ijH03XAU1nJIEzoP0McC4ywobxnYAXYqp-QBnMGUCMQCdQ3ildGHWFa4lfjTCXn17chCK_ibs4Nz3FZcpcUbO6aTN60vTMUvSNB8n5kbCVjYCMHgmm98QRCXqz_qb61mS9ns6ifZIJ8HDRL0fZnl_7GOskq92L0eDTGbkvF_OJQF7ag==<</CIPHER>>
         host: "gov-collector.newrelic.com"
-        log_path: !Join [*bfdServerDir, /]
+        log_path: /usr/local/bfd-server/
         high_security_enabled: false
-        extensions_dir: !Join [*bfdServerDir, /]
+        extensions_dir: /usr/local/bfd-server/
         app_name: "BFD Server test"
         env: *env_name
         metrics:
@@ -242,23 +242,22 @@ bfd:
       port: &server_port <<CIPHER>>AgV4-WnACU_FV34ssXQE-x3tIm3kT4m0-4ISOiKUDlY0vCIAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFrNDlFNStvbTh3ZjBtNU1rdzMrUHhMY2grd2JKb1RsM2hZMTJNalFHRVhqTzV0VkFLQjVUZm1hdjV4S2JhUXN1dz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEwLmCZuB4mTK7myEvErhNOAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMH49ZBRj_GE4SxZRBAgEQgDtOg9Og6f6pFm8vEsxwbCP6a2MhCefw323u0mPpEcBFTKbJiVkS-LXv2SPTBkh8JS8PK-uCgF_eU0OOywIAABAAPZQYLX0RHfJp0JHjuh_2ejaqZNvFMsoNc1WQNvyAkCJxu50MOC11rXBal5vBV3Ob_____wAAAAEAAAAAAAAAAAAAAAEAAAAG_dvZor6XjQeXIPGyYh77vWPoTcJ-YQBnMGUCMQDRFQhoAd7NDJFCSBWSJP7o4tckEorfUB1TdVGf-bQAv5HfUku_ruaZ-b8Emjw2KscCMCIfCsF1bOwAmq8XJEFfOowqAFWIqLJgvySC5hKnuDyT5I7HENO0CZQ-QphTbVWe2g==<</CIPHER>>
       paths:
         dirs:
-          logs: !Join [*bfdServerDir, /]
-          tmp: !Join [*bfdServerDir, /tmp]
+          logs: /usr/local/bfd-server/
+          tmp: /usr/local/bfd-server/tmp
         files:
-          keystore: !Join [*bfdServerDir, /bluebutton-appserver-keystore.pfx]
-          truststore:
-            !Join [*bfdServerDir, /bluebutton-appserver-truststore.pfx]
+          keystore: /usr/local/bfd-server/bluebutton-appserver-keystore.pfx
+          truststore: /usr/local/bfd-server/bluebutton-appserver-truststore.pfx
           war: UNDEFINED
           launcher_script: UNDEFINED
-          new_relic_agent_jar: !Join [*bfdServerDir, /newrelic/newrelic.jar]
-          launcher_log: !Join [*bfdServerDir, /bluebutton-server-app-log.json]
+          new_relic_agent_jar: /usr/local/bfd-server/newrelic/newrelic.jar
+          launcher_log: /usr/local/bfd-server/bluebutton-server-app-log.json
       jboss:
         logging_provider: "slf4j"
       java:
         app_main_class: "gov.cms.bfd.server.launcher.DataServerLauncherApp"
       systemd:
         working_dir: *bfdServerDir
-        exec_start: !Join [*bfdServerDir, /bfd-server.sh]
+        exec_start: /usr/local/bfd-server/bfd-server.sh
         user: "bfd"
       data_server_dir: *bfdServerDir
       data_server_new_relic_metric_host: *newRelicMetricHost
