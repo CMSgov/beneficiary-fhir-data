@@ -125,6 +125,7 @@ public class RdaLoadOptions {
   public RdaFissClaimLoadJob createFissClaimsLoadJob(
       PipelineApplicationState appState, MbiCache mbiCache) {
     Callable<RdaSource<FissClaimChange, RdaChange<RdaFissClaim>>> preJobTaskFactory;
+    CleanupJob cleanupJob;
 
     if (jobConfig.shouldProcessDLQ()) {
       preJobTaskFactory =
@@ -141,6 +142,14 @@ public class RdaLoadOptions {
       preJobTaskFactory = EmptyRdaSource::new;
     }
 
+    // removes old RDA FISS claims data if enabled.
+    cleanupJob =
+        new RdaFissClaimCleanupJob(
+            appState.getEntityManagerFactory(),
+            jobConfig.getCleanupRunSize(),
+            jobConfig.getCleanupTransactionSize(),
+            jobConfig.shouldRunCleanup());
+
     return new RdaFissClaimLoadJob(
         jobConfig,
         preJobTaskFactory,
@@ -153,6 +162,7 @@ public class RdaLoadOptions {
                 jobConfig.getStartingFissSeqNum(),
                 jobConfig.getRdaVersion()),
         createFissSinkFactory(appState, mbiCache),
+        cleanupJob,
         appState.getMeters());
   }
 
@@ -200,6 +210,7 @@ public class RdaLoadOptions {
   public RdaMcsClaimLoadJob createMcsClaimsLoadJob(
       PipelineApplicationState appState, MbiCache mbiCache) {
     Callable<RdaSource<McsClaimChange, RdaChange<RdaMcsClaim>>> preJobTaskFactory;
+    CleanupJob cleanupJob;
 
     if (jobConfig.shouldProcessDLQ()) {
       preJobTaskFactory =
@@ -216,6 +227,14 @@ public class RdaLoadOptions {
       preJobTaskFactory = EmptyRdaSource::new;
     }
 
+    // removes old RDA MCS claims data if enabled.
+    cleanupJob =
+        new RdaMcsClaimCleanupJob(
+            appState.getEntityManagerFactory(),
+            jobConfig.getCleanupRunSize(),
+            jobConfig.getCleanupTransactionSize(),
+            jobConfig.shouldRunCleanup());
+
     return new RdaMcsClaimLoadJob(
         jobConfig,
         preJobTaskFactory,
@@ -228,6 +247,7 @@ public class RdaLoadOptions {
                 jobConfig.getStartingMcsSeqNum(),
                 jobConfig.getRdaVersion()),
         createMcsSinkFactory(appState, mbiCache),
+        cleanupJob,
         appState.getMeters());
   }
 

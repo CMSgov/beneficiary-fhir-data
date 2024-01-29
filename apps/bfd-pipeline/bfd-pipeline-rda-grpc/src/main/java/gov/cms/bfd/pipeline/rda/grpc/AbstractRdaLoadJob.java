@@ -67,6 +67,9 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
   private final ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception>
       sinkFactory;
 
+  /** Cleanup job that purges old claims data. */
+  private final CleanupJob cleanupJob;
+
   /** Logger provided from each subclass. */
   private final Logger logger;
 
@@ -86,6 +89,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
    * @param preJobTaskFactory the pre job task factory
    * @param sourceFactory the source factory
    * @param sinkFactory the sink factory
+   * @param cleanupJob the cleanup job
    * @param appMetrics the app metrics
    * @param logger the logger
    */
@@ -94,12 +98,14 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
       Callable<RdaSource<TResponse, TClaim>> preJobTaskFactory,
       Callable<RdaSource<TResponse, TClaim>> sourceFactory,
       ThrowingFunction<RdaSink<TResponse, TClaim>, SinkTypePreference, Exception> sinkFactory,
+      CleanupJob cleanupJob,
       MeterRegistry appMetrics,
       Logger logger) {
     this.config = Preconditions.checkNotNull(config);
     this.preJobTaskFactory = Preconditions.checkNotNull(preJobTaskFactory);
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
     this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
+    this.cleanupJob = Preconditions.checkNotNull(cleanupJob);
     this.logger = logger;
     metrics = new Metrics(appMetrics, getClass());
     runningSemaphore = new Semaphore(1);
@@ -122,6 +128,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
     try {
       int processedCount = 0;
       try {
+        executeCleanupJob();
         processedCount += executePreJobTasks();
         processedCount += callRdaServiceAndStoreRecords();
       } catch (ProcessingException ex) {
@@ -167,6 +174,21 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
       throw ex;
     } catch (Exception ex) {
       logger.error("pre-processing aborted by an exception: message={}", ex.getMessage(), ex);
+      throw new ProcessingException(ex, 0);
+    }
+  }
+
+  /**
+   * Executes the cleanup job and logs the number of claims deleted.
+   *
+   * @throws ProcessingException if the task throws an exception.
+   */
+  void executeCleanupJob() throws ProcessingException {
+    try {
+      int deletedCount = cleanupJob.run();
+      logger.info("cleanup job removed {} claims", deletedCount);
+    } catch (Exception ex) {
+      logger.error("cleanup job exception: message={}", ex.getMessage(), ex);
       throw new ProcessingException(ex, 0);
     }
   }
@@ -277,6 +299,15 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
     /** Determines if the DLQ should be processed for subsequent job runs. */
     private final boolean processDLQ;
 
+    /** Determines if the claims cleanup job should run. */
+    private final boolean runCleanup;
+
+    /** The maximum number of claims to delete per cleanup job run. */
+    @Getter private final int cleanupRunSize;
+
+    /** The maximum number of claims to delete per db transaction. */
+    @Getter private final int cleanupTransactionSize;
+
     /** Indicates the preferred sink type to create for created jobs. */
     @Getter private final SinkTypePreference sinkTypePreference;
 
@@ -292,6 +323,9 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
      * @param startingFissSeqNum the starting fiss seq num
      * @param startingMcsSeqNum the starting MCS seq num
      * @param processDLQ if the job should process the DLQ
+     * @param runCleanup if the claims cleanup job should run
+     * @param cleanupRunSize the number of claims to remove per cleanup run
+     * @param cleanupTransactionSize the number of claims to remove per cleanup db transaction
      * @param sinkTypePreference The {@link SinkTypePreference} to use for created jobs
      * @param rdaVersion The required {@link RdaVersion} in order to ingest data
      */
@@ -303,6 +337,9 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
         @Nullable Long startingFissSeqNum,
         @Nullable Long startingMcsSeqNum,
         boolean processDLQ,
+        boolean runCleanup,
+        int cleanupRunSize,
+        int cleanupTransactionSize,
         SinkTypePreference sinkTypePreference,
         RdaVersion rdaVersion) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
@@ -311,6 +348,9 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
       this.startingFissSeqNum = startingFissSeqNum;
       this.startingMcsSeqNum = startingMcsSeqNum;
       this.processDLQ = processDLQ;
+      this.runCleanup = runCleanup;
+      this.cleanupRunSize = cleanupRunSize;
+      this.cleanupTransactionSize = cleanupTransactionSize;
       this.sinkTypePreference = sinkTypePreference;
       this.rdaVersion = rdaVersion;
       // zero is ok because that means the job should run exactly once
@@ -321,6 +361,17 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
       Preconditions.checkArgument(
           this.writeThreads >= 1, "writeThreads less than 1: %s", writeThreads);
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s", batchSize);
+
+      if (runCleanup) {
+        Preconditions.checkArgument(
+            cleanupRunSize <= 0 || cleanupRunSize < cleanupTransactionSize,
+            "cleanupRunSize must be greater than 0 and greater than cleanupTransactionSize: %s",
+            cleanupRunSize);
+        Preconditions.checkArgument(
+            cleanupTransactionSize <= 0,
+            "cleanupTransactionSize must be greater than 0: %s",
+            cleanupTransactionSize);
+      }
     }
 
     /**
@@ -350,6 +401,17 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
      */
     public boolean shouldProcessDLQ() {
       return processDLQ;
+    }
+
+    /**
+     * Returns true if the job has been configured to run the old claims clean up job, false
+     * otherwise.
+     *
+     * @return true if the job has been configured to run the old claims clean up job, false
+     *     otherwise.
+     */
+    public boolean shouldRunCleanup() {
+      return runCleanup;
     }
   }
 
