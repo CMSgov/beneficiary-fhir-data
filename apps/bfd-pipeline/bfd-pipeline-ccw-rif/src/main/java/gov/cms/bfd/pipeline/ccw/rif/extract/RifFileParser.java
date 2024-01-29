@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVRecord;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuple2;
 
 /**
  * Instances of this class provide a method that takes a {@link RifFile} and returns a {@link Flux}
@@ -45,7 +46,11 @@ public abstract class RifFileParser {
           csvParser ->
               Flux.fromIterable(csvParser)
                   .map(FluxUtils.wrapFunction(parser))
-                  .map(new RecordNumberCounter()::count),
+                  // The index operator wraps each record in a tuple containing the index and the
+                  // record.  Then we map with addRecordNumber to set the record number in the
+                  // record and return the record itself.
+                  .index()
+                  .map(RifFileParser::addRecordNumber),
           // used in log message if closing the CSVParser fails
           rifFile.getDisplayName());
     }
@@ -75,7 +80,11 @@ public abstract class RifFileParser {
                   .bufferUntilChanged(csvRecord -> csvRecord.get(groupingColumn))
                   // parses the list of records
                   .flatMap(this::parse)
-                  .map(new RecordNumberCounter()::count),
+                  // The index operator wraps each record in a tuple containing the index and the
+                  // record.  Then we map with addRecordNumber to set the record number in the
+                  // record and return the record itself.
+                  .index()
+                  .map(RifFileParser::addRecordNumber),
           // used in log message if closing the CSVParser fails
           rifFile.getDisplayName());
     }
@@ -96,25 +105,16 @@ public abstract class RifFileParser {
   }
 
   /**
-   * Counts each record as it arrives and sets its record number field appropriately. Record numbers
-   * are non-zero positive integers so that 0 can be used in the database to indicate no records
-   * have been processed.
+   * Extracts the zero based index and accompanying event object, assigns a corresponding 1 based
+   * record number to the event, then returns the numbered event.
+   *
+   * @param indexedEvent tuple containing index and event
+   * @return just the event but with record number assigned
    */
-  @ThreadSafe
-  public static class RecordNumberCounter {
-    /** The current record number. */
-    private long recordNumber;
-
-    /**
-     * Increment the record number and assign it to the record.
-     *
-     * @param record record to update
-     * @return the record
-     */
-    public synchronized RifRecordEvent<?> count(RifRecordEvent<?> record) {
-      recordNumber += 1;
-      record.setRecordNumber(recordNumber);
-      return record;
-    }
+  static RifRecordEvent<?> addRecordNumber(Tuple2<Long, RifRecordEvent<?>> indexedEvent) {
+    long index = indexedEvent.getT1();
+    RifRecordEvent<?> event = indexedEvent.getT2();
+    event.setRecordNumber(index + 1);
+    return event;
   }
 }

@@ -76,14 +76,15 @@ public class RifFileParserTest {
     assertEquals(List.of(), parseString("", parser));
 
     // single record in file should work
-    assertEquals(List.of("1-a"), parseString("id|data\n1|a\n", parser));
+    assertEquals(List.of("1->1-a"), parseString("id|data\n1|a\n", parser));
 
     // several single records should work
-    assertEquals(List.of("1-a", "2-a", "3-a"), parseString("id|data\n1|a\n2|a\n3|a\n", parser));
+    assertEquals(
+        List.of("1->1-a", "2->2-a", "3->3-a"), parseString("id|data\n1|a\n2|a\n3|a\n", parser));
 
     // several with mixed number of records should work
     assertEquals(
-        List.of("1-a", "2-a", "2-b", "3-a", "3-b", "3-c"),
+        List.of("1->1-a", "2->2-a", "3->2-b", "4->3-a", "5->3-b", "6->3-c"),
         parseString("id|data\n1|a\n2|a\n2|b\n3|a\n3|b\n3|c\n", parser));
   }
 
@@ -99,14 +100,15 @@ public class RifFileParserTest {
     assertEquals(List.of(), parseString("", parser));
 
     // single record in file should work
-    assertEquals(List.of("1-a"), parseString("id|data\n1|a\n", parser));
+    assertEquals(List.of("1->1-a"), parseString("id|data\n1|a\n", parser));
 
     // several single records should work
-    assertEquals(List.of("1-a", "2-a", "3-a"), parseString("id|data\n1|a\n2|a\n3|a\n", parser));
+    assertEquals(
+        List.of("1->1-a", "2->2-a", "3->3-a"), parseString("id|data\n1|a\n2|a\n3|a\n", parser));
 
     // several with mixed number of records should work
     assertEquals(
-        List.of("1-a", "2-a;2-b", "3-a;3-b;3-c"),
+        List.of("1->1-a", "2->2-a;2-b", "3->3-a;3-b;3-c"),
         parseString("id|data\n1|a\n2|a\n2|b\n3|a\n3|b\n3|c\n", parser));
 
     // missing grouping column should throw an exception
@@ -133,6 +135,7 @@ public class RifFileParserTest {
       for (int record = 1; record <= 50; ++record) {
         final int lineCount = 1 + random.nextInt(5);
         final var expectedRecordParsingResult = new StringBuilder();
+        expectedRecordParsingResult.append(record + "->");
         final int recordId = random.nextInt(1_000_000);
         for (int line = 1; line <= lineCount; ++line) {
           final int recordData = random.nextInt(1_000_000);
@@ -187,23 +190,27 @@ public class RifFileParserTest {
     Files.writeString(tempFile, csvString);
     return parser
         .parseRifFile(rifFile)
-        .map(rifRecordEvent -> convertRecordsIntoStrings(rifRecordEvent.getRawCsvRecords()))
+        .map(
+            rifRecordEvent ->
+                convertRecordsIntoStrings(
+                    rifRecordEvent.getRecordNumber(), rifRecordEvent.getRawCsvRecords()))
         .collectList()
         .block();
   }
 
   /**
    * Convert a list of {@link CSVRecord} into a single string with fields within each record
-   * separated by {@code -} and individual records separated by {@code ;}.
+   * separated by {@code -} and individual records separated by {@code ;}. The record number is
+   * added to the beginning of the string followed by {@code ->}.
    *
    * @param csvRecords the records to convert
    * @return the resulting string
    */
-  private String convertRecordsIntoStrings(List<CSVRecord> csvRecords) {
+  private String convertRecordsIntoStrings(long recordNumber, List<CSVRecord> csvRecords) {
     List<String> recordStrings =
         csvRecords.stream()
             .map(csvRecord -> csvRecord.stream().collect(Collectors.joining("-")))
             .toList();
-    return String.join(";", recordStrings);
+    return recordNumber + "->" + String.join(";", recordStrings);
   }
 }
