@@ -84,12 +84,6 @@ module "fhir_iam" {
   legacy_service       = local.legacy_service
 }
 
-resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
-  role       = module.fhir_iam.role
-  policy_arn = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
-}
-
-
 ## NLB for the FHIR server (SSL terminated by the FHIR server)
 #
 module "fhir_lb" {

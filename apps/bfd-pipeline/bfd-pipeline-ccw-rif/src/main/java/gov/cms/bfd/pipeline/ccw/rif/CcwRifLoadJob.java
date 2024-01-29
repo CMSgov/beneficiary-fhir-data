@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.entities.S3DataFile;
+import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -9,26 +11,26 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.DataSetMoveTask;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,12 @@ import org.slf4j.LoggerFactory;
  */
 public final class CcwRifLoadJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
+
+  /**
+   * Maximum age of a manifest for it to be considered for processing. Intended to keep database
+   * queries reasonable.
+   */
+  public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(60);
 
   /**
    * Minimum amount of free disk space (in bytes) to allow pre-fetch of second data set while
@@ -118,6 +126,10 @@ public final class CcwRifLoadJob implements PipelineJob {
    */
   public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set processing complete.";
 
+  /** Set of status values that indicate a data file requires processing. */
+  public static final Set<S3DataFile.FileStatus> REQUIRED_PROCESSING_STATUS_VALUES =
+      Set.of(S3DataFile.FileStatus.DISCOVERED, S3DataFile.FileStatus.STARTED);
+
   /**
    * A regex for {@link DataSetManifest} keys in S3. Provides capturing groups for the {@link
    * DataSetManifestId} fields.
@@ -151,9 +163,6 @@ public final class CcwRifLoadJob implements PipelineJob {
   /** The data set listener for finding new files to load. */
   private final DataSetMonitorListener listener;
 
-  /** The manager for taking actions with S3. */
-  private final S3TaskManager s3TaskManager;
-
   /** The application state. */
   private final PipelineApplicationState appState;
 
@@ -169,13 +178,16 @@ public final class CcwRifLoadJob implements PipelineJob {
   /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
+  /** Maintains the background thread used to download files asynchronously. */
+  private final ExecutorService downloadService;
+
   /**
    * Constructs a new instance. The {@link S3TaskManager} will be automatically shut down when this
    * job's {@link #close} method is called.
    *
    * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
-   * @param s3TaskManager the {@link S3TaskManager} to use
+   * @param dataSetQueue the {@link DataSetQueue} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
    * @param isIdempotentMode the {@link boolean} TRUE if running in idempotent mode
    * @param runInterval used to construct the job schedule
@@ -184,7 +196,7 @@ public final class CcwRifLoadJob implements PipelineJob {
   public CcwRifLoadJob(
       PipelineApplicationState appState,
       ExtractionOptions options,
-      S3TaskManager s3TaskManager,
+      DataSetQueue dataSetQueue,
       DataSetMonitorListener listener,
       boolean isIdempotentMode,
       Optional<Duration> runInterval,
@@ -192,13 +204,12 @@ public final class CcwRifLoadJob implements PipelineJob {
     this.appState = appState;
     this.appMetrics = appState.getMetrics();
     this.options = options;
-    this.s3TaskManager = s3TaskManager;
+    this.dataSetQueue = dataSetQueue;
     this.listener = listener;
     this.isIdempotentMode = isIdempotentMode;
     this.runInterval = runInterval;
     this.statusReporter = statusReporter;
-
-    this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
+    downloadService = Executors.newSingleThreadScheduledExecutor();
   }
 
   @Override
@@ -212,7 +223,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     /*
      * TODO While the RIF pipeline itself is interruptable now, the S3 transfers are not.
      *  For now we will leave interrupts disabled and revisit the need for moving files
-     *  between S3 buckets in a later PR.
+     *  between S3 buckets in a later PR. Expected to be changed as part of BFD-3129.
      */
     return false;
   }
@@ -221,15 +232,14 @@ public final class CcwRifLoadJob implements PipelineJob {
   public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
 
-    // Update the queue from S3.
-    statusReporter.reportCheckingBucketForManifest();
-    dataSetQueue.updatePendingDataSets();
+    final Instant startTime = appState.getClock().instant();
 
-    // Grab the first manifest or null if we did not find one.
-    final DataSetManifest manifestToProcess = dataSetQueue.getNextDataSetToProcess().orElse(null);
+    // Get list of eligible manifests from database.
+    statusReporter.reportCheckingBucketForManifest();
+    final var eligibleManifests = readEligibleManifests(startTime);
 
     // If no manifest was found, we're done (until next time).
-    if (manifestToProcess == null) {
+    if (eligibleManifests.isEmpty()) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
       listener.noDataAvailable();
       statusReporter.reportNothingToDo();
@@ -237,12 +247,12 @@ public final class CcwRifLoadJob implements PipelineJob {
     }
 
     // We've found the oldest manifest.
+    S3ManifestFile manifestRecord = eligibleManifests.getFirst().manifestRecord();
+    DataSetManifest manifestToProcess = eligibleManifests.getFirst().manifest();
     LOGGER.info(
-        "Found data set to process: '{}'."
-            + " There were '{}' total pending data sets and '{}' completed ones.",
-        manifestToProcess,
-        dataSetQueue.getPendingManifestsCount(),
-        dataSetQueue.getCompletedManifestsCount().orElse(0));
+        "Found data set to process: '{}'." + " There were '{}' total pending data sets.",
+        manifestToProcess.toString(),
+        eligibleManifests.size());
 
     /*
      * We've got a data set to process. However, it might still be uploading
@@ -250,7 +260,8 @@ public final class CcwRifLoadJob implements PipelineJob {
      * processing it.
      */
     boolean alreadyLoggedWaitingEvent = false;
-    while (!dataSetIsAvailable(manifestToProcess)) {
+    statusReporter.reportAwaitingManifestData(manifestRecord.getS3Key());
+    while (!dataSetQueue.allEntriesExistInS3(manifestRecord)) {
       /*
        * We're very patient here, so we keep looping, but it's prudent to
        * pause between each iteration. TODO should eventually time out,
@@ -301,10 +312,9 @@ public final class CcwRifLoadJob implements PipelineJob {
     if (preValidationOK) {
       List<S3RifFile> rifFiles =
           manifestToProcess.getEntries().stream()
-              .map(
+              .flatMap(
                   manifestEntry ->
-                      new S3RifFile(
-                          appMetrics, manifestEntry, s3TaskManager.downloadAsync(manifestEntry)))
+                      convertManifestEntryToS3RifFile(manifestRecord, manifestEntry).stream())
               .toList();
 
       RifFilesEvent rifFilesEvent =
@@ -318,19 +328,16 @@ public final class CcwRifLoadJob implements PipelineJob {
        * it looks like there's enough disk space, start downloading it early in the
        * background.
        */
-      Optional<DataSetManifest> secondManifestToProcess = dataSetQueue.getSecondDataSetToProcess();
-      if (secondManifestToProcess.isPresent()
-          && dataSetIsAvailable(secondManifestToProcess.get())) {
-        Path tmpdir = Paths.get(System.getProperty("java.io.tmpdir"));
-        long usableFreeTempSpace;
-        try {
-          usableFreeTempSpace = Files.getFileStore(tmpdir).getUsableSpace();
-        } catch (IOException e) {
-          throw new UncheckedIOException(e);
-        }
-
+      if (eligibleManifests.size() > 1) {
+        DataSetQueue.Manifest secondManifestToProcess = eligibleManifests.get(1);
+        final long usableFreeTempSpace = dataSetQueue.getAvailableDiskSpaceInBytes();
         if (usableFreeTempSpace >= MIN_BYTES_FOR_SECOND_DATA_SET_DOWNLOAD) {
-          secondManifestToProcess.get().getEntries().forEach(s3TaskManager::downloadAsync);
+          secondManifestToProcess.manifestRecord().getDataFiles().stream()
+              .filter(this::isProcessingRequired)
+              .forEach(
+                  s3DataFile -> {
+                    downloadService.submit(() -> dataSetQueue.downloadManifestEntry(s3DataFile));
+                  });
         }
       }
 
@@ -342,8 +349,10 @@ public final class CcwRifLoadJob implements PipelineJob {
        * consistency problems).
        */
       statusReporter.reportProcessingManifestData(manifestToProcess.getIncomingS3Key());
+      dataSetQueue.markAsStarted(manifestRecord);
       listener.dataAvailable(rifFilesEvent);
       statusReporter.reportCompletedManifest(manifestToProcess.getIncomingS3Key());
+      dataSetQueue.markAsProcessed(manifestRecord);
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
@@ -356,78 +365,46 @@ public final class CcwRifLoadJob implements PipelineJob {
        */
       rifFiles.forEach(S3RifFile::cleanupTempFile);
     } else {
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
       /*
        * If here, Synthea pre-validation has failed; we want to move the S3 incoming
        * files to a failed folder; so instead of moving files to a done folder we'll just
        * replace the manifest's notion of its Done folder to a Failed folder.
        */
       manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);
+      // TODO END remove once S3 file moves are no longer necessary.
+
+      /*
+       * If here, Synthea pre-validation has failed; we want to mark the data set as rejected int he database.
+       */
+      dataSetQueue.markAsRejected(manifestRecord);
     }
-    dataSetQueue.markProcessed(manifestToProcess);
-    s3TaskManager.submit(new DataSetMoveTask(s3TaskManager, options, manifestToProcess));
+
+    // TODO BEGIN remove once S3 file moves are no longer necessary.
+    // Expected to be changed as part of BFD-3129.
+    dataSetQueue.moveManifestFilesInS3(manifestToProcess);
+    // TODO END remove once S3 file moves are no longer necessary.
 
     return PipelineJobOutcome.WORK_DONE;
   }
 
   /**
-   * Shuts down our {@link S3TaskManager}. If any download or move tasks are still running this
-   * method will wait for them to complete before returning.
+   * Shuts down our {@link S3TaskManager} and clears our S3 files cache. If any download or move
+   * tasks are still running this method will wait for them to complete before returning.
    *
    * <p>{@inheritDoc}
    */
   @Override
   public void close() throws Exception {
-    s3TaskManager.shutdownSafely();
-  }
-
-  /**
-   * Determines if all the objects listed in the specified manifest can be found in S3.
-   *
-   * @param manifest the {@link DataSetManifest} that lists the objects to verify the presence of
-   * @return <code>true</code> if all the objects listed can be found in S3
-   */
-  private boolean dataSetIsAvailable(DataSetManifest manifest) {
-    statusReporter.reportAwaitingManifestData(manifest.getIncomingS3Key());
-
-    /*
-     * There are two ways to do this: 1) list all the objects in the data
-     * set and verify the ones we're looking for are there after, or 2) try
-     * to grab the metadata for each object. Option #2 *should* be simpler,
-     * but isn't, because each missing object will result in an exception.
-     * Exceptions-as-control-flow is a poor design choice, so we'll go with
-     * option #1.
-     */
-
-    final String dataSetKeyPrefix =
-        String.format(
-            "%s/%s/", manifest.getManifestKeyIncomingLocation(), manifest.getTimestampText());
-
-    /*
-     * Pull the object names from the keys that were returned, by
-     * stripping the timestamp prefix and slash from each of them.
-     */
-
-    final Set<String> dataSetObjectNames =
-        s3TaskManager
-            .getS3Dao()
-            .listObjects(
-                options.getS3BucketName(),
-                Optional.of(dataSetKeyPrefix),
-                options.getS3ListMaxKeys())
-            .peek(
-                o ->
-                    LOGGER.debug("Found file: '{}', part of data set: '{}'.", o.getKey(), manifest))
-            .map(o -> o.getKey().substring(dataSetKeyPrefix.length()))
-            .collect(Collectors.toSet());
-
-    for (DataSetManifestEntry manifestEntry : manifest.getEntries()) {
-      if (!dataSetObjectNames.contains(manifestEntry.getName())) {
-        LOGGER.debug(
-            "Waiting for file '{}', part of data set: '{}'.", manifestEntry.getName(), manifest);
-        return false;
-      }
-    }
-    return true;
+    final var closer = new MultiCloser();
+    closer.close(
+        () -> {
+          downloadService.shutdown();
+          downloadService.awaitTermination(1, TimeUnit.HOURS);
+        });
+    closer.close(dataSetQueue::close);
+    closer.finish();
   }
 
   /**
@@ -458,5 +435,96 @@ public final class CcwRifLoadJob implements PipelineJob {
     LOGGER.info(
         "Synthea pre-validation being performed by: {}...", preValInterface.getClass().getName());
     return preValInterface.isValid(manifest);
+  }
+
+  /**
+   * Finds and returns the {@link S3DataFile} from {@link S3ManifestFile#dataFiles} that corresponds
+   * to the provided {@link DataSetManifestEntry}. This should never fail.
+   *
+   * @param manifest the manifest record
+   * @param entry the entry to search for
+   * @return the entry that was found
+   * @throws BadCodeMonkeyException if the manifest record is out of sync with the manifest it
+   *     represents
+   */
+  private S3DataFile selectS3DataRecordForEntry(
+      S3ManifestFile manifest, DataSetManifestEntry entry) {
+    if (manifest.getDataFiles().size() != entry.getParentManifest().getEntries().size()) {
+      throw new BadCodeMonkeyException(
+          String.format(
+              "mismatch in number of entries: database=%d xml=%d",
+              entry.getParentManifest().getEntries().size(), manifest.getDataFiles().size()));
+    }
+    for (S3DataFile dataFile : manifest.getDataFiles()) {
+      if (dataFile.getFileName().equals(entry.getName())) {
+        return dataFile;
+      }
+    }
+    throw new BadCodeMonkeyException(
+        String.format("no data file found for entry name: name=%s", entry.getName()));
+  }
+
+  /**
+   * Used as a lambda when calling {@link DataSetQueue#readEligibleManifests} to ensure that only
+   * manifests that pass our filter criteria and are not intended to be loaded in the future will be
+   * processed.
+   *
+   * @param dataSetManifest the manifest to test
+   * @return true if manifest passes our filter criteria and is not a future manifest
+   */
+  private boolean isEligibleManifest(DataSetManifest dataSetManifest) {
+    return options.getDataSetFilter().test(dataSetManifest)
+        && !dataSetManifest.getId().isFutureManifest();
+  }
+
+  /**
+   * Reads all manifests that are currently eligible for processing.
+   *
+   * @param now current time used in search
+   * @return list of eligible manifests
+   * @throws IOException pass through if lookup fails
+   */
+  private List<DataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
+    final Instant minEligibleTime = now.minus(MAX_MANIFEST_AGE);
+    return dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
+  }
+
+  /**
+   * Adds a task to the download queue to download the data file from S3 and returns a {@link
+   * S3RifFile} containing a {@link Future} to access the result.
+   *
+   * @param manifestRecord database record for the manifest
+   * @param manifestEntry manifest entry for the data file
+   * @return empty if file does not require processing, the {@link S3RifFile} if it does
+   */
+  private Optional<S3RifFile> convertManifestEntryToS3RifFile(
+      S3ManifestFile manifestRecord, DataSetManifestEntry manifestEntry) {
+    final var dataFileRecord = selectS3DataRecordForEntry(manifestRecord, manifestEntry);
+    if (!isProcessingRequired(dataFileRecord)) {
+      return Optional.empty();
+    }
+
+    final Future<DataSetQueue.ManifestEntry> downloadResult =
+        downloadService.submit(() -> dataSetQueue.downloadManifestEntry(dataFileRecord));
+    return Optional.of(new S3RifFile(appMetrics, manifestEntry, downloadResult));
+  }
+
+  /**
+   * Returns true if the status of this data file indicates that it has not yet been fully
+   * processed.
+   *
+   * @param dataFileRecord data file to check
+   * @return true if the file requires processing
+   */
+  private boolean isProcessingRequired(S3DataFile dataFileRecord) {
+    if (REQUIRED_PROCESSING_STATUS_VALUES.contains(dataFileRecord.getStatus())) {
+      return true;
+    }
+    LOGGER.info(
+        "Skipping already processed data file: index={} type={} name={}",
+        dataFileRecord.getIndex(),
+        dataFileRecord.getFileType(),
+        dataFileRecord.getFileName());
+    return false;
   }
 }

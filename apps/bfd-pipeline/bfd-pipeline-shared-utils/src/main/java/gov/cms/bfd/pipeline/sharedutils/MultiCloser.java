@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc;
+package gov.cms.bfd.pipeline.sharedutils;
 
 import javax.annotation.concurrent.ThreadSafe;
 import lombok.extern.slf4j.Slf4j;

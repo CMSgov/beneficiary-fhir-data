@@ -12,8 +12,6 @@ git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBran
 
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
-
 # The extra_vars.json file from the previous build step contains a few incorrect values
 # and needs to get trimmed down to the following
 cat <<EOF >> extra_vars.json
@@ -23,9 +21,7 @@ cat <<EOF >> extra_vars.json
 }
 EOF
 
-ansible-playbook --extra-vars '@extra_vars.json' --vault-password-file=vault.password --tags "post-ami" launch_bfd-pipeline.yml
-
-rm vault.password
+ansible-playbook --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins

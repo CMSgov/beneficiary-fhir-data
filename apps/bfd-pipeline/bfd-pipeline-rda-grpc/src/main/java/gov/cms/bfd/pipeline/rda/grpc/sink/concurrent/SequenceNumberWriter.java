@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import gov.cms.bfd.pipeline.rda.grpc.MultiCloser;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import javax.annotation.concurrent.ThreadSafe;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;

@@ -96,6 +96,7 @@ claim_threads=
 claim_batch_size=
 claim_queue_multiple=
 kubernetes=false
+temp_dir=
 
 usage() {
   cat 1>&2 <<EOF
@@ -125,6 +126,9 @@ Supported long options:
 
 --claim-load-options threads:batch_size:queue_multiple
   Sets the RifLoader settings to use for claim data.
+
+--temp directory
+  Sets the java.io.tmpdir property.
 
 Run mode options: 
   rif     RIF pipeline only.
@@ -189,6 +193,10 @@ while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
          claim_threads=$t
          claim_batch_size=$b
          claim_queue_multiple=$q
+         ;;
+       temp)
+         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+         temp_dir=$val
          ;;
        *) usage ; exit 1
      esac
@@ -437,6 +445,9 @@ if [[ x$kubernetes = xtrue ]] ; then
   helm -n dev uninstall pipeline-$pipeline_type || true
   helm -n dev install pipeline-$pipeline_type pipeline --set pipelineType=$pipeline_type
 elif [[ x$image_tag = x ]] ; then
+  if [[ x$temp_dir != x ]] ; then
+    ARGS="$ARGS -Djava.io.tmpdir=$temp_dir"
+  fi
   echo running application directly
   export CLASSPATH="$classpath"
   exec $java $ARGS $mainClass

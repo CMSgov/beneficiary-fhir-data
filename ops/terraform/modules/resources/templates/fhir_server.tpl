@@ -10,10 +10,6 @@ exec > >(
 
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-# TODO: references to the ansible-vault vault.password file are still necessary for bfd-server until
-#       we develop an alternative for the vault-encrypted JKS file
-aws s3 --quiet cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
-
 # TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
 aws ssm get-parameters-by-path \
     --with-decryption \
@@ -45,9 +41,7 @@ EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --vault-password-file=vault.password --tags "post-ami" launch_bfd-server.yml
-
-rm vault.password
+ansible-playbook --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-server.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins

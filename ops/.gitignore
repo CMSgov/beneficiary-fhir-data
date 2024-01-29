@@ -2,9 +2,6 @@
 venv/
 roles_external/
 
-# Ignore the Ansible Vault password file.
-vault.password
-
 # Ignore Ansible retry files.
 *.retry
 

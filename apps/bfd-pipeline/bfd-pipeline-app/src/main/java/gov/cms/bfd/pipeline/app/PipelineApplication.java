@@ -20,6 +20,9 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
@@ -309,7 +312,7 @@ public final class PipelineApplication {
       CompositeMeterRegistry appMeters,
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource)
-      throws FatalAppException {
+      throws FatalAppException, IOException {
     final var clock = Clock.systemUTC();
 
     /*
@@ -439,7 +442,8 @@ public final class PipelineApplication {
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource,
-      Clock clock) {
+      Clock clock)
+      throws IOException {
     final var jobs = new ArrayList<PipelineJob>();
 
     /*
@@ -512,14 +516,17 @@ public final class PipelineApplication {
       CcwRifLoadOptions loadOptions,
       PipelineApplicationState appState,
       AwsClientConfig awsClientConfig,
-      Clock clock) {
+      Clock clock)
+      throws IOException {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.  The task manager will be automatically closed by the job.
+     * TODO The task manager should be removed once s3 file movement is no longer necessary.
      */
+    // Tell SQ it's ok not to use try-finally here since this will be closed by the DataSetQueue.
+    @SuppressWarnings("java:S2095")
     final var s3TaskManager =
         new S3TaskManager(
-            appState.getMetrics(),
             loadOptions.getExtractionOptions(),
             new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig()));
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
@@ -531,12 +538,25 @@ public final class PipelineApplication {
      */
     DataSetMonitorListener dataSetMonitorListener =
         new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
+    var s3Factory = new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
+    // Tell SQ it's ok not to use try-finally here since this will be closed by the CcwRifLoadJob.
+    @SuppressWarnings("java:S2095")
+    var dataSetQueue =
+        new DataSetQueue(
+            clock,
+            appState.getMetrics(),
+            new S3ManifestDbDao(appState.getEntityManagerFactory()),
+            new S3FileManager(
+                appState.getMetrics(),
+                s3Factory.createS3Dao(),
+                loadOptions.getExtractionOptions().getS3BucketName()),
+            s3TaskManager);
     var statusReporter = createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, clock);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState,
             loadOptions.getExtractionOptions(),
-            s3TaskManager,
+            dataSetQueue,
             dataSetMonitorListener,
             loadOptions.getLoadOptions().isIdempotencyRequired(),
             loadOptions.getRunInterval(),
