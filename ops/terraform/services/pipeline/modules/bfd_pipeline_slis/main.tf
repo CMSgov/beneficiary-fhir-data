@@ -83,10 +83,12 @@ resource "aws_lambda_function" "this" {
   timeout          = 300
   environment {
     variables = {
-      METRICS_NAMESPACE      = local.metrics_namespace
-      ETL_BUCKET_ID          = data.aws_s3_bucket.etl.id
-      RIF_AVAILABLE_DDB_TBL  = aws_dynamodb_table.update_slis_rif_available.name
-      LOAD_AVAILABLE_DDB_TBL = aws_dynamodb_table.update_slis_load_available.name
+      METRICS_NAMESPACE       = local.metrics_namespace
+      ETL_BUCKET_ID           = data.aws_s3_bucket.etl.id
+      RIF_AVAILABLE_DDB_TBL   = aws_dynamodb_table.update_slis_rif_available.name
+      LOAD_AVAILABLE_DDB_TBL  = aws_dynamodb_table.update_slis_load_available.name
+      POWERTOOLS_LOG_LEVEL    = "info"
+      POWERTOOLS_SERVICE_NAME = local.lambdas[local.lambda_update_slis].name
     }
   }
 

@@ -1,6 +1,5 @@
 import calendar
 import json
-import logging
 import os
 import re
 from datetime import datetime, timezone
@@ -9,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Type
 from urllib.parse import unquote
 
 import boto3
+from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore import exceptions as botocore_exceptions
@@ -46,8 +46,7 @@ BOTO_CONFIG = Config(
     },
 )
 
-logging.basicConfig(level=logging.INFO, force=True)
-logger = logging.getLogger()
+logger = Logger()
 
 
 class S3EventType(str, Enum):
@@ -123,43 +122,40 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
     rif_types_group_str = "|".join([e.value for e in RifFileType])
     # The incoming file's key should match an expected format, as follows:
     # "<Incoming/Done>/<ISO date format>/<file name>".
-    if not (
-        match := re.search(
-            rf"^({status_group_str})/([\d\-:TZ]+)/.*({rif_types_group_str}).*$",
-            s3_object_key,
-            re.IGNORECASE,
-        )
-    ):
+    expected_object_key_regex = rf"^({status_group_str})/([\d\-:TZ]+)/.*({rif_types_group_str}).*$"
+    if not (match := re.search(expected_object_key_regex, s3_object_key, re.IGNORECASE)):
         logger.warning(
-            "ETL file or path does not match expected format, skipping: %s", s3_object_key
+            "ETL file or path does not match expected format: %s", expected_object_key_regex
         )
         return
 
-    pipeline_data_status = PipelineDataStatus(match.group(1).lower())
-    group_iso_str = match.group(2)
+    rif_load_status = PipelineDataStatus(match.group(1).lower())
+    data_load_iso_str = match.group(2)
     rif_file_type = RifFileType(match.group(3).lower())
 
-    # Log data extracted from S3 object key now that we know this is a valid RIF file within a
-    # valid data load
-    logger.info("RIF type: %s", rif_file_type.name)
-    logger.info("Load Status: %s", pipeline_data_status.name)
-    logger.info("Data Load: %s", group_iso_str)
+    # Append data extracted from S3 object key to all future log messages now that we know this is a
+    # valid RIF file within a valid data load
+    logger.append_keys(
+        rif_file_type=rif_file_type.name,
+        rif_load_status=rif_load_status,
+        data_load_iso_str=data_load_iso_str,
+    )
 
     rif_type_dimension = {"data_type": rif_file_type.name.lower()}
-    group_timestamp_dimension = {"group_timestamp": group_iso_str}
+    # Group timestamp, or just "group", is a legacy term used interchangibly with "data load" or
+    # "data load ISO string" throughout this Lambda, supporting documentation, and metrics
+    group_timestamp_dimension = {"group_timestamp": data_load_iso_str}
 
     timestamp_metric = (
         PipelineMetric.TIME_DATA_AVAILABLE
-        if pipeline_data_status == PipelineDataStatus.INCOMING
+        if rif_load_status == PipelineDataStatus.INCOMING
         else PipelineMetric.TIME_DATA_LOADED
     )
 
     utc_timestamp = calendar.timegm(s3_event_time.utctimetuple())
 
     logger.info(
-        'Putting data timestamp metrics "%s" up to CloudWatch with unix timestamp value %s',
-        timestamp_metric.full_name(),
-        utc_timestamp,
+        'Putting value %s to CloudWatch Metric "%s"', utc_timestamp, timestamp_metric.full_name()
     )
     backoff_retry(
         # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
@@ -179,45 +175,31 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
     )
     logger.info('Successfully put metrics to "%s"', timestamp_metric.full_name())
 
-    if pipeline_data_status == PipelineDataStatus.INCOMING:
+    if rif_load_status == PipelineDataStatus.INCOMING:
         logger.info(
             "RIF file location indicates data has been made available to load to the ETL pipeline."
-            " Putting event to %s table for %s RIF in group %s indicating when RIF was made"
-            " available...",
+            " Putting event to %s table when RIF was made available",
             RIF_AVAILABLE_DDB_TBL,
-            rif_file_type,
-            group_iso_str,
         )
         backoff_retry(
             func=lambda: put_rif_available_event(
                 table=rif_available_tbl,
                 event=RifAvailableEvent(
-                    date_time=s3_event_time, group_iso_str=group_iso_str, rif=rif_file_type
+                    date_time=s3_event_time, group_iso_str=data_load_iso_str, rif=rif_file_type
                 ),
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
-        logger.info(
-            "event put to %s table for %s RIF in group %s successfully",
-            RIF_AVAILABLE_DDB_TBL,
-            rif_file_type,
-            group_iso_str,
-        )
-
-        logger.info(
-            'Checking if this is the first time data load was discovered for group "%s"...',
-            group_iso_str,
-        )
+        logger.info("Event put to %s table successfully", RIF_AVAILABLE_DDB_TBL)
 
         logger.info(
             "Attempting to retrieve the event indicating when the current load was first made"
-            " available for current group/load, %s, from the %s table, if it exists...",
-            group_iso_str,
+            " available for current group/load, if it exists, from table %s",
             LOAD_AVAILABLE_DDB_TBL,
         )
         load_available_event = backoff_retry(
             func=lambda: get_load_available_event(
-                table=load_available_tbl, group_iso_str=group_iso_str
+                table=load_available_tbl, group_iso_str=data_load_iso_str
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
@@ -228,8 +210,8 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                 " group %s, and therefore does not indicate the time of the first data load for"
                 " this group. Stopping...",
                 LOAD_AVAILABLE_DDB_TBL,
-                group_iso_str,
-                group_iso_str,
+                data_load_iso_str,
+                data_load_iso_str,
             )
             return
 
@@ -238,8 +220,8 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
             " group %s. This indicates that the incoming file is the start of a new data load for"
             ' group %s. Putting data to metric "%s" and corresponding metric "%s" with value %s',
             LOAD_AVAILABLE_DDB_TBL,
-            group_iso_str,
-            group_iso_str,
+            data_load_iso_str,
+            data_load_iso_str,
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
             utc_timestamp,
@@ -282,19 +264,19 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
         logger.info(
             "Putting event indicating that the current data load, %s, has been made available to %s"
             " table. No additional data should be put to the %s metric for this group",
-            group_iso_str,
+            data_load_iso_str,
             LOAD_AVAILABLE_DDB_TBL,
             PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
         )
         backoff_retry(
             func=lambda: put_load_available_event(
                 table=load_available_tbl,
-                event=LoadAvailableEvent(date_time=s3_event_time, group_iso_str=group_iso_str),
+                event=LoadAvailableEvent(date_time=s3_event_time, group_iso_str=data_load_iso_str),
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
         logger.info("Event put to %s table successfully", LOAD_AVAILABLE_DDB_TBL)
-    elif pipeline_data_status == PipelineDataStatus.DONE:
+    elif rif_load_status == PipelineDataStatus.DONE:
         logger.info(
             "Incoming file indicates data has been loaded. Calculating time deltas and checking"
             " if the incoming file was the last loaded file..."
@@ -310,11 +292,11 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
             " %s...",
             rif_file_type.name,
             RIF_AVAILABLE_DDB_TBL,
-            group_iso_str,
+            data_load_iso_str,
         )
         rif_available_event = backoff_retry(
             func=lambda: get_rif_available_event(
-                table=rif_available_tbl, group_iso_str=group_iso_str, rif=rif_file_type
+                table=rif_available_tbl, group_iso_str=data_load_iso_str, rif=rif_file_type
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
@@ -324,7 +306,7 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                 " %s RIF was made available to load for group %s at %s",
                 rif_file_type.name,
                 rif_file_type.name,
-                group_iso_str,
+                data_load_iso_str,
                 str(rif_available_event.date_time),
             )
 
@@ -359,18 +341,18 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                 "No corresponding event found for %s RIF in group %s in table %s; no time delta"
                 " metrics can be computed for this RIF. Continuing...",
                 rif_file_type.name,
-                group_iso_str,
+                data_load_iso_str,
                 RIF_AVAILABLE_DDB_TBL,
             )
 
         logger.info("Checking if the pipeline load has completed...")
         if not _is_pipeline_load_complete(
-            bucket=etl_bucket, group=group_iso_str
-        ) or not _is_incoming_folder_empty(bucket=etl_bucket, group=group_iso_str):
+            bucket=etl_bucket, group=data_load_iso_str
+        ) or not _is_incoming_folder_empty(bucket=etl_bucket, group=data_load_iso_str):
             logger.info(
                 "Not all files have yet to be loaded for group %s. Data load is not complete."
                 " Stopping...",
-                group_iso_str,
+                data_load_iso_str,
             )
             return
 
@@ -378,7 +360,7 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
             "All files have been loaded for group %s. This indicates that the data load has"
             ' been completed for this group. Putting data to metric "%s" and corresponding'
             ' metric "%s" with value %s',
-            group_iso_str,
+            data_load_iso_str,
             PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
             PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
             utc_timestamp,
@@ -414,12 +396,12 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
         logger.info(
             "Retrieving event indicating when current load/group, %s, was first made available to"
             " load in S3 from %s table...",
-            group_iso_str,
+            data_load_iso_str,
             LOAD_AVAILABLE_DDB_TBL,
         )
         load_available_event = backoff_retry(
             func=lambda: get_load_available_event(
-                table=load_available_tbl, group_iso_str=group_iso_str
+                table=load_available_tbl, group_iso_str=data_load_iso_str
             ),
             ignored_exceptions=common_unrecoverable_exceptions,
         )
@@ -432,7 +414,7 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                 " pipeline load for group %s",
                 PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
                 full_load_time_delta.seconds,
-                group_iso_str,
+                data_load_iso_str,
             )
             backoff_retry(
                 func=lambda: put_metric_data(
@@ -456,11 +438,12 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
             logger.warning(
                 "No event found for group %s in table %s; no time delta metrics can be computed for"
                 " this data load",
-                group_iso_str,
+                data_load_iso_str,
                 LOAD_AVAILABLE_DDB_TBL,
             )
 
 
+@logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[Any, Any], context: LambdaContext):
     # The Lambda this handler is defined for is invoked asynchronously, so by default AWS retries
     # any failing invocations twice before dropping the event. This handler has side effects, so
@@ -468,33 +451,44 @@ def handler(event: dict[Any, Any], context: LambdaContext):
     # retry. This is why this handler, and the functions it calls, raise exceptions that are not
     # explicitly handled.
     # See https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html#invocation-async-errors
-    if not all(
-        [REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, RIF_AVAILABLE_DDB_TBL, LOAD_AVAILABLE_DDB_TBL]
-    ):
-        raise RuntimeError("Not all necessary environment variables were defined")
+    try:
+        if not all(
+            [
+                REGION,
+                METRICS_NAMESPACE,
+                ETL_BUCKET_ID,
+                RIF_AVAILABLE_DDB_TBL,
+                LOAD_AVAILABLE_DDB_TBL,
+            ]
+        ):
+            raise RuntimeError("Not all necessary environment variables were defined")
 
-    sns_event = SNSEvent(event)
-    if next(sns_event.records, None) is None:
-        raise ValueError(f"Invalid SNS event {sns_event.raw_event}; empty records")
+        sns_event = SNSEvent(event)
+        if next(sns_event.records, None) is None:
+            raise ValueError(f"Invalid SNS event {sns_event.raw_event}; empty records")
 
-    for sns_record in sns_event.records:
-        s3_event = S3Event(json.loads(sns_record.sns.message))
-        if next(s3_event.records, None) is None:
-            raise ValueError(f"Invalid inner S3 event {s3_event.raw_event}; empty records")
+        for sns_record in sns_event.records:
+            s3_event = S3Event(json.loads(sns_record.sns.message))
+            if next(s3_event.records, None) is None:
+                raise ValueError(f"Invalid inner S3 event {s3_event.raw_event}; empty records")
 
-        for s3_record in s3_event.records:
-            s3_event_time = datetime.fromisoformat(s3_record.event_time.removesuffix("Z")).replace(
-                tzinfo=timezone.utc
-            )
-            s3_object_key = unquote(s3_record.s3.get_object.key)
+            for s3_record in s3_event.records:
+                s3_event_time = datetime.fromisoformat(
+                    s3_record.event_time.removesuffix("Z")
+                ).replace(tzinfo=timezone.utc)
+                s3_object_key = unquote(s3_record.s3.get_object.key)
+                s3_event_name = s3_record.event_name
+                s3_event_type = S3EventType.from_event_name(s3_event_name)
 
-            # Log the various bits of data extracted from the invoking event to aid debugging:
-            logger.info("Invoked at: %s UTC", datetime.utcnow().isoformat())
-            logger.info("S3 Object Key: %s", s3_object_key)
-            logger.info(
-                "S3 Event Type: %s, Specific Event Name: %s",
-                S3EventType.from_event_name(s3_record.event_name).name,
-                s3_record.event_name,
-            )
+                # Append to all future logs information about the S3 Event
+                logger.append_keys(
+                    s3_object_key=s3_object_key,
+                    s3_event_name=s3_event_name,
+                    s3_event_type=s3_event_type.name,
+                    s3_event_time=s3_event_time.isoformat(),
+                )
 
-            _handle_s3_event(s3_event_time=s3_event_time, s3_object_key=s3_object_key)
+                _handle_s3_event(s3_event_time=s3_event_time, s3_object_key=s3_object_key)
+    except Exception:
+        logger.exception("Unrecoverable exception raised")
+        raise

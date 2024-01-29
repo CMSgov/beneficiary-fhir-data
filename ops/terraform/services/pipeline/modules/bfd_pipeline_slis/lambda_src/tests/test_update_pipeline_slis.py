@@ -196,7 +196,7 @@ class TestUpdatePipelineSlisHandler:
             )
 
         # Assert
-        assert "ETL file or path does not match expected format, skipping" in caplog.text
+        assert "ETL file or path does not match expected format" in caplog.text
 
     def test_it_fails_if_key_not_known_rif(self, caplog: pytest.LogCaptureFixture):
         # Arrange
@@ -210,7 +210,7 @@ class TestUpdatePipelineSlisHandler:
             )
 
         # Assert
-        assert "ETL file or path does not match expected format, skipping" in caplog.text
+        assert "ETL file or path does not match expected format" in caplog.text
 
     @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
     @mock.patch(PUT_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
