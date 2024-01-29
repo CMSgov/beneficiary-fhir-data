@@ -13,7 +13,7 @@ variable "first_app_name_select" {
   type        = string
 }
 
-variable "data_set_id" {
+variable "data_set_prod_per_app_id" {
   description = "DataSet resource ID"
   type        = string
 }
