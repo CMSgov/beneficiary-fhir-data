@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
@@ -315,6 +316,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       }
     } catch (NoResultException | ResourceNotFoundException e) {
       patients = Collections.emptyList();
+    } catch (UnclassifiedServerFailureException e) {
+      throw new ResourceNotFoundException(e.getMessage());
     }
 
     /*

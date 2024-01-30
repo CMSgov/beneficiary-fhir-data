@@ -141,7 +141,6 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
-        // we should have 3 entries, since we set page size to 3
         .body("entry.size()", equalTo(1))
         // Check current MBI is returned
         .body("entry.resource.identifier.value.flatten()", hasItem(currentMbi))
@@ -204,6 +203,59 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
   }
 
   /**
+   * Verifies that Patient searchByIdentifier returns a 400 when using HTTP GET with an unhashed
+   * MBI.
+   */
+  @Test
+  public void testPatientUsingGetByIdentifierUsingUnhashedMbi() {
+    String requestString =
+        patientEndpoint
+            + "?identifier="
+            + TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED
+            + "|"
+            + "9AB2WW3GR44";
+
+    // Should return a 400
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        .statusCode(400)
+        .body("issue.severity", hasItem("error"))
+        .body(
+            "issue.diagnostics",
+            hasItem(
+                "Search query by 'http://hl7.org/fhir/sid/us-mbi' is only supported in POST request"))
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verifies that Patient searchByIdentifier returns a 200 when using HTTP POST with an unhashed
+   * MBI in the Request body.
+   */
+  @Test
+  public void testPatientUsingPostByIdentifierUsingUnhashedMbiNoResult() {
+    // _search needed to distinguish the POST version of the endpoint (HAPI-FHIR)
+    String requestString = patientEndpoint + "_search";
+    String formParams =
+        "_id=" + TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED + "|123456789";
+
+    given()
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .spec(requestAuth)
+        .body(formParams)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // we should have zero results in our searchset
+        .body("type", equalTo("searchset"))
+        .body("total", equalTo(0))
+        .statusCode(200)
+        .when()
+        .post(requestString);
+  }
+
+  /**
    * Verifies that Patient searchByIdentifier returns a 404 for a searched MBI that points to more
    * than one bene id in the Bene History table.
    */
@@ -250,6 +302,38 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
                     + distinctBeneIdList))
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verifies that Patient searchByIdentifier returns a 404 for a searched MBI that points to more
+   * than one bene id in the Bene History table.
+   */
+  @Test
+  public void testPatientByIdentifierUsingPostWhenMbiHashWithHistoryBeneDupesExpect404() {
+    // The test setup will load additional records which make the current mbi point to 2 different
+    // bene ids
+    List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
+
+    // _search needed to distinguish the POST version of the endpoint (HAPI-FHIR)
+    String requestString = patientEndpoint + "_search";
+    // use an MBI that'll find duplicate BENE_IDs
+    String formParams =
+        "_id=" + TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED + "|DUPHISTMBI";
+
+    // Should return a 404
+    given()
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .spec(requestAuth)
+        .body(formParams)
+        .expect()
+        .statusCode(404)
+        .body("issue.severity", hasItem("error"))
+        .body(
+            "issue.diagnostics",
+            hasItem(
+                "By hash query found more than one distinct BENE_ID: 2, DistinctBeneIdsList: [66666, 77777]"))
+        .when()
+        .post(requestString);
   }
 
   /**
@@ -309,7 +393,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     String historicalMbi = "HISTMBI";
     String expectedBeneTableMbi = "565654MBI";
     List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
-    // search mbi doesnt exist in the bene table, so bene history search must be true
+    // search mbi does'nt exist in the bene table, so bene history search must be true
     String mbiHash = getMbiHash(historicalMbi, true, loadedRecords);
 
     String requestString =
@@ -596,7 +680,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2010";
     String requestString =
         patientEndpoint
-            + "?_has:Coverage.extension="
+            + "_search/?_has:Coverage.extension="
             + contractId
             + "&_has:Coverage.rfrncyr="
             + refYear;

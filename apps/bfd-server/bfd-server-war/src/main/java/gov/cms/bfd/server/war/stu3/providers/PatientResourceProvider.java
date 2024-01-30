@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
@@ -54,6 +55,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -360,6 +362,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                               p.getMeta().getLastUpdated().toInstant(), lastUpdated))
                   .map(p -> Collections.singletonList((IBaseResource) p))
                   .orElse(Collections.emptyList());
+        } catch (UnclassifiedServerFailureException e) {
+          throw new ResourceNotFoundException(e.getMessage());
         } catch (NoResultException | ResourceNotFoundException e) {
           patients = Collections.emptyList();
         }
@@ -851,6 +855,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)
               ? Collections.singletonList(patient)
               : Collections.emptyList();
+    } catch (NonUniqueResultException e) {
+      throw new ResourceNotFoundException(e.getMessage());
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }

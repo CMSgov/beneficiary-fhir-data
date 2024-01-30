@@ -111,11 +111,16 @@ public class R4PatientResourceProviderTest {
   /** Logical id to pass in which is considered legal for validation checks. */
   private final TokenParam logicalId = new TokenParam("", "1234");
 
-  /** Hash search identifier using a made-up hash. * */
+  /** Hash search identifier using a made-up hash. */
   private final TokenParam mbiHashIdentifier =
       new TokenParam(
           TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
           "7004708ca44c2ff45b663ef661059ac98131ccb90b4a7e53917e3af7f50c4c56");
+
+  /** US-MBI search identifier using a made-up MBI value. */
+  private final TokenParam unhashedMbiIdentifier =
+      new TokenParam(
+          TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9X99XX9XX99");
 
   /** A 'valid' contract id to use in tests. */
   private final TokenParam contractId = new TokenParam("2001/PTDCNTRCT10", "abcde");
@@ -207,7 +212,6 @@ public class R4PatientResourceProviderTest {
 
     when(entityManager.createNativeQuery(anyString())).thenReturn(mockQueryFunction);
     when(mockQueryFunction.setHint(any(), any())).thenReturn(mockQueryFunction);
-    // when(mockQueryFunction.setMaxResults(anyString())).thenReturn(mockQueryFunction);
     when(mockQueryFunction.setParameter(anyString(), anyString())).thenReturn(mockQueryFunction);
   }
 
@@ -231,7 +235,8 @@ public class R4PatientResourceProviderTest {
   public void testReadWhenBeneExistsExpectMetricsCalled() {
     patientProvider.read(patientId, requestDetails);
 
-    String expectedTimerName = patientProvider.getClass().getSimpleName() + ".query.bene_by_id";
+    String expectedTimerName =
+        patientProvider.getClass().getSimpleName() + ".query.bene_by_mbi_or_id";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
     verify(metricsTimer, times(1)).time();
     verify(metricsTimerContext, times(1)).stop();
@@ -603,6 +608,14 @@ public class R4PatientResourceProviderTest {
   public void testSearchByIdentifierIdWhenMbiHashExpectPatientAndMetrics() {
 
     when(requestDetails.getHeader(any())).thenReturn("");
+    when(mockQueryFunction.setParameter(anyString(), anyString())).thenReturn(mockQueryFunction);
+    List<Object> rawValues =
+        new ArrayList<Object>() {
+          {
+            add(Long.toString(testBene.getBeneficiaryId()));
+          }
+        };
+    when(mockQueryFunction.getResultList()).thenReturn(rawValues);
 
     Bundle bundle =
         patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
@@ -610,8 +623,7 @@ public class R4PatientResourceProviderTest {
     assertEquals(1, bundle.getTotal());
 
     String expectedTimerName =
-        patientProvider.getClass().getSimpleName()
-            + ".query.bene_by_mbi.mbis_from_beneficiarieshistory";
+        patientProvider.getClass().getSimpleName() + ".query.bene_by_mbi.bene_by_mbi_or_id";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
     String expectedTimerName2 =
         patientProvider.getClass().getSimpleName() + ".query.bene_by_mbi.bene_by_mbi_or_id";
@@ -676,7 +688,6 @@ public class R4PatientResourceProviderTest {
   public void testSearchByIdentifierIdWhenBeneDoesntExistExpectEmptyBundle() {
     when(loadedFilterManager.getTransactionTime()).thenReturn(Instant.now());
     when(mockQueryFunction.getSingleResult()).thenThrow(NoResultException.class);
-    // when(mockQuery.getResultList()).thenReturn(new ArrayList());
 
     Bundle bundle =
         patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);

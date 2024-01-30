@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -84,6 +85,9 @@ public final class R4PatientResourceProviderIT {
 
   /** The mock query, for mocking DB returns. */
   @Mock TypedQuery mockQuery;
+
+  /** The mock query, for mocking native function call. */
+  @Mock TypedQuery mockQueryFunction;
 
   /** The Test data bene. */
   private Beneficiary testBene;
@@ -174,6 +178,18 @@ public final class R4PatientResourceProviderIT {
     when(mockCriteria.distinct(anyBoolean())).thenReturn(mockCriteria);
     when(mockSubquery.select(any())).thenReturn(mockSubquery);
     when(mockSubquery.from(any(Class.class))).thenReturn(root);
+
+    when(entityManager.createNativeQuery(anyString())).thenReturn(mockQueryFunction);
+    when(mockQueryFunction.setHint(any(), any())).thenReturn(mockQueryFunction);
+    when(mockQueryFunction.setParameter(anyString(), anyString())).thenReturn(mockQueryFunction);
+
+    List<Object> rawValues =
+        new ArrayList<Object>() {
+          {
+            add(Long.toString(testBene.getBeneficiaryId()));
+          }
+        };
+    when(mockQueryFunction.getResultList()).thenReturn(rawValues);
   }
 
   /**

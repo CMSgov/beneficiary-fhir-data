@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
@@ -132,7 +133,8 @@ public class CommonQueries {
     } else if (values.size() > 1) {
       BfdMDC.put(
           "database_query_by_hash_collision_distinct_bene_ids", Long.toString(values.size()));
-      throw new ResourceNotFoundException(
+      throw new UnclassifiedServerFailureException(
+          404,
           "By hash query found more than one distinct BENE_ID: "
               + values.size()
               + ", DistinctBeneIdsList: "
