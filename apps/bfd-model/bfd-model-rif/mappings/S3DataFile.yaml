@@ -12,11 +12,13 @@ mappings:
       dbName: manifest_id
       name: manifestId
       sqlType: bigint
+      javaType: long
       nullable: false
       dbOnly: true
     - comment: Index (zero based) of file within the manifest.
       name: index
       sqlType: smallint
+      javaType: short
       nullable: false
     - comment: Name of file as defined in manifest.
       dbName: file_name
@@ -53,7 +55,8 @@ mappings:
       dbName: last_record_number
       name: lastRecordNumber
       sqlType: bigint
-      nullable: true
+      javaType: long
+      nullable: false
     joins:
     - class: child
       entityMapping: S3ManifestFile

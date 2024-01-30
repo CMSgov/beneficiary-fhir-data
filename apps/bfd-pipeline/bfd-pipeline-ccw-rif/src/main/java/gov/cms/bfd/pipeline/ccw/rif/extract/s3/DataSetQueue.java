@@ -474,7 +474,7 @@ public class DataSetQueue implements AutoCloseable {
      * @return the last record number value or zero if we have no value
      */
     public long getLastRecordNumber() {
-      return dataFileRecord.getLastRecordNumber().orElse(0L);
+      return dataFileRecord.getLastRecordNumber();
     }
 
     /**
@@ -484,7 +484,7 @@ public class DataSetQueue implements AutoCloseable {
      * @param recordNumber the new value
      */
     public void updateLastRecordNumber(long recordNumber) {
-      dataFileRecord.setLastRecordNumber(Optional.of(recordNumber));
+      dataFileRecord.setLastRecordNumber(recordNumber);
       s3Records.updateS3DataFile(dataFileRecord);
     }
   }

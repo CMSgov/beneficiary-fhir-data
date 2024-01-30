@@ -220,7 +220,12 @@ public final class CcwRifLoadJob implements PipelineJob {
 
   @Override
   public boolean isInterruptible() {
-    return true;
+    /*
+     * TODO While the RIF pipeline itself is interruptable now, the S3 transfers are not.
+     *  For now we will leave interrupts disabled and revisit the need for moving files
+     *  between S3 buckets in a later PR. Expected to be changed as part of BFD-3129.
+     */
+    return false;
   }
 
   @Override
@@ -378,7 +383,7 @@ public final class CcwRifLoadJob implements PipelineJob {
 
     // TODO BEGIN remove once S3 file moves are no longer necessary.
     // Expected to be changed as part of BFD-3129.
-    //    dataSetQueue.moveManifestFilesInS3(manifestToProcess);
+    dataSetQueue.moveManifestFilesInS3(manifestToProcess);
     // TODO END remove once S3 file moves are no longer necessary.
 
     return PipelineJobOutcome.WORK_DONE;

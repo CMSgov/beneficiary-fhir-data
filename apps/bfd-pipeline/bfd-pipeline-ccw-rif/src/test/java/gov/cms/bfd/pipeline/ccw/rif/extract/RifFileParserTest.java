@@ -203,6 +203,7 @@ public class RifFileParserTest {
    * separated by {@code -} and individual records separated by {@code ;}. The record number is
    * added to the beginning of the string followed by {@code ->}.
    *
+   * @param recordNumber the record number of the parsed object
    * @param csvRecords the records to convert
    * @return the resulting string
    */

@@ -111,7 +111,7 @@ public final class RifLoader {
    * @return the {@link Scheduler} to use for asynchronous load tasks
    */
   private Scheduler createScheduler(LoadAppOptions.PerformanceSettings settings) {
-    // allow one extra thread for parsing and another for backgroun progress updates
+    // allow one extra thread for parsing and another for background progress updates
     final int threadPoolSize = settings.getLoaderThreads() + 2;
     final int batchSize = settings.getRecordBatchSize();
     final int taskQueueSize = settings.getLoaderThreads() * settings.getTaskQueueSizeMultiple();
