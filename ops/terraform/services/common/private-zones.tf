@@ -1,7 +1,14 @@
-## VPC Private Local Zone for CNAME Records
-module "local_zone" {
-  count      = local.is_ephemeral_env ? 0 : 1
-  source     = "./modules/bfd_common_private_zones"
-  env_config = { env = local.env, vpc_id = data.aws_vpc.main.id }
-}
+# Creates a private zone for the environment
+resource "aws_route53_zone" "main" {
+  name          = "bfd-${local.env}.local"
+  comment       = "BFD private zone for ${local.env}."
+  force_destroy = true
 
+  # VPC is only valid for private zones
+  dynamic "vpc" {
+    for_each = ["dummy"]
+    content {
+      vpc_id = data.aws_vpc.main.id
+    }
+  }
+}
