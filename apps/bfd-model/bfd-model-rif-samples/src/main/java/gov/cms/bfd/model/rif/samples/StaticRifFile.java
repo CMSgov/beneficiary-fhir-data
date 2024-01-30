@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicLong;
 
 /** This {@link RifFile} implementation operates on local files. */
 final class StaticRifFile implements RifFile {
@@ -15,6 +16,9 @@ final class StaticRifFile implements RifFile {
    * count.
    */
   private final StaticRifResource staticRifResource;
+
+  /** Tracks the values set by calls to {@link #updateLastRecordNumber}. */
+  private final AtomicLong lastRecordNumber = new AtomicLong(0L);
 
   /**
    * Constructs a new {@link StaticRifFile}.
@@ -52,6 +56,16 @@ final class StaticRifFile implements RifFile {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+  }
+
+  @Override
+  public long getLastRecordNumber() {
+    return lastRecordNumber.get();
+  }
+
+  @Override
+  public void updateLastRecordNumber(long recordNumber) {
+    lastRecordNumber.set(recordNumber);
   }
 
   /** {@inheritDoc} */
