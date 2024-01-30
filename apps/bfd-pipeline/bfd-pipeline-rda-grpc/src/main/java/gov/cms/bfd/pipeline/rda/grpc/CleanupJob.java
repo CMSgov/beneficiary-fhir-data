@@ -7,5 +7,5 @@ public interface CleanupJob {
    *
    * @return the number of claims deleted.
    */
-  int run();
+  int run() throws ProcessingException;
 }

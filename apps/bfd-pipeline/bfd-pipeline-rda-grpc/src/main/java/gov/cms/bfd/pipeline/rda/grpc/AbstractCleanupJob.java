@@ -3,11 +3,13 @@ package gov.cms.bfd.pipeline.rda.grpc;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.slf4j.Logger;
 
 /**
  * An abstract class that encapsulates the common code for executing a job to clean up old
@@ -16,17 +18,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public abstract class AbstractCleanupJob implements CleanupJob {
-  /** name of the RDA FISS entity class. */
-  public static final String RDA_FISS_CLAIMS_ENTITY = "RdaFissClaim";
-
-  /** name of the RDA FISS claims database table. */
-  public static final String RDA_FISS_CLAIMS_TABLE = "rda.fiss_claims";
-
-  /** name of the RDA MCS entity class. */
-  public static final String RDA_MCS_CLAIMS_ENTITY = "RdaMcsClaim";
-
-  /** name of the RDA MCS claims database table. */
-  public static final String RDA_MCS_CLAIMS_TABLE = "rda.mcs_claims";
 
   /** maximum age of claims in days from current date. */
   private static final int OLDEST_CLAIM_AGE_IN_DAYS = 60;
@@ -40,14 +31,32 @@ public abstract class AbstractCleanupJob implements CleanupJob {
   /** the number of claims to delete in a single run of the cleanup job. */
   private final int cleanupRunSize;
 
-  /** the name of the jpa entity to delete claims from. */
-  private final String entityName;
-
-  /** the name of the RDA claims database table to query. */
-  private final String tableName;
-
   /** when true the cleanup job should run, false otherwise. */
   private final boolean enabled;
+
+  /** Logger provided from each subclass. */
+  private final Logger logger;
+
+  /**
+   * Returns a list of child entity class names for use in jpql.
+   *
+   * @return list of child entity class names.
+   */
+  abstract List<String> getChildEntityNames();
+
+  /**
+   * Returns the principal entity class name for use in jpql.
+   *
+   * @return the class name of the principal entity.
+   */
+  abstract String getEntityName();
+
+  /**
+   * Returns the name of the database table mapped to the principal entity class.
+   *
+   * @return the database table name for the principal entity.
+   */
+  abstract String getEntityTableName();
 
   /**
    * Executes the job if enabled. Calculates the number of transactions from the cleanupRunSize /
@@ -59,27 +68,34 @@ public abstract class AbstractCleanupJob implements CleanupJob {
    *
    * @return the number of deleted claims, or zero if not enabled.
    */
-  public int run() {
+  public int run() throws ProcessingException {
     int claimsDeleted = 0;
 
     if (enabled) {
       var entityManager = entityManagerFactory.createEntityManager();
-      var maxDate = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
-      var transactionMaxDateQuery = getTransactionMaxDateQuery(maxDate, entityManager);
-      var numberOfTransactions = Math.ceilDiv(cleanupRunSize, cleanupTransactionSize);
 
-      for (int i = 0; i < numberOfTransactions; i++) {
-        var result = executeDeleteTransaction(transactionMaxDateQuery, entityManager);
-        claimsDeleted += result;
+      try {
+        var maxDate = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
+        var transactionMaxDateQuery = getTransactionMaxDateQuery(maxDate, entityManager);
+        var numberOfTransactions = Math.ceilDiv(cleanupRunSize, cleanupTransactionSize);
 
-        // If no claims deleted this iteration, or total claims deleted
-        // exceeds the cleanupRunSize, then stop
+        for (int i = 0; i < numberOfTransactions; i++) {
+          var result = executeDeleteTransaction(transactionMaxDateQuery, entityManager);
+          claimsDeleted += result;
 
-        if (result == 0 || claimsDeleted >= cleanupRunSize) {
-          break;
+          // If no claims deleted this iteration, or total claims deleted
+          // exceeds the cleanupRunSize, then stop
+
+          if (result == 0 || claimsDeleted >= cleanupRunSize) {
+            break;
+          }
         }
+      } catch (Exception ex) {
+        logger.error("pre-processing aborted by an exception: message={}", ex.getMessage(), ex);
+        throw new ProcessingException(ex, 0);
+      } finally {
+        entityManager.close();
       }
-      entityManager.close();
     }
 
     return claimsDeleted;
@@ -102,9 +118,9 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
     var transactionMaxDateQuery =
         em.createNativeQuery(
-            "select max(last_updated) from ("
+            "select max(t.last_updated) from ("
                 + " select last_updated from "
-                + tableName
+                + getEntityTableName()
                 + " where last_updated < ?1"
                 + " order by last_updated "
                 + " limit "
@@ -132,13 +148,30 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
     // If date found create delete query and execute in a transaction
     if (transactionMaxDateResult.size() == 1) {
-      var transactionMaxDate = (Timestamp) transactionMaxDateResult.getFirst();
-      em.getTransaction().begin();
-      var query =
-          em.createQuery("delete from " + entityName + " claim where claim.lastUpdated <= ?1");
-      query.setParameter(1, transactionMaxDate.toInstant());
-      claimsDeleted = query.executeUpdate();
-      em.getTransaction().commit();
+      Timestamp transactionMaxDate = (Timestamp) transactionMaxDateResult.getFirst();
+      if (transactionMaxDate != null) {
+        em.getTransaction().begin();
+        getChildEntityNames()
+            .forEach(
+                entityName -> {
+                  Query childQuery =
+                      em.createQuery(
+                          "delete from "
+                              + entityName
+                              + " e "
+                              + "where e.claimId in (select claimId from "
+                              + getEntityName()
+                              + "  claim where claim.lastUpdated <= ?1)");
+                  childQuery.setParameter(1, transactionMaxDate.toInstant());
+                  childQuery.executeUpdate();
+                });
+
+        Query parentQuery =
+            em.createQuery("delete from " + getEntityName() + " where lastUpdated <= ?1");
+        parentQuery.setParameter(1, transactionMaxDate.toInstant());
+        claimsDeleted = parentQuery.executeUpdate();
+        em.getTransaction().commit();
+      }
     }
 
     return claimsDeleted;
