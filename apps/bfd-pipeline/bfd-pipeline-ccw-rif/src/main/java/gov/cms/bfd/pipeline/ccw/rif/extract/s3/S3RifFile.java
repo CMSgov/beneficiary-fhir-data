@@ -6,17 +6,12 @@ import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -40,21 +35,21 @@ public final class S3RifFile implements RifFile {
   private final DataSetManifestEntry manifestEntry;
 
   /** The manifest download result. */
-  private final Future<ManifestEntryDownloadResult> manifestEntryDownload;
+  private final Future<DataSetQueue.ManifestEntry> manifestEntryDownload;
 
   /**
-   * Constructs a new {@link S3RifFile} instance.
+   * Initializes an instance.
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param manifestEntry the specific {@link DataSetManifestEntry} represented by this {@link
    *     S3RifFile}
-   * @param manifestEntryDownload a {@link Future} for the {@link ManifestEntryDownloadResult} with
-   *     a local download of the RIF file's contents
+   * @param manifestEntryDownload a {@link Future} for the {@link DataSetQueue.ManifestEntry} with a
+   *     local download of the RIF file's contents
    */
   public S3RifFile(
       MetricRegistry appMetrics,
       DataSetManifestEntry manifestEntry,
-      Future<ManifestEntryDownloadResult> manifestEntryDownload) {
+      Future<DataSetQueue.ManifestEntry> manifestEntryDownload) {
     Objects.requireNonNull(appMetrics);
     Objects.requireNonNull(manifestEntry);
     Objects.requireNonNull(manifestEntryDownload);
@@ -64,13 +59,11 @@ public final class S3RifFile implements RifFile {
     this.manifestEntryDownload = manifestEntryDownload;
   }
 
-  /** {@inheritDoc} */
   @Override
   public RifFileType getFileType() {
     return manifestEntry.getType();
   }
 
-  /** {@inheritDoc} */
   @Override
   public String getDisplayName() {
     return String.format(
@@ -80,24 +73,20 @@ public final class S3RifFile implements RifFile {
         manifestEntry.getName());
   }
 
-  /** {@inheritDoc} */
   @Override
   public Charset getCharset() {
     return StandardCharsets.UTF_8;
   }
 
-  /** {@inheritDoc} */
   @Override
   public InputStream open() {
-    ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
+    DataSetQueue.ManifestEntry fileDownloadResult = waitForDownload();
 
     // Open a stream for the file.
     InputStream fileDownloadStream;
     try {
-      fileDownloadStream =
-          new BufferedInputStream(
-              new FileInputStream(fileDownloadResult.getLocalDownload().toFile()));
-    } catch (FileNotFoundException e) {
+      fileDownloadStream = fileDownloadResult.getBytes().openBufferedStream();
+    } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
 
@@ -107,9 +96,9 @@ public final class S3RifFile implements RifFile {
   /**
    * Downloads the manifest entry and waits for its completion before returning.
    *
-   * @return the completed {@link ManifestEntryDownloadResult} for {@link #manifestEntryDownload}
+   * @return the completed {@link DataSetQueue.ManifestEntry} for {@link #manifestEntryDownload}
    */
-  private ManifestEntryDownloadResult waitForDownload() {
+  private DataSetQueue.ManifestEntry waitForDownload() {
     Timer.Context downloadWaitTimer = null;
     if (!manifestEntryDownload.isDone()) {
       downloadWaitTimer =
@@ -120,7 +109,7 @@ public final class S3RifFile implements RifFile {
     }
 
     // Get the file download result, blocking and waiting if necessary.
-    ManifestEntryDownloadResult fileDownloadResult;
+    DataSetQueue.ManifestEntry fileDownloadResult;
     try {
       fileDownloadResult = manifestEntryDownload.get(2, TimeUnit.HOURS);
     } catch (InterruptedException e) {
@@ -158,8 +147,8 @@ public final class S3RifFile implements RifFile {
      * wait for completion.
      */
     try {
-      ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
-      Files.deleteIfExists(fileDownloadResult.getLocalDownload());
+      DataSetQueue.ManifestEntry fileDownloadResult = waitForDownload();
+      fileDownloadResult.delete();
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (CancellationException e) {
@@ -168,14 +157,33 @@ public final class S3RifFile implements RifFile {
     LOGGER.debug("Cleaned up '{}'.", this);
   }
 
-  /** {@inheritDoc} */
+  @Override
+  public RecordId getRecordId() {
+    return waitForDownload().getRifFileRecordId();
+  }
+
+  @Override
+  public boolean requiresProcessing() {
+    return waitForDownload().isIncomplete();
+  }
+
+  @Override
+  public void markAsStarted() {
+    waitForDownload().markAsStarted();
+  }
+
+  @Override
+  public void markAsProcessed() {
+    waitForDownload().markAsCompleted();
+  }
+
   @Override
   public String toString() {
     String localDownloadPath;
     try {
       localDownloadPath =
           manifestEntryDownload.isDone()
-              ? manifestEntryDownload.get().getLocalDownload().toAbsolutePath().toString()
+              ? manifestEntryDownload.get().getCachedFilePath()
               : "(not downloaded)";
     } catch (InterruptedException e) {
       // We're not expecting interrupts here, so go boom.

@@ -52,8 +52,8 @@ Here's an example of how to apply this role to the `bfd-db-migrator` host in an 
             bfd_version: 2.0.0-SNAPSHOT
             db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/{{ bfd_version }}/bfd-db-migrator-{{ bfd_version }}.zip"
             db_migrator_db_url: 'jdbc:hsqldb:mem:test'
-            db_migrator_db_username: "{{ vault_db_migrator_db_username }}"
-            db_migrator_db_password: "{{ vault_db_migrator_db_password }}"
+            db_migrator_db_username: "{{ ssm_db_migrator_db_username }}"
+            db_migrator_db_password: "{{ ssm_db_migrator_db_password }}"
 
 
 Running the Tests
