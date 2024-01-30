@@ -19,7 +19,7 @@ jobs:
       image_tag: ${{ inputs.image_tag }}
     steps:
       - name: 'Checkout repo'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: 'Run Tests for ${{ inputs.role }} Role'
         run: |
           export IMAGE_TAG="${image_tag:-$(git rev-parse --short HEAD)}"
