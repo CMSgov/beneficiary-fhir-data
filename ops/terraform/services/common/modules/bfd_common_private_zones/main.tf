@@ -1,6 +1,6 @@
 locals {
   vpc_id = var.env_config.vpc_id
-  env = var.env_config.env
+  env    = var.env_config.env
 }
 
 # Create a private zone for the environment
