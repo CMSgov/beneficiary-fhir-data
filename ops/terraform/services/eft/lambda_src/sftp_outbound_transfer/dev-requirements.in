@@ -2,3 +2,4 @@ black
 isort
 pylint
 setuptools>=69.0.2
+aiohttp==3.9.2
