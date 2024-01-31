@@ -39,8 +39,8 @@ data "archive_file" "lambda_src" {
   }
 
   source {
-    content  = file("${path.module}/lambda_src/sqs.py")
-    filename = "sqs.py"
+    content  = file("${path.module}/lambda_src/dynamo_db.py")
+    filename = "dynamo_db.py"
   }
 
   source {

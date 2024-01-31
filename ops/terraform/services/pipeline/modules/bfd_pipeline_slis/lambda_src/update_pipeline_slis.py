@@ -2,29 +2,41 @@ import calendar
 import json
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Type
+from typing import TYPE_CHECKING, Any, Type
 from urllib.parse import unquote
 
 import boto3
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore import exceptions as botocore_exceptions
 from botocore.config import Config
 
 from backoff_retry import backoff_retry
-from common import METRICS_NAMESPACE, PipelineMetric
-from cw_metrics import (
-    MetricData,
-    MetricDataQuery,
-    gen_all_dimensioned_metrics,
-    get_metric_data,
-    put_metric_data,
+from common import METRICS_NAMESPACE, PipelineMetric, RifFileType
+from cw_metrics import MetricData, gen_all_dimensioned_metrics, put_metric_data
+from dynamo_db import (
+    LoadAvailableEvent,
+    RifAvailableEvent,
+    get_load_available_event,
+    get_rif_available_event,
+    put_load_available_event,
+    put_rif_available_event,
 )
-from sqs import check_sentinel_queue, post_sentinel_message
+
+# Solve typing issues in Lambda as mypy_boto3 will not be included in the Lambda
+if TYPE_CHECKING:
+    from mypy_boto3_s3.service_resource import Bucket
+else:
+    Bucket = object
+
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
-SENTINEL_QUEUE_NAME = os.environ.get("SENTINEL_QUEUE_NAME", "")
+RIF_AVAILABLE_DDB_TBL = os.environ.get("RIF_AVAILABLE_DDB_TBL", "")
+LOAD_AVAILABLE_DDB_TBL = os.environ.get("LOAD_AVAILABLE_DDB_TBL", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -34,6 +46,8 @@ BOTO_CONFIG = Config(
     },
 )
 
+logger = Logger()
+
 
 class S3EventType(str, Enum):
     """Represents the types of S3 events that this Lambda is invoked by and supports. The value of
@@ -41,6 +55,15 @@ class S3EventType(str, Enum):
     event"""
 
     OBJECT_CREATED = "ObjectCreated"
+
+    @classmethod
+    def from_event_name(cls, event_name: str) -> "S3EventType":
+        try:
+            return next(x for x in S3EventType if event_name in x)
+        except StopIteration as ex:
+            raise ValueError(
+                f"Invalid event name {event_name}; no corresponding, supported event found"
+            ) from ex
 
 
 class PipelineDataStatus(str, Enum):
@@ -52,24 +75,8 @@ class PipelineDataStatus(str, Enum):
     DONE = "done"
 
 
-class RifFileType(str, Enum):
-    """Represents all of the possible RIF file types that can be loaded by the BFD ETL Pipeline. The
-    value of each enum is a specific substring that is used to match on each type of file"""
-
-    BENEFICIARY_HISTORY = "beneficiary_history"
-    BENEFICIARY = "bene"
-    CARRIER = "carrier"
-    DME = "dme"
-    HHA = "hha"
-    HOSPICE = "hospice"
-    INPATIENT = "inpatient"
-    OUTPATIENT = "outpatient"
-    PDE = "pde"
-    SNF = "snf"
-
-
-def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
-    done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group_timestamp}/"
+def _is_pipeline_load_complete(bucket: Bucket, group: str) -> bool:
+    done_prefix = f"{PipelineDataStatus.DONE.capitalize()}/{group}/"
     # Returns the file names of all text files within the "done" folder for the current bucket
     finished_rifs = [
         str(object.key).removeprefix(done_prefix)
@@ -90,31 +97,20 @@ def _is_pipeline_load_complete(bucket: Any, group_timestamp: str) -> bool:
     )
 
 
-def _is_incoming_folder_empty(bucket: Any, group_timestamp: str) -> bool:
-    incoming_key_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{group_timestamp}/"
+def _is_incoming_folder_empty(bucket: Bucket, group: str) -> bool:
+    incoming_key_prefix = f"{PipelineDataStatus.INCOMING.capitalize()}/{group}/"
     incoming_objects = list(bucket.objects.filter(Prefix=incoming_key_prefix))
 
     return len(incoming_objects) == 0
 
 
-def handler(event: Any, context: Any):
-    if not all([REGION, METRICS_NAMESPACE, ETL_BUCKET_ID, SENTINEL_QUEUE_NAME]):
-        print("Not all necessary environment variables were defined, exiting...")
-        return
-
-    try:
-        cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
-        s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
-        sqs_resource = boto3.resource("sqs", config=BOTO_CONFIG)  # type: ignore
-        sentinel_queue = sqs_resource.get_queue_by_name(QueueName=SENTINEL_QUEUE_NAME)
-        etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
-    except Exception as exc:
-        print(
-            "Unrecoverable exception occurred when attempting to create boto3 clients/resources:"
-            f" {exc}"
-        )
-        return
-
+def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
+    cw_client = boto3.client(service_name="cloudwatch", config=BOTO_CONFIG)  # type: ignore
+    s3_resource = boto3.resource("s3", config=BOTO_CONFIG)  # type: ignore
+    dynamo_resource = boto3.resource("dynamodb", config=BOTO_CONFIG)  # type: ignore
+    load_available_tbl = dynamo_resource.Table(LOAD_AVAILABLE_DDB_TBL)
+    rif_available_tbl = dynamo_resource.Table(RIF_AVAILABLE_DDB_TBL)
+    etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
     common_unrecoverable_exceptions: list[Type[BaseException]] = [
         cw_client.exceptions.InvalidParameterValueException,
         cw_client.exceptions.MissingRequiredParameterException,
@@ -122,460 +118,377 @@ def handler(event: Any, context: Any):
         botocore_exceptions.ParamValidationError,
     ]
 
-    try:
-        record: dict[str, Any] = event["Records"][0]
-    except KeyError as exc:
-        print(f"The incoming event was invalid: {exc}")
-        return
-    except IndexError:
-        print("Invalid event notification, no records found")
-        return
-
-    try:
-        sns_message_json: str = record["Sns"]["Message"]
-        sns_message = json.loads(sns_message_json)
-    except KeyError:
-        print("No message found in SNS notification")
-        return
-    except json.JSONDecodeError:
-        print("SNS message body was not valid JSON")
-        return
-
-    try:
-        s3_event = sns_message["Records"][0]
-    except KeyError:
-        print("Invalid S3 event, no records found")
-        return
-    except IndexError:
-        print("Invalid event notification, no records found")
-        return
-
-    try:
-        event_type_str = s3_event["eventName"]
-        event_type: S3EventType
-        if S3EventType.OBJECT_CREATED in event_type_str:
-            event_type = S3EventType.OBJECT_CREATED
-        else:
-            print(f"Event type {event_type_str} is unsupported. Exiting...")
-            return
-    except KeyError as ex:
-        print(f"The incoming event record did not contain the type of S3 event: {ex}")
-        return
-
-    try:
-        event_time_iso: str = s3_event["eventTime"]
-        event_timestamp = datetime.fromisoformat(event_time_iso.removesuffix("Z"))
-    except KeyError as exc:
-        print(f'Record did not contain any key with "eventTime": {exc}')
-        return
-    except ValueError as exc:
-        print(f"Event timestamp was not in valid ISO format: {exc}")
-        return
-
-    try:
-        file_key: str = s3_event["s3"]["object"]["key"]
-        decoded_file_key = unquote(file_key)
-    except KeyError as exc:
-        print(f"No bucket file found in event notification: {exc}")
-        return
-
-    # Log the various bits of data extracted from the invoking event to aid debugging:
-    print(f"Invoked at: {datetime.utcnow().isoformat()} UTC")
-    print(f"S3 Object Key: {decoded_file_key}")
-    print(f"S3 Event Type: {event_type.name}, Specific Event Name: {event_type_str}")
-
     status_group_str = "|".join([e.value for e in PipelineDataStatus])
     rif_types_group_str = "|".join([e.value for e in RifFileType])
     # The incoming file's key should match an expected format, as follows:
     # "<Incoming/Done>/<ISO date format>/<file name>".
-    if match := re.search(
-        rf"^({status_group_str})/([\d\-:TZ]+)/.*({rif_types_group_str}).*$",
-        decoded_file_key,
-        re.IGNORECASE,
-    ):
-        pipeline_data_status = PipelineDataStatus(match.group(1).lower())
-        group_timestamp = match.group(2)
-        rif_file_type = RifFileType(match.group(3).lower())
+    expected_object_key_regex = rf"^({status_group_str})/([\d\-:TZ]+)/.*({rif_types_group_str}).*$"
+    if not (match := re.search(expected_object_key_regex, s3_object_key, re.IGNORECASE)):
+        logger.warning(
+            "ETL file or path does not match expected format: %s", expected_object_key_regex
+        )
+        return
 
-        # Log data extracted from S3 object key now that we know this is a valid RIF file within a
-        # valid data load
-        print(f"RIF type: {rif_file_type.name}")
-        print(f"Load Status: {pipeline_data_status.name}")
-        print(f"Data Load: {group_timestamp}")
+    rif_load_status = PipelineDataStatus(match.group(1).lower())
+    data_load_iso_str = match.group(2)
+    rif_file_type = RifFileType(match.group(3).lower())
 
-        rif_type_dimension = {"data_type": rif_file_type.name.lower()}
-        group_timestamp_dimension = {"group_timestamp": group_timestamp}
+    # Append data extracted from S3 object key to all future log messages now that we know this is a
+    # valid RIF file within a valid data load
+    logger.append_keys(
+        rif_file_type=rif_file_type.name,
+        rif_load_status=rif_load_status,
+        data_load_iso_str=data_load_iso_str,
+    )
 
-        timestamp_metric = (
-            PipelineMetric.TIME_DATA_AVAILABLE
-            if pipeline_data_status == PipelineDataStatus.INCOMING
-            else PipelineMetric.TIME_DATA_LOADED
+    rif_type_dimension = {"data_type": rif_file_type.name.lower()}
+    # Group timestamp, or just "group", is a legacy term used interchangibly with "data load" or
+    # "data load ISO string" throughout this Lambda, supporting documentation, and metrics
+    group_timestamp_dimension = {"group_timestamp": data_load_iso_str}
+
+    timestamp_metric = (
+        PipelineMetric.TIME_DATA_AVAILABLE
+        if rif_load_status == PipelineDataStatus.INCOMING
+        else PipelineMetric.TIME_DATA_LOADED
+    )
+
+    utc_timestamp = calendar.timegm(s3_event_time.utctimetuple())
+
+    logger.info(
+        'Putting value %s to CloudWatch Metric "%s"', utc_timestamp, timestamp_metric.full_name()
+    )
+    backoff_retry(
+        # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
+        # dimensions of the given metric based upon the powerset of the dimensions):
+        func=lambda: put_metric_data(
+            cw_client=cw_client,
+            metric_namespace=METRICS_NAMESPACE,
+            metrics=gen_all_dimensioned_metrics(
+                metric_name=timestamp_metric.metric_name,
+                date_time=s3_event_time,
+                value=utc_timestamp,
+                unit=timestamp_metric.unit,
+                dimensions=[rif_type_dimension, group_timestamp_dimension],
+            ),
+        ),
+        ignored_exceptions=common_unrecoverable_exceptions,
+    )
+    logger.info('Successfully put metrics to "%s"', timestamp_metric.full_name())
+
+    if rif_load_status == PipelineDataStatus.INCOMING:
+        logger.info(
+            "RIF file location indicates data has been made available to load to the ETL pipeline."
+            " Putting event to %s table when RIF was made available",
+            RIF_AVAILABLE_DDB_TBL,
+        )
+        backoff_retry(
+            func=lambda: put_rif_available_event(
+                table=rif_available_tbl,
+                event=RifAvailableEvent(
+                    date_time=s3_event_time, group_iso_str=data_load_iso_str, rif=rif_file_type
+                ),
+            ),
+            ignored_exceptions=common_unrecoverable_exceptions,
+        )
+        logger.info("Event put to %s table successfully", RIF_AVAILABLE_DDB_TBL)
+
+        logger.info(
+            "Attempting to retrieve the event indicating when the current load was first made"
+            " available for current group/load, if it exists, from table %s",
+            LOAD_AVAILABLE_DDB_TBL,
+        )
+        load_available_event = backoff_retry(
+            func=lambda: get_load_available_event(
+                table=load_available_tbl, group_iso_str=data_load_iso_str
+            ),
+            ignored_exceptions=common_unrecoverable_exceptions,
+        )
+        if load_available_event:
+            logger.info(
+                "Item indicating first availability of data load was received from table %s for"
+                " current group %s. Incoming file is part of an ongoing, existing data load for"
+                " group %s, and therefore does not indicate the time of the first data load for"
+                " this group. Stopping...",
+                LOAD_AVAILABLE_DDB_TBL,
+                data_load_iso_str,
+                data_load_iso_str,
+            )
+            return
+
+        logger.info(
+            "No event indicating data load availability was retrieved from table %s for current"
+            " group %s. This indicates that the incoming file is the start of a new data load for"
+            ' group %s. Putting data to metric "%s" and corresponding metric "%s" with value %s',
+            LOAD_AVAILABLE_DDB_TBL,
+            data_load_iso_str,
+            data_load_iso_str,
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+            utc_timestamp,
         )
 
-        utc_timestamp = calendar.timegm(event_timestamp.utctimetuple())
+        logger.info(
+            'Putting time metric data to "%s" and corresponding "%s" with value %s...',
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+            utc_timestamp,
+        )
+        backoff_retry(
+            func=lambda: put_metric_data(
+                cw_client=cw_client,
+                metric_namespace=METRICS_NAMESPACE,
+                metrics=gen_all_dimensioned_metrics(
+                    metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                    dimensions=[group_timestamp_dimension],
+                    date_time=s3_event_time,
+                    value=utc_timestamp,
+                    unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
+                )
+                + [
+                    MetricData(
+                        metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
+                        value=utc_timestamp,
+                        unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
+                        date_time=s3_event_time,
+                    )
+                ],
+            ),
+            ignored_exceptions=common_unrecoverable_exceptions,
+        )
+        logger.info(
+            "Metrics put to %s and %s successfully",
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name(),
+        )
 
-        try:
-            print(
-                f'Putting data timestamp metrics "{timestamp_metric.full_name()}" up'
-                f" to CloudWatch with unix timestamp value {utc_timestamp}"
+        logger.info(
+            "Putting event indicating that the current data load, %s, has been made available to %s"
+            " table. No additional data should be put to the %s metric for this group",
+            data_load_iso_str,
+            LOAD_AVAILABLE_DDB_TBL,
+            PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name(),
+        )
+        backoff_retry(
+            func=lambda: put_load_available_event(
+                table=load_available_tbl,
+                event=LoadAvailableEvent(date_time=s3_event_time, group_iso_str=data_load_iso_str),
+            ),
+            ignored_exceptions=common_unrecoverable_exceptions,
+        )
+        logger.info("Event put to %s table successfully", LOAD_AVAILABLE_DDB_TBL)
+    elif rif_load_status == PipelineDataStatus.DONE:
+        logger.info(
+            "Incoming file indicates data has been loaded. Calculating time deltas and checking"
+            " if the incoming file was the last loaded file..."
+        )
+        logger.info(
+            "Putting time delta metrics for the time taken between the current %s RIF file being"
+            " made available and now (when it has been loaded)...",
+            rif_file_type.name,
+        )
+
+        logger.info(
+            "Retrieving event indicating when %s RIF was loaded from %s table for current data load"
+            " %s...",
+            rif_file_type.name,
+            RIF_AVAILABLE_DDB_TBL,
+            data_load_iso_str,
+        )
+        rif_available_event = backoff_retry(
+            func=lambda: get_rif_available_event(
+                table=rif_available_tbl, group_iso_str=data_load_iso_str, rif=rif_file_type
+            ),
+            ignored_exceptions=common_unrecoverable_exceptions,
+        )
+        if rif_available_event:
+            logger.info(
+                "Event indicating when %s RIF was first made available was retrieved successfully."
+                " %s RIF was made available to load for group %s at %s",
+                rif_file_type.name,
+                rif_file_type.name,
+                data_load_iso_str,
+                str(rif_available_event.date_time),
+            )
+
+            rif_last_available = rif_available_event.date_time
+            load_time_delta = s3_event_time - rif_last_available
+
+            logger.info(
+                'Putting time delta metrics to "%s" with value %s s...',
+                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+                load_time_delta.seconds,
             )
             backoff_retry(
-                # Store four metrics (gen_all_dimensioned_metrics() will generate all possible
-                # dimensions of the given metric based upon the powerset of the dimensions):
                 func=lambda: put_metric_data(
                     cw_client=cw_client,
                     metric_namespace=METRICS_NAMESPACE,
                     metrics=gen_all_dimensioned_metrics(
-                        metric_name=timestamp_metric.metric_name,
-                        timestamp=event_timestamp,
-                        value=utc_timestamp,
-                        unit=timestamp_metric.unit,
+                        metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
                         dimensions=[rif_type_dimension, group_timestamp_dimension],
+                        value=round(load_time_delta.total_seconds()),
+                        date_time=s3_event_time,
+                        unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
                     ),
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
             )
-            print(f'Successfully put metrics to "{timestamp_metric.full_name()}"')
-        except Exception as exc:
-            print(
-                "An unrecoverable error occurred when trying to call PutMetricData for metric"
-                f" {METRICS_NAMESPACE}/{timestamp_metric}: {exc}"
+            logger.info(
+                'Metrics put to "%s" successfully',
+                PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name(),
+            )
+        else:
+            logger.warning(
+                "No corresponding event found for %s RIF in group %s in table %s; no time delta"
+                " metrics can be computed for this RIF. Continuing...",
+                rif_file_type.name,
+                data_load_iso_str,
+                RIF_AVAILABLE_DDB_TBL,
+            )
+
+        logger.info("Checking if the pipeline load has completed...")
+        if not _is_pipeline_load_complete(
+            bucket=etl_bucket, group=data_load_iso_str
+        ) or not _is_incoming_folder_empty(bucket=etl_bucket, group=data_load_iso_str):
+            logger.info(
+                "Not all files have yet to be loaded for group %s. Data load is not complete."
+                " Stopping...",
+                data_load_iso_str,
             )
             return
 
-        if pipeline_data_status == PipelineDataStatus.INCOMING:
-            print(
-                "RIF file location indicates data has been made available to load to the ETL"
-                " pipeline. Checking if this is the first time data is available for group"
-                f' "{group_timestamp}"...'
+        logger.info(
+            "All files have been loaded for group %s. This indicates that the data load has"
+            ' been completed for this group. Putting data to metric "%s" and corresponding'
+            ' metric "%s" with value %s',
+            data_load_iso_str,
+            PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
+            PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
+            utc_timestamp,
+        )
+        backoff_retry(
+            func=lambda: put_metric_data(
+                cw_client=cw_client,
+                metric_namespace=METRICS_NAMESPACE,
+                metrics=gen_all_dimensioned_metrics(
+                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                    dimensions=[group_timestamp_dimension],
+                    date_time=s3_event_time,
+                    value=utc_timestamp,
+                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                )
+                + [
+                    MetricData(
+                        metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
+                        value=utc_timestamp,
+                        unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
+                        date_time=s3_event_time,
+                    )
+                ],
+            ),
+            ignored_exceptions=common_unrecoverable_exceptions,
+        )
+        logger.info(
+            'Data put to "%s" and "%s" successfully',
+            PipelineMetric.TIME_DATA_FULLY_LOADED.full_name(),
+            PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name(),
+        )
+
+        logger.info(
+            "Retrieving event indicating when current load/group, %s, was first made available to"
+            " load in S3 from %s table...",
+            data_load_iso_str,
+            LOAD_AVAILABLE_DDB_TBL,
+        )
+        load_available_event = backoff_retry(
+            func=lambda: get_load_available_event(
+                table=load_available_tbl, group_iso_str=data_load_iso_str
+            ),
+            ignored_exceptions=common_unrecoverable_exceptions,
+        )
+        if load_available_event:
+            first_available_time = load_available_event.date_time
+            full_load_time_delta = s3_event_time - first_available_time
+
+            logger.info(
+                'Putting to "%s" the total time delta (%s s) from start to finish for the current'
+                " pipeline load for group %s",
+                PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
+                full_load_time_delta.seconds,
+                data_load_iso_str,
             )
-
-            try:
-                print(
-                    f"Checking if the {SENTINEL_QUEUE_NAME} queue contains any sentinel messages"
-                    f" for the current group ({group_timestamp})..."
-                )
-                queue_is_empty = backoff_retry(
-                    func=lambda: len(
-                        [
-                            msg
-                            for msg in check_sentinel_queue(
-                                sentinel_queue=sentinel_queue, timeout=10
-                            )
-                            if msg.group_timestamp == group_timestamp
-                        ]
-                    )
-                    == 0,
-                    ignored_exceptions=common_unrecoverable_exceptions,
-                )
-            except Exception as exc:
-                print(
-                    "An unrecoverable error occurred when trying to check the"
-                    f" {SENTINEL_QUEUE_NAME} queue; err: {exc}"
-                )
-                return
-
-            if queue_is_empty:
-                print(
-                    f"No sentinel message was received from queue {SENTINEL_QUEUE_NAME} for current"
-                    f" group {group_timestamp}, this indicates that the incoming file is the start"
-                    f" of a new data load for group {group_timestamp}. Putting data to metric"
-                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" and corresponding'
-                    f' metric "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()}"'
-                    f" with value {utc_timestamp}"
-                )
-
-                try:
-                    print(
-                        "Putting time metric data to"
-                        f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" and'
-                        " corresponding"
-                        f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()}" with'
-                        f" value {utc_timestamp}..."
-                    )
-                    backoff_retry(
-                        func=lambda: put_metric_data(
-                            cw_client=cw_client,
-                            metric_namespace=METRICS_NAMESPACE,
-                            metrics=gen_all_dimensioned_metrics(
-                                metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                                dimensions=[group_timestamp_dimension],
-                                timestamp=event_timestamp,
-                                value=utc_timestamp,
-                                unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
-                            )
-                            + [
-                                MetricData(
-                                    metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
-                                    value=utc_timestamp,
-                                    unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
-                                    timestamp=event_timestamp,
-                                )
-                            ],
-                        ),
-                        ignored_exceptions=common_unrecoverable_exceptions,
-                    )
-                    print(
-                        "Metrics put to"
-                        f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()} and"
-                        f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.full_name()} successfully"
-                    )
-                except Exception as exc:
-                    print(
-                        "An unrecoverable error occurred when trying to call PutMetricData; err:"
-                        f" {exc}"
-                    )
-                    return
-
-                print(
-                    f"Posting sentinel message to {SENTINEL_QUEUE_NAME} SQS queue to indicate that"
-                    f" data load has begun for group {group_timestamp} and that no additional data"
-                    " should be put to the"
-                    f" {PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()} metric for this"
-                    " group"
-                )
-
-                try:
-                    backoff_retry(
-                        func=sentinel_queue.purge,
-                        ignored_exceptions=common_unrecoverable_exceptions,
-                    )
-                    backoff_retry(
-                        func=lambda: post_sentinel_message(
-                            sentinel_queue=sentinel_queue, group_timestamp=group_timestamp
-                        ),
-                        ignored_exceptions=common_unrecoverable_exceptions,
-                    )
-
-                    print(f"Sentinel message posted to {SENTINEL_QUEUE_NAME} successfully")
-                except Exception as exc:
-                    print(
-                        "An unrecoverable error occurred when trying to post message to the"
-                        f" {SENTINEL_QUEUE_NAME} SQS queue: {exc}"
-                    )
-            else:
-                print(
-                    f"Sentinel value was received from queue {SENTINEL_QUEUE_NAME} for current"
-                    f" group {group_timestamp}. Incoming file is part of an ongoing, existing data"
-                    f" load for group {group_timestamp}, and therefore does not indicate the time"
-                    " of the first data load for this group. Stopping..."
-                )
-        elif pipeline_data_status == PipelineDataStatus.DONE:
-            print(
-                "Incoming file indicates data has been loaded. Calculating time deltas and checking"
-                " if the incoming file was the last loaded file..."
-            )
-
-            print(
-                "Putting time delta metrics for the time taken between the current"
-                f" {rif_file_type.name} RIF file being made available and now (when it has been"
-                " loaded)..."
-            )
-
-            try:
-                print(
-                    f'Getting corresponding "{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}"'
-                    f' time metric for the current RIF file type "{rif_file_type.name}" and'
-                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" time metric in'
-                    f' group "{group_timestamp}"...'
-                )
-                # We get both the last available metric for the current RIF file type _and_ the
-                # current load's first available time metric to reduce the number of API calls. The
-                # first available time metric is only used if the load has finished (the
-                # notification that started this lambda was for the last-loaded file), otherwise
-                # it's discarded
-                result = backoff_retry(
-                    func=lambda: get_metric_data(
-                        cw_client=cw_client,
-                        metric_data_queries=[
-                            MetricDataQuery(
-                                metric_namespace=METRICS_NAMESPACE,
-                                metric_name=PipelineMetric.TIME_DATA_AVAILABLE.metric_name,
-                                dimensions=rif_type_dimension | group_timestamp_dimension,
-                            ),
-                            MetricDataQuery(
-                                metric_namespace=METRICS_NAMESPACE,
-                                metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
-                                dimensions=group_timestamp_dimension,
-                            ),
-                        ],
-                        statistic="Maximum",
+            backoff_retry(
+                func=lambda: put_metric_data(
+                    cw_client=cw_client,
+                    metric_namespace=METRICS_NAMESPACE,
+                    metrics=gen_all_dimensioned_metrics(
+                        metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                        dimensions=[group_timestamp_dimension],
+                        date_time=s3_event_time,
+                        value=round(full_load_time_delta.total_seconds()),
+                        unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
                     ),
-                    ignored_exceptions=common_unrecoverable_exceptions + [KeyError],
-                )
-                print(
-                    f'"{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}" with dimensions'
-                    f" {rif_type_dimension | group_timestamp_dimension} and"
-                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}" with dimensions'
-                    f" {group_timestamp_dimension} retrieved successfully"
-                )
-            except Exception as exc:
-                print(
-                    f"An unrecoverable error occurred when trying to call GetMetricData; err: {exc}"
-                )
-                return
-
-            try:
-                data_available_metric_data = [
-                    x
-                    for x in result
-                    if x.label == PipelineMetric.TIME_DATA_AVAILABLE.full_name() and x.values
-                ][0]
-                # As explained above, this metric's data will only be used if this lambda was
-                # invoked for the last-loaded file (thus, the pipeline load has finished).
-                # Otherwise, this metric data is discarded
-                data_first_available_metric_data = [
-                    x
-                    for x in result
-                    if x.label == PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name() and x.values
-                ][0]
-            except IndexError as exc:
-                print(
-                    "No metric data result was found for metric"
-                    f' "{PipelineMetric.TIME_DATA_AVAILABLE.full_name()}" or'
-                    f' "{PipelineMetric.TIME_DATA_FIRST_AVAILABLE.full_name()}", no time delta(s)'
-                    " can be computed. Stopping..."
-                )
-                return
-
-            # Get the the unix time (in UTC) of the most recent point in time when the now-loaded
-            # file that invoked this Lambda was made available in order to calculate the time it
-            # took to load said file in the ETL pipeline. We take the value (unix timestamp) instead
-            # of the point's timestamp as it will be a higher resolution and more accurate since
-            # CloudWatch truncates and reduces the precision of data timestamps over time
-            try:
-                latest_value_index = data_available_metric_data.timestamps.index(
-                    max(data_available_metric_data.timestamps)
-                )
-                last_available = datetime.utcfromtimestamp(
-                    data_available_metric_data.values[latest_value_index]
-                )
-            except ValueError as exc:
-                print(
-                    "No values were returned for metric"
-                    f" {PipelineMetric.TIME_DATA_AVAILABLE.full_name()}, no time delta can be"
-                    " computed. Stopping..."
-                )
-                return
-
-            load_time_delta = event_timestamp.replace(tzinfo=last_available.tzinfo) - last_available
-
-            try:
-                print(
-                    "Putting time delta metrics to"
-                    f' "{PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}" with value'
-                    f" {load_time_delta.seconds} s..."
-                )
-                backoff_retry(
-                    func=lambda: put_metric_data(
-                        cw_client=cw_client,
-                        metric_namespace=METRICS_NAMESPACE,
-                        metrics=gen_all_dimensioned_metrics(
-                            metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
-                            dimensions=[rif_type_dimension, group_timestamp_dimension],
-                            value=round(load_time_delta.total_seconds()),
-                            timestamp=event_timestamp,
-                            unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
-                        ),
-                    ),
-                    ignored_exceptions=common_unrecoverable_exceptions,
-                )
-                print(
-                    f'Metrics put to "{PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}"'
-                    " successfully"
-                )
-            except Exception as exc:
-                print(
-                    "An unrecoverable error occurred when trying to call PutMetricData for metric"
-                    f" {PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.full_name()}: {exc}"
-                )
-                return
-
-            print("Checking if the pipeline load has completed...")
-            if not _is_pipeline_load_complete(
-                bucket=etl_bucket, group_timestamp=group_timestamp
-            ) or not _is_incoming_folder_empty(bucket=etl_bucket, group_timestamp=group_timestamp):
-                print(
-                    f"Not all files have yet to be loaded for group {group_timestamp}. Data load is"
-                    " not complete. Stopping..."
-                )
-                return
-
-            try:
-                print(
-                    f"All files have been loaded for group {group_timestamp}. This indicates that"
-                    " the data load has been completed for this group. Putting data to metric"
-                    f' "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}" and corresponding'
-                    f' metric "{PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name()}" with'
-                    f" value {utc_timestamp}"
-                )
-                backoff_retry(
-                    func=lambda: put_metric_data(
-                        cw_client=cw_client,
-                        metric_namespace=METRICS_NAMESPACE,
-                        metrics=gen_all_dimensioned_metrics(
-                            metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
-                            dimensions=[group_timestamp_dimension],
-                            timestamp=event_timestamp,
-                            value=utc_timestamp,
-                            unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
-                        )
-                        + [
-                            MetricData(
-                                metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
-                                value=utc_timestamp,
-                                unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
-                                timestamp=event_timestamp,
-                            )
-                        ],
-                    ),
-                    ignored_exceptions=common_unrecoverable_exceptions,
-                )
-                print(
-                    f'Data put to "{PipelineMetric.TIME_DATA_FULLY_LOADED.full_name()}" and'
-                    f' "{PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.full_name()}" successfully'
-                )
-            except Exception as exc:
-                print(
-                    f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
-                )
-
-            # There should only ever be one single data point for the first available metric for the
-            # current group, so we don't need to sort or otherwise filter the list of values
-            first_available_time = datetime.utcfromtimestamp(
-                data_first_available_metric_data.values[0]
+                ),
+                ignored_exceptions=common_unrecoverable_exceptions,
             )
-            full_load_time_delta = (
-                event_timestamp.replace(tzinfo=first_available_time.tzinfo) - first_available_time
+            logger.info(
+                'Data put to metric "%s" successfully',
+                PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name(),
+            )
+        else:
+            logger.warning(
+                "No event found for group %s in table %s; no time delta metrics can be computed for"
+                " this data load",
+                data_load_iso_str,
+                LOAD_AVAILABLE_DDB_TBL,
             )
 
-            try:
-                print(
-                    f'Putting to "{PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" the'
-                    f" total time delta ({full_load_time_delta.seconds} s) from start to finish for"
-                    f" the current pipeline load for group {group_timestamp}"
+
+@logger.inject_lambda_context(clear_state=True, log_event=True)
+def handler(event: dict[Any, Any], context: LambdaContext):
+    # The Lambda this handler is defined for is invoked asynchronously, so by default AWS retries
+    # any failing invocations twice before dropping the event. This handler has side effects, so
+    # this default has been lowered to 0 such that if the function fails it does not attempt to
+    # retry. This is why this handler, and the functions it calls, raise exceptions that are not
+    # explicitly handled.
+    # See https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html#invocation-async-errors
+    try:
+        if not all(
+            [
+                REGION,
+                METRICS_NAMESPACE,
+                ETL_BUCKET_ID,
+                RIF_AVAILABLE_DDB_TBL,
+                LOAD_AVAILABLE_DDB_TBL,
+            ]
+        ):
+            raise RuntimeError("Not all necessary environment variables were defined")
+
+        sns_event = SNSEvent(event)
+        if next(sns_event.records, None) is None:
+            raise ValueError(f"Invalid SNS event {sns_event.raw_event}; empty records")
+
+        for sns_record in sns_event.records:
+            s3_event = S3Event(json.loads(sns_record.sns.message))
+            if next(s3_event.records, None) is None:
+                raise ValueError(f"Invalid inner S3 event {s3_event.raw_event}; empty records")
+
+            for s3_record in s3_event.records:
+                s3_event_time = datetime.fromisoformat(
+                    s3_record.event_time.removesuffix("Z")
+                ).replace(tzinfo=timezone.utc)
+                s3_object_key = unquote(s3_record.s3.get_object.key)
+                s3_event_name = s3_record.event_name
+                s3_event_type = S3EventType.from_event_name(s3_event_name)
+
+                # Append to all future logs information about the S3 Event
+                logger.append_keys(
+                    s3_object_key=s3_object_key,
+                    s3_event_name=s3_event_name,
+                    s3_event_type=s3_event_type.name,
+                    s3_event_time=s3_event_time.isoformat(),
                 )
-                backoff_retry(
-                    func=lambda: put_metric_data(
-                        cw_client=cw_client,
-                        metric_namespace=METRICS_NAMESPACE,
-                        metrics=gen_all_dimensioned_metrics(
-                            metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
-                            dimensions=[group_timestamp_dimension],
-                            timestamp=event_timestamp,
-                            value=round(full_load_time_delta.total_seconds()),
-                            unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
-                        ),
-                    ),
-                    ignored_exceptions=common_unrecoverable_exceptions,
-                )
-                print(
-                    "Data put to metric"
-                    f' "{PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.full_name()}" successfully'
-                )
-            except Exception as exc:
-                print(
-                    f"An unrecoverable error occurred when trying to call PutMetricData; err: {exc}"
-                )
-    else:
-        print(f"ETL file or path does not match expected format, skipping: {decoded_file_key}")
+
+                _handle_s3_event(s3_event_time=s3_event_time, s3_object_key=s3_object_key)
+    except Exception:
+        logger.exception("Unrecoverable exception raised")
+        raise
