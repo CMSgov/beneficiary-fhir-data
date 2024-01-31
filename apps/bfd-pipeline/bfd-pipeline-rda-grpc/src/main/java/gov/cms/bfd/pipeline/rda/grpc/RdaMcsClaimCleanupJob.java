@@ -11,20 +11,21 @@ public class RdaMcsClaimCleanupJob extends AbstractCleanupJob {
   /** logger to use. */
   static final Logger LOGGER = LoggerFactory.getLogger(RdaMcsClaimCleanupJob.class);
 
-  /** List of child entity class names for use in jpql. */
-  private static final List<String> CHILD_ENTITY_NAMES =
+  /** List of table names for use in native queries. */
+  private static final List<String> TABLE_NAMES =
       List.of(
-          "RdaFissRevenueLine",
-          "RdaFissPayer",
-          "RdaFissDiagnosisCode",
-          "RdaFissProcCode",
-          "RdaFissAuditTrail");
+          "rda.mcs_adjustments",
+          "rda.mcs_audits",
+          "rda.mcs_details",
+          "rda.mcs_diagnosis_codes",
+          "rda.mcs_locations",
+          "rda.mcs_claims");
 
-  /** Principal entity class name for use in jpql. */
-  private static final String ENTITY_NAME = "RdaFissClaim";
+  /** Parent table name for use in native queries. */
+  private static final String PARENT_TABLE_NAME = "rda.mcs_claims";
 
-  /** Principal entity db table name for use in native query. */
-  private static final String ENTITY_TABLE_NAME = "rda.fiss_claims";
+  /** Key column name for the parent table for use in native queries. */
+  private static final String PARENT_KEY_COLUMN = "idr_clm_hd_icn";
 
   /**
    * Constructs a RdaMcsClaimCleanupJob.
@@ -44,19 +45,19 @@ public class RdaMcsClaimCleanupJob extends AbstractCleanupJob {
 
   /** {@inheritDoc} */
   @Override
-  List<String> getChildEntityNames() {
-    return CHILD_ENTITY_NAMES;
+  List<String> getTableNames() {
+    return TABLE_NAMES;
   }
 
   /** {@inheritDoc} */
   @Override
-  String getEntityName() {
-    return ENTITY_NAME;
+  String getParentTableName() {
+    return PARENT_TABLE_NAME;
   }
 
   /** {@inheritDoc} */
   @Override
-  String getEntityTableName() {
-    return ENTITY_TABLE_NAME;
+  String getParentTableKey() {
+    return PARENT_KEY_COLUMN;
   }
 }

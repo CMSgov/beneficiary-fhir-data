@@ -80,7 +80,6 @@ class AbstractCleanupJobTest {
    */
   @Test
   void runAllDeleted() throws ProcessingException {
-    var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
     utils.seedData(5, 0);
 
     var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 2, 6, true);
@@ -89,5 +88,39 @@ class AbstractCleanupJobTest {
     // expecting 5 deletes and no claims remaining
     assertEquals(5, deleted);
     assertEquals(0, utils.count());
+  }
+
+  /**
+   * Test scenario where there are no claims.
+   *
+   * @throws ProcessingException if errors occurs during processing.
+   */
+  @Test
+  void runEmpty() throws ProcessingException {
+    utils.seedData(0, 0);
+
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 2, 6, true);
+    var deleted = cleanUpJob.run();
+
+    // expecting 0 deletes and no claims remaining
+    assertEquals(0, deleted);
+    assertEquals(0, utils.count());
+  }
+
+  /**
+   * Test scenario where the job is not enabled.
+   *
+   * @throws ProcessingException if errors occurs during processing.
+   */
+  @Test
+  void notEnabled() throws ProcessingException {
+    utils.seedData(4, 4);
+
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 2, 6, false);
+    var deleted = cleanUpJob.run();
+
+    // expecting 0 deletes and all 8 claims remaining
+    assertEquals(0, deleted);
+    assertEquals(8, utils.count());
   }
 }

@@ -1,8 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -22,6 +22,16 @@ public abstract class AbstractCleanupJob implements CleanupJob {
   /** maximum age of claims in days from current date. */
   private static final int OLDEST_CLAIM_AGE_IN_DAYS = 60;
 
+  /** template for delete query. */
+  private static final String DELETE_QUERY_TEMPLATE =
+      "delete from %s t where t.%s in ("
+          + "  select %s "
+          + "  from %s "
+          + "  where last_updated < '%s' "
+          + "  order by last_updated desc "
+          + "  limit %d"
+          + ")";
+
   /** EntityManagerFactory to use to generate the EntityManager. */
   private final EntityManagerFactory entityManagerFactory;
 
@@ -38,25 +48,25 @@ public abstract class AbstractCleanupJob implements CleanupJob {
   private final Logger logger;
 
   /**
-   * Returns a list of child entity class names for use in jpql.
+   * Returns a list of table names for use in native queries.
    *
-   * @return list of child entity class names.
+   * @return list of database table names.
    */
-  abstract List<String> getChildEntityNames();
+  abstract List<String> getTableNames();
 
   /**
-   * Returns the principal entity class name for use in jpql.
+   * Returns the name of the database table mapped to the parent entity class.
    *
-   * @return the class name of the principal entity.
+   * @return the database table name for the parent entity.
    */
-  abstract String getEntityName();
+  abstract String getParentTableName();
 
   /**
-   * Returns the name of the database table mapped to the principal entity class.
+   * Returns the key column of the database table mapped to the parent entity class.
    *
-   * @return the database table name for the principal entity.
+   * @return the key column name for the parent entity.
    */
-  abstract String getEntityTableName();
+  abstract String getParentTableKey();
 
   /**
    * Executes the job if enabled. Calculates the number of transactions from the cleanupRunSize /
@@ -72,15 +82,16 @@ public abstract class AbstractCleanupJob implements CleanupJob {
     int claimsDeleted = 0;
 
     if (enabled) {
+      final long startMillis = System.currentTimeMillis();
       var entityManager = entityManagerFactory.createEntityManager();
 
       try {
-        var maxDate = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
-        var transactionMaxDateQuery = getTransactionMaxDateQuery(maxDate, entityManager);
+        Instant cutoffDate = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
+        List<Query> queries = buildDeleteQueries(cutoffDate, entityManager);
         var numberOfTransactions = Math.ceilDiv(cleanupRunSize, cleanupTransactionSize);
 
         for (int i = 0; i < numberOfTransactions; i++) {
-          var result = executeDeleteTransaction(transactionMaxDateQuery, entityManager);
+          var result = executeDeleteTransaction(queries, entityManager);
           claimsDeleted += result;
 
           // If no claims deleted this iteration, or total claims deleted
@@ -90,8 +101,11 @@ public abstract class AbstractCleanupJob implements CleanupJob {
             break;
           }
         }
+        final long endMillis = System.currentTimeMillis();
+        logger.info(
+            "cleanup job removed {} claims in {}ms", claimsDeleted, endMillis - startMillis);
       } catch (Exception ex) {
-        logger.error("pre-processing aborted by an exception: message={}", ex.getMessage(), ex);
+        logger.error("cleanup job aborted by an exception: message={}", ex.getMessage(), ex);
         throw new ProcessingException(ex, 0);
       } finally {
         entityManager.close();
@@ -102,78 +116,47 @@ public abstract class AbstractCleanupJob implements CleanupJob {
   }
 
   /**
-   * Creates a query object. Used to determine the maximum last updated date for a single
-   * transaction. Created as a native sql query because it is not easy to use limits with a subquery
-   * using jpql.
+   * Executes a single delete transaction. The list of queries are passed in execution order, last
+   * query must delete from the parent table, all other queries are child table deletes.
    *
-   * @param maxDate the maximum last_updated date.
-   * @param em the entity manager to use to create the query.
-   * @return a query to retrieve the maximum last_update date.
-   */
-  private Query getTransactionMaxDateQuery(Instant maxDate, EntityManager em) {
-
-    // This native query finds the most recent last update date
-    // for the group of oldest claims eligible for removal,
-    // limited by the batch size for a transaction.
-
-    var transactionMaxDateQuery =
-        em.createNativeQuery(
-            "select max(t.last_updated) from ("
-                + " select last_updated from "
-                + getEntityTableName()
-                + " where last_updated < ?1"
-                + " order by last_updated "
-                + " limit "
-                + cleanupTransactionSize
-                + ") as t");
-
-    transactionMaxDateQuery.setParameter(1, maxDate);
-
-    return transactionMaxDateQuery;
-  }
-
-  /**
-   * Executes a single delete transaction. Used the transactionMaxDateQuery to determine the cutoff
-   * last_updated date for claims to be removed.
-   *
-   * @param transactionMaxDateQuery the query used to determine the cutoff date
+   * @param queries the queries to execute in each transaction.
    * @param em the entitymanager to use with the deletion.
    * @return the number of claims deleted by the transaction.
    */
-  private int executeDeleteTransaction(Query transactionMaxDateQuery, EntityManager em) {
-    var claimsDeleted = 0;
+  private int executeDeleteTransaction(List<Query> queries, EntityManager em) {
+    var count = 0;
+    em.getTransaction().begin();
 
-    // Find the maximum last_updated date for this transaction
-    var transactionMaxDateResult = transactionMaxDateQuery.getResultList();
-
-    // If date found create delete query and execute in a transaction
-    if (transactionMaxDateResult.size() == 1) {
-      Timestamp transactionMaxDate = (Timestamp) transactionMaxDateResult.getFirst();
-      if (transactionMaxDate != null) {
-        em.getTransaction().begin();
-        getChildEntityNames()
-            .forEach(
-                entityName -> {
-                  Query childQuery =
-                      em.createQuery(
-                          "delete from "
-                              + entityName
-                              + " e "
-                              + "where e.claimId in (select claimId from "
-                              + getEntityName()
-                              + "  claim where claim.lastUpdated <= ?1)");
-                  childQuery.setParameter(1, transactionMaxDate.toInstant());
-                  childQuery.executeUpdate();
-                });
-
-        Query parentQuery =
-            em.createQuery("delete from " + getEntityName() + " where lastUpdated <= ?1");
-        parentQuery.setParameter(1, transactionMaxDate.toInstant());
-        claimsDeleted = parentQuery.executeUpdate();
-        em.getTransaction().commit();
-      }
+    // execute all queries in order, use the count from the last query (parent table)
+    // to track the number of claims deleted.
+    for (Query query : queries) {
+      count = query.executeUpdate();
     }
+    em.getTransaction().commit();
+    return count;
+  }
 
-    return claimsDeleted;
+  /**
+   * Build a list of native sql delete queries to remove claims.
+   *
+   * @param cutoffDate the Instant used to identify queries for deletion.
+   * @param em the EntityManager to use.
+   * @return the list of queries.
+   */
+  private List<Query> buildDeleteQueries(Instant cutoffDate, EntityManager em) {
+    List<Query> queries = new ArrayList<>();
+    for (String tableName : getTableNames()) {
+      String queryStr =
+          String.format(
+              DELETE_QUERY_TEMPLATE,
+              tableName,
+              getParentTableKey(),
+              getParentTableKey(),
+              getParentTableName(),
+              cutoffDate.toString(),
+              cleanupTransactionSize);
+      queries.add(em.createNativeQuery(queryStr));
+    }
+    return queries;
   }
 }
