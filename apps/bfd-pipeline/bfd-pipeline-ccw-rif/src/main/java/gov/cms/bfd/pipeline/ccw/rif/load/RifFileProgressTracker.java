@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
+package gov.cms.bfd.pipeline.ccw.rif.load;
 
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.pipeline.sharedutils.SequenceNumberTracker;

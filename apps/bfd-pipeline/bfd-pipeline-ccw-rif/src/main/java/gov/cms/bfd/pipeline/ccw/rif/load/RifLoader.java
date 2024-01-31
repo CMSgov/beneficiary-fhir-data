@@ -16,7 +16,6 @@ import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.RifFileProgressTracker;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.pipeline.sharedutils.FluxWaiter;
