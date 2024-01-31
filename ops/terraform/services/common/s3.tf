@@ -32,8 +32,6 @@ resource "aws_s3_bucket_logging" "this" {
 
   bucket = aws_s3_bucket.this.id
 
-  expected_bucket_owner = local.account_id
-
   target_bucket = local.logging_bucket
   target_prefix = "${local.legacy_service}_s3_access_logs/"
 }
