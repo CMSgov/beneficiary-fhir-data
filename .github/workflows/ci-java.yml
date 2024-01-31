@@ -28,7 +28,7 @@ jobs:
       files: ${{ steps.workflow_files.outputs.files }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
       - id: workflow_files
@@ -43,9 +43,9 @@ jobs:
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: 'Setup JDK'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'corretto'
@@ -56,20 +56,41 @@ jobs:
   mvn-verify:
     runs-on: ubuntu-20.04
     needs: workflow
+    if: needs.workflow.outputs.files
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v4
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: 'maven'
+
+      - name: 'Run Maven Build'
+        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false verify
+        working-directory: ./apps
+
+  # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
+
+  mvn-verify-system:
+    runs-on: ubuntu-20.04
+    needs: workflow
     outputs:
       BFD_PARENT_VERSION: ${{ steps.bfd-parent-version.outputs.BFD_PARENT_VERSION }}
     if: needs.workflow.outputs.files
     steps:
       - name: 'Checkout repo'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: 'Setup JDK'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'corretto'
+          cache: 'maven'
 
-      - name: 'Run Maven Build'
-        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false verify
+      - name: 'Run Maven Build without Tests'
+        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -DskipTests -DskipITs verify
         working-directory: ./apps
 
       - name: 'Install yq'
@@ -102,82 +123,24 @@ jobs:
           docker push "$FULL_COMMIT_TAG"
         working-directory: apps
 
-  # NOTE: Temporarily disable fhir-validation in support of BFD-2198
-  # TODO: Re-enable post BFD-2198 with more thoughtful implementation
-  # fhir-validate:
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - name: 'Checkout repo'
-  #       uses: actions/checkout@v3
-  #     - name: 'Create local branch references'
-  #       # Check out the branches to build references for use in the next step
-  #       run: git fetch && git checkout master && git checkout $GITHUB_HEAD_REF
-  #     - name: 'Set up Python'
-  #       if: steps.run_check.outputs.skip == 'false'
-  #       uses: actions/setup-python@v3
-  #       with:
-  #         python-version: '3.10.5'
-  #     - name: 'Check for new/modified resources'
-  #       id: run_check
-  #       # Checks if there are any modified resources in the endpoint responses
-  #       # grep returns non-zero exit code when no matches are found, so only skip if the condition fails
-  #       run: |
-  #         can_skip=$(if [[ $(python3 ops/fhir_validations/diff_check.py) ]]; then echo "true"; else echo "false"; fi)
-  #         if [[ $can_skip == 'true' ]]; then echo "No modified resources found, skipping rest of job."; else echo "Found modified resources, validating..."; fi
-  #         echo ::set-output name=skip::$can_skip
-  #     - name: 'Install Python dependencies'
-  #       if: steps.run_check.outputs.skip == 'false'
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         pip install -r ops/fhir_validations/requirements.txt
-  #     - name: 'Set up JDK'
-  #       if: steps.run_check.outputs.skip == 'false'
-  #       uses: actions/setup-java@v1
-  #       with:
-  #         java-version: '11'
-  #     - name: 'Download FHIR validator'
-  #       if: steps.run_check.outputs.skip == 'false'
-  #       uses: wei/wget@v1
-  #       with:
-  #         #TODO: Pinning to 5.6.68 due to bug in latest release, re-evaluate later.
-  #         args: https://github.com/hapifhir/org.hl7.fhir.core/releases/download/5.6.68/validator_cli.jar
-  #     - name: 'Verify FHIR resource'
-  #       id: validate_fhir
-  #       if: steps.run_check.outputs.skip == 'false'
-  #       run: |
-  #         is_valid="false"
-  #         if output=$(python3 ops/fhir_validations/validations.py -r) ; then is_valid="true" ; fi
-  #         echo "$output"
-  #         output=$([[ $output =~ .*(Results:[^$'\n']*).* ]] && echo "${BASH_REMATCH[1]}")
-  #         echo ::set-output name=valid::$is_valid
-  #         echo ::set-output name=output::$output
-  #     - name: 'Job Outcome'
-  #       if: steps.run_check.outputs.skip == 'false'
-  #       run: |
-  #         is_valid="${{ steps.validate_fhir.outputs.valid }}"
-  #         output="${{ steps.validate_fhir.outputs.output }}"
-  #         echo "$output" >> $GITHUB_STEP_SUMMARY
-  #         printf "$output\n"
-  #         if [ "$is_valid" = "false" ] ; then exit 1 ; fi
-
   # ansible system testing
   ansible-role-bfd-pipeline:
-    needs: mvn-verify
+    needs: mvn-verify-system
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-pipeline
-      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}
+      bfd_version: ${{ needs.mvn-verify-system.outputs.BFD_PARENT_VERSION }}
 
   ansible-role-bfd-server:
-    needs: mvn-verify
+    needs: mvn-verify-system
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-server
-      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}
+      bfd_version: ${{ needs.mvn-verify-system.outputs.BFD_PARENT_VERSION }}
 
   ansible-role-bfd-db-migrator:
-    needs: mvn-verify
+    needs: mvn-verify-system
     uses: ./.github/workflows/ci-ansible.yml
     with:
       role: bfd-db-migrator
-      bfd_version: ${{ needs.mvn-verify.outputs.BFD_PARENT_VERSION }}
+      bfd_version: ${{ needs.mvn-verify-system.outputs.BFD_PARENT_VERSION }}
