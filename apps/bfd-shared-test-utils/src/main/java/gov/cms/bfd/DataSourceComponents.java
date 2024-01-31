@@ -1,6 +1,7 @@
 package gov.cms.bfd;
 
 import javax.sql.DataSource;
+import lombok.Getter;
 import org.postgresql.ds.PGSimpleDataSource;
 
 /**
@@ -9,6 +10,7 @@ import org.postgresql.ds.PGSimpleDataSource;
  * <p>This is wildly insufficient for more complicated {@link DataSource}s; we're leaning heavily on
  * the very constrained set of simple {@link DataSource}s that are supported for our tests.
  */
+@Getter
 public final class DataSourceComponents {
   /** The JDBC URL that should be used to connect to the test DB. */
   private final String url;
@@ -33,32 +35,5 @@ public final class DataSourceComponents {
     } else {
       throw new RuntimeException();
     }
-  }
-
-  /**
-   * Gets the {@link #url}.
-   *
-   * @return the JDBC URL that should be used to connect to the test DB
-   */
-  public String getUrl() {
-    return url;
-  }
-
-  /**
-   * Gets the {@link #username}.
-   *
-   * @return the username that should be used to connect to the test DB
-   */
-  public String getUsername() {
-    return username;
-  }
-
-  /**
-   * Gets the {@link #password}.
-   *
-   * @return the password that should be used to connect to the test DB
-   */
-  public String getPassword() {
-    return password;
   }
 }

@@ -1,9 +1,12 @@
 package gov.cms.bfd.server.war.commons;
 
 import java.util.Optional;
-import org.hl7.fhir.dstu3.model.Coverage;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /** Enumerates the Medicare segments/parts supported by the application. */
+@Getter
+@AllArgsConstructor
 public enum MedicareSegment {
   /** Represents the part A medicare segment. */
   PART_A("part-a"),
@@ -18,31 +21,12 @@ public enum MedicareSegment {
   private final String urlPrefix;
 
   /**
-   * Enum constant constructor.
-   *
-   * @param urlPrefix the value to use for {@link #getUrlPrefix()}
-   */
-  private MedicareSegment(String urlPrefix) {
-    this.urlPrefix = urlPrefix;
-  }
-
-  /**
-   * Gets the {@link #urlPrefix}.
-   *
-   * @return a {@link String} that can be used in URLs to uniquely identify this {@link
-   *     MedicareSegment} (e.g. as part of FHIR {@link Coverage#getId()} values)
-   */
-  public String getUrlPrefix() {
-    return urlPrefix;
-  }
-
-  /**
    * Gets the {@link MedicareSegment} that matches the input, or an empty {@link Optional} if the
    * input does not match any known segment.
    *
-   * @param urlPrefix the {@link #getUrlPrefix()} to find a match for
-   * @return the {@link MedicareSegment} (if any) whose {@link MedicareSegment#getUrlPrefix()} value
-   *     matches the one specified
+   * @param urlPrefix the {@link #urlPrefix} to find a match for
+   * @return the {@link MedicareSegment} (if any) whose {@link #urlPrefix} value matches the one
+   *     specified
    */
   public static Optional<MedicareSegment> selectByUrlPrefix(String urlPrefix) {
     for (MedicareSegment medicareSegment : values()) {

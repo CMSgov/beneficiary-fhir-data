@@ -21,19 +21,17 @@ def platinumAmiId
 def currentStage
 
 def buildPlatinum(String goldId = '') {
-    // Retrieve latest platium and assign the sourceAmiId tag value with the latest gold AMI ID.
-    withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
-        // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-        dir('ops/ansible/playbooks-ccs') {
-            echo "Using the following gold image: ${goldId}"
+    // Retrieve latest platinum and assign the sourceAmiId tag value with the latest gold AMI ID.
+    // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
+    dir('ops/ansible/playbooks-ccs') {
+        echo "Using the following gold image: ${goldId}"
 
-            sh """
-            packer build -color=false -var vault_password_file="$vaultPasswordFile" \
-            -var source_ami=${goldId} \
-            -var subnet_id=subnet-092c2a68bd18b34d1 \
-            ../../packer/build_bfd-platinum.json
-            """
-        }
+        sh """
+        packer build -color=false \
+        -var source_ami=${goldId} \
+        -var subnet_id=subnet-092c2a68bd18b34d1 \
+        ../../packer/build_bfd-platinum.json
+        """
     }
 }
 
@@ -107,6 +105,9 @@ spec:
         cpu: '8000m'
 """
         }
+    }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
     }
 
     // Run Every day at 7:30 AM Eastern / 11:30 AM UTC

@@ -86,11 +86,12 @@ resource "aws_iam_policy" "logs" {
 EOF
 }
 
-resource "aws_iam_policy" "sqs" {
-  name = "${local.lambdas[local.lambda_update_slis].full_name}-sqs"
+resource "aws_iam_policy" "dynamodb" {
+  name = "${local.lambdas[local.lambda_update_slis].full_name}-dynamodb"
   description = join("", [
-    "Permissions for the ${local.lambdas[local.lambda_update_slis].full_name} Lambda to send and ",
-    "receive messages from the ${aws_sqs_queue.this.name} SQS queue"
+    "Permissions for the ${local.lambdas[local.lambda_update_slis].full_name} Lambda to interact ",
+    "with the ${aws_dynamodb_table.update_slis_rif_available.name} and ",
+    "${aws_dynamodb_table.update_slis_load_available.name} DynamoDB tables"
   ])
   policy = <<-EOF
 {
@@ -99,17 +100,19 @@ resource "aws_iam_policy" "sqs" {
     {
       "Effect": "Allow",
       "Action": [
-        "sqs:GetQueueUrl",
-        "sqs:SendMessage",
-        "sqs:DeleteMessage",
-        "sqs:ReceiveMessage",
-        "sqs:PurgeQueue"
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem"
       ],
-      "Resource": ["${aws_sqs_queue.this.arn}"]
+      "Resource": [
+        "${aws_dynamodb_table.update_slis_rif_available.arn}",
+        "${aws_dynamodb_table.update_slis_load_available.arn}"
+      ]
     },
     {
       "Effect": "Allow",
-      "Action": ["kms:GenerateDataKey*", "kms:Decrypt"],
+      "Action": ["kms:GenerateDataKey*", "kms:Decrypt", "kms:Encrypt"],
       "Resource": ["${local.kms_key_arn}"]
     }
   ]
@@ -148,7 +151,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policies_to_roles" {
       aws_iam_policy.cloudwatch_metrics[local.lambda_update_slis],
       aws_iam_policy.logs[local.lambda_update_slis],
       aws_iam_policy.s3,
-      aws_iam_policy.sqs
+      aws_iam_policy.dynamodb
     ]
     "${local.lambda_repeater}" = [
       aws_iam_policy.cloudwatch_metrics[local.lambda_repeater],

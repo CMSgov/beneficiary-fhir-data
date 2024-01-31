@@ -26,6 +26,8 @@ import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
+import gov.cms.bfd.model.rif.entities.S3DataFile;
+import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -163,6 +165,8 @@ public final class PipelineTestUtils {
             Beneficiary.class,
             LoadedBatch.class,
             LoadedFile.class,
+            S3ManifestFile.class,
+            S3DataFile.class,
             RdaFissClaim.class,
             RdaFissProcCode.class);
 

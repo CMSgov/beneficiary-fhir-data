@@ -4,6 +4,8 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.Instant;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.spark.util.sketch.BloomFilter;
 
 /**
@@ -11,6 +13,8 @@ import org.apache.spark.util.sketch.BloomFilter;
  * file. Beneath the covers, they use BloomFilters (see <a
  * href="https://en.wikipedia.org/wiki/Bloom_filter">Bloom Filters</a>) which are space efficient.
  */
+@Getter
+@AllArgsConstructor
 public class LoadedFileFilter {
   /** False positive percentage value used in creating the bloom filter. */
   public static final double FALSE_POSITIVE_PERCENTAGE = 0.01;
@@ -29,28 +33,6 @@ public class LoadedFileFilter {
 
   /** The beneficiaries that were updated in the RIF load. */
   private final BloomFilter updatedBeneficiaries;
-
-  /**
-   * Build a filter for a LoadedFile.
-   *
-   * @param loadedFileId for this filter
-   * @param batchesCount of the number of batches in this filter
-   * @param firstUpdated for this filter
-   * @param lastUpdated for this filter
-   * @param updatedBeneficiaries bloom filter for this filter
-   */
-  public LoadedFileFilter(
-      long loadedFileId,
-      int batchesCount,
-      Instant firstUpdated,
-      Instant lastUpdated,
-      BloomFilter updatedBeneficiaries) {
-    this.loadedFileId = loadedFileId;
-    this.batchesCount = batchesCount;
-    this.firstUpdated = firstUpdated;
-    this.lastUpdated = lastUpdated;
-    this.updatedBeneficiaries = updatedBeneficiaries;
-  }
 
   /**
    * Tests the filter's time span overlaps the passed in date range.
@@ -111,42 +93,6 @@ public class LoadedFileFilter {
   }
 
   /**
-   * Gets the {@link #loadedFileId}.
-   *
-   * @return the fileId
-   */
-  public long getLoadedFileId() {
-    return loadedFileId;
-  }
-
-  /**
-   * Gets the {@link #firstUpdated}.
-   *
-   * @return the firstUpdated
-   */
-  public Instant getFirstUpdated() {
-    return firstUpdated;
-  }
-
-  /**
-   * Gets the {@link #lastUpdated}.
-   *
-   * @return the lastUpdated
-   */
-  public Instant getLastUpdated() {
-    return lastUpdated;
-  }
-
-  /**
-   * Gets the {@link #updatedBeneficiaries}.
-   *
-   * @return the updatedBeneficiaries
-   */
-  public BloomFilter getUpdatedBeneficiaries() {
-    return updatedBeneficiaries;
-  }
-
-  /**
    * Create a bloom filter with passed size.
    *
    * @param count to allocate
@@ -154,14 +100,5 @@ public class LoadedFileFilter {
    */
   public static BloomFilter createFilter(int count) {
     return BloomFilter.create(count, FALSE_POSITIVE_PERCENTAGE);
-  }
-
-  /**
-   * Gets the {@link #batchesCount}.
-   *
-   * @return the batches count
-   */
-  public int getBatchesCount() {
-    return batchesCount;
   }
 }

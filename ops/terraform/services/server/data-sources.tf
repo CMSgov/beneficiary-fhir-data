@@ -101,11 +101,6 @@ data "aws_security_group" "remote" {
   }
 }
 
-# ansible vault pw read only policy
-data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
-  arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
-}
-
 data "aws_ssm_parameters_by_path" "nonsensitive_common" {
   path = "/bfd/${local.env}/common/nonsensitive"
 }
