@@ -75,10 +75,10 @@ public class DiagnosisUtilV2 {
     // log which ICD codes we couldn't find a match for in our downloaded ICD file
     if (!icdLookupMissingFailures.contains(icdCode)) {
       icdLookupMissingFailures.add(icdCode);
-      LOGGER.info(
-          "No ICD code display value match found for ICD code {} in resource {}.",
-          icdCode,
-          "DGNS_CD.txt");
+      /*LOGGER.info(
+      "No ICD code display value match found for ICD code {} in resource {}.",
+      icdCode,
+      "DGNS_CD.txt");*/
     }
 
     return null;
