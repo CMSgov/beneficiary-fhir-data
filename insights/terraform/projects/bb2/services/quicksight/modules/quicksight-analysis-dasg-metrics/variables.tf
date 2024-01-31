@@ -8,13 +8,18 @@ variable "id" {
   type        = string
 }
 
-variable "first_app_name_select" {
-  description = "First app_name for filter controls"
+variable "data_set_impl_id" {
+  description = "DataSet impl resource ID"
+  type        = string
+}
+
+variable "data_set_prod_id" {
+  description = "DataSet prod resource ID"
   type        = string
 }
 
 variable "data_set_prod_per_app_id" {
-  description = "DataSet resource ID"
+  description = "DataSet prod per_app resource ID"
   type        = string
 }
 
