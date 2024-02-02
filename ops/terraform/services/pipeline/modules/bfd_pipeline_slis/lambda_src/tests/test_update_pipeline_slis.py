@@ -31,7 +31,7 @@ DEFAULT_MOCK_EVENT_TIME_DATETIME = datetime.fromisoformat(
 DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP = calendar.timegm(
     DEFAULT_MOCK_EVENT_TIME_DATETIME.utctimetuple()
 )
-DEFAULT_MOCK_EVENT_NAME = "ObjectCreated"
+DEFAULT_MOCK_EVENT_NAME = "ObjectCreated:Put"
 DEFAULT_MOCK_BUCKET = "mock-bucket"
 DEFAULT_MOCK_NAMESPACE = "mock-namespace"
 DEFAULT_MOCK_RIF_AVAIL_TBL = "mock-rif-available-tbl"
@@ -56,23 +56,17 @@ def generate_event(
     event_name: str = DEFAULT_MOCK_EVENT_NAME,
 ) -> dict[str, Any]:
     return {
-        "Records": [
-            {
-                "Sns": {
-                    "Message": json.dumps(
-                        {
-                            "Records": [
-                                {
-                                    "eventName": event_name,
-                                    "eventTime": event_time_iso,
-                                    "s3": {"object": {"key": key}},
-                                }
-                            ]
-                        }
-                    )
-                }
+        "Records": [{
+            "Sns": {
+                "Message": json.dumps({
+                    "Records": [{
+                        "eventName": event_name,
+                        "eventTime": event_time_iso,
+                        "s3": {"object": {"key": key}},
+                    }]
+                })
             }
-        ]
+        }]
     }
 
 
@@ -135,15 +129,13 @@ class TestUpdatePipelineSlisHandler:
             ),
             (
                 {
-                    "Records": [
-                        {
-                            "Sns": {
-                                "Message": json.dumps(
-                                    {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
-                                )
-                            }
+                    "Records": [{
+                        "Sns": {
+                            "Message": json.dumps(
+                                {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
+                            )
                         }
-                    ]
+                    }]
                 },
                 KeyError,
             ),
@@ -156,23 +148,17 @@ class TestUpdatePipelineSlisHandler:
             ),
             (
                 {
-                    "Records": [
-                        {
-                            "Sns": {
-                                "Message": json.dumps(
-                                    {
-                                        "Records": [
-                                            {
-                                                "eventName": DEFAULT_MOCK_EVENT_NAME,
-                                                "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
-                                                "s3": {"object": {}},
-                                            }
-                                        ]
-                                    }
-                                )
-                            }
+                    "Records": [{
+                        "Sns": {
+                            "Message": json.dumps({
+                                "Records": [{
+                                    "eventName": DEFAULT_MOCK_EVENT_NAME,
+                                    "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
+                                    "s3": {"object": {}},
+                                }]
+                            })
                         }
-                    ]
+                    }]
                 },
                 KeyError,
             ),
@@ -438,8 +424,7 @@ class TestUpdatePipelineSlisHandler:
         # Assert
         assert (
             f"Not all files have yet to be loaded for group {DEFAULT_MOCK_GROUP_ISO_STR}. Data load"
-            " is not complete. Stopping..."
-            in caplog.text
+            " is not complete. Stopping..." in caplog.text
         )
 
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
@@ -549,8 +534,7 @@ class TestUpdatePipelineSlisHandler:
         assert (
             f"No corresponding event found for {rif.name} RIF in group"
             f" {DEFAULT_MOCK_GROUP_ISO_STR} in table {DEFAULT_MOCK_RIF_AVAIL_TBL}; no time delta"
-            " metrics can be computed for this RIF. Continuing..."
-            in caplog.text
+            " metrics can be computed for this RIF. Continuing..." in caplog.text
         )
 
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
@@ -773,8 +757,7 @@ class TestUpdatePipelineSlisHandler:
         assert (
             f"No event found for group {DEFAULT_MOCK_GROUP_ISO_STR} in table"
             f" {DEFAULT_MOCK_LOAD_AVAIL_TBL}; no time delta metrics can be computed for this data"
-            " load"
-            in caplog.text
+            " load" in caplog.text
         )
 
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
@@ -909,8 +892,7 @@ class TestUpdatePipelineSlisHandler:
         assert (
             f"No corresponding event found for {rif.name} RIF in group"
             f" {DEFAULT_MOCK_GROUP_ISO_STR} in table {DEFAULT_MOCK_RIF_AVAIL_TBL}; no time delta"
-            " metrics can be computed for this RIF. Continuing..."
-            in caplog.text
+            " metrics can be computed for this RIF. Continuing..." in caplog.text
         )
 
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
@@ -1023,14 +1005,12 @@ class TestUpdatePipelineSlisHandler:
         assert (
             f"No event found for group {DEFAULT_MOCK_GROUP_ISO_STR} in table"
             f" {DEFAULT_MOCK_LOAD_AVAIL_TBL}; no time delta metrics can be computed for this data"
-            " load"
-            in caplog.text
+            " load" in caplog.text
         )
         assert (
             f"No corresponding event found for {rif.name} RIF in group"
             f" {DEFAULT_MOCK_GROUP_ISO_STR} in table {DEFAULT_MOCK_RIF_AVAIL_TBL}; no time delta"
-            " metrics can be computed for this RIF. Continuing..."
-            in caplog.text
+            " metrics can be computed for this RIF. Continuing..." in caplog.text
         )
         actual_put_metrics = get_mocked_put_metrics(mock_put_metric_data=mock_put_metric_data)
         expected_put_metrics = [
