@@ -57,7 +57,7 @@ class S3EventType(str, Enum):
     @classmethod
     def from_event_name(cls, event_name: str) -> "S3EventType":
         try:
-            return next(x for x in S3EventType if event_name in x)
+            return next(x for x in S3EventType if x in event_name)
         except StopIteration as ex:
             raise ValueError(
                 f"Invalid event name {event_name}; no corresponding, supported event found"
