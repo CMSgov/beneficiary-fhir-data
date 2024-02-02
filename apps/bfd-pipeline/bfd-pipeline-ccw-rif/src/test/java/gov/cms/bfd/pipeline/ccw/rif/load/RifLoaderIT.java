@@ -1222,11 +1222,9 @@ public final class RifLoaderIT {
    * @param loadAppOptions the load app options
    */
   private void loadSample(List<StaticRifResource> sampleResources, LoadAppOptions loadAppOptions) {
-    RifFilesEvent rifFilesEvent =
-        new RifFilesEvent(
-            Instant.now(),
-            false,
-            sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
+    final var rifFiles =
+        sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList());
+    RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), false, rifFiles);
     long loadCount =
         loadSample(
             sampleResources.get(0).getResourceUrl().toString(), loadAppOptions, rifFilesEvent);
@@ -1236,6 +1234,14 @@ public final class RifLoaderIT {
         sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
         loadCount,
         "Unexpected number of loaded records.");
+
+    // Verify that the progress tracker recorded all records as having been processed as well.
+    // Number of records in the file will equal the last record number in the file so simply adding
+    // them up should yield total number of records loaded.
+    assertEquals(
+        rifFiles.stream().mapToLong(r -> r.getLastRecordNumber()).sum(),
+        loadCount,
+        "Expected last record number totals to match number of loaded records.");
   }
 
   /**

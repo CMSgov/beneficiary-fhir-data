@@ -62,6 +62,15 @@ public class S3ManifestDbDao {
   }
 
   /**
+   * Update the {@link S3DataFile} in the database.
+   *
+   * @param dataFile contains the manifest to update
+   */
+  public void updateS3DataFile(S3DataFile dataFile) {
+    transactionManager.executeProcedure(entityManager -> entityManager.merge(dataFile));
+  }
+
+  /**
    * Finds recent manifests in the database that have status values indicating they are not eligible
    * for processing and returns their S3 keys. Used to quickly eliminate S3 manifest files from
    * consideration based on their existing status in database.

@@ -67,4 +67,23 @@ public interface RifFile {
 
   /** Marks the file as fully processed. */
   default void markAsProcessed() {}
+
+  /**
+   * Return the highest record number for which we know that every record with that record number or
+   * lower has been processed. Returns zero if such a value is unknown (either because processing
+   * has not been started, or progress has not been tracked).
+   *
+   * @return the value as described in this comment
+   */
+  default long getLastRecordNumber() {
+    return 0L;
+  }
+
+  /**
+   * Updates the last record number value in some manner. This might include writing to a database
+   * table or doing nothing at all.
+   *
+   * @param recordNumber the new value
+   */
+  default void updateLastRecordNumber(long recordNumber) {}
 }

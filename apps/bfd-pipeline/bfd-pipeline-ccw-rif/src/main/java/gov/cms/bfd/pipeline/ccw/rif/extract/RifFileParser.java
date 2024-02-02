@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVRecord;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuple2;
 
 /**
  * Instances of this class provide a method that takes a {@link RifFile} and returns a {@link Flux}
@@ -42,7 +43,14 @@ public abstract class RifFileParser {
           // creates a CSVParser for new subscriber
           () -> RifParsingUtils.createCsvParser(rifFile),
           // creates flux for subscriber to receive parsed events
-          csvParser -> Flux.fromIterable(csvParser).map(FluxUtils.wrapFunction(parser)),
+          csvParser ->
+              Flux.fromIterable(csvParser)
+                  .map(FluxUtils.wrapFunction(parser))
+                  // The index operator wraps each record in a tuple containing the index and the
+                  // record.  Then we map with addRecordNumber to set the record number in the
+                  // record and return the record itself.
+                  .index()
+                  .map(RifFileParser::addRecordNumber),
           // used in log message if closing the CSVParser fails
           rifFile.getDisplayName());
     }
@@ -71,7 +79,12 @@ public abstract class RifFileParser {
                   // joins consecutive records with same grouping column value
                   .bufferUntilChanged(csvRecord -> csvRecord.get(groupingColumn))
                   // parses the list of records
-                  .flatMap(this::parse),
+                  .flatMap(this::parse)
+                  // The index operator wraps each record in a tuple containing the index and the
+                  // record.  Then we map with addRecordNumber to set the record number in the
+                  // record and return the record itself.
+                  .index()
+                  .map(RifFileParser::addRecordNumber),
           // used in log message if closing the CSVParser fails
           rifFile.getDisplayName());
     }
@@ -89,5 +102,19 @@ public abstract class RifFileParser {
         return Flux.error(ex);
       }
     }
+  }
+
+  /**
+   * Extracts the zero based index and accompanying event object, assigns a corresponding 1 based
+   * record number to the event, then returns the numbered event.
+   *
+   * @param indexedEvent tuple containing index and event
+   * @return just the event but with record number assigned
+   */
+  static RifRecordEvent<?> addRecordNumber(Tuple2<Long, RifRecordEvent<?>> indexedEvent) {
+    long index = indexedEvent.getT1();
+    RifRecordEvent<?> event = indexedEvent.getT2();
+    event.setRecordNumber(index + 1);
+    return event;
   }
 }

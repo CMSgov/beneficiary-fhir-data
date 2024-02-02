@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
+package gov.cms.bfd.pipeline.sharedutils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
