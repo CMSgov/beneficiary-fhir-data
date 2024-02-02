@@ -64,7 +64,13 @@ class S3EventType(str, Enum):
             ) from ex
 
 
+class UnknownPartnerError(Exception): ...
+
+
 class InvalidObjectKeyError(Exception): ...
+
+
+class InvalidPendingDirError(Exception): ...
 
 
 class UnrecognizedFileError(Exception): ...
@@ -83,6 +89,8 @@ class GlobalSsmConfig:
     sftp_host_pub_key: str
     sftp_username: str
     sftp_user_priv_key: str
+    enrolled_partners: list[str]
+    home_dirs_to_partner: dict[str, str]
 
     @classmethod
     def from_ssm(cls, ssm_client: SSMClient) -> "GlobalSsmConfig":
@@ -113,6 +121,21 @@ class GlobalSsmConfig:
             path=f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/user_priv_key",
             with_decrypt=True,
         )
+        enrolled_partners: list[str] = json.loads(
+            get_ssm_parameter(
+                ssm_client=ssm_client,
+                path=f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/partners_list_json",
+                with_decrypt=True,
+            )
+        )
+        home_dirs_to_partner = {
+            get_ssm_parameter(
+                ssm_client=ssm_client,
+                path=f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/bucket_home_dir",
+                with_decrypt=True,
+            ): partner
+            for partner in enrolled_partners
+        }
 
         return GlobalSsmConfig(
             sftp_connect_timeout=sftp_connect_timeout,
@@ -120,6 +143,8 @@ class GlobalSsmConfig:
             sftp_host_pub_key=sftp_host_pub_key,
             sftp_username=sftp_username,
             sftp_user_priv_key=sftp_user_priv_key,
+            enrolled_partners=enrolled_partners,
+            home_dirs_to_partner=home_dirs_to_partner,
         )
 
 
@@ -198,24 +223,30 @@ def _handle_s3_event(s3_object_key: str):
             flags=re.IGNORECASE,
         )
     ) is None:
-        logger.warning(
-            "Invocation event unsupported, object key does not match expected pattern: %s",
-            object_key_pattern,
+        raise InvalidObjectKeyError(
+            f"Invocation event invalid, object key {s3_object_key} does not match expected"
+            f" pattern: {object_key_pattern}",
         )
-        return
 
-    partner = match.group(1)
+    global_config = GlobalSsmConfig.from_ssm(ssm_client=ssm_client)
+
+    partner_home_dir = match.group(1)
+    try:
+        partner = global_config.home_dirs_to_partner[partner_home_dir]
+    except KeyError as exc:
+        raise UnknownPartnerError(
+            f"{partner_home_dir} does not match configured home directory for any enrolled partner"
+        ) from exc
     subfolder = match.group(2)
     filename = match.group(3)
 
     logger.append_keys(partner=partner, filename=filename)
 
-    global_config = GlobalSsmConfig.from_ssm(ssm_client=ssm_client)
     partner_config = PartnerSsmConfig.from_partner(ssm_client=ssm_client, partner=partner)
     if subfolder != partner_config.pending_files_dir:
         # This should be impossible, as the S3 Event Notification configuration is configured to
         # send notifications only from valid pending paths
-        raise InvalidObjectKeyError(
+        raise InvalidPendingDirError(
             f"{partner}'s pending files directory, {partner_config.pending_files_dir}, does not"
             f" match event notification object key: {s3_object_key}"
         )
