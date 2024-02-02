@@ -59,7 +59,7 @@ class S3EventType(str, Enum):
     @classmethod
     def from_event_name(cls, event_name: str) -> "S3EventType":
         try:
-            return next(x for x in S3EventType if event_name in x)
+            return next(x for x in S3EventType if x in event_name)
         except StopIteration as ex:
             raise ValueError(
                 f"Invalid event name {event_name}; no corresponding, supported event found"
@@ -452,15 +452,13 @@ def handler(event: dict[Any, Any], context: LambdaContext):
     # explicitly handled.
     # See https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html#invocation-async-errors
     try:
-        if not all(
-            [
-                REGION,
-                METRICS_NAMESPACE,
-                ETL_BUCKET_ID,
-                RIF_AVAILABLE_DDB_TBL,
-                LOAD_AVAILABLE_DDB_TBL,
-            ]
-        ):
+        if not all([
+            REGION,
+            METRICS_NAMESPACE,
+            ETL_BUCKET_ID,
+            RIF_AVAILABLE_DDB_TBL,
+            LOAD_AVAILABLE_DDB_TBL,
+        ]):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         sns_event = SNSEvent(event)
