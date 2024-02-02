@@ -156,14 +156,17 @@ public class DataUtilityCommons {
    * @throws IOException (any errors encountered will be bubbled up)
    */
   public static void extractFile(ZipInputStream zipIn, Path filePath) throws IOException {
-    BufferedOutputStream bos =
-        new BufferedOutputStream(new FileOutputStream(filePath.toFile().getAbsolutePath()));
-    byte[] bytesIn = new byte[BUFFER_SIZE];
-    int read = 0;
-    while ((read = zipIn.read(bytesIn)) != -1) {
-      bos.write(bytesIn, 0, read);
+    Files.createDirectories(filePath.getParent());
+    try (BufferedOutputStream bos =
+        new BufferedOutputStream(new FileOutputStream(filePath.toFile().getAbsolutePath()))) {
+      byte[] bytesIn = new byte[BUFFER_SIZE];
+      int read;
+      while ((read = zipIn.read(bytesIn)) != -1) {
+        bos.write(bytesIn, 0, read);
+      }
     }
-    bos.close();
+
+    zipIn.closeEntry();
   }
 
   /**
