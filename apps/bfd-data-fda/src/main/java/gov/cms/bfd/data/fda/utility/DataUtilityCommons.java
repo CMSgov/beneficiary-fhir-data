@@ -126,24 +126,26 @@ public class DataUtilityCommons {
    * @throws IOException (any errors encountered will be bubbled up)
    */
   public static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
-    ZipInputStream zipIn =
-        new ZipInputStream(new FileInputStream(zipFilePath.toFile().getAbsolutePath()));
-    ZipEntry entry = zipIn.getNextEntry();
-    // iterates over entries in the zip file
-    while (entry != null) {
-      Path filePath = Paths.get(destDirectory.toFile().getAbsolutePath(), entry.getName());
-      if (!entry.isDirectory()) {
-        // if the entry is a file, extracts it
-        extractFile(zipIn, filePath);
-      } else {
-        // if the entry is a directory, make the directory
-        File dir = new File(filePath.toFile().getAbsolutePath());
-        dir.mkdir();
+    try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile()))) {
+      ZipEntry entry = zipIn.getNextEntry();
+      // iterates over entries in the zip file
+      while (entry != null) {
+        Path filePath = destDirectory.resolve(entry.getName()).normalize();
+        if (!filePath.startsWith(destDirectory)) {
+          // Checks if resolved path is trying to escape from the destination directory
+          throw new IOException("ZipSlip: Entry is outside of the target directory");
+        }
+        if (!entry.isDirectory()) {
+          // if the entry is a file, extracts it
+          extractFile(zipIn, filePath);
+        } else {
+          // if the entry is a directory, make the directory
+          Files.createDirectories(filePath);
+        }
+        zipIn.closeEntry();
+        entry = zipIn.getNextEntry();
       }
-      zipIn.closeEntry();
-      entry = zipIn.getNextEntry();
     }
-    zipIn.close();
   }
 
   /**
