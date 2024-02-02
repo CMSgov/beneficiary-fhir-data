@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.sharedutils;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,8 +34,8 @@ public class TransactionManager implements AutoCloseable {
    */
   @Nullable private EntityManager entityManager;
 
-  /** Random generator for function retry logic. */
-  private final Random random = new Random();
+  /** Secure Random generator for function retry logic. */
+  private final SecureRandom random = new SecureRandom();
 
   /**
    * Creates a new instance using the provided {@link EntityManagerFactory}.

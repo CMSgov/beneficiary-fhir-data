@@ -21,6 +21,11 @@ mappings:
       nullable: false
       sqlType: bigint
       javaType: long
+    - comment: record number in original RIF source file for this record
+      name: recordNumber
+      nullable: false
+      javaType: long
+      fieldType: Transient
     - comment: Claim Group ID
       dbName: clm_grp_id
       name: claimGroupId

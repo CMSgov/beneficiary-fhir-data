@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
@@ -309,7 +308,7 @@ public final class CommonTransformerUtils {
 
     // log which NPI codes we couldn't find a match for in our downloaded NPI file
     if (!npiCodeLookupMissingFailures.contains(npiCode)) {
-      LOGGER.info("NPI code: {} not found in NPI code file: {}", npiCode, NPI_CODE_FILE);
+      // LOGGER.info("NPI code: {} not found in NPI code file: {}", npiCode, NPI_CODE_FILE);
       npiCodeLookupMissingFailures.add(npiCode);
     }
     return null;
@@ -394,10 +393,10 @@ public final class CommonTransformerUtils {
     // log which Procedure codes we couldn't find a match for in our procedure codes
     if (!procedureLookupMissingFailures.contains(procedureCode)) {
       procedureLookupMissingFailures.add(procedureCode);
-      LOGGER.info(
-          "No procedure code display value match found for procedure code: {} in resource {}.",
-          procedureCode,
-          PROCEDURE_CODE_FILE);
+      /*LOGGER.info(
+      "No procedure code display value match found for procedure code: {} in resource {}.",
+      procedureCode,
+      PROCEDURE_CODE_FILE);*/
     }
     return null;
   }
@@ -479,7 +478,7 @@ public final class CommonTransformerUtils {
     } else if (matchingVariableValues.isEmpty()) {
       if (!codebookLookupMissingFailures.contains(ccwVariable)) {
         codebookLookupMissingFailures.add(ccwVariable);
-        if (ccwVariable instanceof CcwCodebookVariable) {
+        /*if (ccwVariable instanceof CcwCodebookVariable) {
           LOGGER.info(
               "No display value match found for {}.{} in resource '{}/{}'.",
               CcwCodebookVariable.class.getSimpleName(),
@@ -493,14 +492,14 @@ public final class CommonTransformerUtils {
               ccwVariable.name(),
               rootResource.getClass().getSimpleName(),
               rootResource.getId());
-        }
+        }*/
       }
       return Optional.empty();
     } else if (matchingVariableValues.size() > 1) {
       if (!codebookLookupDuplicateFailures.contains(ccwVariable)) {
         // Note: The race condition here (from concurrent requests) is harmless.
         codebookLookupDuplicateFailures.add(ccwVariable);
-        if (ccwVariable instanceof CcwCodebookVariable) {
+        /*if (ccwVariable instanceof CcwCodebookVariable) {
           LOGGER.info(
               "Multiple display value matches found for {}.{} in resource '{}/{}'.",
               CcwCodebookVariable.class.getSimpleName(),
@@ -514,7 +513,7 @@ public final class CommonTransformerUtils {
               ccwVariable.name(),
               rootResource.getClass().getSimpleName(),
               rootResource.getId());
-        }
+        }*/
       }
       return Optional.empty();
     } else {
@@ -548,10 +547,10 @@ public final class CommonTransformerUtils {
     // log which ICD codes we couldn't find a match for in our downloaded ICD file
     if (!icdCodeLookupMissingFailures.contains(icdCode)) {
       icdCodeLookupMissingFailures.add(icdCode);
-      LOGGER.info(
-          "No ICD code display value match found for ICD code {} in resource {}.",
-          icdCode,
-          "DGNS_CD.txt");
+      /*LOGGER.info(
+      "No ICD code display value match found for ICD code {} in resource {}.",
+      icdCode,
+      "DGNS_CD.txt");*/
     }
     return null;
   }

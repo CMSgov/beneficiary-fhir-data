@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.sharedutils.SequenceNumberTracker;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +22,7 @@ public class SequenceNumberWriterTest {
   /** Mock used for verifying database writes. */
   @Mock private RdaSink<Integer, Long> sink;
 
-  /**
-   * Instance of {@link gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.SequenceNumberTracker} passed
-   * to the {@link SequenceNumberWriter}.
-   */
+  /** Instance of {@link SequenceNumberTracker} passed to the {@link SequenceNumberWriter}. */
   private SequenceNumberTracker tracker;
 
   /** Instance being tested. */

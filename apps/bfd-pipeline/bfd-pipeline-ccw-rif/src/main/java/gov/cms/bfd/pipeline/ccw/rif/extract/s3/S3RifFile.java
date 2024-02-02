@@ -178,6 +178,16 @@ public final class S3RifFile implements RifFile {
   }
 
   @Override
+  public long getLastRecordNumber() {
+    return waitForDownload().getLastRecordNumber();
+  }
+
+  @Override
+  public void updateLastRecordNumber(long recordNumber) {
+    waitForDownload().updateLastRecordNumber(recordNumber);
+  }
+
+  @Override
   public String toString() {
     String localDownloadPath;
     try {

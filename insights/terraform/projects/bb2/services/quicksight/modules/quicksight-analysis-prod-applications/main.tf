@@ -39,7 +39,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
   definition {
     data_set_identifiers_declarations {
 
-      data_set_arn = "arn:aws:quicksight:us-east-1:${local.account_id}:dataset/${var.data_set_id}"
+      data_set_arn = "arn:aws:quicksight:us-east-1:${local.account_id}:dataset/${var.data_set_prod_per_app_id}"
       identifier   = "prod_global_state_per_app"
     }
 
@@ -825,9 +825,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
       }
     }
     filter_groups {
-      cross_dataset = "SINGLE_DATASET"
-      # HERE9
-      #cross_dataset   = "ALL_DATASETS"
+      cross_dataset   = "SINGLE_DATASET"
       filter_group_id = "7756128f-f3c3-4817-978e-2cdf42d577e0"
       status          = "ENABLED"
 
@@ -1321,11 +1319,11 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
               row_subtotal_options {
                 totals_visibility = "HIDDEN"
-                # total_cell_style {
+                #total_cell_style {
                 #   BUG NOTE: With AWS provider v5.29.0
                 #     After TF apply, plan still shows: height = 0
                 #   Also causes an apply error if including these lines.
-                # }
+                #}
               }
               row_total_options {
                 custom_label      = "Total"
@@ -1714,6 +1712,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"
@@ -2090,6 +2098,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"
@@ -2241,6 +2259,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"
@@ -2392,6 +2420,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"
@@ -2582,6 +2620,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"
@@ -2791,6 +2839,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"
@@ -2981,6 +3039,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"
@@ -3147,6 +3215,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"
@@ -3429,6 +3507,16 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               }
             }
             sort_configuration {
+              field_sort_options {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+
+                sort_by {
+                  field {
+                    direction = "ASC"
+                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.3.1663876105758"
+                  }
+                }
+              }
             }
             table_options {
               metric_placement = "ROW"

@@ -27,13 +27,24 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state_per_app" {
   permissions {
     principal = "arn:aws:quicksight:us-east-1:${local.account_id}:${var.quicksight_groupname_owners}"
     actions = [
+      "quicksight:DeleteDataSet",
+      "quicksight:UpdateDataSetPermissions",
+      "quicksight:PutDataSetRefreshProperties",
+      "quicksight:CreateRefreshSchedule",
+      "quicksight:CancelIngestion",
+      "quicksight:DeleteRefreshSchedule",
+      "quicksight:ListRefreshSchedules",
+      "quicksight:UpdateRefreshSchedule",
+      "quicksight:PassDataSet",
+      "quicksight:DescribeDataSetRefreshProperties",
       "quicksight:DescribeDataSet",
-      "quicksight:DescribeDataSetPermissions",
-      "quicksight:DescribeIngestion",
+      "quicksight:CreateIngestion",
       "quicksight:DescribeRefreshSchedule",
       "quicksight:ListIngestions",
-      "quicksight:ListRefreshSchedules",
-      "quicksight:PassDataSet",
+      "quicksight:UpdateDataSet",
+      "quicksight:DescribeDataSetPermissions",
+      "quicksight:DeleteDataSetRefreshProperties",
+      "quicksight:DescribeIngestion"
     ]
   }
 

@@ -3624,9 +3624,9 @@ public final class TransformerUtilsV2 {
           organization.setName(npiOrgName.get());
         } else {
           organization.setName(NPI_ORG_DISPLAY_DEFAULT);
-          if (value.isPresent())
+          /*if (value.isPresent())
             LOGGER.info("Organization not found for npi number:" + value.get());
-          else LOGGER.info("Organization not found for empty npi nummber");
+          else LOGGER.info("Organization not found for empty npi number");*/
         }
       }
 
