@@ -73,4 +73,22 @@ public final class RifRecordEvent<R extends RifRecordBase> {
     builder.append("]");
     return builder.toString();
   }
+
+  /**
+   * Gets the record number from the record.
+   *
+   * @return the record number value
+   */
+  public long getRecordNumber() {
+    return record.getRecordNumber();
+  }
+
+  /**
+   * Sets the record number of the record.
+   *
+   * @param recordNumber the new record number value
+   */
+  public void setRecordNumber(long recordNumber) {
+    record.setRecordNumber(recordNumber);
+  }
 }
