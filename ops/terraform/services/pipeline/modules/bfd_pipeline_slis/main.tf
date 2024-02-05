@@ -117,6 +117,10 @@ resource "aws_dynamodb_table" "update_slis_rif_available" {
     kms_key_arn = local.kms_key_arn
   }
 
+  point_in_time_recovery {
+    enabled = true
+  }
+
   attribute {
     name = "group_iso_str"
     type = "S"
@@ -144,6 +148,10 @@ resource "aws_dynamodb_table" "update_slis_load_available" {
   server_side_encryption {
     enabled     = true
     kms_key_arn = local.kms_key_arn
+  }
+
+  point_in_time_recovery {
+    enabled = true
   }
 
   attribute {
