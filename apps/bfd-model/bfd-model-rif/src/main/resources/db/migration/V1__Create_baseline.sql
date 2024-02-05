@@ -1,16 +1,16 @@
 
-CREATE SCHEMA ccw;
+CREATE SCHEMA IF NOT EXISTS ccw;
 
-ALTER SCHEMA ccw OWNER TO svc_fhirdb_migrator;
+-- ALTER SCHEMA ccw OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: rda; Type: SCHEMA; Schema: -; Owner: svc_fhirdb_migrator
 --
 
-CREATE SCHEMA rda;
+CREATE SCHEMA IF NOT EXISTS rda;
 
 
-ALTER SCHEMA rda OWNER TO svc_fhirdb_migrator;
+-- ALTER SCHEMA rda OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: pg_stat_statements; Type: EXTENSION; Schema: -; Owner: -
@@ -55,7 +55,7 @@ CREATE OR REPLACE FUNCTION ccw.add_db_group_if_not_exists(db_name text, group_na
  END $$;
 
 
-ALTER FUNCTION ccw.add_db_group_if_not_exists(db_name text, group_name text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.add_db_group_if_not_exists(db_name text, group_name text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: add_migrator_role_to_schema(text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -82,7 +82,7 @@ CREATE OR REPLACE FUNCTION ccw.add_migrator_role_to_schema(role_name text, schem
  END $$;
 
 
-ALTER FUNCTION ccw.add_migrator_role_to_schema(role_name text, schema_name text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.add_migrator_role_to_schema(role_name text, schema_name text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: add_reader_role_to_schema(text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -102,7 +102,7 @@ CREATE OR REPLACE FUNCTION ccw.add_reader_role_to_schema(role_name text, schema_
  END $$;
 
 
-ALTER FUNCTION ccw.add_reader_role_to_schema(role_name text, schema_name text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.add_reader_role_to_schema(role_name text, schema_name text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: add_writer_role_to_schema(text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -122,7 +122,7 @@ CREATE OR REPLACE FUNCTION ccw.add_writer_role_to_schema(role_name text, schema_
  END $$;
 
 
-ALTER FUNCTION ccw.add_writer_role_to_schema(role_name text, schema_name text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.add_writer_role_to_schema(role_name text, schema_name text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: check_claims_mask(bigint); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -232,7 +232,7 @@ END;
  $$;
 
 
-ALTER FUNCTION ccw.check_claims_mask(v_bene_id bigint) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.check_claims_mask(v_bene_id bigint) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: create_role_if_not_exists(text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -247,7 +247,7 @@ CREATE OR REPLACE FUNCTION ccw.create_role_if_not_exists(role_name text) RETURNS
  END $$;
 
 
-ALTER FUNCTION ccw.create_role_if_not_exists(role_name text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.create_role_if_not_exists(role_name text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: find_beneficiary(text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -295,7 +295,7 @@ END;
 $$;
 
 
-ALTER FUNCTION ccw.find_beneficiary(p_type text, p_value text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.find_beneficiary(p_type text, p_value text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: pg_idfromdate(text, text, timestamp without time zone); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -376,7 +376,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_idfromdate(text, text, timestamp without time zone) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_idfromdate(text, text, timestamp without time zone) OWNER TO bfduser;
 
 --
 -- Name: pg_idfromdate(text, text, text, timestamp without time zone); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -455,7 +455,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_idfromdate(text, text, text, timestamp without time zone) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_idfromdate(text, text, text, timestamp without time zone) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_epoch_from_id(text, text, bigint, text); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -478,7 +478,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_epoch_from_id(text, text, bigint, text) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_epoch_from_id(text, text, bigint, text) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_epoch_from_id(text, text, text, bigint, text); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -504,7 +504,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_epoch_from_id(text, text, text, bigint, text) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_epoch_from_id(text, text, text, bigint, text) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_fetch_row_from_small_range(text, text, bigint, bigint, timestamp without time zone); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -543,7 +543,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_fetch_row_from_small_range(text, text, bigint, bigint, timestamp without time zone) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_fetch_row_from_small_range(text, text, bigint, bigint, timestamp without time zone) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_fetch_row_from_small_range(text, text, text, bigint, bigint, timestamp without time zone); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -581,7 +581,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_fetch_row_from_small_range(text, text, text, bigint, bigint, timestamp without time zone) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_fetch_row_from_small_range(text, text, text, bigint, bigint, timestamp without time zone) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_max_id(text); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -601,7 +601,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_max_id(text) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_max_id(text) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_max_id(text, text); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -622,7 +622,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_max_id(text, text) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_max_id(text, text) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_middle_id(bigint, bigint); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -642,7 +642,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_middle_id(bigint, bigint) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_middle_id(bigint, bigint) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_min_id(text); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -663,7 +663,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_min_id(text) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_min_id(text) OWNER TO bfduser;
 
 --
 -- Name: pg_ifd_min_id(text, text); Type: FUNCTION; Schema: ccw; Owner: bfduser
@@ -684,7 +684,7 @@ END;
 $_$;
 
 
-ALTER FUNCTION ccw.pg_ifd_min_id(text, text) OWNER TO bfduser;
+-- ALTER FUNCTION ccw.pg_ifd_min_id(text, text) OWNER TO bfduser;
 
 --
 -- Name: revoke_db_privs(text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -710,7 +710,7 @@ CREATE OR REPLACE FUNCTION ccw.revoke_db_privs(db_name text, role_name text) RET
  END $$;
 
 
-ALTER FUNCTION ccw.revoke_db_privs(db_name text, role_name text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.revoke_db_privs(db_name text, role_name text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: revoke_schema_privs(text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -739,7 +739,7 @@ CREATE OR REPLACE FUNCTION ccw.revoke_schema_privs(schema_name text, role_name t
  END $$;
 
 
-ALTER FUNCTION ccw.revoke_schema_privs(schema_name text, role_name text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.revoke_schema_privs(schema_name text, role_name text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: set_fhirdb_owner(text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -799,7 +799,7 @@ CREATE OR REPLACE FUNCTION ccw.set_fhirdb_owner(role_name text) RETURNS void
  END $$;
 
 
-ALTER FUNCTION ccw.set_fhirdb_owner(role_name text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.set_fhirdb_owner(role_name text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: synthea_load_pre_validate(bigint, integer, bigint, bigint, bigint, bigint, bigint, text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -975,7 +975,7 @@ END;
 $$;
 
 
-ALTER FUNCTION ccw.synthea_load_pre_validate(p_beg_bene_id bigint, p_num_benes_to_generate integer, p_clm_id bigint, p_beg_clm_grp_id bigint, p_pde_id_start bigint, p_carr_clm_cntl_num_start bigint, p_fi_doc_cntl_num_start bigint, p_hicn_start text, p_mbi_start text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.synthea_load_pre_validate(p_beg_bene_id bigint, p_num_benes_to_generate integer, p_clm_id bigint, p_beg_clm_grp_id bigint, p_pde_id_start bigint, p_carr_clm_cntl_num_start bigint, p_fi_doc_cntl_num_start bigint, p_hicn_start text, p_mbi_start text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: synthea_load_pre_validate(bigint, bigint, bigint, bigint, bigint, bigint, bigint, text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -1149,7 +1149,7 @@ END;
 $$;
 
 
-ALTER FUNCTION ccw.synthea_load_pre_validate(p_beg_bene_id bigint, p_end_bene_id bigint, p_clm_id bigint, p_beg_clm_grp_id bigint, p_pde_id_start bigint, p_carr_clm_cntl_num_start bigint, p_fi_doc_cntl_num_start bigint, p_hicn_start text, p_mbi_start text) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.synthea_load_pre_validate(p_beg_bene_id bigint, p_end_bene_id bigint, p_clm_id bigint, p_beg_clm_grp_id bigint, p_pde_id_start bigint, p_carr_clm_cntl_num_start bigint, p_fi_doc_cntl_num_start bigint, p_hicn_start text, p_mbi_start text) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: synthea_load_pre_validate(bigint, bigint, bigint, bigint, bigint, bigint, bigint, character varying, character varying); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -1372,7 +1372,7 @@ CREATE OR REPLACE FUNCTION ccw.synthea_load_pre_validate(p_beg_bene_id bigint, p
                    $$;
 
 
-ALTER FUNCTION ccw.synthea_load_pre_validate(p_beg_bene_id bigint, p_end_bene_id bigint, p_clm_id bigint, p_beg_clm_grp_id bigint, p_pde_id_start bigint, p_carr_clm_cntl_num_start bigint, p_fi_doc_cntl_num_start bigint, p_hicn_start character varying, p_mbi_start character varying) OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.synthea_load_pre_validate(p_beg_bene_id bigint, p_end_bene_id bigint, p_clm_id bigint, p_beg_clm_grp_id bigint, p_pde_id_start bigint, p_carr_clm_cntl_num_start bigint, p_fi_doc_cntl_num_start bigint, p_hicn_start character varying, p_mbi_start character varying) OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: track_bene_monthly_change(); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -1391,7 +1391,7 @@ CREATE OR REPLACE FUNCTION ccw.track_bene_monthly_change() RETURNS trigger
  $$;
 
 
-ALTER FUNCTION ccw.track_bene_monthly_change() OWNER TO svc_fhirdb_migrator;
+-- ALTER FUNCTION ccw.track_bene_monthly_change() OWNER TO svc_fhirdb_migrator;
 
 SET default_tablespace = '';
 
@@ -1401,37 +1401,39 @@ SET default_table_access_method = heap;
 -- Name: BeneficiariesHistory_old; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw."BeneficiariesHistory_old" (
-    "beneficiaryHistoryId" bigint NOT NULL,
-    "beneficiaryId" character varying(15) NOT NULL,
-    "birthDate" date NOT NULL,
+CREATE TABLE IF NOT EXISTS ccw."BeneficiariesHistory_old" (
+    beneficiaryHistoryId bigint NOT NULL,
+    beneficiaryId character varying(15) NOT NULL,
+    birthDate date NOT NULL,
     hicn character varying(64) NOT NULL,
     sex character(1) NOT NULL,
-    "hicnUnhashed" character varying(11),
-    "medicareBeneficiaryId" character varying(11)
+    hicnUnhashed character varying(11),
+    medicareBeneficiaryId character varying(11),
+    CONSTRAINT "BeneficiariesHistory_pkey_old" PRIMARY KEY (beneficiaryHistoryId)
 );
 
 
-ALTER TABLE ccw."BeneficiariesHistory_old" OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw."BeneficiariesHistory_old" OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: NewBeneficiariesHistory; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw."NewBeneficiariesHistory" (
-    "beneficiaryHistoryId" bigint NOT NULL,
-    "beneficiaryId" character varying(15) NOT NULL,
-    "birthDate" date NOT NULL,
+CREATE TABLE IF NOT EXISTS ccw."NewBeneficiariesHistory" (
+    beneficiaryHistoryId bigint NOT NULL,
+    beneficiaryId character varying(15) NOT NULL,
+    birthDate date NOT NULL,
     hicn character varying(64) NOT NULL,
     sex character(1) NOT NULL,
-    "hicnUnhashed" character varying(11),
-    "medicareBeneficiaryId" character varying(11),
-    "mbiHash" character varying(64),
-    lastupdated timestamp with time zone
+    hicnUnhashed character varying(11),
+    medicareBeneficiaryId character varying(11),
+    mbiHash character varying(64),
+    lastupdated timestamp with time zone,
+    CONSTRAINT "NewBeneficiariesHistory_pkey" PRIMARY KEY (beneficiaryHistoryId)
 );
 
 
-ALTER TABLE ccw."NewBeneficiariesHistory" OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw."NewBeneficiariesHistory" OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: bene_monthly_audit_seq; Type: SEQUENCE; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -1445,13 +1447,13 @@ CREATE SEQUENCE ccw.bene_monthly_audit_seq
     CACHE 1;
 
 
-ALTER TABLE ccw.bene_monthly_audit_seq OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.bene_monthly_audit_seq OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: beneficiaries; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.beneficiaries (
+CREATE TABLE IF NOT EXISTS ccw.beneficiaries (
     bene_id bigint NOT NULL,
     mbi_num character varying(11),
     rfrnc_yr numeric(4,0),
@@ -1663,17 +1665,18 @@ CREATE TABLE ccw.beneficiaries (
     ptb_cvrg_strt_dt date,
     ptb_cvrg_end_dt date,
     ptd_cvrg_strt_dt date,
-    ptd_cvrg_end_dt date
+    ptd_cvrg_end_dt date,
+    CONSTRAINT beneficiaries_pkey PRIMARY KEY (bene_id)
 );
 
 
-ALTER TABLE ccw.beneficiaries OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.beneficiaries OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: beneficiaries_history; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.beneficiaries_history (
+CREATE TABLE IF NOT EXISTS ccw.beneficiaries_history (
     bene_history_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     hicn_unhashed character varying(11),
@@ -1684,34 +1687,37 @@ CREATE TABLE ccw.beneficiaries_history (
     mbi_hash character varying(64),
     bene_birth_dt date NOT NULL,
     bene_sex_ident_cd character(1) NOT NULL,
-    last_updated timestamp with time zone
+    last_updated timestamp with time zone,
+    CONSTRAINT beneficiaries_history_pkey PRIMARY KEY (bene_history_id),
+    CONSTRAINT beneficiaries_history_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.beneficiaries_history OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.beneficiaries_history OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: beneficiaries_history_invalid_beneficiaries; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.beneficiaries_history_invalid_beneficiaries (
+CREATE TABLE IF NOT EXISTS ccw.beneficiaries_history_invalid_beneficiaries (
     bene_history_id bigint NOT NULL,
     bene_id character varying(15),
     bene_birth_dt date NOT NULL,
     bene_crnt_hic_num character varying(64) NOT NULL,
     bene_sex_ident_cd character(1) NOT NULL,
     hicn_unhashed character varying(11),
-    mbi_num character varying(11)
+    mbi_num character varying(11),
+    CONSTRAINT beneficiaries_history_invalid_beneficiaries_pkey PRIMARY KEY (bene_history_id)
 );
 
 
-ALTER TABLE ccw.beneficiaries_history_invalid_beneficiaries OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.beneficiaries_history_invalid_beneficiaries OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: beneficiary_monthly; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.beneficiary_monthly (
+CREATE TABLE IF NOT EXISTS ccw.beneficiary_monthly (
     bene_id bigint NOT NULL,
     year_month date NOT NULL,
     partd_contract_number_id character varying(5),
@@ -1726,17 +1732,19 @@ CREATE TABLE ccw.beneficiary_monthly (
     partd_segment_number_id character varying(3),
     partd_low_income_cost_share_group_code character varying(2),
     partc_pbp_number_id character varying(3),
-    partc_plan_type_code character varying(3)
+    partc_plan_type_code character varying(3),
+    CONSTRAINT beneficiary_monthly_pkey PRIMARY KEY (bene_id, year_month),
+    CONSTRAINT beneficiary_monthly_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.beneficiary_monthly OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.beneficiary_monthly OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: beneficiary_monthly_audit; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.beneficiary_monthly_audit (
+CREATE TABLE IF NOT EXISTS ccw.beneficiary_monthly_audit (
     bene_id bigint NOT NULL,
     year_month date NOT NULL,
     partd_contract_number_id character varying(5),
@@ -1754,11 +1762,12 @@ CREATE TABLE ccw.beneficiary_monthly_audit (
     partc_plan_type_code character varying(3),
     operation character(1) NOT NULL,
     update_ts timestamp without time zone NOT NULL,
-    seq_id bigint NOT NULL
+    seq_id bigint NOT NULL,
+    CONSTRAINT beneficiary_monthly_audit_pkey PRIMARY KEY (seq_id)
 );
 
 
-ALTER TABLE ccw.beneficiary_monthly_audit OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.beneficiary_monthly_audit OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: beneficiaryhistory_beneficiaryhistoryid_seq; Type: SEQUENCE; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -1772,7 +1781,7 @@ CREATE SEQUENCE ccw.beneficiaryhistory_beneficiaryhistoryid_seq
     CACHE 1;
 
 
-ALTER TABLE ccw.beneficiaryhistory_beneficiaryhistoryid_seq OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.beneficiaryhistory_beneficiaryhistoryid_seq OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: beneficiaryhistorytemp_beneficiaryhistoryid_seq; Type: SEQUENCE; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -1786,69 +1795,13 @@ CREATE SEQUENCE ccw.beneficiaryhistorytemp_beneficiaryhistoryid_seq
     CACHE 1;
 
 
-ALTER TABLE ccw.beneficiaryhistorytemp_beneficiaryhistoryid_seq OWNER TO svc_fhirdb_migrator;
-
---
--- Name: carrier_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-CREATE TABLE ccw.carrier_claim_lines (
-    clm_id bigint NOT NULL,
-    line_num smallint NOT NULL,
-    carr_line_rdcd_pmt_phys_astn_c character(1) NOT NULL,
-    carr_line_prvdr_type_cd character(1) NOT NULL,
-    carr_line_prcng_lclty_cd character varying(2) NOT NULL,
-    carr_line_mtus_cnt numeric NOT NULL,
-    carr_line_ansthsa_unit_cnt numeric NOT NULL,
-    carr_prfrng_pin_num character varying(15) NOT NULL,
-    carr_line_mtus_cd character(1),
-    carr_line_rx_num character varying(30),
-    carr_line_clia_lab_num character varying(10),
-    line_1st_expns_dt date,
-    line_last_expns_dt date,
-    line_alowd_chrg_amt numeric(12,2) NOT NULL,
-    line_coinsrnc_amt numeric(12,2) NOT NULL,
-    line_sbmtd_chrg_amt numeric(12,2) NOT NULL,
-    line_bene_pmt_amt numeric(12,2) NOT NULL,
-    line_prvdr_pmt_amt numeric(12,2) NOT NULL,
-    line_bene_prmry_pyr_cd character(1),
-    line_bene_prmry_pyr_pd_amt numeric(12,2) NOT NULL,
-    line_bene_ptb_ddctbl_amt numeric(12,2) NOT NULL,
-    line_place_of_srvc_cd character varying(2) NOT NULL,
-    line_pmt_80_100_cd character(1),
-    line_srvc_cnt numeric NOT NULL,
-    line_cms_type_srvc_cd character(1) NOT NULL,
-    line_hct_hgb_type_cd character varying(2),
-    line_hct_hgb_rslt_num numeric(4,1) NOT NULL,
-    line_ndc_cd character varying(11),
-    line_nch_pmt_amt numeric(12,2) NOT NULL,
-    line_icd_dgns_cd character varying(7),
-    line_icd_dgns_vrsn_cd character(1),
-    line_prcsg_ind_cd character varying(2),
-    line_service_deductible character(1),
-    betos_cd character varying(3),
-    hcpcs_cd character varying(5),
-    hcpcs_1st_mdfr_cd character varying(5),
-    hcpcs_2nd_mdfr_cd character varying(5),
-    hpsa_scrcty_ind_cd character(1),
-    prvdr_state_cd character varying(2),
-    prvdr_spclty character varying(3),
-    prvdr_zip character varying(9),
-    tax_num character varying(10) NOT NULL,
-    org_npi_num character varying(10),
-    prf_physn_npi character varying(12),
-    prf_physn_upin character varying(12),
-    prtcptng_ind_cd character(1)
-);
-
-
-ALTER TABLE ccw.carrier_claim_lines OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.beneficiaryhistorytemp_beneficiaryhistoryid_seq OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: carrier_claims; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.carrier_claims (
+CREATE TABLE IF NOT EXISTS ccw.carrier_claims (
     clm_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
@@ -1903,19 +1856,30 @@ CREATE TABLE ccw.carrier_claims (
     icd_dgns_vrsn_cd11 character(1),
     icd_dgns_cd12 character varying(7),
     icd_dgns_vrsn_cd12 character(1),
-    carr_clm_blg_npi_num character varying(10)
+    carr_clm_blg_npi_num character varying(10),
+    CONSTRAINT carrier_claims_pkey PRIMARY KEY (clm_id),
+    CONSTRAINT carrier_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.carrier_claims OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.carrier_claims OWNER TO svc_fhirdb_migrator;
 
 --
--- Name: dme_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+-- Name: carrier_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.dme_claim_lines (
+CREATE TABLE IF NOT EXISTS ccw.carrier_claim_lines (
     clm_id bigint NOT NULL,
     line_num smallint NOT NULL,
+    carr_line_rdcd_pmt_phys_astn_c character(1) NOT NULL,
+    carr_line_prvdr_type_cd character(1) NOT NULL,
+    carr_line_prcng_lclty_cd character varying(2) NOT NULL,
+    carr_line_mtus_cnt numeric NOT NULL,
+    carr_line_ansthsa_unit_cnt numeric NOT NULL,
+    carr_prfrng_pin_num character varying(15) NOT NULL,
+    carr_line_mtus_cd character(1),
+    carr_line_rx_num character varying(30),
+    carr_line_clia_lab_num character varying(10),
     line_1st_expns_dt date,
     line_last_expns_dt date,
     line_alowd_chrg_amt numeric(12,2) NOT NULL,
@@ -1931,42 +1895,38 @@ CREATE TABLE ccw.dme_claim_lines (
     line_srvc_cnt numeric NOT NULL,
     line_cms_type_srvc_cd character(1) NOT NULL,
     line_hct_hgb_type_cd character varying(2),
-    line_hct_hgb_rslt_num numeric(3,1) NOT NULL,
+    line_hct_hgb_rslt_num numeric(4,1) NOT NULL,
     line_ndc_cd character varying(11),
     line_nch_pmt_amt numeric(12,2) NOT NULL,
     line_icd_dgns_cd character varying(7),
     line_icd_dgns_vrsn_cd character(1),
-    line_dme_prchs_price_amt numeric(12,2) NOT NULL,
-    line_prmry_alowd_chrg_amt numeric(12,2) NOT NULL,
     line_prcsg_ind_cd character varying(2),
     line_service_deductible character(1),
     betos_cd character varying(3),
     hcpcs_cd character varying(5),
     hcpcs_1st_mdfr_cd character varying(5),
     hcpcs_2nd_mdfr_cd character varying(5),
-    hcpcs_3rd_mdfr_cd character varying(5),
-    hcpcs_4th_mdfr_cd character varying(5),
-    dmerc_line_mtus_cd character(1),
-    dmerc_line_mtus_cnt numeric NOT NULL,
-    dmerc_line_prcng_state_cd character varying(2),
-    dmerc_line_scrn_svgs_amt numeric(12,2),
-    dmerc_line_supplr_type_cd character(1),
-    prtcptng_ind_cd character(1),
-    prvdr_npi character varying(12),
-    prvdr_num character varying(10),
+    hpsa_scrcty_ind_cd character(1),
+    prvdr_state_cd character varying(2),
     prvdr_spclty character varying(3),
-    prvdr_state_cd character varying(2) NOT NULL,
-    tax_num character varying(10) NOT NULL
+    prvdr_zip character varying(9),
+    tax_num character varying(10) NOT NULL,
+    org_npi_num character varying(10),
+    prf_physn_npi character varying(12),
+    prf_physn_upin character varying(12),
+    prtcptng_ind_cd character(1),
+    CONSTRAINT carrier_claim_lines_pkey PRIMARY KEY (clm_id, line_num),
+    CONSTRAINT carrier_claim_lines_clm_id_to_carrier_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.carrier_claims(clm_id)
 );
 
 
-ALTER TABLE ccw.dme_claim_lines OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.carrier_claim_lines OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: dme_claims; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.dme_claims (
+CREATE TABLE IF NOT EXISTS ccw.dme_claims (
     clm_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
@@ -2019,48 +1979,74 @@ CREATE TABLE ccw.dme_claims (
     icd_dgns_cd11 character varying(7),
     icd_dgns_vrsn_cd11 character(1),
     icd_dgns_cd12 character varying(7),
-    icd_dgns_vrsn_cd12 character(1)
+    icd_dgns_vrsn_cd12 character(1),
+    CONSTRAINT dme_claims_pkey PRIMARY KEY (clm_id),
+    CONSTRAINT dme_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.dme_claims OWNER TO svc_fhirdb_migrator;
-
+-- ALTER TABLE ccw.dme_claims OWNER TO svc_fhirdb_migrator;
 --
--- Name: hha_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+-- Name: dme_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.hha_claim_lines (
+CREATE TABLE IF NOT EXISTS ccw.dme_claim_lines (
     clm_id bigint NOT NULL,
-    clm_line_num smallint NOT NULL,
-    rev_cntr character varying(4) NOT NULL,
-    rev_cntr_unit_cnt numeric NOT NULL,
-    rev_cntr_tot_chrg_amt numeric(12,2) NOT NULL,
-    rev_cntr_rate_amt numeric(12,2) NOT NULL,
-    rev_cntr_ncvrd_chrg_amt numeric(12,2) NOT NULL,
-    rev_cntr_ddctbl_coinsrnc_cd character(1),
-    rev_cntr_pmt_amt_amt numeric(12,2) NOT NULL,
-    rev_cntr_dt date,
-    rev_cntr_ndc_qty_qlfr_cd character varying(2),
-    rev_cntr_ndc_qty numeric,
-    rev_cntr_1st_ansi_cd character varying(5),
-    rev_cntr_apc_hipps_cd character varying(5),
-    rev_cntr_pmt_mthd_ind_cd character varying(2),
-    rev_cntr_stus_ind_cd character varying(2),
+    line_num smallint NOT NULL,
+    line_1st_expns_dt date,
+    line_last_expns_dt date,
+    line_alowd_chrg_amt numeric(12,2) NOT NULL,
+    line_coinsrnc_amt numeric(12,2) NOT NULL,
+    line_sbmtd_chrg_amt numeric(12,2) NOT NULL,
+    line_bene_pmt_amt numeric(12,2) NOT NULL,
+    line_prvdr_pmt_amt numeric(12,2) NOT NULL,
+    line_bene_prmry_pyr_cd character(1),
+    line_bene_prmry_pyr_pd_amt numeric(12,2) NOT NULL,
+    line_bene_ptb_ddctbl_amt numeric(12,2) NOT NULL,
+    line_place_of_srvc_cd character varying(2) NOT NULL,
+    line_pmt_80_100_cd character(1),
+    line_srvc_cnt numeric NOT NULL,
+    line_cms_type_srvc_cd character(1) NOT NULL,
+    line_hct_hgb_type_cd character varying(2),
+    line_hct_hgb_rslt_num numeric(3,1) NOT NULL,
+    line_ndc_cd character varying(11),
+    line_nch_pmt_amt numeric(12,2) NOT NULL,
+    line_icd_dgns_cd character varying(7),
+    line_icd_dgns_vrsn_cd character(1),
+    line_dme_prchs_price_amt numeric(12,2) NOT NULL,
+    line_prmry_alowd_chrg_amt numeric(12,2) NOT NULL,
+    line_prcsg_ind_cd character varying(2),
+    line_service_deductible character(1),
+    betos_cd character varying(3),
     hcpcs_cd character varying(5),
     hcpcs_1st_mdfr_cd character varying(5),
     hcpcs_2nd_mdfr_cd character varying(5),
-    rndrng_physn_npi character varying(12),
-    rndrng_physn_upin character varying(12)
+    hcpcs_3rd_mdfr_cd character varying(5),
+    hcpcs_4th_mdfr_cd character varying(5),
+    dmerc_line_mtus_cd character(1),
+    dmerc_line_mtus_cnt numeric NOT NULL,
+    dmerc_line_prcng_state_cd character varying(2),
+    dmerc_line_scrn_svgs_amt numeric(12,2),
+    dmerc_line_supplr_type_cd character(1),
+    prtcptng_ind_cd character(1),
+    prvdr_npi character varying(12),
+    prvdr_num character varying(10),
+    prvdr_spclty character varying(3),
+    prvdr_state_cd character varying(2) NOT NULL,
+    tax_num character varying(10) NOT NULL,
+    CONSTRAINT dme_claim_lines_pkey PRIMARY KEY (clm_id, line_num),
+    CONSTRAINT dme_claim_lines_clm_id_to_dme_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.dme_claims(clm_id)
 );
 
 
-ALTER TABLE ccw.hha_claim_lines OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.dme_claim_lines OWNER TO svc_fhirdb_migrator;
+
 
 --
 -- Name: hha_claims; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.hha_claims (
+CREATE TABLE IF NOT EXISTS ccw.hha_claims (
     clm_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
@@ -2172,46 +2158,53 @@ CREATE TABLE ccw.hha_claims (
     icd_dgns_vrsn_cd24 character(1),
     icd_dgns_cd25 character varying(7),
     icd_dgns_vrsn_cd25 character(1),
-    claim_query_code character(1)
+    claim_query_code character(1),
+    CONSTRAINT hha_claims_pkey PRIMARY KEY (clm_id),
+    CONSTRAINT hha_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.hha_claims OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.hha_claims OWNER TO svc_fhirdb_migrator;
 
 --
--- Name: hospice_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+-- Name: hha_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.hospice_claim_lines (
+CREATE TABLE IF NOT EXISTS ccw.hha_claim_lines (
     clm_id bigint NOT NULL,
     clm_line_num smallint NOT NULL,
     rev_cntr character varying(4) NOT NULL,
     rev_cntr_unit_cnt numeric NOT NULL,
     rev_cntr_tot_chrg_amt numeric(12,2) NOT NULL,
     rev_cntr_rate_amt numeric(12,2) NOT NULL,
-    rev_cntr_ncvrd_chrg_amt numeric(12,2),
+    rev_cntr_ncvrd_chrg_amt numeric(12,2) NOT NULL,
     rev_cntr_ddctbl_coinsrnc_cd character(1),
-    rev_cntr_bene_pmt_amt numeric(12,2) NOT NULL,
     rev_cntr_pmt_amt_amt numeric(12,2) NOT NULL,
-    rev_cntr_prvdr_pmt_amt numeric(12,2) NOT NULL,
     rev_cntr_dt date,
     rev_cntr_ndc_qty_qlfr_cd character varying(2),
     rev_cntr_ndc_qty numeric,
+    rev_cntr_1st_ansi_cd character varying(5),
+    rev_cntr_apc_hipps_cd character varying(5),
+    rev_cntr_pmt_mthd_ind_cd character varying(2),
+    rev_cntr_stus_ind_cd character varying(2),
     hcpcs_cd character varying(5),
     hcpcs_1st_mdfr_cd character varying(5),
     hcpcs_2nd_mdfr_cd character varying(5),
     rndrng_physn_npi character varying(12),
-    rndrng_physn_upin character varying(12)
+    rndrng_physn_upin character varying(12),
+    CONSTRAINT hha_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num),
+    CONSTRAINT hha_claim_lines_clm_id_to_hha_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.hha_claims(clm_id)
 );
 
 
-ALTER TABLE ccw.hospice_claim_lines OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.hha_claim_lines OWNER TO svc_fhirdb_migrator;
+
 
 --
 -- Name: hospice_claims; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.hospice_claims (
+CREATE TABLE IF NOT EXISTS ccw.hospice_claims (
     clm_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
@@ -2323,40 +2316,51 @@ CREATE TABLE ccw.hospice_claims (
     icd_dgns_vrsn_cd24 character(1),
     icd_dgns_cd25 character varying(7),
     icd_dgns_vrsn_cd25 character(1),
-    claim_query_code character(1)
+    claim_query_code character(1),
+    CONSTRAINT hospice_claims_pkey PRIMARY KEY (clm_id),
+    CONSTRAINT hospice_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.hospice_claims OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.hospice_claims OWNER TO svc_fhirdb_migrator;
 
 --
--- Name: inpatient_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+-- Name: hospice_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.inpatient_claim_lines (
+CREATE TABLE IF NOT EXISTS ccw.hospice_claim_lines (
     clm_id bigint NOT NULL,
     clm_line_num smallint NOT NULL,
     rev_cntr character varying(4) NOT NULL,
     rev_cntr_unit_cnt numeric NOT NULL,
-    rev_cntr_rate_amt numeric(12,2) NOT NULL,
     rev_cntr_tot_chrg_amt numeric(12,2) NOT NULL,
-    rev_cntr_ncvrd_chrg_amt numeric(12,2) NOT NULL,
+    rev_cntr_rate_amt numeric(12,2) NOT NULL,
+    rev_cntr_ncvrd_chrg_amt numeric(12,2),
     rev_cntr_ddctbl_coinsrnc_cd character(1),
+    rev_cntr_bene_pmt_amt numeric(12,2) NOT NULL,
+    rev_cntr_pmt_amt_amt numeric(12,2) NOT NULL,
+    rev_cntr_prvdr_pmt_amt numeric(12,2) NOT NULL,
+    rev_cntr_dt date,
     rev_cntr_ndc_qty_qlfr_cd character varying(2),
     rev_cntr_ndc_qty numeric,
     hcpcs_cd character varying(5),
+    hcpcs_1st_mdfr_cd character varying(5),
+    hcpcs_2nd_mdfr_cd character varying(5),
     rndrng_physn_npi character varying(12),
-    rndrng_physn_upin character varying(12)
+    rndrng_physn_upin character varying(12),
+    CONSTRAINT hospice_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num),
+    CONSTRAINT hospice_claim_lines_clm_id_to_hospice_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.hospice_claims(clm_id)
 );
 
 
-ALTER TABLE ccw.inpatient_claim_lines OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.hospice_claim_lines OWNER TO svc_fhirdb_migrator;
+
 
 --
 -- Name: inpatient_claims; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.inpatient_claims (
+CREATE TABLE IF NOT EXISTS ccw.inpatient_claims (
     clm_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
@@ -2619,40 +2623,71 @@ CREATE TABLE ccw.inpatient_claims (
     icd_prcdr_vrsn_cd25 character(1),
     icd_dgns_cd25 character varying(7),
     icd_dgns_vrsn_cd25 character(1),
-    clm_poa_ind_sw25 character(1)
+    clm_poa_ind_sw25 character(1),
+    CONSTRAINT inpatient_claims_pkey PRIMARY KEY (clm_id),
+    CONSTRAINT inpatient_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.inpatient_claims OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.inpatient_claims OWNER TO svc_fhirdb_migrator;
+
 
 --
--- Name: loaded_batches; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+-- Name: inpatient_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.loaded_batches (
-    loaded_batch_id bigint NOT NULL,
-    loaded_file_id bigint NOT NULL,
-    beneficiaries character varying(20000) NOT NULL,
-    created timestamp with time zone NOT NULL
+CREATE TABLE IF NOT EXISTS ccw.inpatient_claim_lines (
+    clm_id bigint NOT NULL,
+    clm_line_num smallint NOT NULL,
+    rev_cntr character varying(4) NOT NULL,
+    rev_cntr_unit_cnt numeric NOT NULL,
+    rev_cntr_rate_amt numeric(12,2) NOT NULL,
+    rev_cntr_tot_chrg_amt numeric(12,2) NOT NULL,
+    rev_cntr_ncvrd_chrg_amt numeric(12,2) NOT NULL,
+    rev_cntr_ddctbl_coinsrnc_cd character(1),
+    rev_cntr_ndc_qty_qlfr_cd character varying(2),
+    rev_cntr_ndc_qty numeric,
+    hcpcs_cd character varying(5),
+    rndrng_physn_npi character varying(12),
+    rndrng_physn_upin character varying(12),
+    CONSTRAINT inpatient_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num),
+    CONSTRAINT inpatient_claim_lines_clm_id_to_inpatient_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.inpatient_claims(clm_id)
 );
 
 
-ALTER TABLE ccw.loaded_batches OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.inpatient_claim_lines OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: loaded_files; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.loaded_files (
+CREATE TABLE IF NOT EXISTS ccw.loaded_files (
     loaded_file_id bigint NOT NULL,
     rif_type character varying(48) NOT NULL,
     created timestamp with time zone NOT NULL,
     s3_manifest_id bigint,
-    s3_file_index smallint
+    s3_file_index smallint,
+    CONSTRAINT loaded_files_pkey PRIMARY KEY (loaded_file_id)
 );
 
 
-ALTER TABLE ccw.loaded_files OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.loaded_files OWNER TO svc_fhirdb_migrator;
+
+--
+-- Name: loaded_batches; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+--
+
+CREATE TABLE IF NOT EXISTS ccw.loaded_batches (
+    loaded_batch_id bigint NOT NULL,
+    loaded_file_id bigint NOT NULL,
+    beneficiaries character varying(20000) NOT NULL,
+    created timestamp with time zone NOT NULL,
+    CONSTRAINT loaded_batches_pkey PRIMARY KEY (loaded_batch_id),
+    CONSTRAINT loaded_batches_loaded_file_id FOREIGN KEY (loaded_file_id) REFERENCES ccw.loaded_files(loaded_file_id)
+);
+
+
+-- ALTER TABLE ccw.loaded_batches OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: loadedbatches_loadedbatchid_seq; Type: SEQUENCE; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -2667,7 +2702,7 @@ CREATE SEQUENCE ccw.loadedbatches_loadedbatchid_seq
     CYCLE;
 
 
-ALTER TABLE ccw.loadedbatches_loadedbatchid_seq OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.loadedbatches_loadedbatchid_seq OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: loadedfiles_loadedfileid_seq; Type: SEQUENCE; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -2682,59 +2717,13 @@ CREATE SEQUENCE ccw.loadedfiles_loadedfileid_seq
     CYCLE;
 
 
-ALTER TABLE ccw.loadedfiles_loadedfileid_seq OWNER TO svc_fhirdb_migrator;
-
---
--- Name: outpatient_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-CREATE TABLE ccw.outpatient_claim_lines (
-    clm_id bigint NOT NULL,
-    clm_line_num smallint NOT NULL,
-    rev_cntr character varying(4) NOT NULL,
-    rev_cntr_unit_cnt numeric NOT NULL,
-    rev_cntr_rate_amt numeric(12,2) NOT NULL,
-    rev_cntr_tot_chrg_amt numeric(12,2) NOT NULL,
-    rev_cntr_ncvrd_chrg_amt numeric(12,2) NOT NULL,
-    rev_cntr_coinsrnc_wge_adjstd_c numeric(12,2) NOT NULL,
-    rev_cntr_bene_pmt_amt numeric(12,2) NOT NULL,
-    rev_cntr_blood_ddctbl_amt numeric(12,2) NOT NULL,
-    rev_cntr_cash_ddctbl_amt numeric(12,2) NOT NULL,
-    rev_cntr_rdcd_coinsrnc_amt numeric(12,2) NOT NULL,
-    rev_cntr_pmt_amt_amt numeric(12,2) NOT NULL,
-    rev_cntr_prvdr_pmt_amt numeric(12,2) NOT NULL,
-    rev_cntr_dt date,
-    rev_cntr_ptnt_rspnsblty_pmt numeric(12,2) NOT NULL,
-    rev_cntr_ndc_qty_qlfr_cd character varying(2),
-    rev_cntr_ndc_qty numeric,
-    rev_cntr_1st_ansi_cd character varying(5),
-    rev_cntr_1st_msp_pd_amt numeric(12,2) NOT NULL,
-    rev_cntr_2nd_ansi_cd character varying(5),
-    rev_cntr_2nd_msp_pd_amt numeric(12,2) NOT NULL,
-    rev_cntr_3rd_ansi_cd character varying(5),
-    rev_cntr_4th_ansi_cd character varying(5),
-    rev_cntr_apc_hipps_cd character varying(5),
-    rev_cntr_dscnt_ind_cd character(1),
-    rev_cntr_ide_ndc_upc_num character varying(24),
-    rev_cntr_otaf_pmt_cd character(1),
-    rev_cntr_packg_ind_cd character(1),
-    rev_cntr_pmt_mthd_ind_cd character varying(2),
-    rev_cntr_stus_ind_cd character varying(2),
-    hcpcs_cd character varying(5),
-    hcpcs_2nd_mdfr_cd character varying(5),
-    hcpcs_1st_mdfr_cd character varying(5),
-    rndrng_physn_npi character varying(12),
-    rndrng_physn_upin character varying(12)
-);
-
-
-ALTER TABLE ccw.outpatient_claim_lines OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.loadedfiles_loadedfileid_seq OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: outpatient_claims; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.outpatient_claims (
+CREATE TABLE IF NOT EXISTS ccw.outpatient_claims (
     clm_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
@@ -2933,17 +2922,68 @@ CREATE TABLE ccw.outpatient_claims (
     icd_dgns_cd25 character varying(7),
     icd_dgns_vrsn_cd25 character(1),
     icd_prcdr_cd25 character varying(7),
-    icd_prcdr_vrsn_cd25 character(1)
+    icd_prcdr_vrsn_cd25 character(1),
+    CONSTRAINT outpatient_claims_pkey PRIMARY KEY (clm_id),
+    CONSTRAINT outpatient_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.outpatient_claims OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.outpatient_claims OWNER TO svc_fhirdb_migrator;
+
+--
+-- Name: outpatient_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+--
+
+CREATE TABLE IF NOT EXISTS ccw.outpatient_claim_lines (
+    clm_id bigint NOT NULL,
+    clm_line_num smallint NOT NULL,
+    rev_cntr character varying(4) NOT NULL,
+    rev_cntr_unit_cnt numeric NOT NULL,
+    rev_cntr_rate_amt numeric(12,2) NOT NULL,
+    rev_cntr_tot_chrg_amt numeric(12,2) NOT NULL,
+    rev_cntr_ncvrd_chrg_amt numeric(12,2) NOT NULL,
+    rev_cntr_coinsrnc_wge_adjstd_c numeric(12,2) NOT NULL,
+    rev_cntr_bene_pmt_amt numeric(12,2) NOT NULL,
+    rev_cntr_blood_ddctbl_amt numeric(12,2) NOT NULL,
+    rev_cntr_cash_ddctbl_amt numeric(12,2) NOT NULL,
+    rev_cntr_rdcd_coinsrnc_amt numeric(12,2) NOT NULL,
+    rev_cntr_pmt_amt_amt numeric(12,2) NOT NULL,
+    rev_cntr_prvdr_pmt_amt numeric(12,2) NOT NULL,
+    rev_cntr_dt date,
+    rev_cntr_ptnt_rspnsblty_pmt numeric(12,2) NOT NULL,
+    rev_cntr_ndc_qty_qlfr_cd character varying(2),
+    rev_cntr_ndc_qty numeric,
+    rev_cntr_1st_ansi_cd character varying(5),
+    rev_cntr_1st_msp_pd_amt numeric(12,2) NOT NULL,
+    rev_cntr_2nd_ansi_cd character varying(5),
+    rev_cntr_2nd_msp_pd_amt numeric(12,2) NOT NULL,
+    rev_cntr_3rd_ansi_cd character varying(5),
+    rev_cntr_4th_ansi_cd character varying(5),
+    rev_cntr_apc_hipps_cd character varying(5),
+    rev_cntr_dscnt_ind_cd character(1),
+    rev_cntr_ide_ndc_upc_num character varying(24),
+    rev_cntr_otaf_pmt_cd character(1),
+    rev_cntr_packg_ind_cd character(1),
+    rev_cntr_pmt_mthd_ind_cd character varying(2),
+    rev_cntr_stus_ind_cd character varying(2),
+    hcpcs_cd character varying(5),
+    hcpcs_2nd_mdfr_cd character varying(5),
+    hcpcs_1st_mdfr_cd character varying(5),
+    rndrng_physn_npi character varying(12),
+    rndrng_physn_upin character varying(12),
+    CONSTRAINT outpatient_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num),
+    CONSTRAINT outpatient_claim_lines_clm_id_to_outpatient_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.outpatient_claims(clm_id)
+);
+
+
+-- ALTER TABLE ccw.outpatient_claim_lines OWNER TO svc_fhirdb_migrator;
+
 
 --
 -- Name: partd_events; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.partd_events (
+CREATE TABLE IF NOT EXISTS ccw.partd_events (
     pde_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
@@ -2984,17 +3024,36 @@ CREATE TABLE ccw.partd_events (
     nstd_frmt_cd character(1),
     prcng_excptn_cd character(1),
     rx_orgn_cd character(1),
-    submsn_clr_cd character varying(2)
+    submsn_clr_cd character varying(2),
+    CONSTRAINT partd_events_pkey PRIMARY KEY (pde_id),
+    CONSTRAINT partd_events_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.partd_events OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.partd_events OWNER TO svc_fhirdb_migrator;
+
+--
+-- Name: s3_manifest_files; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+--
+
+CREATE TABLE IF NOT EXISTS ccw.s3_manifest_files (
+    manifest_id bigint NOT NULL,
+    s3_key character varying(1024) NOT NULL,
+    status character varying(24) NOT NULL,
+    status_timestamp timestamp with time zone,
+    manifest_timestamp timestamp with time zone NOT NULL,
+    discovery_timestamp timestamp with time zone NOT NULL,
+    CONSTRAINT pk_s3_manifest_files PRIMARY KEY (manifest_id)
+);
+
+
+-- ALTER TABLE ccw.s3_manifest_files OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: s3_data_files; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.s3_data_files (
+CREATE TABLE IF NOT EXISTS ccw.s3_data_files (
     manifest_id bigint NOT NULL,
     index smallint NOT NULL,
     file_name character varying(128) NOT NULL,
@@ -3002,27 +3061,13 @@ CREATE TABLE ccw.s3_data_files (
     s3_key character varying(1024) NOT NULL,
     status character varying(24) NOT NULL,
     status_timestamp timestamp with time zone,
-    discovery_timestamp timestamp with time zone NOT NULL
+    discovery_timestamp timestamp with time zone NOT NULL,
+    CONSTRAINT pk_s3_data_files PRIMARY KEY (manifest_id, file_name),
+    CONSTRAINT fk_s3_data_files_s3_manifest_files FOREIGN KEY (manifest_id) REFERENCES ccw.s3_manifest_files(manifest_id)
 );
 
 
-ALTER TABLE ccw.s3_data_files OWNER TO svc_fhirdb_migrator;
-
---
--- Name: s3_manifest_files; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-CREATE TABLE ccw.s3_manifest_files (
-    manifest_id bigint NOT NULL,
-    s3_key character varying(1024) NOT NULL,
-    status character varying(24) NOT NULL,
-    status_timestamp timestamp with time zone,
-    manifest_timestamp timestamp with time zone NOT NULL,
-    discovery_timestamp timestamp with time zone NOT NULL
-);
-
-
-ALTER TABLE ccw.s3_manifest_files OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.s3_data_files OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: s3_manifest_files_manifest_id_seq; Type: SEQUENCE; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -3036,44 +3081,25 @@ CREATE SEQUENCE ccw.s3_manifest_files_manifest_id_seq
     CACHE 1;
 
 
-ALTER TABLE ccw.s3_manifest_files_manifest_id_seq OWNER TO svc_fhirdb_migrator;
-
---
--- Name: schema_version; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-CREATE TABLE ccw.schema_version (
-    installed_rank integer NOT NULL,
-    version character varying(50),
-    description character varying(200) NOT NULL,
-    type character varying(20) NOT NULL,
-    script character varying(1000) NOT NULL,
-    checksum integer,
-    installed_by character varying(100) NOT NULL,
-    installed_on timestamp without time zone DEFAULT now() NOT NULL,
-    execution_time integer NOT NULL,
-    success boolean NOT NULL
-);
-
-
-ALTER TABLE ccw.schema_version OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.s3_manifest_files_manifest_id_seq OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: skipped_rif_records; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.skipped_rif_records (
+CREATE TABLE IF NOT EXISTS ccw.skipped_rif_records (
     record_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     skip_reason character varying(50) NOT NULL,
     rif_file_timestamp timestamp with time zone NOT NULL,
     rif_file_type character varying(48) NOT NULL,
     dml_ind character varying(6) NOT NULL,
-    rif_data text NOT NULL
+    rif_data text NOT NULL,
+    CONSTRAINT skipped_rif_records_pkey PRIMARY KEY (record_id)
 );
 
 
-ALTER TABLE ccw.skipped_rif_records OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.skipped_rif_records OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: skipped_rif_records_record_id_seq; Type: SEQUENCE; Schema: ccw; Owner: svc_fhirdb_migrator
@@ -3087,36 +3113,13 @@ CREATE SEQUENCE ccw.skipped_rif_records_record_id_seq
     CACHE 1;
 
 
-ALTER TABLE ccw.skipped_rif_records_record_id_seq OWNER TO svc_fhirdb_migrator;
-
---
--- Name: snf_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-CREATE TABLE ccw.snf_claim_lines (
-    clm_id bigint NOT NULL,
-    clm_line_num smallint NOT NULL,
-    rev_cntr character varying(4) NOT NULL,
-    rev_cntr_unit_cnt integer NOT NULL,
-    rev_cntr_tot_chrg_amt numeric(12,2) NOT NULL,
-    rev_cntr_rate_amt numeric(12,2) NOT NULL,
-    rev_cntr_ncvrd_chrg_amt numeric(12,2) NOT NULL,
-    rev_cntr_ddctbl_coinsrnc_cd character(1),
-    rev_cntr_ndc_qty_qlfr_cd character varying(2),
-    rev_cntr_ndc_qty numeric,
-    hcpcs_cd character varying(5),
-    rndrng_physn_npi character varying(12),
-    rndrng_physn_upin character varying(12)
-);
-
-
-ALTER TABLE ccw.snf_claim_lines OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.skipped_rif_records_record_id_seq OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: snf_claims; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE ccw.snf_claims (
+CREATE TABLE IF NOT EXISTS ccw.snf_claims (
     clm_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
@@ -3334,17 +3337,44 @@ CREATE TABLE ccw.snf_claims (
     prcdr_dt22 date,
     prcdr_dt23 date,
     prcdr_dt24 date,
-    prcdr_dt25 date
+    prcdr_dt25 date,
+    CONSTRAINT snf_claims_pkey PRIMARY KEY (clm_id),
+    CONSTRAINT snf_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id)
 );
 
 
-ALTER TABLE ccw.snf_claims OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE ccw.snf_claims OWNER TO svc_fhirdb_migrator;
+
+--
+-- Name: snf_claim_lines; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+--
+
+CREATE TABLE IF NOT EXISTS ccw.snf_claim_lines (
+    clm_id bigint NOT NULL,
+    clm_line_num smallint NOT NULL,
+    rev_cntr character varying(4) NOT NULL,
+    rev_cntr_unit_cnt integer NOT NULL,
+    rev_cntr_tot_chrg_amt numeric(12,2) NOT NULL,
+    rev_cntr_rate_amt numeric(12,2) NOT NULL,
+    rev_cntr_ncvrd_chrg_amt numeric(12,2) NOT NULL,
+    rev_cntr_ddctbl_coinsrnc_cd character(1),
+    rev_cntr_ndc_qty_qlfr_cd character varying(2),
+    rev_cntr_ndc_qty numeric,
+    hcpcs_cd character varying(5),
+    rndrng_physn_npi character varying(12),
+    rndrng_physn_upin character varying(12),
+    CONSTRAINT snf_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num),
+    CONSTRAINT snf_claim_lines_clm_id_to_snf_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.snf_claims(clm_id)
+);
+
+
+-- ALTER TABLE ccw.snf_claim_lines OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: claim_message_meta_data; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.claim_message_meta_data (
+CREATE TABLE IF NOT EXISTS rda.claim_message_meta_data (
     claim_type character(1) NOT NULL,
     sequence_number bigint NOT NULL,
     claim_id character varying(43) NOT NULL,
@@ -3356,34 +3386,37 @@ CREATE TABLE rda.claim_message_meta_data (
     phase smallint,
     phase_seq_num smallint,
     extract_date date,
-    transmission_timestamp timestamp with time zone
+    transmission_timestamp timestamp with time zone,
+    CONSTRAINT claim_message_meta_data_pkey PRIMARY KEY (claim_type, sequence_number),
+    CONSTRAINT claim_message_meta_data_mbi FOREIGN KEY (mbi_id) REFERENCES rda.mbi_cache(mbi_id)
 );
 
 
-ALTER TABLE rda.claim_message_meta_data OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.claim_message_meta_data OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: fiss_audit_trails; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.fiss_audit_trails (
+CREATE TABLE IF NOT EXISTS rda.fiss_audit_trails (
     claim_id character varying(43) NOT NULL,
     rda_position smallint NOT NULL,
     badt_status character varying(1),
     badt_loc character varying(5),
     badt_oper_id character varying(9),
     badt_reas character varying(5),
-    badt_curr_date date
+    badt_curr_date date,
+    CONSTRAINT fiss_audit_trails_pkey PRIMARY KEY (claim_id, rda_position),
+    CONSTRAINT fiss_audit_trails_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id)
 );
 
-
-ALTER TABLE rda.fiss_audit_trails OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.fiss_audit_trails OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: fiss_claims; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.fiss_claims (
+CREATE TABLE IF NOT EXISTS rda.fiss_claims (
     claim_id character varying(43) NOT NULL,
     hic_no character varying(12) NOT NULL,
     curr_status character(1) NOT NULL,
@@ -3465,32 +3498,36 @@ CREATE TABLE rda.fiss_claims (
     group_code character varying(2),
     clm_typ_ind character varying(1),
     dcn character varying(23) NOT NULL,
-    intermediary_nb character varying(5) NOT NULL
+    intermediary_nb character varying(5) NOT NULL,
+    CONSTRAINT fiss_claims_pkey PRIMARY KEY (claim_id),
+    CONSTRAINT fiss_claims_mbi_id_fkey FOREIGN KEY (mbi_id) REFERENCES rda.mbi_cache(mbi_id)
 );
 
 
-ALTER TABLE rda.fiss_claims OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.fiss_claims OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: fiss_diagnosis_codes; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.fiss_diagnosis_codes (
+CREATE TABLE IF NOT EXISTS rda.fiss_diagnosis_codes (
     claim_id character varying(43) NOT NULL,
     rda_position smallint NOT NULL,
     diag_cd2 character varying(7),
     diag_poa_ind character varying(1),
-    bit_flags character varying(4)
+    bit_flags character varying(4),
+    CONSTRAINT fiss_diagnosis_codes_pkey PRIMARY KEY (claim_id, rda_position),
+    CONSTRAINT fiss_diagnosis_codes_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id)
 );
 
 
-ALTER TABLE rda.fiss_diagnosis_codes OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.fiss_diagnosis_codes OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: fiss_payers; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.fiss_payers (
+CREATE TABLE IF NOT EXISTS rda.fiss_payers (
     claim_id character varying(43) NOT NULL,
     rda_position smallint NOT NULL,
     payer_type character varying(20),
@@ -3518,32 +3555,36 @@ CREATE TABLE rda.fiss_payers (
     insured_sex character varying(1),
     insured_rel_x12 character varying(2),
     insured_dob date,
-    insured_dob_text character varying(9)
+    insured_dob_text character varying(9),
+    CONSTRAINT fiss_payers_pkey PRIMARY KEY (claim_id, rda_position),
+    CONSTRAINT fiss_payers_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id)
 );
 
 
-ALTER TABLE rda.fiss_payers OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.fiss_payers OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: fiss_proc_codes; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.fiss_proc_codes (
+CREATE TABLE IF NOT EXISTS rda.fiss_proc_codes (
     claim_id character varying(43) NOT NULL,
     rda_position smallint NOT NULL,
     proc_code character varying(10) NOT NULL,
     proc_flag character varying(4),
-    proc_date date
+    proc_date date,
+    CONSTRAINT fiss_proc_codes_pkey PRIMARY KEY (claim_id, rda_position),
+    CONSTRAINT fiss_proc_codes_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id)
 );
 
 
-ALTER TABLE rda.fiss_proc_codes OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.fiss_proc_codes OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: fiss_revenue_lines; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.fiss_revenue_lines (
+CREATE TABLE IF NOT EXISTS rda.fiss_revenue_lines (
     claim_id character varying(43) NOT NULL,
     rda_position smallint NOT NULL,
     non_bill_rev_code character varying(1),
@@ -3562,46 +3603,42 @@ CREATE TABLE rda.fiss_revenue_lines (
     apc_hcpcs_apc character varying(5),
     aco_red_rarc character varying(5),
     aco_red_carc character varying(3),
-    aco_red_cagc character varying(2)
+    aco_red_cagc character varying(2),
+    CONSTRAINT fiss_revenue_lines_pkey PRIMARY KEY (claim_id, rda_position),
+    CONSTRAINT fiss_revenue_lines_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id)
 );
 
 
-ALTER TABLE rda.fiss_revenue_lines OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.fiss_revenue_lines OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: mbi_cache; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.mbi_cache (
-    mbi_id bigint NOT NULL,
+CREATE TABLE IF NOT EXISTS rda.mbi_cache (
+    mbi_id bigint NOT NULL GENERATED BY DEFAULT AS IDENTITY (
+        SEQUENCE NAME rda.mbi_cache_mbi_id_seq
+        START WITH 1
+        INCREMENT BY 1
+        NO MINVALUE
+        NO MAXVALUE
+        CACHE 1),
     mbi character varying(11) NOT NULL,
     hash character varying(64) NOT NULL,
     old_hash character varying(64),
-    last_updated timestamp with time zone
+    last_updated timestamp with time zone,
+    CONSTRAINT mbi_cache_pkey PRIMARY KEY (mbi_id)
 );
 
 
-ALTER TABLE rda.mbi_cache OWNER TO svc_fhirdb_migrator;
-
---
--- Name: mbi_cache_mbi_id_seq; Type: SEQUENCE; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE rda.mbi_cache ALTER COLUMN mbi_id ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME rda.mbi_cache_mbi_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
+-- ALTER TABLE rda.mbi_cache OWNER TO svc_fhirdb_migrator;
 
 
 --
 -- Name: mcs_adjustments; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.mcs_adjustments (
+CREATE TABLE IF NOT EXISTS rda.mcs_adjustments (
     idr_clm_hd_icn character varying(15) NOT NULL,
     rda_position smallint NOT NULL,
     idr_adj_date date,
@@ -3610,32 +3647,36 @@ CREATE TABLE rda.mcs_adjustments (
     idr_init_ccn character varying(15),
     idr_adj_chk_wrt_dt date,
     idr_adj_b_eomb_amt numeric(7,2),
-    idr_adj_p_eomb_amt numeric(7,2)
+    idr_adj_p_eomb_amt numeric(7,2),
+    CONSTRAINT mcs_adjustments_pkey PRIMARY KEY (idr_clm_hd_icn, rda_position),
+    CONSTRAINT mcs_adjustments_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn)
 );
 
 
-ALTER TABLE rda.mcs_adjustments OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.mcs_adjustments OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: mcs_audits; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.mcs_audits (
+CREATE TABLE IF NOT EXISTS rda.mcs_audits (
     idr_clm_hd_icn character varying(15) NOT NULL,
     rda_position smallint NOT NULL,
     idr_j_audit_num integer,
     idr_j_audit_ind character varying(1),
-    idr_j_audit_disp character varying(1)
+    idr_j_audit_disp character varying(1),
+    CONSTRAINT mcs_audits_pkey PRIMARY KEY (idr_clm_hd_icn, rda_position),
+    CONSTRAINT mcs_audits_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn)
 );
 
 
-ALTER TABLE rda.mcs_audits OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.mcs_audits OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: mcs_claims; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.mcs_claims (
+CREATE TABLE IF NOT EXISTS rda.mcs_claims (
     idr_clm_hd_icn character varying(15) NOT NULL,
     idr_contr_id character varying(5) NOT NULL,
     idr_hic character varying(12),
@@ -3688,17 +3729,19 @@ CREATE TABLE rda.mcs_claims (
     idr_amb_dropoff_city character varying(20),
     idr_amb_dropoff_state character varying(2),
     idr_amb_dropoff_zipcode character varying(9),
-    mbi_id bigint
+    mbi_id bigint,
+    CONSTRAINT mcs_claims_pkey PRIMARY KEY (idr_clm_hd_icn),
+    CONSTRAINT mcs_claims_mbi_id_fkey FOREIGN KEY (mbi_id) REFERENCES rda.mbi_cache(mbi_id)
 );
 
 
-ALTER TABLE rda.mcs_claims OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.mcs_claims OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: mcs_details; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.mcs_details (
+CREATE TABLE IF NOT EXISTS rda.mcs_details (
     idr_clm_hd_icn character varying(15) NOT NULL,
     idr_dtl_number smallint NOT NULL,
     idr_dtl_status character varying(1),
@@ -3737,47 +3780,53 @@ CREATE TABLE rda.mcs_details (
     idr_dtl_amb_dropoff_addr_l2 character varying(20),
     idr_dtl_amb_dropoff_city character varying(20),
     idr_dtl_amb_dropoff_state character varying(2),
-    idr_dtl_amb_dropoff_zipcode character varying(9)
+    idr_dtl_amb_dropoff_zipcode character varying(9),
+    CONSTRAINT mcs_details_pkey PRIMARY KEY (idr_clm_hd_icn, idr_dtl_number),
+    CONSTRAINT mcs_details_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn)
 );
 
 
-ALTER TABLE rda.mcs_details OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.mcs_details OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: mcs_diagnosis_codes; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.mcs_diagnosis_codes (
+CREATE TABLE IF NOT EXISTS rda.mcs_diagnosis_codes (
     idr_clm_hd_icn character varying(15) NOT NULL,
     rda_position smallint NOT NULL,
     idr_diag_icd_type character varying(1),
-    idr_diag_code character varying(7) NOT NULL
+    idr_diag_code character varying(7) NOT NULL,
+    CONSTRAINT mcs_diagnosis_codes_pkey PRIMARY KEY (idr_clm_hd_icn, rda_position),
+    CONSTRAINT mcs_diagnosis_codes_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn)
 );
 
 
-ALTER TABLE rda.mcs_diagnosis_codes OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.mcs_diagnosis_codes OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: mcs_locations; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.mcs_locations (
+CREATE TABLE IF NOT EXISTS rda.mcs_locations (
     idr_clm_hd_icn character varying(15) NOT NULL,
     rda_position smallint NOT NULL,
     idr_loc_clerk character varying(4),
     idr_loc_code character varying(3),
     idr_loc_date date,
-    idr_loc_actv_code character varying(1)
+    idr_loc_actv_code character varying(1),
+    CONSTRAINT mcs_locations_key PRIMARY KEY (idr_clm_hd_icn, rda_position),
+    CONSTRAINT mcs_locations_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn)
 );
 
 
-ALTER TABLE rda.mcs_locations OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.mcs_locations OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: message_errors; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.message_errors (
+CREATE TABLE IF NOT EXISTS rda.message_errors (
     sequence_number bigint NOT NULL,
     claim_type character varying(20) NOT NULL,
     claim_id character varying(43) NOT NULL,
@@ -3786,494 +3835,144 @@ CREATE TABLE rda.message_errors (
     updated_date timestamp with time zone NOT NULL,
     errors jsonb NOT NULL,
     message jsonb NOT NULL,
-    status character varying(20) DEFAULT 'UNRESOLVED'::character varying NOT NULL
+    status character varying(20) DEFAULT 'UNRESOLVED'::character varying NOT NULL,
+    CONSTRAINT message_errors_pkey PRIMARY KEY (sequence_number, claim_type)
 );
 
 
-ALTER TABLE rda.message_errors OWNER TO svc_fhirdb_migrator;
+-- ALTER TABLE rda.message_errors OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: rda_api_progress; Type: TABLE; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE TABLE rda.rda_api_progress (
+CREATE TABLE IF NOT EXISTS rda.rda_api_progress (
     claim_type character varying(20) NOT NULL,
     last_sequence_number bigint NOT NULL,
-    last_updated timestamp with time zone
+    last_updated timestamp with time zone,
+    CONSTRAINT rda_api_progress_pkey PRIMARY KEY (claim_type)
 );
 
 
-ALTER TABLE rda.rda_api_progress OWNER TO svc_fhirdb_migrator;
-
---
--- Name: BeneficiariesHistory_old BeneficiariesHistory_pkey_old; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw."BeneficiariesHistory_old"
-    ADD CONSTRAINT "BeneficiariesHistory_pkey_old" PRIMARY KEY ("beneficiaryHistoryId");
-
-
---
--- Name: NewBeneficiariesHistory NewBeneficiariesHistory_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw."NewBeneficiariesHistory"
-    ADD CONSTRAINT "NewBeneficiariesHistory_pkey" PRIMARY KEY ("beneficiaryHistoryId");
-
-
---
--- Name: beneficiaries_history_invalid_beneficiaries beneficiaries_history_invalid_beneficiaries_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.beneficiaries_history_invalid_beneficiaries
-    ADD CONSTRAINT beneficiaries_history_invalid_beneficiaries_pkey PRIMARY KEY (bene_history_id);
-
-
---
--- Name: beneficiaries_history beneficiaries_history_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.beneficiaries_history
-    ADD CONSTRAINT beneficiaries_history_pkey PRIMARY KEY (bene_history_id);
-
-
---
--- Name: beneficiaries beneficiaries_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.beneficiaries
-    ADD CONSTRAINT beneficiaries_pkey PRIMARY KEY (bene_id);
-
-
---
--- Name: beneficiary_monthly_audit beneficiary_monthly_audit_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.beneficiary_monthly_audit
-    ADD CONSTRAINT beneficiary_monthly_audit_pkey PRIMARY KEY (seq_id);
-
-
---
--- Name: beneficiary_monthly beneficiary_monthly_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.beneficiary_monthly
-    ADD CONSTRAINT beneficiary_monthly_pkey PRIMARY KEY (bene_id, year_month);
-
-
---
--- Name: carrier_claim_lines carrier_claim_lines_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.carrier_claim_lines
-    ADD CONSTRAINT carrier_claim_lines_pkey PRIMARY KEY (clm_id, line_num);
-
-
---
--- Name: carrier_claims carrier_claims_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.carrier_claims
-    ADD CONSTRAINT carrier_claims_pkey PRIMARY KEY (clm_id);
-
-
---
--- Name: dme_claim_lines dme_claim_lines_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.dme_claim_lines
-    ADD CONSTRAINT dme_claim_lines_pkey PRIMARY KEY (clm_id, line_num);
-
-
---
--- Name: dme_claims dme_claims_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.dme_claims
-    ADD CONSTRAINT dme_claims_pkey PRIMARY KEY (clm_id);
-
-
---
--- Name: hha_claim_lines hha_claim_lines_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.hha_claim_lines
-    ADD CONSTRAINT hha_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-
-
---
--- Name: hha_claims hha_claims_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.hha_claims
-    ADD CONSTRAINT hha_claims_pkey PRIMARY KEY (clm_id);
-
-
---
--- Name: hospice_claim_lines hospice_claim_lines_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.hospice_claim_lines
-    ADD CONSTRAINT hospice_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-
-
---
--- Name: hospice_claims hospice_claims_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.hospice_claims
-    ADD CONSTRAINT hospice_claims_pkey PRIMARY KEY (clm_id);
-
-
---
--- Name: inpatient_claim_lines inpatient_claim_lines_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.inpatient_claim_lines
-    ADD CONSTRAINT inpatient_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-
-
---
--- Name: inpatient_claims inpatient_claims_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.inpatient_claims
-    ADD CONSTRAINT inpatient_claims_pkey PRIMARY KEY (clm_id);
-
-
---
--- Name: loaded_batches loaded_batches_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.loaded_batches
-    ADD CONSTRAINT loaded_batches_pkey PRIMARY KEY (loaded_batch_id);
-
-
---
--- Name: loaded_files loaded_files_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.loaded_files
-    ADD CONSTRAINT loaded_files_pkey PRIMARY KEY (loaded_file_id);
-
-
---
--- Name: outpatient_claim_lines outpatient_claim_lines_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.outpatient_claim_lines
-    ADD CONSTRAINT outpatient_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-
-
---
--- Name: outpatient_claims outpatient_claims_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.outpatient_claims
-    ADD CONSTRAINT outpatient_claims_pkey PRIMARY KEY (clm_id);
-
-
---
--- Name: partd_events partd_events_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.partd_events
-    ADD CONSTRAINT partd_events_pkey PRIMARY KEY (pde_id);
-
-
---
--- Name: s3_data_files pk_s3_data_files; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.s3_data_files
-    ADD CONSTRAINT pk_s3_data_files PRIMARY KEY (manifest_id, file_name);
-
-
---
--- Name: s3_manifest_files pk_s3_manifest_files; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.s3_manifest_files
-    ADD CONSTRAINT pk_s3_manifest_files PRIMARY KEY (manifest_id);
-
-
---
--- Name: schema_version schema_version_pk; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.schema_version
-    ADD CONSTRAINT schema_version_pk PRIMARY KEY (installed_rank);
-
-
---
--- Name: skipped_rif_records skipped_rif_records_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.skipped_rif_records
-    ADD CONSTRAINT skipped_rif_records_pkey PRIMARY KEY (record_id);
-
-
---
--- Name: snf_claim_lines snf_claim_lines_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.snf_claim_lines
-    ADD CONSTRAINT snf_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-
-
---
--- Name: snf_claims snf_claims_pkey; Type: CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.snf_claims
-    ADD CONSTRAINT snf_claims_pkey PRIMARY KEY (clm_id);
-
-
---
--- Name: claim_message_meta_data claim_message_meta_data_pkey; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.claim_message_meta_data
-    ADD CONSTRAINT claim_message_meta_data_pkey PRIMARY KEY (claim_type, sequence_number);
-
-
---
--- Name: fiss_audit_trails fiss_audit_trails_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_audit_trails
-    ADD CONSTRAINT fiss_audit_trails_key PRIMARY KEY (claim_id, rda_position);
-
-
---
--- Name: fiss_claims fiss_claims_pkey; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_claims
-    ADD CONSTRAINT fiss_claims_pkey PRIMARY KEY (claim_id);
-
-
---
--- Name: fiss_diagnosis_codes fiss_diagnosis_codes_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_diagnosis_codes
-    ADD CONSTRAINT fiss_diagnosis_codes_key PRIMARY KEY (claim_id, rda_position);
-
-
---
--- Name: fiss_payers fiss_payers_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_payers
-    ADD CONSTRAINT fiss_payers_key PRIMARY KEY (claim_id, rda_position);
-
-
---
--- Name: fiss_proc_codes fiss_proc_codes_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_proc_codes
-    ADD CONSTRAINT fiss_proc_codes_key PRIMARY KEY (claim_id, rda_position);
-
-
---
--- Name: fiss_revenue_lines fiss_revenue_lines_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_revenue_lines
-    ADD CONSTRAINT fiss_revenue_lines_key PRIMARY KEY (claim_id, rda_position);
-
-
---
--- Name: mbi_cache mbi_cache_pkey; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mbi_cache
-    ADD CONSTRAINT mbi_cache_pkey PRIMARY KEY (mbi_id);
-
-
---
--- Name: mcs_adjustments mcs_adjustments_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_adjustments
-    ADD CONSTRAINT mcs_adjustments_key PRIMARY KEY (idr_clm_hd_icn, rda_position);
-
-
---
--- Name: mcs_audits mcs_audits_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_audits
-    ADD CONSTRAINT mcs_audits_key PRIMARY KEY (idr_clm_hd_icn, rda_position);
-
-
---
--- Name: mcs_claims mcs_claims_pkey; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_claims
-    ADD CONSTRAINT mcs_claims_pkey PRIMARY KEY (idr_clm_hd_icn);
-
-
---
--- Name: mcs_details mcs_details_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_details
-    ADD CONSTRAINT mcs_details_key PRIMARY KEY (idr_clm_hd_icn, idr_dtl_number);
-
-
---
--- Name: mcs_diagnosis_codes mcs_diagnosis_codes_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_diagnosis_codes
-    ADD CONSTRAINT mcs_diagnosis_codes_key PRIMARY KEY (idr_clm_hd_icn, rda_position);
-
-
---
--- Name: mcs_locations mcs_locations_key; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_locations
-    ADD CONSTRAINT mcs_locations_key PRIMARY KEY (idr_clm_hd_icn, rda_position);
-
-
---
--- Name: message_errors message_errors_pkey; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.message_errors
-    ADD CONSTRAINT message_errors_pkey PRIMARY KEY (sequence_number, claim_type);
-
-
---
--- Name: rda_api_progress rda_api_progress_pkey; Type: CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.rda_api_progress
-    ADD CONSTRAINT rda_api_progress_pkey PRIMARY KEY (claim_type);
-
+-- ALTER TABLE rda.rda_api_progress OWNER TO svc_fhirdb_migrator;
 
 --
 -- Name: BeneficiariesHistory_hicn_idx_old; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX "BeneficiariesHistory_hicn_idx_old" ON ccw."BeneficiariesHistory_old" USING btree (hicn);
+CREATE INDEX IF NOT EXISTS BeneficiariesHistory_hicn_idx_old ON ccw."BeneficiariesHistory_old" USING btree (hicn);
 
 
 --
 -- Name: NewBeneficiariesHistory_beneficiaryId_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX "NewBeneficiariesHistory_beneficiaryId_idx" ON ccw."NewBeneficiariesHistory" USING btree ("beneficiaryId");
+CREATE INDEX IF NOT EXISTS NewBeneficiariesHistory_beneficiaryId_idx ON ccw."NewBeneficiariesHistory" USING btree (beneficiaryId);
 
 
 --
 -- Name: NewBeneficiariesHistory_hicn_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX "NewBeneficiariesHistory_hicn_idx" ON ccw."NewBeneficiariesHistory" USING btree (hicn);
+CREATE INDEX IF NOT EXISTS NewBeneficiariesHistory_hicn_idx ON ccw."NewBeneficiariesHistory" USING btree (hicn);
 
 
 --
 -- Name: NewBeneficiariesHistory_mbiHash_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX "NewBeneficiariesHistory_mbiHash_idx" ON ccw."NewBeneficiariesHistory" USING btree ("mbiHash");
+CREATE INDEX IF NOT EXISTS NewBeneficiariesHistory_mbiHash_idx ON ccw."NewBeneficiariesHistory" USING btree (mbiHash);
 
 
 --
 -- Name: beneficiaries_hicn_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiaries_hicn_idx ON ccw.beneficiaries USING btree (bene_crnt_hic_num);
+CREATE INDEX IF NOT EXISTS beneficiaries_hicn_idx ON ccw.beneficiaries USING btree (bene_crnt_hic_num);
 
 
 --
 -- Name: beneficiaries_history_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiaries_history_bene_id_idx ON ccw.beneficiaries_history USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS beneficiaries_history_bene_id_idx ON ccw.beneficiaries_history USING btree (bene_id);
 
 
 --
 -- Name: beneficiaries_history_hicn_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiaries_history_hicn_idx ON ccw.beneficiaries_history USING btree (bene_crnt_hic_num);
+CREATE INDEX IF NOT EXISTS beneficiaries_history_hicn_idx ON ccw.beneficiaries_history USING btree (bene_crnt_hic_num);
 
 
 --
 -- Name: beneficiaries_history_mbi_hash_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiaries_history_mbi_hash_idx ON ccw.beneficiaries_history USING btree (mbi_hash);
+CREATE INDEX IF NOT EXISTS beneficiaries_history_mbi_hash_idx ON ccw.beneficiaries_history USING btree (mbi_hash);
 
 
 --
 -- Name: beneficiaries_history_mbi_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiaries_history_mbi_idx ON ccw.beneficiaries_history USING btree (mbi_num);
+CREATE INDEX IF NOT EXISTS beneficiaries_history_mbi_idx ON ccw.beneficiaries_history USING btree (mbi_num);
 
 
 --
 -- Name: beneficiaries_mbi_hash_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiaries_mbi_hash_idx ON ccw.beneficiaries USING btree (mbi_hash);
+CREATE INDEX IF NOT EXISTS beneficiaries_mbi_hash_idx ON ccw.beneficiaries USING btree (mbi_hash);
 
 
 --
 -- Name: beneficiaries_mbi_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiaries_mbi_idx ON ccw.beneficiaries USING btree (mbi_num);
+CREATE INDEX IF NOT EXISTS beneficiaries_mbi_idx ON ccw.beneficiaries USING btree (mbi_num);
 
 
 --
 -- Name: beneficiary_monthly_audit_bene_id_year_month_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiary_monthly_audit_bene_id_year_month_idx ON ccw.beneficiary_monthly_audit USING btree (bene_id, year_month);
+CREATE INDEX IF NOT EXISTS beneficiary_monthly_audit_bene_id_year_month_idx ON ccw.beneficiary_monthly_audit USING btree (bene_id, year_month);
 
 
 --
 -- Name: beneficiary_monthly_partd_contract_year_month_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX beneficiary_monthly_partd_contract_year_month_bene_id_idx ON ccw.beneficiary_monthly USING btree (partd_contract_number_id, year_month, bene_id);
+CREATE INDEX IF NOT EXISTS beneficiary_monthly_partd_contract_year_month_bene_id_idx ON ccw.beneficiary_monthly USING btree (partd_contract_number_id, year_month, bene_id);
 
 
 --
 -- Name: carrier_claims_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX carrier_claims_bene_id_idx ON ccw.carrier_claims USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS carrier_claims_bene_id_idx ON ccw.carrier_claims USING btree (bene_id);
 
 
 --
 -- Name: dme_claims_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX dme_claims_bene_id_idx ON ccw.dme_claims USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS dme_claims_bene_id_idx ON ccw.dme_claims USING btree (bene_id);
 
 
 --
 -- Name: hha_claims_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX hha_claims_bene_id_idx ON ccw.hha_claims USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS hha_claims_bene_id_idx ON ccw.hha_claims USING btree (bene_id);
 
 
 --
 -- Name: hospice_claims_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX hospice_claims_bene_id_idx ON ccw.hospice_claims USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS hospice_claims_bene_id_idx ON ccw.hospice_claims USING btree (bene_id);
 
 
 --
@@ -4294,383 +3993,119 @@ CREATE UNIQUE INDEX idx_s3_manifest_files_s3_key ON ccw.s3_manifest_files USING 
 -- Name: inpatient_claims_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX inpatient_claims_bene_id_idx ON ccw.inpatient_claims USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS inpatient_claims_bene_id_idx ON ccw.inpatient_claims USING btree (bene_id);
 
 
 --
 -- Name: loaded_batches_created_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX loaded_batches_created_idx ON ccw.loaded_batches USING btree (created);
+CREATE INDEX IF NOT EXISTS loaded_batches_created_idx ON ccw.loaded_batches USING btree (created);
 
 
 --
 -- Name: loaded_batches_loaded_file_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX loaded_batches_loaded_file_id_idx ON ccw.loaded_batches USING btree (loaded_file_id DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS loaded_batches_loaded_file_id_idx ON ccw.loaded_batches USING btree (loaded_file_id DESC NULLS LAST);
 
 
 --
 -- Name: outpatient_claims_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX outpatient_claims_bene_id_idx ON ccw.outpatient_claims USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS outpatient_claims_bene_id_idx ON ccw.outpatient_claims USING btree (bene_id);
 
 
 --
 -- Name: partd_events_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX partd_events_bene_id_idx ON ccw.partd_events USING btree (bene_id);
-
-
---
--- Name: schema_version_s_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-CREATE INDEX schema_version_s_idx ON ccw.schema_version USING btree (success);
+CREATE INDEX IF NOT EXISTS partd_events_bene_id_idx ON ccw.partd_events USING btree (bene_id);
 
 
 --
 -- Name: skipped_rif_records_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX skipped_rif_records_bene_id_idx ON ccw.skipped_rif_records USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS skipped_rif_records_bene_id_idx ON ccw.skipped_rif_records USING btree (bene_id);
 
 
 --
 -- Name: snf_claims_bene_id_idx; Type: INDEX; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX snf_claims_bene_id_idx ON ccw.snf_claims USING btree (bene_id);
+CREATE INDEX IF NOT EXISTS snf_claims_bene_id_idx ON ccw.snf_claims USING btree (bene_id);
 
 
 --
 -- Name: claim_message_meta_data_last_updated_idx; Type: INDEX; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX claim_message_meta_data_last_updated_idx ON rda.claim_message_meta_data USING btree (last_updated);
+CREATE INDEX IF NOT EXISTS claim_message_meta_data_last_updated_idx ON rda.claim_message_meta_data USING btree (last_updated);
 
 
 --
 -- Name: fiss_claims_last_updated_idx; Type: INDEX; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX fiss_claims_last_updated_idx ON rda.fiss_claims USING btree (last_updated);
+CREATE INDEX IF NOT EXISTS fiss_claims_last_updated_idx ON rda.fiss_claims USING btree (last_updated);
 
 
 --
 -- Name: fiss_claims_mbi_id_idx; Type: INDEX; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX fiss_claims_mbi_id_idx ON rda.fiss_claims USING btree (mbi_id);
+CREATE INDEX IF NOT EXISTS fiss_claims_mbi_id_idx ON rda.fiss_claims USING btree (mbi_id);
 
 
 --
 -- Name: mbi_cache_hash_idx; Type: INDEX; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE UNIQUE INDEX mbi_cache_hash_idx ON rda.mbi_cache USING btree (hash);
+CREATE UNIQUE INDEX IF NOT EXISTS mbi_cache_hash_idx ON rda.mbi_cache USING btree (hash);
 
 
 --
 -- Name: mbi_cache_mbi_idx; Type: INDEX; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX mbi_cache_mbi_idx ON rda.mbi_cache USING btree (mbi);
+CREATE INDEX IF NOT EXISTS mbi_cache_mbi_idx ON rda.mbi_cache USING btree (mbi);
 
 
 --
 -- Name: mbi_cache_old_hash_idx; Type: INDEX; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX mbi_cache_old_hash_idx ON rda.mbi_cache USING btree (old_hash);
+CREATE INDEX IF NOT EXISTS mbi_cache_old_hash_idx ON rda.mbi_cache USING btree (old_hash);
 
 
 --
 -- Name: mcs_claims_last_updated_idx; Type: INDEX; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX mcs_claims_last_updated_idx ON rda.mcs_claims USING btree (last_updated);
+CREATE INDEX IF NOT EXISTS mcs_claims_last_updated_idx ON rda.mcs_claims USING btree (last_updated);
 
 
 --
 -- Name: mcs_claims_mbi_id_idx; Type: INDEX; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-CREATE INDEX mcs_claims_mbi_id_idx ON rda.mcs_claims USING btree (mbi_id);
+CREATE INDEX IF NOT EXISTS mcs_claims_mbi_id_idx ON rda.mcs_claims USING btree (mbi_id);
 
 
 --
 -- Name: beneficiary_monthly audit_ccw_update; Type: TRIGGER; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-CREATE TRIGGER audit_ccw_update AFTER UPDATE ON ccw.beneficiary_monthly FOR EACH ROW WHEN (((((old.partd_contract_number_id)::text <> '0'::text) OR ((old.partc_contract_number_id)::text <> '0'::text)) AND (((((((((((((old.partd_contract_number_id)::text IS DISTINCT FROM (new.partd_contract_number_id)::text) OR ((old.partc_contract_number_id)::text IS DISTINCT FROM (new.partc_contract_number_id)::text)) OR ((old.medicare_status_code)::text IS DISTINCT FROM (new.medicare_status_code)::text)) OR ((old.fips_state_cnty_code)::text IS DISTINCT FROM (new.fips_state_cnty_code)::text)) OR (old.entitlement_buy_in_ind IS DISTINCT FROM new.entitlement_buy_in_ind)) OR (old.hmo_indicator_ind IS DISTINCT FROM new.hmo_indicator_ind)) OR ((old.medicaid_dual_eligibility_code)::text IS DISTINCT FROM (new.medicaid_dual_eligibility_code)::text)) OR ((old.partd_pbp_number_id)::text IS DISTINCT FROM (new.partd_pbp_number_id)::text)) OR ((old.partd_segment_number_id)::text IS DISTINCT FROM (new.partd_segment_number_id)::text)) OR ((old.partd_low_income_cost_share_group_code)::text IS DISTINCT FROM (new.partd_low_income_cost_share_group_code)::text)) OR ((old.partc_pbp_number_id)::text IS DISTINCT FROM (new.partc_pbp_number_id)::text)) OR ((old.partc_plan_type_code)::text IS DISTINCT FROM (new.partc_plan_type_code)::text)))) EXECUTE FUNCTION ccw.track_bene_monthly_change();
-
-
---
--- Name: beneficiaries_history beneficiaries_history_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.beneficiaries_history
-    ADD CONSTRAINT beneficiaries_history_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: beneficiary_monthly beneficiary_monthly_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.beneficiary_monthly
-    ADD CONSTRAINT beneficiary_monthly_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: carrier_claim_lines carrier_claim_lines_clm_id_to_carrier_claims_new; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.carrier_claim_lines
-    ADD CONSTRAINT carrier_claim_lines_clm_id_to_carrier_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.carrier_claims(clm_id);
-
-
---
--- Name: carrier_claims carrier_claims_bene_id_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.carrier_claims
-    ADD CONSTRAINT carrier_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: dme_claim_lines dme_claim_lines_clm_id_to_dme_claims_new; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.dme_claim_lines
-    ADD CONSTRAINT dme_claim_lines_clm_id_to_dme_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.dme_claims(clm_id);
-
-
---
--- Name: dme_claims dme_claims_bene_id_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.dme_claims
-    ADD CONSTRAINT dme_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: s3_data_files fk_s3_data_files_s3_manifest_files; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.s3_data_files
-    ADD CONSTRAINT fk_s3_data_files_s3_manifest_files FOREIGN KEY (manifest_id) REFERENCES ccw.s3_manifest_files(manifest_id);
-
-
---
--- Name: hha_claim_lines hha_claim_lines_clm_id_to_hha_claims_new; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.hha_claim_lines
-    ADD CONSTRAINT hha_claim_lines_clm_id_to_hha_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.hha_claims(clm_id);
-
-
---
--- Name: hha_claims hha_claims_bene_id_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.hha_claims
-    ADD CONSTRAINT hha_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: hospice_claim_lines hospice_claim_lines_clm_id_to_hospice_claims_new; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.hospice_claim_lines
-    ADD CONSTRAINT hospice_claim_lines_clm_id_to_hospice_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.hospice_claims(clm_id);
-
-
---
--- Name: hospice_claims hospice_claims_bene_id_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.hospice_claims
-    ADD CONSTRAINT hospice_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: inpatient_claim_lines inpatient_claim_lines_clm_id_to_inpatient_claims_new; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.inpatient_claim_lines
-    ADD CONSTRAINT inpatient_claim_lines_clm_id_to_inpatient_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.inpatient_claims(clm_id);
-
-
---
--- Name: inpatient_claims inpatient_claims_bene_id_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.inpatient_claims
-    ADD CONSTRAINT inpatient_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: loaded_batches loaded_batches_loaded_file_id; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.loaded_batches
-    ADD CONSTRAINT loaded_batches_loaded_file_id FOREIGN KEY (loaded_file_id) REFERENCES ccw.loaded_files(loaded_file_id);
-
-
---
--- Name: outpatient_claim_lines outpatient_claim_lines_clm_id_to_outpatient_claims_new; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.outpatient_claim_lines
-    ADD CONSTRAINT outpatient_claim_lines_clm_id_to_outpatient_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.outpatient_claims(clm_id);
-
-
---
--- Name: outpatient_claims outpatient_claims_bene_id_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.outpatient_claims
-    ADD CONSTRAINT outpatient_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: partd_events partd_events_bene_id_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.partd_events
-    ADD CONSTRAINT partd_events_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: snf_claim_lines snf_claim_lines_clm_id_to_snf_claims_new; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.snf_claim_lines
-    ADD CONSTRAINT snf_claim_lines_clm_id_to_snf_claims_new FOREIGN KEY (clm_id) REFERENCES ccw.snf_claims(clm_id);
-
-
---
--- Name: snf_claims snf_claims_bene_id_to_beneficiaries; Type: FK CONSTRAINT; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY ccw.snf_claims
-    ADD CONSTRAINT snf_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES ccw.beneficiaries(bene_id);
-
-
---
--- Name: claim_message_meta_data claim_message_meta_data_mbi; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.claim_message_meta_data
-    ADD CONSTRAINT claim_message_meta_data_mbi FOREIGN KEY (mbi_id) REFERENCES rda.mbi_cache(mbi_id);
-
-
---
--- Name: fiss_audit_trails fiss_audit_trails_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_audit_trails
-    ADD CONSTRAINT fiss_audit_trails_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id);
-
-
---
--- Name: fiss_claims fiss_claims_mbi_id_fkey; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_claims
-    ADD CONSTRAINT fiss_claims_mbi_id_fkey FOREIGN KEY (mbi_id) REFERENCES rda.mbi_cache(mbi_id);
-
-
---
--- Name: fiss_diagnosis_codes fiss_diagnosis_codes_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_diagnosis_codes
-    ADD CONSTRAINT fiss_diagnosis_codes_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id);
-
-
---
--- Name: fiss_payers fiss_payers_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_payers
-    ADD CONSTRAINT fiss_payers_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id);
-
-
---
--- Name: fiss_proc_codes fiss_proc_codes_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_proc_codes
-    ADD CONSTRAINT fiss_proc_codes_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id);
-
-
---
--- Name: fiss_revenue_lines fiss_revenue_lines_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.fiss_revenue_lines
-    ADD CONSTRAINT fiss_revenue_lines_parent FOREIGN KEY (claim_id) REFERENCES rda.fiss_claims(claim_id);
-
-
---
--- Name: mcs_adjustments mcs_adjustments_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_adjustments
-    ADD CONSTRAINT mcs_adjustments_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn);
-
-
---
--- Name: mcs_audits mcs_audits_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_audits
-    ADD CONSTRAINT mcs_audits_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn);
-
-
---
--- Name: mcs_claims mcs_claims_mbi_id_fkey; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_claims
-    ADD CONSTRAINT mcs_claims_mbi_id_fkey FOREIGN KEY (mbi_id) REFERENCES rda.mbi_cache(mbi_id);
-
-
---
--- Name: mcs_details mcs_details_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_details
-    ADD CONSTRAINT mcs_details_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn);
-
-
---
--- Name: mcs_diagnosis_codes mcs_diagnosis_codes_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_diagnosis_codes
-    ADD CONSTRAINT mcs_diagnosis_codes_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn);
-
-
---
--- Name: mcs_locations mcs_locations_parent; Type: FK CONSTRAINT; Schema: rda; Owner: svc_fhirdb_migrator
---
-
-ALTER TABLE ONLY rda.mcs_locations
-    ADD CONSTRAINT mcs_locations_parent FOREIGN KEY (idr_clm_hd_icn) REFERENCES rda.mcs_claims(idr_clm_hd_icn);
-
+CREATE OR REPLACE TRIGGER audit_ccw_update AFTER UPDATE ON ccw.beneficiary_monthly FOR EACH ROW WHEN (((((old.partd_contract_number_id)::text <> '0'::text) OR ((old.partc_contract_number_id)::text <> '0'::text)) AND (((((((((((((old.partd_contract_number_id)::text IS DISTINCT FROM (new.partd_contract_number_id)::text) OR ((old.partc_contract_number_id)::text IS DISTINCT FROM (new.partc_contract_number_id)::text)) OR ((old.medicare_status_code)::text IS DISTINCT FROM (new.medicare_status_code)::text)) OR ((old.fips_state_cnty_code)::text IS DISTINCT FROM (new.fips_state_cnty_code)::text)) OR (old.entitlement_buy_in_ind IS DISTINCT FROM new.entitlement_buy_in_ind)) OR (old.hmo_indicator_ind IS DISTINCT FROM new.hmo_indicator_ind)) OR ((old.medicaid_dual_eligibility_code)::text IS DISTINCT FROM (new.medicaid_dual_eligibility_code)::text)) OR ((old.partd_pbp_number_id)::text IS DISTINCT FROM (new.partd_pbp_number_id)::text)) OR ((old.partd_segment_number_id)::text IS DISTINCT FROM (new.partd_segment_number_id)::text)) OR ((old.partd_low_income_cost_share_group_code)::text IS DISTINCT FROM (new.partd_low_income_cost_share_group_code)::text)) OR ((old.partc_pbp_number_id)::text IS DISTINCT FROM (new.partc_pbp_number_id)::text)) OR ((old.partc_plan_type_code)::text IS DISTINCT FROM (new.partc_plan_type_code)::text)))) EXECUTE FUNCTION ccw.track_bene_monthly_change();
 
 --
 -- Name: SCHEMA ccw; Type: ACL; Schema: -; Owner: rdsadmin
 --
 
-REVOKE ALL ON SCHEMA ccw FROM rdsadmin;
-GRANT ALL ON SCHEMA ccw TO bfduser;
+-- REVOKE ALL ON SCHEMA ccw FROM rdsadmin;
+-- GRANT ALL ON SCHEMA ccw TO bfduser;
 GRANT USAGE ON SCHEMA ccw TO bfd_reader_role;
 GRANT USAGE ON SCHEMA ccw TO bfd_writer_role;
 GRANT ALL ON SCHEMA ccw TO bfd_migrator_role;
@@ -4680,9 +4115,9 @@ GRANT ALL ON SCHEMA ccw TO bfd_migrator_role;
 -- Name: SCHEMA rda; Type: ACL; Schema: -; Owner: svc_fhirdb_migrator
 --
 
-GRANT USAGE ON SCHEMA rda TO svc_bfd_server_0;
-GRANT USAGE ON SCHEMA rda TO svc_bfd_server_1;
-GRANT USAGE ON SCHEMA rda TO svc_bfd_pipeline_0;
+-- GRANT USAGE ON SCHEMA rda TO svc_bfd_server_0;
+-- GRANT USAGE ON SCHEMA rda TO svc_bfd_server_1;
+-- GRANT USAGE ON SCHEMA rda TO svc_bfd_pipeline_0;
 GRANT USAGE ON SCHEMA rda TO paca_reader_role;
 GRANT USAGE ON SCHEMA rda TO paca_writer_role;
 GRANT ALL ON SCHEMA rda TO paca_migrator_role;
@@ -4952,14 +4387,14 @@ GRANT ALL ON FUNCTION ccw.synthea_load_pre_validate(p_beg_bene_id bigint, p_end_
 --
 
 REVOKE ALL ON FUNCTION ccw.track_bene_monthly_change() FROM PUBLIC;
-REVOKE ALL ON FUNCTION ccw.track_bene_monthly_change() FROM svc_fhirdb_migrator;
+-- REVOKE ALL ON FUNCTION ccw.track_bene_monthly_change() FROM svc_fhirdb_migrator;
 
 
 --
 -- Name: TABLE "BeneficiariesHistory_old"; Type: ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-GRANT ALL ON TABLE ccw."BeneficiariesHistory_old" TO svc_bfd_pipeline_0;
+-- GRANT ALL ON TABLE ccw."BeneficiariesHistory_old" TO svc_bfd_pipeline_0;
 GRANT SELECT ON TABLE ccw."BeneficiariesHistory_old" TO bfd_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw."BeneficiariesHistory_old" TO bfd_writer_role;
 GRANT ALL ON TABLE ccw."BeneficiariesHistory_old" TO bfd_migrator_role;
@@ -4969,9 +4404,9 @@ GRANT ALL ON TABLE ccw."BeneficiariesHistory_old" TO bfd_migrator_role;
 -- Name: TABLE "NewBeneficiariesHistory"; Type: ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-GRANT ALL ON TABLE ccw."NewBeneficiariesHistory" TO svc_bfd_pipeline_0;
-GRANT SELECT ON TABLE ccw."NewBeneficiariesHistory" TO svc_bfd_server_0;
-GRANT SELECT ON TABLE ccw."NewBeneficiariesHistory" TO svc_bfd_server_1;
+-- GRANT ALL ON TABLE ccw."NewBeneficiariesHistory" TO svc_bfd_pipeline_0;
+-- GRANT SELECT ON TABLE ccw."NewBeneficiariesHistory" TO svc_bfd_server_0;
+-- GRANT SELECT ON TABLE ccw."NewBeneficiariesHistory" TO svc_bfd_server_1;
 GRANT SELECT ON TABLE ccw."NewBeneficiariesHistory" TO bfd_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw."NewBeneficiariesHistory" TO bfd_writer_role;
 GRANT ALL ON TABLE ccw."NewBeneficiariesHistory" TO bfd_migrator_role;
@@ -5008,7 +4443,7 @@ GRANT ALL ON TABLE ccw.beneficiaries_history TO bfd_migrator_role;
 -- Name: TABLE beneficiaries_history_invalid_beneficiaries; Type: ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-GRANT ALL ON TABLE ccw.beneficiaries_history_invalid_beneficiaries TO svc_bfd_pipeline_0;
+-- GRANT ALL ON TABLE ccw.beneficiaries_history_invalid_beneficiaries TO svc_bfd_pipeline_0;
 GRANT SELECT ON TABLE ccw.beneficiaries_history_invalid_beneficiaries TO bfd_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw.beneficiaries_history_invalid_beneficiaries TO bfd_writer_role;
 GRANT ALL ON TABLE ccw.beneficiaries_history_invalid_beneficiaries TO bfd_migrator_role;
@@ -5144,7 +4579,7 @@ GRANT ALL ON TABLE ccw.inpatient_claims TO bfd_migrator_role;
 -- Name: TABLE loaded_batches; Type: ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-GRANT ALL ON TABLE ccw.loaded_batches TO svc_bfd_pipeline_0;
+-- GRANT ALL ON TABLE ccw.loaded_batches TO svc_bfd_pipeline_0;
 GRANT SELECT ON TABLE ccw.loaded_batches TO bfd_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw.loaded_batches TO bfd_writer_role;
 GRANT ALL ON TABLE ccw.loaded_batches TO bfd_migrator_role;
@@ -5154,7 +4589,7 @@ GRANT ALL ON TABLE ccw.loaded_batches TO bfd_migrator_role;
 -- Name: TABLE loaded_files; Type: ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-GRANT ALL ON TABLE ccw.loaded_files TO svc_bfd_pipeline_0;
+-- GRANT ALL ON TABLE ccw.loaded_files TO svc_bfd_pipeline_0;
 GRANT SELECT ON TABLE ccw.loaded_files TO bfd_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw.loaded_files TO bfd_writer_role;
 GRANT ALL ON TABLE ccw.loaded_files TO bfd_migrator_role;
@@ -5251,16 +4686,6 @@ GRANT ALL ON SEQUENCE ccw.s3_manifest_files_manifest_id_seq TO bfd_migrator_role
 
 
 --
--- Name: TABLE schema_version; Type: ACL; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-GRANT ALL ON TABLE ccw.schema_version TO svc_bfd_pipeline_0;
-GRANT SELECT ON TABLE ccw.schema_version TO bfd_reader_role;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw.schema_version TO bfd_writer_role;
-GRANT ALL ON TABLE ccw.schema_version TO bfd_migrator_role;
-
-
---
 -- Name: TABLE skipped_rif_records; Type: ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
@@ -5273,9 +4698,9 @@ GRANT ALL ON TABLE ccw.skipped_rif_records TO bfd_migrator_role;
 -- Name: SEQUENCE skipped_rif_records_record_id_seq; Type: ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-GRANT SELECT,USAGE ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO svc_bfd_server_0;
-GRANT SELECT,USAGE ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO svc_bfd_server_1;
-GRANT ALL ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO svc_bfd_pipeline_0;
+-- GRANT SELECT,USAGE ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO svc_bfd_server_0;
+-- GRANT SELECT,USAGE ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO svc_bfd_server_1;
+-- GRANT ALL ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO svc_bfd_pipeline_0;
 GRANT SELECT ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO bfd_reader_role;
 GRANT USAGE ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO bfd_writer_role;
 GRANT ALL ON SEQUENCE ccw.skipped_rif_records_record_id_seq TO bfd_migrator_role;
@@ -5321,9 +4746,9 @@ GRANT ALL ON TABLE rda.fiss_audit_trails TO paca_migrator_role;
 -- Name: TABLE fiss_claims; Type: ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-GRANT SELECT ON TABLE rda.fiss_claims TO svc_bfd_server_0;
-GRANT SELECT ON TABLE rda.fiss_claims TO svc_bfd_server_1;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.fiss_claims TO svc_bfd_pipeline_0;
+-- GRANT SELECT ON TABLE rda.fiss_claims TO svc_bfd_server_0;
+-- GRANT SELECT ON TABLE rda.fiss_claims TO svc_bfd_server_1;
+-- GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.fiss_claims TO svc_bfd_pipeline_0;
 GRANT SELECT ON TABLE rda.fiss_claims TO paca_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.fiss_claims TO paca_writer_role;
 GRANT ALL ON TABLE rda.fiss_claims TO paca_migrator_role;
@@ -5360,10 +4785,10 @@ GRANT ALL ON TABLE rda.fiss_proc_codes TO paca_migrator_role;
 -- Name: TABLE fiss_revenue_lines; Type: ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.fiss_revenue_lines TO svc_bfd_pipeline_0;
-GRANT ALL ON TABLE rda.fiss_revenue_lines TO svc_bfd_pipeline_1;
-GRANT SELECT ON TABLE rda.fiss_revenue_lines TO svc_bfd_server_0;
-GRANT SELECT ON TABLE rda.fiss_revenue_lines TO svc_bfd_server_1;
+-- GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.fiss_revenue_lines TO svc_bfd_pipeline_0;
+-- GRANT ALL ON TABLE rda.fiss_revenue_lines TO svc_bfd_pipeline_1;
+-- GRANT SELECT ON TABLE rda.fiss_revenue_lines TO svc_bfd_server_0;
+-- GRANT SELECT ON TABLE rda.fiss_revenue_lines TO svc_bfd_server_1;
 GRANT SELECT ON TABLE rda.fiss_revenue_lines TO paca_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.fiss_revenue_lines TO paca_writer_role;
 GRANT ALL ON TABLE rda.fiss_revenue_lines TO paca_migrator_role;
@@ -5373,9 +4798,9 @@ GRANT ALL ON TABLE rda.fiss_revenue_lines TO paca_migrator_role;
 -- Name: TABLE mbi_cache; Type: ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-GRANT SELECT ON TABLE rda.mbi_cache TO svc_bfd_server_0;
-GRANT SELECT ON TABLE rda.mbi_cache TO svc_bfd_server_1;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.mbi_cache TO svc_bfd_pipeline_0;
+-- GRANT SELECT ON TABLE rda.mbi_cache TO svc_bfd_server_0;
+-- GRANT SELECT ON TABLE rda.mbi_cache TO svc_bfd_server_1;
+-- GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.mbi_cache TO svc_bfd_pipeline_0;
 GRANT SELECT ON TABLE rda.mbi_cache TO paca_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.mbi_cache TO paca_writer_role;
 GRANT ALL ON TABLE rda.mbi_cache TO paca_migrator_role;
@@ -5385,9 +4810,9 @@ GRANT ALL ON TABLE rda.mbi_cache TO paca_migrator_role;
 -- Name: SEQUENCE mbi_cache_mbi_id_seq; Type: ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-GRANT SELECT ON SEQUENCE rda.mbi_cache_mbi_id_seq TO svc_bfd_server_0;
-GRANT SELECT ON SEQUENCE rda.mbi_cache_mbi_id_seq TO svc_bfd_server_1;
-GRANT USAGE ON SEQUENCE rda.mbi_cache_mbi_id_seq TO svc_bfd_pipeline_0;
+-- GRANT SELECT ON SEQUENCE rda.mbi_cache_mbi_id_seq TO svc_bfd_server_0;
+-- GRANT SELECT ON SEQUENCE rda.mbi_cache_mbi_id_seq TO svc_bfd_server_1;
+-- GRANT USAGE ON SEQUENCE rda.mbi_cache_mbi_id_seq TO svc_bfd_pipeline_0;
 GRANT SELECT ON SEQUENCE rda.mbi_cache_mbi_id_seq TO paca_reader_role;
 GRANT USAGE ON SEQUENCE rda.mbi_cache_mbi_id_seq TO paca_writer_role;
 GRANT ALL ON SEQUENCE rda.mbi_cache_mbi_id_seq TO paca_migrator_role;
@@ -5415,9 +4840,9 @@ GRANT ALL ON TABLE rda.mcs_audits TO paca_migrator_role;
 -- Name: TABLE mcs_claims; Type: ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-GRANT SELECT ON TABLE rda.mcs_claims TO svc_bfd_server_0;
-GRANT SELECT ON TABLE rda.mcs_claims TO svc_bfd_server_1;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.mcs_claims TO svc_bfd_pipeline_0;
+-- GRANT SELECT ON TABLE rda.mcs_claims TO svc_bfd_server_0;
+-- GRANT SELECT ON TABLE rda.mcs_claims TO svc_bfd_server_1;
+-- GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.mcs_claims TO svc_bfd_pipeline_0;
 GRANT SELECT ON TABLE rda.mcs_claims TO paca_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.mcs_claims TO paca_writer_role;
 GRANT ALL ON TABLE rda.mcs_claims TO paca_migrator_role;
@@ -5463,9 +4888,9 @@ GRANT ALL ON TABLE rda.message_errors TO paca_migrator_role;
 -- Name: TABLE rda_api_progress; Type: ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-GRANT SELECT ON TABLE rda.rda_api_progress TO svc_bfd_server_0;
-GRANT SELECT ON TABLE rda.rda_api_progress TO svc_bfd_server_1;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.rda_api_progress TO svc_bfd_pipeline_0;
+-- GRANT SELECT ON TABLE rda.rda_api_progress TO svc_bfd_server_0;
+-- GRANT SELECT ON TABLE rda.rda_api_progress TO svc_bfd_server_1;
+-- GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.rda_api_progress TO svc_bfd_pipeline_0;
 GRANT SELECT ON TABLE rda.rda_api_progress TO paca_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rda.rda_api_progress TO paca_writer_role;
 GRANT ALL ON TABLE rda.rda_api_progress TO paca_migrator_role;
@@ -5475,133 +4900,133 @@ GRANT ALL ON TABLE rda.rda_api_progress TO paca_migrator_role;
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: ccw; Owner: svc_bfd_pipeline_1
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT SELECT ON SEQUENCES  TO bfd_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT USAGE ON SEQUENCES  TO bfd_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT ALL ON SEQUENCES  TO bfd_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT SELECT ON SEQUENCES  TO bfd_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT USAGE ON SEQUENCES  TO bfd_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT ALL ON SEQUENCES  TO bfd_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT SELECT ON SEQUENCES  TO bfd_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT USAGE ON SEQUENCES  TO bfd_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT ALL ON SEQUENCES  TO bfd_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT SELECT ON SEQUENCES  TO bfd_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT USAGE ON SEQUENCES  TO bfd_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT ALL ON SEQUENCES  TO bfd_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: ccw; Owner: svc_bfd_pipeline_1
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT ALL ON FUNCTIONS  TO bfd_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT ALL ON FUNCTIONS  TO bfd_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT ALL ON FUNCTIONS  TO bfd_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT ALL ON FUNCTIONS  TO bfd_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: ccw; Owner: svc_bfd_pipeline_1
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT SELECT ON TABLES  TO bfd_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO bfd_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT ALL ON TABLES  TO bfd_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT SELECT ON TABLES  TO bfd_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO bfd_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA ccw GRANT ALL ON TABLES  TO bfd_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT SELECT ON TABLES  TO bfd_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO bfd_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT ALL ON TABLES  TO bfd_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT SELECT ON TABLES  TO bfd_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO bfd_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT ALL ON TABLES  TO bfd_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: rda; Owner: bfduser
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO svc_bfd_server_0;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO svc_bfd_server_1;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO svc_bfd_pipeline_0;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO svc_bfd_pipeline_1;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO paca_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO paca_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT ALL ON SEQUENCES  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO svc_bfd_server_0;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO svc_bfd_server_1;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO svc_bfd_pipeline_0;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO svc_bfd_pipeline_1;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO paca_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO paca_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT ALL ON SEQUENCES  TO paca_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: rda; Owner: svc_bfd_pipeline_1
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO paca_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO paca_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT ALL ON SEQUENCES  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO paca_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO paca_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT ALL ON SEQUENCES  TO paca_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO paca_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO paca_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT ALL ON SEQUENCES  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT SELECT ON SEQUENCES  TO paca_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT USAGE ON SEQUENCES  TO paca_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT ALL ON SEQUENCES  TO paca_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: rda; Owner: svc_bfd_pipeline_1
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT ALL ON FUNCTIONS  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT ALL ON FUNCTIONS  TO paca_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: rda; Owner: bfduser
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT ALL ON FUNCTIONS  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT ALL ON FUNCTIONS  TO paca_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT ALL ON FUNCTIONS  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT ALL ON FUNCTIONS  TO paca_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: rda; Owner: bfduser
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON TABLES  TO svc_bfd_server_0;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON TABLES  TO svc_bfd_server_1;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO svc_bfd_pipeline_0;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO svc_bfd_pipeline_1;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON TABLES  TO paca_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO paca_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT ALL ON TABLES  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON TABLES  TO svc_bfd_server_0;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON TABLES  TO svc_bfd_server_1;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO svc_bfd_pipeline_0;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO svc_bfd_pipeline_1;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT ON TABLES  TO paca_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO paca_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT ALL ON TABLES  TO paca_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: rda; Owner: svc_bfd_pipeline_1
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT SELECT ON TABLES  TO paca_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO paca_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT ALL ON TABLES  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT SELECT ON TABLES  TO paca_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO paca_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_bfd_pipeline_1 IN SCHEMA rda GRANT ALL ON TABLES  TO paca_migrator_role;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: rda; Owner: svc_fhirdb_migrator
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT SELECT ON TABLES  TO paca_reader_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO paca_writer_role;
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT ALL ON TABLES  TO paca_migrator_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT SELECT ON TABLES  TO paca_reader_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO paca_writer_role;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA rda GRANT ALL ON TABLES  TO paca_migrator_role;
 
 
 --
