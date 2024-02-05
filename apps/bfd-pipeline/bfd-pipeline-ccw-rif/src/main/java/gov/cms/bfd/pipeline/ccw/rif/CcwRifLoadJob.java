@@ -376,7 +376,7 @@ public final class CcwRifLoadJob implements PipelineJob {
       // TODO END remove once S3 file moves are no longer necessary.
 
       /*
-       * If here, Synthea pre-validation has failed; we want to mark the data set as rejected int he database.
+       * If here, Synthea pre-validation has failed; we want to mark the data set as rejected in the database.
        */
       dataSetQueue.markAsRejected(manifestRecord);
     }

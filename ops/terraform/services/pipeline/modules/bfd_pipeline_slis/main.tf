@@ -79,22 +79,90 @@ resource "aws_lambda_function" "this" {
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.9"
+  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:60"]
   timeout          = 300
   environment {
     variables = {
-      METRICS_NAMESPACE   = local.metrics_namespace
-      ETL_BUCKET_ID       = data.aws_s3_bucket.etl.id
-      SENTINEL_QUEUE_NAME = aws_sqs_queue.this.name
+      METRICS_NAMESPACE       = local.metrics_namespace
+      ETL_BUCKET_ID           = data.aws_s3_bucket.etl.id
+      RIF_AVAILABLE_DDB_TBL   = aws_dynamodb_table.update_slis_rif_available.name
+      LOAD_AVAILABLE_DDB_TBL  = aws_dynamodb_table.update_slis_load_available.name
+      POWERTOOLS_LOG_LEVEL    = "info"
+      POWERTOOLS_SERVICE_NAME = local.lambdas[local.lambda_update_slis].name
     }
   }
 
   role = aws_iam_role.lambda[local.lambda_update_slis].arn
 }
 
-resource "aws_sqs_queue" "this" {
-  name                       = local.lambdas[local.lambda_update_slis].full_name
-  visibility_timeout_seconds = 0
-  kms_master_key_id          = local.kms_key_id
+resource "aws_lambda_function_event_invoke_config" "this" {
+  function_name = aws_lambda_function.this.function_name
+  # This Lambda is invoked by SNS, which invokes the Lambda asynchronously. By default, AWS Lambda
+  # retries failing Functions twice before dropping the event, but because this Lambda has side
+  # effects (creates metrics, posts events to a queue, etc.) we don't want to retry if it fails.
+  maximum_retry_attempts = 0
+}
+
+resource "aws_dynamodb_table" "update_slis_rif_available" {
+  name      = "${local.lambdas[local.lambda_update_slis].full_name}-rif-available"
+  hash_key  = "group_iso_str"
+  range_key = "rif"
+  # The number of writes/reads, combined with the average size of approx. 120 bytes per-item, means
+  # that it's highly likely this table will cost less than $1 (probably _far_ less) per-month. It
+  # would be _far_ more expensive for this table to be set to PROVISIONED
+  billing_mode = "PAY_PER_REQUEST"
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = local.kms_key_arn
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  attribute {
+    name = "group_iso_str"
+    type = "S"
+  }
+
+  attribute {
+    name = "rif"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "dynamo_expiration"
+    enabled        = true
+  }
+}
+
+resource "aws_dynamodb_table" "update_slis_load_available" {
+  name     = "${local.lambdas[local.lambda_update_slis].full_name}-load-available"
+  hash_key = "group_iso_str"
+  # The number of writes/reads, combined with the average size of approx. 120 bytes per-item, means
+  # that it's highly likely this table will cost less than $1 (probably _far_ less) per-month. It
+  # would be _far_ more expensive for this table to be set to PROVISIONED
+  billing_mode = "PAY_PER_REQUEST"
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = local.kms_key_arn
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  attribute {
+    name = "group_iso_str"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "dynamo_expiration"
+    enabled        = true
+  }
 }
 
 resource "aws_scheduler_schedule_group" "repeater" {
