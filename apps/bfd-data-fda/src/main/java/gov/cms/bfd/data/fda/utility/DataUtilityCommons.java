@@ -53,7 +53,7 @@ public class DataUtilityCommons {
       Path convertedNdcDataFile = outputPath.resolve(fdaFile);
 
       try {
-        DataUtilityCommons.buildProductsResource(convertedNdcDataFile, workingDir);
+        buildProductsResource(convertedNdcDataFile, workingDir);
       } finally {
         // Recursively delete the working dir.
         recursivelyDelete(workingDir);
@@ -165,8 +165,6 @@ public class DataUtilityCommons {
         bos.write(bytesIn, 0, read);
       }
     }
-
-    zipIn.closeEntry();
   }
 
   /**
