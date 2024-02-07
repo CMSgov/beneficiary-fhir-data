@@ -467,5 +467,25 @@ public class DataSetQueue implements AutoCloseable {
     public void markAsCompleted() {
       DataSetQueue.this.markAsCompleted(dataFileRecord);
     }
+
+    /**
+     * Used to implement {@link RifFile#getLastRecordNumber}.
+     *
+     * @return the last record number value or zero if we have no value
+     */
+    public long getLastRecordNumber() {
+      return dataFileRecord.getLastRecordNumber();
+    }
+
+    /**
+     * Used to implement {@link RifFile#updateLastRecordNumber}. Sets the new record number value
+     * and updates the record in the database.
+     *
+     * @param recordNumber the new value
+     */
+    public void updateLastRecordNumber(long recordNumber) {
+      dataFileRecord.setLastRecordNumber(recordNumber);
+      s3Records.updateS3DataFile(dataFileRecord);
+    }
   }
 }

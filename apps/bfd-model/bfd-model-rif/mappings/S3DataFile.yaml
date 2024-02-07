@@ -12,11 +12,13 @@ mappings:
       dbName: manifest_id
       name: manifestId
       sqlType: bigint
+      javaType: long
       nullable: false
       dbOnly: true
     - comment: Index (zero based) of file within the manifest.
       name: index
       sqlType: smallint
+      javaType: short
       nullable: false
     - comment: Name of file as defined in manifest.
       dbName: file_name
@@ -49,6 +51,12 @@ mappings:
       name: discoveryTimestamp
       nullable: false
       sqlType: timestamp with time zone
+    - comment: Highest record number for a record which has been written to the database and for which we know that all records with lower record numbers have also been written to the database from this file.
+      dbName: last_record_number
+      name: lastRecordNumber
+      sqlType: bigint
+      javaType: long
+      nullable: false
     joins:
     - class: child
       entityMapping: S3ManifestFile
