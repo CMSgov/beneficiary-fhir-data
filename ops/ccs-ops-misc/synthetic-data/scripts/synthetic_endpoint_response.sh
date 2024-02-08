@@ -18,7 +18,7 @@ set -e
 #psqlpass=""  # Database password
 #psqldb=""   # Database
 
-#psql "host=$psqlhost port=$psqlport dbname=$psqldb user=$psqluser password=$psqlpass" -P "footer=off"  -t -c "SELECT \"beneficiaryId\" FROM public.\"Beneficiaries\" WHERE \"beneficiaryId\" LIKE '-%'" --output=input.txt
+#psql "host=$psqlhost port=$psqlport dbname=$psqldb user=$psqluser password=$psqlpass" -P "footer=off"  -t -c "SELECT \"beneficiaryId\" FROM ccw.\"Beneficiaries\" WHERE \"beneficiaryId\" LIKE '-%'" --output=input.txt
 
 ###### END OF PART 1 ######
 

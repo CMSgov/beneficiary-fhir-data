@@ -109,7 +109,7 @@ def get_bene_data(bene_id_start, bene_id_end, db_string):
     
     query = f"SELECT bene_id, mbi_num, concat_ws(',', ptd_cntrct_jan_id, ptd_cntrct_feb_id,ptd_cntrct_mar_id,ptd_cntrct_apr_id,ptd_cntrct_may_id,ptd_cntrct_jun_id,"\
         f" ptd_cntrct_jul_id, ptd_cntrct_aug_id, ptd_cntrct_sept_id, ptd_cntrct_oct_id, ptd_cntrct_nov_id, ptd_cntrct_dec_id) as \"Part D Contract Number\""\
-        f" FROM public.beneficiaries WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end} order by bene_id desc"
+        f" FROM ccw.beneficiaries WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end} order by bene_id desc"
         
     print(f"Starting query for bene data...");
     raw_query_response = _execute_query(db_string, query)
@@ -125,7 +125,7 @@ def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
     """
     
     query = "SELECT bene_id, count(*)"\
-            f" FROM public.{table_name}"\
+            f" FROM ccw.{table_name}"\
             f" WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end}"\
             " GROUP BY bene_id"\
             " ORDER BY bene_id desc;"\

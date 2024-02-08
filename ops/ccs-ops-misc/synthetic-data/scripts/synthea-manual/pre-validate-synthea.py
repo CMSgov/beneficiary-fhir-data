@@ -166,15 +166,15 @@ def check_ranges(properties_file, number_of_benes_to_generate, db_string):
     query = 'select count(*) from ('\
             '  select count(*) bene_id_count from ('\
             '    select distinct bene_id, mbi_num '\
-            '    from public.beneficiaries '\
+            '    from ccw.beneficiaries '\
             '    where bene_id < 0 and mbi_num IS NOT NULL '\
             '   union '\
             '    select distinct bene_id, mbi_num '\
-            '    from public.beneficiaries_history '\
+            '    from ccw.beneficiaries_history '\
             '    where bene_id < 0 and mbi_num IS NOT NULL '\
             '   union '\
             '    select distinct bene_id, mbi_num '\
-            '    from public.medicare_beneficiaryid_history '\
+            '    from ccw.medicare_beneficiaryid_history '\
             '    where bene_id < 0 and mbi_num IS NOT NULL '\
             '  ) as foo '\
             '  group by mbi_num '\

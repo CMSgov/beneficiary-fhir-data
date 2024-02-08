@@ -90,7 +90,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
   private static final String CHECK_MBI_DUPES =
       "select count(*) from ( "
           + "select count(*) bene_id_count from ("
-          + "select distinct bene_id, mbi_num from public.beneficiaries_history "
+          + "select distinct bene_id, mbi_num from ccw.beneficiaries_history "
           + "where bene_id < 0 and mbi_num IS NOT NULL "
           + ") as foo group by mbi_num "
           + "having count(*) > 1) as s";
