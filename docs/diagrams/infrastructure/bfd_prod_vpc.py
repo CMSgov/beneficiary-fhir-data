@@ -19,10 +19,10 @@ legend_text = (
 "CCW Pipeline Instance is triggered via lambda script when RIF files arrive in s3 bucket.\l"
 "RDA Pipeline runs 24x7\l"
 )
-title = "BFD FHIR Service - Production"
+title = "BFD FHIR Service - Production VPC"
 outformat = "png"
-filename = "out/BFD FHIR Service - Production"
-filenamegraph = "out//BFD FHIR Service - Production.gv"
+filename = "out/BFD FHIR Service - Production VPC"
+filenamegraph = "out//BFD FHIR Service - Production VPC.gv"
 show = False
 direction = "TB"
 
@@ -38,25 +38,34 @@ with Diagram(
     with Cluster(label='bfd-prod-vpc'):
         s3 = S3("bfd-prod-etl")
         lamb = Lambda("bfd-prod-pipeline-scheduler")
-        with Cluster("bfd-prod-az(1,2,3)-dmz"):
-            elb = ELB("Prod ELB")
-        with Cluster("AutoScaling Group"):
+        with Cluster("DMZ Layer"):
+            with Cluster("bfd-prod-az(1,2,3)-dmz"):
+                with Cluster("Public Subnet"):
+                    elb = ELB("Prod ELB")
+        with Cluster("Application Layer"):
             with Cluster("brd-prod-az1-app"):
-                server1 = EC2("bfd-prod-fhir-ap1")
+                with Cluster("Private Subnet"):
+                    server1 = EC2("bfd-prod-fhir-ap1")
             with Cluster("brd-prod-az2-app"):
-                server2 = EC2("bfd-prod-fhir-ap2")
+                with Cluster("Private Subnet"):
+                    server2 = EC2("bfd-prod-fhir-ap2")
             with Cluster("brd-prod-az3-app"):
-                server3 = EC2("bfd-prod-fhir-ap3")
-        with Cluster("bfd-prod-az1-data"):
-            db1 = Aurora("bfd-prod-replica1")
-        with Cluster("bfd-prod-az2-data"):
-            db2 = Aurora("bfd-prod-replica2")
-            db_writer = Aurora("bfd-prod-master")
-            ccw = EC2("CCW bfd-prod-etl1")
-            rda = EC2("RDA bfd-prod-etl1")
-            migrator = EC2("Db Migrator")
-        with Cluster("bfd-prod-az3-data"):
-            db3 = Aurora("bfd-prod-replica3")
+                with Cluster("Private Subnet"):
+                    server3 = EC2("bfd-prod-fhir-ap3")
+        with Cluster("Data Layer"):
+            with Cluster("bfd-prod-az1-data"):
+                with Cluster("Private Subnet"):
+                    db1 = Aurora("bfd-prod-replica1")
+            with Cluster("bfd-prod-az2-data"):
+                with Cluster("Private Subnet"):
+                    db2 = Aurora("bfd-prod-replica2")
+                    db_writer = Aurora("bfd-prod-master")
+                    ccw = EC2("CCW bfd-prod-etl1")
+                    rda = EC2("RDA bfd-prod-etl1")
+                    migrator = EC2("Db Migrator")
+            with Cluster("bfd-prod-az3-data"):
+                with Cluster("Private Subnet"):
+                    db3 = Aurora("bfd-prod-replica3")
             
     elb >> server1 >> db1 >> db_writer
     elb >> server2  >> db2 >> db_writer 
