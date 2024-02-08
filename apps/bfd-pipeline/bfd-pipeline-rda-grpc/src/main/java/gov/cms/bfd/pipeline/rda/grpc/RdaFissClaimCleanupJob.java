@@ -11,7 +11,7 @@ public class RdaFissClaimCleanupJob extends AbstractCleanupJob {
   /** logger to use. */
   static final Logger LOGGER = LoggerFactory.getLogger(RdaFissClaimCleanupJob.class);
 
-  /** List of table names for use in native queries. */
+  /** List of table names for use in native queries. Parent claims table must be last. */
   private static final List<String> TABLE_NAMES =
       List.of(
           "rda.fiss_revenue_lines",
@@ -31,16 +31,16 @@ public class RdaFissClaimCleanupJob extends AbstractCleanupJob {
    * Constructs a RdaFissClaimCleanupJob.
    *
    * @param entityManagerFactory the EntityManagerFactory to use.
-   * @param claimsPerTransaction the number of claims to remove in a single transaction.
    * @param claimsPerRun the number of claims to remove in a single run of this job.
+   * @param claimsPerTransaction the number of claims to remove in a single transaction.
    * @param enabled true if this job should run, false otherwise.
    */
   public RdaFissClaimCleanupJob(
       EntityManagerFactory entityManagerFactory,
-      int claimsPerTransaction,
       int claimsPerRun,
+      int claimsPerTransaction,
       boolean enabled) {
-    super(entityManagerFactory, claimsPerTransaction, claimsPerRun, enabled, LOGGER);
+    super(entityManagerFactory, claimsPerRun, claimsPerTransaction, enabled, LOGGER);
   }
 
   /** {@inheritDoc} */

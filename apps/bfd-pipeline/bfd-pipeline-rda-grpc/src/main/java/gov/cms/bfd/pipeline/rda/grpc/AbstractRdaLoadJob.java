@@ -185,8 +185,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
    */
   void executeCleanupJob() throws ProcessingException {
     try {
-      int deletedCount = cleanupJob.run();
-      logger.info("cleanup job removed {} claims", deletedCount);
+      cleanupJob.run();
     } catch (Exception ex) {
       logger.error("cleanup job exception: message={}", ex.getMessage(), ex);
       throw new ProcessingException(ex, 0);
@@ -364,11 +363,11 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim> implements PipelineJ
 
       if (runCleanup) {
         Preconditions.checkArgument(
-            cleanupRunSize <= 0 || cleanupRunSize < cleanupTransactionSize,
+            cleanupRunSize >= 0 || cleanupRunSize > cleanupTransactionSize,
             "cleanupRunSize must be greater than 0 and greater than cleanupTransactionSize: %s",
             cleanupRunSize);
         Preconditions.checkArgument(
-            cleanupTransactionSize <= 0,
+            cleanupTransactionSize >= 0,
             "cleanupTransactionSize must be greater than 0: %s",
             cleanupTransactionSize);
       }

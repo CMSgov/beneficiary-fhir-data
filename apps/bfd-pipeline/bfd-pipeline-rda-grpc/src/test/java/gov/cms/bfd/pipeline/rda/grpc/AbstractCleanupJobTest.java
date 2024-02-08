@@ -40,7 +40,7 @@ class AbstractCleanupJobTest {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
     utils.seedData(8, 4);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 2, 6, true);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, true);
     var deleted = cleanUpJob.run();
 
     // after first run 6 should be deleted and 6 remaining
@@ -64,7 +64,7 @@ class AbstractCleanupJobTest {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
     utils.seedData(0, 8);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 2, 6, true);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, true);
     var deleted = cleanUpJob.run();
 
     // expecting no deletes and all claims still remaining
@@ -82,7 +82,7 @@ class AbstractCleanupJobTest {
   void runAllDeleted() throws ProcessingException {
     utils.seedData(5, 0);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 2, 6, true);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, true);
     var deleted = cleanUpJob.run();
 
     // expecting 5 deletes and no claims remaining
@@ -99,7 +99,7 @@ class AbstractCleanupJobTest {
   void runEmpty() throws ProcessingException {
     utils.seedData(0, 0);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 2, 6, true);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, true);
     var deleted = cleanUpJob.run();
 
     // expecting 0 deletes and no claims remaining
@@ -116,7 +116,7 @@ class AbstractCleanupJobTest {
   void notEnabled() throws ProcessingException {
     utils.seedData(4, 4);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 2, 6, false);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, false);
     var deleted = cleanUpJob.run();
 
     // expecting 0 deletes and all 8 claims remaining

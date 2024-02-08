@@ -28,18 +28,18 @@ public abstract class AbstractCleanupJob implements CleanupJob {
           + "  select %s "
           + "  from %s "
           + "  where last_updated < '%s' "
-          + "  order by last_updated desc "
+          + "  order by last_updated "
           + "  limit %d"
           + ")";
 
   /** EntityManagerFactory to use to generate the EntityManager. */
   private final EntityManagerFactory entityManagerFactory;
 
-  /** the number of claims to include in a single delete transaction. */
-  private final int cleanupTransactionSize;
-
   /** the number of claims to delete in a single run of the cleanup job. */
   private final int cleanupRunSize;
+
+  /** the number of claims to include in a single delete transaction. */
+  private final int cleanupTransactionSize;
 
   /** when true the cleanup job should run, false otherwise. */
   private final boolean enabled;
@@ -88,7 +88,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
       try {
         Instant cutoffDate = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
         List<Query> queries = buildDeleteQueries(cutoffDate, entityManager);
-        var numberOfTransactions = Math.ceilDiv(cleanupRunSize, cleanupTransactionSize);
+        var numberOfTransactions = Math.floorDiv(cleanupRunSize, cleanupTransactionSize);
 
         for (int i = 0; i < numberOfTransactions; i++) {
           var result = executeDeleteTransaction(queries, entityManager);
@@ -140,7 +140,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
    * Build a list of native sql delete queries to remove claims.
    *
    * @param cutoffDate the Instant used to identify queries for deletion.
-   * @param em the EntityManager to use.
+   * @param em the EntityManager to use to create queries.
    * @return the list of queries.
    */
   private List<Query> buildDeleteQueries(Instant cutoffDate, EntityManager em) {
