@@ -71,7 +71,7 @@ public class CommonQueries {
    * (beneficiaries) and historical (beneficiaries_history) data for a match.
    *
    * <p>For more information on the database function, see:
-   * V115__FIND_BENEFICIARY_IDENTIFIER_FUNCTION.SQL in the db migration directory.
+   * V116__FIND_BENEFICIARY_IDENTIFIER_FUNCTION.SQL in the db migration directory.
    *
    * @param entityManager {@link EntityManager} used to query database.
    * @param metricRegistry {@link MetricRegistry} used to setup/capture performance metrics.
