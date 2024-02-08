@@ -44,9 +44,17 @@ public class CommonQueries {
    * for the specified beneficiaryId. This represents a fast and efficient way to ignore a requested
    * claim type that ultimately has no data for our beneficiaryId.
    *
-   * <p>The database function returns bits as follows: CARRIER_CLAIMS : bit 0 INPATIENT CLAIMS : bit
-   * 1 OUTPATIENT CLAIMS : bit 2 SNF CLAIMS : bit 3 DME CLAIMS : bit 4 HHA CLAIMS : bit 5 HOSPICE
-   * CLAIMS : bit 6 PART D CLAIMS : bit 7
+   * <p>The database function returns bits as follows: 
+   *  <ul>
+   *    <li>CARRIER CLAIMS    : bit 0
+   *    <li>INPATIENT CLAIMS  : bit 1
+   *    <li>OUTPATIENT CLAIMS : bit 2
+   *    <li>SNF CLAIMS        : bit 3
+   *    <li>DME CLAIMS        : bit 4
+   *    <li>HHA CLAIMS        : bit 5
+   *    <li>HOSPICE CLAIMS    : bit 6
+   *    <li>PART D CLAIMS     : bit 7
+   *  </ul>
    *
    * <p>For more information on the database function, see:
    * V111__SETUP_CLAIMS_AVAILABILITY_FUNCTION.SQL in the db migration directory.
