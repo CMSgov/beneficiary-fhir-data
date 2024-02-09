@@ -10,15 +10,16 @@ import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
@@ -28,6 +29,7 @@ import lombok.Getter;
  * Utility class for supporting testing of the CleanupJob tasks. (Borrows from
  * gov.cms.bfd.server.war.utils.RDATestUtils.)
  */
+@Getter
 public class CleanupTestUtils {
 
   /** Tracking entities (tables) so they can be cleaned after. */
@@ -55,11 +57,11 @@ public class CleanupTestUtils {
   /** Test fiss claim (DCN). */
   public static final String FISS_CLAIM_DCN = "123456d";
 
-  /** EntityManager to use with tests. */
-  private EntityManager entityManager;
+  /** TransactionManager to use with tests. */
+  private TransactionManager transactionManager;
 
   /** EntityManagerFactory to use with tests. */
-  @Getter private EntityManagerFactory entityManagerFactory;
+  private EntityManagerFactory entityManagerFactory;
 
   /** Initializes the test utility. */
   public void init() {
@@ -71,35 +73,36 @@ public class CleanupTestUtils {
     entityManagerFactory =
         Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties);
 
-    entityManager = entityManagerFactory.createEntityManager();
-  }
-
-  /** Closes all resources. */
-  public void close() {
-    if (entityManager != null) {
-      entityManager.close();
-    }
+    transactionManager = new TransactionManager(entityManagerFactory);
   }
 
   /**
    * Generate sample claims data to fit a given test scenario.
    *
+   * @param cutoff the 60-day cutoff Instant used for the test.
    * @param oldClaims the number of Fiss claims to generate that are greater than 60 days since
    *     lastUpdated.
    * @param newClaims the number of Fiss claims to generate that are less than 60 days since
    *     lastUpdated.
    */
-  public void seedData(int oldClaims, int newClaims) {
-    var dateSeq = createDateSequence(Instant.now().minus(60, ChronoUnit.DAYS), oldClaims);
-    dateSeq.addAll(createDateSequence(Instant.now(), newClaims));
-    int baseClaimId = 1;
-    entityManager.getTransaction().begin();
-    Mbi mbi = entityManager.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).build());
-    for (Instant i : dateSeq) {
-      String claimId = "" + (baseClaimId++);
-      entityManager.merge(createFissClaimForDate(claimId, mbi, i));
-    }
-    entityManager.getTransaction().commit();
+  public void seedData(Instant cutoff, int oldClaims, int newClaims) {
+    List<Instant> dateSeq = new ArrayList<>();
+
+    // add 60-day dates
+    dateSeq.addAll(Collections.nCopies(oldClaims, cutoff));
+    // add 59-day dates (after cutoff)
+    dateSeq.addAll(Collections.nCopies(newClaims, cutoff.plus(1, ChronoUnit.DAYS)));
+    Mbi mbi =
+        transactionManager.executeFunction(
+            entityManager -> entityManager.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).build()));
+    transactionManager.executeProcedure(
+        entityManager -> {
+          int baseClaimId = 1;
+          for (Instant i : dateSeq) {
+            String claimId = "" + (baseClaimId++);
+            entityManager.merge(createFissClaimForDate(claimId, mbi, i));
+          }
+        });
   }
 
   /**
@@ -108,13 +111,16 @@ public class CleanupTestUtils {
    * @return the count of RdaFissClaim entities.
    */
   public long count() {
-    long count = 0L;
-    List<Long> result =
-        entityManager.createQuery("select count(*) from RdaFissClaim").getResultList();
-    if (result != null && !result.isEmpty()) {
-      count = result.getFirst();
-    }
-    return count;
+    return transactionManager.executeFunction(
+        entityManager -> {
+          List<Long> result =
+              entityManager.createQuery("select count(*) from RdaFissClaim").getResultList();
+          if (result != null && !result.isEmpty()) {
+            return result.getFirst();
+          } else {
+            return 0L;
+          }
+        });
   }
 
   /**
@@ -124,13 +130,18 @@ public class CleanupTestUtils {
    * @return an Instant representing the oldest lastUpdated property of RdaFissClaim.
    */
   public Instant oldestLastUpdatedDate() {
-    Instant lastUpdated = Instant.EPOCH;
-    List<Instant> result =
-        entityManager.createQuery("select max(lastUpdated) from RdaFissClaim").getResultList();
-    if (result != null && !result.isEmpty()) {
-      lastUpdated = result.getFirst();
-    }
-    return lastUpdated;
+    return transactionManager.executeFunction(
+        entityManager -> {
+          List<Instant> result =
+              entityManager
+                  .createQuery("select max(lastUpdated) from RdaFissClaim")
+                  .getResultList();
+          if (result != null && !result.isEmpty()) {
+            return result.getFirst();
+          } else {
+            return Instant.EPOCH;
+          }
+        });
   }
 
   /**
@@ -266,26 +277,13 @@ public class CleanupTestUtils {
 
   /** Delete all the test data from the db. */
   public void truncateTables() {
-    entityManager.getTransaction().begin();
-    TABLE_ENTITIES.forEach(
-        e -> entityManager.createQuery("delete from " + e.getSimpleName() + " f").executeUpdate());
-    entityManager.getTransaction().commit();
-  }
-
-  /**
-   * Creates a list of {@link java.time.Instant} of count size starting with the start provided and
-   * decremented by one day each.
-   *
-   * @param start the Instant in time to start with
-   * @param count the number of Instant to add to the list
-   * @return a list of Instant
-   */
-  private List<Instant> createDateSequence(Instant start, int count) {
-    List<Instant> dates = new ArrayList<>(count);
-    for (int i = 0; i < count; i++) {
-      dates.add(start);
-      start = start.minus(1, ChronoUnit.DAYS);
-    }
-    return dates;
+    transactionManager.executeProcedure(
+        entityManager -> {
+          TABLE_ENTITIES.forEach(
+              e ->
+                  entityManager
+                      .createQuery("delete from " + e.getSimpleName() + " f")
+                      .executeUpdate());
+        });
   }
 }

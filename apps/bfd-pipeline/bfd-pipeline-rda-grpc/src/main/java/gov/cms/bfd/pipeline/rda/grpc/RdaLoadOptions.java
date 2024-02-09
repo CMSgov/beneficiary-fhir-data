@@ -145,7 +145,7 @@ public class RdaLoadOptions {
     // removes old RDA FISS claims data if enabled.
     cleanupJob =
         new RdaFissClaimCleanupJob(
-            appState.getEntityManagerFactory(),
+            new TransactionManager(appState.getEntityManagerFactory()),
             jobConfig.getCleanupRunSize(),
             jobConfig.getCleanupTransactionSize(),
             jobConfig.shouldRunCleanup());
@@ -230,7 +230,7 @@ public class RdaLoadOptions {
     // removes old RDA MCS claims data if enabled.
     cleanupJob =
         new RdaMcsClaimCleanupJob(
-            appState.getEntityManagerFactory(),
+            new TransactionManager(appState.getEntityManagerFactory()),
             jobConfig.getCleanupRunSize(),
             jobConfig.getCleanupTransactionSize(),
             jobConfig.shouldRunCleanup());

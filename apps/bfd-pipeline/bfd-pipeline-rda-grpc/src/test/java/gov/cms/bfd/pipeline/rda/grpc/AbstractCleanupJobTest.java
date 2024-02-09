@@ -27,7 +27,6 @@ class AbstractCleanupJobTest {
   @AfterEach
   void cleanupAfterEach() {
     utils.truncateTables();
-    utils.close();
   }
 
   /**
@@ -38,9 +37,9 @@ class AbstractCleanupJobTest {
   @Test
   void runComplete() throws ProcessingException {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
-    utils.seedData(8, 4);
+    utils.seedData(cutoff, 8, 4);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, true);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
 
     // after first run 6 should be deleted and 6 remaining
@@ -62,9 +61,9 @@ class AbstractCleanupJobTest {
   @Test
   void runNoneFound() throws ProcessingException {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
-    utils.seedData(0, 8);
+    utils.seedData(cutoff, 0, 8);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, true);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
 
     // expecting no deletes and all claims still remaining
@@ -80,9 +79,10 @@ class AbstractCleanupJobTest {
    */
   @Test
   void runAllDeleted() throws ProcessingException {
-    utils.seedData(5, 0);
+    var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
+    utils.seedData(cutoff, 5, 0);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, true);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
 
     // expecting 5 deletes and no claims remaining
@@ -97,9 +97,10 @@ class AbstractCleanupJobTest {
    */
   @Test
   void runEmpty() throws ProcessingException {
-    utils.seedData(0, 0);
+    var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
+    utils.seedData(cutoff, 0, 0);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, true);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
 
     // expecting 0 deletes and no claims remaining
@@ -114,9 +115,10 @@ class AbstractCleanupJobTest {
    */
   @Test
   void notEnabled() throws ProcessingException {
-    utils.seedData(4, 4);
+    var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
+    utils.seedData(cutoff, 4, 4);
 
-    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getEntityManagerFactory(), 6, 2, false);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, false);
     var deleted = cleanUpJob.run();
 
     // expecting 0 deletes and all 8 claims remaining

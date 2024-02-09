@@ -1,11 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,8 +31,8 @@ public abstract class AbstractCleanupJob implements CleanupJob {
           + "  limit %d"
           + ")";
 
-  /** EntityManagerFactory to use to generate the EntityManager. */
-  private final EntityManagerFactory entityManagerFactory;
+  /** TransactionManager to use for db operations. */
+  private final TransactionManager transactionManager;
 
   /** the number of claims to delete in a single run of the cleanup job. */
   private final int cleanupRunSize;
@@ -53,13 +52,6 @@ public abstract class AbstractCleanupJob implements CleanupJob {
    * @return list of database table names.
    */
   abstract List<String> getTableNames();
-
-  /**
-   * Returns the name of the database table mapped to the parent entity class.
-   *
-   * @return the database table name for the parent entity.
-   */
-  abstract String getParentTableName();
 
   /**
    * Returns the key column of the database table mapped to the parent entity class.
@@ -83,15 +75,14 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
     if (enabled) {
       final long startMillis = System.currentTimeMillis();
-      var entityManager = entityManagerFactory.createEntityManager();
 
       try {
         Instant cutoffDate = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
-        List<Query> queries = buildDeleteQueries(cutoffDate, entityManager);
+        List<Query> queries = buildDeleteQueries(cutoffDate, transactionManager);
         var numberOfTransactions = Math.floorDiv(cleanupRunSize, cleanupTransactionSize);
 
         for (int i = 0; i < numberOfTransactions; i++) {
-          var result = executeDeleteTransaction(queries, entityManager);
+          var result = executeDeleteTransaction(queries, transactionManager);
           claimsDeleted += result;
 
           // If no claims deleted this iteration, or total claims deleted
@@ -107,8 +98,6 @@ public abstract class AbstractCleanupJob implements CleanupJob {
       } catch (Exception ex) {
         logger.error("cleanup job aborted by an exception: message={}", ex.getMessage(), ex);
         throw new ProcessingException(ex, 0);
-      } finally {
-        entityManager.close();
       }
     }
 
@@ -120,43 +109,47 @@ public abstract class AbstractCleanupJob implements CleanupJob {
    * query must delete from the parent table, all other queries are child table deletes.
    *
    * @param queries the queries to execute in each transaction.
-   * @param em the entitymanager to use with the deletion.
+   * @param tm the TransactionManager to use with the deletion.
    * @return the number of claims deleted by the transaction.
    */
-  private int executeDeleteTransaction(List<Query> queries, EntityManager em) {
-    var count = 0;
-    em.getTransaction().begin();
-
-    // execute all queries in order, use the count from the last query (parent table)
-    // to track the number of claims deleted.
-    for (Query query : queries) {
-      count = query.executeUpdate();
-    }
-    em.getTransaction().commit();
-    return count;
+  private int executeDeleteTransaction(List<Query> queries, TransactionManager tm) {
+    return tm.executeFunction(
+        entityManager -> {
+          // execute all queries in order, use the count from the last query (parent table)
+          // to track the number of claims deleted.
+          var count = 0;
+          for (Query query : queries) {
+            count = query.executeUpdate();
+          }
+          return count;
+        });
   }
 
   /**
    * Build a list of native sql delete queries to remove claims.
    *
    * @param cutoffDate the Instant used to identify queries for deletion.
-   * @param em the EntityManager to use to create queries.
+   * @param tm the TransactionManager to use to create queries.
    * @return the list of queries.
    */
-  private List<Query> buildDeleteQueries(Instant cutoffDate, EntityManager em) {
+  private List<Query> buildDeleteQueries(Instant cutoffDate, TransactionManager tm) {
     List<Query> queries = new ArrayList<>();
-    for (String tableName : getTableNames()) {
-      String queryStr =
-          String.format(
-              DELETE_QUERY_TEMPLATE,
-              tableName,
-              getParentTableKey(),
-              getParentTableKey(),
-              getParentTableName(),
-              cutoffDate.toString(),
-              cleanupTransactionSize);
-      queries.add(em.createNativeQuery(queryStr));
-    }
+    String parentTableName = getTableNames().getLast();
+    tm.executeProcedure(
+        entityManager -> {
+          for (String tableName : getTableNames()) {
+            String queryStr =
+                String.format(
+                    DELETE_QUERY_TEMPLATE,
+                    tableName,
+                    getParentTableKey(),
+                    getParentTableKey(),
+                    parentTableName,
+                    cutoffDate.toString(),
+                    cleanupTransactionSize);
+            queries.add(entityManager.createNativeQuery(queryStr));
+          }
+        });
     return queries;
   }
 }

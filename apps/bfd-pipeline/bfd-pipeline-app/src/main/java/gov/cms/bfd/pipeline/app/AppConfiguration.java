@@ -279,13 +279,13 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * The path of the SSM parameter that should be used to determine if the cleanup tasks that remove
    * old FISS and MCS claims should be run on subsequent job runs.
    */
-  public static final String SSM_PATH_RUN_CLEANUP = "rda/job/run_cleanup";
+  public static final String SSM_PATH_RUN_CLEANUP = "rda/job/cleanup/run_cleanup";
 
   /** The maximum number of claims that will be removed during a cleanup task run. */
-  public static final String SSM_PATH_CLEANUP_RUN_SIZE = "rda/job/cleanup_run_size";
+  public static final String SSM_PATH_CLEANUP_RUN_SIZE = "rda/job/cleanup/run_size";
 
   /** The number of claims to remove as part of a single transaction during a cleanup task run. */
-  public static final String SSM_PATH_CLEANUP_TRANSACTION_SIZE = "rda/job/cleanup_transaction_size";
+  public static final String SSM_PATH_CLEANUP_TRANSACTION_SIZE = "rda/job/cleanup/transaction_size";
 
   /**
    * The path of the SSM parameter that can be set to override the RDA API Version that the running
