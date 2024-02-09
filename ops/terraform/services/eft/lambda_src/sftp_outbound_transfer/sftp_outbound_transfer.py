@@ -139,8 +139,14 @@ class StatusNotification:
                 self.type = "UNKNOWN_ERROR"
             case _:  # pyright: ignore [reportUnnecessaryComparison]
                 raise ValueError(
-                    f"Invalid details, must be one of: {TransferSuccessDetails.__name__},"
-                    f" {TransferFailedDetails.__name__}"
+                    f"Invalid details, must be one of: "
+                    f"{(", ".join([
+                        x.__name__ for x in [
+                            TransferSuccessDetails,
+                            TransferFailedDetails,
+                            UnknownErrorDetails,
+                        ]
+                    ]))}"
                 )
 
     def as_sns_message(self) -> str:
