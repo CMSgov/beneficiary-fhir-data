@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
+import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_CLEANUP_ENABLED;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_CLEANUP_RUN_SIZE;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_CLEANUP_TRANSACTION_SIZE;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_GRPC_AUTH_TOKEN;
@@ -22,7 +23,6 @@ import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_STARTIN
 import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_STARTING_MCS_SEQ_NUM;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_JOB_WRITE_THREADS;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RDA_VERSION;
-import static gov.cms.bfd.pipeline.app.AppConfiguration.SSM_PATH_RUN_CLEANUP;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadBeneficiaryPerformanceSettings;
 import static gov.cms.bfd.pipeline.app.AppConfiguration.loadClaimPerformanceSettings;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -380,7 +380,7 @@ public class AppConfigurationTest {
     assertEquals(0, jobConfig.getCleanupTransactionSize());
 
     // verify claims cleanup settings when values are present
-    settingsMap.put(SSM_PATH_RUN_CLEANUP, "true");
+    settingsMap.put(SSM_PATH_CLEANUP_ENABLED, "true");
     settingsMap.put(SSM_PATH_CLEANUP_RUN_SIZE, "100000");
     settingsMap.put(SSM_PATH_CLEANUP_TRANSACTION_SIZE, "5000");
     jobConfig = AppConfiguration.loadRdaLoadJobConfigOptions(configLoader);

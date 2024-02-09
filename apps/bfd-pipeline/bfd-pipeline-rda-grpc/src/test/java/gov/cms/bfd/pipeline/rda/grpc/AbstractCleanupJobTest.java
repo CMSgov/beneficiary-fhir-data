@@ -51,6 +51,13 @@ class AbstractCleanupJobTest {
     assertEquals(2, deleted);
     assertEquals(4, utils.count());
     assertTrue(utils.oldestLastUpdatedDate().isAfter(cutoff));
+
+    deleted = cleanUpJob.run();
+
+    // after third run 0 should be deleted and 4 remaining, none older than 60 days;
+    assertEquals(0, deleted);
+    assertEquals(4, utils.count());
+    assertTrue(utils.oldestLastUpdatedDate().isAfter(cutoff));
   }
 
   /**
