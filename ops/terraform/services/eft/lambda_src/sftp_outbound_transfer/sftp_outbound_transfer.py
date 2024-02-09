@@ -18,7 +18,6 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
-from mypy_boto3_sns import SNSClient
 from paramiko.ssh_exception import (
     AuthenticationException,
     BadHostKeyException,
@@ -31,16 +30,15 @@ if TYPE_CHECKING:
     from mypy_boto3_sns.service_resource import Topic
     from mypy_boto3_ssm.client import SSMClient
 else:
-    SSMClient = object
-    SNSClient = object
     Topic = object
+    SSMClient = object
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 BUCKET = os.environ.get("BUCKET", "")
 BUCKET_ROOT_DIR = os.environ.get("BUCKET_ROOT_DIR", "")
 BFD_SNS_TOPIC_ARN = os.environ.get("BFD_SNS_TOPIC_ARN", "")
-PARTNER_SNS_TOPIC_PREFIX = os.environ.get("PARTNER_SNS_TOPIC_PREFIX", "")
+SNS_TOPIC_ARNS_BY_PARTNER_JSON = os.environ.get("SNS_TOPIC_ARNS_BY_PARTNER_JSON", "{}")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -72,7 +70,7 @@ class S3EventType(str, Enum):
 
 class BaseTransferError(Exception):
     def __init__(self, message: str, s3_object_key: str, partner: str | None):
-        super(BaseTransferError, self).__init__(message, s3_object_key, partner)
+        super().__init__(message, s3_object_key, partner)
 
         self.message = message
         self.s3_object_key = s3_object_key
@@ -155,20 +153,6 @@ def send_notification(topic: Topic, notification: StatusNotification):
         MessageAttributes={"type": {"DataType": "String", "StringValue": notification.type}},
     )
     logger.info("Published %s to %s", notification.as_sns_message(), topic.arn)
-
-
-def get_partner_topic(sns_client: SNSClient, partner: str) -> Topic:
-    topics = sns_client.list_topics()
-    try:
-        partner_topic = next(
-            topic_arn
-            for topic in topics["Topics"]
-            if (topic_arn := topic.get("TopicArn", None)) is not None
-        )
-    except StopIteration as exc:
-        raise ValueError(f"No corresponding topic found for {partner}") from exc
-
-    return boto3.resource("sns", config=BOTO_CONFIG).Topic(partner_topic)
 
 
 @dataclass(frozen=True, eq=True)
@@ -468,7 +452,8 @@ def _handle_s3_event(s3_object_key: str):
             global_config.sftp_hostname,
         )
 
-        default_topic = boto3.resource("sns", config=BOTO_CONFIG).Topic(BFD_SNS_TOPIC_ARN)
+        sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
+        bfd_topic = sns_resource.Topic(BFD_SNS_TOPIC_ARN)
         notification = StatusNotification(
             details=TransferSuccessDetails(
                 partner=partner,
@@ -477,24 +462,22 @@ def _handle_s3_event(s3_object_key: str):
                 destination=recognized_file.destination_folder,
             )
         )
-        send_notification(topic=default_topic, notification=notification)
-        partner_topic = get_partner_topic(
-            sns_client=boto3.client("sns", config=BOTO_CONFIG), partner=partner
-        )
-        send_notification(topic=partner_topic, notification=notification)
+        send_notification(topic=bfd_topic, notification=notification)
+        topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
+        if partner in topic_arns_by_partner:
+            partner_topic = sns_resource.Topic(topic_arns_by_partner[partner])
+            send_notification(topic=partner_topic, notification=notification)
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[Any, Any], context: LambdaContext):
     try:
-        if not all(
-            [
-                REGION,
-                BFD_ENVIRONMENT,
-                BUCKET,
-                BUCKET_ROOT_DIR,
-            ]
-        ):
+        if not all([
+            REGION,
+            BFD_ENVIRONMENT,
+            BUCKET,
+            BUCKET_ROOT_DIR,
+        ]):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         sns_event = SNSEvent(event)
@@ -530,7 +513,8 @@ def handler(event: dict[Any, Any], context: LambdaContext):
 
                 _handle_s3_event(s3_object_key=s3_object_key)
     except Exception as exc:
-        bfd_topic = boto3.resource("sns", config=BOTO_CONFIG).Topic(BFD_SNS_TOPIC_ARN)
+        sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
+
         notification: StatusNotification
         if isinstance(exc, BaseTransferError):
             notification = StatusNotification(
@@ -543,9 +527,9 @@ def handler(event: dict[Any, Any], context: LambdaContext):
                 )
             )
 
-            if exc.partner:
-                sns_client = boto3.client("sns", config=BOTO_CONFIG)
-                partner_topic = get_partner_topic(sns_client=sns_client, partner=exc.partner)
+            topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
+            if exc.partner and exc.partner in topic_arns_by_partner:
+                partner_topic = sns_resource.Topic(topic_arns_by_partner[exc.partner])
                 send_notification(topic=partner_topic, notification=notification)
         else:
             notification = StatusNotification(
@@ -554,7 +538,8 @@ def handler(event: dict[Any, Any], context: LambdaContext):
                 )
             )
 
-        send_notification(topic=bfd_topic, notification=notification)
+        send_notification(topic=sns_resource.Topic(BFD_SNS_TOPIC_ARN), notification=notification)
 
-        logger.exception("Unrecoverable exception raised")
         raise
+    finally:
+        logger.exception("Unrecoverable exception raised")
