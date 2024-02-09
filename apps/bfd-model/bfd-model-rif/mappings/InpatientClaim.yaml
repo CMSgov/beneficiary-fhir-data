@@ -1498,6 +1498,7 @@ mappings:
       mappedBy: parentClaim
       orderBy: CLM_LINE_NUM ASC
     name: inpatient_claims
+    schema: ccw
     primaryKeyColumns:
     - claimId
     quoteNames: false

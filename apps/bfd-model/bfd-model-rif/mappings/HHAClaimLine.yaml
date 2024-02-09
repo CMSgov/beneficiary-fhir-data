@@ -111,6 +111,7 @@ mappings:
       joinColumnName: claimId
       joinType: ManyToOne
     name: hha_claim_lines
+    schema: ccw
     primaryKeyColumns:
     - parentClaim
     - lineNumber

@@ -639,6 +639,7 @@ mappings:
       mappedBy: parentClaim
       orderBy: CLM_LINE_NUM ASC
     name: hha_claims
+    schema: ccw
     primaryKeyColumns:
     - claimId
     quoteNames: false

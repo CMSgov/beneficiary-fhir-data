@@ -82,6 +82,7 @@ mappings:
       joinColumnName: beneficiaryId
       joinType: ManyToOne
     name: beneficiary_monthly
+    schema: ccw
     primaryKeyColumns:
     - parentBeneficiary
     - yearMonth

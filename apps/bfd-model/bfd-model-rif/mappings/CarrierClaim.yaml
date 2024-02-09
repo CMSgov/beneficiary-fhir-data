@@ -312,6 +312,7 @@ mappings:
       mappedBy: parentClaim
       orderBy: LINE_NUM ASC
     name: carrier_claims
+    schema: ccw
     primaryKeyColumns:
     - claimId
     quoteNames: false

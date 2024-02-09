@@ -80,6 +80,7 @@ mappings:
       joinColumnName: claimId
       joinType: ManyToOne
     name: snf_claim_lines
+    schema: ccw
     primaryKeyColumns:
     - parentClaim
     - lineNumber

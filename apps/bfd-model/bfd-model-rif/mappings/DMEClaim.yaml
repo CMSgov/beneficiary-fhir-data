@@ -305,6 +305,7 @@ mappings:
       mappedBy: parentClaim
       orderBy: LINE_NUM ASC
     name: dme_claims
+    schema: ccw
     primaryKeyColumns:
     - claimId
     quoteNames: false

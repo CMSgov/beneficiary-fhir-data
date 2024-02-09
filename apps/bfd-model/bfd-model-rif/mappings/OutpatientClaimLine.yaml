@@ -182,6 +182,7 @@ mappings:
       joinColumnName: claimId
       joinType: ManyToOne
     name: outpatient_claim_lines
+    schema: ccw
     primaryKeyColumns:
     - parentClaim
     - lineNumber

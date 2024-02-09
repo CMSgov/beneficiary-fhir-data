@@ -225,6 +225,7 @@ mappings:
       sqlType: timestamp with time zone
     equalsNeeded: false
     name: partd_events
+    schema: ccw
     primaryKeyColumns:
     - eventId
     quoteNames: false

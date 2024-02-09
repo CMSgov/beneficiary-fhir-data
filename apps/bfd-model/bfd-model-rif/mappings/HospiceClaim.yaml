@@ -635,6 +635,7 @@ mappings:
       mappedBy: parentClaim
       orderBy: CLM_LINE_NUM ASC
     name: hospice_claims
+    schema: ccw
     primaryKeyColumns:
     - claimId
     quoteNames: false

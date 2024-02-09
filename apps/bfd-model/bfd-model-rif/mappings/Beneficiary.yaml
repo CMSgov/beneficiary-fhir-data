@@ -952,6 +952,7 @@ mappings:
       orphanRemoval: false
       readOnly: true
     name: beneficiaries
+    schema: ccw
     primaryKeyColumns:
     - beneficiaryId
     quoteNames: false
