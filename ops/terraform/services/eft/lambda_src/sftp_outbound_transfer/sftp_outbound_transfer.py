@@ -3,7 +3,7 @@ import os
 import re
 import socket
 from base64 import b64decode
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from io import StringIO
@@ -18,6 +18,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
+from mypy_boto3_sns import SNSClient
 from paramiko.ssh_exception import (
     AuthenticationException,
     BadHostKeyException,
@@ -27,14 +28,19 @@ from paramiko.ssh_exception import (
 
 # Solve typing issues in Lambda as mypy_boto3 will not be included in the Lambda
 if TYPE_CHECKING:
+    from mypy_boto3_sns.service_resource import Topic
     from mypy_boto3_ssm.client import SSMClient
 else:
     SSMClient = object
+    SNSClient = object
+    Topic = object
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 BUCKET = os.environ.get("BUCKET", "")
 BUCKET_ROOT_DIR = os.environ.get("BUCKET_ROOT_DIR", "")
+BFD_SNS_TOPIC_ARN = os.environ.get("BFD_SNS_TOPIC_ARN", "")
+PARTNER_SNS_TOPIC_PREFIX = os.environ.get("PARTNER_SNS_TOPIC_PREFIX", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -96,6 +102,73 @@ class SFTPConnectionError(BaseTransferError): ...
 class SFTPTransferError(BaseTransferError): ...
 
 
+@dataclass(frozen=True, eq=True)
+class TransferSuccessDetails:
+    partner: str
+    timestamp: datetime
+    object_key: str
+    destination: str
+
+
+@dataclass(frozen=True, eq=True)
+class TransferFailedDetails:
+    partner: str
+    timestamp: datetime
+    object_key: str
+    error_name: str
+    reason: str
+
+
+@dataclass(frozen=True, eq=True)
+class UnknownErrorDetails:
+    timestamp: datetime
+    error_name: str
+    reason: str
+
+
+@dataclass
+class StatusNotification:
+    type: str = field(init=False, default="")
+    details: TransferSuccessDetails | TransferFailedDetails | UnknownErrorDetails
+
+    def __post_init__(self):
+        match self.details:
+            case TransferSuccessDetails():
+                self.type = "TRANSFER_SUCCESS"
+            case TransferFailedDetails():
+                self.type = "TRANSFER_FAILED"
+            case UnknownErrorDetails():
+                self.type = "UNKNOWN_ERROR"
+            case _:  # pyright: ignore [reportUnnecessaryComparison]
+                raise ValueError(
+                    f"Invalid details, must be one of: {TransferSuccessDetails.__name__},"
+                    f" {TransferFailedDetails.__name__}"
+                )
+
+    def as_sns_message(self) -> str:
+        return json.dumps(asdict(self), default=str)
+
+
+def send_notification(topic: Topic, notification: StatusNotification):
+    topic.publish(
+        Message=notification.as_sns_message(),
+        MessageAttributes={"type": {"DataType": "String", "StringValue": notification.type}},
+    )
+    logger.info("Published %s to %s", notification.as_sns_message(), topic.arn)
+
+
+def get_partner_topic(sns_client: SNSClient, partner: str) -> Topic:
+    topics = sns_client.list_topics()
+    try:
+        partner_topic = next(
+            topic_arn
+            for topic in topics["Topics"]
+            if (topic_arn := topic.get("TopicArn", None)) is not None
+        )
+    except StopIteration as exc:
+        raise ValueError(f"No corresponding topic found for {partner}") from exc
+
+    return boto3.resource("sns", config=BOTO_CONFIG).Topic(partner_topic)
 
 
 @dataclass(frozen=True, eq=True)
@@ -395,6 +468,21 @@ def _handle_s3_event(s3_object_key: str):
             global_config.sftp_hostname,
         )
 
+        default_topic = boto3.resource("sns", config=BOTO_CONFIG).Topic(BFD_SNS_TOPIC_ARN)
+        notification = StatusNotification(
+            details=TransferSuccessDetails(
+                partner=partner,
+                timestamp=datetime.utcnow(),
+                object_key=s3_object_key,
+                destination=recognized_file.destination_folder,
+            )
+        )
+        send_notification(topic=default_topic, notification=notification)
+        partner_topic = get_partner_topic(
+            sns_client=boto3.client("sns", config=BOTO_CONFIG), partner=partner
+        )
+        send_notification(topic=partner_topic, notification=notification)
+
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[Any, Any], context: LambdaContext):
@@ -441,6 +529,32 @@ def handler(event: dict[Any, Any], context: LambdaContext):
                 )
 
                 _handle_s3_event(s3_object_key=s3_object_key)
-    except Exception:
+    except Exception as exc:
+        bfd_topic = boto3.resource("sns", config=BOTO_CONFIG).Topic(BFD_SNS_TOPIC_ARN)
+        notification: StatusNotification
+        if isinstance(exc, BaseTransferError):
+            notification = StatusNotification(
+                details=TransferFailedDetails(
+                    partner=exc.partner or "unknown",
+                    timestamp=datetime.utcnow(),
+                    object_key=exc.s3_object_key,
+                    error_name=exc.__class__.__name__,
+                    reason=exc.message,
+                )
+            )
+
+            if exc.partner:
+                sns_client = boto3.client("sns", config=BOTO_CONFIG)
+                partner_topic = get_partner_topic(sns_client=sns_client, partner=exc.partner)
+                send_notification(topic=partner_topic, notification=notification)
+        else:
+            notification = StatusNotification(
+                details=UnknownErrorDetails(
+                    timestamp=datetime.utcnow(), error_name=exc.__class__.__name__, reason=str(exc)
+                )
+            )
+
+        send_notification(topic=bfd_topic, notification=notification)
+
         logger.exception("Unrecoverable exception raised")
         raise
