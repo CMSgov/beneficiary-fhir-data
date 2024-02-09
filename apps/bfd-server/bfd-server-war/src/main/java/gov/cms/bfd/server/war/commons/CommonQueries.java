@@ -47,14 +47,14 @@ public class CommonQueries {
    * <p>The database function returns bits as follows:
    *
    * <ul>
-   *   <li>CARRIER CLAIMS : bit 0
-   *   <li>INPATIENT CLAIMS : bit 1
-   *   <li>OUTPATIENT CLAIMS : bit 2
-   *   <li>SNF CLAIMS : bit 3
-   *   <li>DME CLAIMS : bit 4
-   *   <li>HHA CLAIMS : bit 5
-   *   <li>HOSPICE CLAIMS : bit 6
-   *   <li>PART D CLAIMS : bit 7
+   *   <li>CARRIER CLAIMS : bit 0</li>
+   *   <li>INPATIENT CLAIMS : bit 1</li>
+   *   <li>OUTPATIENT CLAIMS : bit 2</li>
+   *   <li>SNF CLAIMS : bit 3</li>
+   *   <li>DME CLAIMS : bit 4</li>
+   *   <li>HHA CLAIMS : bit 5</li>
+   *   <li>HOSPICE CLAIMS : bit 6</li>
+   *   <li>PART D CLAIMS : bit 7</li>
    * </ul>
    *
    * <p>For more information on the database function, see:
