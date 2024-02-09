@@ -156,6 +156,9 @@ bfd:
         data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
         data_pipeline_rda_job_write_threads: *rda_job_write_thread_count
         data_pipeline_rda_process_dlq: *rda_job_process_dlq
+        data_pipeline_rda_cleanup_enabled: true
+        data_pipeline_rda_cleanup_run_size: 50000
+        data_pipeline_rda_cleanup_transaction_size: 5000
         instance_type: m6i.large
       shared:
         bfd_pipeline_dir: *bfdPipelineDir
