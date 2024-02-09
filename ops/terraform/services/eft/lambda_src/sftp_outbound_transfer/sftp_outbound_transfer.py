@@ -64,22 +64,38 @@ class S3EventType(str, Enum):
             ) from ex
 
 
-class UnknownPartnerError(Exception): ...
+class BaseTransferError(Exception):
+    def __init__(self, message: str, s3_object_key: str, partner: str | None):
+        super(BaseTransferError, self).__init__(message, s3_object_key, partner)
+
+        self.message = message
+        self.s3_object_key = s3_object_key
+        self.partner = partner
+
+    def __str__(self) -> str:
+        return json.dumps(
+            {"message": self.message, "s3_object_key": self.s3_object_key, "partner": self.partner}
+        )
 
 
-class InvalidObjectKeyError(Exception): ...
+class UnknownPartnerError(BaseTransferError): ...
 
 
-class InvalidPendingDirError(Exception): ...
+class InvalidObjectKeyError(BaseTransferError): ...
 
 
-class UnrecognizedFileError(Exception): ...
+class InvalidPendingDirError(BaseTransferError): ...
 
 
-class SFTPConnectionError(Exception): ...
+class UnrecognizedFileError(BaseTransferError): ...
 
 
-class SFTPTransferError(Exception): ...
+class SFTPConnectionError(BaseTransferError): ...
+
+
+class SFTPTransferError(BaseTransferError): ...
+
+
 
 
 @dataclass(frozen=True, eq=True)
@@ -224,8 +240,12 @@ def _handle_s3_event(s3_object_key: str):
         )
     ) is None:
         raise InvalidObjectKeyError(
-            f"Invocation event invalid, object key {s3_object_key} does not match expected"
-            f" pattern: {object_key_pattern}",
+            message=(
+                f"Invocation event invalid, object key {s3_object_key} does not match expected"
+                f" pattern: {object_key_pattern}"
+            ),
+            s3_object_key=s3_object_key,
+            partner=None,
         )
 
     global_config = GlobalSsmConfig.from_ssm(ssm_client=ssm_client)
@@ -235,7 +255,12 @@ def _handle_s3_event(s3_object_key: str):
         partner = global_config.home_dirs_to_partner[partner_home_dir]
     except KeyError as exc:
         raise UnknownPartnerError(
-            f"{partner_home_dir} does not match configured home directory for any enrolled partner"
+            message=(
+                f"{partner_home_dir} does not match configured home directory for any enrolled"
+                " partner"
+            ),
+            s3_object_key=s3_object_key,
+            partner=None,
         ) from exc
     subfolder = match.group(2)
     filename = match.group(3)
@@ -247,8 +272,12 @@ def _handle_s3_event(s3_object_key: str):
         # This should be impossible, as the S3 Event Notification configuration is configured to
         # send notifications only from valid pending paths
         raise InvalidPendingDirError(
-            f"{partner}'s pending files directory, {partner_config.pending_files_dir}, does not"
-            f" match event notification object key: {s3_object_key}"
+            message=(
+                f"{partner}'s pending files directory, {partner_config.pending_files_dir}, does not"
+                f" match event notification object key: {s3_object_key}"
+            ),
+            s3_object_key=s3_object_key,
+            partner=partner,
         )
     logger.append_keys(
         sftp_hostname=global_config.sftp_hostname, sftp_username=global_config.sftp_username
@@ -264,8 +293,13 @@ def _handle_s3_event(s3_object_key: str):
     )
     if not recognized_file:
         raise UnrecognizedFileError(
-            f"The file {filename} did not match any recognized files"
-            f" ({json.dumps(partner_config.recognized_files, default=str)}) for partner {partner}"
+            message=(
+                f"The file {filename} did not match any recognized files"
+                f" ({json.dumps(partner_config.recognized_files, default=str)}) for partner"
+                f" {partner}"
+            ),
+            s3_object_key=s3_object_key,
+            partner=partner,
         )
 
     logger.info(
@@ -311,7 +345,12 @@ def _handle_s3_event(s3_object_key: str):
             NoValidConnectionsError,
         ) as exc:
             raise SFTPConnectionError(
-                "An unrecoverable error occurred when attempting to connect to CMS EFT SFTP server"
+                message=(
+                    "An unrecoverable error occurred when attempting to connect to CMS EFT SFTP"
+                    " server"
+                ),
+                s3_object_key=s3_object_key,
+                partner=partner,
             ) from exc
 
         logger.info(
@@ -341,8 +380,12 @@ def _handle_s3_event(s3_object_key: str):
                     s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=f)  # type: ignore
         except (SSHException, IOError, botocore.exceptions.ClientError) as exc:
             raise SFTPTransferError(
-                f"An unrecoverable error occurred when attempting to transfer {filename} to the CMS"
-                " EFT SFTP Server"
+                message=(
+                    f"An unrecoverable error occurred when attempting to transfer {filename} to the"
+                    " CMS EFT SFTP Server"
+                ),
+                s3_object_key=s3_object_key,
+                partner=partner,
             ) from exc
 
         logger.info(
