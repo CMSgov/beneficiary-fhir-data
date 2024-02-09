@@ -393,7 +393,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     String historicalMbi = "HISTMBI";
     String expectedBeneTableMbi = "565654MBI";
     List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
-    // search mbi does'nt exist in the bene table, so bene history search must be true
+    // search mbi doesn't exist in the bene table, so bene history search must be true
     String mbiHash = getMbiHash(historicalMbi, true, loadedRecords);
 
     String requestString =
