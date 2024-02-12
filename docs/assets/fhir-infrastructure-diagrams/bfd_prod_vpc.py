@@ -20,9 +20,9 @@ legend_text = (
 "RDA Pipeline runs 24x7\l"
 )
 title = "BFD FHIR Service - Production VPC"
-outformat = "png"
-filename = "out/BFD FHIR Service - Production VPC"
-filenamegraph = "out//BFD FHIR Service - Production VPC.gv"
+outformat = "svg"
+filename = "BFD FHIR Service - Production VPC"
+filenamegraph = "BFD FHIR Service - Production VPC.gv"
 show = False
 direction = "TB"
 
