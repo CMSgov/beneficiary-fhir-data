@@ -34,7 +34,7 @@ $ pipenv install diagrams
 ## Quick Start
 
 ```python
-# diagram.py
+# example_diagram.py
 from diagrams import Diagram
 from diagrams.aws.compute import EC2
 from diagrams.aws.database import RDS
@@ -47,9 +47,9 @@ with Diagram("Web Service", show=False):
 This code generates below diagram.
 
 ```shell
-python diagram.py
+python3 example_diagram.py
 ```
 
-![web service diagram](./example/web_service_diagram.png)
+![web service diagram](./example/web_service.png)
 
 It will be saved as `web_service.png` on your working directory.
