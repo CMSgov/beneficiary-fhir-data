@@ -35,9 +35,12 @@ public final class SampleServlet extends HttpServlet {
 
   /** {@inheritDoc} */
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    PrintWriter out = resp.getWriter();
-    out.print("Johnny 5 is alive on HTTP!");
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    try {
+      PrintWriter out = resp.getWriter();
+      out.print("Johnny 5 is alive on HTTP!");
+    } catch (IOException io) {
+      LOGGER_MISC.info("An IOException occurred in SampleServlet", io);
+    }
   }
 }
