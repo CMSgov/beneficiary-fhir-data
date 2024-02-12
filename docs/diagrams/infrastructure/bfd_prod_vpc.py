@@ -13,7 +13,7 @@ legend_text = (
 "AZs - BFD does not exercise the assignment of resources per AZ. \l"
 "Colocation of pipeline/migrator workloads reside with master aurora node \l"
 "AutoScaling Group Cluster is actually nested inside each application AZ.\l"
-"Due to limitations of diagram app, ASG is showing outside AZs.\l" #FIX_ME
+"Due to limitations of diagram app, ASG is not displayed. Note Instances in App Layer are in ASG.\l" #FIX_ME
 "--------------\l"
 "Data Sources\l"
 "CCW Pipeline Instance is triggered via lambda script when RIF files arrive in s3 bucket.\l"
@@ -62,7 +62,7 @@ with Diagram(
                     db_writer = Aurora("bfd-prod-master")
                     ccw = EC2("CCW bfd-prod-etl1")
                     rda = EC2("RDA bfd-prod-etl1")
-                    migrator = EC2("Db Migrator")
+                    migrator = EC2("DB Migrator")
             with Cluster("bfd-prod-az3-data"):
                 with Cluster("Private Subnet"):
                     db3 = Aurora("bfd-prod-replica3")
