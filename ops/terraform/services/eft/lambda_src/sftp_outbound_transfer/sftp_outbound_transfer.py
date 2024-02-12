@@ -3,11 +3,9 @@ import os
 import re
 import socket
 from base64 import b64decode
-from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from enum import Enum
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from urllib.parse import unquote
 
 import boto3
@@ -25,13 +23,24 @@ from paramiko.ssh_exception import (
     SSHException,
 )
 
-# Solve typing issues in Lambda as mypy_boto3 will not be included in the Lambda
-if TYPE_CHECKING:
-    from mypy_boto3_sns.service_resource import Topic
-    from mypy_boto3_ssm.client import SSMClient
-else:
-    Topic = object
-    SSMClient = object
+from errors import (
+    BaseTransferError,
+    InvalidObjectKeyError,
+    InvalidPendingDirError,
+    SFTPConnectionError,
+    SFTPTransferError,
+    UnknownPartnerError,
+    UnrecognizedFileError,
+)
+from s3 import S3EventType
+from sns import (
+    StatusNotification,
+    TransferFailedDetails,
+    TransferSuccessDetails,
+    UnknownErrorDetails,
+    send_notification,
+)
+from ssm import GlobalSsmConfig, PartnerSsmConfig
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
@@ -51,248 +60,9 @@ BOTO_CONFIG = Config(
 logger = Logger()
 
 
-class S3EventType(str, Enum):
-    """Represents the types of S3 events that this Lambda is invoked by and supports. The value of
-    each Enum is a substring that is matched for on the "eventName" property of an invocation
-    event"""
-
-    OBJECT_CREATED = "ObjectCreated"
-
-    @classmethod
-    def from_event_name(cls, event_name: str) -> "S3EventType":
-        try:
-            return next(x for x in S3EventType if x in event_name)
-        except StopIteration as ex:
-            raise ValueError(
-                f"Invalid event name {event_name}; no corresponding, supported event found"
-            ) from ex
-
-
-class BaseTransferError(Exception):
-    def __init__(self, message: str, s3_object_key: str, partner: str | None):
-        super().__init__(message, s3_object_key, partner)
-
-        self.message = message
-        self.s3_object_key = s3_object_key
-        self.partner = partner
-
-    def __str__(self) -> str:
-        return json.dumps(
-            {"message": self.message, "s3_object_key": self.s3_object_key, "partner": self.partner}
-        )
-
-
-class UnknownPartnerError(BaseTransferError): ...
-
-
-class InvalidObjectKeyError(BaseTransferError): ...
-
-
-class InvalidPendingDirError(BaseTransferError): ...
-
-
-class UnrecognizedFileError(BaseTransferError): ...
-
-
-class SFTPConnectionError(BaseTransferError): ...
-
-
-class SFTPTransferError(BaseTransferError): ...
-
-
-@dataclass(frozen=True, eq=True)
-class TransferSuccessDetails:
-    partner: str
-    timestamp: datetime
-    object_key: str
-    destination: str
-
-
-@dataclass(frozen=True, eq=True)
-class TransferFailedDetails:
-    partner: str
-    timestamp: datetime
-    object_key: str
-    error_name: str
-    reason: str
-
-
-@dataclass(frozen=True, eq=True)
-class UnknownErrorDetails:
-    timestamp: datetime
-    error_name: str
-    reason: str
-
-
-@dataclass
-class StatusNotification:
-    type: str = field(init=False, default="")
-    details: TransferSuccessDetails | TransferFailedDetails | UnknownErrorDetails
-
-    def __post_init__(self):
-        match self.details:
-            case TransferSuccessDetails():
-                self.type = "TRANSFER_SUCCESS"
-            case TransferFailedDetails():
-                self.type = "TRANSFER_FAILED"
-            case UnknownErrorDetails():
-                self.type = "UNKNOWN_ERROR"
-            case _:  # pyright: ignore [reportUnnecessaryComparison]
-                raise ValueError(
-                    f"Invalid details, must be one of: "
-                    f"{(", ".join([
-                        x.__name__ for x in [
-                            TransferSuccessDetails,
-                            TransferFailedDetails,
-                            UnknownErrorDetails,
-                        ]
-                    ]))}"
-                )
-
-    def as_sns_message(self) -> str:
-        return json.dumps(asdict(self), default=str)
-
-
-def send_notification(topic: Topic, notification: StatusNotification):
-    topic.publish(
-        Message=notification.as_sns_message(),
-        MessageAttributes={"type": {"DataType": "String", "StringValue": notification.type}},
-    )
-    logger.info("Published %s to %s", notification.as_sns_message(), topic.arn)
-
-
-@dataclass(frozen=True, eq=True)
-class GlobalSsmConfig:
-    sftp_connect_timeout: int
-    sftp_hostname: str
-    sftp_host_pub_key: str
-    sftp_username: str
-    sftp_user_priv_key: str
-    enrolled_partners: list[str]
-    home_dirs_to_partner: dict[str, str]
-
-    @classmethod
-    def from_ssm(cls, ssm_client: SSMClient) -> "GlobalSsmConfig":
-        sftp_connect_timeout = int(
-            get_ssm_parameter(
-                ssm_client=ssm_client,
-                path=f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/timeout",
-                with_decrypt=True,
-            )
-        )
-        sftp_hostname = get_ssm_parameter(
-            ssm_client=ssm_client,
-            path=f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/host",
-            with_decrypt=True,
-        )
-        sftp_host_pub_key = get_ssm_parameter(
-            ssm_client=ssm_client,
-            path=f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/trusted_host_key",
-            with_decrypt=True,
-        )
-        sftp_username = get_ssm_parameter(
-            ssm_client=ssm_client,
-            path=f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/username",
-            with_decrypt=True,
-        )
-        sftp_user_priv_key = get_ssm_parameter(
-            ssm_client=ssm_client,
-            path=f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/user_priv_key",
-            with_decrypt=True,
-        )
-        enrolled_partners: list[str] = json.loads(
-            get_ssm_parameter(
-                ssm_client=ssm_client,
-                path=f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/partners_list_json",
-                with_decrypt=True,
-            )
-        )
-        home_dirs_to_partner = {
-            get_ssm_parameter(
-                ssm_client=ssm_client,
-                path=f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/bucket_home_dir",
-                with_decrypt=True,
-            ): partner
-            for partner in enrolled_partners
-        }
-
-        return GlobalSsmConfig(
-            sftp_connect_timeout=sftp_connect_timeout,
-            sftp_hostname=sftp_hostname,
-            sftp_host_pub_key=sftp_host_pub_key,
-            sftp_username=sftp_username,
-            sftp_user_priv_key=sftp_user_priv_key,
-            enrolled_partners=enrolled_partners,
-            home_dirs_to_partner=home_dirs_to_partner,
-        )
-
-
-@dataclass(frozen=True, eq=True)
-class RecognizedFile:
-    filename_pattern: str
-    destination_folder: str
-
-
-@dataclass(frozen=True, eq=True)
-class PartnerSsmConfig:
-    partner: str
-    bucket_home_dir: str
-    pending_files_dir: str
-    recognized_files: list[RecognizedFile]
-
-    @classmethod
-    def from_partner(cls, ssm_client: SSMClient, partner: str) -> "PartnerSsmConfig":
-        bucket_home_dir = get_ssm_parameter(
-            ssm_client=ssm_client,
-            path=f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/bucket_home_dir",
-            with_decrypt=True,
-        )
-        pending_files_dir = get_ssm_parameter(
-            ssm_client=ssm_client,
-            path=f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/pending_dir",
-            with_decrypt=True,
-        )
-        recognized_files = [
-            RecognizedFile(**file_dict)
-            for file_dict in json.loads(
-                get_ssm_parameter(
-                    ssm_client=ssm_client,
-                    path=(
-                        f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/recognized_files_json"
-                    ),
-                    with_decrypt=True,
-                )
-            )
-        ]
-
-        return PartnerSsmConfig(
-            partner=partner,
-            bucket_home_dir=bucket_home_dir,
-            pending_files_dir=pending_files_dir,
-            recognized_files=recognized_files,
-        )
-
-    @property
-    def bucket_home_path(self):
-        return f"{BUCKET_ROOT_DIR}/{self.bucket_home_dir}"
-
-    @property
-    def pending_files_full_path(self):
-        return f"{self.bucket_home_path}/{self.pending_files_dir}"
-
-
-def get_ssm_parameter(ssm_client: SSMClient, path: str, with_decrypt: bool = False) -> str:
-    response = ssm_client.get_parameter(Name=path, WithDecryption=with_decrypt)
-
-    try:
-        return response["Parameter"]["Value"]
-    except KeyError as exc:
-        raise ValueError(f'SSM parameter "{path}" not found or empty') from exc
-
-
 def _handle_s3_event(s3_object_key: str):
-    s3_client = boto3.client("s3", config=BOTO_CONFIG)  # type: ignore
-    ssm_client = boto3.client("ssm", config=BOTO_CONFIG)  # type: ignore
+    s3_client = boto3.client("s3", config=BOTO_CONFIG)
+    ssm_client = boto3.client("ssm", config=BOTO_CONFIG)
 
     object_key_pattern = rf"^{BUCKET_ROOT_DIR}/([\w_]+)/([\w_]+)/(.*)$"
     if (
@@ -311,7 +81,7 @@ def _handle_s3_event(s3_object_key: str):
             partner=None,
         )
 
-    global_config = GlobalSsmConfig.from_ssm(ssm_client=ssm_client)
+    global_config = GlobalSsmConfig.from_ssm(ssm_client=ssm_client, env=BFD_ENVIRONMENT)
 
     partner_home_dir = match.group(1)
     try:
@@ -330,7 +100,9 @@ def _handle_s3_event(s3_object_key: str):
 
     logger.append_keys(partner=partner, filename=filename)
 
-    partner_config = PartnerSsmConfig.from_partner(ssm_client=ssm_client, partner=partner)
+    partner_config = PartnerSsmConfig.from_ssm(
+        ssm_client=ssm_client, partner=partner, env=BFD_ENVIRONMENT
+    )
     if subfolder != partner_config.pending_files_dir:
         # This should be impossible, as the S3 Event Notification configuration is configured to
         # send notifications only from valid pending paths
@@ -440,7 +212,7 @@ def _handle_s3_event(s3_object_key: str):
                 with sftp_client.open(
                     f"{recognized_file.destination_folder}/{filename}", "wb", 32768
                 ) as f:
-                    s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=f)  # type: ignore
+                    s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=f)
         except (SSHException, IOError, botocore.exceptions.ClientError) as exc:
             raise SFTPTransferError(
                 message=(
@@ -476,7 +248,7 @@ def _handle_s3_event(s3_object_key: str):
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[Any, Any], context: LambdaContext):
+def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=unused-argument
     try:
         if not all([
             REGION,
