@@ -146,17 +146,9 @@ locals {
             ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         ),
-        s3_notifications = {
-          pending_file_targets = jsondecode(
-            lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/pending_file_targets_json", "[]")
-          ),
-          sent_file_targets = jsondecode(
-            lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/sent_file_targets_json", "[]")
-          ),
-          failed_file_targets = jsondecode(
-            lookup(local.ssm_config, "/${partner}/${local.service}/outbound/s3_notifications/failed_file_targets_json", "[]")
-          )
-        }
+        notification_targets = jsondecode(
+          lookup(local.ssm_config, "/${partner}/${local.service}/outbound/notification_targets_json", "[]")
+        ),
       }
     }
   }
@@ -198,8 +190,7 @@ locals {
       local.outbound_sftp_host_key,
       local.outbound_sftp_username,
       local.outbound_sftp_user_priv_key
-    ] : trimspace(coalesce(x, "INVALID")) != "INVALID"]
-    ) ? [
+    ] : trimspace(coalesce(x, "INVALID")) != "INVALID"]) ? [
     for partner, _ in local.eft_partners_config :
     partner
     if contains(local.outbound_eft_partners, partner) && length(
@@ -213,15 +204,10 @@ locals {
     partner
     if length(local.eft_partners_config[partner].inbound.s3_notifications.received_file_targets) > 0
   ]
-  eft_partners_with_outbound_sent_notifs = [
+  eft_partners_with_outbound_notifs = [
     for partner in local.eft_partners_with_outbound_enabled :
     partner
-    if length(local.eft_partners_config[partner].outbound.s3_notifications.sent_file_targets) > 0
-  ]
-  eft_partners_with_outbound_failed_notifs = [
-    for partner in local.eft_partners_with_outbound_enabled :
-    partner
-    if length(local.eft_partners_config[partner].outbound.s3_notifications.failed_file_targets) > 0
+    if length(local.eft_partners_config[partner].outbound.notification_targets) > 0
   ]
 
   account_id = data.aws_caller_identity.current.account_id
@@ -263,8 +249,6 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
   count = length(concat(
     local.eft_partners_with_inbound_received_notifs,
     local.eft_partners_with_outbound_enabled,
-    local.eft_partners_with_outbound_sent_notifs,
-    local.eft_partners_with_outbound_failed_notifs
   )) > 0 ? 1 : 0
 
   bucket = aws_s3_bucket.this.id
@@ -280,36 +264,12 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
   }
 
   dynamic "topic" {
-    # Unlike other outbound notification classes, we want to enable S3 Event Notifications for files
-    # landing in a partner's pending directory even if they have no configured targets if outbound
-    # is enabled for them (specifically, if they have any recognized files configured). This is
-    # necessary to invoke the outbound SFTP Lambda
     for_each = toset(local.eft_partners_with_outbound_enabled)
     content {
       events        = ["s3:ObjectCreated:*"]
       filter_prefix = "${local.eft_partners_config[topic.key].outbound.pending_path}/"
       id            = aws_sns_topic.outbound_pending_s3_notifs[topic.key].name
       topic_arn     = aws_sns_topic.outbound_pending_s3_notifs[topic.key].arn
-    }
-  }
-
-  dynamic "topic" {
-    for_each = toset(local.eft_partners_with_outbound_sent_notifs)
-    content {
-      events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.key].outbound.sent_path}/"
-      id            = aws_sns_topic.outbound_sent_s3_notifs[topic.key].name
-      topic_arn     = aws_sns_topic.outbound_sent_s3_notifs[topic.key].arn
-    }
-  }
-
-  dynamic "topic" {
-    for_each = toset(local.eft_partners_with_outbound_failed_notifs)
-    content {
-      events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "${local.eft_partners_config[topic.key].outbound.failed_path}/"
-      id            = aws_sns_topic.outbound_failed_s3_notifs[topic.key].name
-      topic_arn     = aws_sns_topic.outbound_failed_s3_notifs[topic.key].arn
     }
   }
 }
@@ -338,9 +298,16 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
 
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
-      BUCKET          = local.full_name
-      BUCKET_ROOT_DIR = local.inbound_sftp_s3_home_dir
+      BFD_ENVIRONMENT   = local.env
+      BUCKET            = local.full_name
+      BUCKET_ROOT_DIR   = local.inbound_sftp_s3_home_dir
+      BFD_SNS_TOPIC_ARN = one(aws_sns_topic.outbound_notifs[*].arn)
+      SNS_TOPIC_ARNS_BY_PARTNER_JSON = jsonencode(
+        {
+          for partner in local.eft_partners_with_outbound_notifs
+          : partner => aws_sns_topic.outbound_partner_notifs[partner].arn
+        }
+      )
     }
   }
 
@@ -392,8 +359,6 @@ resource "aws_sns_topic_subscription" "sftp_outbound_transfer" {
   endpoint  = one(aws_lambda_function.sftp_outbound_transfer[*].arn)
 }
 
-# FUTURE: If any additional SNS Topics are required similar to the ones defined below, this
-# duplication should be consolidated
 resource "aws_sns_topic" "inbound_received_s3_notifs" {
   for_each = toset(local.eft_partners_with_inbound_received_notifs)
 
@@ -459,141 +424,62 @@ resource "aws_sns_topic_policy" "outbound_pending_s3_notifs" {
   policy = jsonencode(
     {
       Version = "2012-10-17"
-      Statement = concat(
-        [
-          {
-            Sid       = "Allow_Publish_from_S3"
-            Effect    = "Allow"
-            Principal = { Service = "s3.amazonaws.com" }
-            Action    = "SNS:Publish"
-            Resource  = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
-            Condition = {
-              ArnLike = {
-                "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
-              }
+      Statement = [
+        {
+          Sid       = "Allow_Publish_from_S3"
+          Effect    = "Allow"
+          Principal = { Service = "s3.amazonaws.com" }
+          Action    = "SNS:Publish"
+          Resource  = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
+          Condition = {
+            ArnLike = {
+              "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
             }
           }
-        ],
-        [
-          for index, target in local.eft_partners_config[each.key].outbound.s3_notifications.pending_file_targets : {
-            Sid       = "Allow_Subscribe_from_${each.key}_${index}"
-            Effect    = "Allow"
-            Principal = { AWS = target.principal }
-            Action    = ["SNS:Subscribe", "SNS:Receive"]
-            Resource  = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
-            Condition = {
-              StringEquals = {
-                "sns:Protocol" = target.protocol
-              }
-              "ForAllValues:StringEquals" = {
-                "sns:Endpoint" = [target.arn]
-              }
-            }
-          }
-        ]
-      )
+        }
+      ]
     }
   )
 }
 
-resource "aws_sns_topic" "outbound_sent_s3_notifs" {
-  for_each = toset(local.eft_partners_with_outbound_sent_notifs)
+resource "aws_sns_topic" "outbound_notifs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name              = "${local.full_name}-outbound-sent-s3-${each.key}"
+  name              = "${local.full_name}-outbound-events"
   kms_master_key_id = local.kms_key_id
 }
 
-resource "aws_sns_topic_policy" "outbound_sent_s3_notifs" {
-  for_each = toset(local.eft_partners_with_outbound_sent_notifs)
+resource "aws_sns_topic" "outbound_partner_notifs" {
+  for_each = toset(local.eft_partners_with_outbound_notifs)
 
-  arn = aws_sns_topic.outbound_sent_s3_notifs[each.key].arn
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = concat(
-        [
-          {
-            Sid       = "Allow_Publish_from_S3"
-            Effect    = "Allow"
-            Principal = { Service = "s3.amazonaws.com" }
-            Action    = "SNS:Publish"
-            Resource  = aws_sns_topic.outbound_sent_s3_notifs[each.key].arn
-            Condition = {
-              ArnLike = {
-                "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
-              }
-            }
-          }
-        ],
-        [
-          for index, target in local.eft_partners_config[each.key].outbound.s3_notifications.sent_file_targets : {
-            Sid       = "Allow_Subscribe_from_${each.key}_${index}"
-            Effect    = "Allow"
-            Principal = { AWS = target.principal }
-            Action    = ["SNS:Subscribe", "SNS:Receive"]
-            Resource  = aws_sns_topic.outbound_sent_s3_notifs[each.key].arn
-            Condition = {
-              StringEquals = {
-                "sns:Protocol" = target.protocol
-              }
-              "ForAllValues:StringEquals" = {
-                "sns:Endpoint" = [target.arn]
-              }
-            }
-          }
-        ]
-      )
-    }
-  )
-}
-
-resource "aws_sns_topic" "outbound_failed_s3_notifs" {
-  for_each = toset(local.eft_partners_with_outbound_failed_notifs)
-
-  name              = "${local.full_name}-outbound-failed-s3-${each.key}"
+  name              = "${local.full_name}-outbound-events-${each.key}"
   kms_master_key_id = local.kms_key_id
 }
 
-resource "aws_sns_topic_policy" "outbound_failed_s3_notifs" {
-  for_each = toset(local.eft_partners_with_outbound_failed_notifs)
+resource "aws_sns_topic_policy" "outbound_partner_notifs" {
+  for_each = toset(local.eft_partners_with_outbound_notifs)
 
-  arn = aws_sns_topic.outbound_failed_s3_notifs[each.key].arn
+  arn = aws_sns_topic.outbound_partner_notifs[each.key].arn
   policy = jsonencode(
     {
       Version = "2012-10-17"
-      Statement = concat(
-        [
-          {
-            Sid       = "Allow_Publish_from_S3"
-            Effect    = "Allow"
-            Principal = { Service = "s3.amazonaws.com" }
-            Action    = "SNS:Publish"
-            Resource  = aws_sns_topic.outbound_failed_s3_notifs[each.key].arn
-            Condition = {
-              ArnLike = {
-                "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
-              }
+      Statement = [
+        for index, target in local.eft_partners_config[each.key].outbound.notification_targets : {
+          Sid       = "Allow_Subscribe_from_${each.key}_${index}"
+          Effect    = "Allow"
+          Principal = { AWS = target.principal }
+          Action    = ["SNS:Subscribe", "SNS:Receive"]
+          Resource  = aws_sns_topic.outbound_partner_notifs[each.key].arn
+          Condition = {
+            StringEquals = {
+              "sns:Protocol" = target.protocol
+            }
+            "ForAllValues:StringEquals" = {
+              "sns:Endpoint" = [target.arn]
             }
           }
-        ],
-        [
-          for index, target in local.eft_partners_config[each.key].outbound.s3_notifications.failed_file_targets : {
-            Sid       = "Allow_Subscribe_from_${each.key}_${index}"
-            Effect    = "Allow"
-            Principal = { AWS = target.principal }
-            Action    = ["SNS:Subscribe", "SNS:Receive"]
-            Resource  = aws_sns_topic.outbound_failed_s3_notifs[each.key].arn
-            Condition = {
-              StringEquals = {
-                "sns:Protocol" = target.protocol
-              }
-              "ForAllValues:StringEquals" = {
-                "sns:Endpoint" = [target.arn]
-              }
-            }
-          }
-        ]
-      )
+        }
+      ]
     }
   )
 }
