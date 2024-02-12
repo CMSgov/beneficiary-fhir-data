@@ -156,7 +156,7 @@ def _handle_s3_event(s3_object_key: str):
     with paramiko.SSHClient() as ssh_client:
         try:
             sftp_host_key = paramiko.RSAKey(
-                data=b64decode(global_config.sftp_host_pub_key.removeprefix("ssh-rsa "))
+                data=b64decode(global_config.sftp_host_pub_key.removeprefix("ssh-rsa").strip())
             )
             sftp_priv_key = paramiko.RSAKey.from_private_key(
                 StringIO(global_config.sftp_user_priv_key)
