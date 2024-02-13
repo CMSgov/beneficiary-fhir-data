@@ -19,8 +19,8 @@ legend_text = (
 
 title = "BFD High Level View - Infrastructure"
 outformat = "svg"
-filename = "BFD High Level View - Infrastructure"
-filenamegraph = "BFD High Level View - Infrastructure.gv"
+filename = "bfd_infrastructure"
+filenamegraph = "bfd_infrastructure.gv"
 show = False
 direction = "TB"
 

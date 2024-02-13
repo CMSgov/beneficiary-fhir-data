@@ -53,3 +53,9 @@ python3 example_diagram.py
 ![web service diagram](./example/web_service.png)
 
 It will be saved as `web_service.png` on your working directory.
+
+### Issues with embedded images for svg output
+
+ As of 2/13/24 - Due to issues with [embedding images into svg outputs](https://github.com/mingrammer/diagrams/issues/26), a small script has been added here to post-process against output from diagrams python scripts.
+
+ Once you have ran a diagram script to generate an SVG file, you will need to run the `python3 embed_svg.py <name_of_original_svg_output>` and will generate a new svg with images embedded. This file will have a suffix of `_out` added which can later be removed. Delete original svg and rename suffixed file.

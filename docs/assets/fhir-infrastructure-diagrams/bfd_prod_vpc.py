@@ -19,10 +19,10 @@ legend_text = (
 "CCW Pipeline Instance is triggered via lambda script when RIF files arrive in s3 bucket.\l"
 "RDA Pipeline runs 24x7\l"
 )
-title = "BFD FHIR Service - Production VPC"
+title = "BFD - Production VPC"
 outformat = "svg"
-filename = "BFD FHIR Service - Production VPC"
-filenamegraph = "BFD FHIR Service - Production VPC.gv"
+filename = "bfd_prod_vpc"
+filenamegraph = "bfd_prod_vpc.gv"
 show = False
 direction = "TB"
 
