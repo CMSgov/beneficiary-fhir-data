@@ -1,3 +1,4 @@
+pytest
 boto3-stubs
 boto3-stubs[sns,ssm]
 black
