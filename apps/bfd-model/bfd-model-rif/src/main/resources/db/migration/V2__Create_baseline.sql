@@ -319,7 +319,7 @@ CREATE TABLE IF NOT EXISTS ccw.carrier_claims (
     clm_id bigint NOT NULL,
     bene_id bigint NOT NULL,
     clm_grp_id bigint NOT NULL,
-    last_updated date,
+    last_updated timestamp with time zone,
     clm_from_dt date NOT NULL,
     clm_thru_dt date NOT NULL,
     clm_disp_cd character varying(2) NOT NULL,
