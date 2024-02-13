@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
@@ -174,12 +175,17 @@ public class DataUtilityCommons {
    */
   private static void recursivelyDelete(Path tempDir) {
     // Recursively delete the working dir.
-    try {
-      Files.walk(tempDir)
+    try (Stream<Path> paths = Files.walk(tempDir)) {
+      paths
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
           .peek(System.out::println)
-          .forEach(File::delete);
+          .forEach(
+              file -> {
+                if (!file.delete()) {
+                  LOGGER.warn("Failed to delete file: " + file);
+                }
+              });
     } catch (IOException e) {
       LOGGER.warn("Failed to cleanup the temporary folder", e);
     }
