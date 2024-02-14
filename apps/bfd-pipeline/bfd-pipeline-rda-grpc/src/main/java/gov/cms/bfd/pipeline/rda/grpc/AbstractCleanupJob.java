@@ -5,9 +5,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 
 /**
@@ -23,12 +25,12 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
   /** template for delete query. */
   private static final String DELETE_QUERY_TEMPLATE =
-      "delete from %s t where t.%s in ("
-          + "  select %s "
-          + "  from %s "
-          + "  where last_updated < '%s' "
+      "delete from ${tableName} t where t.${parentTableKey} in ("
+          + "  select ${parentTableKey} "
+          + "  from ${parentTableName} "
+          + "  where last_updated < '${cutoffDate}' "
           + "  order by last_updated "
-          + "  limit %d"
+          + "  limit ${limit}"
           + ")";
 
   /** TransactionManager to use for db operations. */
@@ -138,15 +140,15 @@ public abstract class AbstractCleanupJob implements CleanupJob {
     tm.executeProcedure(
         entityManager -> {
           for (String tableName : getTableNames()) {
-            String queryStr =
-                String.format(
-                    DELETE_QUERY_TEMPLATE,
-                    tableName,
-                    getParentTableKey(),
-                    getParentTableKey(),
-                    parentTableName,
-                    cutoffDate.toString(),
-                    cleanupTransactionSize);
+            Map<String, String> params =
+                Map.of(
+                    "tableName", tableName,
+                    "parentTableName", parentTableName,
+                    "parentTableKey", getParentTableKey(),
+                    "cutoffDate", cutoffDate.toString(),
+                    "limit", Integer.toString(cleanupTransactionSize));
+            StringSubstitutor strSub = new StringSubstitutor(params);
+            String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
             queries.add(entityManager.createNativeQuery(queryStr));
           }
         });
