@@ -40,7 +40,8 @@ from diagrams.aws.compute import EC2
 from diagrams.aws.database import RDS
 from diagrams.aws.network import ELB
 
-with Diagram("Web Service", show=False):
+outformat = "svg"
+with Diagram("Web Service", show=False, outformat=outformat):
     ELB("lb") >> EC2("web") >> RDS("userdb")
 ```
 
@@ -50,9 +51,9 @@ This code generates below diagram.
 python3 example_diagram.py
 ```
 
-![web service diagram](./example/web_service.png)
+![web service diagram](./example/web_service.svg)
 
-It will be saved as `web_service.png` on your working directory.
+It will be saved as `web_service.svg` on your working directory.
 
 ### Issues with embedded images for svg output
 
