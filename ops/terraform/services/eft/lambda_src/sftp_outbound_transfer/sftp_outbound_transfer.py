@@ -60,6 +60,19 @@ BOTO_CONFIG = Config(
 logger = Logger()
 
 
+def _safe_sftp_mkdir(sftp_client: paramiko.SFTPClient, dirpath: str):
+    current_dir = ""
+    for dir_part in dirpath.split("/"):
+        if not dir_part:
+            continue
+        current_dir += f"/{dir_part}"
+        try:
+            sftp_client.listdir(current_dir)
+        except IOError:
+            logger.info("%s does not exist, creating it", current_dir)
+            sftp_client.mkdir(current_dir)
+
+
 def _handle_s3_event(s3_object_key: str):
     s3_client = boto3.client("s3", config=BOTO_CONFIG)
     ssm_client = boto3.client("ssm", config=BOTO_CONFIG)
@@ -141,11 +154,11 @@ def _handle_s3_event(s3_object_key: str):
         "%s recognized using pattern %s; will be sent to %s",
         filename,
         recognized_file.filename_pattern,
-        recognized_file.destination_folder,
+        recognized_file.input_folder,
     )
     logger.append_keys(
         matched_pattern=recognized_file.filename_pattern,
-        destination_folder=recognized_file.destination_folder,
+        destination_folder=recognized_file.input_folder,
     )
 
     logger.info(
@@ -192,27 +205,72 @@ def _handle_s3_event(s3_object_key: str):
             "Connected successfully to %s. Starting upload of %s to %s on %s",
             global_config.sftp_hostname,
             filename,
-            recognized_file.destination_folder,
+            recognized_file.input_folder,
             global_config.sftp_hostname,
         )
 
         try:
             with ssh_client.open_sftp() as sftp_client:
-                current_dir = ""
-                for dir_part in recognized_file.destination_folder.split("/"):
-                    if not dir_part:
-                        continue
-                    current_dir += f"/{dir_part}"
-                    try:
-                        sftp_client.listdir(current_dir)
-                    except IOError:
-                        logger.info("%s does not exist, creating it", current_dir)
-                        sftp_client.mkdir(current_dir)
+                # Clean the provided paths of any whitespace or trailing/leading slashes
+                staging_dir_path = f"/{recognized_file.staging_folder.strip().strip(" / ")}"
+                input_dir_path = recognized_file.input_folder.strip().strip("/")
+                # First, ensure the staging folder exists by creating it, piece-by-piece, if it
+                # doesn't
+                logger.info(
+                    "Checking if the staging path %s exists, creating it if it does not",
+                    staging_dir_path,
+                )
+                _safe_sftp_mkdir(sftp_client=sftp_client, dirpath=staging_dir_path)
+                logger.info("%s exists or has been created", staging_dir_path)
 
-                with sftp_client.open(
-                    f"{recognized_file.destination_folder}/{filename}", "wb", 32768
-                ) as f:
+                # Then, upload the file to the staging folder. This avoids the SWEEPS automation
+                # from sweeping partially uploaded files as we will move this file to the SWEEPS
+                # input folder only once it has fully uploaded
+                logger.info(
+                    "Starting upload of %s to the staging path %s",
+                    filename,
+                    staging_dir_path,
+                )
+                staging_file_path = f"{staging_dir_path}/{filename}"
+                with sftp_client.open(staging_file_path, "wb", 32768) as f:
                     s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=f)
+                logger.info("Upload of %s to %s successful", filename, staging_dir_path)
+
+                # Once uploaded, we must modify the file permissions such that the SWEEPS automation
+                # user can interact with the file
+                logger.info(
+                    "Modifying file permissons of %s on %s to 664",
+                    staging_file_path,
+                    global_config.sftp_hostname,
+                )
+                sftp_client.chmod(staging_file_path, 0o664)
+                logger.info(
+                    "File permissions of %s modified to 664 successfully", staging_file_path
+                )
+
+                # Once the permissions have been modified, we need to move the file to the actual
+                # SWEEPS input directory. Just like before, we check if the directory exists and
+                # attempt to create it if it doesn't
+                logger.info(
+                    "Checking if the SWEEPS input path %s exists, creating it if it does not",
+                    input_dir_path,
+                )
+                _safe_sftp_mkdir(sftp_client=sftp_client, dirpath=input_dir_path)
+                logger.info("%s exists or has been created", input_dir_path)
+
+                # Once we're sure the directory exists, the file is moved (SFTP calls this a
+                # "rename") to the input directory
+                logger.info(
+                    "Moving %s to SWEEPS input directory path %s", staging_file_path, input_dir_path
+                )
+                input_file_path = f"{input_dir_path}/{filename}"
+                sftp_client.rename(staging_file_path, input_file_path)
+                logger.info(
+                    "%s moved to %s successfully; %s has been transferred successfully",
+                    filename,
+                    input_file_path,
+                    filename,
+                )
         except (SSHException, IOError, botocore.exceptions.ClientError) as exc:
             raise SFTPTransferError(
                 message=(
@@ -226,7 +284,7 @@ def _handle_s3_event(s3_object_key: str):
         logger.info(
             "%s uploaded successfully to %s on %s",
             s3_object_key,
-            recognized_file.destination_folder,
+            recognized_file.input_folder,
             global_config.sftp_hostname,
         )
 
@@ -237,7 +295,7 @@ def _handle_s3_event(s3_object_key: str):
                 partner=partner,
                 timestamp=datetime.utcnow(),
                 object_key=s3_object_key,
-                destination=recognized_file.destination_folder,
+                destination=recognized_file.input_folder,
             )
         )
         send_notification(topic=bfd_topic, notification=notification)

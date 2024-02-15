@@ -77,8 +77,10 @@ class GlobalSsmConfig:
 
 @dataclass(frozen=True, eq=True)
 class RecognizedFile:
+    type: str
     filename_pattern: str
-    destination_folder: str
+    staging_folder: str
+    input_folder: str
 
 
 @dataclass(frozen=True, eq=True)
