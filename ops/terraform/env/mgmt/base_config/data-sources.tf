@@ -5,6 +5,6 @@ data "external" "yaml" {
   query = {
     seed_env    = local.env
     env         = local.env
-    kms_key_arn = local.kms_key_id
+    kms_key_alias = local.kms_key_alias
   }
 }
