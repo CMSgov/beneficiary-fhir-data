@@ -27,8 +27,9 @@ aws ecr-public get-login-password --region us-east-1 | docker login --username A
 
 # Build tagged node image. Note that DOCKER_BUILDKIT is specified to enable Dockerfile local
 # Dockerignore, see https://stackoverflow.com/a/57774684
-DOCKER_BUILDKIT=1 docker build "$CONTEXT_DIR" \
+DOCKER_BUILDKIT=1 docker buildx build "$CONTEXT_DIR" \
   --file "$SCRIPT_DIR/Dockerfile" \
+  --provenance false \
   --target lambda \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG}" \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG_LATEST}" \
