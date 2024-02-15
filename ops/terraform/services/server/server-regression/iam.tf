@@ -380,7 +380,7 @@ resource "aws_iam_policy" "spice_refresh_policy" {
   name = "${local.spice_trigger_lambda_name}-quicksight"
   description = join("", [
     "Policy that allows searching and refreshing SPICE data sets for the ",
-    "bfd-${local.env}-${local.service} refresh spice trigegr lambda",
+    "${local.spice_trigger_lambda_name} Lambda",
   ])
   policy = jsonencode(
     {
