@@ -326,3 +326,86 @@ resource "aws_iam_role" "glue_trigger" {
     aws_iam_policy.glue.arn
   ]
 }
+
+resource "aws_iam_role" "spice_refresh_role" {
+  name = local.spice_trigger_lambda_name
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          }
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  force_detach_policies = true
+}
+
+resource "aws_iam_policy" "spice_refresh_logs_policy" {
+  name = "${local.spice_trigger_lambda_name}-logs"
+  description = join("", [
+    "Permissions for the ${local.spice_trigger_lambda_name} Lambda to write to its corresponding ",
+    "CloudWatch Log Group and Log Stream",
+  ])
+  policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action   = "logs:CreateLogGroup"
+          Effect   = "Allow"
+          Resource = "arn:aws:logs:${local.region}:${local.account_id}:*"
+        },
+        {
+          Action = [
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+          ]
+          Effect = "Allow"
+          Resource = [
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${local.spice_trigger_lambda_name}:*",
+          ]
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+}
+
+resource "aws_iam_policy" "spice_refresh_policy" {
+  name = "${local.spice_trigger_lambda_name}-quicksight"
+  description = join("", [
+    "Policy that allows searching and refreshing SPICE data sets for the ",
+    "${local.spice_trigger_lambda_name} Lambda",
+  ])
+  policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = [
+            "quicksight:SearchDataSets",
+            "quicksight:CreateIngestion",
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+          Sid      = "VisualEditor0"
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "spice_refresh_lambda_execution_policy_attach" {
+  role       = aws_iam_role.spice_refresh_role.name
+  policy_arn = aws_iam_policy.spice_refresh_logs_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "spice_refresh_policy_attach" {
+  role       = aws_iam_role.spice_refresh_role.name
+  policy_arn = aws_iam_policy.spice_refresh_policy.arn
+}
