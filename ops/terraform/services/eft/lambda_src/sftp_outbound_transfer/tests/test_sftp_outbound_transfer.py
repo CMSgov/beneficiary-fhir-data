@@ -102,12 +102,10 @@ mock_ssh_client_func = mock.MagicMock()
 mock_send_notification = mock.Mock()
 
 
-def get_mock_send_notification_calls(
-    mock_send_notiification: mock.MagicMock,
-) -> list[tuple[str, StatusNotification]]:
+def get_mock_send_notification_calls() -> list[tuple[str, StatusNotification]]:
     return [
         (str(x.kwargs["topic"]), x.kwargs["notification"])
-        for x in mock_send_notiification.call_args_list
+        for x in mock_send_notification.call_args_list
     ]
 
 
@@ -224,9 +222,7 @@ class TestUpdatePipelineSlisHandler:
 
         assert mock_send_notification.call_count == 1
 
-        actual_topic_arn, actual_notification = get_mock_send_notification_calls(
-            mock_send_notiification=mock_send_notification
-        )[0]
+        actual_topic_arn, actual_notification = get_mock_send_notification_calls()[0]
         assert actual_topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN
         assert isinstance(actual_notification.details, UnknownErrorDetails)
         assert actual_notification.details.error_name == expected_error.__name__
@@ -242,9 +238,7 @@ class TestUpdatePipelineSlisHandler:
 
         assert mock_send_notification.call_count == 1
 
-        actual_topic_arn, actual_notification = get_mock_send_notification_calls(
-            mock_send_notiification=mock_send_notification
-        )[0]
+        actual_topic_arn, actual_notification = get_mock_send_notification_calls()[0]
         assert actual_topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN
         assert isinstance(actual_notification.details, TransferFailedDetails)
         assert actual_notification.details.error_name == InvalidObjectKeyError.__name__
@@ -271,9 +265,7 @@ class TestUpdatePipelineSlisHandler:
 
         assert mock_send_notification.call_count == 1
 
-        actual_topic_arn, actual_notification = get_mock_send_notification_calls(
-            mock_send_notiification=mock_send_notification
-        )[0]
+        actual_topic_arn, actual_notification = get_mock_send_notification_calls()[0]
         assert actual_topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN
         assert isinstance(actual_notification.details, TransferFailedDetails)
         assert actual_notification.details.error_name == UnknownPartnerError.__name__
@@ -286,9 +278,7 @@ class TestUpdatePipelineSlisHandler:
         with pytest.raises(InvalidPendingDirError):
             handler(event=invalid_event, context=mock_lambda_context)
 
-        mocked_calls = get_mock_send_notification_calls(
-            mock_send_notiification=mock_send_notification
-        )
+        mocked_calls = get_mock_send_notification_calls()
         assert mock_send_notification.call_count == 2
         assert all(
             isinstance(actual_notification.details, TransferFailedDetails)
@@ -301,7 +291,9 @@ class TestUpdatePipelineSlisHandler:
             for topic_arn, _ in mocked_calls
         )
 
-    def test_it_raises_invalid_partner_error_and_sends_notifications_if_file_is_unrecognized(self):
+    def test_it_raises_unrecognized_file_error_and_sends_notifications_if_file_is_unrecognized(
+        self,
+    ):
         invalid_event = generate_event(
             key=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/unknown_file"
         )
@@ -309,9 +301,7 @@ class TestUpdatePipelineSlisHandler:
         with pytest.raises(UnrecognizedFileError):
             handler(event=invalid_event, context=mock_lambda_context)
 
-        mocked_calls = get_mock_send_notification_calls(
-            mock_send_notiification=mock_send_notification
-        )
+        mocked_calls = get_mock_send_notification_calls()
         assert mock_send_notification.call_count == 2
         assert all(
             isinstance(actual_notification.details, TransferFailedDetails)
@@ -331,9 +321,7 @@ class TestUpdatePipelineSlisHandler:
         with pytest.raises(SFTPConnectionError):
             handler(event=event, context=mock_lambda_context)
 
-        mocked_calls = get_mock_send_notification_calls(
-            mock_send_notiification=mock_send_notification
-        )
+        mocked_calls = get_mock_send_notification_calls()
         assert mock_send_notification.call_count == 2
         assert all(
             isinstance(actual_notification.details, TransferFailedDetails)
@@ -353,9 +341,7 @@ class TestUpdatePipelineSlisHandler:
         with pytest.raises(SFTPTransferError):
             handler(event=event, context=mock_lambda_context)
 
-        mocked_calls = get_mock_send_notification_calls(
-            mock_send_notiification=mock_send_notification
-        )
+        mocked_calls = get_mock_send_notification_calls()
         assert mock_send_notification.call_count == 2
         assert all(
             isinstance(actual_notification.details, TransferFailedDetails)
@@ -430,14 +416,14 @@ class TestUpdatePipelineSlisHandler:
         }
         assert actual_sftp_rename_data == expected_sftp_rename_data
 
-        mocked_calls = get_mock_send_notification_calls(
-            mock_send_notiification=mock_send_notification
-        )
+        mocked_calls = get_mock_send_notification_calls()
         assert mock_send_notification.call_count == 2
         assert all(
             isinstance(actual_notification.details, TransferSuccessDetails)
             and actual_notification.details.object_key == DEFAULT_MOCK_OBJECT_KEY
             and actual_notification.details.partner == DEFAULT_MOCK_PARTNER_NAME
+            and actual_notification.details.file_type
+            == DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].type
             for _, actual_notification in mocked_calls
         )
         assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)

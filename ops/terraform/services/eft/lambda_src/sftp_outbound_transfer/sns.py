@@ -17,7 +17,7 @@ class TransferSuccessDetails:
     partner: str
     timestamp: datetime
     object_key: str
-    destination: str
+    file_type: str
 
 
 @dataclass(frozen=True, eq=True)

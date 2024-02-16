@@ -142,19 +142,24 @@ def _handle_s3_event(s3_object_key: str):
     if not recognized_file:
         raise UnrecognizedFileError(
             message=(
-                f"The file {filename} did not match any recognized files"
-                f" ({json.dumps(partner_config.recognized_files, default=str)}) for partner"
-                f" {partner}"
+                f"The file {filename} did not match any of {partner}'s recognized files: "
+                f"{json.dumps(
+                    [
+                        {"type": file.type, "pattern": file.filename_pattern}
+                        for file in partner_config.recognized_files
+                    ]
+                )}"
             ),
             s3_object_key=s3_object_key,
             partner=partner,
         )
 
     logger.info(
-        "%s recognized using pattern %s; will be sent to %s",
+        "%s recognized as %s file type using pattern %s; will be sent to %s",
         filename,
+        recognized_file.type,
         recognized_file.filename_pattern,
-        recognized_file.input_folder,
+        global_config.sftp_hostname,
     )
     logger.append_keys(
         matched_pattern=recognized_file.filename_pattern,
@@ -295,7 +300,7 @@ def _handle_s3_event(s3_object_key: str):
                 partner=partner,
                 timestamp=datetime.utcnow(),
                 object_key=s3_object_key,
-                destination=recognized_file.input_folder,
+                file_type=recognized_file.type,
             )
         )
         send_notification(topic=bfd_topic, notification=notification)
