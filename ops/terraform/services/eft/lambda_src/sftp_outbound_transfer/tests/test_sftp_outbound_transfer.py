@@ -2,7 +2,9 @@
 # pylint: disable=too-many-lines,too-many-arguments,too-many-public-methods
 import calendar
 import json
+from base64 import b64encode
 from datetime import datetime, timezone
+from io import StringIO
 from typing import Any, Callable, Type
 from unittest import mock
 
@@ -17,10 +19,11 @@ from errors import (
     UnknownPartnerError,
     UnrecognizedFileError,
 )
-from sftp_outbound_transfer import handler
+from sftp_outbound_transfer import _safe_sftp_mkdir, handler
 from sns import (
     StatusNotification,
     TransferFailedDetails,
+    TransferSuccessDetails,
     UnknownErrorDetails,
     send_notification,
 )
@@ -39,6 +42,9 @@ DEFAULT_MOCK_PARTNER_HOME_DIR = "partner_home_dir"
 DEFAULT_MOCK_BFD_ENVIRONMENT = "mock"
 DEFAULT_MOCK_BUCKET = "mock-bucket"
 DEFAULT_MOCK_BUCKET_ROOT_DIR = "mock_root"
+DEFAULT_MOCK_PENDING_DIR = "out"
+DEFAULT_MOCK_OBJECT_FILENAME = "file"
+DEFAULT_MOCK_OBJECT_KEY = f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/{DEFAULT_MOCK_OBJECT_FILENAME}"
 DEFAULT_MOCK_BFD_SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:123456789012:mock-topic"
 DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER = {
     f"{DEFAULT_MOCK_PARTNER_NAME}": f"arn:aws:sns:us-east-1:123456789012:mock-topic-{DEFAULT_MOCK_PARTNER_NAME}"
@@ -56,9 +62,9 @@ DEFAULT_MOCK_GLOBAL_CONFIG = GlobalSsmConfig(
 DEFAULT_MOCK_PARTNER_CONFIG = PartnerSsmConfig(
     partner=DEFAULT_MOCK_PARTNER_NAME,
     bucket_home_dir=DEFAULT_MOCK_PARTNER_HOME_DIR,
-    pending_files_dir="out",
+    pending_files_dir=DEFAULT_MOCK_PENDING_DIR,
     bucket_home_path=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}",
-    pending_files_full_path=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/out",
+    pending_files_full_path=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}",
     recognized_files=[
         RecognizedFile(
             type="test",
@@ -83,11 +89,14 @@ asserted upon"""
 mock_boto3_resource.Topic.side_effect = mock_new_topic
 mock_boto3_resource_func = mock.Mock(return_value=mock_boto3_resource)
 mock_lambda_context = mock.Mock()
+mock_global_ssm = mock.Mock()
+mock_partner_ssm = mock.Mock()
 mock_paramiko = mock.Mock()
 mock_ssh_client = mock.Mock()
 mock_sftp_client = mock.Mock()
 mock_ssh_client_open_sftp_func = mock.MagicMock()
 mock_ssh_client_func = mock.MagicMock()
+mock_send_notification = mock.Mock()
 
 
 def get_mock_send_notification_calls(
@@ -100,7 +109,7 @@ def get_mock_send_notification_calls(
 
 
 def generate_event(
-    key: str = f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/out/file",
+    key: str = DEFAULT_MOCK_OBJECT_KEY,
     event_time_iso: str = DEFAULT_MOCK_EVENT_TIME_ISO,
     event_name: str = DEFAULT_MOCK_EVENT_NAME,
 ) -> dict[str, Any]:
@@ -129,20 +138,32 @@ def generate_event(
     f"{MODULE_UNDER_TEST}.SNS_TOPIC_ARNS_BY_PARTNER_JSON",
     DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER_JSON,
 )
+@mock.patch(GLOBAL_SSM_CONFIG_PATCH_PATH, new=mock_global_ssm)
+@mock.patch(PARTNER_SSM_CONFIG_PATCH_PATH, new=mock_partner_ssm)
 @mock.patch(PARAMIKO_PATCH_PATH, new=mock_paramiko)
+@mock.patch(SEND_NOTIFICATION_PATCH_PATH, new=mock_send_notification)
 class TestUpdatePipelineSlisHandler:
     @pytest.fixture(autouse=True)
     def run_before_and_after_tests(self):
+        # Reset global/partner SSM config default return values before each test
+        mock_global_ssm.from_ssm.return_value = DEFAULT_MOCK_GLOBAL_CONFIG
+        mock_partner_ssm.from_ssm.return_value = DEFAULT_MOCK_PARTNER_CONFIG
         # Reset context manager mocking before each test
         mock_ssh_client_open_sftp_func.__enter__.return_value = mock_sftp_client
         mock_ssh_client.open_sftp.return_value = mock_ssh_client_open_sftp_func
         mock_ssh_client_func.__enter__.return_value = mock_ssh_client
         mock_paramiko.SSHClient.return_value = mock_ssh_client_func
+        mock_sftp_client.open = mock.MagicMock()
         yield
         # Remove modifications to mocked objects returned by above context manager mocking after
         # each test
         mock_ssh_client.reset_mock(side_effect=True, return_value=True)
         mock_sftp_client.reset_mock(side_effect=True, return_value=True)
+        # Reset other mocks, as well
+        mock_boto3_client.reset_mock(side_effect=True, return_value=True)
+        mock_global_ssm.reset_mock(side_effect=True, return_value=True)
+        mock_partner_ssm.reset_mock(side_effect=True, return_value=True)
+        mock_send_notification.reset_mock(side_effect=True, return_value=True)
 
     @pytest.mark.parametrize(
         "event,expected_error",
@@ -192,9 +213,8 @@ class TestUpdatePipelineSlisHandler:
             ),
         ],
     )
-    @mock.patch(SEND_NOTIFICATION_PATCH_PATH)
     def test_it_raises_exception_and_sends_notification_if_event_is_invalid(
-        self, mock_send_notification: mock.MagicMock, event: Any, expected_error: Type[Exception]
+        self, event: Any, expected_error: Type[Exception]
     ):
         with pytest.raises(expected_error):
             handler(event=event, context=mock_lambda_context)
@@ -208,12 +228,11 @@ class TestUpdatePipelineSlisHandler:
         assert isinstance(actual_notification.details, UnknownErrorDetails)
         assert actual_notification.details.error_name == expected_error.__name__
 
-    @mock.patch(SEND_NOTIFICATION_PATCH_PATH)
-    def test_it_raises_invalid_key_error_and_sends_notification_if_event_is_invalid(
-        self, mock_send_notification: mock.MagicMock
-    ):
+    def test_it_raises_invalid_key_error_and_sends_notification_if_event_is_invalid(self):
         # Missing the root dir
-        event_with_invalid_key = generate_event(key=f"{DEFAULT_MOCK_PARTNER_HOME_DIR}/out/file")
+        event_with_invalid_key = generate_event(
+            key=f"{DEFAULT_MOCK_PARTNER_HOME_DIR}/out/{DEFAULT_MOCK_OBJECT_FILENAME}"
+        )
 
         with pytest.raises(InvalidObjectKeyError):
             handler(event=event_with_invalid_key, context=mock_lambda_context)
@@ -227,10 +246,8 @@ class TestUpdatePipelineSlisHandler:
         assert isinstance(actual_notification.details, TransferFailedDetails)
         assert actual_notification.details.error_name == InvalidObjectKeyError.__name__
 
-    @mock.patch(SEND_NOTIFICATION_PATCH_PATH)
-    @mock.patch(GLOBAL_SSM_CONFIG_PATCH_PATH)
     def test_it_raises_unknown_partner_error_and_sends_notification_if_global_config_is_invalid(
-        self, mock_global_ssm: mock.MagicMock, mock_send_notification: mock.MagicMock
+        self,
     ):
         event = generate_event()
         mock_global_ssm.from_ssm.return_value = GlobalSsmConfig(
@@ -258,20 +275,10 @@ class TestUpdatePipelineSlisHandler:
         assert isinstance(actual_notification.details, TransferFailedDetails)
         assert actual_notification.details.error_name == UnknownPartnerError.__name__
 
-    @mock.patch(SEND_NOTIFICATION_PATCH_PATH)
-    @mock.patch(PARTNER_SSM_CONFIG_PATCH_PATH)
-    @mock.patch(GLOBAL_SSM_CONFIG_PATCH_PATH)
-    def test_it_raises_invalid_partner_error_and_sends_notifications_if_event_is_invalid(
-        self,
-        mock_global_ssm: mock.MagicMock,
-        mock_partner_ssm: mock.MagicMock,
-        mock_send_notification: mock.MagicMock,
-    ):
+    def test_it_raises_invalid_partner_error_and_sends_notifications_if_event_is_invalid(self):
         invalid_event = generate_event(
-            key=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/invalid/file"
+            key=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/invalid/{DEFAULT_MOCK_OBJECT_FILENAME}"
         )
-        mock_global_ssm.from_ssm.return_value = DEFAULT_MOCK_GLOBAL_CONFIG
-        mock_partner_ssm.from_ssm.return_value = DEFAULT_MOCK_PARTNER_CONFIG
 
         with pytest.raises(InvalidPendingDirError):
             handler(event=invalid_event, context=mock_lambda_context)
@@ -291,20 +298,10 @@ class TestUpdatePipelineSlisHandler:
             for topic_arn, _ in mocked_calls
         )
 
-    @mock.patch(SEND_NOTIFICATION_PATCH_PATH)
-    @mock.patch(PARTNER_SSM_CONFIG_PATCH_PATH)
-    @mock.patch(GLOBAL_SSM_CONFIG_PATCH_PATH)
-    def test_it_raises_invalid_partner_error_and_sends_notifications_if_file_is_unrecognized(
-        self,
-        mock_global_ssm: mock.MagicMock,
-        mock_partner_ssm: mock.MagicMock,
-        mock_send_notification: mock.MagicMock,
-    ):
+    def test_it_raises_invalid_partner_error_and_sends_notifications_if_file_is_unrecognized(self):
         invalid_event = generate_event(
-            key=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/out/unknown_file"
+            key=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/unknown_file"
         )
-        mock_global_ssm.from_ssm.return_value = DEFAULT_MOCK_GLOBAL_CONFIG
-        mock_partner_ssm.from_ssm.return_value = DEFAULT_MOCK_PARTNER_CONFIG
 
         with pytest.raises(UnrecognizedFileError):
             handler(event=invalid_event, context=mock_lambda_context)
@@ -324,18 +321,8 @@ class TestUpdatePipelineSlisHandler:
             for topic_arn, _ in mocked_calls
         )
 
-    @mock.patch(SEND_NOTIFICATION_PATCH_PATH)
-    @mock.patch(PARTNER_SSM_CONFIG_PATCH_PATH)
-    @mock.patch(GLOBAL_SSM_CONFIG_PATCH_PATH)
-    def test_it_raises_sftp_connection_error_and_sends_notifications_if_connection_fails(
-        self,
-        mock_global_ssm: mock.MagicMock,
-        mock_partner_ssm: mock.MagicMock,
-        mock_send_notification: mock.MagicMock,
-    ):
+    def test_it_raises_sftp_connection_error_and_sends_notifications_if_connection_fails(self):
         event = generate_event()
-        mock_global_ssm.from_ssm.return_value = DEFAULT_MOCK_GLOBAL_CONFIG
-        mock_partner_ssm.from_ssm.return_value = DEFAULT_MOCK_PARTNER_CONFIG
         mock_ssh_client.connect.side_effect = paramiko.SSHException()
 
         with pytest.raises(SFTPConnectionError):
@@ -356,18 +343,8 @@ class TestUpdatePipelineSlisHandler:
             for topic_arn, _ in mocked_calls
         )
 
-    @mock.patch(SEND_NOTIFICATION_PATCH_PATH)
-    @mock.patch(PARTNER_SSM_CONFIG_PATCH_PATH)
-    @mock.patch(GLOBAL_SSM_CONFIG_PATCH_PATH)
-    def test_it_raises_sftp_transfer_error_and_sends_notifications_if_transfer_fails(
-        self,
-        mock_global_ssm: mock.MagicMock,
-        mock_partner_ssm: mock.MagicMock,
-        mock_send_notification: mock.MagicMock,
-    ):
+    def test_it_raises_sftp_transfer_error_and_sends_notifications_if_transfer_fails(self):
         event = generate_event()
-        mock_global_ssm.from_ssm.return_value = DEFAULT_MOCK_GLOBAL_CONFIG
-        mock_partner_ssm.from_ssm.return_value = DEFAULT_MOCK_PARTNER_CONFIG
         mock_sftp_client.open.side_effect = IOError()
 
         with pytest.raises(SFTPTransferError):
@@ -380,6 +357,84 @@ class TestUpdatePipelineSlisHandler:
         assert all(
             isinstance(actual_notification.details, TransferFailedDetails)
             and actual_notification.details.error_name == SFTPTransferError.__name__
+            for _, actual_notification in mocked_calls
+        )
+        assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)
+        assert any(
+            topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
+            for topic_arn, _ in mocked_calls
+        )
+
+    @mock.patch(f"{MODULE_UNDER_TEST}.{_safe_sftp_mkdir.__name__}")
+    def test_it_executes_sftp_transfer_process_if_event_is_valid(
+        self, mock_safe_sftp_mkdir: mock.MagicMock
+    ):
+        event = generate_event()
+        mock_host_keys = mock.Mock()
+        mock_ssh_client.get_host_keys.return_value = mock_host_keys
+        mock_rsakey_func: Callable[[bytes], str] = lambda data: b64encode(data).decode("utf-8")
+        mock_paramiko.RSAKey.side_effect = mock_rsakey_func
+        mock_rsakey_privkey_func: Callable[[StringIO], str] = lambda file_obj: file_obj.getvalue()
+        mock_paramiko.RSAKey.from_private_key.side_effect = mock_rsakey_privkey_func
+        mock_s3_client = mock.Mock()
+        mock_boto3_client.return_value = mock_s3_client
+
+        handler(event=event, context=mock_lambda_context)
+
+        actual_add_host_key_data = mock_host_keys.add.call_args.kwargs
+        expected_add_host_key_data = {
+            "hostname": DEFAULT_MOCK_GLOBAL_CONFIG.sftp_hostname,
+            "keytype": "ssh-rsa",
+            "key": DEFAULT_MOCK_GLOBAL_CONFIG.sftp_host_pub_key,
+        }
+        assert actual_add_host_key_data == expected_add_host_key_data
+
+        actual_ssh_connect_data = mock_ssh_client.connect.call_args.kwargs
+        expected_ssh_connect_data = {
+            "hostname": DEFAULT_MOCK_GLOBAL_CONFIG.sftp_hostname,
+            "username": DEFAULT_MOCK_GLOBAL_CONFIG.sftp_username,
+            "pkey": DEFAULT_MOCK_GLOBAL_CONFIG.sftp_user_priv_key,
+            "look_for_keys": False,
+            "allow_agent": False,
+            "timeout": DEFAULT_MOCK_GLOBAL_CONFIG.sftp_connect_timeout,
+        }
+        assert actual_ssh_connect_data == expected_ssh_connect_data
+
+        actual_staging_mkdir_path = mock_safe_sftp_mkdir.call_args_list[0].kwargs["dirpath"]
+        expected_staging_mkdir_path = DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder
+        assert actual_staging_mkdir_path == expected_staging_mkdir_path
+
+        actual_s3_download_obj_key = mock_s3_client.download_fileobj.call_args.kwargs["Key"]
+        expected_s3_download_obj_key = DEFAULT_MOCK_OBJECT_KEY
+        assert actual_s3_download_obj_key == expected_s3_download_obj_key
+
+        actual_sftp_open_path = mock_sftp_client.open.call_args.kwargs["filename"]
+        expected_sftp_open_path = f"{expected_staging_mkdir_path}/{DEFAULT_MOCK_OBJECT_FILENAME}"
+        assert actual_sftp_open_path == expected_sftp_open_path
+
+        actual_sftp_chmod_data = mock_sftp_client.chmod.call_args.kwargs
+        expected_sftp_chmod_data = {"path": expected_sftp_open_path, "mode": 0o664}
+        assert actual_sftp_chmod_data == expected_sftp_chmod_data
+
+        actual_input_mkdir_path = mock_safe_sftp_mkdir.call_args_list[1].kwargs["dirpath"]
+        expected_input_mkdir_path = DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder
+        assert actual_input_mkdir_path == expected_input_mkdir_path
+
+        actual_sftp_rename_data = mock_sftp_client.rename.call_args.kwargs
+        expected_sftp_rename_data = {
+            "oldpath": expected_sftp_open_path,
+            "newpath": f"{expected_input_mkdir_path}/{DEFAULT_MOCK_OBJECT_FILENAME}",
+        }
+        assert actual_sftp_rename_data == expected_sftp_rename_data
+
+        mocked_calls = get_mock_send_notification_calls(
+            mock_send_notiification=mock_send_notification
+        )
+        assert mock_send_notification.call_count == 2
+        assert all(
+            isinstance(actual_notification.details, TransferSuccessDetails)
+            and actual_notification.details.object_key == DEFAULT_MOCK_OBJECT_KEY
+            and actual_notification.details.partner == DEFAULT_MOCK_PARTNER_NAME
             for _, actual_notification in mocked_calls
         )
         assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)
