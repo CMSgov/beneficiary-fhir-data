@@ -172,13 +172,13 @@ def _handle_s3_event(s3_object_key: str):
                 data=b64decode(global_config.sftp_host_pub_key.removeprefix("ssh-rsa").strip())
             )
             sftp_priv_key = paramiko.RSAKey.from_private_key(
-                StringIO(global_config.sftp_user_priv_key)
+                file_obj=StringIO(global_config.sftp_user_priv_key)
             )
             ssh_client.get_host_keys().add(
                 hostname=global_config.sftp_hostname, keytype="ssh-rsa", key=sftp_host_key
             )
             ssh_client.connect(
-                global_config.sftp_hostname,
+                hostname=global_config.sftp_hostname,
                 username=global_config.sftp_username,
                 pkey=sftp_priv_key,
                 look_for_keys=False,
@@ -212,8 +212,8 @@ def _handle_s3_event(s3_object_key: str):
         try:
             with ssh_client.open_sftp() as sftp_client:
                 # Clean the provided paths of any whitespace or trailing/leading slashes
-                staging_dir_path = f"/{recognized_file.staging_folder.strip().strip(" / ")}"
-                input_dir_path = recognized_file.input_folder.strip().strip("/")
+                staging_dir_path = f"/{recognized_file.staging_folder.strip().strip('/')}"
+                input_dir_path = f"/{recognized_file.input_folder.strip().strip('/')}"
                 # First, ensure the staging folder exists by creating it, piece-by-piece, if it
                 # doesn't
                 logger.info(
@@ -232,7 +232,7 @@ def _handle_s3_event(s3_object_key: str):
                     staging_dir_path,
                 )
                 staging_file_path = f"{staging_dir_path}/{filename}"
-                with sftp_client.open(staging_file_path, "wb", 32768) as f:
+                with sftp_client.open(filename=staging_file_path, mode="wb", bufsize=32768) as f:
                     s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=f)
                 logger.info("Upload of %s to %s successful", filename, staging_dir_path)
 
@@ -243,7 +243,7 @@ def _handle_s3_event(s3_object_key: str):
                     staging_file_path,
                     global_config.sftp_hostname,
                 )
-                sftp_client.chmod(staging_file_path, 0o664)
+                sftp_client.chmod(path=staging_file_path, mode=0o664)
                 logger.info(
                     "File permissions of %s modified to 664 successfully", staging_file_path
                 )
@@ -264,7 +264,7 @@ def _handle_s3_event(s3_object_key: str):
                     "Moving %s to SWEEPS input directory path %s", staging_file_path, input_dir_path
                 )
                 input_file_path = f"{input_dir_path}/{filename}"
-                sftp_client.rename(staging_file_path, input_file_path)
+                sftp_client.rename(oldpath=staging_file_path, newpath=input_file_path)
                 logger.info(
                     "%s moved to %s successfully; %s has been transferred successfully",
                     filename,
