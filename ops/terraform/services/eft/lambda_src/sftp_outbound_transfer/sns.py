@@ -12,6 +12,7 @@ else:
 
 logger = Logger()
 
+
 @dataclass(frozen=True, eq=True)
 class TransferSuccessDetails:
     partner: str
@@ -51,14 +52,17 @@ class StatusNotification:
                 self.type = "UNKNOWN_ERROR"
             case _:  # pyright: ignore [reportUnnecessaryComparison]
                 raise ValueError(
-                    f"Invalid details, must be one of: "
-                    f"{(", ".join([
-                        x.__name__ for x in [
-                            TransferSuccessDetails,
-                            TransferFailedDetails,
-                            UnknownErrorDetails,
+                    "Invalid details, must be one of: "
+                    + ", ".join(
+                        [
+                            x.__name__
+                            for x in [
+                                TransferSuccessDetails,
+                                TransferFailedDetails,
+                                UnknownErrorDetails,
+                            ]
                         ]
-                    ]))}"
+                    )
                 )
 
     def as_sns_message(self) -> str:

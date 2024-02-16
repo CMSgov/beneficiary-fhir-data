@@ -115,17 +115,23 @@ def generate_event(
     event_name: str = DEFAULT_MOCK_EVENT_NAME,
 ) -> dict[str, Any]:
     return {
-        "Records": [{
-            "Sns": {
-                "Message": json.dumps({
-                    "Records": [{
-                        "eventName": event_name,
-                        "eventTime": event_time_iso,
-                        "s3": {"object": {"key": key}},
-                    }]
-                })
+        "Records": [
+            {
+                "Sns": {
+                    "Message": json.dumps(
+                        {
+                            "Records": [
+                                {
+                                    "eventName": event_name,
+                                    "eventTime": event_time_iso,
+                                    "s3": {"object": {"key": key}},
+                                }
+                            ]
+                        }
+                    )
+                }
             }
-        }]
+        ]
     }
 
 
@@ -185,30 +191,38 @@ class TestUpdatePipelineSlisHandler:
             (generate_event(event_name="invalid"), ValueError),
             (
                 {
-                    "Records": [{
-                        "Sns": {
-                            "Message": json.dumps(
-                                {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
-                            )
+                    "Records": [
+                        {
+                            "Sns": {
+                                "Message": json.dumps(
+                                    {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
+                                )
+                            }
                         }
-                    }]
+                    ]
                 },
                 KeyError,
             ),
             (generate_event(event_time_iso="24-01-19T00:00:00Z"), ValueError),
             (
                 {
-                    "Records": [{
-                        "Sns": {
-                            "Message": json.dumps({
-                                "Records": [{
-                                    "eventName": DEFAULT_MOCK_EVENT_NAME,
-                                    "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
-                                    "s3": {"object": {}},
-                                }]
-                            })
+                    "Records": [
+                        {
+                            "Sns": {
+                                "Message": json.dumps(
+                                    {
+                                        "Records": [
+                                            {
+                                                "eventName": DEFAULT_MOCK_EVENT_NAME,
+                                                "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
+                                                "s3": {"object": {}},
+                                            }
+                                        ]
+                                    }
+                                )
+                            }
                         }
-                    }]
+                    ]
                 },
                 KeyError,
             ),
