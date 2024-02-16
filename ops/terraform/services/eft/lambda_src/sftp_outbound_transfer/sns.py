@@ -71,4 +71,3 @@ def send_notification(topic: Topic, notification: StatusNotification):
         MessageAttributes={"type": {"DataType": "String", "StringValue": notification.type}},
     )
     logger.info("Published %s to %s", notification.as_sns_message(), topic.arn)
-
