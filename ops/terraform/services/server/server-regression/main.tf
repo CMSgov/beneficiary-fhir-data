@@ -11,9 +11,11 @@ module "terraservice" {
 }
 
 locals {
-  default_tags = module.terraservice.default_tags
-  env          = module.terraservice.env
-  seed_env     = module.terraservice.seed_env
+  default_tags              = module.terraservice.default_tags
+  env                       = module.terraservice.env
+  seed_env                  = module.terraservice.seed_env
+  region                    = data.aws_region.current.name
+  spice_trigger_lambda_name = "bfd-${local.env}-${local.service}-refresh-spice-trigger"
 
   account_id = data.aws_caller_identity.current.account_id
   layer      = "app"
@@ -154,4 +156,59 @@ resource "aws_lambda_function" "glue_trigger" {
   }
 
   role = aws_iam_role.glue_trigger.arn
+}
+
+resource "aws_lambda_function" "spice_refresh_trigger" {
+  description      = "Triggers a full SPICE refresh when the server regression glue crawler completes"
+  architectures    = ["x86_64"]
+  function_name    = local.spice_trigger_lambda_name
+  handler          = "spice-trigger.lambda_handler"
+  memory_size      = 128
+  package_type     = "Zip"
+  role             = aws_iam_role.spice_refresh_role.arn
+  runtime          = "python3.9"
+  filename         = data.archive_file.spice_trigger.output_path
+  source_code_hash = data.archive_file.spice_trigger.output_base64sha256
+  timeout          = 60
+  environment {
+    variables = {
+      ENV = local.env
+    }
+  }
+}
+
+resource "aws_cloudwatch_event_rule" "spice_refresh_event_rule" {
+  description = "Event to execute a refresh of SPICE server regression ${local.env} dataset"
+  event_pattern = jsonencode(
+    {
+      detail = {
+        crawlerName = [
+          "bfd-insights-bfd-${local.env}-server-regression",
+        ]
+        state = [
+          "Succeeded",
+        ]
+      }
+      detail-type = [
+        "Glue Crawler State Change",
+      ]
+      source = [
+        "aws.glue",
+      ]
+    }
+  )
+  name = "${local.spice_trigger_lambda_name}-on-glue-crawler-success"
+}
+
+resource "aws_cloudwatch_event_target" "spice_refresh_event_target" {
+  arn  = aws_lambda_function.spice_refresh_trigger.arn
+  rule = aws_cloudwatch_event_rule.spice_refresh_event_rule.id
+}
+
+resource "aws_lambda_permission" "allow_event_bridge_access" {
+  statement_id  = "${local.spice_trigger_lambda_name}-on-glue-crawler-success"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.spice_refresh_trigger.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.spice_refresh_event_rule.arn
 }
