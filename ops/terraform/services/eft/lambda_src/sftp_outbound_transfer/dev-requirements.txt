@@ -120,13 +120,13 @@ black==24.2.0 \
     --hash=sha256:e8a6ae970537e67830776488bca52000eaa37fa63b9988e8c487458d9cd5ace6 \
     --hash=sha256:faf2ee02e6612577ba0181f4347bcbcf591eb122f7841ae5ba233d12c39dcb4d
     # via -r dev-requirements.in
-boto3-stubs[sns,ssm]==1.34.40 \
-    --hash=sha256:a57dee7d314ef76620ed35097a583ae41e44ac97e5c7e858f38b79774ab8c23f \
-    --hash=sha256:ad0a67c78fe647cd2b611f3f82daf2569e1643781d53cbc869f18062e177ae28
+boto3-stubs[sns,ssm]==1.34.46 \
+    --hash=sha256:8f0706c13e3263f23af0f4912f4dc3a9cef266dc83778e93c395e6f10bd3e832 \
+    --hash=sha256:fd01ecbd599bdfbc0933d2537ec33beddc9f93399b395e557f46aadad17a0726
     # via -r dev-requirements.in
-botocore-stubs==1.34.40 \
-    --hash=sha256:50870a5ac8b638dac575aa26d92506dda8cc38e179f93ce2ffe48197ce054dbf \
-    --hash=sha256:d6322bfb9aa882006fe7f8fc3d8a933a66c5627dcf571e65d65a5233c6c172be
+botocore-stubs==1.34.46 \
+    --hash=sha256:a501639bf8b0d94e945cea522a2cefd9d32bce3073db9be1dc240573aea76f7c \
+    --hash=sha256:e1bfb0ca3eafb101cfff810b04fb8f7a5a7d32f900357832733b0d6c9d5880e9
     # via boto3-stubs
 click==8.1.7 \
     --hash=sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28 \
@@ -329,9 +329,9 @@ multidict==6.0.5 \
     # via
     #   aiohttp
     #   yarl
-mypy-boto3-sns==1.34.0 \
-    --hash=sha256:9a10f3d77a9ac03abab5401e8b8dcd0b0364cea4801546b8cdc309853940d745 \
-    --hash=sha256:aba3feb8f7721e3b596339c1c2d5a68d26c17708f7e50c7691d0c7df95e00132
+mypy-boto3-sns==1.34.44 \
+    --hash=sha256:677dc30884075f65e5bda71e5affb87316e7c21ad7c869246b5ba8087ab2399b \
+    --hash=sha256:a985b5281d00a156dd7c9093e5813c10c4ea6b91f2ebb71567fe7bb7b210a652
     # via boto3-stubs
 mypy-boto3-ssm==1.34.32 \
     --hash=sha256:185e46fa5996843e34a5c7fb5e2129df57a37fca3187daa1ab81996d5633c772 \
@@ -365,9 +365,9 @@ pylint==3.0.3 \
     --hash=sha256:58c2398b0301e049609a8429789ec6edf3aabe9b6c5fec916acd18639c16de8b \
     --hash=sha256:7a1585285aefc5165db81083c3e06363a27448f6b467b3b0f30dbd0ac1f73810
     # via -r dev-requirements.in
-pytest==8.0.0 \
-    --hash=sha256:249b1b0864530ba251b7438274c4d251c58d868edaaec8762893ad4a0d71c36c \
-    --hash=sha256:50fb9cbe836c3f20f0dfa99c565201fb75dc54c8d76373cd1bde06b06657bdb6
+pytest==8.0.1 \
+    --hash=sha256:267f6563751877d772019b13aacbe4e860d73fe8f651f28112e9ac37de7513ae \
+    --hash=sha256:3e4f16fe1c0a9dc9d9389161c127c3edc5d810c38d6793042fb81d9f48a59fca
     # via -r dev-requirements.in
 tomlkit==0.12.3 \
     --hash=sha256:75baf5012d06501f07bee5bf8e801b9f343e7aac5a92581f20f80ce632e6b5a4 \
@@ -475,9 +475,9 @@ yarl==1.9.4 \
     # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.0.3 \
-    --hash=sha256:385eb4edd9c9d5c17540511303e39a147ce2fc04bc55289c322b9e5904fe2c05 \
-    --hash=sha256:be1af57fc409f93647f2e8e4573a142ed38724b8cdd389706a867bb4efcf1e78
+setuptools==69.1.0 \
+    --hash=sha256:850894c4195f09c4ed30dba56213bf7c3f21d86ed6bdaafb5df5972593bfc401 \
+    --hash=sha256:c054629b81b946d63a9c6e732bc8b2513a7c3ea645f11d0139a2191d735c60c6
     # via
     #   -c requirements.txt
     #   -r dev-requirements.in
