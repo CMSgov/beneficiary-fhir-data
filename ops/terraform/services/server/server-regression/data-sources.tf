@@ -73,3 +73,9 @@ data "archive_file" "glue_trigger" {
 data "aws_ssm_parameters_by_path" "nonsensitive_common" {
   path = "/bfd/${local.env}/common/nonsensitive"
 }
+
+data "archive_file" "spice_trigger" {
+  type        = "zip"
+  source_file = "${path.module}/lambda-src/spice-trigger/spice-trigger.py"
+  output_path = "${path.module}/lambda-src/spice-trigger/out/spice-trigger.zip"
+}

@@ -47,6 +47,9 @@ public class MavenUtils {
       if (pomFile.exists()) {
         try {
           DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+          // It is advisable to restrict the resolution of external entities by disabling
+          // DOCTYPE declarations entirely when they are not essential.
+          factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
           DocumentBuilder builder = factory.newDocumentBuilder();
           Document document = builder.parse(new File(pomFileName));
           XPath xPath = XPathFactory.newInstance().newXPath();
