@@ -77,6 +77,9 @@ PARAMIKO_PATCH_PATH = f"{MODULE_UNDER_TEST}.{paramiko.__name__}"
 mock_boto3_client = mock.Mock()
 mock_boto3_resource = mock.Mock()
 mock_new_topic: Callable[[str], str] = lambda topic_arn: topic_arn
+"""Lambda that modifies the Topic function to return a string representing the Lambda ARN passed to
+the function for use in tests so that the Topic can be discerned for a given notification and
+asserted upon"""
 mock_boto3_resource.Topic.side_effect = mock_new_topic
 mock_boto3_resource_func = mock.Mock(return_value=mock_boto3_resource)
 mock_lambda_context = mock.Mock()
@@ -84,11 +87,7 @@ mock_paramiko = mock.Mock()
 mock_ssh_client = mock.Mock()
 mock_sftp_client = mock.Mock()
 mock_ssh_client_open_sftp_func = mock.MagicMock()
-mock_ssh_client_open_sftp_func.__enter__.return_value = mock_sftp_client
-mock_ssh_client.open_sftp.return_value = mock_ssh_client_open_sftp_func
 mock_ssh_client_func = mock.MagicMock()
-mock_ssh_client_func.__enter__.return_value = mock_ssh_client
-mock_paramiko.SSHClient.return_value = mock_ssh_client_func
 
 
 def get_mock_send_notification_calls(
@@ -132,6 +131,19 @@ def generate_event(
 )
 @mock.patch(PARAMIKO_PATCH_PATH, new=mock_paramiko)
 class TestUpdatePipelineSlisHandler:
+    @pytest.fixture(autouse=True)
+    def run_before_and_after_tests(self):
+        # Reset context manager mocking before each test
+        mock_ssh_client_open_sftp_func.__enter__.return_value = mock_sftp_client
+        mock_ssh_client.open_sftp.return_value = mock_ssh_client_open_sftp_func
+        mock_ssh_client_func.__enter__.return_value = mock_ssh_client
+        mock_paramiko.SSHClient.return_value = mock_ssh_client_func
+        yield
+        # Remove modifications to mocked objects returned by above context manager mocking after
+        # each test
+        mock_ssh_client.reset_mock(side_effect=True, return_value=True)
+        mock_sftp_client.reset_mock(side_effect=True, return_value=True)
+
     @pytest.mark.parametrize(
         "event,expected_error",
         [
