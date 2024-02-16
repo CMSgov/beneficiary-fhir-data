@@ -19,7 +19,10 @@ from errors import (
     UnknownPartnerError,
     UnrecognizedFileError,
 )
-from sftp_outbound_transfer import _safe_sftp_mkdir, handler
+from sftp_outbound_transfer import (
+    _safe_sftp_mkdir,  # pyright: ignore[reportPrivateUsage]
+)
+from sftp_outbound_transfer import handler
 from sns import (
     StatusNotification,
     TransferFailedDetails,
