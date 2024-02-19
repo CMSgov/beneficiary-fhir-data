@@ -276,6 +276,18 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final String SSM_PATH_PROCESS_DLQ = "rda/job/process_dlq";
 
   /**
+   * The path of the SSM parameter that should be used to determine if the cleanup tasks that remove
+   * old FISS and MCS claims should be run on subsequent job runs.
+   */
+  public static final String SSM_PATH_CLEANUP_ENABLED = "rda/cleanup/enabled";
+
+  /** The maximum number of claims that will be removed during a cleanup task run. */
+  public static final String SSM_PATH_CLEANUP_RUN_SIZE = "rda/cleanup/run_size";
+
+  /** The number of claims to remove as part of a single transaction during a cleanup task run. */
+  public static final String SSM_PATH_CLEANUP_TRANSACTION_SIZE = "rda/cleanup/transaction_size";
+
+  /**
    * The path of the SSM parameter that can be set to override the RDA API Version that the running
    * job should be configured to ingest data for. The job will normally use the default value
    * hardcoded in the code, but this env variable can be used for special circumstances.
@@ -666,6 +678,11 @@ public final class AppConfiguration extends BaseAppConfiguration {
         .map(seq -> Math.max(1L, seq))
         .ifPresent(jobConfig::startingMcsSeqNum);
     config.booleanOption(SSM_PATH_PROCESS_DLQ).ifPresent(jobConfig::processDLQ);
+    config.booleanOption(SSM_PATH_CLEANUP_ENABLED).ifPresent(jobConfig::runCleanup);
+    config.intOption(SSM_PATH_CLEANUP_RUN_SIZE).ifPresent(jobConfig::cleanupRunSize);
+    config
+        .intOption(SSM_PATH_CLEANUP_TRANSACTION_SIZE)
+        .ifPresent(jobConfig::cleanupTransactionSize);
     // Default to the hardcoded RDA version in RdaService, restricted to major version
     jobConfig.rdaVersion(
         RdaVersion.builder()

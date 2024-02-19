@@ -54,6 +54,9 @@ public class AbstractRdaLoadJobTest {
   /** The {@link TestingLoadJob} used in the testing. */
   private TestingLoadJob job;
 
+  /** Mock {@link AbstractCleanupJob} to use in testing. */
+  @Mock private AbstractCleanupJob cleanupJob;
+
   /** The {@link MeterRegistry} used in the testing. */
   private MeterRegistry appMetrics;
 
@@ -77,7 +80,8 @@ public class AbstractRdaLoadJobTest {
             .sinkTypePreference(AbstractRdaLoadJob.SinkTypePreference.NONE)
             .build();
     appMetrics = new SimpleMeterRegistry();
-    job = new TestingLoadJob(config, preJobTask, sourceFactory, sinkFactory, appMetrics);
+    job =
+        new TestingLoadJob(config, preJobTask, sourceFactory, sinkFactory, cleanupJob, appMetrics);
   }
 
   /**
@@ -293,6 +297,7 @@ public class AbstractRdaLoadJobTest {
               return source;
             },
             (preference) -> sink,
+            cleanupJob,
             appMetrics);
     final ExecutorService pool = Executors.newCachedThreadPool();
     try {
@@ -331,6 +336,7 @@ public class AbstractRdaLoadJobTest {
      * @param preJobTask the pre job task
      * @param sourceFactory the source factory
      * @param sinkFactory the sink factory
+     * @param cleanupJob the cleanup job
      * @param appMetrics the app metrics
      */
     public TestingLoadJob(
@@ -338,12 +344,14 @@ public class AbstractRdaLoadJobTest {
         Callable<RdaSource<Integer, Integer>> preJobTask,
         Callable<RdaSource<Integer, Integer>> sourceFactory,
         ThrowingFunction<RdaSink<Integer, Integer>, SinkTypePreference, Exception> sinkFactory,
+        CleanupJob cleanupJob,
         MeterRegistry appMetrics) {
       super(
           config,
           preJobTask,
           sourceFactory,
           sinkFactory,
+          cleanupJob,
           appMetrics,
           LoggerFactory.getLogger(TestingLoadJob.class));
     }

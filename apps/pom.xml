@@ -150,6 +150,7 @@
         <commons.io.version>2.15.1</commons.io.version>
         <commons.collections4.version>4.4</commons.collections4.version>
         <commons-codec.version>1.16.0</commons-codec.version>
+        <commons-text.version>1.10.0</commons-text.version>
         <hamcrest-library.version>2.2</hamcrest-library.version>
         <awaitility.version>4.2.0</awaitility.version>
         <lombok.version>1.18.30</lombok.version>
@@ -326,6 +327,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons.collections4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
