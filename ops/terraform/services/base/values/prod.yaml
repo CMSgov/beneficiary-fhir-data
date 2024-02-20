@@ -147,6 +147,10 @@ bfd:
           process_dlq: &rda_job_process_dlq true
           starting_fiss_seq_num: &rda_job_starting_fiss UNDEFINED
           starting_mcs_seq_num: &rda_job_starting_mcs UNDEFINED
+        cleanup:
+          enabled: true
+          run_size: 50000
+          transaction_size: 5000
         data_pipeline_rda_grpc_inproc_server_mode: *grpc_inprocess_mode
         data_pipeline_rda_grpc_max_idle_seconds: *rda_grpc_idle_secs
         data_pipeline_rda_grpc_server_type: *rda_grpc_server_type

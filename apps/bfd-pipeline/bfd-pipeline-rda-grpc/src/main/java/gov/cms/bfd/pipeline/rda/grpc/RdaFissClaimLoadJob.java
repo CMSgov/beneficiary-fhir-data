@@ -24,6 +24,7 @@ public class RdaFissClaimLoadJob
    * @param preJobTaskFactory the pre job task factory
    * @param sourceFactory the source factory
    * @param sinkFactory the sink factory
+   * @param cleanupJob the cleanup job
    * @param appMetrics the app metrics
    */
   public RdaFissClaimLoadJob(
@@ -33,7 +34,8 @@ public class RdaFissClaimLoadJob
       ThrowingFunction<
               RdaSink<FissClaimChange, RdaChange<RdaFissClaim>>, SinkTypePreference, Exception>
           sinkFactory,
+      CleanupJob cleanupJob,
       MeterRegistry appMetrics) {
-    super(config, preJobTaskFactory, sourceFactory, sinkFactory, appMetrics, LOGGER);
+    super(config, preJobTaskFactory, sourceFactory, sinkFactory, cleanupJob, appMetrics, LOGGER);
   }
 }

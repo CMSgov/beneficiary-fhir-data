@@ -23,6 +23,7 @@ public class RdaMcsClaimLoadJob extends AbstractRdaLoadJob<McsClaimChange, RdaCh
    * @param preJobTaskFactory the pre job task factory
    * @param sourceFactory the source factory
    * @param sinkFactory the sink factory
+   * @param cleanupJob the cleanup job
    * @param appMetrics the app metrics
    */
   public RdaMcsClaimLoadJob(
@@ -32,7 +33,8 @@ public class RdaMcsClaimLoadJob extends AbstractRdaLoadJob<McsClaimChange, RdaCh
       ThrowingFunction<
               RdaSink<McsClaimChange, RdaChange<RdaMcsClaim>>, SinkTypePreference, Exception>
           sinkFactory,
+      CleanupJob cleanupJob,
       MeterRegistry appMetrics) {
-    super(config, preJobTaskFactory, sourceFactory, sinkFactory, appMetrics, LOGGER);
+    super(config, preJobTaskFactory, sourceFactory, sinkFactory, cleanupJob, appMetrics, LOGGER);
   }
 }
