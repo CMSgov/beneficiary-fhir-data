@@ -371,6 +371,10 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
             topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
             if exc.partner and exc.partner in topic_arns_by_partner:
                 partner_topic = sns_resource.Topic(topic_arns_by_partner[exc.partner])
+                logger.info(
+                    "%s status notification topic configured. Sending error notification",
+                    exc.partner,
+                )
                 send_notification(topic=partner_topic, notification=notification)
         else:
             notification = StatusNotification(
@@ -379,6 +383,7 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
                 )
             )
 
+        logger.info("Sending error notification to BFD catch-all topic %s", BFD_SNS_TOPIC_ARN)
         send_notification(topic=sns_resource.Topic(BFD_SNS_TOPIC_ARN), notification=notification)
 
         raise
