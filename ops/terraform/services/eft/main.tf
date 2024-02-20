@@ -203,10 +203,11 @@ locals {
   sftp_port      = 22
   logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
 
-  outbound_lambda_name      = "sftp-outbound-transfer"
-  outbound_lambda_full_name = "${local.full_name}-${local.outbound_lambda_name}"
-  outbound_lambda_src       = replace(local.outbound_lambda_name, "-", "_")
-  outbound_lambda_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.latest_version}"
+  outbound_lambda_name         = "sftp-outbound-transfer"
+  outbound_lambda_full_name    = "${local.full_name}-${local.outbound_lambda_name}"
+  outbound_lambda_src          = replace(local.outbound_lambda_name, "-", "_")
+  outbound_lambda_image_uri    = "${data.aws_ecr_repository.ecr.repository_url}:${local.latest_version}"
+  outbound_notifs_topic_prefix = "${local.full_name}-outbound-events"
   # For some reason, the transfer server endpoint service does not support us-east-1b and instead
   # opts to support us-east-1d. In order to enable support for this sub-az in the future
   # automatically (if transfer server VPC endpoints begin to support 1c), we filter our desired
@@ -453,15 +454,31 @@ resource "aws_sns_topic_policy" "outbound_pending_s3_notifs" {
 resource "aws_sns_topic" "outbound_notifs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name              = "${local.full_name}-outbound-events"
+  name              = local.outbound_notifs_topic_prefix
   kms_master_key_id = local.kms_key_id
+
+  lambda_success_feedback_sample_rate = 100
+  lambda_success_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
+  lambda_failure_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
+
+  sqs_success_feedback_sample_rate = 100
+  sqs_success_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
+  sqs_failure_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
 }
 
 resource "aws_sns_topic" "outbound_partner_notifs" {
   for_each = toset(local.eft_partners_with_outbound_notifs)
 
-  name              = "${local.full_name}-outbound-events-${each.key}"
+  name              = "${local.outbound_notifs_topic_prefix}-${each.key}"
   kms_master_key_id = local.kms_key_id
+
+  lambda_success_feedback_sample_rate = 100
+  lambda_success_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
+  lambda_failure_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
+
+  sqs_success_feedback_sample_rate = 100
+  sqs_success_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
+  sqs_failure_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
 }
 
 resource "aws_sns_topic_policy" "outbound_partner_notifs" {

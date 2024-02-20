@@ -387,3 +387,127 @@ resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
   role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
   policy_arn = each.value
 }
+
+resource "aws_iam_policy" "outbound_notifs_logs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name = "${local.outbound_notifs_topic_prefix}-logs"
+  description = join("", [
+    "Permissions for the ${local.outbound_notifs_topic_prefix} SNS topic to write to its corresponding ",
+    "CloudWatch Log Group and Log Stream",
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect   = "Allow"
+          Action   = "logs:CreateLogGroup"
+          Resource = "arn:aws:logs:${local.region}:${local.account_id}:*"
+        },
+        {
+          Effect = "Allow"
+          Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
+          Resource = [
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/sns/${local.region}/${local.outbound_notifs_topic_prefix}*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "outbound_partner_notifs_logs" {
+  for_each = toset(local.eft_partners_with_outbound_notifs)
+
+  name = "${local.outbound_notifs_topic_prefix}-${each.key}-logs"
+  description = join("", [
+    "Permissions for the ${local.outbound_notifs_topic_prefix}-${each.key} SNS topic to write to ",
+    "its corresponding CloudWatch Log Group and Log Stream",
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect   = "Allow"
+          Action   = "logs:CreateLogGroup"
+          Resource = "arn:aws:logs:${local.region}:${local.account_id}:*"
+        },
+        {
+          Effect = "Allow"
+          Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
+          Resource = [
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/sns/${local.region}/${local.outbound_notifs_topic_prefix}-${each.key}*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_role" "outbound_notifs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name        = local.outbound_notifs_topic_prefix
+  path        = "/"
+  description = "Role for ${local.outbound_notifs_topic_prefix} SNS Topic"
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Action = "sts:AssumeRole",
+          Effect = "Allow",
+          Principal = {
+            Service = "sns.amazonaws.com"
+          }
+        }
+      ]
+    }
+  )
+
+  force_detach_policies = true
+}
+
+resource "aws_iam_role" "outbound_partner_notifs" {
+  for_each = toset(local.eft_partners_with_outbound_notifs)
+
+  name        = "${local.outbound_notifs_topic_prefix}-${each.key}"
+  path        = "/"
+  description = "Role for ${local.outbound_notifs_topic_prefix}-${each.key} SNS Topic"
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Action = "sts:AssumeRole",
+          Effect = "Allow",
+          Principal = {
+            Service = "sns.amazonaws.com"
+          }
+        }
+      ]
+    }
+  )
+
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "outbound_notifs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  role       = one(aws_iam_role.outbound_notifs[*].name)
+  policy_arn = one(aws_iam_policy.outbound_notifs_logs[*].arn)
+}
+
+resource "aws_iam_role_policy_attachment" "outbound_partner_notifs" {
+  for_each = toset(local.eft_partners_with_outbound_notifs)
+
+  role       = aws_iam_role.outbound_partner_notifs[each.key].name
+  policy_arn = aws_iam_policy.outbound_partner_notifs_logs[each.key].arn
+}
