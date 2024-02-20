@@ -126,26 +126,6 @@ locals {
             ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
           ]
         ),
-        sent_path = join(
-          "/",
-          [
-            for path in [
-              local.inbound_sftp_s3_home_dir,
-              trim(lookup(local.ssm_config, "/${partner}/${local.service}/bucket_home_dir", ""), "/"),
-              trim(lookup(local.ssm_config, "/${partner}/${local.service}/outbound/sent_dir", ""), "/")
-            ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
-          ]
-        ),
-        failed_path = join(
-          "/",
-          [
-            for path in [
-              local.inbound_sftp_s3_home_dir,
-              trim(lookup(local.ssm_config, "/${partner}/${local.service}/bucket_home_dir", ""), "/"),
-              trim(lookup(local.ssm_config, "/${partner}/${local.service}/outbound/failed_dir", ""), "/")
-            ] : path if coalesce(replace(path, "/\\s/", ""), "INVALID") != "INVALID"
-          ]
-        ),
         notification_targets = jsondecode(
           lookup(local.ssm_config, "/${partner}/${local.service}/outbound/notification_targets_json", "[]")
         ),
@@ -161,11 +141,11 @@ locals {
     partner => data if alltrue([
       for path in flatten([
         [local.unfiltered_eft_partners_config[partner].bucket_home_path],
-        contains(local.inbound_eft_partners, partner) ? [local.unfiltered_eft_partners_config[partner].inbound.dir] : [],
+        contains(local.inbound_eft_partners, partner) ? [
+          local.unfiltered_eft_partners_config[partner].inbound.dir
+        ] : [],
         contains(local.outbound_eft_partners, partner) ? [
-          local.unfiltered_eft_partners_config[partner].outbound.pending_path,
-          local.unfiltered_eft_partners_config[partner].outbound.sent_path,
-          local.unfiltered_eft_partners_config[partner].outbound.failed_path
+          local.unfiltered_eft_partners_config[partner].outbound.pending_path
         ] : []
       ]) :
       coalesce(path, "INVALID") != "INVALID" && length(regexall("\\s", path)) == 0

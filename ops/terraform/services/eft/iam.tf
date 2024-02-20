@@ -302,14 +302,10 @@ resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
           Resource = [aws_s3_bucket.this.arn]
           Condition = {
             StringLike = {
-              "s3:prefix" = flatten([
+              "s3:prefix" = [
                 for partner in local.eft_partners_with_outbound_enabled :
-                [
-                  "${local.eft_partners_config[partner].outbound.pending_path}/*",
-                  "${local.eft_partners_config[partner].outbound.sent_path}/*",
-                  "${local.eft_partners_config[partner].outbound.failed_path}/*"
-                ]
-              ])
+                "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.pending_path}/*"
+              ]
             }
           }
         },
@@ -328,14 +324,10 @@ resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
             "s3:PutObjectAcl",
             "s3:PutObjectVersionAcl"
           ],
-          Resource = flatten([
+          Resource = [
             for partner in local.eft_partners_with_outbound_enabled :
-            [
-              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.pending_path}/*",
-              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.sent_path}/*",
-              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.failed_path}/*"
-            ]
-          ])
+            "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.pending_path}/*"
+          ]
         },
         {
           Sid    = "AllowEncryptionAndDecryptionOfS3Files"
