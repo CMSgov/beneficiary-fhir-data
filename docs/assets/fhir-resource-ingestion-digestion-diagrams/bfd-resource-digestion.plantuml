@@ -1,12 +1,12 @@
 @startuml
 title BFD-Server FHIR Resource Digestion Sequence
-participant client
+participant "peering partner"
 participant "bfd-server"
 database "bfd-db"
-client -> "bfd-server": Endpoint for a resource called \n e.g. '/v2/fhir/ExplanationOfBenefit' 
+"peering partner" -> "bfd-server": Endpoint for a resource called \n e.g. '/v2/fhir/ExplanationOfBenefit' 
 "bfd-server" -> "bfd-server": Resource provider 'read' OR 'search' method called \n (Depending on params; See OpenAPI Docs)
 "bfd-server" -> "bfd-db": A single resource (for read) or collection of resources (for search) queried from the db
 "bfd-db" --> "bfd-server"
 "bfd-server" -> "bfd-server": Transformer method for resource is retrieved and invoked to generate: \n a single FHIR resource (for read) or a FHIR bundle(for search)
-"bfd-server" -> client: Serialized FHIR data (Plus a pointer if returning bundle) sent as a response
+"bfd-server" -> "peering partner": Serialized FHIR data (Plus a pointer if returning bundle) sent as a response
 @enduml
