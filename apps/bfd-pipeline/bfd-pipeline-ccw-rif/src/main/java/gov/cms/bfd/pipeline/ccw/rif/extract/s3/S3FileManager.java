@@ -174,6 +174,7 @@ public class S3FileManager implements AutoCloseable {
    * @return Base64 encoded md5 value
    * @throws IOException if there is an issue reading or closing the downloaded file
    */
+  @SuppressWarnings("java:S4790")
   public static String computeMD5CheckSum(ByteSource bytesToCheck) throws IOException {
     try (var inputStream = bytesToCheck.openStream()) {
       final MessageDigest md5Digest = MessageDigest.getInstance("MD5");
