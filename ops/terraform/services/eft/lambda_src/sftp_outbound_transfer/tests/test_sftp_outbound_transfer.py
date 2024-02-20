@@ -86,7 +86,7 @@ PARAMIKO_PATCH_PATH = f"{MODULE_UNDER_TEST}.{paramiko.__name__}"
 mock_boto3_client = mock.Mock()
 mock_boto3_resource = mock.Mock()
 mock_new_topic: Callable[[str], str] = lambda topic_arn: topic_arn
-"""Lambda that modifies the Topic function to return a string representing the Lambda ARN passed to
+"""Lambda that modifies the Topic function to return a string representing the Topic ARN passed to
 the function for use in tests so that the Topic can be discerned for a given notification and
 asserted upon"""
 mock_boto3_resource.Topic.side_effect = mock_new_topic
