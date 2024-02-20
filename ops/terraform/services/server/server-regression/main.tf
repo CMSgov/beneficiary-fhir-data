@@ -197,7 +197,7 @@ resource "aws_cloudwatch_event_rule" "spice_refresh_event_rule" {
       ]
     }
   )
-  name = "${local.spice_trigger_lambda_name}-on-glue-crawler-success"
+  name = local.spice_trigger_lambda_name
 }
 
 resource "aws_cloudwatch_event_target" "spice_refresh_event_target" {
@@ -206,7 +206,7 @@ resource "aws_cloudwatch_event_target" "spice_refresh_event_target" {
 }
 
 resource "aws_lambda_permission" "allow_event_bridge_access" {
-  statement_id  = "${local.spice_trigger_lambda_name}-on-glue-crawler-success"
+  statement_id  = local.spice_trigger_lambda_name
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.spice_refresh_trigger.arn
   principal     = "events.amazonaws.com"
