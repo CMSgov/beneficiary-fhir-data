@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
@@ -53,7 +54,7 @@ public class DataUtilityCommons {
       Path convertedNdcDataFile = outputPath.resolve(fdaFile);
 
       try {
-        DataUtilityCommons.buildProductsResource(convertedNdcDataFile, workingDir);
+        buildProductsResource(convertedNdcDataFile, workingDir);
       } finally {
         // Recursively delete the working dir.
         recursivelyDelete(workingDir);
@@ -126,24 +127,26 @@ public class DataUtilityCommons {
    * @throws IOException (any errors encountered will be bubbled up)
    */
   public static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
-    ZipInputStream zipIn =
-        new ZipInputStream(new FileInputStream(zipFilePath.toFile().getAbsolutePath()));
-    ZipEntry entry = zipIn.getNextEntry();
-    // iterates over entries in the zip file
-    while (entry != null) {
-      Path filePath = Paths.get(destDirectory.toFile().getAbsolutePath(), entry.getName());
-      if (!entry.isDirectory()) {
-        // if the entry is a file, extracts it
-        extractFile(zipIn, filePath);
-      } else {
-        // if the entry is a directory, make the directory
-        File dir = new File(filePath.toFile().getAbsolutePath());
-        dir.mkdir();
+    try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile()))) {
+      ZipEntry entry = zipIn.getNextEntry();
+      // iterates over entries in the zip file
+      while (entry != null) {
+        Path filePath = destDirectory.resolve(entry.getName()).normalize();
+        if (!filePath.startsWith(destDirectory)) {
+          // Checks if resolved path is trying to escape from the destination directory
+          throw new IOException("ZipSlip: Entry is outside of the target directory");
+        }
+        if (!entry.isDirectory()) {
+          // if the entry is a file, extracts it
+          extractFile(zipIn, filePath);
+        } else {
+          // if the entry is a directory, make the directory
+          Files.createDirectories(filePath);
+        }
+        zipIn.closeEntry();
+        entry = zipIn.getNextEntry();
       }
-      zipIn.closeEntry();
-      entry = zipIn.getNextEntry();
     }
-    zipIn.close();
   }
 
   /**
@@ -154,14 +157,15 @@ public class DataUtilityCommons {
    * @throws IOException (any errors encountered will be bubbled up)
    */
   public static void extractFile(ZipInputStream zipIn, Path filePath) throws IOException {
-    BufferedOutputStream bos =
-        new BufferedOutputStream(new FileOutputStream(filePath.toFile().getAbsolutePath()));
-    byte[] bytesIn = new byte[BUFFER_SIZE];
-    int read = 0;
-    while ((read = zipIn.read(bytesIn)) != -1) {
-      bos.write(bytesIn, 0, read);
+    Files.createDirectories(filePath.getParent());
+    try (BufferedOutputStream bos =
+        new BufferedOutputStream(new FileOutputStream(filePath.toFile().getAbsolutePath()))) {
+      byte[] bytesIn = new byte[BUFFER_SIZE];
+      int read;
+      while ((read = zipIn.read(bytesIn)) != -1) {
+        bos.write(bytesIn, 0, read);
+      }
     }
-    bos.close();
   }
 
   /**
@@ -171,12 +175,17 @@ public class DataUtilityCommons {
    */
   private static void recursivelyDelete(Path tempDir) {
     // Recursively delete the working dir.
-    try {
-      Files.walk(tempDir)
+    try (Stream<Path> paths = Files.walk(tempDir)) {
+      paths
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
           .peek(System.out::println)
-          .forEach(File::delete);
+          .forEach(
+              file -> {
+                if (!file.delete()) {
+                  LOGGER.warn("Failed to delete file: " + file);
+                }
+              });
     } catch (IOException e) {
       LOGGER.warn("Failed to cleanup the temporary folder", e);
     }
