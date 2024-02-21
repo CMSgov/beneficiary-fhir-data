@@ -2,6 +2,8 @@ import json
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+import botocore.exceptions
+
 if TYPE_CHECKING:
     from mypy_boto3_ssm.client import SSMClient
 else:
@@ -133,9 +135,9 @@ class PartnerSsmConfig:
 
 
 def get_ssm_parameter(ssm_client: SSMClient, path: str, with_decrypt: bool = False) -> str:
-    response = ssm_client.get_parameter(Name=path, WithDecryption=with_decrypt)
-
     try:
+        response = ssm_client.get_parameter(Name=path, WithDecryption=with_decrypt)
+
         return response["Parameter"]["Value"]
-    except KeyError as exc:
+    except (KeyError, botocore.exceptions.ClientError) as exc:
         raise ValueError(f'SSM parameter "{path}" not found or empty') from exc
