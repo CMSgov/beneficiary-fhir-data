@@ -1,7 +1,5 @@
 package gov.cms.model.dsl.codegen.plugin;
 
-import gov.cms.model.dsl.codegen.library.DataTransformer;
-import gov.cms.model.dsl.codegen.library.ExternalTransformation;
 import gov.cms.model.dsl.codegen.plugin.mappers.CsvToExcel;
 import gov.cms.model.dsl.codegen.plugin.mappers.FhirElementToCsv;
 import gov.cms.model.dsl.codegen.plugin.mappers.FhirElementToJson;
@@ -10,13 +8,10 @@ import gov.cms.model.dsl.codegen.plugin.model.FhirElementBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.ModelUtil;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
-import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
-import gov.cms.model.dsl.codegen.plugin.transformer.FieldTransformer;
 import gov.cms.model.dsl.codegen.plugin.util.Version;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,8 +25,8 @@ import org.apache.maven.project.MavenProject;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- * A Maven Mojo that generates a data dictionary from yaml mappings. The generated transformer class consists of the following parts:
- *
+ * A Maven Mojo that generates a data dictionary from yaml mappings. The generated transformer class
+ * consists of the following parts:
  */
 @Mojo(name = "dataDictionary", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
@@ -57,7 +52,8 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
   private String v2TemplateFilePath;
 
   /**
-   * Instance of {@link MavenProject} used to call {@link MavenProject#addCompileSourceRoot(String)}.
+   * Instance of {@link MavenProject} used to call {@link
+   * MavenProject#addCompileSourceRoot(String)}.
    */
   @Parameter(property = "project", readonly = true)
   private MavenProject project;
@@ -66,8 +62,8 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
   public GenerateDataDictionaryFromDslMojo() {}
 
   /**
-   * Executed by maven to execute the mojo. Reads all mapping files and generates a data dictionary using fhir
-   * elements from every {@link MappingBean}
+   * Executed by maven to execute the mojo. Reads all mapping files and generates a data dictionary
+   * using fhir elements from every {@link MappingBean}
    *
    * @throws MojoExecutionException if the process fails due to some error
    */
