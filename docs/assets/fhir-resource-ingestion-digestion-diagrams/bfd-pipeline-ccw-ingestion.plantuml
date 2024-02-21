@@ -1,7 +1,10 @@
 @startuml
 title BFD-Pipeline-CCW Ingestion of Beneficiary/Claim Data Sequence
 participant ccw
+note over ccw: Schedule: \n Every Friday - check #bfd-notices 
 database s3
+participant "lambda"
+participant "asg"
 participant "bfd-pipeline"
 participant splunk
 note over splunk: Specific Splunk Components: \n forwarders/indexers/search heads/ui/configuration
@@ -9,7 +12,9 @@ participant slack
 database "bfd-db"
 ccw -> s3: Delivery of RIF and manifest files to 'bfd-prod-etl' S3 bucket \n under 'Incoming/<timestamp>' prefix
 s3 --> ccw
-s3 -> "bfd-pipeline": ETL/RIF Loader process triggered via event notification
+s3 -> "lambda": S3 Event Notification generated from Incoming/ RIFs
+"lambda" -> "asg": Create Scheduled Action to scale-out single bfd-pipeline EC2 instance
+"asg" -> "bfd-pipeline": Scheduled Action scales-out bfd-pipeline instance 
 group ETL
 "bfd-pipeline" <-> splunk: bfd-pipeline logs forwarded \n to splunk via splunk-forwarder
 activate splunk
@@ -27,4 +32,8 @@ splunk -> splunk: data load messages detected
 splunk -> slack: data load status sent \n to #bfd-notices channel
 deactivate splunk
 end
+"bfd-pipeline" -> s3: Final loaded RIF moved to Done/ folder
+s3 -> "lambda": S3 Event Notification generated from final RIF moved to Done/
+"lambda" -> "asg": Create Scheduled Action to scale-in bfd-pipeline instance in 5 minutes
+"asg" -> "bfd-pipeline": Scale-in bfd-pipeline instance
 @enduml
