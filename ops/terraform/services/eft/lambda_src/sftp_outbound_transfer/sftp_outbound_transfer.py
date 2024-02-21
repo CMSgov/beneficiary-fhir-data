@@ -160,8 +160,10 @@ def _handle_s3_event(s3_object_key: str):
         global_config.sftp_hostname,
     )
     logger.append_keys(
+        file_type=recognized_file.type,
         matched_pattern=recognized_file.filename_pattern,
-        destination_folder=recognized_file.input_folder,
+        staging_folder=recognized_file.staging_folder,
+        input_folder=recognized_file.input_folder,
     )
 
     logger.info(
