@@ -106,7 +106,7 @@ class PartnerSsmConfig:
         )
         bucket_root_dir = get_ssm_parameter(
             ssm_client=ssm_client,
-            path=f"/bfd/{env}/eft/sensitive/inbound/sftp/eft_user_home_dir",
+            path=f"/bfd/{env}/eft/sensitive/inbound/sftp_server/eft_user_home_dir",
             with_decrypt=True,
         )
         bucket_home_path = f"{bucket_root_dir}/{bucket_home_dir}"
