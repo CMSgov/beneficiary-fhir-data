@@ -23,7 +23,7 @@ IMAGE_NAME_NODE="${PRIVATE_REGISTRY_URI}/bfd-mgmt-eft-sftp-outbound-transfer-lam
 DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"$BFD_PARENT_VERSION"}"
 DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
 
-aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+aws ecr-public get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin public.ecr.aws
 aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$PRIVATE_REGISTRY_URI"
 
 # Build tagged node image. Note that DOCKER_BUILDKIT is specified to enable Dockerfile local
