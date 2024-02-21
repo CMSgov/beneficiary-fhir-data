@@ -151,6 +151,10 @@
                 <version>${project.version}</version>
                 <configuration>
                     <mappingPath>${project.basedir}/mappings</mappingPath>
+                    <projectVersion>${project.version}</projectVersion>
+                    <destinationDirectory>${project.basedir}/../../../dist-temp</destinationDirectory>
+                    <v1TemplateFilePath>${project.basedir}/data-dictionary-template/v1-to-csv.json</v1TemplateFilePath>
+                    <v2TemplateFilePath>${project.basedir}/data-dictionary-template/v2-to-csv.json</v2TemplateFilePath>
                 </configuration>
                 <executions>
                     <execution>
@@ -158,6 +162,7 @@
                             <goal>entities</goal>
                             <goal>sql</goal>
                             <goal>transformers</goal>
+                            <goal>dataDictionary</goal>
                         </goals>
                     </execution>
                 </executions>

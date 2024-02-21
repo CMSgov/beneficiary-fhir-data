@@ -101,9 +101,9 @@ mappings:
       name: nameMiddleInitial
       sqlType: char
     - comment: Medicare Beneficiary ID
-      dbName: mbi_num
-      name: medicareBeneficiaryId
-      sqlType: varchar(11)
+      dbName: &mbi_num mbi_num
+      name: &mbi_num_javaFieldName medicareBeneficiaryId
+      sqlType: &mbi_num_dbType varchar(11)
     - comment: Date of Death
       dbName: death_dt
       name: beneficiaryDateOfDeath
@@ -540,9 +540,9 @@ mappings:
       name: partDContractNumberJanId
       sqlType: varchar(5)
     - comment: Part D Contract Number - February
-      dbName: ptd_cntrct_feb_id
-      name: partDContractNumberFebId
-      sqlType: varchar(5)
+      dbName: &ptd_cntrct_feb_id ptd_cntrct_feb_id
+      name: &ptd_cntrct_feb_id_javaFieldName partDContractNumberFebId
+      sqlType: &ptd_cntrct_feb_id_dbType varchar(5)
     - comment: Part D Contract Number - March
       dbName: ptd_cntrct_mar_id
       name: partDContractNumberMarId
@@ -1213,7 +1213,7 @@ mappings:
     to: nameGiven
   - from: BENE_MDL_NAME
     to: nameMiddleInitial
-  - from: MBI_NUM
+  - from: &ccw_mapping_mbi_num MBI_NUM
     to: medicareBeneficiaryId
   - from: DEATH_DT
     to: beneficiaryDateOfDeath
@@ -1428,7 +1428,7 @@ mappings:
     to: partCPlanTypeDecCode
   - from: PTD_CNTRCT_JAN_ID
     to: partDContractNumberJanId
-  - from: PTD_CNTRCT_FEB_ID
+  - from: &ccw_mapping_ptd_cntrct_feb_id PTD_CNTRCT_FEB_ID
     to: partDContractNumberFebId
   - from: PTD_CNTRCT_MAR_ID
     to: partDContractNumberMarId
@@ -1608,3 +1608,26 @@ mappings:
   - from: PTD_CVRG_END_DT
     to: partDCoverageEndDate
   transformerClassName: gov.cms.bfd.model.rif.entities.BeneficiaryParser
+  r4FhirElements:
+    - id: 422
+      name: Patient Resource ID
+      description: Each resource has an id element which contains the 'logical id' of the resource assigned by the server responsible for storing it.
+      appliesTo: [ ]
+      suppliedIn: [ BB2, BFD, DPC, SyntheticData ]
+      bfdTableType: beneficiaries
+      bfdColumnName: bene_id
+      bfdDbType: bigint
+      bfdDbSize: 15
+      bfdJavaFieldName: beneficiaryId
+      ccwMapping: [ BENE_ID ]
+      cclfMapping: [ ]
+      fhirMapping:
+        - version: R4
+          resource: Patient
+          element: id
+          fhirPath: ""
+          discriminator: [ ]
+          additional: [ ]
+          derived: ""
+          note: ""
+          example: ""
