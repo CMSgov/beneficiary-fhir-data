@@ -85,6 +85,7 @@ public class DataUtilityCommons {
    * @param destDirectory the destination directory
    * @throws IOException (any errors encountered will be bubbled up)
    */
+  @SuppressWarnings("java:S5042")
   public static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
     try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile()))) {
       ZipEntry entry = zipIn.getNextEntry();
