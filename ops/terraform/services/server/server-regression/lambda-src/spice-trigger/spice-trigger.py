@@ -44,7 +44,7 @@ def refresh_data_set(client, account_id, data_set_id):
         AwsAccountId=account_id,
         DataSetId=data_set_id,
         IngestionId=ingestion_id,
-        IngestionType="INCREMENTAL_REFRESH",
+        IngestionType="FULL_REFRESH",
     )
     ingestion_status = response["IngestionStatus"]
     print(
