@@ -39,6 +39,7 @@ public class DataUtilityCommons {
    * @param outputDir the output directory.
    * @param fdaFile the fda file.
    */
+  @SuppressWarnings("java:S5443")
   public static void getFDADrugCodes(String outputDir, String fdaFile)
       throws IllegalStateException {
     Path outputPath = Paths.get(outputDir);
