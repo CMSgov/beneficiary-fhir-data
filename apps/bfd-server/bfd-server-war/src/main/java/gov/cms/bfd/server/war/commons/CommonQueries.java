@@ -65,15 +65,6 @@ public class CommonQueries {
    * @return int bitmask denoting which claims have data.
    */
   public static int availableClaimsData(EntityManager entityManager, long beneficiaryId) {
-    /*
-    List<Integer> values =
-        entityManager
-            .createNativeQuery(CHECK_CLAIMS_FOR_DATA_SQL, Integer.class)
-            .setParameter("beneIdValue", beneficiaryId)
-            .getResultList();
-
-    return (values.isEmpty() ? 0 : values.getFirst());
-    */
     List<Object> values =
         entityManager
             .createNativeQuery(CHECK_CLAIMS_FOR_DATA_SQL)
@@ -157,7 +148,7 @@ public class CommonQueries {
               + ", DistinctBeneIdsList: "
               + values);
     }
-    return values.get(0);
+    return values.getFirst();
   }
 
   /**
