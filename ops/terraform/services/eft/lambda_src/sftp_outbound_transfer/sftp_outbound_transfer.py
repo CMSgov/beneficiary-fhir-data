@@ -2,6 +2,7 @@ import json
 import os
 import re
 import socket
+import sys
 from base64 import b64decode
 from datetime import datetime, timezone
 from io import StringIO
@@ -390,4 +391,6 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
 
         raise
     finally:
-        logger.exception("Unrecoverable exception raised")
+        _, exception, _ = sys.exc_info()
+        if exception:
+            logger.exception("Unrecoverable exception raised")
