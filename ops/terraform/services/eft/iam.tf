@@ -468,15 +468,18 @@ resource "aws_iam_policy" "outbound_notifs_logs" {
       Version = "2012-10-17"
       Statement = [
         {
-          Effect   = "Allow"
-          Action   = "logs:CreateLogGroup"
-          Resource = "arn:aws:logs:${local.region}:${local.account_id}:*"
-        },
-        {
           Effect = "Allow"
-          Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:PutMetricFilter",
+            "logs:PutRetentionPolicy"
+          ]
           Resource = [
-            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/sns/${local.region}/${local.outbound_notifs_topic_prefix}*"
+            # There is no documentation about SNS delivery status logging that explicitly defines
+            # the log group naming format. So, constraining this policy is not entirely possible
+            "arn:aws:logs:${local.region}:${local.account_id}:*"
           ]
         }
       ]
@@ -498,18 +501,17 @@ resource "aws_iam_policy" "outbound_partner_notifs_logs" {
       Version = "2012-10-17"
       Statement = [
         {
-          Effect   = "Allow"
-          Action   = "logs:CreateLogGroup"
-          Resource = "arn:aws:logs:${local.region}:${local.account_id}:/sns*"
-        },
-        {
-          Effect = "Allow"
-          Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:PutMetricFilter",
+            "logs:PutRetentionPolicy"
+          ]
           Resource = [
             # There is no documentation about SNS delivery status logging that explicitly defines
-            # the log group naming format. It seems that the Log Groups generated all begin with
-            # "/sns", so that is the best we are able to constrain this policy
-            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/sns*"
+            # the log group naming format. So, constraining this policy is not entirely possible
+            "arn:aws:logs:${local.region}:${local.account_id}:*"
           ]
         }
       ]
