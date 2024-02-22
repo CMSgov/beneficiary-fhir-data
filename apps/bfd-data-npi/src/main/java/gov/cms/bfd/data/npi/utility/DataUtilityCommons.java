@@ -50,6 +50,7 @@ public class DataUtilityCommons {
    * @throws IOException if there is an issue reading file
    * @throws IllegalStateException if there is an issue with the output directory
    */
+  @SuppressWarnings("java:S5443")
   public static void getNPIOrgNames(String outputDir, Optional<String> downloadUrl, String npiFile)
       throws IOException, IllegalStateException {
     Path outputPath = Paths.get(outputDir);
@@ -85,6 +86,7 @@ public class DataUtilityCommons {
    * @param destDirectory the destination directory
    * @throws IOException (any errors encountered will be bubbled up)
    */
+  @SuppressWarnings("java:S5042")
   public static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
     try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile()))) {
       ZipEntry entry = zipIn.getNextEntry();

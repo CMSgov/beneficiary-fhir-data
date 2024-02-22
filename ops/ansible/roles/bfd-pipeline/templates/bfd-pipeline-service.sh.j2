@@ -70,6 +70,15 @@ export BFD_RDA_GRPC_INPROCESS_SERVER_S3_DIR='{{ data_pipeline_rda_grpc_inproc_se
 # Referenced by the pipeline's logback.xml file to add environment name for use in splunk.
 export BFD_ENV_NAME='{{ env_name_std }}'
 
+#Layered configuration support
+CONFIG_SETTINGS_JSON=$(cat <<EOF
+{"ssmHierarchies": [
+    "/bfd/{{ env_name_std }}/pipeline/sensitive/",
+    "/bfd/{{ env_name_std }}/pipeline/nonsensitive/"
+]}
+EOF
+)
+export CONFIG_SETTINGS_JSON
 
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"

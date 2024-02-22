@@ -54,7 +54,7 @@ public class S3FileManager implements AutoCloseable {
     this.appMetrics = appMetrics;
     this.s3Dao = s3Dao;
     this.s3BucketName = s3Bucket;
-    final Path cacheDirectory = Files.createTempDirectory("s3cache");
+    final Path cacheDirectory = createSecureTempDirectory();
     s3DirectoryDao = new S3DirectoryDao(s3Dao, s3Bucket, "", cacheDirectory, true, true);
   }
 
@@ -174,6 +174,7 @@ public class S3FileManager implements AutoCloseable {
    * @return Base64 encoded md5 value
    * @throws IOException if there is an issue reading or closing the downloaded file
    */
+  @SuppressWarnings("java:S4790")
   public static String computeMD5CheckSum(ByteSource bytesToCheck) throws IOException {
     try (var inputStream = bytesToCheck.openStream()) {
       final MessageDigest md5Digest = MessageDigest.getInstance("MD5");
@@ -191,5 +192,16 @@ public class S3FileManager implements AutoCloseable {
       // this should never happen so convert it to an unchecked exception
       throw new BadCodeMonkeyException("No MessageDigest instance for MD5", e);
     }
+  }
+
+  /**
+   * Private Method to create a SecureTemp Dir.
+   *
+   * @return created Directory.
+   * @throws IOException for I/O errors.
+   */
+  @SuppressWarnings("java:S5443")
+  private Path createSecureTempDirectory() throws IOException {
+    return Files.createTempDirectory("s3cache");
   }
 }

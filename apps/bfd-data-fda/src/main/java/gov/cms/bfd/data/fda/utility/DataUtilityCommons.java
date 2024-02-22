@@ -39,6 +39,7 @@ public class DataUtilityCommons {
    * @param outputDir the output directory.
    * @param fdaFile the fda file.
    */
+  @SuppressWarnings("java:S5443")
   public static void getFDADrugCodes(String outputDir, String fdaFile)
       throws IllegalStateException {
     Path outputPath = Paths.get(outputDir);
@@ -126,6 +127,7 @@ public class DataUtilityCommons {
    * @param destDirectory the destination directory
    * @throws IOException (any errors encountered will be bubbled up)
    */
+  @SuppressWarnings("java:S5042")
   public static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
     try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile()))) {
       ZipEntry entry = zipIn.getNextEntry();
