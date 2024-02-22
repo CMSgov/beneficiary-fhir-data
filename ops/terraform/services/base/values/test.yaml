@@ -146,7 +146,7 @@ bfd:
           starting_fiss_seq_num: &rda_job_starting_fiss 0
           starting_mcs_seq_num: &rda_job_starting_mcs 0
         cleanup:
-          enabled: false        
+          enabled: &rda_cleanup_enabled false
         data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
         data_pipeline_rda_job_enabled: *rda_job_enabled
         data_pipeline_rda_grpc_inproc_server_mode: UNDEFINED
@@ -640,3 +640,6 @@ ab2d:
             <<CIPHER>>AgV4BQVjAOXN9gwcjHE4rxwfo3CjI7S0uN9IirWtzo7atDEAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE3djlYSjBITXVLZWdIVlgyWForVElxRng3U0NVcWErRFRuZ0FFY0Q4bGlLcVdOSkVHWHBMSXhvR0U4VnBibVMwQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGQ_2BF6v8YN2gtanfguzLQAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMZgXb7weRxDJhHV5lAgEQgDue4VXYQ4Wdrd4DAKMBAjVWdVCH2WY7xTdAmKlQrKJfL9BYg9_8wSqKy6oCaSGPFH51LL0TRU37XmQowgIAABAAYNsLlSwCE2padAFrjry24L8fzqOxVgC518gjZFzaMkHEfykXyh6qg3ZbF23YUYMf_____wAAAAEAAAAAAAAAAAAAAAEAAAAPtKNGqakWxoV6Sr4X7LVAkPCrAVoXxvo7Y-50srWK0QBnMGUCMQCvtif0hIot9gpLCO4Cdc9gqCsPRpEcLQv6zePP8uALfPw4lwJFh1XxSJq2fG19LvgCMBuu-W2XNHOdpxie7FOYCOzUve5uLsnB_nJejibRRIGTfqcVZCHT5_H66l7PqXOlBw==<</CIPHER>>
           failed_file_targets_json: >-
             <<CIPHER>>AgV4BQVjAOXN9gwcjHE4rxwfo3CjI7S0uN9IirWtzo7atDEAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE3djlYSjBITXVLZWdIVlgyWForVElxRng3U0NVcWErRFRuZ0FFY0Q4bGlLcVdOSkVHWHBMSXhvR0U4VnBibVMwQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGQ_2BF6v8YN2gtanfguzLQAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMZgXb7weRxDJhHV5lAgEQgDue4VXYQ4Wdrd4DAKMBAjVWdVCH2WY7xTdAmKlQrKJfL9BYg9_8wSqKy6oCaSGPFH51LL0TRU37XmQowgIAABAAYNsLlSwCE2padAFrjry24L8fzqOxVgC518gjZFzaMkHEfykXyh6qg3ZbF23YUYMf_____wAAAAEAAAAAAAAAAAAAAAEAAAAPtKNGqakWxoV6Sr4X7LVAkPCrAVoXxvo7Y-50srWK0QBnMGUCMQCvtif0hIot9gpLCO4Cdc9gqCsPRpEcLQv6zePP8uALfPw4lwJFh1XxSJq2fG19LvgCMBuu-W2XNHOdpxie7FOYCOzUve5uLsnB_nJejibRRIGTfqcVZCHT5_H66l7PqXOlBw==<</CIPHER>>
+
+#TODO: Remove the following as part of BFD-3296
+bfd/test/pipeline/nonsensitive/rda/cleanup/enabled: *rda_cleanup_enabled
