@@ -107,6 +107,7 @@ if test -f "${YAML_FILE}"; then
       jq -s --argjson sensitivity "$decrypted_params_sensitivity" 'add * $sensitivity'
   )"
 
+  # Address (remove) the following as part of BFD-3296
   # FUTURE: This is awful, but done so that compatability can be had with existing Terraform state
   # and so that these changes are not as significant for services that consume configuration from
   # SSM. Clean this up in the future when parameters are standardized.
@@ -129,7 +130,9 @@ if test -f "${YAML_FILE}"; then
     | .key |= (
       split("/") 
       | (
-        if .[2] == "pipeline" and (.[3] == "shared" or .[3] == "rda" or .[3] == "ccw") then
+        if .[3] == "nonsensitive" then
+          (["/" + .[0], .[1], .[2], $value.sensitivity] + .[4:length]) | join("/")
+        elif .[2] == "pipeline" and (.[3] == "shared" or .[3] == "rda" or .[3] == "ccw") then
           (["/" + .[0], .[1], .[2], .[3], $value.sensitivity] + .[4:length]) | join("/")
         else
           (["/" + .[0], .[1], .[2], $value.sensitivity] + .[3:length]) | join("/")

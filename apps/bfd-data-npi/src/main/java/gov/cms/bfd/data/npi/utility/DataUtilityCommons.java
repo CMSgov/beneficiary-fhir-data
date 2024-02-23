@@ -50,6 +50,7 @@ public class DataUtilityCommons {
    * @throws IOException if there is an issue reading file
    * @throws IllegalStateException if there is an issue with the output directory
    */
+  @SuppressWarnings("java:S5443")
   public static void getNPIOrgNames(String outputDir, Optional<String> downloadUrl, String npiFile)
       throws IOException, IllegalStateException {
     Path outputPath = Paths.get(outputDir);

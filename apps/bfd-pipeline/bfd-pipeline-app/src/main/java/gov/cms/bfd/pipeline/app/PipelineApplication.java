@@ -661,6 +661,7 @@ public final class PipelineApplication {
    *
    * @throws IOException pass through
    */
+  @SuppressWarnings("java:S5443")
   private void logTempDirectory() throws IOException {
     Path tempFile = Files.createTempFile("a", "x");
     LOGGER.info("Temp dir is {}", tempFile.getParent().toFile().getAbsoluteFile());
