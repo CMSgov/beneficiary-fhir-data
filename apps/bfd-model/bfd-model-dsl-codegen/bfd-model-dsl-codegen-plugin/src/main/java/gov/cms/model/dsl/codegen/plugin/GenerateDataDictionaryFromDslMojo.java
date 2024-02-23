@@ -80,7 +80,7 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
       for (Version version : List.of(Version.V1, Version.V2)) {
         var templatePath = templateFileMap.get(version);
         final RootBean root =
-            ModelUtil.loadModelFromYamlFileOrDirectory(
+            ModelUtil.loadModelFromYamlFileWithAliasesOrDirectory(
                 mappingPath); // todo: modify so does V1 vs V2
         MojoUtil.validateModel(root);
         processYamlFiles(
