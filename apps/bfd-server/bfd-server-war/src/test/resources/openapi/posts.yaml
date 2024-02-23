@@ -1,0 +1,249 @@
+paths:
+  /ExplanationOfBenefit/_search:
+    post:
+      tags: [ExplanationOfBenefit]
+      summary: 'search-type: Search for ExplanationOfBenefits instances'
+      description: This is a search type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patient:
+                  type: string
+                  description: |-
+                    **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
+                    
+                    Fetch _Patient_ data using a FHIR _IdType_ identifier; an IdType
+                    represents the logical identity for a resource, or as much of that
+                    identity that is known. In FHIR, every resource must have a _logical ID_ which is
+                    defined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:
+                    
+                    `Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),
+                    '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID
+                    or any other identifier pattern that meets these constraints.)`
+                    
+                    This class contains that logical ID, and can optionally also contain a relative or absolute URL
+                    representing the resource identity; the following are all valid values for IdType, and all might
+                    represent the same resource:
+                      - `_id=567834`
+                      - `_id=1234`
+                  example: "567834"
+                _lastUpdated:
+                  type: string
+                  description: |-
+                    Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
+                    A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
+                    This parameter can be included in a request one or more times.
+                    
+                    Examples:
+                      - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
+                      - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
+                      - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                  example: "gt2023-01-02"
+                excludeSAMHSA:
+                  type: string
+                  description: |-
+                    The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)
+                    is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
+                    Setting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.
+                    _ClaimResponse_ doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between _ClaimResponse_
+                    and _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.
+                    
+                    Example:
+                      - `excludeSAMHSA=true`
+                  enum: ["true", "false"]
+                includeTaxNumber:
+                  type: string
+                  description: |-
+                    Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
+                    
+                    Example:
+                       - `includeTaxNumbers=true`
+                  enum: ["true", "false"]
+                isHashed:
+                  type: string
+                  description: |-
+                    Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
+                    
+                    Example:
+                      - `isHashed=true`
+                  enum: ["true", "false"]
+                service-date:
+                  type: string
+                  description: |-
+                    Only satisfy the Search request if a claim's Date
+                    falls within a specified _DateRange_. A _DateRange_ can be
+                    defined by providing less than `lt` and/or greater than `gt` values.
+                    This parameter can be included in a request one or more times.
+                    
+                    Examples:
+                       - `service-date=gt2023-01-02&service-date=lt2023-05-01`
+                       - `service-date=gt2023-01-02`
+                       - `service-date=lt2023-05-01`
+                  example: "gt2023-01-02"
+                startIndex:
+                  type: integer
+                  description: |-
+                    When fetching a _Bundle Response_ using pagination, this URL parameter represents an offset
+                    (starting point) into the list of elements for the _Request_.
+                    It is optional and defaults to 1 if not supplied.
+                    A value 0 is not allowed and negative indices are not currently supported.
+                    
+                    Example:
+                       - `startIndex=100`
+                  format: int32
+                  example: 100
+                type:
+                  type: string
+                  description: |-
+                    One or more comma-delimited claim types that filters the response to contain only EoBs that include the specified claim types.
+                    This is optional and defaults to `*` denoting all types.
+                    Supported values for claim type:
+                       - `*` all types (default)
+                       - `carrier`
+                       - `dme`
+                       - `hha`
+                       - `hospice`
+                       - `inpatient`
+                       - `outpatient`
+                       - `partd`
+                       - `snf`
+                    
+                    Examples:
+                       - `type=carrier,inpatient,snf,dme`
+                       - `type=outpatient`
+                       - `type=*`
+                  example: "carrier,inpatient,snf,dme"
+                _elements:
+                  type: string
+                  description: |-
+                    The _elements parameter consists of a comma-separated list of base element names. Only elements that are listed are to be returned.
+                    Clients SHOULD list desired elements in a resource as part of
+                    the list of elements. The list of elements does not apply to included resources.
+                    Servers are not obliged to return just the requested elements; mandatory elements are returned whether
+                    they are requested or not. Each value of the list may also be a period-separated path to a specified element.
+                  example: "identifier.value,identifier.type,status,use,billablePeriod.start,insurer,provider"
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
+  /Patient/_search:
+    post:
+      tags: [Patient]
+      summary: 'search-type: Search for Patient instances'
+      description: This is a search type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  description: |-
+                    **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
+                    
+                    Fetch _Patient_ data using a FHIR _IdType_ identifier; an IdType
+                    represents the logical identity for a resource, or as much of that
+                    identity that is known. In FHIR, every resource must have a _logical ID_ which is
+                    defined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:
+                    
+                    `Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),
+                    '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID
+                    or any other identifier pattern that meets these constraints.)`
+                    
+                    This class contains that logical ID, and can optionally also contain a relative or absolute URL
+                    representing the resource identity; the following are all valid values for IdType, and all might
+                    represent the same resource:
+                      - `_id=567834`
+                      - `_id=1234`
+                  example: "567834"
+                _lastUpdated:
+                  type: string
+                  description: |-
+                    Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
+                    A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
+                    This parameter can be included in a request one or more times.
+                    
+                    Examples:
+                      - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
+                      - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
+                      - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                  example: "gt2023-01-02"
+                startIndex:
+                  type: integer
+                  description: |-
+                    When fetching a _Bundle Response_ using pagination, this URL parameter represents an offset
+                    (starting point) into the list of elements for the _Request_.
+                    It is optional and defaults to 1 if not supplied.
+                    A value 0 is not allowed and negative indices are not currently supported.
+                    
+                    Example:
+                       - `startIndex=100`
+                  format: int32
+                  example: 100
+                identifier:
+                  type: string
+                  description: |-
+                    **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
+                    
+                    Fetch _Patient_ data using a FHIR _identifier_; an identifier contains a set of values that
+                    include the logical identity for a resource. In FHIR, the _identifier_ is a parent element
+                    defined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes-definitions.html#Identifier) as:
+                    
+                    `A string, typically numeric or alphanumeric, that is associated with a single object or entity within a given system.
+                    Typically, identifiers are used to connect content in resources to external content available in other frameworks or protocols.
+                    Identifiers are associated with objects and may be changed or retired due to human or system process and errors.`
+                    
+                    This class contains the identifier, which is usually represented as a URL, along with a single, url encoded, pipe-delimited key|value pair, with the value as
+                    (mbi, hicn, etc); the following are all valid values for Identifier, and all might represent the same resource:
+                      - `identifier=https://bluebutton.cms.gov/resources/identifier/hicn-hash|<your hicn hash>`
+                      - `identifier=https://bluebutton.cms.gov/resources/identifier/mbi-hash|<your mbi hash>`
+                  example: "https://bluebutton.cms.gov/resources/identifier/mbi-hash|<your mbi hash>"
+                '_has:Coverage.extension':
+                  type: string
+                  description: |-
+                    **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
+                    
+                    When searching for a Patient's Part D events information, this resource identifies
+                    the Part D contract value that will be used when determining eligibility.
+                    
+                    Example:
+                       - `_has:Coverage.extension=<Part D Contract ID Here>`
+                       - `_has:Coverage.extension=ABCD`
+                  example: "ABCD"
+                '_has:Coverage.rfrncyr':
+                  type: string
+                  description: |-
+                    When searching for a Patient's Part D events information, this resource identifies
+                    the reference year that will be applied when determining applicable Part D events.
+                    
+                    Example:
+                       - `_has:Coverage.rfrncyr=2023`
+                  example: "2023"
+                cursor:
+                  type: integer
+                  description: |-
+                    Provide a pagination cursor or numeric _offset_ for processing Patient's Part D events information.
+                    
+                    Examples:
+                       - `cursor=200` the first record is the 201st record
+                       - `cursor=1000` the first record is the 1001st record
+                  format: int32
+                  example: 1000
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
