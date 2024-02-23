@@ -36,55 +36,8 @@ public class OpenApiDocs {
   /** The request specification to use with the api-docs requests. */
   private RequestSpecification requestAuth;
 
-  /**
-   * Constructs an instance of OpenApiDocs for a given project version and destination directory.
-   *
-   * @param projectVersion @see #projectVersion
-   * @param destinationDirectory @see #destinationDirectory
-   */
-  private OpenApiDocs(String projectVersion, String destinationDirectory) {
-    this.projectVersion = projectVersion;
-    this.destinationDirectory = destinationDirectory;
-  }
-
-  /**
-   * Downloads the OpenAPI yaml from the api-docs V1 endpoint using a local E2E test server
-   * instance.
-   *
-   * @param apiVersion the bfd api version, either V1 or V2.
-   * @throws IOException when IO operations fail
-   */
-  void downloadApiDocs(String apiVersion) throws IOException {
-    var apiDocsUrl = String.format("%s/%s/fhir/api-docs", baseServerUrl, apiVersion.toLowerCase());
-    var response =
-        given()
-            .spec(requestAuth)
-            .when()
-            .get(apiDocsUrl)
-            .then()
-            .contentType("text/yaml")
-            .extract()
-            .asString();
-
-    response = addHeaderParameters(response, apiVersion);
-
-    writeFile(apiVersion, response);
-  }
-
-  /**
-   * Write the OpenAPI yaml content to a file.
-   *
-   * @param apiVersion either V1 or V2
-   * @param contents the OpenAPI yaml contents to write to the file
-   * @throws IOException when file operations fail
-   */
-  private void writeFile(String apiVersion, String contents) throws IOException {
-    var fileName =
-        String.format("%s/%s-OpenAPI-%s.yaml", destinationDirectory, apiVersion, projectVersion);
-    try (var fileWriter = new FileWriter(fileName)) {
-      fileWriter.write(contents);
-    }
-  }
+  /** YAML reading/writing utility. */
+  private final Yaml yaml;
 
   /**
    * Entry point, starts an E2E test server instance and downloads OpenAPI yaml.
@@ -104,13 +57,24 @@ public class OpenApiDocs {
     System.setProperty("user.dir", workingDirectory);
 
     var openApiDocs = new OpenApiDocs(projectVersion, destinationDirectory);
+
     try {
       // Start E2E test server instance.
       openApiDocs.setup();
 
-      // Download and save OpenAPI yaml for V1 and V2.
       for (var apiVersion : Set.of("V1", "V2")) {
-        openApiDocs.downloadApiDocs(apiVersion);
+
+        // Download OpenAPI spec
+        var spec = openApiDocs.downloadApiDocs(apiVersion);
+
+        // Add post specifications
+        openApiDocs.addPostSpecifications(spec, apiVersion);
+
+        // Augment with header parameters
+        openApiDocs.addHeaderParameters(spec, apiVersion);
+
+        // Write out spec
+        openApiDocs.save(spec, apiVersion);
       }
 
     } catch (IOException e) {
@@ -119,6 +83,57 @@ public class OpenApiDocs {
 
     // Stop E2E server instance.
     System.exit(0);
+  }
+
+  /**
+   * Constructs an instance of OpenApiDocs for a given project version and destination directory.
+   *
+   * @param projectVersion @see #projectVersion
+   * @param destinationDirectory @see #destinationDirectory
+   */
+  private OpenApiDocs(String projectVersion, String destinationDirectory) {
+    this.projectVersion = projectVersion;
+    this.destinationDirectory = destinationDirectory;
+    this.yaml = new Yaml();
+  }
+
+  /**
+   * Downloads the OpenAPI yaml from the api-docs V1 endpoint using a local E2E test server
+   * instance.
+   *
+   * @param apiVersion the bfd api version, either V1 or V2.
+   * @return a Map with the OpenAPI spec components.
+   * @throws IOException when IO operations fail
+   */
+  private Map<String, Object> downloadApiDocs(String apiVersion) throws IOException {
+    var apiDocsUrl = String.format("%s/%s/fhir/api-docs", baseServerUrl, apiVersion.toLowerCase());
+    var response =
+        given()
+            .spec(requestAuth)
+            .when()
+            .get(apiDocsUrl)
+            .then()
+            .contentType("text/yaml")
+            .extract()
+            .asString();
+
+    return yaml.load(response);
+  }
+
+  /**
+   * Write the OpenAPI yaml content to a file.
+   *
+   * @param spec the OpenAPI yaml contents to write to the file
+   * @param apiVersion either V1 or V2
+   * @throws IOException when file operations fail
+   */
+  private void save(Map<String, Object> spec, String apiVersion) throws IOException {
+    var fileName =
+        String.format("%s/%s-OpenAPI-%s.yaml", destinationDirectory, apiVersion, projectVersion);
+    var contents = yaml.dump(spec);
+    try (var fileWriter = new FileWriter(fileName)) {
+      fileWriter.write(contents);
+    }
   }
 
   /**
@@ -194,65 +209,112 @@ public class OpenApiDocs {
   /**
    * Adds header parameters to all paths except '/metadata'.
    *
-   * @param specStr the OpenAPI spec String
+   * @param spec the OpenAPI spec Map
    * @param apiVersion the bfd api version, either V1 or V2.
-   * @return new OpenAPI spec String with header parameters added.
+   * @throws IOException for input stream errors.
    */
-  private String addHeaderParameters(String specStr, String apiVersion) {
-    Yaml yaml = new Yaml();
-    Map<String, Object> spec = yaml.load(specStr);
+  private void addHeaderParameters(Map<String, Object> spec, String apiVersion) throws IOException {
 
-    InputStream headersYaml =
-        this.getClass().getClassLoader().getResourceAsStream("openapi/headers.yaml");
-    Map<String, Object> headers = yaml.load(headersYaml);
+    try (InputStream headersYaml =
+        this.getClass().getClassLoader().getResourceAsStream("openapi/headers.yaml")) {
 
-    // add header params to be used in refs
-    var components = (Map<String, Object>) spec.get("components");
-    var headerComponents = (Map<String, Object>) headers.get("components");
-    var headerParameters = (Map<String, Object>) headerComponents.get("parameters");
-    components.put("parameters", headerParameters);
+      Map<String, Object> headers = yaml.load(headersYaml);
 
-    // add parameter refs to each path
-    var paths = (Map<String, Object>) spec.get("paths");
-    for (String path : paths.keySet()) {
-      if (!"/metadata".equals(path)) {
-        var pathMap = (Map<String, Object>) paths.get(path);
-        var headerRefs = new ArrayList<>();
-        headerRefs.add(createRef("#/components/parameters/BULK-CLIENTID-header"));
-        headerRefs.add(createRef("#/components/parameters/BULK-CLIENTNAME-header"));
-        headerRefs.add(createRef("#/components/parameters/BULK-JOBID-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryCounter-header"));
-        headerRefs.add(
-            createRef("#/components/parameters/BlueButton-OriginalQueryTimestamp-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-Developer-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-Application-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-UserId-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-User-header"));
-        headerRefs.add(createRef("#/components/parameters/BlueButton-BeneficiaryId-header"));
+      // add header params to be used in refs
+      var components = (Map<String, Object>) spec.get("components");
+      var headerComponents = (Map<String, Object>) headers.get("components");
+      var headerParameters = (Map<String, Object>) headerComponents.get("parameters");
+      components.put("parameters", headerParameters);
 
-        // add ref for IncludeIdentifiers header for V1 Patient endpoints
-        if (path.contains("/Patient") && apiVersion.equals("V1")) {
-          headerRefs.add(createRef("#/components/parameters/IncludeIdentifiers-header"));
+      // add parameter refs to each path
+      var paths = (Map<String, Object>) spec.get("paths");
+      for (String path : paths.keySet()) {
+        if (!"/metadata".equals(path)) {
+          var pathMap = (Map<String, Object>) paths.get(path);
+          var headerRefs = new ArrayList<>();
+          headerRefs.add(createRef("#/components/parameters/BULK-CLIENTID-header"));
+          headerRefs.add(createRef("#/components/parameters/BULK-CLIENTNAME-header"));
+          headerRefs.add(createRef("#/components/parameters/BULK-JOBID-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
+          headerRefs.add(
+              createRef("#/components/parameters/BlueButton-OriginalQueryCounter-header"));
+          headerRefs.add(
+              createRef("#/components/parameters/BlueButton-OriginalQueryTimestamp-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-Developer-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-Application-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-UserId-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-User-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-BeneficiaryId-header"));
+
+          // add ref for IncludeIdentifiers header for V1 Patient endpoints
+          if (path.contains("/Patient") && apiVersion.equals("V1")) {
+            headerRefs.add(createRef("#/components/parameters/IncludeIdentifiers-header"));
+          }
+
+          // add ref for IncludeAddressFields for Patient endpoints
+          if (path.contains("/Patient")) {
+            headerRefs.add(createRef("#/components/parameters/IncludeAddressFields-header"));
+          }
+
+          // add ref for IncludeTaxNumbers for ExplanationOfBenefit, Claim, ClaimResponse endpoints
+          if (path.contains("/ExplanationOfBenefit") || path.contains("/Claim")) {
+            headerRefs.add(createRef("#/components/parameters/IncludeTaxNumbers-header"));
+          }
+
+          pathMap.put("parameters", headerRefs);
         }
-
-        // add ref for IncludeAddressFields for Patient endpoints
-        if (path.contains("/Patient")) {
-          headerRefs.add(createRef("#/components/parameters/IncludeAddressFields-header"));
-        }
-
-        // add ref for IncludeTaxNumbers for ExplanationOfBenefit, Claim, ClaimResponse endpoints
-        if (path.contains("/ExplanationOfBenefit") || path.contains("/Claim")) {
-          headerRefs.add(createRef("#/components/parameters/IncludeTaxNumbers-header"));
-        }
-
-        pathMap.put("parameters", headerRefs);
       }
     }
+  }
 
-    return yaml.dump(spec);
+  /**
+   * Add specification for POST endpoints which are not generated by hapi-fhir.
+   *
+   * @param spec the OpenAPI spec Map to update with POST info.
+   * @param apiVersion either V1 or V2
+   * @throws IOException for input stream errors.
+   */
+  private void addPostSpecifications(Map<String, Object> spec, String apiVersion)
+      throws IOException {
+
+    try (InputStream postsYaml =
+        this.getClass().getClassLoader().getResourceAsStream("openapi/posts.yaml")) {
+      Map<String, Object> postSpecs = yaml.load(postsYaml);
+
+      // iterate over paths and add post specification to _search endpoints
+      var paths = (Map<String, Object>) spec.get("paths");
+      for (String path : paths.keySet()) {
+        if (apiVersion.equals("V2")
+            && (path.endsWith("ExplanationOfBenefit/_search")
+                || path.endsWith("Patient/_search"))) {
+          var pathMap = (Map<String, Object>) paths.get(path);
+          var postSpec = findPostSpecification(path, postSpecs);
+
+          // add resulting POST specification
+          pathMap.put("post", postSpec);
+        }
+      }
+    }
+  }
+
+  /**
+   * Retrieve the post method spec for a given endpoint.
+   *
+   * @param endPoint the endpoint to search for.
+   * @param postSpecs the collection of post specifications.
+   * @return the post spec for the given endpoint.
+   * @throws RuntimeException when post spec is not found.
+   */
+  private Map<String, Object> findPostSpecification(String endPoint, Map<String, Object> postSpecs)
+      throws RuntimeException {
+    var paths = (Map<String, Object>) postSpecs.get("paths");
+    var path = (Map<String, Object>) paths.get(endPoint);
+    if (path == null) {
+      throw new RuntimeException("POST specification not found for endpoint " + endPoint);
+    }
+    return (Map<String, Object>) path.get("post");
   }
 
   /**
