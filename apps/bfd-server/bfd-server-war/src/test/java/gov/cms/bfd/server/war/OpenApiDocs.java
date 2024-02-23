@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -23,6 +24,12 @@ import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
 
 /** Program to gather the OpenAPI yaml content for V1 and V2 and store. */
 public class OpenApiDocs {
+
+  /** BFD API version 1 moniker. */
+  private static final String API_VERSION_1 = "v1";
+
+  /** BFD API version 2 moniker. */
+  private static final String API_VERSION_2 = "v2";
 
   /** The version from the project pom. */
   private final String projectVersion;
@@ -43,8 +50,9 @@ public class OpenApiDocs {
    * Entry point, starts an E2E test server instance and downloads OpenAPI yaml.
    *
    * @param args The project version, working directory, and destination directory.
+   * @throws IOException for file operation or server startup errors.
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
 
     // Validate arguments.
     validateArgs(args);
@@ -62,77 +70,34 @@ public class OpenApiDocs {
       // Start E2E test server instance.
       openApiDocs.setup();
 
-      for (var apiVersion : Set.of("V1", "V2")) {
+      List<Map<String, Object>> specs = new ArrayList<>(2);
 
-        // Download OpenAPI spec
+      for (String apiVersion : List.of(API_VERSION_1, API_VERSION_2)) {
+
+        // Download OpenAPI specs
         var spec = openApiDocs.downloadApiDocs(apiVersion);
+
+        // Update paths and tags
+        openApiDocs.updatePathsAndTags(spec, apiVersion);
 
         // Add post specifications
         openApiDocs.addPostSpecifications(spec, apiVersion);
 
-        // Augment with header parameters
-        openApiDocs.addHeaderParameters(spec, apiVersion);
-
-        // Write out spec
-        openApiDocs.save(spec, apiVersion);
+        specs.add(spec);
       }
 
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+      // Merge spec versions into a combined spec
+      var combinedSpec = openApiDocs.merge(specs);
 
-    // Stop E2E server instance.
-    System.exit(0);
-  }
+      // Add header information to combined spec
+      openApiDocs.addHeaderParameters(combinedSpec);
 
-  /**
-   * Constructs an instance of OpenApiDocs for a given project version and destination directory.
-   *
-   * @param projectVersion @see #projectVersion
-   * @param destinationDirectory @see #destinationDirectory
-   */
-  private OpenApiDocs(String projectVersion, String destinationDirectory) {
-    this.projectVersion = projectVersion;
-    this.destinationDirectory = destinationDirectory;
-    this.yaml = new Yaml();
-  }
+      // Write out combined spec
+      openApiDocs.save(combinedSpec);
 
-  /**
-   * Downloads the OpenAPI yaml from the api-docs V1 endpoint using a local E2E test server
-   * instance.
-   *
-   * @param apiVersion the bfd api version, either V1 or V2.
-   * @return a Map with the OpenAPI spec components.
-   * @throws IOException when IO operations fail
-   */
-  private Map<String, Object> downloadApiDocs(String apiVersion) throws IOException {
-    var apiDocsUrl = String.format("%s/%s/fhir/api-docs", baseServerUrl, apiVersion.toLowerCase());
-    var response =
-        given()
-            .spec(requestAuth)
-            .when()
-            .get(apiDocsUrl)
-            .then()
-            .contentType("text/yaml")
-            .extract()
-            .asString();
-
-    return yaml.load(response);
-  }
-
-  /**
-   * Write the OpenAPI yaml content to a file.
-   *
-   * @param spec the OpenAPI yaml contents to write to the file
-   * @param apiVersion either V1 or V2
-   * @throws IOException when file operations fail
-   */
-  private void save(Map<String, Object> spec, String apiVersion) throws IOException {
-    var fileName =
-        String.format("%s/%s-OpenAPI-%s.yaml", destinationDirectory, apiVersion, projectVersion);
-    var contents = yaml.dump(spec);
-    try (var fileWriter = new FileWriter(fileName)) {
-      fileWriter.write(contents);
+    } finally {
+      // Stop E2E server instance.
+      System.exit(0);
     }
   }
 
@@ -164,6 +129,18 @@ public class OpenApiDocs {
   }
 
   /**
+   * Constructs an instance of OpenApiDocs for a given project version and destination directory.
+   *
+   * @param projectVersion @see #projectVersion
+   * @param destinationDirectory @see #destinationDirectory
+   */
+  private OpenApiDocs(String projectVersion, String destinationDirectory) {
+    this.projectVersion = projectVersion;
+    this.destinationDirectory = destinationDirectory;
+    this.yaml = new Yaml();
+  }
+
+  /**
    * Initializes and starts a test database and bfd server.
    *
    * @throws IOException when an error occurs starting the bfd server.
@@ -181,6 +158,199 @@ public class OpenApiDocs {
       Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
     } else {
       throw new RuntimeException("Could not start server instance.");
+    }
+  }
+
+  /**
+   * Downloads the OpenAPI yaml from the api-docs V1 endpoint using a local E2E test server
+   * instance.
+   *
+   * @param apiVersion the bfd api version, either V1 or V2.
+   * @return a Map with the OpenAPI spec components.
+   * @throws IOException when file operations fail
+   */
+  private Map<String, Object> downloadApiDocs(String apiVersion) throws IOException {
+    var apiDocsUrl = String.format("%s/%s/fhir/api-docs", baseServerUrl, apiVersion.toLowerCase());
+    var response =
+        given()
+            .spec(requestAuth)
+            .when()
+            .get(apiDocsUrl)
+            .then()
+            .contentType("text/yaml")
+            .extract()
+            .asString();
+
+    return yaml.load(response);
+  }
+
+  /**
+   * Add the api version to endpoint paths and add version tags.
+   *
+   * @param spec the spec Map to update.
+   * @param apiVersion the api version to apply to the paths and tags.
+   */
+  private void updatePathsAndTags(Map<String, Object> spec, String apiVersion) {
+    var paths = (Map<String, Object>) spec.get("paths");
+    var newPaths = new LinkedHashMap<String, Object>(paths.size());
+
+    // iterate over paths and update the url to add the version,
+    // and add an api version tag.
+
+    Set<String> pathKeys = paths.keySet();
+    for (String path : pathKeys) {
+      var pathMap = (Map<String, Object>) paths.get(path);
+      var getMap = (Map<String, Object>) pathMap.get("get");
+      var tags = (List<String>) getMap.get("tags");
+      tags.addFirst(apiVersion);
+      newPaths.put(String.format("/%s/fhir%s", apiVersion, path), pathMap);
+    }
+
+    spec.put("paths", newPaths);
+  }
+
+  /**
+   * Add specification for POST endpoints which are not generated by hapi-fhir.
+   *
+   * @param spec the OpenAPI spec Map to update with POST info.
+   * @param apiVersion either V1 or V2
+   * @throws IOException for input stream errors.
+   */
+  private void addPostSpecifications(Map<String, Object> spec, String apiVersion)
+      throws IOException {
+
+    try (InputStream postsYaml =
+        this.getClass().getClassLoader().getResourceAsStream("openapi/posts.yaml")) {
+      Map<String, Object> postSpecs = yaml.load(postsYaml);
+
+      // iterate over paths and add post specification to _search endpoints
+      var paths = (Map<String, Object>) spec.get("paths");
+      for (String path : paths.keySet()) {
+        if (apiVersion.equals(API_VERSION_2)
+            && (path.endsWith("ExplanationOfBenefit/_search")
+                || path.endsWith("Patient/_search"))) {
+          var pathMap = (Map<String, Object>) paths.get(path);
+          var postSpec = findPostSpecification(path, postSpecs);
+
+          // add resulting POST specification
+          pathMap.put("post", postSpec);
+        }
+      }
+    }
+  }
+
+  /**
+   * Merge the spec Maps for BFD API V1 and V2, adding version tags and servers to the combined
+   * definition.
+   *
+   * @param specs the list of spec Maps to combine, first Map is V1, second is V2.
+   * @return a new spec Map combining the two separate spec Maps.
+   * @throws IOException for input spec errors.
+   */
+  private Map<String, Object> merge(List<Map<String, Object>> specs) throws IOException {
+
+    // start combined spec with v1
+    var combinedSpec = new LinkedHashMap<>(specs.getFirst());
+
+    // update servers, tags
+    try (InputStream serversYaml =
+        this.getClass().getClassLoader().getResourceAsStream("openapi/servers.yaml")) {
+      Map<String, Object> serversAndTags = yaml.load(serversYaml);
+
+      // replace servers with values from the servers.yaml
+      var newServers = serversAndTags.get("servers");
+      combinedSpec.put("servers", newServers);
+
+      // prepend api version tags from servers.yaml
+      var newTags = (List<Object>) serversAndTags.get("tags");
+      var tags = (List<Object>) combinedSpec.get("tags");
+      newTags.addAll(tags);
+      combinedSpec.put("tags", newTags);
+    }
+
+    // add v2 paths
+    var combinedPaths = (Map<String, Object>) combinedSpec.get("paths");
+    var v2Paths = (Map<String, Object>) specs.get(1).get("paths");
+    combinedPaths.putAll(v2Paths);
+
+    return combinedSpec;
+  }
+
+  /**
+   * Adds header parameters to all paths except '/metadata'.
+   *
+   * @param spec the OpenAPI spec Map
+   * @throws IOException for input stream errors.
+   */
+  private void addHeaderParameters(Map<String, Object> spec) throws IOException {
+
+    try (InputStream headersYaml =
+        this.getClass().getClassLoader().getResourceAsStream("openapi/headers.yaml")) {
+
+      Map<String, Object> headers = yaml.load(headersYaml);
+
+      // add header params to be used in refs
+      var components = (Map<String, Object>) spec.get("components");
+      var headerComponents = (Map<String, Object>) headers.get("components");
+      var headerParameters = (Map<String, Object>) headerComponents.get("parameters");
+      components.put("parameters", headerParameters);
+
+      // add parameter refs to each path
+      var paths = (Map<String, Object>) spec.get("paths");
+      for (String path : paths.keySet()) {
+        if (!path.endsWith("/metadata")) {
+          var pathMap = (Map<String, Object>) paths.get(path);
+          var headerRefs = new ArrayList<>();
+          headerRefs.add(createRef("#/components/parameters/BULK-CLIENTID-header"));
+          headerRefs.add(createRef("#/components/parameters/BULK-CLIENTNAME-header"));
+          headerRefs.add(createRef("#/components/parameters/BULK-JOBID-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
+          headerRefs.add(
+              createRef("#/components/parameters/BlueButton-OriginalQueryCounter-header"));
+          headerRefs.add(
+              createRef("#/components/parameters/BlueButton-OriginalQueryTimestamp-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-Developer-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-Application-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-UserId-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-User-header"));
+          headerRefs.add(createRef("#/components/parameters/BlueButton-BeneficiaryId-header"));
+
+          // add ref for IncludeIdentifiers header for V1 Patient endpoints
+          var getMap = (Map<String, Object>) pathMap.get("get");
+          var tags = (List<String>) getMap.get("tags");
+          if (path.contains("/Patient") && tags.contains(API_VERSION_1)) {
+            headerRefs.add(createRef("#/components/parameters/IncludeIdentifiers-header"));
+          }
+
+          // add ref for IncludeAddressFields for Patient endpoints
+          if (path.contains("/Patient")) {
+            headerRefs.add(createRef("#/components/parameters/IncludeAddressFields-header"));
+          }
+
+          // add ref for IncludeTaxNumbers for ExplanationOfBenefit, Claim, ClaimResponse endpoints
+          if (path.contains("/ExplanationOfBenefit") || path.contains("/Claim")) {
+            headerRefs.add(createRef("#/components/parameters/IncludeTaxNumbers-header"));
+          }
+
+          pathMap.put("parameters", headerRefs);
+        }
+      }
+    }
+  }
+
+  /**
+   * Write the OpenAPI yaml content to a file.
+   *
+   * @param spec the OpenAPI yaml contents to write to the file
+   * @throws IOException when file operations fail
+   */
+  private void save(Map<String, Object> spec) throws IOException {
+    var fileName = String.format("%s/OpenAPI-%s.yaml", destinationDirectory, projectVersion);
+    var contents = yaml.dump(spec);
+    try (var fileWriter = new FileWriter(fileName)) {
+      fileWriter.write(contents);
     }
   }
 
@@ -204,99 +374,6 @@ public class OpenApiDocs {
                 .allowAllHostnames());
     requestAuth =
         new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
-  }
-
-  /**
-   * Adds header parameters to all paths except '/metadata'.
-   *
-   * @param spec the OpenAPI spec Map
-   * @param apiVersion the bfd api version, either V1 or V2.
-   * @throws IOException for input stream errors.
-   */
-  private void addHeaderParameters(Map<String, Object> spec, String apiVersion) throws IOException {
-
-    try (InputStream headersYaml =
-        this.getClass().getClassLoader().getResourceAsStream("openapi/headers.yaml")) {
-
-      Map<String, Object> headers = yaml.load(headersYaml);
-
-      // add header params to be used in refs
-      var components = (Map<String, Object>) spec.get("components");
-      var headerComponents = (Map<String, Object>) headers.get("components");
-      var headerParameters = (Map<String, Object>) headerComponents.get("parameters");
-      components.put("parameters", headerParameters);
-
-      // add parameter refs to each path
-      var paths = (Map<String, Object>) spec.get("paths");
-      for (String path : paths.keySet()) {
-        if (!"/metadata".equals(path)) {
-          var pathMap = (Map<String, Object>) paths.get(path);
-          var headerRefs = new ArrayList<>();
-          headerRefs.add(createRef("#/components/parameters/BULK-CLIENTID-header"));
-          headerRefs.add(createRef("#/components/parameters/BULK-CLIENTNAME-header"));
-          headerRefs.add(createRef("#/components/parameters/BULK-JOBID-header"));
-          headerRefs.add(createRef("#/components/parameters/BlueButton-OriginalQueryId-header"));
-          headerRefs.add(
-              createRef("#/components/parameters/BlueButton-OriginalQueryCounter-header"));
-          headerRefs.add(
-              createRef("#/components/parameters/BlueButton-OriginalQueryTimestamp-header"));
-          headerRefs.add(createRef("#/components/parameters/BlueButton-DeveloperId-header"));
-          headerRefs.add(createRef("#/components/parameters/BlueButton-Developer-header"));
-          headerRefs.add(createRef("#/components/parameters/BlueButton-ApplicationId-header"));
-          headerRefs.add(createRef("#/components/parameters/BlueButton-Application-header"));
-          headerRefs.add(createRef("#/components/parameters/BlueButton-UserId-header"));
-          headerRefs.add(createRef("#/components/parameters/BlueButton-User-header"));
-          headerRefs.add(createRef("#/components/parameters/BlueButton-BeneficiaryId-header"));
-
-          // add ref for IncludeIdentifiers header for V1 Patient endpoints
-          if (path.contains("/Patient") && apiVersion.equals("V1")) {
-            headerRefs.add(createRef("#/components/parameters/IncludeIdentifiers-header"));
-          }
-
-          // add ref for IncludeAddressFields for Patient endpoints
-          if (path.contains("/Patient")) {
-            headerRefs.add(createRef("#/components/parameters/IncludeAddressFields-header"));
-          }
-
-          // add ref for IncludeTaxNumbers for ExplanationOfBenefit, Claim, ClaimResponse endpoints
-          if (path.contains("/ExplanationOfBenefit") || path.contains("/Claim")) {
-            headerRefs.add(createRef("#/components/parameters/IncludeTaxNumbers-header"));
-          }
-
-          pathMap.put("parameters", headerRefs);
-        }
-      }
-    }
-  }
-
-  /**
-   * Add specification for POST endpoints which are not generated by hapi-fhir.
-   *
-   * @param spec the OpenAPI spec Map to update with POST info.
-   * @param apiVersion either V1 or V2
-   * @throws IOException for input stream errors.
-   */
-  private void addPostSpecifications(Map<String, Object> spec, String apiVersion)
-      throws IOException {
-
-    try (InputStream postsYaml =
-        this.getClass().getClassLoader().getResourceAsStream("openapi/posts.yaml")) {
-      Map<String, Object> postSpecs = yaml.load(postsYaml);
-
-      // iterate over paths and add post specification to _search endpoints
-      var paths = (Map<String, Object>) spec.get("paths");
-      for (String path : paths.keySet()) {
-        if (apiVersion.equals("V2")
-            && (path.endsWith("ExplanationOfBenefit/_search")
-                || path.endsWith("Patient/_search"))) {
-          var pathMap = (Map<String, Object>) paths.get(path);
-          var postSpec = findPostSpecification(path, postSpecs);
-
-          // add resulting POST specification
-          pathMap.put("post", postSpec);
-        }
-      }
-    }
   }
 
   /**
