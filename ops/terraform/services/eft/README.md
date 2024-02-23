@@ -27,9 +27,9 @@ terraform destroy $(for r in `terraform state list | grep -vE "aws_ec2_subnet_ci
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.22 |
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Inputs
@@ -37,17 +37,17 @@ https://terraform-docs.io/user-guide/configuration/
 No inputs.
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Outputs
@@ -55,9 +55,9 @@ https://terraform-docs.io/user-guide/configuration/
 No outputs.
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Resources
@@ -67,17 +67,26 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_alb_target_group_attachment.nlb_to_vpc_endpoint](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/alb_target_group_attachment) | resource |
 | [aws_ec2_subnet_cidr_reservation.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_subnet_cidr_reservation) | resource |
 | [aws_iam_policy.eft_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.outbound_notifs_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.outbound_partner_notifs_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.partner_bucket_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.sftp_outbound_transfer_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.sftp_outbound_transfer_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.sftp_outbound_transfer_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.sftp_outbound_transfer_sns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.sftp_outbound_transfer_sqs_dlq](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.sftp_outbound_transfer_ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.eft_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.outbound_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.outbound_partner_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.partner_bucket_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.sftp_outbound_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.outbound_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.outbound_partner_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.sftp_outbound_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_lambda_function.sftp_outbound_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
+| [aws_lambda_function_event_invoke_config.sftp_outbound_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function_event_invoke_config) | resource |
 | [aws_lambda_permission.sftp_outbound_transfer_sns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_lb.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
 | [aws_lb_listener.nlb_to_vpc_endpoint](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
@@ -95,14 +104,14 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_security_group.sftp_outbound_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.vpc_endpoint](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_sns_topic.inbound_received_s3_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
-| [aws_sns_topic.outbound_failed_s3_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
+| [aws_sns_topic.outbound_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
+| [aws_sns_topic.outbound_partner_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
 | [aws_sns_topic.outbound_pending_s3_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
-| [aws_sns_topic.outbound_sent_s3_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
 | [aws_sns_topic_policy.inbound_received_s3_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_policy) | resource |
-| [aws_sns_topic_policy.outbound_failed_s3_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_policy) | resource |
+| [aws_sns_topic_policy.outbound_partner_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_policy) | resource |
 | [aws_sns_topic_policy.outbound_pending_s3_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_policy) | resource |
-| [aws_sns_topic_policy.outbound_sent_s3_notifs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_policy) | resource |
 | [aws_sns_topic_subscription.sftp_outbound_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
+| [aws_sqs_queue.sftp_outbound_transfer_dlq](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sqs_queue) | resource |
 | [aws_transfer_server.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/transfer_server) | resource |
 | [aws_transfer_ssh_key.eft_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/transfer_ssh_key) | resource |
 | [aws_transfer_user.eft_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/transfer_user) | resource |

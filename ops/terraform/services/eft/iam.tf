@@ -261,19 +261,38 @@ resource "aws_iam_policy" "sftp_outbound_transfer_ssm" {
 resource "aws_iam_policy" "sftp_outbound_transfer_kms" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name        = "${local.outbound_lambda_full_name}-kms"
-  description = "Permissions to decrypt master and config KMS keys for ${local.env}"
+  name = "${local.outbound_lambda_full_name}-kms"
+  description = join("", [
+    "Permissions to decrypt config KMS keys and encrypt and decrypt master KMS keys for ",
+    "${local.env}"
+  ])
+
   policy = jsonencode(
     {
       Version = "2012-10-17",
       Statement = [
         {
+          Sid    = "AllowEncryptionAndDecryptionOfConfigKeys"
           Effect = "Allow",
           Action = [
             "kms:Decrypt"
           ],
           Resource = local.kms_config_key_arns
-        }
+        },
+        {
+          Sid    = "AllowEncryptionAndDecryptionOfMasterKeys"
+          Effect = "Allow"
+          Action = [
+            "kms:Encrypt",
+            "kms:Decrypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey",
+          ]
+          Resource = [
+            local.kms_key_id
+          ]
+        },
       ]
     }
   )
@@ -302,14 +321,10 @@ resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
           Resource = [aws_s3_bucket.this.arn]
           Condition = {
             StringLike = {
-              "s3:prefix" = flatten([
+              "s3:prefix" = [
                 for partner in local.eft_partners_with_outbound_enabled :
-                [
-                  "${local.eft_partners_config[partner].outbound.pending_path}/*",
-                  "${local.eft_partners_config[partner].outbound.sent_path}/*",
-                  "${local.eft_partners_config[partner].outbound.failed_path}/*"
-                ]
-              ])
+                "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.pending_path}/*"
+              ]
             }
           }
         },
@@ -328,33 +343,74 @@ resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
             "s3:PutObjectAcl",
             "s3:PutObjectVersionAcl"
           ],
-          Resource = flatten([
-            for partner in local.eft_partners_with_outbound_enabled :
-            [
-              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.pending_path}/*",
-              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.sent_path}/*",
-              "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.failed_path}/*"
-            ]
-          ])
-        },
-        {
-          Sid    = "AllowEncryptionAndDecryptionOfS3Files"
-          Effect = "Allow"
-          Action = [
-            "kms:Encrypt",
-            "kms:Decrypt",
-            "kms:ReEncrypt*",
-            "kms:GenerateDataKey*",
-            "kms:DescribeKey",
-          ]
           Resource = [
-            local.kms_key_id
+            for partner in local.eft_partners_with_outbound_enabled :
+            "${aws_s3_bucket.this.arn}/${local.eft_partners_config[partner].outbound.pending_path}/*"
           ]
         },
       ]
     }
   )
 }
+
+resource "aws_iam_policy" "sftp_outbound_transfer_sqs_dlq" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name = "${local.outbound_lambda_full_name}-sqs-dlq"
+  description = join("", [
+    "Allows the ${local.outbound_lambda_full_name} to push events into its DLQ upon any failures"
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid    = "AllowSendingMessages"
+          Effect = "Allow"
+          Action = [
+            "sqs:GetQueueUrl",
+            "sqs:SendMessage"
+          ]
+          Resource = [one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].arn)]
+        },
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "sftp_outbound_transfer_sns" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name = "${local.outbound_lambda_full_name}-sns"
+  description = join("", [
+    "Allows the ${local.outbound_lambda_full_name} to publish status notifications to the ",
+    "${local.outbound_notifs_topic_prefix} SNS Topic and partner-specific Topics"
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid    = "AllowSendingMessages"
+          Effect = "Allow"
+          Action = [
+            "SNS:Publish"
+          ]
+          Resource = flatten([
+            aws_sns_topic.outbound_notifs[*].arn,
+            [
+              for partner in local.eft_partners_with_outbound_enabled :
+              aws_sns_topic.outbound_partner_notifs[partner].arn
+            ]
+          ])
+        },
+      ]
+    }
+  )
+}
+
 resource "aws_iam_role" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
@@ -383,15 +439,147 @@ resource "aws_iam_role" "sftp_outbound_transfer" {
 resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
   for_each = {
     for key, arn in {
-      logs = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn),
-      ssm  = one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn),
-      kms  = one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn),
-      s3   = one(aws_iam_policy.sftp_outbound_transfer_s3[*].arn),
-      vpc  = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+      logs    = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn),
+      ssm     = one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn),
+      kms     = one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn),
+      s3      = one(aws_iam_policy.sftp_outbound_transfer_s3[*].arn),
+      sqs_dlq = one(aws_iam_policy.sftp_outbound_transfer_sqs_dlq[*].arn)
+      sns     = one(aws_iam_policy.sftp_outbound_transfer_sns[*].arn)
+      vpc     = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
     } : key => arn
     if length(local.eft_partners_with_outbound_enabled) > 0
   }
 
   role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
   policy_arn = each.value
+}
+
+resource "aws_iam_policy" "outbound_notifs_logs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name = "${local.outbound_notifs_topic_prefix}-logs"
+  description = join("", [
+    "Permissions for the ${local.outbound_notifs_topic_prefix} SNS topic to write to its corresponding ",
+    "CloudWatch Log Group and Log Stream",
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:PutMetricFilter",
+            "logs:PutRetentionPolicy"
+          ]
+          Resource = [
+            # There is no documentation about SNS delivery status logging that explicitly defines
+            # the log group naming format. So, constraining this policy is not entirely possible
+            "arn:aws:logs:${local.region}:${local.account_id}:*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "outbound_partner_notifs_logs" {
+  for_each = toset(local.eft_partners_with_outbound_notifs)
+
+  name = "${local.outbound_notifs_topic_prefix}-${each.key}-logs"
+  description = join("", [
+    "Permissions for the ${local.outbound_notifs_topic_prefix}-${each.key} SNS topic to write to ",
+    "its corresponding CloudWatch Log Group and Log Stream",
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:PutMetricFilter",
+            "logs:PutRetentionPolicy"
+          ]
+          Resource = [
+            # There is no documentation about SNS delivery status logging that explicitly defines
+            # the log group naming format. So, constraining this policy is not entirely possible
+            "arn:aws:logs:${local.region}:${local.account_id}:*"
+          ]
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_role" "outbound_notifs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name        = local.outbound_notifs_topic_prefix
+  path        = "/"
+  description = "Role for ${local.outbound_notifs_topic_prefix} SNS Topic"
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Action = "sts:AssumeRole",
+          Effect = "Allow",
+          Principal = {
+            Service = "sns.amazonaws.com"
+          }
+        }
+      ]
+    }
+  )
+
+  force_detach_policies = true
+}
+
+resource "aws_iam_role" "outbound_partner_notifs" {
+  for_each = toset(local.eft_partners_with_outbound_notifs)
+
+  name        = "${local.outbound_notifs_topic_prefix}-${each.key}"
+  path        = "/"
+  description = "Role for ${local.outbound_notifs_topic_prefix}-${each.key} SNS Topic"
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Action = "sts:AssumeRole",
+          Effect = "Allow",
+          Principal = {
+            Service = "sns.amazonaws.com"
+          }
+        }
+      ]
+    }
+  )
+
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "outbound_notifs" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  role       = one(aws_iam_role.outbound_notifs[*].name)
+  policy_arn = one(aws_iam_policy.outbound_notifs_logs[*].arn)
+}
+
+resource "aws_iam_role_policy_attachment" "outbound_partner_notifs" {
+  for_each = toset(local.eft_partners_with_outbound_notifs)
+
+  role       = aws_iam_role.outbound_partner_notifs[each.key].name
+  policy_arn = aws_iam_policy.outbound_partner_notifs_logs[each.key].arn
 }
