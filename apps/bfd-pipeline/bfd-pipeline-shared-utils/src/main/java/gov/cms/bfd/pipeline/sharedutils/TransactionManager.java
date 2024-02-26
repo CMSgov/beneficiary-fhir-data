@@ -113,9 +113,9 @@ public class TransactionManager implements AutoCloseable {
     } catch (Exception firstException) {
       if (isRetriableException.test(firstException)) {
         for (int retryNumber = 1; retryNumber <= maxRetries; ++retryNumber) {
+          int retryDelayMultiple = retryNumber + random.nextInt(MaxRetryDelayMultiple);
           try {
-            int retryDelayMultiple = retryNumber + random.nextInt(MaxRetryDelayMultiple);
-            Thread.sleep(BaseRetryMilliseconds * retryDelayMultiple);
+            wait(BaseRetryMilliseconds * retryDelayMultiple);
             T result = executeFunction(functionLogic);
             return new RetryResult<>(result, retryNumber, firstException);
           } catch (Exception retryException) {
