@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
@@ -200,14 +201,16 @@ public class DataUtilityCommons {
    */
   private static void recursivelyDelete(Path tempDir) {
     // Recursively delete the working dir.
-    try {
-      Files.walk(tempDir)
+    try (Stream<Path> paths = Files.walk(tempDir)) {
+      paths
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
           .peek(f -> LOGGER.info("deleting {}", f))
           .forEach(File::delete);
     } catch (IOException e) {
       LOGGER.warn("Failed to cleanup the temporary folder", e);
+    } finally {
+
     }
   }
 
