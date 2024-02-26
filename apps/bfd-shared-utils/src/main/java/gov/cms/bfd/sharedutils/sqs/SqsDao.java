@@ -2,8 +2,10 @@ package gov.cms.bfd.sharedutils.sqs;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
+import org.awaitility.Awaitility;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
@@ -34,6 +36,20 @@ public class SqsDao {
   }
 
   /**
+   * Verifies that the client is ready to make requests. This is intended for use in tests.
+   *
+   * @return true when then the client is ready
+   */
+  private boolean isReady() {
+    try {
+      final var response = sqsClient.listQueues();
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  /**
    * Sends a message to an SQS queue.
    *
    * @param queueUrl identifies the queue to post the message to
@@ -56,6 +72,7 @@ public class SqsDao {
    * @throws SqsException if the operation cannot be completed
    */
   public String createQueue(String queueName) {
+    Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> isReady());
     final var createQueueRequest = CreateQueueRequest.builder().queueName(queueName).build();
     final var response = sqsClient.createQueue(createQueueRequest);
     return response.queueUrl();
