@@ -588,6 +588,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneExists ? 1 : 0);
+      // Close the resource
+      matchingBeneExistsTimer.close();
     }
   }
 
@@ -649,6 +651,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "bene_ids_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneIds == null ? 0 : matchingBeneIds.size());
+      beneIdMatchesTimer.close();
     }
   }
 
@@ -690,6 +693,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "benes_by_year_month_part_d_contract_id",
           beneMatchesTimerQueryNanoSeconds,
           matchingBenes == null ? 0 : matchingBenes.size());
+      beneIdTimer.close();
     }
   }
 
@@ -891,6 +895,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "bene_by_" + hashType + "_" + hashType + "s_from_beneficiarieshistory",
           hicnsFromHistoryQueryNanoSeconds,
           matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
+      beneHistoryMatchesTimer.close();
     }
 
     // Then, find all Beneficiary records that match the hash or those BENE_IDs.
@@ -930,6 +935,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes.size());
+      timerHicnQuery.close();
     }
 
     // Then, if we found more than one distinct BENE_ID, or none, throw an error.
