@@ -213,6 +213,9 @@
         <!-- Skip by default.  Override to let open api documents be generated. -->
         <apidocgen.skip>true</apidocgen.skip>
 
+        <!-- Skip by default.  Override to let bfd-ops be generated. -->
+        <bfdOps.skip>true</bfdOps.skip>
+
         <!-- maven plugin versions -->
         <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
         <maven.antrun.plugin.version>3.1.0</maven.antrun.plugin.version>
@@ -1278,6 +1281,7 @@
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <checkstyle.skip>true</checkstyle.skip>
                 <apidocgen.skip>false</apidocgen.skip>
+                <bfdOps.skip>false</bfdOps.skip>
             </properties>
             <distributionManagement>
                 <repository>

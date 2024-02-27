@@ -54,6 +54,7 @@
                                     <fileset dir="${assembly.orig.dir}" />
                                 </copy>
                             </target>
+                            <skip>${bfdOps.skip}</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -73,6 +74,9 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <configuration>
+                            <skipAssembly>${bfdOps.skip}</skipAssembly>
+                        </configuration>
                         <id>build-assembly</id>
                         <phase>package</phase>
                         <goals>
