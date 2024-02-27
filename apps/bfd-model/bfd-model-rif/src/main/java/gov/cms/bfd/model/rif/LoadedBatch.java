@@ -20,7 +20,7 @@ public class LoadedBatch {
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedbatches_loadedbatchid_seq")
   @SequenceGenerator(
       name = "loadedbatches_loadedbatchid_seq",
-      sequenceName = "loadedbatches_loadedbatchid_seq",
+      sequenceName = "ccw.loadedbatches_loadedbatchid_seq",
       allocationSize = 20)
   private long loadedBatchId;
 

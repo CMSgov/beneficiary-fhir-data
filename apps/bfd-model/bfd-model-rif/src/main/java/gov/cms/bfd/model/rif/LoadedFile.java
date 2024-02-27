@@ -15,7 +15,7 @@ public class LoadedFile {
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedfiles_loadedfileid_seq")
   @SequenceGenerator(
       name = "loadedfiles_loadedfileid_seq",
-      sequenceName = "loadedfiles_loadedfileid_seq",
+      sequenceName = "ccw.loadedfiles_loadedfileid_seq",
       allocationSize = 1)
   private long loadedFileId;
 

@@ -18,7 +18,7 @@
  --
  -- revoke_schema_privs
  --
- CREATE OR REPLACE FUNCTION revoke_schema_privs(schema_name TEXT, role_name TEXT) RETURNS void AS $func$
+ CREATE OR REPLACE FUNCTION public.revoke_schema_privs(schema_name TEXT, role_name TEXT) RETURNS void AS $func$
  BEGIN
    IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = role_name) THEN
      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON TABLES FROM %I;', schema_name, role_name);
@@ -41,7 +41,7 @@
  --
  -- create_role_if_not_exists
  --
- CREATE OR REPLACE FUNCTION create_role_if_not_exists(role_name TEXT) RETURNS void AS $func$
+ CREATE OR REPLACE FUNCTION public.create_role_if_not_exists(role_name TEXT) RETURNS void AS $func$
  BEGIN
    EXECUTE format('CREATE ROLE %I;', role_name);
    EXCEPTION WHEN SQLSTATE '42710' THEN RAISE NOTICE '%, skipping', SQLERRM USING ERRCODE = SQLSTATE;
@@ -50,7 +50,7 @@
  --
  -- revoke_db_privs
  --
- CREATE OR REPLACE FUNCTION revoke_db_privs(db_name TEXT, role_name TEXT) RETURNS void AS $func$
+ CREATE OR REPLACE FUNCTION public.revoke_db_privs(db_name TEXT, role_name TEXT) RETURNS void AS $func$
  DECLARE
    t record;
  BEGIN
@@ -61,7 +61,7 @@
        AND nspname != 'information_schema'
        AND nspname != 'public'
      LOOP
-       PERFORM revoke_schema_privs(t.nspname, role_name);
+       PERFORM public.revoke_schema_privs(t.nspname, role_name);
      END LOOP;
      EXECUTE format('REVOKE ALL ON DATABASE %I FROM %I;', db_name, role_name);
    END IF;
@@ -70,10 +70,10 @@
  --
  -- add_reader_role_to_schema
  --
- CREATE OR REPLACE FUNCTION add_reader_role_to_schema(role_name TEXT, schema_name TEXT) RETURNS void AS $func$
+ CREATE OR REPLACE FUNCTION public.add_reader_role_to_schema(role_name TEXT, schema_name TEXT) RETURNS void AS $func$
  BEGIN
-   PERFORM create_role_if_not_exists(role_name);
-   PERFORM revoke_schema_privs(role_name, schema_name);
+   PERFORM public.create_role_if_not_exists(role_name);
+   PERFORM public.revoke_schema_privs(role_name, schema_name);
    EXECUTE format('GRANT USAGE ON SCHEMA %I TO %I;', schema_name, role_name);
    EXECUTE format('GRANT SELECT ON ALL TABLES IN SCHEMA %I TO %I;', schema_name, role_name);
    EXECUTE format('GRANT SELECT ON ALL SEQUENCES IN SCHEMA %I TO %I;', schema_name, role_name); --curval
@@ -84,10 +84,10 @@
  --
  -- add_writer_role_to_schema
  --
- CREATE OR REPLACE FUNCTION add_writer_role_to_schema(role_name TEXT, schema_name TEXT) RETURNS void AS $func$
+ CREATE OR REPLACE FUNCTION public.add_writer_role_to_schema(role_name TEXT, schema_name TEXT) RETURNS void AS $func$
  BEGIN
-   PERFORM create_role_if_not_exists(role_name);
-   PERFORM revoke_schema_privs(role_name, schema_name);
+   PERFORM public.create_role_if_not_exists(role_name);
+   PERFORM public.revoke_schema_privs(role_name, schema_name);
    EXECUTE format('GRANT USAGE ON SCHEMA %I TO %I;', schema_name, role_name);
    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA %I TO %I;', schema_name, role_name);
    EXECUTE format('GRANT USAGE ON ALL SEQUENCES IN SCHEMA %I TO %I;', schema_name, role_name); --curval, nextval
@@ -98,10 +98,10 @@
  --
  -- add_migrator_role_to_schema
  --
- CREATE OR REPLACE FUNCTION add_migrator_role_to_schema(role_name TEXT, schema_name TEXT) RETURNS void AS $func$
+ CREATE OR REPLACE FUNCTION public.add_migrator_role_to_schema(role_name TEXT, schema_name TEXT) RETURNS void AS $func$
  BEGIN
-   PERFORM create_role_if_not_exists(role_name);
-   PERFORM revoke_schema_privs(role_name, schema_name);
+   PERFORM public.create_role_if_not_exists(role_name);
+   PERFORM public.revoke_schema_privs(role_name, schema_name);
    EXECUTE format('GRANT ALL ON SCHEMA %I TO %I;', schema_name, role_name); -- uwsage + create
    EXECUTE format('GRANT ALL ON ALL TABLES IN SCHEMA %I TO %I;', schema_name, role_name); -- tables/views
    EXECUTE format('GRANT ALL ON ALL SEQUENCES IN SCHEMA %I TO %I;', schema_name, role_name); --curval, nextval, setval
@@ -119,9 +119,9 @@
  --
  -- add_db_group_if_not_exists
  --
- CREATE OR REPLACE FUNCTION add_db_group_if_not_exists(db_name TEXT, group_name TEXT) RETURNS void AS $func$
+ CREATE OR REPLACE FUNCTION public.add_db_group_if_not_exists(db_name TEXT, group_name TEXT) RETURNS void AS $func$
  BEGIN
-   PERFORM create_role_if_not_exists(group_name);
+   PERFORM public.create_role_if_not_exists(group_name);
    EXECUTE format('GRANT CONNECT ON DATABASE %I TO %I;', db_name, group_name);
    -- ignore dup errors
    EXCEPTION WHEN duplicate_object THEN RAISE NOTICE '%, skipping', SQLERRM USING ERRCODE = SQLSTATE;
@@ -130,7 +130,7 @@
  --
  -- set_fhirdb_owner
  --
- CREATE OR REPLACE FUNCTION set_fhirdb_owner(role_name TEXT) RETURNS void AS $func$
+ CREATE OR REPLACE FUNCTION public.set_fhirdb_owner(role_name TEXT) RETURNS void AS $func$
  DECLARE
   t record;
  BEGIN
@@ -180,6 +180,3 @@
      END;
    END LOOP;
  END $func$ LANGUAGE plpgsql;
-
-
-

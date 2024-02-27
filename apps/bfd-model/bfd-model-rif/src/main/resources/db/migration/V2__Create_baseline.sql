@@ -1,9 +1,4 @@
 
-CREATE SCHEMA IF NOT EXISTS ccw;
-select add_migrator_role_to_schema('svc_fhirdb_migrator', 'ccw');
-
-CREATE SCHEMA IF NOT EXISTS rda;
-select add_migrator_role_to_schema('svc_fhirdb_migrator', 'rda');
 
 -- =====================================================
 
@@ -304,7 +299,7 @@ CREATE TABLE IF NOT EXISTS ccw.beneficiary_monthly_audit (
     operation character(1) NOT NULL,
     update_ts timestamp without time zone NOT NULL,
     seq_id bigint NOT NULL,
-    CONSTRAINT beneficiary_monthly_audit_pkey PRIMARY KEY (bene_id, year_month)
+    CONSTRAINT beneficiary_monthly_audit_pkey PRIMARY KEY (seq_id)
 );
 
 CREATE INDEX IF NOT EXISTS beneficiary_monthly_audit_bene_id_year_month_idx
@@ -2189,6 +2184,8 @@ CREATE OR REPLACE FUNCTION ccw.check_claims_mask(v_bene_id bigint) RETURNS integ
   END;
 $func$;
 
+GRANT EXECUTE ON FUNCTION ccw.check_claims_mask(v_bene_id bigint)  TO bfd_reader_role;
+
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION ccw.track_bene_monthly_change() RETURNS trigger
@@ -2196,15 +2193,14 @@ CREATE OR REPLACE FUNCTION ccw.track_bene_monthly_change() RETURNS trigger
     AS $func$
      BEGIN
         IF (TG_OP = 'UPDATE') THEN
-            INSERT INTO ccw.beneficiary_monthly_audit VALUES (OLD.*, 'U', now(), nextval('public.bene_monthly_audit_seq'));
+            INSERT INTO ccw.beneficiary_monthly_audit VALUES (OLD.*, 'U', now(), nextval('ccw.bene_monthly_audit_seq'));
             RETURN NEW;
         END IF;
         RETURN NULL; -- result is ignored since this is an AFTER trigger
      END;
  $func$;
 
-CREATE SEQUENCE IF NOT EXISTS ccw.bene_monthly_audit_seq
-    START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+GRANT EXECUTE ON FUNCTION ccw.check_claims_mask(v_bene_id bigint)  TO bfd_writer_role;
 
 CREATE OR REPLACE TRIGGER audit_ccw_update
 	AFTER UPDATE ON ccw.beneficiary_monthly
@@ -2224,6 +2220,9 @@ CREATE OR REPLACE TRIGGER audit_ccw_update
 		OR ((old.partc_pbp_number_id)::text IS DISTINCT FROM (new.partc_pbp_number_id)::text))
 		OR ((old.partc_plan_type_code)::text IS DISTINCT FROM (new.partc_plan_type_code)::text))))
 			EXECUTE FUNCTION ccw.track_bene_monthly_change();
+
+--GRANT EXECUTE ON TRIGGER audit_ccw_update TO bfd_writer_role;
+
 --
 -- Name: find_beneficiary(text, text); Type: FUNCTION; Schema: ccw; Owner: svc_fhirdb_migrator
 --
@@ -2268,11 +2267,13 @@ BEGIN
 END;
 $func$;
 
+GRANT EXECUTE ON FUNCTION ccw.find_beneficiary(p_type text, p_value text) TO bfd_reader_role;
+
 --
 -- Name: pg_idfromdate(text, text, timestamp without time zone); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_idfromdate(text, text, timestamp without time zone) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_idfromdate(text, text, timestamp without time zone) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2349,7 +2350,7 @@ $func$;
 --
 -- Name: pg_ifd_epoch_from_id(text, text, bigint, text); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
-CREATE OR REPLACE FUNCTION pg_ifd_epoch_from_id(text, text, bigint, text) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_epoch_from_id(text, text, bigint, text) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2369,7 +2370,7 @@ $func$;
 -- Name: pg_ifd_epoch_from_id(text, text, text, bigint, text); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_ifd_epoch_from_id(text, text, text, bigint, text) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_epoch_from_id(text, text, text, bigint, text) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2392,7 +2393,7 @@ $func$;
 -- Name: pg_ifd_fetch_row_from_small_range(text, text, bigint, bigint, timestamp without time zone); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_ifd_fetch_row_from_small_range(text, text, bigint, bigint, timestamp without time zone) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_fetch_row_from_small_range(text, text, bigint, bigint, timestamp without time zone) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2428,7 +2429,7 @@ $func$;
 -- Name: pg_ifd_fetch_row_from_small_range(text, text, text, bigint, bigint, timestamp without time zone); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_ifd_fetch_row_from_small_range(text, text, text, bigint, bigint, timestamp without time zone) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_fetch_row_from_small_range(text, text, text, bigint, bigint, timestamp without time zone) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2463,7 +2464,7 @@ $func$;
 -- Name: pg_ifd_max_id(text); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_ifd_max_id(text) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_max_id(text) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2480,7 +2481,7 @@ $func$;
 -- Name: pg_ifd_max_id(text, text); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_ifd_max_id(text, text) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_max_id(text, text) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2498,7 +2499,7 @@ $func$;
 -- Name: pg_ifd_middle_id(bigint, bigint); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_ifd_middle_id(bigint, bigint) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_middle_id(bigint, bigint) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2515,7 +2516,7 @@ $func$;
 -- Name: pg_ifd_min_id(text); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_ifd_min_id(text) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_min_id(text) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2533,7 +2534,7 @@ $func$;
 -- Name: pg_ifd_min_id(text, text); Type: FUNCTION; Schema: ccw; Owner: bfduser
 --
 
-CREATE OR REPLACE FUNCTION pg_ifd_min_id(text, text) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.pg_ifd_min_id(text, text) RETURNS bigint
     LANGUAGE plpgsql
     AS $func$
 DECLARE
@@ -2947,8 +2948,6 @@ CREATE TABLE IF NOT EXISTS ccw.skipped_rif_records (
 CREATE SEQUENCE IF NOT EXISTS ccw.skipped_rif_records_record_id_seq
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 
-
-REVOKE ALL ON SCHEMA ccw FROM rdsadmin;
 GRANT ALL ON SCHEMA   ccw TO bfduser;
 GRANT USAGE ON SCHEMA ccw TO bfd_reader_role;
 GRANT USAGE ON SCHEMA ccw TO bfd_writer_role;
@@ -2968,7 +2967,7 @@ GRANT ALL ON FUNCTION ccw.add_writer_role_to_schema(role_name text, schema_name 
 GRANT ALL ON FUNCTION ccw.check_claims_mask(v_bene_id bigint) TO bfd_migrator_role;
 GRANT ALL ON FUNCTION ccw.create_role_if_not_exists(role_name text) TO bfd_migrator_role;
 */
-GRANT ALL ON FUNCTION ccw.find_beneficiary(p_type text, p_value text) TO bfd_migrator_role;
+
 /*
 GRANT ALL ON FUNCTION ccw.pg_idfromdate(text, text, timestamp without time zone) TO bfd_migrator_role;
 GRANT ALL ON FUNCTION ccw.pg_idfromdate(text, text, text, timestamp without time zone) TO bfd_migrator_role;
@@ -3006,6 +3005,7 @@ REVOKE ALL ON FUNCTION ccw.track_bene_monthly_change() FROM svc_fhirdb_migrator;
 
 */
 
+/*
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw.beneficiaries             TO bfd_writer_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw.beneficiaries_history     TO bfd_writer_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw.beneficiary_monthly       TO bfd_writer_role;
@@ -3148,6 +3148,7 @@ GRANT ALL    ON SEQUENCE ccw.loadedfiles_loadedfileid_seq                TO bfd_
 GRANT SELECT ON SEQUENCE ccw.s3_manifest_files_manifest_id_seq           TO bfd_reader_role;
 GRANT USAGE  ON SEQUENCE ccw.s3_manifest_files_manifest_id_seq           TO bfd_writer_role;
 GRANT ALL    ON SEQUENCE ccw.s3_manifest_files_manifest_id_seq           TO bfd_migrator_role;
+*/
 
 --GRANT SELECT ON TABLE pg_stat_statements                          TO bfd_reader_role;
 --GRANT ALL    ON TABLE pg_stat_statements                          TO bfd_migrator_role;
@@ -3161,8 +3162,8 @@ GRANT SELECT ON TABLE ccw.schema_version                                 TO bfd_
 GRANT ALL    ON TABLE ccw.schema_version                                 TO bfd_migrator_role;
 */
 
-GRANT SELECT,USAGE ON SEQUENCE ccw.skipped_rif_records_record_id_seq     TO svc_bfd_server_0;
-GRANT SELECT,USAGE ON SEQUENCE ccw.skipped_rif_records_record_id_seq     TO svc_bfd_server_1;
+GRANT SELECT ON SEQUENCE ccw.skipped_rif_records_record_id_seq     TO svc_bfd_server_0;
+GRANT SELECT ON SEQUENCE ccw.skipped_rif_records_record_id_seq     TO svc_bfd_server_1;
 GRANT ALL          ON SEQUENCE ccw.skipped_rif_records_record_id_seq     TO svc_bfd_pipeline_0;
 GRANT SELECT       ON SEQUENCE ccw.skipped_rif_records_record_id_seq     TO bfd_reader_role;
 GRANT USAGE        ON SEQUENCE ccw.skipped_rif_records_record_id_seq     TO bfd_writer_role;
@@ -3170,6 +3171,7 @@ GRANT ALL          ON SEQUENCE ccw.skipped_rif_records_record_id_seq     TO bfd_
 
 -- ==============================================
 
+/*
 GRANT SELECT ON TABLE rda.claim_message_meta_data          TO paca_reader_role;
 GRANT ALL    ON TABLE rda.claim_message_meta_data          TO paca_migrator_role;
 
@@ -3238,11 +3240,12 @@ GRANT USAGE  ON SEQUENCE rda.mbi_cache_mbi_id_seq          TO svc_bfd_pipeline_0
 GRANT SELECT ON SEQUENCE rda.mbi_cache_mbi_id_seq          TO paca_reader_role;
 GRANT USAGE  ON SEQUENCE rda.mbi_cache_mbi_id_seq          TO paca_writer_role;
 GRANT ALL    ON SEQUENCE rda.mbi_cache_mbi_id_seq          TO paca_migrator_role;
-
+*/
 
 -- =================================
 --    svc_fhirdb_migrator privs
 -- =================================
+/*
 ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT SELECT ON SEQUENCES  TO bfd_reader_role;
 ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT USAGE  ON SEQUENCES  TO bfd_writer_role;
 ALTER DEFAULT PRIVILEGES FOR ROLE svc_fhirdb_migrator IN SCHEMA ccw GRANT ALL    ON SEQUENCES  TO bfd_migrator_role;
@@ -3294,3 +3297,62 @@ ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT ALL ON TABLES     
 ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO svc_bfd_pipeline_0;
 ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO svc_bfd_pipeline_1;
 ALTER DEFAULT PRIVILEGES FOR ROLE bfduser IN SCHEMA rda GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO paca_writer_role;
+*/
+
+
+-- free reign for the migrator; GRANT ALL allows:
+--
+--     SELECT     : Allows the role to retrieve data from the table. 
+--     INSERT     : Allows the role to add new rows to the table. 
+--     UPDATE     : Allows the role to modify existing rows in the table. 
+--     DELETE     : Allows the role to remove rows from the table. 
+--     TRUNCATE   : Allows the role to truncate the entire table, removing all rows. 
+--     REFERENCES : Allows the role to create a foreign key referencing the table. 
+--     TRIGGER    : Allows the role to create triggers on the table. 
+--     ALTER      : Allows the role to alter the table, e.g., add or remove columns. 
+--     INDEX      : Allows the role to create indexes on the table. 
+--     USAGE      : Allows the role to use sequences associated with the table (if any). 
+--     RULE       : Allows the role to create rules on the table. 
+
+GRANT ALL ON ALL TABLES  IN SCHEMA ccw TO bfd_migrator_role;
+GRANT ALL ON ALL TABLES  IN SCHEMA rda TO bfd_migrator_role;
+
+-- ETL can perform updates to schema TABLES and USAGE to schema SEQUENCES
+--
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES    IN SCHEMA ccw TO bfd_writer_role;
+GRANT SELECT, USAGE                  ON ALL SEQUENCES IN SCHEMA ccw TO bfd_writer_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES    IN SCHEMA rda TO paca_writer_role;
+GRANT SELECT, USAGE                  ON ALL SEQUENCES IN SCHEMA rda TO paca_writer_role;
+
+GRANT bfd_writer_role   TO svc_bfd_pipeline_0;
+GRANT bfd_writer_role   TO svc_bfd_pipeline_1;
+GRANT paca_writer_role  TO svc_bfd_pipeline_0;
+GRANT paca_writer_role  TO svc_bfd_pipeline_1;
+
+-- allow read (SELECT, USAGE) on all tables and sequences for ccw and rda;
+-- support all reader roles for both schemas.
+--
+GRANT SELECT ON ALL TABLES     IN SCHEMA ccw     TO bfd_reader_role;
+GRANT SELECT ON ALL SEQUENCES  IN SCHEMA ccw     TO bfd_reader_role;
+GRANT SELECT ON ALL TABLES     IN SCHEMA rda     TO paca_reader_role;
+GRANT SELECT ON ALL SEQUENCES  IN SCHEMA rda     TO paca_reader_role;
+/*
+GRANT SELECT ON ALL TABLES     IN SCHEMA rda     TO bfd_reader_role;
+GRANT SELECT ON ALL SEQUENCES  IN SCHEMA rda     TO bfd_reader_role;
+GRANT SELECT ON ALL TABLES     IN SCHEMA rda     TO paca_reader_role;
+GRANT SELECT ON ALL SEQUENCES  IN SCHEMA rda     TO paca_reader_role;
+*/
+
+-- BFD and RDA share the same server....allow RO access to both schemas
+--
+--GRANT bfd_reader_role   TO svc_bfd_server_0 WITH INHERIT TRUE;
+--GRANT bfd_reader_role   TO svc_bfd_server_1 WITH INHERIT TRUE;
+--GRANT paca_reader_role  TO svc_bfd_server_0 WITH INHERIT TRUE;
+--GRANT paca_reader_role  TO svc_bfd_server_1 WITH INHERIT TRUE;
+
+-- make life easier for a role; set default schema when USER with that ROLE logs in
+--
+ALTER ROLE bfd_reader_role    SET search_path to ccw;
+ALTER ROLE bfd_writer_role    SET search_path to ccw;
+ALTER ROLE paca_reader_role   SET search_path to rda;
+ALTER ROLE paca_writer_role   SET search_path to rda;
