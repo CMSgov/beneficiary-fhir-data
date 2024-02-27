@@ -129,6 +129,10 @@
             <artifactId>dropwizard-metrics-newrelic</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+        </dependency>
+        <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-shared-test-utils</artifactId>
             <version>${project.version}</version>
