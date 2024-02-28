@@ -4,6 +4,7 @@ mappings:
   nullableFieldAccessorType: Optional
   table:
     name: s3_data_files
+    schema: ccw
     primaryKeyColumns:
     - parentManifest
     - fileName

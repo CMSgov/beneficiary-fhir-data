@@ -1687,6 +1687,8 @@ CREATE TABLE IF NOT EXISTS ccw.loaded_files (
     loaded_file_id bigint NOT NULL,
     rif_type character varying(48) NOT NULL,
     created timestamp with time zone NOT NULL,
+    s3_manifest_id bigint,
+    s3_file_index smallint,
     CONSTRAINT loaded_files_pkey PRIMARY KEY (loaded_file_id)
 );
 
@@ -2705,10 +2707,6 @@ BEGIN
                union 
                 select distinct bene_id, mbi_num 
                 from ccw.beneficiaries_history 
-                where bene_id < 0 and mbi_num IS NOT NULL 
-               union 
-                select distinct bene_id, mbi_num 
-                from ccw.medicare_beneficiaryid_history 
                 where bene_id < 0 and mbi_num IS NOT NULL
               ) as foo 
               group by mbi_num 
@@ -2876,10 +2874,6 @@ BEGIN
                union 
                 select distinct bene_id, mbi_num 
                 from ccw.beneficiaries_history 
-                where bene_id < 0 and mbi_num IS NOT NULL 
-               union 
-                select distinct bene_id, mbi_num 
-                from ccw.medicare_beneficiaryid_history 
                 where bene_id < 0 and mbi_num IS NOT NULL
               ) as foo 
               group by mbi_num 
@@ -2893,6 +2887,32 @@ END;
 $$;
 
 --
+-- Name: s3_manifest_files; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
+--
+
+CREATE TABLE IF NOT EXISTS ccw.s3_manifest_files (
+    manifest_id bigint NOT NULL, 
+    s3_key character varying(1024) NOT NULL, 
+    status character varying(24) NOT NULL, 
+    status_timestamp timestamp with time zone, 
+    manifest_timestamp timestamp with time zone NOT NULL, 
+    discovery_timestamp timestamp with time zone NOT NULL, 
+    CONSTRAINT pk_s3_manifest_files PRIMARY KEY (manifest_id) 
+);
+
+--
+-- Sequence used to generate primary key manifest_id
+--
+CREATE SEQUENCE IF NOT EXISTS ccw.s3_manifest_files_manifest_id_seq
+    INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807;
+
+ALTER SEQUENCE ccw.s3_manifest_files_manifest_id_seq OWNER TO svc_fhirdb_migrator;
+GRANT ALL    ON SEQUENCE ccw.s3_manifest_files_manifest_id_seq TO svc_fhirdb_migrator;
+GRANT ALL    ON SEQUENCE ccw.s3_manifest_files_manifest_id_seq TO bfd_migrator_role;
+GRANT SELECT ON SEQUENCE ccw.s3_manifest_files_manifest_id_seq TO bfd_reader_role;
+GRANT USAGE  ON SEQUENCE ccw.s3_manifest_files_manifest_id_seq TO bfd_writer_role;
+
+--
 -- Name: s3_data_files; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
 --
 
@@ -2904,28 +2924,17 @@ CREATE TABLE IF NOT EXISTS ccw.s3_data_files (
     s3_key character varying(1024) NOT NULL,
     status character varying(24) NOT NULL,
     status_timestamp timestamp with time zone,
-    discovery_timestamp timestamp with time zone NOT NULL
+    discovery_timestamp timestamp with time zone NOT NULL,
+    last_record_number bigint NOT NULL DEFAULT 0,
+    CONSTRAINT pk_s3_data_files PRIMARY KEY (manifest_id, file_name), 
+    CONSTRAINT fk_s3_data_files_s3_manifest_files 
+       FOREIGN KEY (manifest_id) REFERENCES ccw.s3_manifest_files(manifest_id) 
 );
 
---
--- Name: s3_manifest_files; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-CREATE TABLE IF NOT EXISTS ccw.s3_manifest_files (
-    manifest_id bigint NOT NULL,
-    s3_key character varying(1024) NOT NULL,
-    status character varying(24) NOT NULL,
-    status_timestamp timestamp with time zone,
-    manifest_timestamp timestamp with time zone NOT NULL,
-    discovery_timestamp timestamp with time zone NOT NULL
-);
-
---
--- Name: s3_manifest_files_manifest_id_seq; Type: SEQUENCE; Schema: ccw; Owner: svc_fhirdb_migrator
---
-
-CREATE SEQUENCE IF NOT EXISTS ccw.s3_manifest_files_manifest_id_seq
-    START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+/*
+ * Index used when checking status of a file from S3 bucket
+ */
+CREATE UNIQUE INDEX IF NOT EXISTS idx_s3_data_files_s3_key on ccw.s3_data_files(s3_key);
 
 --
 -- Name: skipped_rif_records; Type: TABLE; Schema: ccw; Owner: svc_fhirdb_migrator
