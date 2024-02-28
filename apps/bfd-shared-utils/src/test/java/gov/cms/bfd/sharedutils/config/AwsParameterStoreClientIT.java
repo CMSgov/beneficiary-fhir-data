@@ -36,7 +36,7 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
                     AwsBasicCredentials.create(
                         localstack.getAccessKey(), localstack.getSecretKey())))
             .build();
-    Awaitility.await().atMost(5, TimeUnit.SECONDS).until(this::isReady);
+    Awaitility.await().atMost(30, TimeUnit.SECONDS).until(this::isReady);
   }
 
   /** Close the {@link SsmClient} after each test. */
