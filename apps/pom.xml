@@ -115,7 +115,7 @@
         <rest-assured.version>5.4.0</rest-assured.version>
         <assertj.version>3.24.2</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
-        <postgresql.version>42.7.1</postgresql.version>
+        <postgresql.version>42.7.2</postgresql.version>
         <slf4j.version>2.0.9</slf4j.version>
         <log4j.version>2.22.0</log4j.version>
         <hikari.version>5.1.0</hikari.version>
@@ -171,8 +171,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed when changing this property. -->
         <its.testcontainer.db.image>postgres:14.9-alpine</its.testcontainer.db.image>
@@ -206,12 +206,15 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>latest</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
         <!-- Skip by default.  Override to let open api documents be generated. -->
         <apidocgen.skip>true</apidocgen.skip>
+
+        <!-- Skip by default.  Override to let bfd-ops be generated. -->
+        <bfdOps.skip>true</bfdOps.skip>
 
         <!-- maven plugin versions -->
         <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
@@ -720,6 +723,11 @@
                     of all plugins used in the module builds here to help ensure that the builds
                     are always reproducible. This is actually enforced down below by the maven-enforcer-plugin
                     execution. -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build.helper.maven.plugin.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
@@ -1278,6 +1286,7 @@
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <checkstyle.skip>true</checkstyle.skip>
                 <apidocgen.skip>false</apidocgen.skip>
+                <bfdOps.skip>false</bfdOps.skip>
             </properties>
             <distributionManagement>
                 <repository>

@@ -42,7 +42,7 @@ public class SqsDao {
    */
   private boolean isReady() {
     try {
-      final var response = sqsClient.listQueues();
+      sqsClient.listQueues();
       return true;
     } catch (Exception e) {
       return false;
@@ -72,7 +72,7 @@ public class SqsDao {
    * @throws SqsException if the operation cannot be completed
    */
   public String createQueue(String queueName) {
-    Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> isReady());
+    Awaitility.await().atMost(5, TimeUnit.SECONDS).until(this::isReady);
     final var createQueueRequest = CreateQueueRequest.builder().queueName(queueName).build();
     final var response = sqsClient.createQueue(createQueueRequest);
     return response.queueUrl();
