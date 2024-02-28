@@ -36,7 +36,7 @@ public class AttributionBuilder {
    * @param dataSampler The {@link DataSampler} set to pull data from.
    */
   public void run(DataSampler<String> dataSampler) {
-    try {
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
       Path templatePath = Path.of(attributionTemplate);
       Path baseDir = templatePath.getParent();
       String templateFile = templatePath.getFileName().toString();
@@ -46,7 +46,6 @@ public class AttributionBuilder {
       config.setLogTemplateExceptions(false);
 
       Template t = config.getTemplate(templateFile);
-      BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript));
       List<String> values = Lists.newArrayList(dataSampler);
       t.process(Map.of("value", values), writer);
     } catch (IOException | TemplateException e) {
