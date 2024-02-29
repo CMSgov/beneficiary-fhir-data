@@ -256,7 +256,8 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
 }
 
 resource "aws_lambda_function" "sftp_outbound_transfer" {
-  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+  depends_on = [aws_iam_role_policy_attachment.sftp_outbound_transfer]
+  count      = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   function_name = local.outbound_lambda_full_name
 
@@ -303,7 +304,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
 resource "aws_sqs_queue" "sftp_outbound_transfer_dlq" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name                      = "${one(aws_lambda_function.sftp_outbound_transfer[*].function_name)}-dlq"
+  name                      = "${local.outbound_lambda_full_name}-dlq"
   kms_master_key_id         = local.kms_key_id
   message_retention_seconds = 14 * 24 * 60 * 60 # 14 days, in seconds, which is the maximum
 }
