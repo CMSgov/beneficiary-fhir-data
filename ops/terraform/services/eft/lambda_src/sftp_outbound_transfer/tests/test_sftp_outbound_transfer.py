@@ -19,9 +19,6 @@ from errors import (
     UnknownPartnerError,
     UnrecognizedFileError,
 )
-from sftp_outbound_transfer import (
-    _safe_sftp_mkdir,  # pyright: ignore[reportPrivateUsage]
-)
 from sftp_outbound_transfer import handler
 from sns import (
     FileDiscoveredDetails,
@@ -399,10 +396,7 @@ class TestUpdatePipelineSlisHandler:
             == 2
         )
 
-    @mock.patch(f"{MODULE_UNDER_TEST}.{_safe_sftp_mkdir.__name__}")
-    def test_it_executes_sftp_transfer_process_if_event_is_valid(
-        self, mock_safe_sftp_mkdir: mock.MagicMock
-    ):
+    def test_it_executes_sftp_transfer_process_if_event_is_valid(self):
         event = generate_event()
         mock_host_keys = mock.Mock()
         mock_ssh_client.get_host_keys.return_value = mock_host_keys
@@ -434,30 +428,22 @@ class TestUpdatePipelineSlisHandler:
         }
         assert actual_ssh_connect_data == expected_ssh_connect_data
 
-        actual_staging_mkdir_path = mock_safe_sftp_mkdir.call_args_list[0].kwargs["dirpath"]
-        expected_staging_mkdir_path = DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder
-        assert actual_staging_mkdir_path == expected_staging_mkdir_path
-
         actual_s3_download_obj_key = mock_s3_client.download_fileobj.call_args.kwargs["Key"]
         expected_s3_download_obj_key = DEFAULT_MOCK_OBJECT_KEY
         assert actual_s3_download_obj_key == expected_s3_download_obj_key
 
         actual_sftp_open_path = mock_sftp_client.open.call_args.kwargs["filename"]
-        expected_sftp_open_path = f"{expected_staging_mkdir_path}/{DEFAULT_MOCK_OBJECT_FILENAME}"
+        expected_sftp_open_path = f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}"
         assert actual_sftp_open_path == expected_sftp_open_path
 
         actual_sftp_chmod_data = mock_sftp_client.chmod.call_args.kwargs
         expected_sftp_chmod_data = {"path": expected_sftp_open_path, "mode": 0o664}
         assert actual_sftp_chmod_data == expected_sftp_chmod_data
 
-        actual_input_mkdir_path = mock_safe_sftp_mkdir.call_args_list[1].kwargs["dirpath"]
-        expected_input_mkdir_path = DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder
-        assert actual_input_mkdir_path == expected_input_mkdir_path
-
         actual_sftp_rename_data = mock_sftp_client.rename.call_args.kwargs
         expected_sftp_rename_data = {
             "oldpath": expected_sftp_open_path,
-            "newpath": f"{expected_input_mkdir_path}/{DEFAULT_MOCK_OBJECT_FILENAME}",
+            "newpath": f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}",
         }
         assert actual_sftp_rename_data == expected_sftp_rename_data
 

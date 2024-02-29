@@ -62,19 +62,6 @@ BOTO_CONFIG = Config(
 logger = Logger()
 
 
-def _safe_sftp_mkdir(sftp_client: paramiko.SFTPClient, dirpath: str):
-    current_dir = ""
-    for dir_part in dirpath.split("/"):
-        if not dir_part:
-            continue
-        current_dir += f"/{dir_part}"
-        try:
-            sftp_client.listdir(current_dir)
-        except IOError:
-            logger.info("%s does not exist, creating it", current_dir)
-            sftp_client.mkdir(current_dir)
-
-
 def _handle_s3_event(s3_object_key: str):
     s3_client = boto3.client("s3", config=BOTO_CONFIG)
     ssm_client = boto3.client("ssm", config=BOTO_CONFIG)
@@ -244,16 +231,8 @@ def _handle_s3_event(s3_object_key: str):
                 # Clean the provided paths of any whitespace or trailing/leading slashes
                 staging_dir_path = f"/{recognized_file.staging_folder.strip().strip('/')}"
                 input_dir_path = f"/{recognized_file.input_folder.strip().strip('/')}"
-                # First, ensure the staging folder exists by creating it, piece-by-piece, if it
-                # doesn't
-                logger.info(
-                    "Checking if the staging path %s exists, creating it if it does not",
-                    staging_dir_path,
-                )
-                _safe_sftp_mkdir(sftp_client=sftp_client, dirpath=staging_dir_path)
-                logger.info("%s exists or has been created", staging_dir_path)
 
-                # Then, upload the file to the staging folder. This avoids the SWEEPS automation
+                # First, upload the file to the staging folder. This avoids the SWEEPS automation
                 # from sweeping partially uploaded files as we will move this file to the SWEEPS
                 # input folder only once it has fully uploaded
                 logger.info(
@@ -279,17 +258,7 @@ def _handle_s3_event(s3_object_key: str):
                 )
 
                 # Once the permissions have been modified, we need to move the file to the actual
-                # SWEEPS input directory. Just like before, we check if the directory exists and
-                # attempt to create it if it doesn't
-                logger.info(
-                    "Checking if the SWEEPS input path %s exists, creating it if it does not",
-                    input_dir_path,
-                )
-                _safe_sftp_mkdir(sftp_client=sftp_client, dirpath=input_dir_path)
-                logger.info("%s exists or has been created", input_dir_path)
-
-                # Once we're sure the directory exists, the file is moved (SFTP calls this a
-                # "rename") to the input directory
+                # SWEEPS input directory. (SFTP calls this a "rename")
                 logger.info(
                     "Moving %s to SWEEPS input directory path %s", staging_file_path, input_dir_path
                 )
