@@ -23,7 +23,7 @@ public class QueryUtils {
    * value that shows if a given claim type will have any data.
    */
   public static final String CHECK_CLAIMS_FOR_DATA_SQL =
-      "SELECT * FROM check_claims_mask(:beneIdValue)";
+      "SELECT * FROM ccw.check_claims_mask(:beneIdValue)";
 
   /** BitSet index identifier for Carrier Claims. */
   public static final int CARRIER_HAS_DATA = 0;
