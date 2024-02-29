@@ -2,20 +2,27 @@
 set -eo pipefail
 
 LOGFILE="${LOGFILE:-repack.log}"
-TO_PROCESS="${TO_PROCESS:-to_repack.txt}"
+TO_REPACK="${TO_REPACK:-repack_list.txt}"
 PGHOST="${PGHOST:-}"
 PGUSER="${PGUSER:-}"
 PGDATABASE="${PGDATABASE:-}"
 PGPORT="${PGPORT:-}"
 PGPASSWORD="${PGPASSWORD:-}"
+SKIP_SCHEMAS="${SKIP_SCHEMAS:-"('pg_catalog', 'information_schema', 'repack', 'palm_beach')"}"
 TABLES=
 
+prepend_timestamp() {
+  while IFS= read -r line; do
+    echo "$(date '+%Y-%m-%d %H:%M:%S') $line"
+  done
+}
+
 log() {
-  echo "[$(date)] $1" >> "$LOGFILE"
+  echo "$1" | prepend_timestamp >> "$LOGFILE"
 }
 
 error_exit() {
-  echo "Error: $1" >&2 | tee -a "$LOGFILE"
+  echo "Error: $1" >&2 | prepend_timestamp | tee -a "$LOGFILE"
   exit 1
 }
 
@@ -38,20 +45,32 @@ SELECT
 FROM
     information_schema.tables
 WHERE
-    table_schema NOT IN ('pg_catalog', 'information_schema')
+    table_schema NOT IN $SKIP_SCHEMAS
+    AND
+    table_name NOT LIKE 'pg_%'
+    AND
+    table_type = 'BASE TABLE'
 ORDER BY
-    pg_total_relation_size('"' || table_schema || '"."' || table_name || '"') DESC;
+    pg_total_relation_size('"' || table_schema || '"."' || table_name || '"');
 EOF
 }
 
-generate_to_process_file() {
-  query_tables_by_size_asc > "$TO_PROCESS"
+# run this function to remove the pg_repack extension and all of its objects from the database, this will remove any
+# repack triggers and other objects that may be left behind after a failed repack (easier than manually removing them)
+reset_repack() {
+  psql -c "DROP EXTENSION IF EXISTS pg_repack CASCADE;" || true
+  psql -c "CREATE EXTENSION IF NOT EXISTS pg_repack;" || true
+  log "pg_repack extension reset"
+}
+
+generate_repack_file() {
+  query_tables_by_size_asc > "$TO_REPACK"
 }
 
 load_tables_from_file(){
   # assumes the table names are the first column in a pipe deleminated file
-  TABLES=$(cut -d'|' -f1 "$TO_PROCESS")
-  log "Loaded $(echo "$TABLES" | wc -l) tables to repack from $TO_PROCESS"
+  TABLES=$(cut -d'|' -f1 "$TO_REPACK")
+  log "Loaded $(echo "$TABLES" | wc -l) tables to repack from $TO_REPACK"
   export TABLES
 }
 
@@ -99,29 +118,56 @@ export PGHOST PGUSER PGDATABASE PGPORT PGPASSWORD
 
 touch "$LOGFILE"
 
-# if the $TO_PROCESS file exists, ask if we should load it or start with a new one
-if [ -f "$TO_PROCESS" ] ; then
-  echo "Existing $TO_PROCESS file found, load this file or remove it and start new?"
+case "$1" in
+  reset) reset_repack; exit;;
+  gen*) generate_repack_file; exit;;
+esac
+
+# if the $TO_REPACK file exists, ask if we should load it or start with a new one
+if [ -f "$TO_REPACK" ] ; then
+  echo "Existing $TO_REPACK file found, load this file or remove it and start new?"
   select yn in "Load" "Start new" "Quit"; do
     case $yn in
       Load ) load_tables_from_file; break;;
-      "Start new" ) generate_to_process_file; load_tables_from_file; break;;
+      "Start new" ) generate_repack_file; load_tables_from_file; break;;
+      "Generate repack list and quit" ) generate_repack_file; load_tables_from_file; break;;
       Quit ) exit;;
     esac
   done
 else
-  generate_to_process_file
+  # query the database for a list of schemas
+  if [ -z "$SCHEMAS" ]; then
+    SCHEMAS=$(psql -t -A -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ('pg_catalog', 'information_schema');")
+  fi
+  # if no schemas are found, exit
+  [ -n "$SCHEMAS" ] || error_exit "No schemas found in the database"
+  # prompt to pick a schema
+  echo "Select a schema to repack"
+  select schema in $SCHEMAS; do
+    SCHEMAS=$schema
+    break
+  done
+  generate_repack_file "$SCHEMAS"
   load_tables_from_file
 fi
-[ -f "$TO_PROCESS" ] || error_exit "No $TO_PROCESS file found to process.. exiting"
+[ -f "$TO_REPACK" ] || error_exit "No $TO_REPACK file found to process.. exiting"
 
-echo "Repacking! Tables will be removed from the $TO_PROCESS files after they are successfully repacked. Follow along by tailing the log file: tail -f $LOGFILE"
+# prompt to continue
+echo "Press any key to continue or Ctrl+C to quit"
+read -r -n 1 -s
+
+echo "Repacking! Tables will be removed from the $TO_REPACK files after they are successfully repacked. Follow along by tailing the log file: tail -f $LOGFILE"
 for table in $TABLES; do
-  if time pg_repack -e -h "$PGHOST" -U "$PGUSER" -t "$table" -k "$PGDATABASE" 2>&1 | tee -a "$LOGFILE"; then
-    # remove the table from the to_process file
-    sed -i "/^$table|/d" "$TO_PROCESS"
+  start_time=$(date '+%Y-%m-%d %H:%M:%S')
+
+  # Run pg_repack and prepend timestamps, including capturing stderr
+  if pg_repack -e -h "$PGHOST" -U "$PGUSER" -t "$table" -k "$PGDATABASE" 2>&1 | prepend_timestamp > "$LOGFILE" 2>&1; then
+    end_time=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "${table} Start time: $start_time, End time: $end_time" | prepend_timestamp
+    # Remove the table from the TO_REPACK file
+    sed -i "/^$table|/d" "$TO_REPACK"
   else
-    error_exit "Failed to repack $table"
+    error_exit "Failed to repack $table" | prepend_timestamp
   fi
 done
 echo "Repack complete! All tables have been repacked."

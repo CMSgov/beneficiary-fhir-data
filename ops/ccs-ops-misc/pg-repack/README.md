@@ -2,9 +2,16 @@
 
 Over time our fhirdb Aurora clusters can become bloated with unused disk space, leading to performance issues and increased storage costs. `VACUUM FULL` requires exclusive locks on tables while it runs, so it is not something we run on a production db. Instead, we can use the `pg_repack` extension to reclaim this space without downtime and with minimal performance impact.
 
+Note: There was some confusion about "dynamic resizing" of Aurora storage, especially with the very misleading news announcement from AWS. [Automatic resizing](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Performance.html?ref=timescale.com#Aurora.Managing.Performance.StorageScaling):
+
+> applies to operations that physically remove or resize tablespaces within the cluster volume. Thus, it applies to SQL statements such as DROP TABLE, DROP DATABASE, TRUNCATE TABLE, and ALTER TABLE ... DROP PARTITION. It doesn't apply to deleting rows using the DELETE statement.
+
+This means that while Aurora will automatically reclaim space when you delete a table, it will not automatically reclaim space when you delete (or update) rows. This is where `pg_repack` comes in.
+
 ## How it works
 
 Essentially, `pg_repack` works by creating a new table with the same structure as the original table, and then copying the data from the original table to the new table. Once the data is copied, the old table is dropped and the new table is renamed to the original table's name. This process is done in a way that is transparent to the application, so it can be run on a live database without downtime (sub-second locks on each table).
+
 
 There is two components to `pg_repack`:
 
@@ -13,7 +20,16 @@ There is two components to `pg_repack`:
 
 The latter must be built from source, and the version of the binary must match the version of the extension installed on the cluster. These instructions will guide you through the process of building the binary and running the repack process.
 
-_NOTE: pg_repack needs to run using our database superuser!_
+## Notes
+
+- `pg_repack` _does_ take an exclusive lock on each table as it prepares to process, but only for a very short period of time (in the milliseconds)
+- `pg_repack` _does_ takes an ACCESS SHARE lock on each table while it is processing, this is the least restrictive lock and will not block reads or writes, but it will block DDL operations on the table (no migrations, schema changes, etc)
+- `pg_repack` _does_ requires roughly double the space of the original table to run, as it creates a new table and copies the data to it before dropping the original table (including indexes)
+- `pg_repack` needs to be run using the database superuser credentials
+
+## How long does it take?
+
+This will depend on the size of the tables and amount of bloat, but expect repacking all tables in BFD and RDA to take many hours to complete. Some tables take 30 minutes, some take hours. To prevent running out of space or causing performance issues, it's best to run the process on a dedicated ec2 instance over a period of days.
 
 ## Process Overview
 
