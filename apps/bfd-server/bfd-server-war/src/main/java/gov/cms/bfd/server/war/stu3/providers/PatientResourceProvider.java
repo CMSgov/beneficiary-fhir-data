@@ -187,45 +187,46 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
 
     Beneficiary beneficiary = null;
-    Timer.Context timerBeneQuery =
+    try (Timer.Context timerBeneQuery =
         CommonTransformerUtils.createMetricsTimer(
-            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id");
-    try {
-      beneficiary = entityManager.createQuery(criteria).getSingleResult();
+            metricRegistry, getClass().getSimpleName(), "query", "bene_by_id")) {
+      try {
+        beneficiary = entityManager.createQuery(criteria).getSingleResult();
 
-      // Add bene_id to MDC logs
-      LoggingUtils.logBeneIdToMdc(beneficiaryId);
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(1);
-    } catch (NoResultException e) {
-      // Add number of resources to MDC logs
-      LoggingUtils.logResourceCountToMdc(0);
+        // Add bene_id to MDC logs
+        LoggingUtils.logBeneIdToMdc(beneficiaryId);
+        // Add number of resources to MDC logs
+        LoggingUtils.logResourceCountToMdc(1);
+      } catch (NoResultException e) {
+        // Add number of resources to MDC logs
+        LoggingUtils.logResourceCountToMdc(0);
 
-      throw new ResourceNotFoundException(patientId);
-    } finally {
-      long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+        throw new ResourceNotFoundException(patientId);
+      } finally {
+        long beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
-      CommonTransformerUtils.recordQueryInMdc(
-          String.format(
-              "bene_by_id_include_%s",
-              String.join(
-                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
-          beneByIdQueryNanoSeconds,
-          beneficiary == null ? 0 : 1);
+        CommonTransformerUtils.recordQueryInMdc(
+            String.format(
+                "bene_by_id_include_%s",
+                String.join(
+                    "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
+            beneByIdQueryNanoSeconds,
+            beneficiary == null ? 0 : 1);
+      }
+
+      // Null out the unhashed HICNs if we're not supposed to be returning them
+      if (!requestHeader.isHICNinIncludeIdentifiers()) {
+        beneficiary.setHicnUnhashed(Optional.empty());
+      }
+
+      // Null out the unhashed MBIs if we're not supposed to be returning
+      if (!requestHeader.isMBIinIncludeIdentifiers()) {
+        beneficiary.setMedicareBeneficiaryId(Optional.empty());
+      }
+
+      Patient patient = beneficiaryTransformer.transform(beneficiary, requestHeader);
+      return patient;
     }
-
-    // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!requestHeader.isHICNinIncludeIdentifiers()) {
-      beneficiary.setHicnUnhashed(Optional.empty());
-    }
-
-    // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!requestHeader.isMBIinIncludeIdentifiers()) {
-      beneficiary.setMedicareBeneficiaryId(Optional.empty());
-    }
-
-    Patient patient = beneficiaryTransformer.transform(beneficiary, requestHeader);
-    return patient;
   }
 
   /**
@@ -587,6 +588,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneExists ? 1 : 0);
+      // Close the resource
+      matchingBeneExistsTimer.close();
     }
   }
 
@@ -648,6 +651,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "bene_ids_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneIds == null ? 0 : matchingBeneIds.size());
+      beneIdMatchesTimer.close();
     }
   }
 
@@ -689,6 +693,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "benes_by_year_month_part_d_contract_id",
           beneMatchesTimerQueryNanoSeconds,
           matchingBenes == null ? 0 : matchingBenes.size());
+      beneIdTimer.close();
     }
   }
 
@@ -890,6 +895,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "bene_by_" + hashType + "_" + hashType + "s_from_beneficiarieshistory",
           hicnsFromHistoryQueryNanoSeconds,
           matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
+      beneHistoryMatchesTimer.close();
     }
 
     // Then, find all Beneficiary records that match the hash or those BENE_IDs.
@@ -929,6 +935,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes.size());
+      timerHicnQuery.close();
     }
 
     // Then, if we found more than one distinct BENE_ID, or none, throw an error.
