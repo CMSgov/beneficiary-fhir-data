@@ -23,7 +23,11 @@ void deployTerraservice(Map args = [:]) {
     // this reference.
     // TODO: Replace this with a static ID when we switch from user-PATs to bfd-release
     githubTokenCredential = 'bfd-jenkins-pat-bcruz'
-    withCredentials([string(credentialsId: githubTokenCredential, variable: 'GITHUB_TOKEN')]) {
+    withCredentials([usernamePassword(
+        credentialsId: githubTokenCredential,
+        usernameVariable: 'GITHUB_USERNAME', 
+        passwordVariable: 'GITHUB_TOKEN'
+    )]) {
         dir("${workspace}/${serviceDirectory}") {
             // Debug output terraform version
             sh 'terraform --version'
