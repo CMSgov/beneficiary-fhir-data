@@ -463,11 +463,6 @@
                                     <classifier>v1-data-dictionary</classifier>
                                 </artifact>
                                 <artifact>
-                                    <file>${project.basedir}/../../../dist/V1-OpenAPI-${project.version}.yaml</file>
-                                    <type>yaml</type>
-                                    <classifier>v1-openapi</classifier>
-                                </artifact>
-                                <artifact>
                                     <file>${project.basedir}/../../../dist/V2-data-dictionary-${project.version}.csv</file>
                                     <type>csv</type>
                                     <classifier>v2-data-dictionary</classifier>
@@ -478,14 +473,14 @@
                                     <classifier>v2-data-dictionary</classifier>
                                 </artifact>
                                 <artifact>
-                                    <file>${project.basedir}/../../../dist/V2-OpenAPI-${project.version}.yaml</file>
-                                    <type>yaml</type>
-                                    <classifier>v2-openapi</classifier>
-                                </artifact>
-                                <artifact>
                                     <file>${project.basedir}/../../../dist/data-dictionary-${project.version}.xlsx</file>
                                     <type>xlsx</type>
                                     <classifier>data-dictionary</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/OpenAPI-${project.version}.yaml</file>
+                                    <type>yaml</type>
+                                    <classifier>openapi</classifier>
                                 </artifact>
                             </artifacts>
                             <skipAttach>${apidocgen.skip}</skipAttach>

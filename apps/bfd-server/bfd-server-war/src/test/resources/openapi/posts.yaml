@@ -1,7 +1,7 @@
 paths:
-  /ExplanationOfBenefit/_search:
+  /v2/fhir/ExplanationOfBenefit/_search:
     post:
-      tags: [ExplanationOfBenefit]
+      tags: [v2,ExplanationOfBenefit]
       summary: 'search-type: Search for ExplanationOfBenefits instances'
       description: This is a search type
       requestBody:
@@ -134,9 +134,9 @@ paths:
               schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
             application/fhir+xml:
               schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
-  /Patient/_search:
+  /v2/fhir/Patient/_search:
     post:
-      tags: [Patient]
+      tags: [v2,Patient]
       summary: 'search-type: Search for Patient instances'
       description: This is a search type
       requestBody:
