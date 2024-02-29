@@ -35,6 +35,7 @@ from errors import (
 )
 from s3 import S3EventType
 from sns import (
+    FileDiscoveredDetails,
     StatusNotification,
     TransferFailedDetails,
     TransferSuccessDetails,
@@ -77,6 +78,7 @@ def _safe_sftp_mkdir(sftp_client: paramiko.SFTPClient, dirpath: str):
 def _handle_s3_event(s3_object_key: str):
     s3_client = boto3.client("s3", config=BOTO_CONFIG)
     ssm_client = boto3.client("ssm", config=BOTO_CONFIG)
+    sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
 
     object_key_pattern = rf"^{BUCKET_ROOT_DIR}/([\w_]+)/([\w_]+)/(.*)$"
     if (
@@ -166,6 +168,28 @@ def _handle_s3_event(s3_object_key: str):
         staging_folder=recognized_file.staging_folder,
         input_folder=recognized_file.input_folder,
     )
+
+    file_discovered_time = datetime.utcnow()
+    bfd_topic = sns_resource.Topic(BFD_SNS_TOPIC_ARN)
+    discovered_notif = StatusNotification(
+        details=FileDiscoveredDetails(
+            partner=partner,
+            timestamp=file_discovered_time,
+            object_key=s3_object_key,
+            file_type=recognized_file.type,
+        )
+    )
+
+    send_notification(topic=bfd_topic, notification=discovered_notif)
+
+    topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
+    partner_topic = (
+        sns_resource.Topic(topic_arns_by_partner[partner])
+        if partner in topic_arns_by_partner
+        else None
+    )
+    if partner_topic:
+        send_notification(topic=partner_topic, notification=discovered_notif)
 
     logger.info(
         'Preconditions checked. Connecting to SFTP host "%s" as user "%s"',
@@ -294,21 +318,19 @@ def _handle_s3_event(s3_object_key: str):
             global_config.sftp_hostname,
         )
 
-        sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
-        bfd_topic = sns_resource.Topic(BFD_SNS_TOPIC_ARN)
-        notification = StatusNotification(
+        success_time = datetime.utcnow()
+        success_notif = StatusNotification(
             details=TransferSuccessDetails(
                 partner=partner,
                 timestamp=datetime.utcnow(),
                 object_key=s3_object_key,
                 file_type=recognized_file.type,
+                transfer_duration=round((success_time - file_discovered_time).total_seconds()),
             )
         )
-        send_notification(topic=bfd_topic, notification=notification)
-        topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
-        if partner in topic_arns_by_partner:
-            partner_topic = sns_resource.Topic(topic_arns_by_partner[partner])
-            send_notification(topic=partner_topic, notification=notification)
+        send_notification(topic=bfd_topic, notification=success_notif)
+        if partner_topic:
+            send_notification(topic=partner_topic, notification=success_notif)
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)

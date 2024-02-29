@@ -24,6 +24,7 @@ from sftp_outbound_transfer import (
 )
 from sftp_outbound_transfer import handler
 from sns import (
+    FileDiscoveredDetails,
     StatusNotification,
     TransferFailedDetails,
     TransferSuccessDetails,
@@ -336,16 +337,31 @@ class TestUpdatePipelineSlisHandler:
             handler(event=event, context=mock_lambda_context)
 
         mocked_calls = get_mock_send_notification_calls()
-        assert mock_send_notification.call_count == 2
-        assert all(
-            isinstance(actual_notification.details, TransferFailedDetails)
-            and actual_notification.details.error_name == SFTPConnectionError.__name__
-            for _, actual_notification in mocked_calls
+        assert mock_send_notification.call_count == 4
+        assert (
+            sum(
+                isinstance(actual_notification.details, FileDiscoveredDetails)
+                for _, actual_notification in mocked_calls
+            )
+            == 2
         )
-        assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)
-        assert any(
-            topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
-            for topic_arn, _ in mocked_calls
+        assert (
+            sum(
+                isinstance(actual_notification.details, TransferFailedDetails)
+                and actual_notification.details.error_name == SFTPConnectionError.__name__
+                for _, actual_notification in mocked_calls
+            )
+            == 2
+        )
+        assert (
+            sum(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls) == 2
+        )
+        assert (
+            sum(
+                topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
+                for topic_arn, _ in mocked_calls
+            )
+            == 2
         )
 
     def test_it_raises_sftp_transfer_error_and_sends_notifications_if_transfer_fails(self):
@@ -356,16 +372,31 @@ class TestUpdatePipelineSlisHandler:
             handler(event=event, context=mock_lambda_context)
 
         mocked_calls = get_mock_send_notification_calls()
-        assert mock_send_notification.call_count == 2
-        assert all(
-            isinstance(actual_notification.details, TransferFailedDetails)
-            and actual_notification.details.error_name == SFTPTransferError.__name__
-            for _, actual_notification in mocked_calls
+        assert mock_send_notification.call_count == 4
+        assert (
+            sum(
+                isinstance(actual_notification.details, FileDiscoveredDetails)
+                for _, actual_notification in mocked_calls
+            )
+            == 2
         )
-        assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)
-        assert any(
-            topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
-            for topic_arn, _ in mocked_calls
+        assert (
+            sum(
+                isinstance(actual_notification.details, TransferFailedDetails)
+                and actual_notification.details.error_name == SFTPTransferError.__name__
+                for _, actual_notification in mocked_calls
+            )
+            == 2
+        )
+        assert (
+            sum(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls) == 2
+        )
+        assert (
+            sum(
+                topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
+                for topic_arn, _ in mocked_calls
+            )
+            == 2
         )
 
     @mock.patch(f"{MODULE_UNDER_TEST}.{_safe_sftp_mkdir.__name__}")
@@ -431,17 +462,36 @@ class TestUpdatePipelineSlisHandler:
         assert actual_sftp_rename_data == expected_sftp_rename_data
 
         mocked_calls = get_mock_send_notification_calls()
-        assert mock_send_notification.call_count == 2
-        assert all(
-            isinstance(actual_notification.details, TransferSuccessDetails)
-            and actual_notification.details.object_key == DEFAULT_MOCK_OBJECT_KEY
-            and actual_notification.details.partner == DEFAULT_MOCK_PARTNER_NAME
-            and actual_notification.details.file_type
-            == DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].type
-            for _, actual_notification in mocked_calls
+        assert mock_send_notification.call_count == 4
+        assert (
+            sum(
+                isinstance(actual_notification.details, FileDiscoveredDetails)
+                and actual_notification.details.object_key == DEFAULT_MOCK_OBJECT_KEY
+                and actual_notification.details.partner == DEFAULT_MOCK_PARTNER_NAME
+                and actual_notification.details.file_type
+                == DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].type
+                for _, actual_notification in mocked_calls
+            )
+            == 2
         )
-        assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)
-        assert any(
-            topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
-            for topic_arn, _ in mocked_calls
+        assert (
+            sum(
+                isinstance(actual_notification.details, TransferSuccessDetails)
+                and actual_notification.details.object_key == DEFAULT_MOCK_OBJECT_KEY
+                and actual_notification.details.partner == DEFAULT_MOCK_PARTNER_NAME
+                and actual_notification.details.file_type
+                == DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].type
+                for _, actual_notification in mocked_calls
+            )
+            == 2
+        )
+        assert (
+            sum(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls) == 2
+        )
+        assert (
+            sum(
+                topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
+                for topic_arn, _ in mocked_calls
+            )
+            == 2
         )
