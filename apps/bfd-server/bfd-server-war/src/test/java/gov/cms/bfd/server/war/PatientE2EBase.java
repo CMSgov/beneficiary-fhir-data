@@ -765,6 +765,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
 
     List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
     additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION);
+    additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
 
     ServerTestUtils.assertAccessJsonHasMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys);
