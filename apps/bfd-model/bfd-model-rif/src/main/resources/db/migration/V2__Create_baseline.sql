@@ -2150,35 +2150,35 @@ CREATE OR REPLACE FUNCTION ccw.check_claims_mask(v_bene_id bigint) RETURNS integ
     V_HOSPICE        integer  := 64;   -- public static final int V_HOSPICE_HAS_DATA     = (1 << 6);
     V_PART_D         integer  := 128;  -- public static final int V_PART_D_HAS_DATA      = (1 << 7);
  BEGIN
-   PERFORM 1 FROM carrier_claims WHERE bene_id = v_bene_id limit 1;
+   PERFORM 1 FROM ccw.carrier_claims WHERE bene_id = v_bene_id limit 1;
    IF FOUND THEN
      v_rslt = V_CARRIER;
    END IF;
-   PERFORM 1 FROM inpatient_claims WHERE bene_id = v_bene_id limit 1;
+   PERFORM 1 FROM ccw.inpatient_claims WHERE bene_id = v_bene_id limit 1;
    IF FOUND THEN
      v_rslt = v_rslt + V_INPATIENT;
    END IF;
-   PERFORM 1 FROM outpatient_claims WHERE bene_id = v_bene_id limit 1;
+   PERFORM 1 FROM ccw.outpatient_claims WHERE bene_id = v_bene_id limit 1;
    IF FOUND THEN
      v_rslt = v_rslt + V_OUTPATIENT;
    END IF;
-   PERFORM 1 FROM snf_claims WHERE bene_id = v_bene_id limit 1;
+   PERFORM 1 FROM ccw.snf_claims WHERE bene_id = v_bene_id limit 1;
    IF FOUND THEN
      v_rslt = v_rslt + V_SNF;
    END IF;
-   PERFORM 1 FROM dme_claims WHERE bene_id = v_bene_id limit 1;
+   PERFORM 1 FROM ccw.dme_claims WHERE bene_id = v_bene_id limit 1;
    IF FOUND THEN
      v_rslt = v_rslt + V_DME;
    END IF;
-   PERFORM 1 FROM hha_claims WHERE bene_id = v_bene_id limit 1;
+   PERFORM 1 FROM ccw.hha_claims WHERE bene_id = v_bene_id limit 1;
    IF FOUND THEN
      v_rslt = v_rslt + V_HHA;
    END IF;
-   PERFORM 1 FROM hospice_claims WHERE bene_id = v_bene_id limit 1;
+   PERFORM 1 FROM ccw.hospice_claims WHERE bene_id = v_bene_id limit 1;
    IF FOUND THEN
      v_rslt = v_rslt + V_HOSPICE;
    END IF;
-   PERFORM 1 FROM partd_events WHERE bene_id = v_bene_id limit 1;
+   PERFORM 1 FROM ccw.partd_events WHERE bene_id = v_bene_id limit 1;
    IF FOUND THEN
      v_rslt = v_rslt + V_PART_D;
    END IF;
@@ -2201,8 +2201,6 @@ CREATE OR REPLACE FUNCTION ccw.track_bene_monthly_change() RETURNS trigger
         RETURN NULL; -- result is ignored since this is an AFTER trigger
      END;
  $func$;
-
-GRANT EXECUTE ON FUNCTION ccw.check_claims_mask(v_bene_id bigint)  TO bfd_writer_role;
 
 CREATE OR REPLACE TRIGGER audit_ccw_update
 	AFTER UPDATE ON ccw.beneficiary_monthly
