@@ -353,7 +353,7 @@ resource "aws_security_group" "sftp_outbound_transfer" {
 resource "aws_lambda_permission" "sftp_outbound_transfer_sns" {
   for_each = toset(local.eft_partners_with_outbound_enabled)
 
-  statement_id   = "${local.outbound_lambda_full_name}-allow-sns"
+  statement_id   = "${local.outbound_lambda_full_name}-allow-sns-${each.key}"
   action         = "lambda:InvokeFunction"
   function_name  = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
   principal      = "sns.amazonaws.com"
