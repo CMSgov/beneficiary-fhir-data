@@ -18,31 +18,38 @@ void deployTerraservice(Map args = [:]) {
     terraformVariables = tfVars.findAll { it.value != '' && it.value != null && it.value != "null" }
             .collect { k,v -> "\"-var=${k}=${v}\"" }.join(" ")
 
-    dir("${workspace}/${serviceDirectory}") {
-        // Debug output terraform version
-        sh 'terraform --version'
+    // This is _real_ bad, but the PAT credential ID changes each time the PAT is updated. We need
+    // to standardize on a name, otherwise whenever this PAT is updated we will need to also update
+    // this reference.
+    // TODO: Replace this with a static ID when we switch from user-PATs to bfd-release
+    githubTokenCredential = 'bfd-jenkins-pat-bcruz'
+    withCredentials([string(credentialsId: githubTokenCredential, variable: 'GITHUB_TOKEN')]) {
+        dir("${workspace}/${serviceDirectory}") {
+            // Debug output terraform version
+            sh 'terraform --version'
 
-        // Initilize terraform
-        sh 'terraform init -no-color'
+            // Initilize terraform
+            sh 'terraform init -no-color'
 
-        // - Attempt to create the desired workspace
-        // - Select the desired workspace
-        // NOTE: this is the terraform concept of workspace **NOT** Jenkins
-        sh """
-terraform workspace new "$bfdEnv" 2> /dev/null || true &&\
-terraform workspace select "$bfdEnv" -no-color
-"""
-        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+            // - Attempt to create the desired workspace
+            // - Select the desired workspace
+            // NOTE: this is the terraform concept of workspace **NOT** Jenkins
+            sh """
+    terraform workspace new "$bfdEnv" 2> /dev/null || true &&\
+    terraform workspace select "$bfdEnv" -no-color
+    """
+            echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
-        // Gathering terraform plan
-        sh "terraform plan ${terraformVariables} -no-color -out=tfplan"
+            // Gathering terraform plan
+            sh "terraform plan ${terraformVariables} -no-color -out=tfplan"
 
-        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+            echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 
-        // Apply Terraform plan
-        sh 'terraform apply -no-color -input=false tfplan'
+            // Apply Terraform plan
+            sh 'terraform apply -no-color -input=false tfplan'
 
-        echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+            echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
+        }
     }
 }
 
