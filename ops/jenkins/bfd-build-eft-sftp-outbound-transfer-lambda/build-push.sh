@@ -23,19 +23,16 @@ IMAGE_NAME_NODE="${PRIVATE_REGISTRY_URI}/bfd-mgmt-eft-sftp-outbound-transfer-lam
 DOCKER_TAG="${DOCKER_TAG_OVERRIDE:-"$BFD_PARENT_VERSION"}"
 DOCKER_TAG_LATEST="${DOCKER_TAG_LATEST_OVERRIDE:-"latest"}"
 
-aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+aws ecr-public get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin public.ecr.aws
+aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$PRIVATE_REGISTRY_URI"
 
 # Build tagged node image. Note that DOCKER_BUILDKIT is specified to enable Dockerfile local
 # Dockerignore, see https://stackoverflow.com/a/57774684
-DOCKER_BUILDKIT=1 docker build "$CONTEXT_DIR" \
+DOCKER_BUILDKIT=1 docker buildx build "$CONTEXT_DIR" \
   --file "$SCRIPT_DIR/Dockerfile" \
+  --provenance false \
   --target lambda \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG}" \
   --tag "${IMAGE_NAME_NODE}:${DOCKER_TAG_LATEST}" \
-  --platform "linux/amd64"
-
-# Get registry password and tell docker to login
-aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$PRIVATE_REGISTRY_URI"
-
-# Push image to ECR
-docker push "$IMAGE_NAME_NODE" --all-tags
+  --platform "linux/amd64" \
+  --push

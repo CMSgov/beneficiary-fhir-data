@@ -6,6 +6,8 @@ import gov.cms.bfd.AbstractLocalStackTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
+import software.amazon.awssdk.services.ssm.model.GetParametersByPathRequest;
 import software.amazon.awssdk.services.ssm.model.ParameterType;
 import software.amazon.awssdk.services.ssm.model.PutParameterRequest;
 
@@ -33,12 +36,28 @@ public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
                     AwsBasicCredentials.create(
                         localstack.getAccessKey(), localstack.getSecretKey())))
             .build();
+    Awaitility.await().atMost(30, TimeUnit.SECONDS).until(this::isReady);
   }
 
   /** Close the {@link SsmClient} after each test. */
   @AfterEach
   void tearDown() {
     ssmClient.close();
+  }
+
+  /**
+   * Verifies that the client is ready to make requests.
+   *
+   * @return true when then the client is ready
+   */
+  private boolean isReady() {
+    var request = GetParametersByPathRequest.builder().path("/").build();
+    try {
+      ssmClient.getParametersByPath(request);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   /** Upload some variables and verify that we can retrieve them. */

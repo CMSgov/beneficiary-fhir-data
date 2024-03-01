@@ -324,21 +324,22 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     criteria.where(wherePredicate);
 
     List<T> claimEntities = null;
-    Timer.Context timerEobQuery =
+    try (Timer.Context timerEobQuery =
         CommonTransformerUtils.createMetricsTimer(
             metricRegistry,
             metricRegistry.getClass().getSimpleName(),
             "query",
             "eobs_by_bene_id",
-            claimType.name().toLowerCase());
-    try {
-      claimEntities = entityManager.createQuery(criteria).getResultList();
-    } finally {
-      long eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
-      CommonTransformerUtils.recordQueryInMdc(
-          String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
-          eobsByBeneIdQueryNanoSeconds,
-          claimEntities == null ? 0 : claimEntities.size());
+            claimType.name().toLowerCase())) {
+      try {
+        claimEntities = entityManager.createQuery(criteria).getResultList();
+      } finally {
+        long eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
+        CommonTransformerUtils.recordQueryInMdc(
+            String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
+            eobsByBeneIdQueryNanoSeconds,
+            claimEntities == null ? 0 : claimEntities.size());
+      }
     }
 
     if (claimEntities != null && !serviceDate.isEmpty()) {

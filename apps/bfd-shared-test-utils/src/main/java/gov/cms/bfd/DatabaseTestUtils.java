@@ -150,9 +150,9 @@ public final class DatabaseTestUtils {
     Path testDatabasePropertiesPath = findWarServerTestDatabaseProperties();
     if (!Files.isRegularFile(testDatabasePropertiesPath)) return Optional.empty();
 
-    try {
+    try (FileReader fileReader = new FileReader(testDatabasePropertiesPath.toFile())) {
       Properties testDbProps = new Properties();
-      testDbProps.load(new FileReader(testDatabasePropertiesPath.toFile()));
+      testDbProps.load(fileReader);
       return Optional.of(testDbProps);
     } catch (IOException e) {
       throw new UncheckedIOException(e);

@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.security.auth.x500.X500Principal;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -48,6 +50,17 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
 
   /** Prefix for responses. */
   private static final String RESPONSE_PREFIX = "response";
+
+  /** obfuscated replacement for MBI. */
+  private static final String OBFUSCATED_MBI = "us-mbi|*********";
+
+  /** Regex Pattern to check for an /Patient request end-point. */
+  private static final Pattern PATIENT_REQUEST_REGEX = Pattern.compile("fhir/Patient");
+
+  /** Regex Pattern to check for an MBI. */
+  private static final Pattern MBI_REGEX =
+      Pattern.compile(
+          "us-mbi\\|[1-9][^SLOIBZsloibz0-9][^SLOIBZsloibz][0-9]-?[^SLOIBZsloibz0-9][^SLOIBZsloibz][0-9]-?[^SLOIBZsloibz0-9][^SLOIBZsloibz0-9][0-9][0-9]");
 
   /** {@inheritDoc} */
   @Override
@@ -117,9 +130,22 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
           servletRequest.getRequestURL().toString());
       BfdMDC.put(
           BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "uri"), servletRequest.getRequestURI());
-      BfdMDC.put(
-          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "query_string"),
-          servletRequest.getQueryString());
+
+      Matcher matcher = PATIENT_REQUEST_REGEX.matcher(servletRequest.getRequestURI());
+      // Only /Patient supports us-mbi identifier
+      if (matcher.find()
+          && servletRequest.getQueryString() != null
+          && servletRequest.getQueryString().length() > 0) {
+        // protect vs. logging an MBI_NUM
+        matcher = MBI_REGEX.matcher(servletRequest.getQueryString());
+        String uriString =
+            matcher.find() ? matcher.replaceAll(OBFUSCATED_MBI) : servletRequest.getQueryString();
+        BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "query_string"), uriString);
+      } else {
+        BfdMDC.put(
+            BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "query_string"),
+            servletRequest.getQueryString());
+      }
       BfdMDC.put(
           BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "clientSSL", "DN"),
           getClientSslPrincipalDistinguishedName(servletRequest));

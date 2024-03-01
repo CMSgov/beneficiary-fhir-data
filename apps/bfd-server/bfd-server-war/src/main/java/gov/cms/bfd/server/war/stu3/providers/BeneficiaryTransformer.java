@@ -58,185 +58,186 @@ final class BeneficiaryTransformer {
    */
   public Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
     Objects.requireNonNull(beneficiary);
-    Timer.Context timer =
+    try (Timer.Context timer =
         CommonTransformerUtils.createMetricsTimer(
-            metricRegistry, this.getClass().getSimpleName(), "transform");
+            metricRegistry, this.getClass().getSimpleName(), "transform")) {
 
-    Patient patient = new Patient();
+      Patient patient = new Patient();
 
-    /*
-     * Notify end users when they receive Patient records impacted by
-     * https://jira.cms.gov/browse/BFD-1566. See the documentation on
-     * LoadAppOptions.isFilteringNonNullAndNon2023Benes() for details.
-     */
-    if (!beneficiary.getSkippedRifRecords().isEmpty()) {
-      patient
-          .getMeta()
-          .addTag(
-              TransformerConstants.CODING_SYSTEM_BFD_TAGS,
-              TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
-              TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY);
-    }
-
-    patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
-    patient.addIdentifier(
-        TransformerUtils.createIdentifier(
-            CcwCodebookVariable.BENE_ID, String.valueOf(beneficiary.getBeneficiaryId())));
-
-    // Add hicn-hash identifier ONLY if raw hicn is requested.
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      patient
-          .addIdentifier()
-          .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
-          .setValue(beneficiary.getHicn());
-    }
-
-    if (beneficiary.getMbiHash().isPresent()) {
-      Period mbiPeriod = new Period();
-
-      if (beneficiary.getMbiEffectiveDate().isPresent()) {
-        TransformerUtils.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
+      /*
+       * Notify end users when they receive Patient records impacted by
+       * https://jira.cms.gov/browse/BFD-1566. See the documentation on
+       * LoadAppOptions.isFilteringNonNullAndNon2023Benes() for details.
+       */
+      if (!beneficiary.getSkippedRifRecords().isEmpty()) {
+        patient
+            .getMeta()
+            .addTag(
+                TransformerConstants.CODING_SYSTEM_BFD_TAGS,
+                TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
+                TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY);
       }
 
-      if (beneficiary.getMbiObsoleteDate().isPresent()) {
-        TransformerUtils.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
-      }
+      patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
+      patient.addIdentifier(
+          TransformerUtils.createIdentifier(
+              CcwCodebookVariable.BENE_ID, String.valueOf(beneficiary.getBeneficiaryId())));
 
-      if (mbiPeriod.hasStart() || mbiPeriod.hasEnd()) {
+      // Add hicn-hash identifier ONLY if raw hicn is requested.
+      if (requestHeader.isHICNinIncludeIdentifiers()) {
         patient
             .addIdentifier()
-            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
-            .setValue(beneficiary.getMbiHash().get())
-            .setPeriod(mbiPeriod);
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
+            .setValue(beneficiary.getHicn());
+      }
+
+      if (beneficiary.getMbiHash().isPresent()) {
+        Period mbiPeriod = new Period();
+
+        if (beneficiary.getMbiEffectiveDate().isPresent()) {
+          TransformerUtils.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
+        }
+
+        if (beneficiary.getMbiObsoleteDate().isPresent()) {
+          TransformerUtils.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
+        }
+
+        if (mbiPeriod.hasStart() || mbiPeriod.hasEnd()) {
+          patient
+              .addIdentifier()
+              .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+              .setValue(beneficiary.getMbiHash().get())
+              .setPeriod(mbiPeriod);
+        } else {
+          patient
+              .addIdentifier()
+              .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+              .setValue(beneficiary.getMbiHash().get());
+        }
+      }
+
+      Extension currentIdentifier =
+          TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
+      Extension historicalIdentifier =
+          TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
+      // Add lastUpdated
+      TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
+
+      if (requestHeader.isHICNinIncludeIdentifiers()) {
+        Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
+
+        if (hicnUnhashedCurrent.isPresent()) {
+          addUnhashedIdentifier(
+              patient,
+              hicnUnhashedCurrent.get(),
+              TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
+              currentIdentifier);
+        }
+
+        List<String> unhashedHicns = new ArrayList<>();
+        for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
+          Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
+          if (hicnUnhashedHistoric.isPresent()) {
+            unhashedHicns.add(hicnUnhashedHistoric.get());
+          }
+          TransformerUtils.updateMaxLastUpdated(patient, beneHistory.getLastUpdated());
+        }
+
+        List<String> unhashedHicnsNoDupes = unhashedHicns.stream().distinct().toList();
+        for (String hicn : unhashedHicnsNoDupes) {
+          addUnhashedIdentifier(
+              patient,
+              hicn,
+              TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
+              historicalIdentifier);
+        }
+      }
+
+      if (requestHeader.isMBIinIncludeIdentifiers()) {
+        Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
+
+        if (mbiUnhashedCurrent.isPresent()) {
+          addUnhashedIdentifier(
+              patient,
+              mbiUnhashedCurrent.get(),
+              TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+              currentIdentifier);
+        }
+        addHistoricalMbiExtensions(patient, beneficiary, historicalIdentifier);
+      }
+
+      // support header includeAddressFields from downstream components e.g. BB2
+      // per requirement of BFD-379, BB2 always send header includeAddressFields = False
+      Boolean addrHdrVal =
+          requestHeader.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
+      if (addrHdrVal != null && addrHdrVal) {
+        patient
+            .addAddress()
+            .setState(beneficiary.getStateCode())
+            .setPostalCode(beneficiary.getPostalCode())
+            .setCity(beneficiary.getDerivedCityName().orElse(null))
+            .addLine(beneficiary.getDerivedMailingAddress1().orElse(null))
+            .addLine(beneficiary.getDerivedMailingAddress2().orElse(null))
+            .addLine(beneficiary.getDerivedMailingAddress3().orElse(null))
+            .addLine(beneficiary.getDerivedMailingAddress4().orElse(null))
+            .addLine(beneficiary.getDerivedMailingAddress5().orElse(null))
+            .addLine(beneficiary.getDerivedMailingAddress6().orElse(null));
       } else {
         patient
-            .addIdentifier()
-            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
-            .setValue(beneficiary.getMbiHash().get());
-      }
-    }
-
-    Extension currentIdentifier =
-        TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
-    Extension historicalIdentifier =
-        TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
-    // Add lastUpdated
-    TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
-
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
-
-      if (hicnUnhashedCurrent.isPresent()) {
-        addUnhashedIdentifier(
-            patient,
-            hicnUnhashedCurrent.get(),
-            TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
-            currentIdentifier);
+            .addAddress()
+            .setState(beneficiary.getStateCode())
+            .setPostalCode(beneficiary.getPostalCode());
       }
 
-      List<String> unhashedHicns = new ArrayList<>();
-      for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
-        Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
-        if (hicnUnhashedHistoric.isPresent()) {
-          unhashedHicns.add(hicnUnhashedHistoric.get());
-        }
-        TransformerUtils.updateMaxLastUpdated(patient, beneHistory.getLastUpdated());
+      if (beneficiary.getBirthDate() != null) {
+        patient.setBirthDate(CommonTransformerUtils.convertToDate(beneficiary.getBirthDate()));
       }
 
-      List<String> unhashedHicnsNoDupes = unhashedHicns.stream().distinct().toList();
-      for (String hicn : unhashedHicnsNoDupes) {
-        addUnhashedIdentifier(
-            patient,
-            hicn,
-            TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
-            historicalIdentifier);
+      // Death Date
+      if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
+        patient.setDeceased(
+            new DateTimeType(
+                CommonTransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+                TemporalPrecisionEnum.DAY));
       }
-    }
 
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
-
-      if (mbiUnhashedCurrent.isPresent()) {
-        addUnhashedIdentifier(
-            patient,
-            mbiUnhashedCurrent.get(),
-            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
-            currentIdentifier);
+      char sex = beneficiary.getSex();
+      if (sex == Sex.MALE.getCode()) {
+        patient.setGender((AdministrativeGender.MALE));
+      } else if (sex == Sex.FEMALE.getCode()) {
+        patient.setGender((AdministrativeGender.FEMALE));
+      } else {
+        patient.setGender((AdministrativeGender.UNKNOWN));
       }
-      addHistoricalMbiExtensions(patient, beneficiary, historicalIdentifier);
+
+      if (beneficiary.getRace().isPresent()) {
+        patient.addExtension(
+            TransformerUtils.createExtensionCoding(
+                patient, CcwCodebookVariable.RACE, beneficiary.getRace().get()));
+      }
+
+      HumanName name =
+          patient
+              .addName()
+              .addGiven(beneficiary.getNameGiven())
+              .setFamily(beneficiary.getNameSurname())
+              .setUse(HumanName.NameUse.USUAL);
+      if (beneficiary.getNameMiddleInitial().isPresent()) {
+        name.addGiven(String.valueOf(beneficiary.getNameMiddleInitial().get()));
+      }
+
+      // The reference year of the enrollment data
+      if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+        patient.addExtension(
+            TransformerUtils.createExtensionDate(
+                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+
+        addMedicaidDualEligibility(patient, beneficiary);
+      }
+
+      timer.stop();
+      return patient;
     }
-
-    // support header includeAddressFields from downstream components e.g. BB2
-    // per requirement of BFD-379, BB2 always send header includeAddressFields = False
-    Boolean addrHdrVal =
-        requestHeader.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
-    if (addrHdrVal != null && addrHdrVal) {
-      patient
-          .addAddress()
-          .setState(beneficiary.getStateCode())
-          .setPostalCode(beneficiary.getPostalCode())
-          .setCity(beneficiary.getDerivedCityName().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress1().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress2().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress3().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress4().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress5().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress6().orElse(null));
-    } else {
-      patient
-          .addAddress()
-          .setState(beneficiary.getStateCode())
-          .setPostalCode(beneficiary.getPostalCode());
-    }
-
-    if (beneficiary.getBirthDate() != null) {
-      patient.setBirthDate(CommonTransformerUtils.convertToDate(beneficiary.getBirthDate()));
-    }
-
-    // Death Date
-    if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
-      patient.setDeceased(
-          new DateTimeType(
-              CommonTransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
-              TemporalPrecisionEnum.DAY));
-    }
-
-    char sex = beneficiary.getSex();
-    if (sex == Sex.MALE.getCode()) {
-      patient.setGender((AdministrativeGender.MALE));
-    } else if (sex == Sex.FEMALE.getCode()) {
-      patient.setGender((AdministrativeGender.FEMALE));
-    } else {
-      patient.setGender((AdministrativeGender.UNKNOWN));
-    }
-
-    if (beneficiary.getRace().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient, CcwCodebookVariable.RACE, beneficiary.getRace().get()));
-    }
-
-    HumanName name =
-        patient
-            .addName()
-            .addGiven(beneficiary.getNameGiven())
-            .setFamily(beneficiary.getNameSurname())
-            .setUse(HumanName.NameUse.USUAL);
-    if (beneficiary.getNameMiddleInitial().isPresent()) {
-      name.addGiven(String.valueOf(beneficiary.getNameMiddleInitial().get()));
-    }
-
-    // The reference year of the enrollment data
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionDate(
-              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
-
-      addMedicaidDualEligibility(patient, beneficiary);
-    }
-
-    timer.stop();
-    return patient;
   }
 
   /**

@@ -336,6 +336,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
           String.format("eobs_by_bene_id_%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
           claimEntities == null ? 0 : claimEntities.size());
+      timerEobQuery.close();
     }
 
     if (claimEntities != null && !serviceDate.isEmpty()) {

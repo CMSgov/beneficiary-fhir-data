@@ -170,7 +170,7 @@ public final class PipelineTestUtils {
             RdaFissClaim.class,
             RdaFissProcCode.class);
 
-    try (Connection connection = pipelineApplicationState.getPooledDataSource().getConnection(); ) {
+    try (Connection connection = pipelineApplicationState.getPooledDataSource().getConnection()) {
       // Disable auto-commit and remember the default schema name.
       connection.setAutoCommit(false);
       Optional<String> defaultSchemaName = Optional.ofNullable(connection.getSchema());

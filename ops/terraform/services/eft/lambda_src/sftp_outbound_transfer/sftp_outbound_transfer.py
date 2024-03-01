@@ -1,13 +1,10 @@
 import json
-import logging
 import os
 import re
 import socket
 import sys
 from base64 import b64decode
-from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum, StrEnum, auto
+from datetime import datetime, timezone
 from io import StringIO
 from typing import Any
 from urllib.parse import unquote
@@ -16,6 +13,9 @@ import boto3
 import botocore
 import botocore.exceptions
 import paramiko
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
 from paramiko.ssh_exception import (
     AuthenticationException,
@@ -24,10 +24,31 @@ from paramiko.ssh_exception import (
     SSHException,
 )
 
+from errors import (
+    BaseTransferError,
+    InvalidObjectKeyError,
+    InvalidPendingDirError,
+    SFTPConnectionError,
+    SFTPTransferError,
+    UnknownPartnerError,
+    UnrecognizedFileError,
+)
+from s3 import S3EventType
+from sns import (
+    StatusNotification,
+    TransferFailedDetails,
+    TransferSuccessDetails,
+    UnknownErrorDetails,
+    send_notification,
+)
+from ssm import GlobalSsmConfig, PartnerSsmConfig
+
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 BUCKET = os.environ.get("BUCKET", "")
 BUCKET_ROOT_DIR = os.environ.get("BUCKET_ROOT_DIR", "")
+BFD_SNS_TOPIC_ARN = os.environ.get("BFD_SNS_TOPIC_ARN", "")
+SNS_TOPIC_ARNS_BY_PARTNER_JSON = os.environ.get("SNS_TOPIC_ARNS_BY_PARTNER_JSON", "{}")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -37,329 +58,133 @@ BOTO_CONFIG = Config(
     },
 )
 
-logging.basicConfig(level=logging.INFO, force=True)
-logger = logging.getLogger()
-try:
-    s3_client = boto3.client("s3", config=BOTO_CONFIG)  # type: ignore
-    ssm_client = boto3.client("ssm", config=BOTO_CONFIG)  # type: ignore
-except Exception:
-    logger.error(
-        "Unrecoverable exception occurred when attempting to create boto3 clients/resources: ",
-        exc_info=True,
-    )
-    sys.exit(0)
+logger = Logger()
 
 
-class S3EventType(str, Enum):
-    """Represents the types of S3 events that this Lambda is invoked by and supports. The value of
-    each Enum is a substring that is matched for on the "eventName" property of an invocation
-    event"""
-
-    OBJECT_CREATED = "ObjectCreated"
-
-
-class FileTransferError(StrEnum):
-    UNRECOGNIZED_FILE = auto()
-    SFTP_CONNECTION_ERROR = auto()
-    SFTP_TRANSFER_ERROR = auto()
-
-@dataclass(frozen=True, eq=True)
-class GlobalSsmConfig:
-    sftp_connect_timeout: int
-    sftp_hostname: str
-    sftp_host_pub_key: str
-    sftp_username: str
-    sftp_user_priv_key: str
-
-    @classmethod
-    def from_ssm(cls) -> "GlobalSsmConfig":
-        sftp_connect_timeout = int(get_ssm_parameter(
-            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/timeout", with_decrypt=True
-        ))
-        sftp_hostname = get_ssm_parameter(
-            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/host", with_decrypt=True
-        )
-        sftp_host_pub_key = get_ssm_parameter(
-            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/trusted_host_key", with_decrypt=True
-        )
-        sftp_username = get_ssm_parameter(
-            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/username", with_decrypt=True
-        )
-        sftp_user_priv_key = get_ssm_parameter(
-            f"/bfd/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sftp/user_priv_key", with_decrypt=True
-        )
-
-        return GlobalSsmConfig(
-            sftp_connect_timeout=sftp_connect_timeout,
-            sftp_hostname=sftp_hostname,
-            sftp_host_pub_key=sftp_host_pub_key,
-            sftp_username=sftp_username,
-            sftp_user_priv_key=sftp_user_priv_key
-        )
+def _safe_sftp_mkdir(sftp_client: paramiko.SFTPClient, dirpath: str):
+    current_dir = ""
+    for dir_part in dirpath.split("/"):
+        if not dir_part:
+            continue
+        current_dir += f"/{dir_part}"
+        try:
+            sftp_client.listdir(current_dir)
+        except IOError:
+            logger.info("%s does not exist, creating it", current_dir)
+            sftp_client.mkdir(current_dir)
 
 
-@dataclass(frozen=True, eq=True)
-class RecognizedFile:
-    filename_pattern: str
-    destination_folder: str
-
-
-@dataclass(frozen=True, eq=True)
-class PartnerSsmConfig:
-    partner: str
-    bucket_home_dir: str
-    pending_files_dir: str
-    sent_files_dir: str
-    failed_files_dir: str
-    recognized_files: list[RecognizedFile]
-
-    @classmethod
-    def from_partner(cls, partner: str) -> "PartnerSsmConfig":
-        bucket_home_dir = get_ssm_parameter(
-            f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/bucket_home_dir", with_decrypt=True
-        )
-        pending_files_dir = get_ssm_parameter(
-            f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/pending_dir", with_decrypt=True
-        )
-        sent_files_dir = get_ssm_parameter(
-            f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/sent_dir", with_decrypt=True
-        )
-        failed_files_dir = get_ssm_parameter(
-            f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/failed_dir", with_decrypt=True
-        )
-        recognized_files = [
-            RecognizedFile(**file_dict)
-            for file_dict in json.loads(
-                get_ssm_parameter(
-                    f"/{partner}/{BFD_ENVIRONMENT}/eft/sensitive/outbound/recognized_files_json",
-                    with_decrypt=True,
-                )
-            )
-        ]
-
-        return PartnerSsmConfig(
-            partner=partner,
-            bucket_home_dir=bucket_home_dir,
-            pending_files_dir=pending_files_dir,
-            sent_files_dir=sent_files_dir,
-            failed_files_dir=failed_files_dir,
-            recognized_files=recognized_files,
-        )
-
-    @property
-    def bucket_home_path(self):
-        return f"{BUCKET_ROOT_DIR}/{self.bucket_home_dir}"
-
-    @property
-    def pending_files_full_path(self):
-        return f"{self.bucket_home_path}/{self.pending_files_dir}"
-
-    @property
-    def sent_files_full_path(self):
-        return f"{self.bucket_home_path}/{self.sent_files_dir}"
-
-    @property
-    def failed_files_full_path(self):
-        return f"{self.bucket_home_path}/{self.failed_files_dir}"
-
-
-def get_ssm_parameter(name: str, with_decrypt: bool = False) -> str:
-    response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
-
-    try:
-        return response["Parameter"]["Value"]
-    except KeyError as exc:
-        raise ValueError(f'SSM parameter "{name}" not found or empty') from exc
-
-
-def move_s3_object(object_key: str, destination: str) -> None:
-    try:
-        s3_client.copy(
-            CopySource={"Bucket": BUCKET, "Key": object_key},
-            Bucket=BUCKET,
-            Key=destination,
-        )
-        s3_client.delete_object(Bucket=BUCKET, Key=object_key)
-    except botocore.exceptions.ClientError as exc:
-        raise RuntimeError(f"Unable to copy or delete {object_key}") from exc
-
-
-def handler(event: Any, context: Any):
-    if not all(
-        [
-            REGION,
-            BFD_ENVIRONMENT,
-            BUCKET,
-            BUCKET_ROOT_DIR,
-        ]
-    ):
-        logger.error("Not all necessary environment variables were defined, exiting...")
-        return
-
-    try:
-        record: dict[str, Any] = event["Records"][0]
-    except KeyError:
-        logger.error("The incoming event was invalid: ", exc_info=True)
-        return
-    except IndexError:
-        logger.error("Invalid event notification, no records found: ", exc_info=True)
-        return
-
-    try:
-        sns_message_json: str = record["Sns"]["Message"]
-        sns_message = json.loads(sns_message_json)
-    except KeyError:
-        logger.error("No message found in SNS notification: ", exc_info=True)
-        return
-    except json.JSONDecodeError:
-        logger.error("SNS message body was not valid JSON: ", exc_info=True)
-        return
-
-    try:
-        s3_event = sns_message["Records"][0]
-    except KeyError:
-        logger.error("Invalid S3 event, no records found: ", exc_info=True)
-        return
-    except IndexError:
-        logger.error("Invalid event notification, no records found: ", exc_info=True)
-        return
-
-    try:
-        event_type_str = s3_event["eventName"]
-        event_type: S3EventType
-        if S3EventType.OBJECT_CREATED in event_type_str:
-            event_type = S3EventType.OBJECT_CREATED
-        else:
-            logger.error("Event type %s is unsupported. Exiting...", event_type_str)
-            return
-    except KeyError:
-        logger.error(
-            "The incoming event record did not contain the type of S3 event: ", exc_info=True
-        )
-        return
-
-    try:
-        file_key: str = s3_event["s3"]["object"]["key"]
-        decoded_file_key = unquote(file_key)
-    except KeyError:
-        logger.error("No bucket file found in event notification: ", exc_info=True)
-        return
-
-    # Log the various bits of data extracted from the invoking event to aid debugging:
-    logger.info("Invoked at: %s UTC", datetime.utcnow().isoformat())
-    logger.info("S3 Object Key: %s", decoded_file_key)
-    logger.info("S3 Event Type: %s, Specific Event Name: %s", event_type.name, event_type_str)
+def _handle_s3_event(s3_object_key: str):
+    s3_client = boto3.client("s3", config=BOTO_CONFIG)
+    ssm_client = boto3.client("ssm", config=BOTO_CONFIG)
 
     object_key_pattern = rf"^{BUCKET_ROOT_DIR}/([\w_]+)/([\w_]+)/(.*)$"
-    match = re.search(
-        pattern=object_key_pattern,
-        string=decoded_file_key,
-        flags=re.IGNORECASE,
-    )
-    if match is None:
-        logger.error(
-            "Invocation event unsupported, object key does not match expected pattern: %s. See log"
-            " for additional detail. Exiting...",
-            object_key_pattern,
+    if (
+        match := re.search(
+            pattern=object_key_pattern,
+            string=s3_object_key,
+            flags=re.IGNORECASE,
         )
-        return
+    ) is None:
+        raise InvalidObjectKeyError(
+            message=(
+                f"Invocation event invalid, object key {s3_object_key} does not match expected"
+                f" pattern: {object_key_pattern}"
+            ),
+            s3_object_key=s3_object_key,
+            partner=None,
+        )
 
-    partner = match.group(1)
+    global_config = GlobalSsmConfig.from_ssm(ssm_client=ssm_client, env=BFD_ENVIRONMENT)
+
+    partner_home_dir = match.group(1)
+    try:
+        partner = global_config.home_dirs_to_partner[partner_home_dir]
+    except KeyError as exc:
+        raise UnknownPartnerError(
+            message=(
+                f"{partner_home_dir} does not match configured home directory for any enrolled"
+                " partner"
+            ),
+            s3_object_key=s3_object_key,
+            partner=None,
+        ) from exc
     subfolder = match.group(2)
     filename = match.group(3)
 
-    try: 
-        global_config = GlobalSsmConfig.from_ssm()
-    except (ValueError, botocore.exceptions.ClientError):
-        logger.error(
-            "An unrecoverable error occurred when attempting to retrieve "
-            "global outbound SSM configuration: ",
-            exc_info=True,
-        )
-        return
+    logger.append_keys(partner=partner, filename=filename)
 
-    try:
-        partner_config = PartnerSsmConfig.from_partner(partner=partner)
-    except (ValueError, botocore.exceptions.ClientError):
-        logger.error(
-            "An unrecoverable error occurred when attempting to retrieve SSM configuration for"
-            " partner %s: ",
-            partner,
-            exc_info=True,
-        )
-        return
-
+    partner_config = PartnerSsmConfig.from_ssm(
+        ssm_client=ssm_client, partner=partner, env=BFD_ENVIRONMENT
+    )
     if subfolder != partner_config.pending_files_dir:
-        logger.error(
-            "%s pending files directory, %s, does not match object key: %s, exiting...",
-            partner,
-            partner_config.pending_files_dir,
-            decoded_file_key,
+        # This should be impossible, as the S3 Event Notification configuration is configured to
+        # send notifications only from valid pending paths
+        raise InvalidPendingDirError(
+            message=(
+                f"{partner}'s pending files directory, {partner_config.pending_files_dir}, does not"
+                f" match event notification object key: {s3_object_key}"
+            ),
+            s3_object_key=s3_object_key,
+            partner=partner,
         )
-        return
+    logger.append_keys(
+        sftp_hostname=global_config.sftp_hostname, sftp_username=global_config.sftp_username
+    )
 
-    destination_folder = next(
+    recognized_file = next(
         (
-            recognized_file.destination_folder
+            recognized_file
             for recognized_file in partner_config.recognized_files
             if re.search(pattern=recognized_file.filename_pattern, string=filename)
         ),
         None,
     )
-    if not destination_folder:
-        logger.error(
-            "The file %s did not match any recognized files (%s) for partner %s",
-            filename,
-            str(partner_config.recognized_files),
-            partner,
+    if not recognized_file:
+        raise UnrecognizedFileError(
+            message=f"The file {filename} did not match any of {partner}'s recognized files: "
+            + json.dumps(
+                [
+                    {"type": file.type, "pattern": file.filename_pattern}
+                    for file in partner_config.recognized_files
+                ]
+            ),
+            s3_object_key=s3_object_key,
+            partner=partner,
         )
-        failed_full_path = "/".join(
-            [
-                partner_config.failed_files_full_path,
-                FileTransferError.UNRECOGNIZED_FILE,
-                filename,
-            ]
-        )
-        logger.error(
-            'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
-            decoded_file_key,
-            failed_full_path,
-            BUCKET,
-        )
-
-        try:
-            move_s3_object(object_key=decoded_file_key, destination=failed_full_path)
-        except RuntimeError:
-            logger.error(
-                "Unrecoverable error occurred when attempting to move %s to %s",
-                decoded_file_key,
-                failed_full_path,
-                exc_info=True,
-            )
-        return
 
     logger.info(
-        'Preconditions checked. Connecting to SFTP host "%s" as user "%s" with provided private key'
-        " and server host public key...",
+        "%s recognized as %s file type using pattern %s; will be sent to %s",
+        filename,
+        recognized_file.type,
+        recognized_file.filename_pattern,
+        global_config.sftp_hostname,
+    )
+    logger.append_keys(
+        file_type=recognized_file.type,
+        matched_pattern=recognized_file.filename_pattern,
+        staging_folder=recognized_file.staging_folder,
+        input_folder=recognized_file.input_folder,
+    )
+
+    logger.info(
+        'Preconditions checked. Connecting to SFTP host "%s" as user "%s"',
         global_config.sftp_hostname,
         global_config.sftp_username,
     )
-
     with paramiko.SSHClient() as ssh_client:
         try:
             sftp_host_key = paramiko.RSAKey(
-                data=b64decode(
-                    global_config.sftp_host_pub_key.removeprefix("ssh-rsa ")
-                )
+                data=b64decode(global_config.sftp_host_pub_key.removeprefix("ssh-rsa").strip())
             )
             sftp_priv_key = paramiko.RSAKey.from_private_key(
-                StringIO(global_config.sftp_user_priv_key)
+                file_obj=StringIO(global_config.sftp_user_priv_key)
             )
             ssh_client.get_host_keys().add(
                 hostname=global_config.sftp_hostname, keytype="ssh-rsa", key=sftp_host_key
             )
             ssh_client.connect(
-                global_config.sftp_hostname,
+                hostname=global_config.sftp_hostname,
                 username=global_config.sftp_username,
                 pkey=sftp_priv_key,
                 look_for_keys=False,
@@ -372,113 +197,200 @@ def handler(event: Any, context: Any):
             socket.error,
             SSHException,
             NoValidConnectionsError,
-        ):
-            logger.error(
-                "An unrecoverable exception occurred when attempting to connect to SFTP server %s",
-                global_config.sftp_hostname,
-                exc_info=True,
-            )
-            failed_full_path = "/".join(
-                [
-                    partner_config.failed_files_full_path,
-                    FileTransferError.SFTP_CONNECTION_ERROR,
-                    filename,
-                ]
-            )
-            logger.error(
-                'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
-                decoded_file_key,
-                failed_full_path,
-                BUCKET,
-            )
-
-            try:
-                move_s3_object(object_key=decoded_file_key, destination=failed_full_path)
-            except RuntimeError:
-                logger.error(
-                    "Unrecoverable error occurred when attempting to move %s to %s",
-                    decoded_file_key,
-                    failed_full_path,
-                    exc_info=True,
-                )
-            return
+        ) as exc:
+            raise SFTPConnectionError(
+                message=(
+                    "An unrecoverable error occurred when attempting to connect to CMS EFT SFTP"
+                    " server"
+                ),
+                s3_object_key=s3_object_key,
+                partner=partner,
+            ) from exc
 
         logger.info(
-            "Connected successfully to %s. Attempting to upload %s to %s...",
+            "Connected successfully to %s. Starting upload of %s to %s on %s",
             global_config.sftp_hostname,
             filename,
-            destination_folder,
+            recognized_file.input_folder,
+            global_config.sftp_hostname,
         )
 
         try:
             with ssh_client.open_sftp() as sftp_client:
-                current_dir = ""
-                for dir_part in destination_folder.split("/"):
-                    if not dir_part:
-                        continue
-                    current_dir += f"/{dir_part}"
-                    try:
-                        sftp_client.listdir(current_dir)
-                    except IOError:
-                        logger.info("%s does not exist, creating it", current_dir)
-                        sftp_client.mkdir(current_dir)
-
-                with sftp_client.open(f"{destination_folder}/{filename}", "wb", 32768) as f:
-                    s3_client.download_fileobj(Bucket=BUCKET, Key=decoded_file_key, Fileobj=f)  # type: ignore
-        except (SSHException, IOError, botocore.exceptions.ClientError):
-            logger.error(
-                "An unrecoverable exception occurred when attempting to upload %s via SFTP to %s on"
-                " %s: ",
-                decoded_file_key,
-                destination_folder,
-                global_config.sftp_hostname,
-                exc_info=True,
-            )
-            failed_full_path = "/".join(
-                [
-                    partner_config.failed_files_full_path,
-                    FileTransferError.SFTP_TRANSFER_ERROR,
-                    filename,
-                ]
-            )
-            logger.error(
-                'The file "%s" will be moved to %s in the %s bucket to indicate this failure',
-                decoded_file_key,
-                failed_full_path,
-                BUCKET,
-            )
-
-            try:
-                move_s3_object(object_key=decoded_file_key, destination=failed_full_path)
-            except RuntimeError:
-                logger.error(
-                    "Unrecoverable error occurred when attempting to move %s to %s",
-                    decoded_file_key,
-                    failed_full_path,
-                    exc_info=True,
+                # Clean the provided paths of any whitespace or trailing/leading slashes
+                staging_dir_path = f"/{recognized_file.staging_folder.strip().strip('/')}"
+                input_dir_path = f"/{recognized_file.input_folder.strip().strip('/')}"
+                # First, ensure the staging folder exists by creating it, piece-by-piece, if it
+                # doesn't
+                logger.info(
+                    "Checking if the staging path %s exists, creating it if it does not",
+                    staging_dir_path,
                 )
-            return
+                _safe_sftp_mkdir(sftp_client=sftp_client, dirpath=staging_dir_path)
+                logger.info("%s exists or has been created", staging_dir_path)
+
+                # Then, upload the file to the staging folder. This avoids the SWEEPS automation
+                # from sweeping partially uploaded files as we will move this file to the SWEEPS
+                # input folder only once it has fully uploaded
+                logger.info(
+                    "Starting upload of %s to the staging path %s",
+                    filename,
+                    staging_dir_path,
+                )
+                staging_file_path = f"{staging_dir_path}/{filename}"
+                with sftp_client.open(filename=staging_file_path, mode="wb", bufsize=32768) as f:
+                    s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=f)
+                logger.info("Upload of %s to %s successful", filename, staging_dir_path)
+
+                # Once uploaded, we must modify the file permissions such that the SWEEPS automation
+                # user can interact with the file
+                logger.info(
+                    "Modifying file permissons of %s on %s to 664",
+                    staging_file_path,
+                    global_config.sftp_hostname,
+                )
+                sftp_client.chmod(path=staging_file_path, mode=0o664)
+                logger.info(
+                    "File permissions of %s modified to 664 successfully", staging_file_path
+                )
+
+                # Once the permissions have been modified, we need to move the file to the actual
+                # SWEEPS input directory. Just like before, we check if the directory exists and
+                # attempt to create it if it doesn't
+                logger.info(
+                    "Checking if the SWEEPS input path %s exists, creating it if it does not",
+                    input_dir_path,
+                )
+                _safe_sftp_mkdir(sftp_client=sftp_client, dirpath=input_dir_path)
+                logger.info("%s exists or has been created", input_dir_path)
+
+                # Once we're sure the directory exists, the file is moved (SFTP calls this a
+                # "rename") to the input directory
+                logger.info(
+                    "Moving %s to SWEEPS input directory path %s", staging_file_path, input_dir_path
+                )
+                input_file_path = f"{input_dir_path}/{filename}"
+                sftp_client.rename(oldpath=staging_file_path, newpath=input_file_path)
+                logger.info(
+                    "%s moved to %s successfully; %s has been transferred successfully",
+                    filename,
+                    input_file_path,
+                    filename,
+                )
+        except (SSHException, IOError, botocore.exceptions.ClientError) as exc:
+            raise SFTPTransferError(
+                message=(
+                    f"An unrecoverable error occurred when attempting to transfer {filename} to the"
+                    " CMS EFT SFTP Server"
+                ),
+                s3_object_key=s3_object_key,
+                partner=partner,
+            ) from exc
 
         logger.info(
             "%s uploaded successfully to %s on %s",
-            decoded_file_key,
-            destination_folder,
+            s3_object_key,
+            recognized_file.input_folder,
             global_config.sftp_hostname,
         )
-        success_full_path = f"{partner_config.sent_files_full_path}/{filename}"
-        logger.info(
-            'The file "%s" will be moved to %s in the %s bucket to indicate that the file was'
-            " successfully uploaded",
-            decoded_file_key,
-            success_full_path,
-            BUCKET,
-        )
-        try:
-            move_s3_object(object_key=decoded_file_key, destination=success_full_path)
-        except RuntimeError:
-            logger.error(
-                "Unrecoverable error occurred when attempting to move %s to %s",
-                decoded_file_key,
-                success_full_path,
-                exc_info=True,
+
+        sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
+        bfd_topic = sns_resource.Topic(BFD_SNS_TOPIC_ARN)
+        notification = StatusNotification(
+            details=TransferSuccessDetails(
+                partner=partner,
+                timestamp=datetime.utcnow(),
+                object_key=s3_object_key,
+                file_type=recognized_file.type,
             )
+        )
+        send_notification(topic=bfd_topic, notification=notification)
+        topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
+        if partner in topic_arns_by_partner:
+            partner_topic = sns_resource.Topic(topic_arns_by_partner[partner])
+            send_notification(topic=partner_topic, notification=notification)
+
+
+@logger.inject_lambda_context(clear_state=True, log_event=True)
+def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=unused-argument
+    try:
+        if not all(
+            [
+                REGION,
+                BFD_ENVIRONMENT,
+                BUCKET,
+                BUCKET_ROOT_DIR,
+            ]
+        ):
+            raise RuntimeError("Not all necessary environment variables were defined")
+
+        sns_event = SNSEvent(event)
+        if next(sns_event.records, None) is None:
+            raise ValueError(
+                "Invalid SNS event with empty records:"
+                f" {json.dumps(sns_event.raw_event, default=str)}"
+            )
+
+        for sns_record in sns_event.records:
+            s3_event = S3Event(json.loads(sns_record.sns.message))
+            if next(s3_event.records, None) is None:
+                raise ValueError(
+                    "Invalid inner S3 event with empty records:"
+                    f" {json.dumps(s3_event.raw_event, default=str)}"
+                )
+
+            for s3_record in s3_event.records:
+                s3_event_time = datetime.fromisoformat(
+                    s3_record.event_time.removesuffix("Z")
+                ).replace(tzinfo=timezone.utc)
+                s3_object_key = unquote(s3_record.s3.get_object.key)
+                s3_event_name = s3_record.event_name
+                s3_event_type = S3EventType.from_event_name(s3_event_name)
+
+                # Append to all future logs information about the S3 Event
+                logger.append_keys(
+                    s3_object_key=s3_object_key,
+                    s3_event_name=s3_event_name,
+                    s3_event_type=s3_event_type.name,
+                    s3_event_time=s3_event_time.isoformat(),
+                )
+
+                _handle_s3_event(s3_object_key=s3_object_key)
+    except Exception as exc:
+        sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
+
+        notification: StatusNotification
+        if isinstance(exc, BaseTransferError):
+            notification = StatusNotification(
+                details=TransferFailedDetails(
+                    partner=exc.partner or "unknown",
+                    timestamp=datetime.utcnow(),
+                    object_key=exc.s3_object_key,
+                    error_name=exc.__class__.__name__,
+                    reason=exc.message,
+                )
+            )
+
+            topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
+            if exc.partner and exc.partner in topic_arns_by_partner:
+                partner_topic = sns_resource.Topic(topic_arns_by_partner[exc.partner])
+                logger.info(
+                    "%s status notification topic configured. Sending error notification",
+                    exc.partner,
+                )
+                send_notification(topic=partner_topic, notification=notification)
+        else:
+            notification = StatusNotification(
+                details=UnknownErrorDetails(
+                    timestamp=datetime.utcnow(), error_name=exc.__class__.__name__, reason=str(exc)
+                )
+            )
+
+        logger.info("Sending error notification to BFD catch-all topic %s", BFD_SNS_TOPIC_ARN)
+        send_notification(topic=sns_resource.Topic(BFD_SNS_TOPIC_ARN), notification=notification)
+
+        raise
+    finally:
+        _, exception, _ = sys.exc_info()
+        if exception:
+            logger.exception("Unrecoverable exception raised")
