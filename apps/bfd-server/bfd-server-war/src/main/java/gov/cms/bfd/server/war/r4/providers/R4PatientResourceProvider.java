@@ -226,6 +226,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
+      timerBeneQuery.close();
     }
 
     return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
@@ -862,6 +863,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "bene_by_" + hashType + "_" + hashType + "s_from_beneficiarieshistory",
           fromHistoryQueryNanoSeconds,
           matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
+      beneHistoryMatchesTimer.close();
     }
 
     // Then, find all Beneficiary records that match the hash or those BENE_IDs.
@@ -905,6 +907,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes.size());
+      timerQuery.close();
     }
 
     List<Long> distinctBeneIds =
@@ -1069,6 +1072,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "benes_by_year_month_part_d_contract_id",
           beneMatchesTimerQueryNanoSeconds,
           matchingBenes == null ? 0 : matchingBenes.size());
+      beneIdTimer.close();
     }
   }
 
@@ -1268,6 +1272,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneExists ? 1 : 0);
+      matchingBeneExistsTimer.close();
     }
   }
 
@@ -1329,6 +1334,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "bene_ids_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneIds == null ? 0 : matchingBeneIds.size());
+      beneIdMatchesTimer.close();
     }
   }
 }

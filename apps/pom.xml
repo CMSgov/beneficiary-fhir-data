@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.110.0-SNAPSHOT</version>
+    <version>2.111.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -65,7 +65,7 @@
         <!-- The version of Java that we'll use for everything. -->
         <javaSourceVersion>21</javaSourceVersion>
 
-        <project.build.outputTimestamp>2024-02-23T21:19:29Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2024-02-29T19:47:18Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -115,7 +115,7 @@
         <rest-assured.version>5.4.0</rest-assured.version>
         <assertj.version>3.24.2</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
-        <postgresql.version>42.7.1</postgresql.version>
+        <postgresql.version>42.7.2</postgresql.version>
         <slf4j.version>2.0.9</slf4j.version>
         <log4j.version>2.22.0</log4j.version>
         <hikari.version>5.1.0</hikari.version>
@@ -212,6 +212,9 @@
 
         <!-- Skip by default.  Override to let open api documents be generated. -->
         <apidocgen.skip>true</apidocgen.skip>
+
+        <!-- Skip by default.  Override to let bfd-ops be generated. -->
+        <bfdOps.skip>true</bfdOps.skip>
 
         <!-- maven plugin versions -->
         <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
@@ -720,6 +723,11 @@
                     of all plugins used in the module builds here to help ensure that the builds
                     are always reproducible. This is actually enforced down below by the maven-enforcer-plugin
                     execution. -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build.helper.maven.plugin.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
@@ -1278,6 +1286,7 @@
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <checkstyle.skip>true</checkstyle.skip>
                 <apidocgen.skip>false</apidocgen.skip>
+                <bfdOps.skip>false</bfdOps.skip>
             </properties>
             <distributionManagement>
                 <repository>

@@ -1,0 +1,6 @@
+servers:
+  - {url: 'https://prod-sbx.bfd.cms.gov', description: 'Blue Button API: Sandbox Server'}
+  - {url: 'https://bfd.cms.gov', description: 'Blue Button API: Production Server'}
+tags:
+  - {name: v1, description: 'BFD API Version 1'}
+  - {name: v2, description: 'BFD API Version 2'}
