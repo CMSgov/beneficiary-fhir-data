@@ -27,12 +27,12 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonQueries;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
-import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -373,7 +373,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
     }
 
     // See if we have any claims data for the beneficiary.
-    int claimTypesThatHaveData = QueryUtils.availableClaimsData(entityManager, beneficiaryId);
+    int claimTypesThatHaveData = CommonQueries.availableClaimsData(entityManager, beneficiaryId);
     Bundle bundle = null;
     if (claimTypesThatHaveData > 0) {
       try {

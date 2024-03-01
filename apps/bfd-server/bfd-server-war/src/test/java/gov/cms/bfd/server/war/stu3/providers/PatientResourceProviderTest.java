@@ -182,7 +182,8 @@ public class PatientResourceProviderTest {
   public void testReadWhenBeneExistsExpectMetricsCalled() {
     patientProvider.read(patientId, requestDetails);
 
-    String expectedTimerName = patientProvider.getClass().getSimpleName() + ".query.bene_by_id";
+    String expectedTimerName =
+        patientProvider.getClass().getSimpleName() + ".query.bene_by_mbi_or_id";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
     verify(metricsTimer, times(1)).time();
     verify(metricsTimerContext, times(1)).stop();
@@ -333,7 +334,7 @@ public class PatientResourceProviderTest {
         assertThrows(
             InvalidRequestException.class,
             () -> patientProvider.searchByIdentifier(identifier, null, null, requestDetails));
-    assertEquals("Hash value cannot be null/empty", exception.getLocalizedMessage());
+    assertEquals("lookup value cannot be null/empty", exception.getLocalizedMessage());
   }
 
   /**

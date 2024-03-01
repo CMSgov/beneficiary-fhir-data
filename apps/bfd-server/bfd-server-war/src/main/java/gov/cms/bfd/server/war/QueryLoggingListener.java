@@ -202,6 +202,8 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     HIBERNATE_INFORMATION_SCHEMA_SEQUENCES(
         "hibernate_information_schema_sequences",
         (s -> s.contains(" from information_schema.sequences"))),
+    /** Represents query that invokes the find_beneficiary function. */
+    FIND_BENEFICIARY_FUNCTION("find_beneficiary", (s -> s.contains("find_beneficiary"))),
     /** Represents an unknown query (one not explicitly defined in this list). */
     UNKNOWN("unknown", null);
 

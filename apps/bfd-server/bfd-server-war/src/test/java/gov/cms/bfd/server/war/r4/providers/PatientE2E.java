@@ -1,11 +1,13 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -16,7 +18,9 @@ import gov.cms.bfd.server.war.PatientE2EBase;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -260,5 +264,40 @@ public class PatientE2E extends PatientE2EBase {
         .statusCode(200)
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verifies that Patient searchByIdentifier returns a 200 when using HTTP POST with an unhashed
+   * MBI.
+   */
+  @Test
+  public void testPatientUsingPostByIdentifierUsingUnhashedMbi() {
+    List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
+
+    // _search needed to distinguish the POST version of the endpoint (HAPI-FHIR)
+    String requestString = patientEndpoint + "_search";
+    String lookupMbi = "9AB2WW3GR44";
+    String formParams =
+        "_id="
+            + TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED
+            + "|"
+            + lookupMbi;
+
+    RequestSpecification httpRequest =
+        given()
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .spec(requestAuth)
+            .body(formParams);
+
+    // Should return a 200
+    Response response = httpRequest.post(requestString);
+    assertThat(response.statusCode(), equalTo(200));
+    JsonPath jsonPathEvaluator = response.jsonPath();
+    assertThat(jsonPathEvaluator.get("total"), equalTo(1));
+    // fetch all MBIs as a list
+    List<String> mbis = jsonPathEvaluator.getList("entry.resource.identifier.value.flatten()");
+    assertThat(mbis.size(), equalTo(7));
+    assertThat(mbis.contains(currentMbi), is(true));
+    assertThat(mbis.containsAll(historicalMbis), is(true));
   }
 }
