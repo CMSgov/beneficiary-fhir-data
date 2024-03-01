@@ -161,76 +161,77 @@ public final class DataServerLauncherApp {
         "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256");
 
     // Apply the config.
-    ServerConnector serverConnector =
+    try (ServerConnector serverConnector =
         new ServerConnector(
             server,
             new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.toString()),
-            new HttpConnectionFactory(httpsConfig));
-    serverConnector.setHost(appConfig.getHost().orElse("0.0.0.0"));
-    serverConnector.setPort(appConfig.getPort());
-    server.setConnectors(new Connector[] {serverConnector});
+            new HttpConnectionFactory(httpsConfig))) {
+      serverConnector.setHost(appConfig.getHost().orElse("0.0.0.0"));
+      serverConnector.setPort(appConfig.getPort());
+      server.setConnectors(new Connector[] {serverConnector});
 
-    // Jetty will be used to run a WAR, via this WebAppContext.
-    WebAppContext webapp = new WebAppContext();
-    webapp.setContextPath("/");
-    webapp.setWar(appConfig.getWar().toString());
+      // Jetty will be used to run a WAR, via this WebAppContext.
+      WebAppContext webapp = new WebAppContext();
+      webapp.setContextPath("/");
+      webapp.setWar(appConfig.getWar().toString());
 
-    // Ensure that Jetty finds config via annotations, in addition to the usual.
-    webapp.setConfigurations(
-        new Configuration[] {
-          new WebInfConfiguration(),
-          new WebXmlConfiguration(),
-          new WebAppConfiguration(),
-          new MetaInfConfiguration(),
-          new FragmentConfiguration(),
-          new JettyWebXmlConfiguration(),
-          new AnnotationConfiguration()
-        });
+      // Ensure that Jetty finds config via annotations, in addition to the usual.
+      webapp.setConfigurations(
+          new Configuration[] {
+            new WebInfConfiguration(),
+            new WebXmlConfiguration(),
+            new WebAppConfiguration(),
+            new MetaInfConfiguration(),
+            new FragmentConfiguration(),
+            new JettyWebXmlConfiguration(),
+            new AnnotationConfiguration()
+          });
 
-    // Allow webapps to see but not override SLF4J (prevents LinkageErrors).
-    webapp.getSystemClassMatcher().add("org.slf4j.");
+      // Allow webapps to see but not override SLF4J (prevents LinkageErrors).
+      webapp.getSystemClassMatcher().add("org.slf4j.");
 
-    /*
-     * Disable Logback's builtin shutdown hook, so that OUR shutdown hook can still use the loggers
-     * (and then shut Logback down itself).
-     */
-    webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
+      /*
+       * Disable Logback's builtin shutdown hook, so that OUR shutdown hook can still use the loggers
+       * (and then shut Logback down itself).
+       */
+      webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    /* Configure the log output generation via a Jetty CustomRequestLog.
-     * As of Feb 8th 2023, the Access.log file has been removed, and BFD server is only writing to access.json.
-     * CustomRequestLog allows with minimal side effects to get the response output size, so a blank writer and format
-     * are instantiated to access the methods to get the response output size.
-     *
-     */
-    final String requestLogFormat = "";
-    final BfdRequestLog requestLog =
-        new BfdRequestLog(new Slf4jRequestLogWriter(), requestLogFormat);
+      /* Configure the log output generation via a Jetty CustomRequestLog.
+       * As of Feb 8th 2023, the Access.log file has been removed, and BFD server is only writing to access.json.
+       * CustomRequestLog allows with minimal side effects to get the response output size, so a blank writer and format
+       * are instantiated to access the methods to get the response output size.
+       *
+       */
+      final String requestLogFormat = "";
+      final BfdRequestLog requestLog =
+          new BfdRequestLog(new Slf4jRequestLogWriter(), requestLogFormat);
 
-    server.setRequestLog(requestLog);
+      server.setRequestLog(requestLog);
 
-    /*
-     * Configure authentication for webapps. Note that this is a distinct operation from configuring
-     * mutual TLS above via the SslContextFactory, as that mostly only impacts the connections. In
-     * order to expose the client cert auth info to the webapp, this additional config here is
-     * needed.
-     */
-    ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
-    securityHandler.setAuthenticator(new ClientCertAuthenticator());
-    securityHandler.setLoginService(new ClientCertLoginService());
-    Constraint constraint = new Constraint();
-    constraint.setName("auth");
-    constraint.setAuthenticate(true);
-    constraint.setRoles(new String[] {Constraint.ANY_AUTH});
-    ConstraintMapping constraintMapping = new ConstraintMapping();
-    constraintMapping.setPathSpec("/*");
-    constraintMapping.setConstraint(constraint);
-    securityHandler.setConstraintMappings(new ConstraintMapping[] {constraintMapping});
-    webapp.setSecurityHandler(securityHandler);
+      /*
+       * Configure authentication for webapps. Note that this is a distinct operation from configuring
+       * mutual TLS above via the SslContextFactory, as that mostly only impacts the connections. In
+       * order to expose the client cert auth info to the webapp, this additional config here is
+       * needed.
+       */
+      ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+      securityHandler.setAuthenticator(new ClientCertAuthenticator());
+      securityHandler.setLoginService(new ClientCertLoginService());
+      Constraint constraint = new Constraint();
+      constraint.setName("auth");
+      constraint.setAuthenticate(true);
+      constraint.setRoles(new String[] {Constraint.ANY_AUTH});
+      ConstraintMapping constraintMapping = new ConstraintMapping();
+      constraintMapping.setPathSpec("/*");
+      constraintMapping.setConstraint(constraint);
+      securityHandler.setConstraintMappings(new ConstraintMapping[] {constraintMapping});
+      webapp.setSecurityHandler(securityHandler);
 
-    // Wire up the WebAppContext to Jetty.
-    HandlerCollection handlers = new HandlerCollection(webapp);
-    server.setHandler(handlers);
-    return new ServerInfo(server, webapp);
+      // Wire up the WebAppContext to Jetty.
+      HandlerCollection handlers = new HandlerCollection(webapp);
+      server.setHandler(handlers);
+      return new ServerInfo(server, webapp);
+    }
   }
 
   /**

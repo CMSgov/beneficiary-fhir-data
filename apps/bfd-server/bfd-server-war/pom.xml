@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-server-parent</artifactId>
-        <version>2.110.0-SNAPSHOT</version>
+        <version>2.111.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-server-war</artifactId>
@@ -443,7 +443,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>${build.helper.maven.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-dd-openapi-artifacts</id>
@@ -464,11 +463,6 @@
                                     <classifier>v1-data-dictionary</classifier>
                                 </artifact>
                                 <artifact>
-                                    <file>${project.basedir}/../../../dist/V1-OpenAPI-${project.version}.yaml</file>
-                                    <type>yaml</type>
-                                    <classifier>v1-openapi</classifier>
-                                </artifact>
-                                <artifact>
                                     <file>${project.basedir}/../../../dist/V2-data-dictionary-${project.version}.csv</file>
                                     <type>csv</type>
                                     <classifier>v2-data-dictionary</classifier>
@@ -479,14 +473,14 @@
                                     <classifier>v2-data-dictionary</classifier>
                                 </artifact>
                                 <artifact>
-                                    <file>${project.basedir}/../../../dist/V2-OpenAPI-${project.version}.yaml</file>
-                                    <type>yaml</type>
-                                    <classifier>v2-openapi</classifier>
-                                </artifact>
-                                <artifact>
                                     <file>${project.basedir}/../../../dist/data-dictionary-${project.version}.xlsx</file>
                                     <type>xlsx</type>
                                     <classifier>data-dictionary</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>${project.basedir}/../../../dist/OpenAPI-${project.version}.yaml</file>
+                                    <type>yaml</type>
+                                    <classifier>openapi</classifier>
                                 </artifact>
                             </artifacts>
                             <skipAttach>${apidocgen.skip}</skipAttach>

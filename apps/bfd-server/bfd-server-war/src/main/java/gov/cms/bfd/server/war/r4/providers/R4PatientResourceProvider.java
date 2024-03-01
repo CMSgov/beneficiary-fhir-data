@@ -855,7 +855,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                 String.join(
                     "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))));
 
-    // Null out the unhashed HICN; in v2 we are ignoring HICNs
+    // Null out the unhashed HICNs; in v2 we are ignoring HICNs
     beneficiary.setHicnUnhashed(Optional.empty());
 
     return beneficiaryTransformerV2.transform(beneficiary, requestHeader, true);
@@ -945,6 +945,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "benes_by_year_month_part_d_contract_id",
           beneMatchesTimerQueryNanoSeconds,
           matchingBenes == null ? 0 : matchingBenes.size());
+      beneIdTimer.close();
     }
   }
 
@@ -1144,6 +1145,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "bene_exists_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneExists ? 1 : 0);
+      matchingBeneExistsTimer.close();
     }
   }
 
@@ -1205,6 +1207,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "bene_ids_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneIds == null ? 0 : matchingBeneIds.size());
+      beneIdMatchesTimer.close();
     }
   }
 }
