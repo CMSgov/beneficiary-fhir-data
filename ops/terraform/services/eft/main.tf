@@ -757,6 +757,12 @@ resource "aws_vpc_endpoint" "this" {
 }
 
 module "outbound_alerting" {
+  depends_on = [
+    aws_sqs_queue.sftp_outbound_transfer_dlq,
+    aws_lambda_function.sftp_outbound_transfer,
+    aws_sns_topic.outbound_notifs,
+    aws_sns_topic.outbound_partner_notifs
+  ]
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   source = "./modules/bfd_eft_outbound_alerting"
