@@ -38,26 +38,26 @@ def _slack_outbound_event(status_notification: StatusNotification):
         case NotificationType.FILE_DISCOVERED:
             message_preamble = (
                 ":information_source: A file was discovered by the BFD EFT Outbound Lambda in"
-                f" {BFD_ENVIRONMENT} and will be transferred soon. See details below for more"
+                f" `{BFD_ENVIRONMENT}` and will be transferred soon. See details below for more"
                 " information :information_source:"
             )
         case NotificationType.TRANSFER_SUCCESS:
             message_preamble = (
                 ":tada: A file was successfully transferred to the CMS EFT SFTP Server by the BFD"
-                f" EFT Outbound Lambda in {BFD_ENVIRONMENT}. See details below for more information"
-                " :tada:"
+                f" EFT Outbound Lambda in `{BFD_ENVIRONMENT}`. See details below for more"
+                " information :tada:"
             )
         case NotificationType.TRANSFER_FAILED:
             message_preamble = (
                 ":warning: A file was unable to be transferred to the CMS EFT SFTP Server by the"
-                f" BFD EFT Outbound Lambda in {BFD_ENVIRONMENT}. See details below for more"
+                f" BFD EFT Outbound Lambda in `{BFD_ENVIRONMENT}`. See details below for more"
                 " information :warning:"
             )
         case NotificationType.UNKNOWN_ERROR:
             message_preamble = (
                 ":warning: An unexpected error occurred when the BFD EFT Outbound Lambda attempted"
-                f" to transfer a file in {BFD_ENVIRONMENT}. See details below for more information"
-                " :warning:"
+                f" to transfer a file in `{BFD_ENVIRONMENT}`. See details below for more"
+                " information :warning:"
             )
 
     slack_message = {
