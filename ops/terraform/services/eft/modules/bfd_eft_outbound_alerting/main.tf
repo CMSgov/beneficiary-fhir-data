@@ -10,13 +10,13 @@ locals {
   outbound_sns_topic_names = concat([var.outbound_bfd_sns_topic_name], var.outbound_partner_sns_topic_names)
   alarms_raw_config = {
     lambda_errors = {
-      breach_topic   = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/lambda_errors/alarms/breach_topic", null)
-      ok_topic       = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/lambda_errors/alarms/ok_topic", null)
+      breach_topic   = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/alarms/lambda_errors/breach_topic", null)
+      ok_topic       = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/alarms/lambda_errors/ok_topic", null)
       log_group_name = "/aws/lambda/${var.outbound_lambda_name}"
     }
     sns_failures = {
-      breach_topic = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/sns_failures/alarms/breach_topic", null)
-      ok_topic     = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/sns_failures/alarms/ok_topic", null)
+      breach_topic = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/alarms/sns_failures/breach_topic", null)
+      ok_topic     = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/alarms/sns_failures/ok_topic", null)
       per_topic = {
         for topic_name in local.outbound_sns_topic_names :
         topic_name => {
