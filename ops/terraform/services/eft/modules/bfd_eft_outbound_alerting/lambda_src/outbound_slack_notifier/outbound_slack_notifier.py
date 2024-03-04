@@ -15,7 +15,7 @@ SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 logger = Logger()
 
 
-class NotificationType(Enum, str):
+class NotificationType(str, Enum):
     FILE_DISCOVERED = "FILE_DISCOVERED"
     TRANSFER_SUCCESS = "TRANSFER_SUCCESS"
     TRANSFER_FAILED = "TRANSFER_FAILED"
@@ -32,7 +32,7 @@ class StatusNotification:
 class PostSlackMessageError(Exception): ...
 
 
-def _slack_outbound_event(status_notification: StatusNotification):
+def _slack_status_notif(status_notification: StatusNotification):
     message_preamble: str
     match status_notification.type:
         case NotificationType.FILE_DISCOVERED:
@@ -103,12 +103,12 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
 
         for sns_record in sns_event.records:
             raw_notification: dict[str, Any] = json.loads(sns_record.sns.message)
-            raw_notification["type"] = NotificationType[str(raw_notification["type"]).lower()]
+            raw_notification["type"] = NotificationType[raw_notification["type"]]
             status_notification = StatusNotification(**raw_notification)
 
             logger.append_keys(notification_type=status_notification.type.value)
 
-            _slack_outbound_event(status_notification=status_notification)
+            _slack_status_notif(status_notification=status_notification)
     except Exception:
         logger.exception("Unrecoverable exception raised")
         raise
