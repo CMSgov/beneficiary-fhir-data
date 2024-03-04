@@ -755,3 +755,14 @@ resource "aws_vpc_endpoint" "this" {
   vpc_id              = local.vpc_id
   tags                = { Name = "${local.full_name}-sftp-endpoint" }
 }
+
+module "outbound_alerting" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  source = "./modules/bfd_eft_outbound_alerting"
+
+  ssm_config               = local.ssm_config
+  outbound_lambda_name     = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
+  outbound_lambda_dlq_name = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].name)
+  outbound_sns_topic_names = concat(aws_sns_topic.outbound_notifs[*].name, [for _, v in aws_sns_topic.outbound_partner_notifs : v.name])
+}
