@@ -1,0 +1,48 @@
+{
+    "id": 57,
+    "name": "MCO Paid Switch",
+    "description": "A switch indicating whether or not a Managed Care Organization (MCO) has paid the provider for an institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_mco_pd_sw",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "mcoPaidSw",
+    "ccwMapping": [
+        "CLM_MCO_PD_SW"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].code.coding[N].code",
+            "fhirPath": "supportingInfo.where(code.coding.where(system='https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw')).code.coding.code",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claiminformationcategory'",
+                "eob.supportingInfo[N].category.coding[N].code = 'info'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Information')",
+                "eob.supportingInfo[N].category.coding[N].system = https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.supportingInfo[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Claim MCO Paid Switch')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 7,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/claiminformationcategory\",\\n          \"code\": \"info\",\\n          \"display\": \"Information\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/information\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw\",\\n          \"display\": \"Claim MCO Paid Switch\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw\",\\n          \"code\": \"0\",\\n          \"display\": \"No managed care organization (MCO) payment\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

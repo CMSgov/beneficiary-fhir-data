@@ -1,0 +1,42 @@
+{
+    "id": 9,
+    "name": "Total Coinsurance Days Count",
+    "description": "The count of the total number of coinsurance days involved with the beneficiary's stay in a facility.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "bene_tot_coinsrnc_days_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "coinsuranceDayCount",
+    "ccwMapping": [
+        "BENE_TOT_COINSRNC_DAYS_CNT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedUnsignedInt",
+            "fhirPath": "benefitBalance[%n].financial.where(type.coding.code='https://bluebutton.cms.gov/resources/variables/bene_tot_coinsrnc_days_cnt').usedUnsignedInt",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/bene_tot_coinsrnc_days_cnt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'Beneficiary Total Coinsurance Days Count'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/benefit-balance\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/bene_tot_coinsrnc_days_cnt\",\\n          \"display\": \"Beneficiary Total Coinsurance Days Count\"\\n        }\\n      ]\\n    },\\n    \"usedUnsignedInt\": 0\\n  }\\n]"
+        }
+    ]
+}

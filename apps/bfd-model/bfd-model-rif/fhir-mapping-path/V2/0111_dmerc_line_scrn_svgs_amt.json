@@ -1,0 +1,38 @@
+{
+    "id": 111,
+    "name": "Screen Savings Amount",
+    "description": "The amount of savings attributable to the coverage screen for this DMERC line item.",
+    "appliesTo": [
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "dmerc_line_scrn_svgs_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "screenSavingsAmount",
+    "ccwMapping": [
+        "DMERC_LINE_SCRN_SVGS_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueQuantity.value",
+            "fhirPath": "item[%n].extension.where(url = 'https://bluebutton.cms.gov/resources/variables/dmerc_line_scrn_svgs_amt').valueQuantity.value",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/dmerc_line_scrn_svgs_amt'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/dmerc_line_scrn_svgs_amt\",\\n    \"valueQuantity\": {\\n      \"value\": 0\\n    }\\n  }\\n]"
+        }
+    ]
+}

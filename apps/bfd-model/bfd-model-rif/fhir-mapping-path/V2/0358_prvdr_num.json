@@ -1,0 +1,53 @@
+{
+    "id": 358,
+    "name": "Provider Number",
+    "description": "This variable is the provider identification number.  OR The billing number assigned to the supplier of the Part B service/DMEPOS by the National Supplier Clearinghouse, as reported on the line item for the DMERC claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prvdr_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 6,
+    "bfdJavaFieldName": "providerNumber",
+    "ccwMapping": [
+        "PRVDR_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF1.PRVDR_OSCAR_NUM",
+        "CCLF2.PRVDR_OSCAR_NUM",
+        "CCLF3.PRVDR_OSCAR_NUM",
+        "CCLF4.PRVDR_OSCAR_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "contained[N].identifier[N].value",
+            "fhirPath": "contained.where(resourceType='Organization').identifier.where(type.coding.where(code='PRN')).value",
+            "discriminator": [
+                "contained[N].resourceType = 'Organization'",
+                "contained[N].identifier[N].type.coding.system = 'http://terminology.hl7.org/CodeSystem/v2-0203'",
+                "contained[N].identifier[N].type.coding.code = 'PRN'"
+            ],
+            "additional": [
+                "eob.contained[N].id = <unique identifier derived 'provider-org#'> (ie.. Provider-org3)",
+                "eob.provider.reference = #<unique identifier derived 'provider-org#'> (ie.. #provider-org3)"
+            ],
+            "derived": "The unique org identifier (provider-org) will be utililzed to reference the contained element, which will have the organizations npi, supplied by the provider number from the database.",
+            "note": "For information about list elements and discriminators, see 'Slicing' in the Glossary tab.  The eob.contained[N].id will be used/stored in the other element:  eob.provider.reference (ie.. #provider-org3)",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/v2-0203\",\\n          \"code\": \"PRN\"\\n        }\\n      ]\\n    },\\n    \"value\": \"777776\"\\n  }\\n]"
+        }
+    ]
+}

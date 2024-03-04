@@ -1,0 +1,49 @@
+{
+    "id": 357,
+    "name": "Provider NPI",
+    "description": "The National Provider Identifier (NPI) assigned to the supplier of the Part B service/DMEPOS line item.",
+    "appliesTo": [
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prvdr_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "providerNPI",
+    "ccwMapping": [
+        "PRVDR_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF6.PAYTO_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value AND item[N].careTeamSequence",
+            "fhirPath": "careTeam.where(role.coding.where(code='performing')).provider.identifier.where(type.coding.where(code='npi')).value",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].type.coding[N].code = 'npi'",
+                "careTeam[N].role.coding[N].code = 'performing'"
+            ],
+            "additional": [
+                "eob.careTeam[N].responsible = true",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'National Provider Identifier')",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole'",
+                "eob.careTeam[N].role.coding[N].system = 'Performing provider')"
+            ],
+            "derived": "",
+            "note": "The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamSequence list.",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"1244444444\"\\n  }\\n]"
+        }
+    ]
+}

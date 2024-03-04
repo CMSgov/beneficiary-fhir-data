@@ -1,0 +1,39 @@
+{
+    "id": 406,
+    "name": "Reason For Visit Diagnosis Code 1 Version",
+    "description": "The code used to indicate if the reason for visit diagnosis code is ICD-9 or ICD-10.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rsn_visit_vrsn_cd1",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisAdmission1CodeVersion",
+    "ccwMapping": [
+        "RSN_VISIT_VRSN_CD1"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].system",
+            "fhirPath": "diagnosis.where(type.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType' and code='patientreasonforvisit')).diagnosisCodeableConcept.coding.where(system='http://hl7.org/fhir/sid/icd-10-cm').system",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType'",
+                "diagnosis[N].type[N].coding[N].code = 'patientreasonforvisit'"
+            ],
+            "additional": [],
+            "derived": "IF = 9 then eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' IF = 0  eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10-cm'",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n    \"code\": \"A37\",\\n    \"display\": \"WHOOPING COUGH\"\\n  }\\n]"
+        }
+    ]
+}

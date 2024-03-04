@@ -66,6 +66,9 @@ public class MappingBean implements ModelBean {
   /** Meta data for transformations used to copy data from message to entity. */
   @NotNull @Singular private List<@Valid TransformationBean> transformations = new ArrayList<>();
 
+  /** Meta data for R4 fhir elements. */
+  private List<@Valid FhirElementBean> r4FhirElements = new ArrayList<>();
+
   /** Meta data for any external transformations used in transformer. */
   @NotNull @Singular
   private List<@Valid ExternalTransformationBean> externalTransformations = new ArrayList<>();

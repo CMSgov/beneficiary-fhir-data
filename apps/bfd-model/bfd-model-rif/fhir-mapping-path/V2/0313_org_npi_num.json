@@ -1,0 +1,48 @@
+{
+    "id": 313,
+    "name": "Organization NPI",
+    "description": "The National Provider Identifier (NPI) of the organization or group practice.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "org_npi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "organizationNpi",
+    "ccwMapping": [
+        "ORG_NPI_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF1.FAC_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "careTeam.where(role.coding.where(code = 'primary')).provider.identifier.where(type.coding.where(code='npi')).value",
+            "discriminator": [
+                "careTeam[N].role.coding[N].code = 'primary'",
+                "careTeam[N].provider.identifier[N].type.coding[N].code = 'npi'"
+            ],
+            "additional": [
+                "(eob.careTeam[N].provider.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'National Provider Identifier')",
+                "eob.careTeam[N].role.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claimcareteamrole'",
+                "eob.careTeam[N].role.coding[N].display = 'Primary provider')"
+            ],
+            "derived": "",
+            "note": "The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamSequence list.",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"0000000000\"\\n  }\\n]"
+        }
+    ]
+}

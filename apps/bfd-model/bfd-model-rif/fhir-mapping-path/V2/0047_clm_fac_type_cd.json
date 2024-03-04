@@ -1,0 +1,48 @@
+{
+    "id": 47,
+    "name": "Claim Facility Type Code",
+    "description": "The type of facility.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_fac_type_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "claimFacilityTypeCode",
+    "ccwMapping": [
+        "CLM_FAC_TYPE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_BILL_FAC_TYPE_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "facility.extension[N].valueCoding.code",
+            "fhirPath": "facility.extension.where(url='https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd').valueCoding.code",
+            "discriminator": [
+                "facility.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd'"
+            ],
+            "additional": [
+                "eob.facility.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd\",\\n      \"code\": \"1\",\\n      \"display\": \"Hospital\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

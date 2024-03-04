@@ -1,0 +1,45 @@
+{
+    "id": 276,
+    "name": "Processing Indicator Code",
+    "description": "The code on a non-institutional claim indicating to whom payment was made or if the claim was denied.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_prcsg_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "processingIndicatorCode",
+    "ccwMapping": [
+        "LINE_PRCSG_IND_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_PRCSG_IND_CD",
+        "CCLF6.CLM_PRCSG_IND_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueCoding.code",
+            "fhirPath": "item[%n].extension.where(url='https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd').valueCoding.code",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd'"
+            ],
+            "additional": [
+                "eob.item[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd\",\\n      \"code\": \"A\",\\n      \"display\": \"Allowed\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,36 @@
+{
+    "id": 444,
+    "name": "Health Insurance Claim Number (HICN) Historic",
+    "description": "The Health Insurance Claim Number (HICN) is a Medicare beneficiary's identification number, used for paying claims and for determining eligibility for services across multiple entities (e.g. Social Security Administration (SSA), Railroad Retirement Board (RRB), States, Medicare providers and health plans, etc.)",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIESHISTORY",
+    "bfdColumnName": "bene_crnt_hic_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 11,
+    "bfdJavaFieldName": "hicnUnhashed",
+    "ccwMapping": [
+        "BENE_CRNT_HIC_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

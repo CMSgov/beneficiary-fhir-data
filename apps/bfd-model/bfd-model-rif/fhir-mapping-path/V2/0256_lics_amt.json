@@ -1,0 +1,45 @@
+{
+    "id": 256,
+    "name": "Low Income Cost Sharing Subsidy Amount",
+    "description": "This is the amount of cost sharing for the drug that was paid by the Part D low-income subsidy (LICS). This field contains plan-reported amounts per drug event; CMS uses this information to reconcile the prospective payments it makes to Part D plans for expected low-income cost sharing with the actual amounts incurred by the plans.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "lics_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "lowIncomeSubsidyPaidAmount",
+    "ccwMapping": [
+        "LICS_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(code = 'https://bluebutton.cms.gov/resources/variables/lics_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/lics_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'discount'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Discount')",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Amount paid for the PDE by Part D low income subsidy'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication\",\\n          \"code\": \"discount\",\\n          \"display\": \"Discount\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/lics_amt\",\\n          \"display\": \"Amount paid for the PDE by Part D low income subsidy\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 122.23,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

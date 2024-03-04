@@ -1,0 +1,47 @@
+{
+    "id": 298,
+    "name": "Near Line Record Identification Code",
+    "description": "A code defining the type of claim record being processed.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_near_line_rec_ident_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "nearLineRecordIdCode",
+    "ccwMapping": [
+        "NCH_NEAR_LINE_REC_IDENT_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd\",\\n      \"code\": \"O\",\\n      \"display\": \"Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

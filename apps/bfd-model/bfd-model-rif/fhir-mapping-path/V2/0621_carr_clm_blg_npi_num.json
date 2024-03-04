@@ -1,0 +1,38 @@
+{
+    "id": 621,
+    "name": "Carrier Claim Billing NPI Number",
+    "description": "The CMS National Provider Identifier (NPI) number assigned to the billing provider",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_blg_npi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "carrierClaimBlgNpiNumber",
+    "ccwMapping": [
+        "CARR_CLM_BLG_NPI_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "provider.identifier.value",
+            "fhirPath": "provider.identifier.where(system='https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num').value",
+            "discriminator": [
+                "provider.identifier.system='https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/carr_clm_blg_npi_num\",\\n    \"value\": \"1234567890\"\\n  }\\n]\\n"
+        }
+    ]
+}

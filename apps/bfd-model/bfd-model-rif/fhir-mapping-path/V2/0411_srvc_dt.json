@@ -1,0 +1,39 @@
+{
+    "id": 411,
+    "name": "Prescription Fill Date",
+    "description": "This field contains the date on which the prescription was filled.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "srvc_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "prescriptionFillDate",
+    "ccwMapping": [
+        "SRVC_DT"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_FROM_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].servicedDate AND billablePeriod.start AND billablePeriod.end",
+            "fhirPath": "item[%n].servicedDate",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  \"2015-05-12\"\\n]"
+        }
+    ]
+}

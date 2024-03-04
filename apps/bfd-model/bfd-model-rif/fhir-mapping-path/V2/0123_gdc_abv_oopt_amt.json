@@ -1,0 +1,45 @@
+{
+    "id": 123,
+    "name": "Gross Drug Cost Above Out Of Pocket Threshold",
+    "description": "This variable is the portion of the gross drug cost for the prescription drug fill that was covered by Part D\u2019s catastrophic coverage.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "gdc_abv_oopt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "grossCostAboveOutOfPocketThreshold",
+    "ccwMapping": [
+        "GDC_ABV_OOPT_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(code = 'https://bluebutton.cms.gov/resources/variables/gdc_abv_oopt_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/gdc_abv_oopt_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'coinsurance'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Co-insurance')",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Gross Drug Cost Above Part D Out-of-Pocket Threshold (GDCA)'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication\",\\n          \"code\": \"coinsurance\",\\n          \"display\": \"Co-insurance\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/gdc_abv_oopt_amt\",\\n          \"display\": \"Gross Drug Cost Above Part D Out-of-Pocket Threshold (GDCA)\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 15.25,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

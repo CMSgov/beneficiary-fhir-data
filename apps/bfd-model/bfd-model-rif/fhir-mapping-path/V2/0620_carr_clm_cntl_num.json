@@ -1,0 +1,45 @@
+{
+    "id": 620,
+    "name": "Carrier Clam Control Number",
+    "description": "This field is an identification number for professional claims processed by the multi-carrier system (MCS). This field contains a numeric value that identifies a claim throughout the processing cycle and allows for a linkage between the claim and the beneficiary for whom it was submitted. This should be handled as a character field due to leading \u20180\u2019s. This is a unique field created by MCS.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_cntl_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 23,
+    "bfdJavaFieldName": "claimCarrierControlNumber",
+    "ccwMapping": [
+        "CARR_CLM_CNTL_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_CNTL_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueIdentifier.value",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num').valueIdentifier.value",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num'"
+            ],
+            "additional": [
+                "eob.extension[N].valueIdentifier.system = 'https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num\",\\n    \"valueIdentifier\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num\",\\n      \"value\": \"74655592568216\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

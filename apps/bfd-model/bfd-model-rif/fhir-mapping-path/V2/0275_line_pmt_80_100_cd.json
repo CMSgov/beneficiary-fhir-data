@@ -1,0 +1,40 @@
+{
+    "id": 275,
+    "name": "Payment Code",
+    "description": "The code indicating that the amount shown in the payment field on the non-institutional line item represents either 80% or 100% of the allowed charges less any deductible, or 100% limitation of liability only.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_pmt_80_100_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "paymentCode",
+    "ccwMapping": [
+        "LINE_PMT_80_100_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].extension[N].valueCoding.code",
+            "fhirPath": "item[%n].adjudication.extension.where(url='https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd').valueCoding.code",
+            "discriminator": [
+                "item[N].adjudication[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd\",\\n      \"code\": \"0\",\\n      \"display\": \"80%\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

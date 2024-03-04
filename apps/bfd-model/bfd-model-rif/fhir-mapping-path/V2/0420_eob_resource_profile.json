@@ -1,0 +1,43 @@
+{
+    "id": 420,
+    "name": "EOB Resource Profile",
+    "description": "An assertion that the content within the FHIR resource response conforms to a FHIR resource profile defined by HL7 or other FHIR Accelerator Groups. The industry standard profile that is used as a template for this FHIR Resource.",
+    "appliesTo": [
+        "PDE",
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "meta.profile",
+            "fhirPath": "meta.profile",
+            "discriminator": [],
+            "additional": [],
+            "derived": "IF DME, INPATIENT, HOSPICE, SNF then 'http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional'.  IF CARRIER, HHA,  then 'http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician'.  IF OUTPATIENT then 'http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional'.  IF PDE then 'http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy' ",
+            "note": "",
+            "example": "[\\n  \"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy\"\\n]"
+        }
+    ]
+}

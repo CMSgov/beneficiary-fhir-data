@@ -1,0 +1,50 @@
+{
+    "id": 364,
+    "name": "Patient Discharge Status Code",
+    "description": "The code used to identify the status of the patient as of the Claim Through Date.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "ptnt_dschrg_stus_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "patientDischargeStatusCode",
+    "ccwMapping": [
+        "PTNT_DSCHRG_STUS_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.BENE_PTNT_STUS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].code.coding[N].code",
+            "fhirPath": "supportingInfo.where(code.coding.where(system='https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd')).code.coding.code",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "eob.supportingInfo[N].category.coding[N].code = 'discharge-status'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Discharge Status')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 9,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"discharge-status\",\\n          \"display\": \"Discharge Status\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd\",\\n          \"code\": \"51\",\\n          \"display\": \"Discharged/transferred to a Hospice \u2013 medical facility.\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

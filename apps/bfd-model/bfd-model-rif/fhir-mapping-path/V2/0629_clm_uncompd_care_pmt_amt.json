@@ -1,0 +1,40 @@
+{
+    "id": 629,
+    "name": "Claim Uncompensated Care Payment Amount",
+    "description": "This field identifies the payment for disproportionate share hospitals (DSH). It represents the uncompensated care amount of the payment",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_uncompd_care_pmt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "claimUncompensatedCareAmount",
+    "ccwMapping": [
+        "CLM_UNCOMPD_CARE_PMT_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_HIPPS_UNCOMPD_CARE_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt').valueMoney.value",
+            "discriminator": [
+                "extension.url = 'url='https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "{\\n \"url\" : \"https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt\",\\n  \"valueMoney\" : {\\n      \"value\" : 120.56,\\n      \"system\" : \"urn:iso:std:iso:4217\",\\n      \"code\" : \"USD\"\\n}"
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "id": 311,
+    "name": "Operating Physician UPIN",
+    "description": "On an institutional claim, the unique physician identification number (UPIN) of the physician who performed the principal procedure. This element is used by the provider to identify the operating physician who performed the surgical procedure.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "op_physn_upin",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 6,
+    "bfdJavaFieldName": "operatingPhysicianUpin",
+    "ccwMapping": [
+        "OP_PHYSN_UPIN"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "careTeam.where(role.coding.where(code='operating')).provider.identifier.where(type.coding.where(code='upin')).value",
+            "discriminator": [
+                "careTeam[N].role.coding[N].code = 'operating'",
+                "careTeam[N].provider.identifier[N].system = 'http://hl7.org/fhir/sid/us-upin'"
+            ],
+            "additional": [
+                "(eob.careTeam[N].provider.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'Medicare/CMS (formerly HCFA)'s Universal Physician Identification numbers')",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole'",
+                "eob.careTeam[N].role.coding[N].display = 'Operating')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "id": 21,
+    "name": "Carrier MTUS Indicator Code",
+    "description": "Code indicating the units associated with services needing unit reporting on the line item for the carrier claim (non-DMERC).",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_line_mtus_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "mtusCode",
+    "ccwMapping": [
+        "CARR_LINE_MTUS_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueCoding.code",
+            "fhirPath": "item[%n].extension.where(url = 'https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd').valueCoding.code",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd'"
+            ],
+            "additional": [
+                "eob.item[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd\",\\n      \"code\": \"3\",\\n      \"display\": \"Services\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

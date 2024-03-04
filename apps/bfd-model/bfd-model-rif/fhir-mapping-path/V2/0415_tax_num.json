@@ -1,0 +1,43 @@
+{
+    "id": 415,
+    "name": "Provider Tax Number",
+    "description": "The federal taxpayer identification number (TIN) that identifies the physician/practice/supplier to whom payment is made for the line-item service.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "tax_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "providerTaxNumber",
+    "ccwMapping": [
+        "TAX_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_RNDRG_PRVDR_TAX_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueCoding.code",
+            "fhirPath": "item[%n].extension.where(url = 'https://bluebutton.cms.gov/resources/variables/tax_num').valueCoding.code",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/tax_num'",
+                "item[N].extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/tax_num'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamSequence list.",
+            "example": ""
+        }
+    ]
+}

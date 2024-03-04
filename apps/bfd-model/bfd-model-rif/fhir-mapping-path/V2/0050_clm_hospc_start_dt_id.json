@@ -1,0 +1,43 @@
+{
+    "id": 50,
+    "name": "Claim Hospice Start Date",
+    "description": "On an institutional claim, the date the beneficiary was admitted to the hospice care.",
+    "appliesTo": [
+        "Hospice"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_hospc_start_dt_id",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "claimHospiceStartDate",
+    "ccwMapping": [
+        "CLM_HOSPC_START_DT_ID"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_RNG_BGN_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].timingPeriod.start",
+            "fhirPath": "supportingInfo.where(category.coding.where(code='admissionperiod')).timingPeriod.start",
+            "discriminator": [
+                "supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "supportingInfo[N].category.coding[N].code = 'admissionperiod'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].category.coding[N].display = 'Admission Period'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 3,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"admissionperiod\",\\n          \"display\": \"Admission Period\"\\n        }\\n      ]\\n    },\\n    \"timingPeriod\": {\\n      \"start\": \"2014-07-06\",\\n      \"end\": \"2015-06-29\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

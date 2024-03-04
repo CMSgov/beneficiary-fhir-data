@@ -1,0 +1,45 @@
+{
+    "id": 51,
+    "name": "Claim LUPA Indicator Code",
+    "description": "The code used to identify those Home Health PPS claims that have 4 visits or less in a 60-day episode.",
+    "appliesTo": [
+        "HHA"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_hha_lupa_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "claimLUPACode",
+    "ccwMapping": [
+        "CLM_HHA_LUPA_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].code.coding[N].code",
+            "fhirPath": "supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/resources/variables/clm_hha_lupa_ind_cd').code.coding.code",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_hha_lupa_ind_cd'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claiminformationcategory'",
+                "eob.supportingInfo[N].category.coding[N].code = 'info'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Information')",
+                "eob.supportingInfo[N].category.coding[N].system = https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.supportingInfo[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_hha_lupa_ind_cd'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Claim HHA Low Utilization Payment Adjustment (LUPA) Indicator Code')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 6,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/claiminformationcategory\",\\n          \"code\": \"info\",\\n          \"display\": \"Information\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/information\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_hha_lupa_ind_cd\",\\n          \"display\": \"Claim HHA Low Utilization Payment Adjustment (LUPA) Indicator Code\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_hha_lupa_ind_cd\",\\n          \"code\": \"L\",\\n          \"display\": \"Low utilization payment adjustment (LUPA) claim\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

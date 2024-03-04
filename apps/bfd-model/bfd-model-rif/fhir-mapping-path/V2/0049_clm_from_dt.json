@@ -1,0 +1,51 @@
+{
+    "id": 49,
+    "name": "Claim From Date",
+    "description": "The first day on the billing statement covering services rendered to the beneficiary (a.k.a. 'Statement Covers From Date').",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_from_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "dateFrom",
+    "ccwMapping": [
+        "CLM_FROM_DT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_FROM_DT",
+        "CCLF2.CLM_FROM_DT",
+        "CCLF3.CLM_FROM_DT",
+        "CCLF4.CLM_FROM_DT",
+        "CCLF5.CLM_FROM_DT",
+        "CCLF6.CLM_FROM_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "billablePeriod.start",
+            "fhirPath": "billablePeriod.start",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"start\": \"1999-10-27\",\\n    \"end\": \"1999-10-27\"\\n  }\\n]\\n"
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "id": 356,
+    "name": "Provider Participating Indicator Code",
+    "description": "Code indicating whether or not a provider is participating (accepting assignment) for this line-item service on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prtcptng_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "providerParticipatingIndCode",
+    "ccwMapping": [
+        "PRTCPTNG_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].extension[N].valueCoding.code",
+            "fhirPath": "careTeam[%n].extension.where(url='https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd').valueCoding.code",
+            "discriminator": [
+                "careTeam[N].extension[N].valueCoding.system = ''https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd'",
+                "careTeam[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd'"
+            ],
+            "additional": [
+                "eob.careTeam[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "This is only set for the 'Performing' Provider in the list of CareTeam members, if one exists.",
+            "example": ""
+        }
+    ]
+}

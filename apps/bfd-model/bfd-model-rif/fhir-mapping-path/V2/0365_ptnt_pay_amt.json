@@ -1,0 +1,48 @@
+{
+    "id": 365,
+    "name": "Patient Pay Amount",
+    "description": "This variable is the dollar amount that the beneficiary paid for the PDE without being reimbursed by a third party.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "ptnt_pay_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "patientPaidAmount",
+    "ccwMapping": [
+        "PTNT_PAY_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_BENE_PMT_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication' and code = 'https://bluebutton.cms.gov/resources/variables/ptnt_pay_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/ptnt_pay_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/adjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'paidbypatient'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Paid by Patient')",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Amount Paid by Patient'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication\",\\n          \"code\": \"paidbypatient\",\\n          \"display\": \"Paid by patient\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/ptnt_pay_amt\",\\n          \"display\": \"Amount Paid by Patient\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 235.85,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "id": 377,
+    "name": "Revenue Center Blood Deductible Amount",
+    "description": "This variable is the dollar amount the beneficiary is responsible for related to the deductible for blood products that appear on the revenue center record.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_blood_ddctbl_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "bloodDeductibleAmount",
+    "ccwMapping": [
+        "REV_CNTR_BLOOD_DDCTBL_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication' and code = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_blood_ddctbl_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_blood_ddctbl_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/adjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'deductible'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Deductible')",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Revenue Center Blood Deductible Amount'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/adjudication\",\\n          \"code\": \"deductible\",\\n          \"display\": \"Deductible\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/rev_cntr_blood_ddctbl_amt\",\\n          \"display\": \"Revenue Center Blood Deductible Amount\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 10.45,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

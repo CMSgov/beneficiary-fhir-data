@@ -1,0 +1,39 @@
+{
+    "id": 19,
+    "name": "Anesthesia Unit Count",
+    "description": "The base number of units assigned to the line item anesthesia procedure on the carrier claim (non-DMERC).",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "carr_line_ansthsa_unit_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "anesthesiaUnitCount",
+    "ccwMapping": [
+        "CARR_LINE_ANSTHSA_UNIT_CNT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueQuantity.value",
+            "fhirPath": "item[%n].extension.where(url = 'https://bluebutton.cms.gov/resources/variables/carr_line_ansthsa_unit_cnt').valueQuantity.value",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_line_ansthsa_unit_cnt'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n    {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/carr_line_ansthsa_unit_cnt\",\\n        \"valueQuantity\": {\\n            \"value\": 6\\n        }\\n    }\\n]"
+        }
+    ]
+}

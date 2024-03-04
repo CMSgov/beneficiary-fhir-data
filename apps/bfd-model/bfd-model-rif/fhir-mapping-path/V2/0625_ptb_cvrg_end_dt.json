@@ -1,0 +1,36 @@
+{
+    "id": 625,
+    "name": "Medicare Coverage B End Date",
+    "description": "That date that Medicare Coverage Part B ended for the Beneficiary.",
+    "appliesTo": [
+        "Part-B"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "ptb_cvrg_end_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "partBCoverageEndDate",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "period.end",
+            "fhirPath": "period.end",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"start\": \"2020-03-17\",\\n    \"end\": \"2020-06-17\"\\n  }\\n]\\n"
+        }
+    ]
+}

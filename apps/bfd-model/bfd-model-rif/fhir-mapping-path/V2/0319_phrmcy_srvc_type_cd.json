@@ -1,0 +1,43 @@
+{
+    "id": 319,
+    "name": "Pharmacy Type Code",
+    "description": "The type of pharmacy used. This variable indicates the type of pharmacy that dispensed the prescription, as recorded on the PDE.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "phrmcy_srvc_type_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "pharmacyTypeCode",
+    "ccwMapping": [
+        "PHRMCY_SRVC_TYPE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_PHRMCY_SRVC_TYPE_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "facility.extension[N].valueCoding.code",
+            "fhirPath": "facility.extension.where(url='https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd').valueCoding.code",
+            "discriminator": [
+                "facility.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd'"
+            ],
+            "additional": [
+                "eob.facility.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd\",\\n      \"code\": \"01\",\\n      \"display\": \"Community/retail pharmacy\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

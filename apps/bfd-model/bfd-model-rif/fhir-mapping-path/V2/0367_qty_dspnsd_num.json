@@ -1,0 +1,39 @@
+{
+    "id": 367,
+    "name": "Quantity Dispensed",
+    "description": "This field indicates the number of units, grams, milliliters, or other quantity dispensed in the current drug event.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "qty_dspnsd_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "quantityDispensed",
+    "ccwMapping": [
+        "QTY_DSPNSD_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_SRVC_UNIT_QTY"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].quantity.value",
+            "fhirPath": "item[%n].quantity.value",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"value\": 60\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "id": 350,
+    "name": "Performing Physician UPIN",
+    "description": "The unique physician identification number (UPIN) of the physician who performed the service for this line item on the carrier claim (non-DMERC).",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prf_physn_upin",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "performingPhysicianUpin",
+    "ccwMapping": [
+        "PRF_PHYSN_UPIN"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "careTeam.where(role.coding.where(code = 'performing')).provider.identifier.where(type.coding.where(code='upin')).value",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].type.coding[N].code = 'upin'",
+                "careTeam[N].role.coding[N].code = 'performing'"
+            ],
+            "additional": [
+                "eob.careTeam[N].responsible = true",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'Medicare/CMS (formerly HCFA)'s Universal Physician Identification numbers')",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole'",
+                "eob.careTeam[N].role.coding[N].display = 'Performing provider')"
+            ],
+            "derived": "If 'Performing Physician NPI' is supplied then this will be used to populate the eob.careTeam[N] element, otherwise if 'Performing Physician UPIN' is supplied then that will be the identifier used to populate the eob.careTeam[N] element.",
+            "note": " The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamSequence list.",
+            "example": ""
+        }
+    ]
+}

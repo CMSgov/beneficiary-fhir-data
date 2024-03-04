@@ -1,0 +1,51 @@
+{
+    "id": 312,
+    "name": "Organization NPI",
+    "description": "The National Provider Identifier (NPI) of the organization or group practice.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "org_npi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "organizationNpi",
+    "ccwMapping": [
+        "ORG_NPI_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF1.FAC_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "contained[N].identifier[N].value",
+            "fhirPath": "contained.where(resourceType='Organization').identifier.where(type.coding.where(code='npi')).value",
+            "discriminator": [
+                "contained[N].identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "contained[N].identifier[N].type.coding[N].code = 'npi'",
+                "contained[N].resourceType = 'Organization'"
+            ],
+            "additional": [
+                "eob.contained[N].id = <unique provider-org identifier>",
+                "eob.contained[N].name",
+                "eob.contained[N].meta.profile = ['http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization' ]"
+            ],
+            "derived": "",
+            "note": "The <unique provider-org identifier> will be used in the eob.provider field. This references the internal/contained provider ogranization.",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\"\\n        }\\n      ]\\n    },\\n    \"system\": \"http://hl7.org/fhir/sid/us-npi\",\\n    \"value\": \"0000000000\"\\n  }\\n]"
+        }
+    ]
+}

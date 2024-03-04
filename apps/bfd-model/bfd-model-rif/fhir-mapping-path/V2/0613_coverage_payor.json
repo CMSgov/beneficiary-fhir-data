@@ -1,0 +1,40 @@
+{
+    "id": 613,
+    "name": "Coverage Payor",
+    "description": "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "payor[N].identifier[N].value",
+            "fhirPath": "payor.identifier.value",
+            "discriminator": [
+                "payor[1].identifier[1]"
+            ],
+            "additional": [],
+            "derived": "Centers for Medicare and Medicaid Services",
+            "note": "",
+            "example": "[\\n  {\\n    \"identifier\": {\\n      \"value\": \"Centers for Medicare and Medicaid Services\"\\n    }\\n  }\\n]\\n"
+        }
+    ]
+}
