@@ -756,7 +756,7 @@ resource "aws_vpc_endpoint" "this" {
   tags                = { Name = "${local.full_name}-sftp-endpoint" }
 }
 
-module "outbound_alerting" {
+module "outbound_o11y" {
   depends_on = [
     aws_sqs_queue.sftp_outbound_transfer_dlq,
     aws_lambda_function.sftp_outbound_transfer,
@@ -765,7 +765,7 @@ module "outbound_alerting" {
   ]
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  source = "./modules/bfd_eft_outbound_alerting"
+  source = "./modules/bfd_eft_outbound_o11y"
 
   ssm_config                       = local.ssm_config
   kms_key_arn                      = local.kms_key_id
