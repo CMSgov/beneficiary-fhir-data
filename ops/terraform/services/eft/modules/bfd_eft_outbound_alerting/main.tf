@@ -138,6 +138,7 @@ resource "aws_lambda_function" "slack_notifier" {
   filename         = data.archive_file.slack_notifier_src.output_path
   source_code_hash = data.archive_file.slack_notifier_src.output_base64sha256
   architectures    = ["x86_64"]
+  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:60"]
   handler          = "${local.slack_notifier_lambda_src}.handler"
   memory_size      = 128
   package_type     = "Zip"
