@@ -68,9 +68,9 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
     "The ${var.outbound_lambda_name} has failed to transfer a file in ${local.env}. View the ",
     "linked CloudWatch Log Group for more details on the failure, and inspect the failing event ",
     "in the linked DLQ",
-    "\n\n",
-    "* CloudWatch Log Group: <${local.alarms_config.lambda_errors.log_group_url}|${local.alarms_config.lambda_errors.log_group_name}>",
-    "* Dead Letter Queue: <${local.alarms_config.lambda_errors.queue_url}|${var.outbound_lambda_dlq_name}>",
+    "\n",
+    "\n* CloudWatch Log Group: <${local.alarms_config.lambda_errors.log_group_url}|${local.alarms_config.lambda_errors.log_group_name}>",
+    "\n* Dead Letter Queue: <${local.alarms_config.lambda_errors.queue_url}|${var.outbound_lambda_dlq_name}>",
   ])
 
   metric_name = "Errors"
@@ -98,8 +98,8 @@ resource "aws_cloudwatch_metric_alarm" "sns_failures" {
   alarm_description = join("", [
     "The ${each.key} SNS Topic has failed to deliver a status notification to a subscriber in ",
     "${local.env}. View the linked CloudWatch Log Group for more details",
-    "\n\n",
-    "* CloudWatch Log Group: <${each.value.log_group_url}|${each.value.log_group_name}>",
+    "\n",
+    "\n* CloudWatch Log Group: <${each.value.log_group_url}|${each.value.log_group_name}>",
   ])
 
   metric_name = "NumberOfNotificationsFailed"
