@@ -761,8 +761,11 @@ module "outbound_alerting" {
 
   source = "./modules/bfd_eft_outbound_alerting"
 
-  ssm_config               = local.ssm_config
-  outbound_lambda_name     = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
-  outbound_lambda_dlq_name = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].name)
-  outbound_sns_topic_names = concat(aws_sns_topic.outbound_notifs[*].name, [for _, v in aws_sns_topic.outbound_partner_notifs : v.name])
+  ssm_config                       = local.ssm_config
+  kms_key_arn                      = local.kms_key_id
+  outbound_lambda_name             = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
+  outbound_lambda_dlq_name         = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].name)
+  outbound_bfd_sns_topic_name      = one(aws_sns_topic.outbound_notifs[*].name)
+  outbound_bfd_sns_topic_arn       = one(aws_sns_topic.outbound_notifs[*].arn)
+  outbound_partner_sns_topic_names = [for _, v in aws_sns_topic.outbound_partner_notifs : v.name]
 }

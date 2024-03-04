@@ -22,3 +22,13 @@ data "aws_ssm_parameter" "slack_webhook" {
   name            = local.slack_webhook_ssm_path
   with_decryption = true
 }
+
+data "archive_file" "slack_notifier_src" {
+  type        = "zip"
+  output_path = "${path.module}/lambda_src/${local.slack_notifier_lambda_src}/${local.slack_notifier_lambda_src}.zip"
+
+  source {
+    content  = file("${path.module}/lambda_src/${local.slack_notifier_lambda_src}/${local.slack_notifier_lambda_src}.py")
+    filename = "${local.slack_notifier_lambda_src}.py"
+  }
+}

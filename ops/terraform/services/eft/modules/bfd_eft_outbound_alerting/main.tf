@@ -7,6 +7,7 @@ locals {
   lambda_metrics_namespace = "AWS/Lambda"
   sns_metrics_namespace    = "AWS/SNS"
 
+  outbound_sns_topic_names = concat([var.outbound_bfd_sns_topic_name], var.outbound_partner_sns_topic_names)
   alarms_raw_config = {
     lambda_errors = {
       breach_topic   = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/lambda_errors/alarms/breach_topic", null)
@@ -17,7 +18,7 @@ locals {
       breach_topic = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/sns_failures/alarms/breach_topic", null)
       ok_topic     = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/sns_failures/alarms/ok_topic", null)
       per_topic = {
-        for topic_name in var.outbound_sns_topic_names :
+        for topic_name in local.outbound_sns_topic_names :
         topic_name => {
           log_group_name = "sns/${local.region}/${local.account_id}/${topic_name}/Failure"
         }
@@ -28,7 +29,7 @@ locals {
     lambda_errors = {
       breach_topic_arn = try(data.aws_sns_topic.breach_topics["lambda_errors"].arn, null)
       ok_topic_arn     = try(data.aws_sns_topic.ok_topics["lambda_errors"].arn, null)
-      alarm_name       = "bfd-${local.service}-${var.outbound_lambda_name}-errors"
+      alarm_name       = "${var.outbound_lambda_name}-errors"
       log_group_name   = local.alarms_raw_config.lambda_errors.log_group_name
       log_group_url    = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#logsV2:log-groups/log-group/${replace(local.alarms_raw_config.lambda_errors.log_group_name, "/", "$252F")}"
       queue_url        = "https://us-east-1.console.aws.amazon.com/sqs/v3/home?region=us-east-1#/queues/${urlencode(data.aws_sqs_queue.outbound_lambda_dlq.url)}"
@@ -37,7 +38,7 @@ locals {
       breach_topic_arn = try(data.aws_sns_topic.breach_topics["sns_failures"].arn, null)
       ok_topic_arn     = try(data.aws_sns_topic.ok_topics["sns_failures"].arn, null)
       per_topic = {
-        for topic_name in var.outbound_sns_topic_names :
+        for topic_name in local.outbound_sns_topic_names :
         topic_name => {
           alarm_name     = "${topic_name}-sns-delivery-failures"
           log_group_name = local.alarms_raw_config.sns_failures.per_topic[topic_name].log_group_name
@@ -46,8 +47,11 @@ locals {
       }
     }
   }
-  slack_webhook_ssm_path = var.ssm_config["/bfd/${local.service}/outbound/o11y/slack_notifier/webhook_ssm_path"]
-  slack_webhook          = nonsensitive(data.aws_ssm_parameter.slack_webhook.value)
+
+  slack_notifier_lambda_name = "bfd-${local.env}-${local.service}-outbound-slack-notifier"
+  slack_notifier_lambda_src  = "outbound_slack_notifier"
+  slack_webhook_ssm_path     = var.ssm_config["/bfd/${local.service}/outbound/o11y/slack_notifier/webhook_ssm_path"]
+  slack_webhook              = nonsensitive(data.aws_ssm_parameter.slack_webhook.value)
 }
 
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
@@ -106,4 +110,50 @@ resource "aws_cloudwatch_metric_alarm" "sns_failures" {
 
   alarm_actions = local.alarms_config.sns_failures.breach_topic_arn != null ? [local.alarms_config.sns_failures.breach_topic_arn] : null
   ok_actions    = local.alarms_config.sns_failures.ok_topic_arn != null ? [local.alarms_config.sns_failures.ok_topic_arn] : null
+}
+
+resource "aws_lambda_permission" "slack_notifier_allow_sns" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.slack_notifier.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = var.outbound_bfd_sns_topic_arn
+}
+
+resource "aws_sns_topic_subscription" "sns_to_slack_notifier" {
+  topic_arn = var.outbound_bfd_sns_topic_arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.slack_notifier.arn
+}
+
+resource "aws_lambda_function" "slack_notifier" {
+  function_name = local.slack_notifier_lambda_name
+
+  description = join("", [
+    "Invoked when the ${var.outbound_bfd_sns_topic_name} sends a notification. This Lambda posts ",
+    "the contents of the notification to the configured Slack channel"
+  ])
+
+  kms_key_arn      = var.kms_key_arn
+  filename         = data.archive_file.slack_notifier_src.output_path
+  source_code_hash = data.archive_file.slack_notifier_src.output_base64sha256
+  architectures    = ["x86_64"]
+  handler          = "${local.slack_notifier_lambda_src}.handler"
+  memory_size      = 128
+  package_type     = "Zip"
+  runtime          = "python3.10"
+  timeout          = 300
+
+  tags = {
+    Name = local.slack_notifier_lambda_name
+  }
+
+  environment {
+    variables = {
+      BFD_ENVIRONMENT   = local.env
+      SLACK_WEBHOOK_URL = local.slack_webhook
+    }
+  }
+
+  role = one(aws_iam_role.slack_notifier[*].arn)
 }
