@@ -67,9 +67,9 @@ def _slack_outbound_event(status_notification: StatusNotification):
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        f"*{message_preamble}*",
-                        "\n",
-                        f"```{json.dumps(asdict(status_notification), indent=2)}```",
+                        f"*{message_preamble}*"
+                        "\n"
+                        f"```{json.dumps(asdict(status_notification), indent=2)}```"
                     ),
                 },
             }
