@@ -28,6 +28,9 @@ public class MicrometerConfigHelper {
    */
   private final Function<String, String> valueLookupFunction;
 
+  /** * boolean flag for initialization. */
+  private final boolean initialized;
+
   /**
    * Constructs a new instance. A function is used to do environment variable lookup so that any
    * source of values can be used (for testing, etc).
@@ -40,7 +43,8 @@ public class MicrometerConfigHelper {
     this(
         propertyMappings.stream()
             .collect(ImmutableMap.toImmutableMap(pm -> pm.propertyName, pm -> pm)),
-        valueLookupFunction);
+        valueLookupFunction,
+        true);
   }
 
   /**
@@ -53,7 +57,7 @@ public class MicrometerConfigHelper {
    */
   @VisibleForTesting
   MicrometerConfigHelper withValueLookupFunction(Function<String, String> valueLookupFunction) {
-    return new MicrometerConfigHelper(propertiesByName, valueLookupFunction);
+    return new MicrometerConfigHelper(propertiesByName, valueLookupFunction, initialized);
   }
 
   /**
