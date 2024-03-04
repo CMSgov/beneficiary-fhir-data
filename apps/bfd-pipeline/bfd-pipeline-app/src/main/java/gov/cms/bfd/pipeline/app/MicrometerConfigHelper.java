@@ -48,28 +48,6 @@ public class MicrometerConfigHelper {
   }
 
   /**
-   * Ensures that the MicrometerConfigHelper instance is initialized only once. If it has not been
-   * initialized, it creates a new instance with the specified properties; otherwise, it returns the
-   * current instance.
-   *
-   * @param propertyMappings list of mappings {@link PropertyMapping} defines supported properties
-   * @param valueLookupFunction used to look up environment variables
-   * @return instance with same config and default maps but new lookup function
-   */
-  private MicrometerConfigHelper initialize(
-      List<PropertyMapping> propertyMappings, Function<String, String> valueLookupFunction) {
-    if (!initialized) {
-      return new MicrometerConfigHelper(
-          propertyMappings.stream()
-              .collect(ImmutableMap.toImmutableMap(pm -> pm.propertyName, pm -> pm)),
-          valueLookupFunction,
-          true);
-    } else {
-      return this;
-    }
-  }
-
-  /**
    * Creates a copy of this object that differs only in the value lookup function. Intended for use
    * in unit tests to plug in a testable lookup function (like {@link Map#get}) instead of an
    * untestable one like {@link System#getenv}.
