@@ -59,7 +59,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   deletion_protection = local.rds_deletion_protection_override != null ? local.rds_deletion_protection_override : !local.is_ephemeral_env
 
   # TODO: consider implementing conditional inclusion of the 'cpm backup' tag
-  tags = { "cpm backup" = "Weekly Monthly", "Layer" = "data" }
+  tags = { "cpm backup" = "Weekly", "Layer" = "data" }
 
   # master username and password are null when a snapshot identifier is specified (clone and ephemeral support)
   master_password     = local.rds_master_password
