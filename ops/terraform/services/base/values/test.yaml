@@ -18,8 +18,8 @@ bfd:
       rds_master_username: bfduser
       rds_master_password: <<CIPHER>>AgV4GaDtHRHl9qxgfiTUgEPMrYWN0DkmxfsKvcRPs9oEL4EAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFsUkVRL0lweDdMeGFSQXRtbU9POWdyQXNFOTJiSkZGMWFwZHlVUjg3dmM1R1RlRVVodFlPUndUTlM0cG5zRGRXZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEGP0kcdPzxNkGu3RhEi0tJAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMoJiy-M-cD6yOmpqYAgEQgDshbjLsFgZUCjPXInw1AmrNRB0DjlgIElxuMl54s0KhnCiyl1FDgPsOxGjJ8JlQt0Pi4cQbmcQbRNGOswIAABAAsFsfkGipXo1BaVlKZd_XxSRFEOr0yZPrT1eu46DmKWp0Rq3ARYkX5XqyoqWj2HN4_____wAAAAEAAAAAAAAAAAAAAAEAAAARFL4V6i-oJVqgy5riX723LqqsWVkmGT90z82erLeql8ANAGcwZQIxAKHF_TIrfW8RSRw0Clq1D5kFnnpzqiQ83HXT1qukqXUrXkTprSWk9Brdvx18W5RJfgIwInIUXn2Prt7EIZxi8zEJe4zZ5ke8SMGYrPo5nuhEACiRlFg8jXc1HqgaCE3RVfYn<</CIPHER>>
       rds_cluster_identifier: bfd-test-aurora-cluster
-      rds_instance_class: db.r6i.12xlarge
-      rds_instance_count: 2
+      rds_instance_class: db.r6i.2xlarge
+      rds_instance_count: 1
       rds_security_group: bfd-test-aurora-cluster
       vpc_name: bfd-test-vpc
       vpn_security_group: bfd-test-vpn-private

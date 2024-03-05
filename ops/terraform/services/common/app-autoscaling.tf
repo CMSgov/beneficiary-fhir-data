@@ -33,8 +33,8 @@ resource "aws_appautoscaling_scheduled_action" "scale_out" {
   # NOTE: min_capacity and max_capacity will count nodes that are and
   # are not managed by app-autoscaling when calculating the desired capacity.
   scalable_target_action {
-    min_capacity = 2
-    max_capacity = 2
+    min_capacity = 1
+    max_capacity = 1
   }
 }
 
