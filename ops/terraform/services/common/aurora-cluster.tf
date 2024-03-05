@@ -53,6 +53,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   preferred_maintenance_window        = "fri:07:00-fri:08:00"
   skip_final_snapshot                 = true
   storage_encrypted                   = true
+  storage_type                        = "aurora-iopt1"
 
   # if deletion_protection_override is null, use the default value for the environment, otherwise use the override
   deletion_protection = local.rds_deletion_protection_override != null ? local.rds_deletion_protection_override : !local.is_ephemeral_env
