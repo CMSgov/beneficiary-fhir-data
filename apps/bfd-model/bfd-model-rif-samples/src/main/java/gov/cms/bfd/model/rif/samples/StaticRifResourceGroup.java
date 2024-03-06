@@ -7,6 +7,18 @@ import java.util.stream.Collectors;
 
 /** Enumerates groups of related {@link StaticRifResource}s that can be processed together. */
 public enum StaticRifResourceGroup {
+  /** Sample A for BB2 Resource Group. */
+  SAMPLE_A_BB2(
+      StaticRifResource.SAMPLE_A4BB2_BENES,
+      StaticRifResource.SAMPLE_A4BB2_BENEFICIARY_HISTORY,
+      StaticRifResource.SAMPLE_A4BB2_CARRIER,
+      StaticRifResource.SAMPLE_A4BB2_PDE,
+      StaticRifResource.SAMPLE_A4BB2_INPATIENT,
+      StaticRifResource.SAMPLE_A4BB2_OUTPATIENT,
+      StaticRifResource.SAMPLE_A4BB2_HHA,
+      StaticRifResource.SAMPLE_A4BB2_HOSPICE,
+      StaticRifResource.SAMPLE_A4BB2_SNF,
+      StaticRifResource.SAMPLE_A4BB2_DME),
   /** Sample A Resource Group. */
   SAMPLE_A(
       StaticRifResource.SAMPLE_A_BENES,

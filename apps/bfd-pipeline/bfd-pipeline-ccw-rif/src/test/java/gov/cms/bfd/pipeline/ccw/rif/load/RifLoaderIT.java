@@ -110,6 +110,16 @@ public final class RifLoaderIT {
     validateBeneficiaryCountsInDatabase(1);
   }
 
+  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A_BB2} data. */
+  @Test
+  public void loadSampleA4BB2() {
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_BB2.getResources()));
+    verifyRecordPrimaryKeysPresent(
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_BB2.getResources()));
+    // Ensure no records were skipped
+    validateBeneficiaryCountsInDatabase(1);
+  }
+
   /**
    * Runs {@link RifLoader} against the modified {@link StaticRifResourceGroup#SAMPLE_A} data for an
    * <code>UPDATE</code> on a {@link Beneficiary} record that has a single file with multiple

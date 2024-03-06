@@ -18,6 +18,10 @@ public enum StaticRifResource {
   SAMPLE_A_BENES(
       resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
+  /** Sample A for BB2 Beneficiary static rif. */
+  SAMPLE_A4BB2_BENES(
+      resourceUrl("rif-static-samples/sample-a4bb2-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
+
   /** Sample A Beneficiary without a reference year static rif. */
   SAMPLE_A_BENES_WITHOUT_REFERENCE_YEAR(
       resourceUrl("rif-static-samples/sample-a-beneficiaries-without-reference-year.txt"),
@@ -36,8 +40,18 @@ public enum StaticRifResource {
       RifFileType.BENEFICIARY_HISTORY,
       5),
 
+  /** Sample A for BB2 Beneficiary History static rif. */
+  SAMPLE_A4BB2_BENEFICIARY_HISTORY(
+      resourceUrl("rif-static-samples/sample-a4bb2-beneficiaryhistory.txt"),
+      RifFileType.BENEFICIARY_HISTORY,
+      5),
+
   /** Sample A Carrier static rif. */
   SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
+
+  /** Sample A for BB2 Carrier static rif. */
+  SAMPLE_A4BB2_CARRIER(
+      resourceUrl("rif-static-samples/sample-a4bb2-bcarrier.txt"), RifFileType.CARRIER, 1),
 
   /** Sample A Carrier static rif. */
   SAMPLE_A_CARRIER_MULTIPLE_LINES(
@@ -49,6 +63,10 @@ public enum StaticRifResource {
   SAMPLE_A_INPATIENT(
       resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 
+  /** Sample A for BB2 Inpatient static rif. */
+  SAMPLE_A4BB2_INPATIENT(
+      resourceUrl("rif-static-samples/sample-a4bb2-inpatient.txt"), RifFileType.INPATIENT, 1),
+
   /** Sample A Inpatient four character drg code static rif. */
   SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE(
       resourceUrl("rif-static-samples/sample-a-inpatient-with-four-character-drg-code.txt"),
@@ -59,8 +77,15 @@ public enum StaticRifResource {
   SAMPLE_A_OUTPATIENT(
       resourceUrl("rif-static-samples/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
 
+  /** Sample A for BB2 Outpatient static rif. */
+  SAMPLE_A4BB2_OUTPATIENT(
+      resourceUrl("rif-static-samples/sample-a4bb2-outpatient.txt"), RifFileType.OUTPATIENT, 1),
+
   /** Sample A SNF static rif. */
   SAMPLE_A_SNF(resourceUrl("rif-static-samples/sample-a-snf.txt"), RifFileType.SNF, 1),
+
+  /** Sample A for BB2 SNF static rif. */
+  SAMPLE_A4BB2_SNF(resourceUrl("rif-static-samples/sample-a4bb2-snf.txt"), RifFileType.SNF, 1),
 
   /** Sample A SNF Four Character DRG Code static rif. */
   SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE(
@@ -71,14 +96,27 @@ public enum StaticRifResource {
   /** Sample A Hospice static rif. */
   SAMPLE_A_HOSPICE(resourceUrl("rif-static-samples/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
 
+  /** Sample A for BB2 Hospice static rif. */
+  SAMPLE_A4BB2_HOSPICE(
+      resourceUrl("rif-static-samples/sample-a4bb2-hospice.txt"), RifFileType.HOSPICE, 1),
+
   /** Sample A HHA static rif. */
   SAMPLE_A_HHA(resourceUrl("rif-static-samples/sample-a-hha.txt"), RifFileType.HHA, 1),
+
+  /** Sample A for BB2 HHA static rif. */
+  SAMPLE_A4BB2_HHA(resourceUrl("rif-static-samples/sample-a4bb2-hha.txt"), RifFileType.HHA, 1),
 
   /** Sample A DME static rif. */
   SAMPLE_A_DME(resourceUrl("rif-static-samples/sample-a-dme.txt"), RifFileType.DME, 1),
 
+  /** Sample A for BB2 DME static rif. */
+  SAMPLE_A4BB2_DME(resourceUrl("rif-static-samples/sample-a4bb2-dme.txt"), RifFileType.DME, 1),
+
   /** Sample A PDE static rif. */
   SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
+
+  /** Sample A for BB2 PDE static rif. */
+  SAMPLE_A4BB2_PDE(resourceUrl("rif-static-samples/sample-a4bb2-pde.txt"), RifFileType.PDE, 1),
 
   /** Sample A Multiple Rows Same Beneficiary static rif. */
   SAMPLE_A_MULTIPLE_ROWS_SAME_BENE(

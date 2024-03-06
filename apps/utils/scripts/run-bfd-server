@@ -81,7 +81,7 @@ mkdir -p $exec_dir $bin_dir
 #
 
 # Default option values.
-debug_enabled=false
+debug_enabled=true
 debug_suspend=n
 db_host=localhost
 db_port=5432
@@ -248,7 +248,7 @@ setvar paths/files/truststore "$bin_dir/ssl/${truststore_file}"
 setvar paths/files/keystore "$bin_dir/ssl/${keystore_file}"
 setvar paths/files/war "$bin_dir/$war_file_name"
 
-setvar db/url "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=false"
+setvar db/url "jdbc:postgresql://${db_host}:${db_port}/fhirdb?logServerErrorDetail=false"
 setvar db/username "bfd"
 setvar db/password "InsecureLocalDev"
 
