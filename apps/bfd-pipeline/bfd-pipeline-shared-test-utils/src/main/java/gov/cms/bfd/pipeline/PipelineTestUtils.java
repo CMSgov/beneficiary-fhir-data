@@ -41,6 +41,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
@@ -214,11 +215,13 @@ public final class PipelineTestUtils {
         if (DatabaseUtils.isPostgresConnection(connection)) {
           truncateTableSql = truncateTableSql + " CASCADE";
         }
-        connection.createStatement().execute(truncateTableSql);
-
+        try (Statement statement = connection.createStatement()) {
+          statement.execute(truncateTableSql);
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
         connection.setSchema(defaultSchemaName.get());
       }
-
       connection.commit();
       LOGGER.info("Removed all application data from database.");
     } catch (SQLException e) {
