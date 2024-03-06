@@ -102,7 +102,6 @@ public final class PdfParserTest {
     for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
       Codebook codebook = parser.parseCodebookPdf(supportedCodebook);
 
-      String version = codebook.getVersion();
       for (Variable variable : codebook.getVariables()) {
         if (!variable.getValueGroups().isPresent()) continue;
 
