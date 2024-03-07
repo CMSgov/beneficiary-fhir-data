@@ -134,6 +134,7 @@ public class CommonQueries {
       long queryNanoSeconds = beneHistoryTimer.stop();
       CommonTransformerUtils.recordQueryInMdc(
           "bene_by_mbi.bene_by_mbi_or_id", queryNanoSeconds, values != null ? values.size() : 0);
+      beneHistoryTimer.close();
     }
 
     if (values == null || values.size() < 1) {
@@ -204,6 +205,7 @@ public class CommonQueries {
 
       CommonTransformerUtils.recordQueryInMdc(
           mdcContext, queryNanoSeconds, beneficiary == null ? 0 : 1);
+      timerContext.close();
     }
     return beneficiary;
   }
