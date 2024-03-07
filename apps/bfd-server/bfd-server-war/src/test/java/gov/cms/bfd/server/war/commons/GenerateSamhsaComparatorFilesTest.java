@@ -1,5 +1,10 @@
 package gov.cms.bfd.server.war.commons;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+
 import gov.cms.bfd.server.war.ServerTestUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,6 +64,13 @@ public class GenerateSamhsaComparatorFilesTest {
             .stream()
             .map(AbstractSamhsaMatcher::normalizeIcdCode)
             .toList();
+
+    assertThat(drgCodes, is(not(empty())));
+    assertThat(cptCodes, is(not(empty())));
+    assertThat(icd9ProcedureCodes, is(not(empty())));
+    assertThat(icd9DiagnosisCodes, is(not(empty())));
+    assertThat(icd10ProcedureCodes, is(not(empty())));
+    assertThat(icd10DiagnosisCodes, is(not(empty())));
 
     // keep an incrementing claim id for each claim. We end at ~5000, so increase a digit if we ever
     // need to

@@ -96,13 +96,12 @@ public final class PdfParserTest {
    * Parses all of the {@link SupportedCodebook}s using {@link
    * gov.cms.bfd.model.codebook.extractor.PdfParser}, looking for duplicate {@link Value#getCode()}s
    * within each {@link Variable}.
-   *
-   * @throws IOException Indicates test error.
    */
   @Test
-  public void findDuplicateCodes() throws IOException {
+  public void findDuplicateCodes() {
     for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
       Codebook codebook = parser.parseCodebookPdf(supportedCodebook);
+
       for (Variable variable : codebook.getVariables()) {
         if (!variable.getValueGroups().isPresent()) continue;
 
@@ -127,6 +126,7 @@ public final class PdfParserTest {
         // Log a detailed warning for each duplicate.
         for (String duplicatedCode : duplicatedCodes) {
           List<Value> duplicatedValues = valuesByCode.get(duplicatedCode);
+          assertEquals(duplicatedValues.get(0).getCode(), duplicatedValues.get(1).getCode());
           LOGGER.warn(
               "The code '{}' appears more than once in Variable '{}': {}.",
               duplicatedCode,

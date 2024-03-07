@@ -52,11 +52,16 @@ public final class AppTest {
     try (MockedStatic<DataUtilityCommons> dataUtilityCommons =
         Mockito.mockStatic(DataUtilityCommons.class)) {
       String outputDir = "outputDir";
+      String expectedFdaFile = App.FDA_PRODUCTS_RESOURCE;
 
       dataUtilityCommons
           .when(() -> DataUtilityCommons.getFDADrugCodes(any(), any()))
           .thenAnswer((Answer<Void>) invocation -> null);
       App.main(new String[] {outputDir});
+
+      // Verify that DataUtilityCommons.getFDADrugCodes was called with specific arguments
+      dataUtilityCommons.verify(
+          () -> DataUtilityCommons.getFDADrugCodes(outputDir, expectedFdaFile));
     }
   }
 }
