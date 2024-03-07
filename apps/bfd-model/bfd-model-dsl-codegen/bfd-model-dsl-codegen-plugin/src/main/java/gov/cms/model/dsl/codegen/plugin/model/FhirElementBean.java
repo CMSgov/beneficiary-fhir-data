@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class FhirElementBean implements ModelBean {
+
+  /** Mapping Id. */
+  private String mappingId;
+
   /** Id. */
   private int id;
 

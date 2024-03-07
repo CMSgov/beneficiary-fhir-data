@@ -9,11 +9,14 @@ import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.ModelUtil;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
 import gov.cms.model.dsl.codegen.plugin.util.Version;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.apache.maven.plugin.AbstractMojo;
@@ -62,6 +65,12 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
   @Parameter(property = "project", readonly = true)
   private MavenProject project;
 
+  /** Path to directory to contain generated code. */
+  @Parameter(
+      property = "fhirEntitiesDirectory",
+      defaultValue = "${project.build.directory}/generated-sources/fhirEntities")
+  private String fhirEntitiesDirectory;
+
   /** Parameterless constructor used by Maven to instantiate the plugin. */
   public GenerateDataDictionaryFromDslMojo() {}
 
@@ -72,6 +81,7 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
    * @throws MojoExecutionException if the process fails due to some error
    */
   public void execute() throws MojoExecutionException {
+    final File fhirMappingDir = MojoUtil.initializeOutputDirectory(fhirEntitiesDirectory);
     var templateFileMap = Map.of(Version.V1, v1TemplateFilePath, Version.V2, v2TemplateFilePath);
     var xlsxFilename =
         String.format("%s/data-dictionary-%s.xlsx", destinationDirectory, projectVersion);
@@ -81,13 +91,17 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
         var workbook = new XSSFWorkbook()) {
 
       // Process each data dictionary resource directory in turn
-      for (Version version : List.of(Version.V1, Version.V2)) {
+      for (Version version : List.of(Version.V2)) {
         var resourceDirPath = String.format("%s/%s", fhirMappingPath, version.name());
         var templatePath = templateFileMap.get(version);
         final RootBean root =
-            ModelUtil.loadModelFromYamlFileAndJsonFiles(
-                mappingPath, resourceDirPath); // todo: modify so does V1 vs V2
+            ModelUtil.appendFhirElementsToYamlFiles(mappingPath, fhirMappingDir, resourceDirPath);
         MojoUtil.validateModel(root); // modify so fits for our use case
+
+        if (project != null) {
+          project.addCompileSourceRoot(fhirEntitiesDirectory);
+        }
+
         processYamlFiles(
             root, destinationDirectory, projectVersion, templatePath, workbook, version);
       }
@@ -123,6 +137,8 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
     var jsonPath = basePath + ".json";
     var csvPath = basePath + ".csv";
 
+    List<FhirElement> allFhirElements = new ArrayList<>();
+
     try {
       // create transformers/writers and stream
       var elementToJson = FhirElementToJson.createInstance(new FileWriter(jsonPath));
@@ -133,35 +149,46 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
         switch (version) {
           case Version.V2:
             fhirElements = mapping.getR4FhirElements();
-            System.out.println("fhirElements: " + fhirElements.size());
             break;
           case Version.V1:
             System.out.println("V1 not yet supported");
             break;
         }
-        fhirElements.stream()
-            .map(
-                bean ->
-                    FhirElement.builder()
-                        .id(bean.getId())
-                        .name(bean.getName())
-                        .description(bean.getDescription())
-                        .appliesTo(bean.getAppliesTo())
-                        .suppliedIn(bean.getSuppliedIn())
-                        .bfdTableType(bean.getBfdTableType())
-                        .bfdColumnName(bean.getBfdColumnName())
-                        .bfdDbType(bean.getBfdDbType())
-                        .bfdDbSize(bean.getBfdDbSize())
-                        .bfdJavaFieldName(bean.getBfdJavaFieldName())
-                        .ccwMapping(bean.getCcwMapping())
-                        .cclfMapping(bean.getCclfMapping())
-                        .fhirMapping(bean.getFhirMapping())
-                        .build())
-            .map(elementToJson)
-            .map(elementToCsv)
-            .flatMap(Collection::stream)
-            .forEach(csvToExcel);
+        List<FhirElement> fhirElementList =
+            fhirElements.stream()
+                .map(
+                    bean ->
+                        FhirElement.builder()
+                            .id(bean.getId())
+                            .name(bean.getName())
+                            .description(bean.getDescription())
+                            .appliesTo(bean.getAppliesTo())
+                            .suppliedIn(bean.getSuppliedIn())
+                            .bfdTableType(bean.getBfdTableType())
+                            .bfdColumnName(bean.getBfdColumnName())
+                            .bfdDbType(bean.getBfdDbType())
+                            .bfdDbSize(bean.getBfdDbSize())
+                            .bfdJavaFieldName(bean.getBfdJavaFieldName())
+                            .ccwMapping(bean.getCcwMapping())
+                            .cclfMapping(bean.getCclfMapping())
+                            .fhirMapping(bean.getFhirMapping())
+                            .build())
+                .toList();
+        allFhirElements.addAll(fhirElementList);
       }
+      allFhirElements.sort(
+          new Comparator<FhirElement>() {
+            @Override
+            public int compare(final FhirElement fhirElement1, FhirElement fhirElement2) {
+              return Integer.compare(fhirElement1.getId(), fhirElement2.getId());
+            }
+          });
+      allFhirElements.stream()
+          .map(elementToJson)
+          .map(elementToCsv)
+          .flatMap(Collection::stream)
+          .forEach(csvToExcel);
+      csvToExcel.close();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

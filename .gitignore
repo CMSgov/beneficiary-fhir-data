@@ -10,6 +10,7 @@
 
 # Ignore everything within top-level dist directory
 /dist/**/*
+/dist-temp/**/*
 
 # OSX system files
 .DS_Store

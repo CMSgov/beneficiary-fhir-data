@@ -31,15 +31,6 @@ public class RootBean {
   }
 
   /**
-   * Adds all {@link MappingBean}s from the given {@link RootBean} into this {@link RootBean}.
-   *
-   * @param otherMappings another {@link RootBean} containing mappings we want to add
-   */
-  public void addMappings(List<MappingBean> otherMappings) {
-    mappings.addAll(otherMappings);
-  }
-
-  /**
    * Search for a {@link MappingBean} with the given id value.
    *
    * @param id mapping id to search for
