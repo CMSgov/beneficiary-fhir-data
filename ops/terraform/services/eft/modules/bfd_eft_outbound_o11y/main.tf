@@ -32,7 +32,7 @@ locals {
       alarm_name       = "${var.outbound_lambda_name}-errors"
       log_group_name   = local.alarms_raw_config.lambda_errors.log_group_name
       log_group_url    = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#logsV2:log-groups/log-group/${replace(local.alarms_raw_config.lambda_errors.log_group_name, "/", "$252F")}"
-      queue_url        = "https://us-east-1.console.aws.amazon.com/sqs/v3/home?region=us-east-1#/queues/${urlencode(data.aws_sqs_queue.outbound_lambda_dlq.url)}"
+      queue_url        = "https://${local.region}.console.aws.amazon.com/sqs/v3/home?region=${local.region}#/queues/${urlencode(data.aws_sqs_queue.outbound_lambda_dlq.url)}"
     }
     sns_failures = {
       breach_topic_arn = try(data.aws_sns_topic.breach_topics["sns_failures"].arn, null)
