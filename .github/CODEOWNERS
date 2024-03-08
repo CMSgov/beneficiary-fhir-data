@@ -7,7 +7,7 @@
 # BFD Pipeline and Server Codeowners
 /docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
 /ops @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
-/apps @mackec1 @mjburling @brandoncruz3 @dondevun @meliGuzman
+/apps @mackec1 @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
 
 # BFD Performance Testing Utilities
 /apps/utils/locust_tests @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
