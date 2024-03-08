@@ -2233,35 +2233,55 @@ DECLARE
 	v_rslt           text;
 	v_type           text   := lower(p_type);
 BEGIN
+    -- Try to get a hit on the BENEFICIARIES table first; if
+    -- no data is found, then try the BENEFICIARIES_HISTORY.
 	IF v_type = 'mbi' THEN
-		SELECT string_agg(a.bene_id::text, ',') INTO v_rslt
-		FROM beneficiaries a,
-		(
-			select distinct b.bene_id from beneficiaries_history b
-			where b.mbi_num = p_value
-		) t1
-		where a.mbi_num = p_value
-		or a.bene_id = t1.bene_id;
+        PERFORM 1 FROM ccw.beneficiaries a WHERE a.mbi_num = p_value limit 1;
+        IF FOUND THEN
+            SELECT string_agg(a.bene_id::text, ',') INTO v_rslt
+            from ccw.beneficiaries a
+            where a.mbi_num = p_value;
+        ELSE
+            SELECT string_agg(t1.bene_id::text, ',') INTO v_rslt
+            from (
+                     SELECT distinct(b.bene_id)
+                     FROM ccw.beneficiaries_history b
+                     where b.mbi_num = p_value
+                     order by 1
+                 ) t1;
+        END IF;
 	
 	ELSIF v_type = 'mbi-hash' THEN
-		SELECT string_agg(a.bene_id::text, ',') INTO v_rslt
-		FROM beneficiaries a,
-		(
-			select distinct b.bene_id from beneficiaries_history b
-			where b.mbi_hash = p_value
-		) t1
-		where a.mbi_hash = p_value
-		or a.bene_id = t1.bene_id;
-	
+        PERFORM 1 FROM ccw.beneficiaries a WHERE a.mbi_hash = p_value limit 1;
+        IF FOUND THEN
+            SELECT string_agg(a.bene_id::text, ',') INTO v_rslt
+            from ccw.beneficiaries a
+            where a.mbi_hash = p_value;
+        ELSE
+            SELECT string_agg(t1.bene_id::text, ',') INTO v_rslt
+            from (
+                     SELECT distinct(b.bene_id)
+                     FROM ccw.beneficiaries_history b
+                     where b.mbi_hash = p_value
+                     order by 1
+                 ) t1;
+        END IF;
+
 	ELSIF v_type = 'hicn-hash' THEN
-		SELECT string_agg(a.bene_id::text, ',') INTO v_rslt
-		FROM beneficiaries a,
-		(
-			select distinct b.bene_id from beneficiaries_history b
-			where b.bene_crnt_hic_num = p_value
-		) t1
-		where a.bene_crnt_hic_num = p_value
-		or a.bene_id = t1.bene_id;
+        PERFORM 1 FROM ccw.beneficiaries a WHERE a.bene_crnt_hic_num = p_value limit 1;
+        IF FOUND THEN
+            SELECT string_agg(a.bene_id::text, ',') INTO v_rslt
+            from ccw.beneficiaries a
+            where a.bene_crnt_hic_num = p_value;
+        ELSE
+            SELECT string_agg(t1.bene_id::text, ',') INTO v_rslt
+            from (
+                     SELECT distinct(b.bene_id)
+                     FROM ccw.beneficiaries_history b
+                     where b.bene_crnt_hic_num = p_value
+                     order by 1
+                 ) t1;
+        END IF;
 	END IF;
 	RETURN v_rslt;
 END;
@@ -2574,14 +2594,14 @@ BEGIN
         (
         select '01_beneficiaries', count(v1.bene_id) as "cnt"
         from (
-            select bene_id from beneficiaries
+            select bene_id from ccw.beneficiaries
             where bene_id <= p_beg_bene_id and bene_id > END_BENE_ID
             limit 1
         ) v1
         union
         select '02_carrier_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from carrier_claims
+            select clm_id from ccw.carrier_claims
             where clm_id <= p_clm_id
             and carr_clm_cntl_num::bigint <= p_carr_clm_cntl_num_start
             limit 1
@@ -2589,56 +2609,56 @@ BEGIN
         union
         select '03_carrier_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from carrier_claims
+            select clm_id from ccw.carrier_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '04_inpatient_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from inpatient_claims
+            select clm_id from ccw.inpatient_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '05_outpatient_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from outpatient_claims
+            select clm_id from ccw.outpatient_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '06_snf_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from snf_claims
+            select clm_id from ccw.snf_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '07_dme_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from dme_claims
+            select clm_id from ccw.dme_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '08_hha_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from hha_claims
+            select clm_id from ccw.hha_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '09_hospice_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from hospice_claims
+            select clm_id from ccw.hospice_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '10_partd_events', count(v1.pde_id) as "cnt"
         from (
-            select pde_id from partd_events
+            select pde_id from ccw.partd_events
             where pde_id <= p_pde_id_start
             and clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
@@ -2647,7 +2667,7 @@ BEGIN
         -- look for hicn or mbi collisions...only need 1 collision to trigger a problem
         select '11_bene_hicn_mbi', count(v1.bene_id)
         from (
-            select a.bene_id from beneficiaries a
+            select a.bene_id from ccw.beneficiaries a
             where (a.hicn_unhashed = p_hicn_start or a.mbi_num = p_mbi_start)
             limit 1    
         ) v1
@@ -2659,35 +2679,35 @@ BEGIN
         --
         select '12a_fi_num_outpatient', count(v1.clm_id)
         from (
-            select a.clm_id from outpatient_claims a
+            select a.clm_id from ccw.outpatient_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
         union
         select '12b_fi_num_inpatient', count(v1.clm_id)
         from (
-            select a.clm_id from inpatient_claims a
+            select a.clm_id from ccw.inpatient_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
         union
         select '12c_fi_num_hha', count(v1.clm_id)
         from (
-            select a.clm_id from hha_claims a
+            select a.clm_id from ccw.hha_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
         union
         select '12d_fi_num_snf', count(v1.clm_id)
         from (
-            select a.clm_id from snf_claims a
+            select a.clm_id from ccw.snf_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
         union
         select '12e_fi_num_hospice', count(v1.clm_id)
         from (
-            select a.clm_id from hospice_claims a
+            select a.clm_id from ccw.hospice_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
@@ -2740,14 +2760,14 @@ BEGIN
         (
         select '01_beneficiaries', count(v1.bene_id) as "cnt"
         from (
-            select bene_id from beneficiaries
+            select bene_id from ccw.beneficiaries
             where bene_id <= p_beg_bene_id and bene_id > p_end_bene_id
             limit 1
         ) v1
         union
         select '02_carrier_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from carrier_claims
+            select clm_id from ccw.carrier_claims
             where clm_id <= p_clm_id
             and carr_clm_cntl_num::bigint <= p_carr_clm_cntl_num_start
             limit 1
@@ -2755,56 +2775,56 @@ BEGIN
         union
         select '03_carrier_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from carrier_claims
+            select clm_id from ccw.carrier_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '04_inpatient_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from inpatient_claims
+            select clm_id from ccw.inpatient_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '05_outpatient_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from outpatient_claims
+            select clm_id from ccw.outpatient_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '06_snf_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from snf_claims
+            select clm_id from ccw.snf_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '07_dme_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from dme_claims
+            select clm_id from ccw.dme_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '08_hha_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from hha_claims
+            select clm_id from ccw.hha_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '09_hospice_claims', count(v1.clm_id) as "cnt"
         from (
-            select clm_id from hospice_claims
+            select clm_id from ccw.hospice_claims
             where clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
         ) v1
         union
         select '10_partd_events', count(v1.pde_id) as "cnt"
         from (
-            select pde_id from partd_events
+            select pde_id from ccw.partd_events
             where pde_id <= p_pde_id_start
             and clm_grp_id <= p_beg_clm_grp_id and clm_grp_id > CLM_GRP_ID_END
             limit 1
@@ -2813,7 +2833,7 @@ BEGIN
         -- look for hicn or mbi collisions...only need 1 collision to trigger a problem
         select '11_bene_hicn_mbi', count(v1.bene_id)
         from (
-            select a.bene_id from beneficiaries a
+            select a.bene_id from ccw.beneficiaries a
             where (a.hicn_unhashed = p_hicn_start or a.mbi_num = p_mbi_start)
             limit 1    
         ) v1
@@ -2827,35 +2847,35 @@ BEGIN
         --
         select '12a_fi_num_outpatient', count(v1.clm_id)
         from (
-            select a.clm_id from outpatient_claims a
+            select a.clm_id from ccw.outpatient_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
         union
         select '12b_fi_num_inpatient', count(v1.clm_id)
         from (
-            select a.clm_id from inpatient_claims a
+            select a.clm_id from ccw.inpatient_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
         union
         select '12c_fi_num_hha', count(v1.clm_id)
         from (
-            select a.clm_id from hha_claims a
+            select a.clm_id from ccw.hha_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
         union
         select '12d_fi_num_snf', count(v1.clm_id)
         from (
-            select a.clm_id from snf_claims a
+            select a.clm_id from ccw.snf_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
         union
         select '12e_fi_num_hospice', count(v1.clm_id)
         from (
-            select a.clm_id from hospice_claims a
+            select a.clm_id from ccw.hospice_claims a
             where a.fi_doc_clm_cntl_num = FI_DOC_CNTL_NUM
             limit 1    
         ) v1
