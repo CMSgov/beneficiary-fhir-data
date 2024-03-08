@@ -2,21 +2,21 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
+@mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
 
 # BFD Pipeline and Server Codeowners
-/docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
-/ops @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman
+/docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
+/ops @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
 /apps @mackec1 @mjburling @brandoncruz3 @dondevun @meliGuzman
 
 # BFD Performance Testing Utilities
-/apps/utils/locust_tests @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman
+/apps/utils/locust_tests @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
 
 # BFD Insights Codeowners
-/insights @keithdadkins @mackec1 @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman
+/insights @keithdadkins @mackec1 @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
 
 # GitHub Actions Workflows
-/.github/workflows @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman
+/.github/workflows @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
 
 # Administration
 /.github/CODEOWNERS @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
