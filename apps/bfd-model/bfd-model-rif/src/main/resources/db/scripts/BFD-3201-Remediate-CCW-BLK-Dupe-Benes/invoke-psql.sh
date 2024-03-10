@@ -20,11 +20,21 @@
 set -o pipefail
 
 # following must be passed in as either environment variables or as cmd-line args (default)
-PGHOST="${DB_HOST:-$2}"
-PGUSER="${DB_USER:-$3}"
+PGHOST="${DB_HOST:-$1}"
+PGUSER="${DB_USER:-$2}"
+CSVFILE="${CSVFILE:-$3}"
 # other vars that skirt security (a bit)
 PGDATABASE="${DB_NAME:-fhirdb}"
 export PGPORT="${DB_PORT:-5432}"
+
+if [ -z "${CSVFILE}" ]; then
+  CSVFILE="${PWD}/FHIR_XRefed_BENE_ID.csv"
+fi
+
+if ! test -f "${CSVFILE}"; then
+  echo "CSV file not found...exiting!"
+  exit 1;
+fi
 
 if [ -z "${PGHOST}" ] || [ -z "${PGUSER}" ]; then
     echo "*****  E r r o r - Missing required variables  *****"
@@ -45,51 +55,66 @@ SHOW_SQL=false
 read -r -d '' STEP_ONE_SETUP_TEMP_SQL << EOM
 DROP TABLE IF EXISTS PUBLIC.CCW_DUPL_BENE_FROM_CSV CASCADE;
 
-CREATE TABLE CCW_DUPL_BENE_FROM_CSV(
+CREATE TABLE PUBLIC.CCW_DUPL_BENE_FROM_CSV (
 	bene_id bigint PRIMARY KEY
 );
-
-\copy CCW_DUPL_BENE_FROM_CSV from './FHIR_XRefed_BENE_ID.csv' CSV HEADER;
 EOM
 
-# STEP_TWO_BACKUP_DATA
+# STEP_TWO_COPY_CSV_SQL
 # ==============================================================
-read -r -d '' STEP_TWO_BACKUP_DATA << EOM
-create beneficiaries_ccw_remediation as
-select a.* from beneficiaries a
-where a.bene_id in (
-  select bene_id from ccw_dupl_bene_from_csv
-);
-
-create beneficiary_monthly_ccw_remediation as
-select a.* from beneficiary_monthly a
-where a.bene_id in (
-  select bene_id from ccw_dupl_bene_from_csv
-);
-
-create beneficiaries_history_ccw_remediation as
-select a.* from beneficiaries_history a
-where a.bene_id in (
-  select bene_id from ccw_dupl_bene_from_csv
-);
+# sql to create a temp CCW_DUPL_BENE_FROM_CSV table that will
+# be used to drive the rest of the cleanup.
+# ==============================================================
+read -r -d '' STEP_TWO_COPY_CSV_SQL << EOM
+\\copy PUBLIC.CCW_DUPL_BENE_FROM_CSV from $CSVFILE CSV HEADER;
 EOM
 
-# STEP_THREE_CLEANUP_SQL
+# STEP_THREE_BACKUP_DATA
 # ==============================================================
-read -r -d '' STEP_THREE_CLEANUP_SQL << EOM
-delete from beneficiaries_history
-where bene_id in (
+read -r -d '' STEP_THREE_BACKUP_DATA << EOM
+create table if not exists public.beneficiaries_ccw_remediation as
+select a.* from public.beneficiaries a
+where a.bene_id in (
   select bene_id from ccw_dupl_bene_from_csv
+)
+and a.mbi_num is null;
+
+create table if not exists public.beneficiary_monthly_ccw_remediation as
+select a.*
+from public.beneficiary_monthly a,
+public.beneficiaries b
+where a.bene_id in (
+  select bene_id from ccw_dupl_bene_from_csv
+)
+and b.bene_id = a.bene_id
+and b.mbi_num is null;
+
+create table if not exists public.beneficiaries_history_ccw_remediation as
+select a.* from public.beneficiaries_history a,
+public.beneficiaries b
+where a.bene_id in (
+  select bene_id from public.ccw_dupl_bene_from_csv
+)
+and b.bene_id = a.bene_id
+and b.mbi_num is null;
+EOM
+
+# STEP_FOUR_CLEANUP_SQL
+# ==============================================================
+read -r -d '' STEP_FOUR_CLEANUP_SQL << EOM
+delete from public.beneficiaries_history
+where bene_id in (
+  select bene_id from public.beneficiaries_history_ccw_remediation
 );
 
-delete from beneficiary_monthly
+delete from public.beneficiary_monthly
 where bene_id in (
-  select bene_id from ccw_dupl_bene_from_csv
+  select bene_id from public.beneficiary_monthly_ccw_remediation
 );
 
-delete from beneficiaries
+delete from public.beneficiaries
 where bene_id in (
-  select bene_id from ccw_dupl_bene_from_csv
+  select bene_id from public.beneficiaries_ccw_remediation
 );
 EOM
 
@@ -112,17 +137,16 @@ fi
 # processing; this allows us to (re-)use the same list of BENE_ID's.
 # -------------------------------------------------------------------
 echo "Begin processing of Step 1 at: $(date +'%T')"
-echo "${STEP_ONE_SETUP_TEMP_SQL}"
 
 # create the temp table
-$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${STEP_ONE_SETUP_TEMP_SQL}")
+psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -c "${STEP_ONE_SETUP_TEMP_SQL}"
 
 if [ "${SHOW_SQL}" = true ] ; then
   printf "==========================\n%s\n==========================\n\n" "${STEP_ONE_SETUP_TEMP_SQL}"	
 fi
 
 # check record count to derive success
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM CCW_DUPL_BENE_FROM_CSV")
+SQL="SELECT COUNT(*) FROM CCW_DUPL_BENE_FROM_CSV"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -133,20 +157,42 @@ else
 fi
 echo "Finished processing of Step 1 at: $(date +'%T.%31')"
 
-
 # STEP 2
+# -------------------------------------------------------------------
+# Create a temp CCW_DUPL_BENE_FROM_CSV table that we'll use for
+# processing; this allows us to (re-)use the same list of BENE_ID's.
+# -------------------------------------------------------------------
+echo "Begin processing of Step 2 at: $(date +'%T')"
+
+# create the temp table
+psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -c "${STEP_TWO_COPY_CSV_SQL}"
+
+# check record count to derive success
+SQL="SELECT COUNT(*) FROM PUBLIC.CCW_DUPL_BENE_FROM_CSV"
+CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
+# if we got a value back from the sql, we'll log some info; else 'pull the plug'
+if [ -n "${CNT}" ]; then
+  now=$(date +'%T')
+  printf "%s : count of records in PUBLIC.CCW_DUPL_BENE_FROM_CSV : %d\n\n" "${now}" "${CNT}";
+else
+  exit 1;
+fi
+echo "Finished processing of Step 2 at: $(date +'%T.%31')"
+
+
+# STEP 3
 # ---------------------------------------------------------
 # Backup the data we're about to delete (just in case!!!!).
 # ---------------------------------------------------------
-echo "Begin processing of Step 2 at: $(date +'%T')"
-$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${STEP_TWO_BACKUP_DATA}")
+echo "Begin processing of Step 3 at: $(date +'%T')"
+psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -c "${STEP_THREE_BACKUP_DATA}"
 
 if [ "${SHOW_SQL}" = true ] ; then
-  printf "==========================\n%s\n==========================\n\n" "${STEP_TWO_BACKUP_DATA}"	
+  printf "==========================\n%s\n==========================\n\n" "${STEP_THREE_BACKUP_DATA}"	
 fi
 
 # check record count to derive success
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARIES_CCW_REMEDIATION")
+SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARIES_CCW_REMEDIATION"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -156,7 +202,7 @@ else
   exit 1;
 fi
 
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARY_MONTHLY_CCW_REMEDIATION")
+SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARY_MONTHLY_CCW_REMEDIATION"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -166,7 +212,7 @@ else
   exit 1;
 fi
 
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARIES_HISTORY_CCW_REMEDIATION")
+SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARIES_HISTORY_CCW_REMEDIATION"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -176,13 +222,13 @@ else
   exit 1;
 fi
 
-echo "Finished processing of Step 2 at: $(date +'%T.%31')"
+echo "Finished processing of Step 3 at: $(date +'%T.%31')"
 
-# STEP 3
+# STEP 4
 # ---------------------------------------------------------
-echo "Begin processing of Step 3 at: $(date +'%T')"
+echo "Begin processing of Step 4 at: $(date +'%T')"
 
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARIES")
+SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARIES"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -192,7 +238,7 @@ else
   exit 1;
 fi
 
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARIES_HISTORY")
+SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARIES_HISTORY"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -202,7 +248,7 @@ else
   exit 1;
 fi
 
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARY_MONTHLY")
+SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARY_MONTHLY"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -213,13 +259,13 @@ else
 fi
 
 # do the actual cleanup
-$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${STEP_THREE_CLEANUP_SQL}")
+psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -c "${STEP_FOUR_CLEANUP_SQL}"
 
 if [ "${SHOW_SQL}" = true ] ; then
   printf "==========================\n%s\n==========================\n\n" "${STEP_THREE_CLEANUP_SQL}"	
 fi
 
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARIES")
+SQL="SELECT COUNT(*) FROM BENEFICIARIES"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -229,7 +275,7 @@ else
   exit 1;
 fi
 
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARIES_HISTORY")
+SQL="SELECT COUNT(*) FROM BENEFICIARIES_HISTORY"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -239,7 +285,7 @@ else
   exit 1;
 fi
 
-SQL=$(printf "%s\n\n%s" "SELECT COUNT(*) FROM BENEFICIARY_MONTHLY")
+SQL="SELECT COUNT(*) FROM BENEFICIARY_MONTHLY"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
