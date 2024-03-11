@@ -169,7 +169,7 @@ print("---  TARGET_TABLE: ", TARGET_TABLE)
 print("---")
 
 session = boto3.Session()
-
+# TODO: fix bug in get_table_columns that is unable to get boolean columns
 source_columns_list = get_table_columns(session, params, SOURCE_TABLE)
 target_columns_list = get_table_columns(session, params, TARGET_TABLE)
 

@@ -58,7 +58,10 @@ bfd:
         exec_start: /opt/bfd-db-migrator/bfd-db-migrator-service.sh
         user: "bb-migrator"
       instance_type: m6i.large
+      volume_iops: 3000
       volume_size: 100
+      volume_throughput: 125
+      volume_type: gp3
       sqs_queue_name: *sqs_name
       db_migrator_dir: *bfdMigratorDir
       db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
@@ -266,7 +269,10 @@ bfd:
       # buffer for the worst cases
       asg_instance_warmup_time: 90
       launch_template_instance_type: c6i.4xlarge
-      launch_template_volume_size_gb: 250
+      launch_template_volume_iops: 3000
+      launch_template_volume_size_gb: 170
+      launch_template_volume_throughput: 125
+      launch_template_volume_type: gp3
       # Indicates the amount of time between batched error alerts posted to Slack when 500s occur in
       # BFD Server. See
       # https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html#rate-based for
