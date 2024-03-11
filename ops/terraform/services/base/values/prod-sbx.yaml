@@ -60,7 +60,7 @@ bfd:
       instance_type: m6i.large
       volume_iops: 3000
       volume_size: 100
-      volume_throughput: 128
+      volume_throughput: 125
       volume_type: gp3
       sqs_queue_name: *sqs_name
       db_migrator_dir: *bfdMigratorDir
@@ -266,7 +266,7 @@ bfd:
       launch_template_instance_type: c6i.4xlarge
       launch_template_volume_iops: 3000
       launch_template_volume_size_gb: 60
-      launch_template_volume_throughput: 128
+      launch_template_volume_throughput: 125
       launch_template_volume_type: gp3
       # Indicates the amount of time between batched error alerts posted to Slack when 500s occur in
       # BFD Server. See

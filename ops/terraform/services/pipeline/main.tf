@@ -379,14 +379,14 @@ resource "aws_instance" "pipeline" {
   }
 
   # The RDA pipeline variant does not rely on disk i/o to perform its function.
-  # A 170GB gp3 volume at 3000 iops and 125MB/S throughput is ~19.29% less
-  # expensive than a comparable gp2 volume at 250MB/S throughput
+  # A 170GB gp3 volume at 3000 iops and 125MB/S throughput is >19.29% less
+  # expensive than a comparable gp2 volume at 128MB/S throughput
   root_block_device {
     delete_on_termination = true
     encrypted             = true
     iops                  = 3000
     kms_key_id            = local.kms_key_id
-    throughput            = 128
+    throughput            = 125
     volume_size           = 170
     volume_type           = "gp3"
   }
