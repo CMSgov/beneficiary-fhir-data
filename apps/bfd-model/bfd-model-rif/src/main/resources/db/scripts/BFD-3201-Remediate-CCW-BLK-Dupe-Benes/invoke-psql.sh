@@ -53,9 +53,9 @@ SHOW_SQL=false
 # be used to drive the rest of the cleanup.
 # ==============================================================
 read -r -d '' STEP_ONE_SETUP_TEMP_SQL << EOM
-DROP TABLE IF EXISTS PUBLIC.CCW_DUPL_BENE_FROM_CSV CASCADE;
+DROP TABLE IF EXISTS CCW_DUPL_BENE_FROM_CSV CASCADE;
 
-CREATE TABLE PUBLIC.CCW_DUPL_BENE_FROM_CSV (
+CREATE TABLE CCW_DUPL_BENE_FROM_CSV (
 	bene_id bigint PRIMARY KEY
 );
 EOM
@@ -66,34 +66,34 @@ EOM
 # be used to drive the rest of the cleanup.
 # ==============================================================
 read -r -d '' STEP_TWO_COPY_CSV_SQL << EOM
-\\copy PUBLIC.CCW_DUPL_BENE_FROM_CSV from $CSVFILE CSV HEADER;
+\\copy CCW_DUPL_BENE_FROM_CSV from $CSVFILE CSV HEADER;
 EOM
 
 # STEP_THREE_BACKUP_DATA
 # ==============================================================
 read -r -d '' STEP_THREE_BACKUP_DATA << EOM
-create table if not exists public.beneficiaries_ccw_remediation as
-select a.* from public.beneficiaries a
+create table if not exists beneficiaries_ccw_remediation as
+select a.* from beneficiaries a
 where a.bene_id in (
   select bene_id from ccw_dupl_bene_from_csv
 )
 and a.mbi_num is null;
 
-create table if not exists public.beneficiary_monthly_ccw_remediation as
+create table if not exists beneficiary_monthly_ccw_remediation as
 select a.*
-from public.beneficiary_monthly a,
-public.beneficiaries b
+from beneficiary_monthly a,
+beneficiaries b
 where a.bene_id in (
   select bene_id from ccw_dupl_bene_from_csv
 )
 and b.bene_id = a.bene_id
 and b.mbi_num is null;
 
-create table if not exists public.beneficiaries_history_ccw_remediation as
-select a.* from public.beneficiaries_history a,
-public.beneficiaries b
+create table if not exists beneficiaries_history_ccw_remediation as
+select a.* from beneficiaries_history a,
+beneficiaries b
 where a.bene_id in (
-  select bene_id from public.ccw_dupl_bene_from_csv
+  select bene_id from ccw_dupl_bene_from_csv
 )
 and b.bene_id = a.bene_id
 and b.mbi_num is null;
@@ -102,19 +102,19 @@ EOM
 # STEP_FOUR_CLEANUP_SQL
 # ==============================================================
 read -r -d '' STEP_FOUR_CLEANUP_SQL << EOM
-delete from public.beneficiaries_history
+delete from beneficiaries_history
 where bene_id in (
-  select bene_id from public.beneficiaries_history_ccw_remediation
+  select bene_id from beneficiaries_history_ccw_remediation
 );
 
-delete from public.beneficiary_monthly
+delete from beneficiary_monthly
 where bene_id in (
-  select bene_id from public.beneficiary_monthly_ccw_remediation
+  select bene_id from beneficiary_monthly_ccw_remediation
 );
 
-delete from public.beneficiaries
+delete from beneficiaries
 where bene_id in (
-  select bene_id from public.beneficiaries_ccw_remediation
+  select bene_id from beneficiaries_ccw_remediation
 );
 EOM
 
@@ -168,12 +168,12 @@ echo "Begin processing of Step 2 at: $(date +'%T')"
 psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" -c "${STEP_TWO_COPY_CSV_SQL}"
 
 # check record count to derive success
-SQL="SELECT COUNT(*) FROM PUBLIC.CCW_DUPL_BENE_FROM_CSV"
+SQL="SELECT COUNT(*) FROM CCW_DUPL_BENE_FROM_CSV"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
   now=$(date +'%T')
-  printf "%s : count of records in PUBLIC.CCW_DUPL_BENE_FROM_CSV : %d\n\n" "${now}" "${CNT}";
+  printf "%s : count of records in CCW_DUPL_BENE_FROM_CSV : %d\n\n" "${now}" "${CNT}";
 else
   exit 1;
 fi
@@ -192,7 +192,7 @@ if [ "${SHOW_SQL}" = true ] ; then
 fi
 
 # check record count to derive success
-SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARIES_CCW_REMEDIATION"
+SQL="SELECT COUNT(*) FROM BENEFICIARIES_CCW_REMEDIATION"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -202,7 +202,7 @@ else
   exit 1;
 fi
 
-SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARY_MONTHLY_CCW_REMEDIATION"
+SQL="SELECT COUNT(*) FROM BENEFICIARY_MONTHLY_CCW_REMEDIATION"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -212,7 +212,7 @@ else
   exit 1;
 fi
 
-SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARIES_HISTORY_CCW_REMEDIATION"
+SQL="SELECT COUNT(*) FROM BENEFICIARIES_HISTORY_CCW_REMEDIATION"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -224,11 +224,29 @@ fi
 
 echo "Finished processing of Step 3 at: $(date +'%T.%31')"
 
+# ======================================================
+# come up for air and allow user to check data as needed;
+# continue if things loook OK.
+#
+# default variable for read to store result is $REPLY
+# ======================================================
+echo
+echo "script pausing to allow review of tables backup..."
+read -p "Do you wish to continue ? [Yy] : " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    echo "continuing..."
+else
+  echo "user interrupted execution prior to deleting any data...exiting!";
+  exit 1;
+fi
+
 # STEP 4
 # ---------------------------------------------------------
 echo "Begin processing of Step 4 at: $(date +'%T')"
 
-SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARIES"
+SQL="SELECT COUNT(*) FROM BENEFICIARIES"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -238,7 +256,7 @@ else
   exit 1;
 fi
 
-SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARIES_HISTORY"
+SQL="SELECT COUNT(*) FROM BENEFICIARIES_HISTORY"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
@@ -248,7 +266,7 @@ else
   exit 1;
 fi
 
-SQL="SELECT COUNT(*) FROM PUBLIC.BENEFICIARY_MONTHLY"
+SQL="SELECT COUNT(*) FROM BENEFICIARY_MONTHLY"
 CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 # if we got a value back from the sql, we'll log some info; else 'pull the plug'
 if [ -n "${CNT}" ]; then
