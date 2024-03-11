@@ -32,8 +32,12 @@ locals {
   kms_config_key_alias            = local.nonsensitive_common_config["kms_config_key_alias"]
   queue_name                      = local.nonsensitive_config["sqs_queue_name"]
   rds_cluster_identifier          = local.nonsensitive_common_config["rds_cluster_identifier"]
-  volume_size                     = local.nonsensitive_config["volume_size"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
+
+  volume_iops       = local.nonsensitive_config["volume_iops"]
+  volume_size       = local.nonsensitive_config["volume_size"]
+  volume_throughput = local.nonsensitive_config["volume_throughput"]
+  volume_type       = local.nonsensitive_config["volume_type"]
 
   # Data source lookups
   mgmt_kms_config_key_arns = flatten(
@@ -90,7 +94,7 @@ resource "aws_instance" "this" {
 
   root_block_device {
     tags                  = local.default_tags
-    volume_type           = "gp2"
+    volume_type           = local.volume_type
     volume_size           = local.volume_size
     delete_on_termination = true
     encrypted             = true

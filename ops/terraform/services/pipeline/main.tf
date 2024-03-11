@@ -193,14 +193,19 @@ resource "aws_launch_template" "this" {
     enabled = true
   }
 
+  # The CCW pipeline variant heavily relies on disk i/o to perform its function.
+  # A 1TB gp3 volume at 3000 iops and 250MB/S throughput is ~15% less expensive
+  # than the comparable gp2 volume.
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {
-      volume_type           = "gp2"
-      volume_size           = 1000
       delete_on_termination = true
       encrypted             = true
+      iops                  = 3000
       kms_key_id            = local.kms_key_id
+      throughput            = 250
+      volume_size           = 1000
+      volume_type           = "gp3"
     }
   }
 
@@ -373,13 +378,17 @@ resource "aws_instance" "pipeline" {
     http_tokens                 = "required"
   }
 
+  # The RDA pipeline variant does not rely on disk i/o to perform its function.
+  # A 170GB gp3 volume at 3000 iops and 125MB/S throughput is ~19.29% less
+  # expensive than a comparable gp2 volume at 250MB/S throughput
   root_block_device {
     delete_on_termination = true
     encrypted             = true
+    iops                  = 3000
     kms_key_id            = local.kms_key_id
-    throughput            = 0
-    volume_size           = 1000
-    volume_type           = "gp2"
+    throughput            = 128
+    volume_size           = 170
+    volume_type           = "gp3"
   }
 }
 
