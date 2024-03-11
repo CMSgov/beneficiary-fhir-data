@@ -233,7 +233,7 @@ index=bluebutton source="/var/log/pyapps/perf_mon.log*" env=impl message.type="r
 
 To begin, change your working directory via:
 ```
-cd insights/lambdas/update_athena_metric_tables
+cd insights/terraform/projects/bb2/services/analytics/modules/lambda/update_athena_metric_tables
 ```
 
 ## Adding a New Per Application Metric<a id="how-to-add-per-app-metric"></a>
