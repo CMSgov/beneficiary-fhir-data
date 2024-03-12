@@ -5,7 +5,7 @@
 @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
 
 # BFD Pipeline and Server Codeowners
-/docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc JFU-NAVA-PBC @aschey-forpeople
+/docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @aschey-forpeople
 /ops @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @sb-benohe @aschey-forpeople
 /apps @mackec1 @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @aschey-forpeople
 
