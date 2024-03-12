@@ -57,7 +57,7 @@ bfd:
         working_dir: *bfdMigratorDir
         exec_start: /opt/bfd-db-migrator/bfd-db-migrator-service.sh
         user: "bb-migrator"
-      instance_type: m6i.large
+      instance_type: m6a.large
       volume_iops: 3000
       volume_size: 100
       volume_throughput: 125
@@ -118,7 +118,7 @@ bfd:
         data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
         data_pipeline_ccw_rif_job_enabled: *ccw_enabled
         data_pipeline_idempotency_required: *idem_enabled
-        instance_type: c6i.4xlarge
+        instance_type: c6a.4xlarge
         rif_job_batch_size: *ccw_batch_size
         rif_job_queue_size_multiple: *ccw_queue_size_multiple
         rif_thread_multiple: 3
@@ -160,7 +160,7 @@ bfd:
         data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
         data_pipeline_rda_job_write_threads: *rda_job_write_thread_count
         data_pipeline_rda_process_dlq: *rda_job_process_dlq
-        instance_type: m6i.large
+        instance_type: m6a.large
       shared:
         bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
         data_pipeline_dir: *bfdPipelineDir
@@ -263,7 +263,7 @@ bfd:
       # time it took to start during the period analyzed was 77 seconds. So, 90 provides a decent
       # buffer for the worst cases
       asg_instance_warmup_time: 90
-      launch_template_instance_type: c6i.4xlarge
+      launch_template_instance_type: c6a.4xlarge
       launch_template_volume_iops: 3000
       launch_template_volume_size_gb: 60
       launch_template_volume_throughput: 125
