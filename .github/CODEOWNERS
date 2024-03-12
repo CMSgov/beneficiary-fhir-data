@@ -2,22 +2,22 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
+@mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
 
 # BFD Pipeline and Server Codeowners
-/docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
-/ops @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
-/apps @mackec1 @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
+/docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc JFU-NAVA-PBC @aschey-forpeople
+/ops @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @sb-benohe @aschey-forpeople
+/apps @mackec1 @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @aschey-forpeople
 
 # BFD Performance Testing Utilities
-/apps/utils/locust_tests @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
+/apps/utils/locust_tests @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @aschey-forpeople
 
 # BFD Insights Codeowners
-/insights @keithdadkins @mackec1 @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
+/insights @keithdadkins @mackec1 @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @aschey-forpeople
 
 # GitHub Actions Workflows
-/.github/workflows @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @sb-benohe @aschey-forpeople
+/.github/workflows @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @sb-benohe @aschey-forpeople
 
 # Administration
-/.github/CODEOWNERS @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @aschey-forpeople
+/.github/CODEOWNERS @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
 
