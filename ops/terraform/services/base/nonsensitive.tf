@@ -11,6 +11,7 @@ locals {
   migrator_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "migrator") && strcontains(key, "nonsensitive") && value != "UNDEFINED" }
   pipeline_yaml = { for key, value in local.yaml : key => value if contains(split("/", key), "pipeline") && strcontains(key, "nonsensitive") && value != "UNDEFINED" }
   server_yaml   = { for key, value in local.yaml : key => value if contains(split("/", key), "server") && strcontains(key, "nonsensitive") && value != "UNDEFINED" }
+  eft_yaml      = { for key, value in local.yaml : key => value if contains(split("/", key), "eft") && strcontains(key, "nonsensitive") && value != "UNDEFINED" }
 
   # Low precedence. These values are already present in SSM but aren't (yet) part of the encoded YAML configuration.
   common_nonsensitive_ssm = zipmap(
@@ -28,6 +29,7 @@ locals {
   migrator_nonsensitive = local.migrator_yaml
   pipeline_nonsensitive = local.pipeline_yaml
   server_nonsensitive   = local.server_yaml
+  eft_nonsensitive      = local.eft_yaml
 }
 
 data "aws_ssm_parameters_by_path" "common_nonsensitive" {
@@ -63,6 +65,15 @@ resource "aws_ssm_parameter" "pipeline_nonsensitive" {
 
 resource "aws_ssm_parameter" "server_nonsensitive" {
   for_each = local.server_nonsensitive
+
+  name      = each.key
+  overwrite = true
+  type      = "String"
+  value     = each.value
+}
+
+resource "aws_ssm_parameter" "eft_nonsensitive" {
+  for_each = local.eft_nonsensitive
 
   name      = each.key
   overwrite = true

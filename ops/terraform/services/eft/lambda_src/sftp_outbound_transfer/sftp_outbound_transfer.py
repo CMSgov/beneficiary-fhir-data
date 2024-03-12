@@ -35,6 +35,7 @@ from errors import (
 )
 from s3 import S3EventType
 from sns import (
+    FileDiscoveredDetails,
     StatusNotification,
     TransferFailedDetails,
     TransferSuccessDetails,
@@ -61,22 +62,10 @@ BOTO_CONFIG = Config(
 logger = Logger()
 
 
-def _safe_sftp_mkdir(sftp_client: paramiko.SFTPClient, dirpath: str):
-    current_dir = ""
-    for dir_part in dirpath.split("/"):
-        if not dir_part:
-            continue
-        current_dir += f"/{dir_part}"
-        try:
-            sftp_client.listdir(current_dir)
-        except IOError:
-            logger.info("%s does not exist, creating it", current_dir)
-            sftp_client.mkdir(current_dir)
-
-
 def _handle_s3_event(s3_object_key: str):
     s3_client = boto3.client("s3", config=BOTO_CONFIG)
     ssm_client = boto3.client("ssm", config=BOTO_CONFIG)
+    sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
 
     object_key_pattern = rf"^{BUCKET_ROOT_DIR}/([\w_]+)/([\w_]+)/(.*)$"
     if (
@@ -167,6 +156,28 @@ def _handle_s3_event(s3_object_key: str):
         input_folder=recognized_file.input_folder,
     )
 
+    file_discovered_time = datetime.utcnow()
+    bfd_topic = sns_resource.Topic(BFD_SNS_TOPIC_ARN)
+    discovered_notif = StatusNotification(
+        details=FileDiscoveredDetails(
+            partner=partner,
+            timestamp=file_discovered_time,
+            object_key=s3_object_key,
+            file_type=recognized_file.type,
+        )
+    )
+
+    send_notification(topic=bfd_topic, notification=discovered_notif)
+
+    topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
+    partner_topic = (
+        sns_resource.Topic(topic_arns_by_partner[partner])
+        if partner in topic_arns_by_partner
+        else None
+    )
+    if partner_topic:
+        send_notification(topic=partner_topic, notification=discovered_notif)
+
     logger.info(
         'Preconditions checked. Connecting to SFTP host "%s" as user "%s"',
         global_config.sftp_hostname,
@@ -220,16 +231,8 @@ def _handle_s3_event(s3_object_key: str):
                 # Clean the provided paths of any whitespace or trailing/leading slashes
                 staging_dir_path = f"/{recognized_file.staging_folder.strip().strip('/')}"
                 input_dir_path = f"/{recognized_file.input_folder.strip().strip('/')}"
-                # First, ensure the staging folder exists by creating it, piece-by-piece, if it
-                # doesn't
-                logger.info(
-                    "Checking if the staging path %s exists, creating it if it does not",
-                    staging_dir_path,
-                )
-                _safe_sftp_mkdir(sftp_client=sftp_client, dirpath=staging_dir_path)
-                logger.info("%s exists or has been created", staging_dir_path)
 
-                # Then, upload the file to the staging folder. This avoids the SWEEPS automation
+                # First, upload the file to the staging folder. This avoids the SWEEPS automation
                 # from sweeping partially uploaded files as we will move this file to the SWEEPS
                 # input folder only once it has fully uploaded
                 logger.info(
@@ -255,17 +258,7 @@ def _handle_s3_event(s3_object_key: str):
                 )
 
                 # Once the permissions have been modified, we need to move the file to the actual
-                # SWEEPS input directory. Just like before, we check if the directory exists and
-                # attempt to create it if it doesn't
-                logger.info(
-                    "Checking if the SWEEPS input path %s exists, creating it if it does not",
-                    input_dir_path,
-                )
-                _safe_sftp_mkdir(sftp_client=sftp_client, dirpath=input_dir_path)
-                logger.info("%s exists or has been created", input_dir_path)
-
-                # Once we're sure the directory exists, the file is moved (SFTP calls this a
-                # "rename") to the input directory
+                # SWEEPS input directory. (SFTP calls this a "rename")
                 logger.info(
                     "Moving %s to SWEEPS input directory path %s", staging_file_path, input_dir_path
                 )
@@ -294,21 +287,19 @@ def _handle_s3_event(s3_object_key: str):
             global_config.sftp_hostname,
         )
 
-        sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
-        bfd_topic = sns_resource.Topic(BFD_SNS_TOPIC_ARN)
-        notification = StatusNotification(
+        success_time = datetime.utcnow()
+        success_notif = StatusNotification(
             details=TransferSuccessDetails(
                 partner=partner,
                 timestamp=datetime.utcnow(),
                 object_key=s3_object_key,
                 file_type=recognized_file.type,
+                transfer_duration=round((success_time - file_discovered_time).total_seconds()),
             )
         )
-        send_notification(topic=bfd_topic, notification=notification)
-        topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
-        if partner in topic_arns_by_partner:
-            partner_topic = sns_resource.Topic(topic_arns_by_partner[partner])
-            send_notification(topic=partner_topic, notification=notification)
+        send_notification(topic=bfd_topic, notification=success_notif)
+        if partner_topic:
+            send_notification(topic=partner_topic, notification=success_notif)
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
