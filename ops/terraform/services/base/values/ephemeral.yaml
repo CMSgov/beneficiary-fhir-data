@@ -10,7 +10,7 @@ bfd:
       rds_iam_database_authentication_enabled: true
       rds_instance_count: 1
     migrator:
-      instance_type: m6i.large
+      instance_type: m6a.large
       volume_size: 100
       sqs_queue_name: bfd-${env}-migrator
       new_relic_metric_host: *newRelicMetricHost
@@ -30,7 +30,7 @@ bfd:
         data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
         data_pipeline_ccw_rif_job_enabled: false
         data_pipeline_idempotency_required: true
-        instance_type: c6i.4xlarge
+        instance_type: c6a.4xlarge
         rif_job_batch_size: 7
         rif_job_queue_size_multiple: 5
         rif_thread_multiple: 3
@@ -42,7 +42,7 @@ bfd:
         ## PIPELINE RDA
         data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
         data_pipeline_rda_job_enabled: false
-        instance_type: m6i.large
+        instance_type: m6a.large
         # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
         # data_pipeline_rda_grpc_max_idle_seconds: 600
         # data_pipeline_rda_grpc_server_type: 'Remote'

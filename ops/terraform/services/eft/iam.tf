@@ -401,7 +401,7 @@ resource "aws_iam_policy" "sftp_outbound_transfer_sns" {
           Resource = flatten([
             aws_sns_topic.outbound_notifs[*].arn,
             [
-              for partner in local.eft_partners_with_outbound_enabled :
+              for partner in local.eft_partners_with_outbound_notifs :
               aws_sns_topic.outbound_partner_notifs[partner].arn
             ]
           ])
