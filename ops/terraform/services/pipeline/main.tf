@@ -29,8 +29,8 @@ locals {
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
   nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
 
-  sensitive_ccw_service_map       = zipmap(data.aws_ssm_parameters_by_path.sensitive_ccw.names, data.aws_ssm_parameters_by_path.sensitive_ccw.values)
-  sensitive_ccw_service_config    = { for key, value in local.sensitive_ccw_service_map : split("/", key)[6] => value }
+  sensitive_ccw_service_map    = zipmap(data.aws_ssm_parameters_by_path.sensitive_ccw.names, data.aws_ssm_parameters_by_path.sensitive_ccw.values)
+  sensitive_ccw_service_config = { for key, value in local.sensitive_ccw_service_map : split("/", key)[6] => value }
 
   nonsensitive_ccw_service_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_ccw.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_ccw.values))
   nonsensitive_ccw_service_config = { for key, value in local.nonsensitive_ccw_service_map : split("/", key)[6] => value }
@@ -193,14 +193,19 @@ resource "aws_launch_template" "this" {
     enabled = true
   }
 
+  # The CCW pipeline variant heavily relies on disk i/o to perform its function.
+  # A 1TB gp3 volume at 3000 iops and 250MB/S throughput is ~15% less expensive
+  # than the comparable gp2 volume.
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {
-      volume_type           = "gp2"
-      volume_size           = 1000
       delete_on_termination = true
       encrypted             = true
+      iops                  = 3000
       kms_key_id            = local.kms_key_id
+      throughput            = 250
+      volume_size           = 1000
+      volume_type           = "gp3"
     }
   }
 
@@ -373,13 +378,17 @@ resource "aws_instance" "pipeline" {
     http_tokens                 = "required"
   }
 
+  # The RDA pipeline variant does not rely on disk i/o to perform its function.
+  # A 170GB gp3 volume at 3000 iops and 125MB/S throughput is >19.29% less
+  # expensive than a comparable gp2 volume at 128MB/S throughput
   root_block_device {
     delete_on_termination = true
     encrypted             = true
+    iops                  = 3000
     kms_key_id            = local.kms_key_id
-    throughput            = 0
-    volume_size           = 1000
-    volume_type           = "gp2"
+    throughput            = 125
+    volume_size           = 170
+    volume_type           = "gp3"
   }
 }
 

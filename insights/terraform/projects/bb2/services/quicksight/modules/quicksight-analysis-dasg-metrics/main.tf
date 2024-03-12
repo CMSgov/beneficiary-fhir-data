@@ -66,6 +66,77 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
       identifier   = "prod_global_state"
     }
 
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(({total_grant_and_archived_real_bene_deduped_count} - 265513) / (400000 - 265513), 3)"
+      name                = "bene_served_progress_to_target"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "Difference(sum({app_active_registered}), [{report_date} ASC], -1)"
+      name                = "third_party_apps_served_wow"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "difference(sum({total_grant_and_archived_real_bene_deduped_count}), [{report_date} ASC], -1)"
+      name                = "bene_served_wow"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(({fhir_v1_coverage_since_call_real_count} + {fhir_v1_eob_since_call_real_count} + {fhir_v2_coverage_since_call_real_count} + {fhir_v2_eob_since_call_real_count}) / ({fhir_v1_coverage_call_real_count} + {fhir_v1_eob_call_real_count} + {fhir_v1_coverage_call_real_count} + {fhir_v2_eob_call_real_count}) , 3)"
+      name                = "total_v1_v2_calls_using_since_param_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v1_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v1_call_real_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v1_coverage_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v1_coverage_call_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v1_eob_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v1_eob_call_real_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v1_patient_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v1_patient_call_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v2_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v2_call_real_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v2_coverage_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v2_coverage_call_real_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v2_eob_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v2_eob_call_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v2_patient_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v2_patient_call_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({total_grant_and_archived_real_bene_deduped_count}), [{report_date} ASC], -1), 3)"
+      name                = "bene_served_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round({auth_demoscope_required_choice_not_sharing_real_bene_count} / ({auth_demoscope_required_choice_sharing_real_bene_count} + {auth_demoscope_required_choice_not_sharing_real_bene_count}) , 3)"
+      name                = "auth_bene_chose_not_to_share_demographic_scopes_percent"
+    }
+
     filter_groups {
       cross_dataset   = "SINGLE_DATASET"
       filter_group_id = "b7405b1c-98c4-4d19-b212-085d6773c75e"

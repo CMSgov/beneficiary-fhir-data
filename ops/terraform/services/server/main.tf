@@ -42,17 +42,22 @@ locals {
   ssh_key_pair                    = local.nonsensitive_common_config["key_pair"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
-  lb_is_public                   = local.nonsensitive_service_config["lb_is_public"]
-  lb_ingress_port                = local.nonsensitive_service_config["lb_ingress_port"]
-  lb_egress_port                 = local.nonsensitive_service_config["lb_egress_port"]
-  lb_vpc_peerings                = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
-  asg_min_instance_count         = local.nonsensitive_service_config["asg_min_instance_count"]
-  asg_max_instance_count         = local.nonsensitive_service_config["asg_max_instance_count"]
-  asg_max_warm_instance_count    = local.nonsensitive_service_config["asg_max_warm_instance_count"]
-  asg_desired_instance_count     = local.nonsensitive_service_config["asg_desired_instance_count"]
-  asg_instance_warmup_time       = local.nonsensitive_service_config["asg_instance_warmup_time"]
-  launch_template_instance_type  = local.nonsensitive_service_config["launch_template_instance_type"]
-  launch_template_volume_size_gb = local.nonsensitive_service_config["launch_template_volume_size_gb"]
+  lb_is_public    = local.nonsensitive_service_config["lb_is_public"]
+  lb_ingress_port = local.nonsensitive_service_config["lb_ingress_port"]
+  lb_egress_port  = local.nonsensitive_service_config["lb_egress_port"]
+  lb_vpc_peerings = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
+
+  asg_min_instance_count      = local.nonsensitive_service_config["asg_min_instance_count"]
+  asg_max_instance_count      = local.nonsensitive_service_config["asg_max_instance_count"]
+  asg_max_warm_instance_count = local.nonsensitive_service_config["asg_max_warm_instance_count"]
+  asg_desired_instance_count  = local.nonsensitive_service_config["asg_desired_instance_count"]
+  asg_instance_warmup_time    = local.nonsensitive_service_config["asg_instance_warmup_time"]
+
+  launch_template_instance_type     = local.nonsensitive_service_config["launch_template_instance_type"]
+  launch_template_volume_iops       = local.nonsensitive_service_config["launch_template_volume_iops"]
+  launch_template_volume_size_gb    = local.nonsensitive_service_config["launch_template_volume_size_gb"]
+  launch_template_volume_throughput = local.nonsensitive_service_config["launch_template_volume_throughput"]
+  launch_template_volume_type       = local.nonsensitive_service_config["launch_template_volume_type"]
 
   env_config = {
     default_tags = local.default_tags,
@@ -64,13 +69,13 @@ locals {
 
   ami_id = data.aws_ami.main.image_id
 
-  create_server_lb_alarms    = ! local.is_ephemeral_env || var.force_create_server_lb_alarms
-  create_server_metrics      = ! local.is_ephemeral_env || var.force_create_server_metrics
-  create_server_slo_alarms   = (local.create_server_metrics && ! local.is_ephemeral_env) || var.force_create_server_slo_alarms
-  create_server_log_alarms   = ! local.is_ephemeral_env || var.force_create_server_log_alarms
-  create_server_dashboards   = (local.create_server_metrics && ! local.is_ephemeral_env) || var.force_create_server_dashboards
-  create_server_disk_alarms  = ! local.is_ephemeral_env || var.force_create_server_disk_alarms
-  create_server_error_alerts = ! local.is_ephemeral_env || var.force_create_server_error_alerts
+  create_server_lb_alarms    = !local.is_ephemeral_env || var.force_create_server_lb_alarms
+  create_server_metrics      = !local.is_ephemeral_env || var.force_create_server_metrics
+  create_server_slo_alarms   = (local.create_server_metrics && !local.is_ephemeral_env) || var.force_create_server_slo_alarms
+  create_server_log_alarms   = !local.is_ephemeral_env || var.force_create_server_log_alarms
+  create_server_dashboards   = (local.create_server_metrics && !local.is_ephemeral_env) || var.force_create_server_dashboards
+  create_server_disk_alarms  = !local.is_ephemeral_env || var.force_create_server_disk_alarms
+  create_server_error_alerts = !local.is_ephemeral_env || var.force_create_server_error_alerts
 }
 
 ## IAM role for FHIR
@@ -155,10 +160,13 @@ module "fhir_asg" {
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
-    instance_type = local.launch_template_instance_type
-    volume_size   = local.launch_template_volume_size_gb
-    ami_id        = local.ami_id
-    key_name      = local.ssh_key_pair
+    instance_type     = local.launch_template_instance_type
+    volume_size       = local.launch_template_volume_size_gb
+    volume_type       = local.launch_template_volume_type
+    volume_iops       = local.launch_template_volume_iops
+    volume_throughput = local.launch_template_volume_throughput
+    ami_id            = local.ami_id
+    key_name          = local.ssh_key_pair
 
     profile       = module.fhir_iam.profile
     user_data_tpl = "fhir_server.tpl" # See templates directory for choices
