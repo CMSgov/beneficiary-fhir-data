@@ -7,3 +7,6 @@
   import_tasks: install-utilities.yml
 - name: Install security updates
   import_tasks: install-security-updates.yml
+- name: Complete All Transactions
+  become: true
+  shell: yum-complete-transaction
