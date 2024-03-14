@@ -36,10 +36,10 @@ locals {
     { begin = 1 * var.scaling_request_count_interval, end = 2 * var.scaling_request_count_interval, desired_capacity = local.scaling_capacity_step * 2 },
     # If RequestCount is greater than or equal to 2 * var.scaling_request_count_interval count/min,
     # but less than 4 * var.scaling_request_count_interval count/min we want to be at 9 instances
-    { begin = 2 * var.scaling_request_count_interval, end = 4 * var.scaling_request_count_interval, desired_capacity = local.scaling_capacity_step * 3 },
+    { begin = 2 * var.scaling_request_count_interval, end = 3 * var.scaling_request_count_interval, desired_capacity = local.scaling_capacity_step * 3 },
     # Whenever traffic is greater than or equal to 4 * var.scaling_request_count_interval count/min
     # we want to be at 12 instances
-    { begin = 4 * var.scaling_request_count_interval, end = null, desired_capacity = local.scaling_capacity_step * 4 },
+    { begin = 3 * var.scaling_request_count_interval, end = null, desired_capacity = local.scaling_capacity_step * 4 },
   ]
   scalein_config  = slice(local.scaling_stages, 0, length(local.scaling_stages) - 1)
   scaleout_config = slice(local.scaling_stages, 1, length(local.scaling_stages))
