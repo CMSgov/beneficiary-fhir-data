@@ -5,18 +5,18 @@
 @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
 
 # BFD Pipeline and Server Codeowners
-/docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @aschey-forpeople
-/ops @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @sb-benohe @aschey-forpeople
-/apps @mackec1 @mjburling @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @aschey-forpeople
+/docs/rfcs @mackec1 @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
+/ops @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman
+/apps @mackec1 @mjburling @brandoncruz3 @dondevun @meliGuzman
 
 # BFD Performance Testing Utilities
-/apps/utils/locust_tests @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @aschey-forpeople
+/apps/utils/locust_tests @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman
 
 # BFD Insights Codeowners
-/insights @keithdadkins @mackec1 @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @JFU-NAVA-PBC @aschey-forpeople
+/insights @keithdadkins @mackec1 @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman
 
 # GitHub Actions Workflows
-/.github/workflows @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman @rdatoc @sb-benohe @aschey-forpeople
+/.github/workflows @keithdadkins @mjburling @malessi @brandoncruz3 @dondevun @meliGuzman
 
 # Administration
 /.github/CODEOWNERS @keithdadkins @mjburling @brandoncruz3 @dondevun @meliGuzman
