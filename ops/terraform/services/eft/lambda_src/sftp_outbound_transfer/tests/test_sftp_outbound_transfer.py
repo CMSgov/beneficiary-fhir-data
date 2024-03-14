@@ -19,11 +19,9 @@ from errors import (
     UnknownPartnerError,
     UnrecognizedFileError,
 )
-from sftp_outbound_transfer import (
-    _safe_sftp_mkdir,  # pyright: ignore[reportPrivateUsage]
-)
 from sftp_outbound_transfer import handler
 from sns import (
+    FileDiscoveredDetails,
     StatusNotification,
     TransferFailedDetails,
     TransferSuccessDetails,
@@ -336,16 +334,31 @@ class TestUpdatePipelineSlisHandler:
             handler(event=event, context=mock_lambda_context)
 
         mocked_calls = get_mock_send_notification_calls()
-        assert mock_send_notification.call_count == 2
-        assert all(
-            isinstance(actual_notification.details, TransferFailedDetails)
-            and actual_notification.details.error_name == SFTPConnectionError.__name__
-            for _, actual_notification in mocked_calls
+        assert mock_send_notification.call_count == 4
+        assert (
+            sum(
+                isinstance(actual_notification.details, FileDiscoveredDetails)
+                for _, actual_notification in mocked_calls
+            )
+            == 2
         )
-        assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)
-        assert any(
-            topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
-            for topic_arn, _ in mocked_calls
+        assert (
+            sum(
+                isinstance(actual_notification.details, TransferFailedDetails)
+                and actual_notification.details.error_name == SFTPConnectionError.__name__
+                for _, actual_notification in mocked_calls
+            )
+            == 2
+        )
+        assert (
+            sum(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls) == 2
+        )
+        assert (
+            sum(
+                topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
+                for topic_arn, _ in mocked_calls
+            )
+            == 2
         )
 
     def test_it_raises_sftp_transfer_error_and_sends_notifications_if_transfer_fails(self):
@@ -356,22 +369,34 @@ class TestUpdatePipelineSlisHandler:
             handler(event=event, context=mock_lambda_context)
 
         mocked_calls = get_mock_send_notification_calls()
-        assert mock_send_notification.call_count == 2
-        assert all(
-            isinstance(actual_notification.details, TransferFailedDetails)
-            and actual_notification.details.error_name == SFTPTransferError.__name__
-            for _, actual_notification in mocked_calls
+        assert mock_send_notification.call_count == 4
+        assert (
+            sum(
+                isinstance(actual_notification.details, FileDiscoveredDetails)
+                for _, actual_notification in mocked_calls
+            )
+            == 2
         )
-        assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)
-        assert any(
-            topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
-            for topic_arn, _ in mocked_calls
+        assert (
+            sum(
+                isinstance(actual_notification.details, TransferFailedDetails)
+                and actual_notification.details.error_name == SFTPTransferError.__name__
+                for _, actual_notification in mocked_calls
+            )
+            == 2
+        )
+        assert (
+            sum(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls) == 2
+        )
+        assert (
+            sum(
+                topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
+                for topic_arn, _ in mocked_calls
+            )
+            == 2
         )
 
-    @mock.patch(f"{MODULE_UNDER_TEST}.{_safe_sftp_mkdir.__name__}")
-    def test_it_executes_sftp_transfer_process_if_event_is_valid(
-        self, mock_safe_sftp_mkdir: mock.MagicMock
-    ):
+    def test_it_executes_sftp_transfer_process_if_event_is_valid(self):
         event = generate_event()
         mock_host_keys = mock.Mock()
         mock_ssh_client.get_host_keys.return_value = mock_host_keys
@@ -403,45 +428,56 @@ class TestUpdatePipelineSlisHandler:
         }
         assert actual_ssh_connect_data == expected_ssh_connect_data
 
-        actual_staging_mkdir_path = mock_safe_sftp_mkdir.call_args_list[0].kwargs["dirpath"]
-        expected_staging_mkdir_path = DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder
-        assert actual_staging_mkdir_path == expected_staging_mkdir_path
-
         actual_s3_download_obj_key = mock_s3_client.download_fileobj.call_args.kwargs["Key"]
         expected_s3_download_obj_key = DEFAULT_MOCK_OBJECT_KEY
         assert actual_s3_download_obj_key == expected_s3_download_obj_key
 
         actual_sftp_open_path = mock_sftp_client.open.call_args.kwargs["filename"]
-        expected_sftp_open_path = f"{expected_staging_mkdir_path}/{DEFAULT_MOCK_OBJECT_FILENAME}"
+        expected_sftp_open_path = f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}"
         assert actual_sftp_open_path == expected_sftp_open_path
 
         actual_sftp_chmod_data = mock_sftp_client.chmod.call_args.kwargs
         expected_sftp_chmod_data = {"path": expected_sftp_open_path, "mode": 0o664}
         assert actual_sftp_chmod_data == expected_sftp_chmod_data
 
-        actual_input_mkdir_path = mock_safe_sftp_mkdir.call_args_list[1].kwargs["dirpath"]
-        expected_input_mkdir_path = DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder
-        assert actual_input_mkdir_path == expected_input_mkdir_path
-
         actual_sftp_rename_data = mock_sftp_client.rename.call_args.kwargs
         expected_sftp_rename_data = {
             "oldpath": expected_sftp_open_path,
-            "newpath": f"{expected_input_mkdir_path}/{DEFAULT_MOCK_OBJECT_FILENAME}",
+            "newpath": f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}",
         }
         assert actual_sftp_rename_data == expected_sftp_rename_data
 
         mocked_calls = get_mock_send_notification_calls()
-        assert mock_send_notification.call_count == 2
-        assert all(
-            isinstance(actual_notification.details, TransferSuccessDetails)
-            and actual_notification.details.object_key == DEFAULT_MOCK_OBJECT_KEY
-            and actual_notification.details.partner == DEFAULT_MOCK_PARTNER_NAME
-            and actual_notification.details.file_type
-            == DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].type
-            for _, actual_notification in mocked_calls
+        assert mock_send_notification.call_count == 4
+        assert (
+            sum(
+                isinstance(actual_notification.details, FileDiscoveredDetails)
+                and actual_notification.details.object_key == DEFAULT_MOCK_OBJECT_KEY
+                and actual_notification.details.partner == DEFAULT_MOCK_PARTNER_NAME
+                and actual_notification.details.file_type
+                == DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].type
+                for _, actual_notification in mocked_calls
+            )
+            == 2
         )
-        assert any(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls)
-        assert any(
-            topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
-            for topic_arn, _ in mocked_calls
+        assert (
+            sum(
+                isinstance(actual_notification.details, TransferSuccessDetails)
+                and actual_notification.details.object_key == DEFAULT_MOCK_OBJECT_KEY
+                and actual_notification.details.partner == DEFAULT_MOCK_PARTNER_NAME
+                and actual_notification.details.file_type
+                == DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].type
+                for _, actual_notification in mocked_calls
+            )
+            == 2
+        )
+        assert (
+            sum(topic_arn == DEFAULT_MOCK_BFD_SNS_TOPIC_ARN for topic_arn, _ in mocked_calls) == 2
+        )
+        assert (
+            sum(
+                topic_arn == DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER[DEFAULT_MOCK_PARTNER_NAME]
+                for topic_arn, _ in mocked_calls
+            )
+            == 2
         )

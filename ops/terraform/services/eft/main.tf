@@ -256,7 +256,8 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
 }
 
 resource "aws_lambda_function" "sftp_outbound_transfer" {
-  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+  depends_on = [aws_iam_role_policy_attachment.sftp_outbound_transfer]
+  count      = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   function_name = local.outbound_lambda_full_name
 
@@ -303,7 +304,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
 resource "aws_sqs_queue" "sftp_outbound_transfer_dlq" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name                      = "${one(aws_lambda_function.sftp_outbound_transfer[*].function_name)}-dlq"
+  name                      = "${local.outbound_lambda_full_name}-dlq"
   kms_master_key_id         = local.kms_key_id
   message_retention_seconds = 14 * 24 * 60 * 60 # 14 days, in seconds, which is the maximum
 }
@@ -352,7 +353,7 @@ resource "aws_security_group" "sftp_outbound_transfer" {
 resource "aws_lambda_permission" "sftp_outbound_transfer_sns" {
   for_each = toset(local.eft_partners_with_outbound_enabled)
 
-  statement_id   = "${local.outbound_lambda_full_name}-allow-sns"
+  statement_id   = "${local.outbound_lambda_full_name}-allow-sns-${each.key}"
   action         = "lambda:InvokeFunction"
   function_name  = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
   principal      = "sns.amazonaws.com"
@@ -753,4 +754,24 @@ resource "aws_vpc_endpoint" "this" {
   vpc_endpoint_type   = "Interface"
   vpc_id              = local.vpc_id
   tags                = { Name = "${local.full_name}-sftp-endpoint" }
+}
+
+module "outbound_o11y" {
+  depends_on = [
+    aws_sqs_queue.sftp_outbound_transfer_dlq,
+    aws_lambda_function.sftp_outbound_transfer,
+    aws_sns_topic.outbound_notifs,
+    aws_sns_topic.outbound_partner_notifs
+  ]
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  source = "./modules/bfd_eft_outbound_o11y"
+
+  ssm_config                       = local.ssm_config
+  kms_key_arn                      = local.kms_key_id
+  outbound_lambda_name             = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
+  outbound_lambda_dlq_name         = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].name)
+  outbound_bfd_sns_topic_name      = one(aws_sns_topic.outbound_notifs[*].name)
+  outbound_bfd_sns_topic_arn       = one(aws_sns_topic.outbound_notifs[*].arn)
+  outbound_partner_sns_topic_names = [for _, v in aws_sns_topic.outbound_partner_notifs : v.name]
 }

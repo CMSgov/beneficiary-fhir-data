@@ -124,13 +124,16 @@ resource "aws_launch_template" "main" {
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {
-      volume_type           = "gp2"
-      volume_size           = var.launch_config.volume_size
       delete_on_termination = true
       encrypted             = true
+      iops                  = var.launch_config.volume_iops
       kms_key_id            = data.aws_kms_key.master_key.arn
+      throughput            = var.launch_config.volume_throughput
+      volume_size           = var.launch_config.volume_size
+      volume_type           = var.launch_config.volume_type
     }
   }
+
 
   metadata_options {
     http_endpoint               = "enabled"

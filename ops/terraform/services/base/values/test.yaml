@@ -58,8 +58,11 @@ bfd:
         working_dir: *bfdMigratorDir
         exec_start: /opt/bfd-db-migrator/bfd-db-migrator-service.sh
         user: "bb-migrator"
-      instance_type: m6i.large
+      instance_type: m6a.large
+      volume_iops: 3000
       volume_size: 100
+      volume_throughput: 125
+      volume_type: gp3
       sqs_queue_name: *sqs_name
       db_migrator_dir: *bfdMigratorDir
       db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
@@ -116,7 +119,7 @@ bfd:
         data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
         data_pipeline_ccw_rif_job_enabled: *ccw_enabled
         data_pipeline_idempotency_required: *idem_enabled
-        instance_type: c6i.4xlarge
+        instance_type: c6a.4xlarge
         rif_job_batch_size: *ccw_batch_size
         rif_job_queue_size_multiple: *ccw_queue_size_multiple
         rif_thread_multiple: 3
@@ -158,7 +161,7 @@ bfd:
         data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
         data_pipeline_rda_job_write_threads: *rda_job_write_thread_count
         data_pipeline_rda_process_dlq: *rda_job_process_dlq
-        instance_type: m6i.large
+        instance_type: m6a.large
       shared:
         bfd_pipeline_dir: *bfdPipelineDir
         data_pipeline_dir: *bfdPipelineDir
@@ -256,8 +259,11 @@ bfd:
       # time it took to start during the period analyzed was 77 seconds. So, 90 provides a decent
       # buffer for the worst cases
       asg_instance_warmup_time: 90
-      launch_template_instance_type: c6i.4xlarge
+      launch_template_instance_type: c6a.4xlarge
+      launch_template_volume_iops: 3000
       launch_template_volume_size_gb: 60
+      launch_template_volume_throughput: 125
+      launch_template_volume_type: gp3
       # Indicates the amount of time between batched error alerts posted to Slack when 500s occur in
       # BFD Server. See
       # https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html#rate-based for
@@ -438,6 +444,16 @@ bfd:
           # Private key of the user, used when authenticating to the configured outbound SFTP Server
           user_priv_key: |-
             <<CIPHER>>AgV47mB0gLU1Ouge_CSEMsbcxRE7bYH1S5Z2prWFwVghekoAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF5bFFuRUhVa0lqNW9hWmFXZXJscnZtdGNVazA2bGNPQU4yTkowUW11OHJGdUl1RVZYN3lMQ3ZlZHhmdWxUOGZnUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAGpg4NBBLZYeHtpRW4actH3AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMlDQtFBugagrt_zxsAgEQgDslZFeG3wPGMK8mScEpvNUER5xTG-Rbe7eMQf5VqNE94topCaToy6qT9fNYGQ6MJgMEAzh7l1d0sP5MiwIAABAAK9nPdSArkZBGCCqYncid4Oz3l1jZUKVXclfDiAV_0H_Nrru3WUrYO8Zo-66ZuUAL_____wAAAAEAAAAAAAAAAAAAAAEAAA9cdRUFqqGYQN46fd5zLNr11GnTXTwaj__m1ZDGALtTkXrePjDMe6I0SQWbZDvgcvYWTSSVqJlcX9ZPPG3XNliB99sAoY7oHmV30H0a29D97kiIJiQ5dX562HgGTwH1pKcT8nr0CLFpKv47ZzfF4vgPC_kxnTcIBfYPutKrXrETQ6ZXtXIl8E5Y4Dj5-9_mk-cuzpMarVYlpsaII_VMjdjAEDsxMn-_pPP-3-A7_rKuUsnvbf0N178CWDZapNAcMN4QJsHDT4t4q8DXK3FrVZJnWAxe7rdVFUe1ECkiW2RHnJRBLjkzPoWvdAx8rHyjSDMuwoSAXVwCku1rYT1vCRnZwd6geGxV9C1v_lmwSXrrz2Ybw-skGv6Nahk6szBY6Z762czOe2mFw0aCShvCHWVRWvTCoHeOIS5ne3pvnTB-NpFVbm4hMVvkUbK1mpcjpuMcWSebDz7GaJL0LblZigEI9JNOzMi1seA__gYZdqqt479pwfhRsqlhru1KMKuAm6lbK0eDf2Byeo77KiHNO9yYSDwn4PC6EciOK1npdH66g0BpGEIP_2QKv0k730q3uvQwhMDG1siNIPVoxkLL8637gRuJCXgVid31NPVlQhuoTnAKbBfj1DQQiqL32HfE2wFB3wYK_1_QfmpQx98OMrSF-W65jnPNhL14K7VmtH_b4jdTX10VbFThZe6TvYY-zdbPglYqaJ5Gu1RvH8f0IGhpQwH5_o9DOB1aY3dn5eMNn1DsEXF-zz12ctAXC1YjCtCDdLHf8ue5VnW0qhxA9EMIkimoxyhAmRstkZd_Jp0XUBrmxd9qvNOPdJnimx25LymQM0YV0V0sEaBsCUP3DShgvacg1s3nI2KCdOo1st0Bj9vrUtnsg0rTAxaf_6Rm6rxy8ubZEQiCVq8fHG3EDC2XRJwxyZvlLDjtIsvTKNpPuuQZ2yUEmHltzgKjj2DjodFWGBS6DQ_4_P6xPsnMFdLrEbmO8QOC0AMKX742CGHvnMeR6whx5HXhh3R6hm_chX6mCv92nDP1-8UQqcsGp04dNVhDbBdk11pFjgwoYGw-T35F928PsVv6ha-LKeuR5wMh_eFxro-tM73uHQ80ZQWK6l8Kke_2otb404Zx68sFoqZ5tNofbLBLSHPW--Xoe2XzU-g9_OTw02vO4m_X1IGcusCRhprkn2wF-WIx4ta6WoUV70NF47x9eOaGeLfWEM45Ar33RRyil4fRvp72MEzsRBL-hz7lhUIpn6kjVfpwl8gSaA5onLBHWufTJ91nJC8_0W_-omwuT_Rx1JShv-0GtjdLVVrc_1ryix47bq6PeRiOEwhNmshZKhYZuIkp6EdQ0ATP54H1J4Th1BPEmizlnc9KYtS6iHtabHPhul3rXwReLfSw3_fyfEtfFYnN2qkPzIHw_N9HRx6b2drZcc9xamFQ9R1C5d25Mb-DUdeHmWGZnMlW2VmkF43AHlYT9lAI_tXbeN3om1ruw_h-8AA4822U5TiRPER4gNg_OKO1C1hKaW8JyGyTncypM-yKlF-wOWLPC8cGJeruJGnOFHvZkFmzYuuQdSKq80dC6Zc3m9ebnYy0fR2u9KWDntuo-G-VW3eCV-sChwXP1-9jkPBK4bfWLYIs5HponXTpa5cmtimkGepXa2OfZmnYwh5XSPJxqhYMr_xWlXkSiVx-ItIFwY7dMd1JQ1vkVmtQNrvoH6p0O6pr_-VHh0V-FeQ0lUpKfi50-PI88Sx_2_oQ84r3sUycKMvanhUwAZG4nG_n9v3SPxvzyVdJWU7BJxMVIOceJ-hQOUz7Za0nJ9cchMbs1o2zlOdcgfUbhZ0sWUk4CCJTJFfQYYw1_RYDD1MV6ECmuN2goIpvTZ2sH_zg4-HySw7oWrd5La6MG5rjzggFVbgJH6j9lFbIYSpXaJ-FgRxSvB-TkUmRclP0rsKOEasdrUd-oa1fzvy3pzDreEdkQ4GGMNrS9QpfkCIGPRLy6KiMJJTtaTyIga0kUk9_59pn7ym9PDrrXuAL4tLSo4jQ_jy7--8-Iq-SF6TUK3crDjof0ZA_2yLMASVbTjE7809TKhRNfJrgbyE38ZgAto5zAAB_idwi7aVDviUBX9uuQI66S9T2-Iwl0KtlfykhdB1esg-seHXgFuqGRhmsZvPXYzjj9DqAiSTWrfjTJsEPztu45rH3tsoNmR_yWVb0xkFjeWSrpBQkqbFyr0PF3k1FL7Vy9mxxhC3XR1AtMmHLl6FJ2uXdzVqs-qImZR9NiO2sLegVND92BoR6EpmCrN3GkPuav9Xca42edRS63X4nq5Ee7RCyukWktIsCKdI_ngDltBGQ1BjvyZEr558Byjj5p3rUVz4w4YyhTybco9AL4VPQVyuujTD7WS3ol0wNBfMNr79pNtJq_yMxPcmZoS-YzaNKLDUKR9e-nVRUSrq7H2JGAiKYzvibPFpdWlFTZTjvgo8CO7OmZ7FCZbXbKJss2fixWYhSuKt-C0feJ7rR8J03FuXeEGcTmqLIeW8pEiy4eRKaiHfB-Ud4VJnJBbadvUbTXK5Y6kg7C2gBQgrdibcBZU39Ujn4t5jUFoUY-5I98Awf4Bl8q4FneQ3DO-u8b5HhUBdnnM7qHh7HIeiXMCkPzd2NJ64gbWCB6xGE6QB-PXcaijL9Y_ce8nXZuZIocnpPAWEMbiEdRYZg9F9GsCMfq7r7sUktLSV1WtyUpJZP2FE8LDQGDNbnvGrZvAQM8AP-qzmTKFONysxsMqXQCkl_0OlWV6CbBIv24leFJKvp-wu1y2ihrIa0LrKIccRumjCv1bJnD8Nklc7Fb99lqE5U7pHr880SwvchCVBtvjfsmPkXFdV06l1Vq8xD3IpO4OpPCLT_V2F11ojRFERBRH8w5vnalzf1iIRAqb-g5NmJzMBh6TrIV_oEnBRV6Ql6bLgnkUqLq1Txu3odeW7gDBWw8qNBfWzEbkBT8Xn86IxNqj1kpB-RPcnUG5EGychMi6M-xlXwDB09FJN1GwT3rPWkiaFtL_UwzNUdaTwd81O3fKIEuwnqFSCazzlAbnV0RBiHgD_Ef1uZscVyjVldkKZTnQcD97GycC48T6atY_CRGgHkqx06N1xUilnBwD8G0ACgpIj_b5PePt-Z0RUFiArzS3fb-a2uZySR7VDTw0_Efu3K5-URqtKza00GNtUXl24NRF9tOBHw0ndEG0CiajZ_aMT9HhZc0Qq0Wa4j4wplYISU1mpkY48ucjjDcPJ0uOaMSfK0oUTsuRHPo7-Zn_cZmMlX-JMZSvj6nxWJWmzZHzjAxrVKygfU3xf77o0BtMXbI5nPpqEgwQAf_C0sdzovzPzyG62bReiHDvB_OZOgFya33iO6kwUJvhaThcjxyIfZdB6O_-O9CCLcA1Q_LMqPoMMvMPTT6LbblxhoHe0z5-B4vi3Ndn-gF20bcccAeQsyVCQV7YiFVEjkVtGzXWgcagV0eDgJwkuwzo-Yd67XxiblyUm2HslevbzraMA7a6pQO3-jjsf771iQFi8PZ1Cbnynaf3OyvzdjeF637W9DNYB9jmeuXjWxVIGpXs-7eY80_-P4u9WD2C6l_WZ5BVoPMUVhFhsMPv5yvYfqNBUn0Nn0PrdQtSc8XqnbGlQOvfJOtgyfYwu4CNeULMICRdSgdea_mIYSvI3G5fgKNtP-SyIGnnydVQm07w2kbIWRr-rrp3RBJfNm5bvaJnyBUVN83pdqxTLbByj9TUf796dW1VRx8aEdiNSwrlJblsyqGt9wtdYH9GXYPG3WjPfbc3jHbNPzXRQmGbLQt8zhVyvm6BJkdJi4ov5OuJ_ByQKayXYQ05BnDB3DwasgAqBJVSi3vxNvf7wIi6ISmurrrhpd_yN0AlB2oypZPfYzMD3XL_LYt-D99QXMw8N4vMByFN02m9SSzSUtULoyruNCXxzSuNEapF6Gct7VQ5P08vim4O34Z0__pF5ntEchD1rgtQ_FnG0Mpiso4Xgt0_q6kjo5RCnDoLESMXgKQOWX4MXrQEosXlwntgDUHmJjzZfIdK_F1XyDsAJiyZSxNWFwEecDlGTFzRIIal2BFwAaZyWFUD8rP828LXeHH_TIwi_GBkh5FihvRSje8PeIoWHOVkdVCB2CdZi2Iq2ZW70ZVyPbpG8gt34okmMrVO7soWda5d7eY666gzKP5plMjqH99ljUI7ZAGKINhOr_otDu3fDHRUrrBLDvhHEzUjPiDzwugbwCBOYrDIrJhw7J74SzDjHl19ZGDde-mQIqWgVB0IjrxhupWS_zzIQ2ZAqkpG_mgmiAxeHtDtbF9P7t7vwT0YWufv0BB4HUCToq9gNPMdqW3dpQ0AQ-iZ_lzOU8h4TwdfKnXjYcqa0i-CaZDI0ORBQ8UXWoK9k2oj_3vSe1adgf0DjfOh-jYHSygkSlbAT9xNNCKnc6_tIaEnRdIGVnF-Mo2mAu2to5B4RBvvs-fnph135N1pHcCjNl-ko19QTzYf1oigQcgJ61XVMCfiT8Rd2vPUYBp4yitBdDBUff4bbiVBeF5Z0QAF-7aKNiuH-jbzuOwcVyoZeUYZbbtIwdiYw1_V38XTcbwH5PoMfM3WFWGtAfEi8kugVamhf9f0TGWgt3dmcJDsvk3HsG0WCVVvI5a9UKGAhlOiIEHtBQyuPNadBTyjwzSkER926FBphh_Fy1zlWtoRSXZLICGzxlyiD0iO9UBvdLj9zR2x7oM3ZInwOSlbu55bZfNWdsJDc-MJAuiR80I2GMY6NpLw72Y3jqYd9Mou5vTx2yQf8LKLP8hJ-p-RwxCOUQcr1qJ-eUkCtn_JAC5i6D1pbNPOmhG2CrIZ23Ym3ocnRBwRcJCVNUeDMGGI7eOGaq7F685ZQUd4MAGGYs1DE2M8y1BcHGJipylSkgqhE_IrYYbiCMuA5p01exzzVXykgWvHhKj_yF8pgiEQ4jCh_mz5lkolToyLnocQsBL_T2D4w155ws0ngsafpmMNOhoH7C9n2fSFlKyJNuQZK5TP1FW6bnjZ8Bv2aF9kYlHYyfuFvOqy0of53k13VYbaFQ_BVRFC82IQAdNz1BelQU-MWAyK3DPtQt5Lyzp6-aGdqZlEEzHCH3eS9VFLfSEpxxtEiDdngOr3Im9WAJ6DQStt_A86Mv3otHSA3xh34kQ-j0MClFJKooW5JzuZR3f81-0G9ObJQ69RktHmFVUSYGFL0b5ZTDgDH1JIQwgdnpw3Bby_RLifj78uCxtgC9bWfnfHqjipnShFyN080QxIswAtYYWB_mSDkqAGcwZQIwTm1Wecjs4cP3k0bv_E42i87Vp-I91msrHHeboICMK7y598ceN86kVz3pLWt0K20UAjEAqci8Ne3R1hReo5AbDZcQ5GVSRyoZaWvr8yGCBLkXKd90TSoUkuss9qJLMJpnkYIo<</CIPHER>>
+        o11y:
+          alarms:
+            lambda_errors:
+              breach_topic: "bfd-test-cloudwatch-alarms-slack-bfd-test"
+              ok_topic: UNDEFINED
+            sns_failures:
+              breach_topic: "bfd-test-cloudwatch-alarms-slack-bfd-test"
+              ok_topic: UNDEFINED
+          slack_notifier:
+            webhook_ssm_path: <<CIPHER>>AgV4KTFNULewE-jMPVhlqw6WaVkqh-Aop6DFlU3zLFfO_ZwAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF6a1YrTnN2WXFHVDhKM01YQWtmVVBmeUlEcjhZTnVucnFVV3I0SkJpbkhxaXBlaDlsVGNOdU5FbkwrSDFEZy8xdz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEdnGbynXchjjbfImieCArTAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM_11Cp4eFIPHd6BeCAgEQgDtSr22gYZyjVPNZg5iuZ3k7vUTr1HoFnQGQXsiAPHqrfeXvbqkSknEpDTqsGV-KmQQbW2h6oB-sy50ZbgIAABAANI_tRBAr7NU88OT_2rhSTh4hR5MKfG0r_8ZqYdDEEzk5KvMOYoWRozGoTvn0BGHV_____wAAAAEAAAAAAAAAAAAAAAEAAAAzeCXEEJa3Jp7k6LA5AHEmZE6pCFOyVxryuRg4qa5Y0lgOy1h3-BTb-GoPMGpeU5q5Z1SewfI0hTntqjdzbuT03JdYxgBnMGUCMGIWaKXta6HSlgdzMya7uOJ2eB05pyBYvBrEavWz1pVDxt792kGYlbkIzscp7ooZ2wIxANFTVLs0dszsVUbFfZm0X8Kdd_Y0pin5qPjxPweuHdEHxG6PepF27eL0EqyxvIiYjg==<</CIPHER>>
 dpc:
   test:
     eft:

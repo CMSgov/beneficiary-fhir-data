@@ -7,7 +7,7 @@
       "type": "amazon-ebs",
       "iam_instance_profile": "bfd-packer",
       "ssh_username": "ec2-user",
-      "instance_type": "c6i.4xlarge",
+      "instance_type": "c6a.4xlarge",
       "region": "us-east-1",
       "subnet_id": "{{user `subnet_id`}}",
       "associate_public_ip_address": "false",

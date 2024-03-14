@@ -57,8 +57,11 @@ bfd:
         working_dir: *bfdMigratorDir
         exec_start: /opt/bfd-db-migrator/bfd-db-migrator-service.sh
         user: "bb-migrator"
-      instance_type: m6i.large
+      instance_type: m6a.large
+      volume_iops: 3000
       volume_size: 100
+      volume_throughput: 125
+      volume_type: gp3
       sqs_queue_name: *sqs_name
       db_migrator_dir: *bfdMigratorDir
       db_migrator_tmp_dir: /opt/bfd-db-migrator/tmp
@@ -115,7 +118,7 @@ bfd:
         data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
         data_pipeline_ccw_rif_job_enabled: *ccw_enabled
         data_pipeline_idempotency_required: *idem_enabled
-        instance_type: c6i.4xlarge
+        instance_type: c6a.4xlarge
         rif_job_batch_size: *ccw_batch_size
         rif_job_queue_size_multiple: *ccw_queue_size_multiple
         rif_thread_multiple: 3
@@ -148,7 +151,7 @@ bfd:
           starting_fiss_seq_num: &rda_job_starting_fiss UNDEFINED
           starting_mcs_seq_num: &rda_job_starting_mcs UNDEFINED
         cleanup:
-          enabled: &rda_cleanup_enabled true
+          enabled: &rda_cleanup_enabled false
           run_size: &rda_cleanup_run_size 50000
           transaction_size: &rda_cleanup_transaction_size 5000
         data_pipeline_rda_grpc_inproc_server_mode: *grpc_inprocess_mode
@@ -162,7 +165,7 @@ bfd:
         data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
         data_pipeline_rda_job_write_threads: *rda_job_write_thread_count
         data_pipeline_rda_process_dlq: *rda_job_process_dlq
-        instance_type: m6i.large
+        instance_type: m6a.large
       shared:
         bfd_pipeline_dir: *bfdPipelineDir
         data_pipeline_dir: *bfdPipelineDir
@@ -265,8 +268,11 @@ bfd:
       # time it took to start during the period analyzed was 77 seconds. So, 90 provides a decent
       # buffer for the worst cases
       asg_instance_warmup_time: 90
-      launch_template_instance_type: c6i.4xlarge
-      launch_template_volume_size_gb: 250
+      launch_template_instance_type: c6a.4xlarge
+      launch_template_volume_iops: 3000
+      launch_template_volume_size_gb: 170
+      launch_template_volume_throughput: 125
+      launch_template_volume_type: gp3
       # Indicates the amount of time between batched error alerts posted to Slack when 500s occur in
       # BFD Server. See
       # https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html#rate-based for
@@ -570,6 +576,16 @@ bfd:
           # Private key of the user, used when authenticating to the configured outbound SFTP Server
           user_priv_key: |-
             <<CIPHER>>AgV4ci003Jsasw4q93036eCnYzx-IeimtinADgaKd6nRAiYAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFvaEMrQjZFUndlTklmZVFyMUtaK1hCRWZXSDl6N2w4ZDViRXJPdEd6cDFkUmNYVVZ6Z1RIaTdRa0grUWhIRGNnQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay1iMjNlYjZmZWVlYmM0MzQ2YTk5YTZhNTliYzU2MWRmMwC4AQIBAHipsbBUtIKaXI95_AIHiGnjDkxfPDRzgqb6WVwMZI7-kwGmUJj06RAxQ-EnR7ZGD15tAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMOGd2INRnRGKMHCrtAgEQgDvTr262OgEzeE0aHsF4BvUnnHkUx022EhkYSMf23s9wyIemWvcs1BFQ0Wr9Q_05PnRZ2pFGY_Esiawj4gIAABAA4oqwvbYogT8yVZ2YbCrT4uB0VXRlryBE7PV22Ebub0toymojnkuJ-EZHnU03i_dz_____wAAAAEAAAAAAAAAAAAAAAEAAA9cKqyO19yPt9OwU0_oQ6WpyZVouMfY-y6py_fWavGYmBk-HhZIrtuQmGn3dT-TXiDwsi7eWIUA1QYDtcPhGS_EWc9gUYNCCZ3PyAzwAM6i0T8WHAAAEZSIe_-dVrV5j8kxkiAZSmiy5Go_uketw1H1XWaMYennmIHL8X4yrzsjS-8LtuQxjjLw74IMMGGWKo_RSbxldvef8PYcCfCgUhI8T2evkjN6fY2hVYdE4ujV2UrrlI2siUUE-9GC52FKhI5zp3A0cLUaBuDZylzbK36U0IA6Pkvck53NCijkMejwW_3u2wO4rzzmo48jVqgE-4_FoysJN-SsN8NBOv9MA_mbM12_1SRNEfz6lVsSvlYITNaCbdZAgLawWXiTfHCTBvKY4YuAXIaf4em1doC0ly3oE5xqcLfYGTACDeVFG2aaMmvu2Fdo7KpuWgzg_mg534ODt-ZK57r7J3u180dcMKly4KJkvMxqJB1vbso2UUPKPukqQRUVNbODzGUp0VOQ5668D4RwM6sKZk0vLlwNKFNWz2_1jrlz6unbBhSjnX0Z-tmdHhNuf1buWVwsGy6F8tA8XnBsf03MCOeREXDRrhMqeXZHtLS_YLwCg-tDPzjboT-l9fbbGONfmjI0QWiRDBwYX3ppr68dD7s42NN79HdtMgjH-Z9_djx2znbtXbAK0eru2suJfaHnD57vGisSonaTJgCfZ6taZZPrHojMDz6YaaBEDQjop_giQlnEldoZPFB2DLJ87ss5tNUOHIpbSCFP88rU5Y8Ps5NTicjksflouh3WZk1AG7ISSN_5vOB_lkYwc2QcI-AsgGzK1eRZ-1aClJB8739KWnKAtKAhqpj1367bP3J3Lg8FPdwkEHW-QPGUhZnPuPoHiYQNh1QK_LduV1l_BL9jBWkD-vYPbPCU2FU8zQLKvnO8ODRd2oIef3FErsRYFFxCYw31Un62cHHubPaQ2BX0LkH9lRq6jI9rRXFiJes6V7f9-A-zXb5LIgtcY6o8dwe9Ty-KLC2nfSjrAs1JwLQsnshtEXExsSwxqkx19vJxh19m7bkubVOutl3QD_Kdqi25wSF-E1CcaR7VqAkeqeeyOrjq94GVcieOI9MHb7k_XeYeOhvVOUqXyUn1UxO3ukTEWg_zHvXSBRsvGkA5ZsddY31GBHZyWF-4-qRQIReD2ncaLuD_tUDo-wvhx05ahNd1k3UOV6tQTO_Iq3rC83F5uKCZnQu7UHuwDCBCaeH1kOTxtw2NKuwcu60Np7OvQOi6B5qvdtXfQ6nmVz4WOpl0y70BKeA789uxy7lAgdOAqCvT4Y3t8AIS5EEq8TefjNzOuQSyXMUNbX4Ul1mNc3j9RuCvVipvtF_d9v1Hv8mdcQnTjwzN6VlHipQBa1if6ekNgOXzFSqtXAsq4EemTrTY2CWTGGNOO4yMi2yHz8LI3I1SVWW87Mt-YQSGaciTttULOHelutO00puaHeTFpSdFuZaTVJDoeFIlsA_nEle8iSR_tm8DG0-PuXZRH4Ix3aS7hA6mMcTsTnM1GTFxZK6dObtRAWWRAObD5LJPKG8sUBVbwrPqNDXT9PwY2qWyy5jXtp-CB9bEUn10p4l2nsa_yLDaRDHB1vSSopCTdj9_iyfDVKP08Y42YziS_q-ynIXaEWwSZJddDbVCf_VzYEmZLOwMAW8aIMux33tNxMjgP0Exj7AU3fCFuKFiWgUnKWcZ6pyC5piF7rL-mkuminKNmUuktlCNZE13ImHvLvXe9Gh4DnasOLlbpsHHHC7x28R060FZHjYwA-7p5RyGgOpjvvgQ654Dd7SVTpqye2EGVzBIWUVwnMft6ZjqJgPtT-uFz8HfuWcScK76mCPoTuuK5GywfTg-CCgnXMRaZRNoZIlmX-exoA4Tebd51T0GgN7vH5C5QmbVom04wVIiNomJY51QKYSCwSp2jy-M4d3DN15iiFFpemMvqGhG5iP4GEfXsfwrcIHDSWXTAg-TXkgnvTUYY4GGUMnKDbJ-oMIUkGpokGOcD_PswNDrJHpSM0LN3kZWvOcDp3DbkbrsMKQ6avA8oiOGwk0tg1hRQU0KrqVeLqPOZwmHdk7vmkNDymbqorWSpe0BZU9d3AdFXa8FtI8ptTVQWFqfj_5tFGbY4HYodhWc4HHyy1bfTERJ0s3a4fFx2wfw5eS6QtbPgcZb0fMXhZ37d1fp1NuK9BTx9ezKQaTI23Rr1NuJcxWKPjjysvx1O_U6gcHUGaUixMuxVCkwGycqXKpKv7nKyiWNzaehyXWF-HG3nN4rz8J9Z87Rj3FtDSLG_WPoE9RWHu3Z7YD60EfG8b_UE7_4gEvoE5q1Fc1zR338sUQkgQExw4D-GRsDcrnycIdtBNfkRLBrvZ_tF1zRwDocnBGJooqfMNUUmMgw4yMP8KBQX5BrXHQ5hQ0VZTvMkDZE_FO60N2RA45Kp5218R_6DwjnUtnU9xkJlDFO9xuOxDTBL5Wg7fKUAqKPJY3hXeDc5Bz2Zx2sCmtuVjNZiaXNXTR9PGUwWYXZGiu4a9W_nkVHqnbwmH3kE2OoGCOocZGVFH11vbOnLow1UniuwcC8TtFM_PX8RT1bSW1AXidrx46gF6q8yM-sDC5KE1RDi8up7bGvRV4JwCPGcY0gjPHSU5hkT7KiaXJmHcEFFxlXXtdkKuZidN0_RU-l30JaE_UitQG9wfqwmqw7AWbR7CJGb6h3YvFRDH8Xqu5J4jhW6atXtnvtzd357oRHbw9OQpA4Y-Vp_oK6CLmn9hNgbKMVQrvt0vzLMO9ls3CzZUljD6RfKPdrCxJ14kMuPgUcPw42QjdARemudCTwvbkYevj_criBF76-TC_s01rI_yxbYDDKBgrsg0NoDkA2C9qC7uupxdKNtXRsORrzblVDbdC_tvEo9MJqRBbv6hkdXNySHYD1PBxF2N9XcQ-CNMlsKrTE3Yey_PdmTBWbDr8cnbJZpC5H3WqOQdBmFLP6A2mNGhzU_IDkYrbDzmc-C4faJORCVZDIXOq2eES_uR1u9FGcnnlSq4K9H5zuIQInZDN7Am_iZ2rdSoRT_faas42-BT5Y_r-TDv_0z8bluOpk5fLTwmXQCsymNeYFnsKWRU_5jEFQuDICRXGGoOKy5J4FHJ3W14VmGoYob17cd1He9P9kZCBQ1BzmPbnbWxG2SmXH_76wez7x_3NDh6MypSoSxFHrNhi4i41DmMtMYR3ZMdPy-OdBzWLPKTN6WNFaBGwDNxHoniEFgMt6TlSy01qhqjnbtiuZCwEa2FkKht7Sat7Ifh32uwiZYVk2YIIRYpw2CMLRXvX-mvf36PfmwJTvWAHRfyAnmqe3nmpfLsY1y1UB8zgF17SwOvWM072cOm5yAjw-d354mZEgegaPjXAmbXb5BYVSZGb3xpAevwAhBaHj8Pdf_FCdHGhQoK52EN7DDs--dzXLnSIAX1mm2M1i5SDOrmbL4vA_pu7089aWxhuQwHuk_3rVb2okOH-QWrl0ZBNCApMOfR5A1hc5YbISfmQ1Y3hVB8rzveQKq3mePev0l8QJgSD-0CJqG-qxeXqAZdfCDgalNncOQ1Lkca_UPFRjkF0miQWgtQsNEFG3OKpKf8BjjjS2Q3MBfEPHl3hNmt5_pfaUCCbdJ7oXt9QVmUs4XVBQwVz2le5s_pYg84qVDB8OXdmJ5ojy6DCPIhOOiiPQKaGOCW7L6eAVvyt-6HiKxin6lc6o895Kk53PBsiixDtP3bE-pLzuw5kKqi25dW3VRGc9X1mI5MXnQtJfYtqBFGZpIpT7NrnrW7X4oXqt6pr37yuVJCCEixDPWqu8BJQsuBKBwuo8CXQYPlrL6OzzZ8mBUm7TcrUAIVXimS9PZsCFs83FK1YV3TrFkFk4z_8KcOGhdq2Cj4hKRPPjwMA6XCxpAMAJNlumreagOY-GZZOKORNvzydIcCHh3QogToNToIkhgmLH0-IKVihGaujfD3NQaZk1un-_UMdr-5blcC1ACzziXzaSc28g2eYrE3czbZkCqQBc5vBIOnGlvUB1mtlU8bSxUfsU286FJ_5HeUr2trtgzCKV4_l-XzpAg4qjgjNfzmJGS6MNg10Xvsz3cqEcxu2zX12HNUtTM-jpaPMqgfgWuqBptWYCC6tPrbxEYYyAteRHkWcJePx1SXiZ39Ghp8mpHsyErNzzBxsViC4b4kDVytIsKq4RqB7AJd_wSCOsA5LbCTdmXDehbxgolQ1QmPsCaCHapJ7FcaGXzM2j91cUVtvxS1X5hQY-XKP8X8sz7tnpy0jAORl_Fo5kpqiEpMAZxfFyxs0zbPCRNRCM09LI0aR7WNOMwKKadsK41Uq1QRUvGT1LlcDl_IGA1y-skhFRKvulUY86yMOHHpvV-I4ls9idY7mmqcYWiTNbpLegmMT5YjFYO1DQmjyNIYmPVTSNKvOvS7n8lhghEtyvFEOAxTKVz_2M0FMssUIMFDOo_EB6zb3JOpK8HlQckL5Byd1JMZc9Dh9jOEw-NQj_bTnoM4j0QEMnzBUbJzEHralLwu_yd9b_zHTFGWnUHwDdMetwMGinX8U3FI3rFp7sqdagOg3SBqruqC50zF980ytvSdp21B1c6t8QjjC9IRpiJu6F324OjFvmShYnGrYImKdW61tJ9V7YqJgGjiDkPFCG9-TzjnFMmWPLC5vbNlbfiwj979d8gjxDeARKMWalxWz3vhMtijySIGDuAMYZ9PnwyP8EWuQKCY2TBoEm9MoQ3nOYjcaaE0IF8SQ7NftcdjgFnCWXlmnoc0d4G1SfxopqDarJZc7ttm7nX6exYpsg455-O_413NDVqpKJKCl8On5wygyETX81mfQv1aUA2Su5QXdyWDS-vg0betIWeySuNnIYo7K-_7wMUgj9IBmdjkQ-XG85rVK81F7gP5PvKb4Pjcv5VHE2IOt-A3Yuzt34WyBcaLfvYiWc_234W2sBoKVcUqv-agsU6tvHKgwAKMy4B_mxru369H_lUs1v17Ayc2nUVwjA5a8CuCNhbNsKFp_wa6JEzEimn1nQs8MF19Vz3TlFVU7WqVdDvCQ_eEh7QCBFi6bA2zJYIfPEN6Ku4vgbIJWw1T_Nuj1riRi9TGMNpMdExwblqIQlF7CqTQGBegwrayF91uZFm780PEypk67StQ9kvd-sG4M1MeS9QE0LVnG9oSn4rI5_9Ib66l--M6y_xqdOJXh65XwTxa-Xe6EQQncJKE_zNSa2aH4gZMYydCg3kguRBpugwaqr9HhKj3NEUNZB-eFiAGcwZQIwaSeapk94GWN-x13Leb4ZamIXGJKsSw_8zsN4VADWd00JmDdFVERQu0QNfFMoXKLuAjEAwu0XyVfEqwN_q1fm_X1OpixUmWdn5KcXSatXHwH2JalBGneEyadlqvGK4s5arDYn<</CIPHER>>
+        o11y:
+          alarms:
+            lambda_errors:
+              breach_topic: "bfd-prod-cloudwatch-alarms"
+              ok_topic: UNDEFINED
+            sns_failures:
+              breach_topic: "bfd-prod-cloudwatch-alarms-slack-bfd-alerts"
+              ok_topic: UNDEFINED
+          slack_notifier:
+            webhook_ssm_path: <<CIPHER>>AgV49j0A8a8TSBy0yO-odUXXByH_ON-F00HtQnpZ_bhe4FQAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEzdm9EUU5yMzNad3paS0Y2TUhPNThFa3pQSXNkRjA3RXl4VHczcVF4ck54MjBtdk95NmVDb3NCSlpacUpySjI3UT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay1iMjNlYjZmZWVlYmM0MzQ2YTk5YTZhNTliYzU2MWRmMwC4AQIBAHipsbBUtIKaXI95_AIHiGnjDkxfPDRzgqb6WVwMZI7-kwEal6KwduCCfbhfd1EDeT05AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMUBIryLyo_qIlUexeAgEQgDsMzFTo7OpHM3aHCObek8N48kuU9cJ7cl_zO-XYMllVyfbIUVtkzz3DzSMfR6HkO-9ViqEnpsCzSgLEeQIAABAA3gwwf8isHAcg1ehBvIr5KjSAJu-nGVVcPeyU9ts42i10t82t6BgkjQCMziF6pL_d_____wAAAAEAAAAAAAAAAAAAAAEAAAAzfEa1F26lJ7FjFK0nh16GA0N_f4eDl6FYQmw8WFoVTfd_9OSqAWAarjluB_gdMXZzypgeQSoHpzvmWFpkY8XZVY7WQgBnMGUCMQCOJwzSwjcGz-l5U3GfsrBzdtiudk8ZmnFJcZ0TVn2MBcZo4Nc6AA87vWt4jljXh6YCMC8aFGOMSrQmbYgk73swsdSFQwtSyKszEJFMKzbGv9uxkBhwZX9Yux-YlDlwfRDIqA==<</CIPHER>>
 bcda:
   prod:
     eft:
