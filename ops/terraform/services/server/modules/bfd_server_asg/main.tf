@@ -238,7 +238,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
   comparison_operator = "LessThanThreshold"
   datapoints_to_alarm = local.scaling_alarms_config.scale_in.datapoints_to_alarm
   evaluation_periods  = local.scaling_alarms_config.scale_in.consecutive_periods_to_alarm
-  threshold           = 1
+  threshold           = local.scale_in_cpu_threshold
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_autoscaling_policy.avg_cpu_low.arn]
 
@@ -267,7 +267,7 @@ resource "aws_autoscaling_policy" "avg_cpu_low" {
   policy_type               = "StepScaling"
 
   step_adjustment {
-    metric_interval_lower_bound = 0
+    metric_interval_upper_bound = 0
     scaling_adjustment          = "-${local.scaling_capacity_step}"
   }
 }
@@ -367,7 +367,7 @@ resource "aws_autoscaling_policy" "avg_cpu_high" {
     content {
       metric_interval_lower_bound = step_adjustment.key
       metric_interval_upper_bound = step_adjustment.key + 1 != length(local.scale_out_cpu_thresholds) ? step_adjustment.key + 1 : null
-      scaling_adjustment          = step_adjustment.value.desired_capacity
+      scaling_adjustment          = local.scaling_capacity_step + (local.scaling_capacity_step * (step_adjustment.key + 1))
     }
   }
 }
