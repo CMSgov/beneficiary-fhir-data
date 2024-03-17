@@ -21,8 +21,15 @@ log() {
   echo "$1" | prepend_timestamp >> "$LOGFILE"
 }
 
+cleanup() {
+  echo "Cleaning up.." | prepend_timestamp | tee -a "$LOGFILE"
+  rm -f "$TO_REPACK" || true
+  reset_repack || echo "Failed to reset pg_repack extension.. please reset manually" | prepend_timestamp | tee -a "$LOGFILE"
+}
+
 error_exit() {
   echo "Error: $1" >&2 | prepend_timestamp | tee -a "$LOGFILE"
+  cleanup
   exit 1
 }
 
@@ -135,13 +142,14 @@ if [ -f "$TO_REPACK" ] ; then
     esac
   done
 else
-  # query the database for a list of schemas
+  # NOTE: the following repacking by schema bit is untested.. YMMV
+  # list schemas in the database
   if [ -z "$SCHEMAS" ]; then
     SCHEMAS=$(psql -t -A -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ('pg_catalog', 'information_schema');")
   fi
-  # if no schemas are found, exit
   [ -n "$SCHEMAS" ] || error_exit "No schemas found in the database"
-  # prompt to pick a schema
+
+  # select a schema to repack
   echo "Select a schema to repack"
   select schema in $SCHEMAS; do
     SCHEMAS=$schema
@@ -150,24 +158,28 @@ else
   generate_repack_file "$SCHEMAS"
   load_tables_from_file
 fi
-[ -f "$TO_REPACK" ] || error_exit "No $TO_REPACK file found to process.. exiting"
+
+# short circuit if there are no tables to repack
+[ -n "$TABLES" ] || error_exit "No tables found to repack.. exiting"
 
 # prompt to continue
 echo "Press any key to continue or Ctrl+C to quit"
 read -r -n 1 -s
 
 echo "Repacking! Tables will be removed from the $TO_REPACK files after they are successfully repacked. Follow along by tailing the log file: tail -f $LOGFILE"
+
 for table in $TABLES; do
   start_time=$(date '+%Y-%m-%d %H:%M:%S')
 
-  # Run pg_repack and prepend timestamps, including capturing stderr
-  if pg_repack -e -h "$PGHOST" -U "$PGUSER" -t "$table" -k "$PGDATABASE" 2>&1 | prepend_timestamp > "$LOGFILE" 2>&1; then
+  # Run pg_repack and redirect stdout and stderr to the log file
+  if pg_repack -e -h "$PGHOST" -U "$PGUSER" -t "$table" -k "$PGDATABASE" 2>&1 | prepend_timestamp >> "$LOGFILE" 2>&1; then
     end_time=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "${table} Start time: $start_time, End time: $end_time" | prepend_timestamp
-    # Remove the table from the TO_REPACK file
+    log "${table} Start time: $start_time, End time: $end_time"
+    # Remove the table from the TO_REPACK fil
     sed -i "/^$table|/d" "$TO_REPACK"
   else
-    error_exit "Failed to repack $table" | prepend_timestamp
+    error_exit "Failed to repack $table"
   fi
 done
-echo "Repack complete! All tables have been repacked."
+cleanup
+log "repack completed successfully"
