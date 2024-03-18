@@ -3,13 +3,13 @@ SET search_path TO rda;
 DO $$
 DECLARE
   --mcs (comment this and uncomment fiss below for fiss)
-  parent_table VARCHAR(50) := 'mcs_claims';
-  child_tables VARCHAR[] := ARRAY['mcs_adjustments','mcs_audits','mcs_details','mcs_diagnosis_codes','mcs_locations'];
+  parent_table VARCHAR(50) := 'mcs_claims'; -- source of the claim ids
+  child_tables VARCHAR[] := ARRAY['mcs_adjustments','mcs_audits','mcs_details','mcs_diagnosis_codes','mcs_locations', 'mcs_claims']; -- tables to delete from
   claim_id VARCHAR(50) := 'idr_clm_hd_icn'; -- key to use for joins
 
   -- fiss
-  -- parent_table VARCHAR(50) := 'fiss_claims';
-  -- child_tables VARCHAR[] := ARRAY['fiss_revenue_lines', 'fiss_payers', 'fiss_diagnosis_codes', 'fiss_proc_codes', 'fiss_audit_trails'];
+  -- parent_table VARCHAR(50) := 'fiss_claims'; -- source of the claim ids
+  -- child_tables VARCHAR[] := ARRAY['fiss_revenue_lines', 'fiss_payers', 'fiss_diagnosis_codes', 'fiss_proc_codes', 'fiss_audit_trails', 'fiss_claims']; -- tables to delete from
   -- claim_id VARCHAR(50) := 'claim_id'; -- key to use for joins
 
   -- knobs
@@ -34,7 +34,7 @@ BEGIN
   EXECUTE format('CREATE TEMPORARY TABLE aged_claim_ids (%I VARCHAR(43) PRIMARY KEY);', claim_id);
   -- disable autovacuum and autoanalyze
   ALTER TABLE aged_claim_ids SET (autovacuum_enabled = false);
-  ALTER TABLE parent_table SET (autovacuum_enabled = false);
+  EXECUTE format('ALTER TABLE %I SET (autovacuum_enabled = false);', parent_table);
   FOREACH child_table IN ARRAY child_tables LOOP
     EXECUTE format('ALTER TABLE %I SET (autovacuum_enabled = false)', child_table);
   END LOOP;
