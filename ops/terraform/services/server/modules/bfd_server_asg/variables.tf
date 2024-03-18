@@ -63,8 +63,8 @@ variable "jdbc_suffix" {
   type        = string
 }
 
-variable "scaling_networkin_interval_mb" {
-  description = "The interval value in megabytes for evaluating the asg scaling capacity, based on the metric FilteredNetworkIn"
+variable "scaling_request_count_interval" {
+  description = "The distinct interval for each scaling range, based on the ELB metric RequestCount"
   type        = number
-  default     = 100000000
+  default     = 5000
 }
