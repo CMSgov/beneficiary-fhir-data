@@ -152,6 +152,7 @@
                 <configuration>
                     <mappingPath>${project.basedir}/mappings</mappingPath>
                     <fhirMappingPath>${project.basedir}/fhir-mapping-path</fhirMappingPath>
+                    <codeBookPath>${project.basedir}/../bfd-model-codebook-data/target/generated-resources</codeBookPath>
                     <projectVersion>${project.version}</projectVersion>
                     <destinationDirectory>${project.basedir}/../../../dist-temp</destinationDirectory>
                     <v1TemplateFilePath>${project.basedir}/data-dictionary-template/v1-to-csv.json</v1TemplateFilePath>

@@ -42,6 +42,10 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
   @Parameter(property = "fhirMappingPath")
   private String fhirMappingPath;
 
+  /** Path to a single mapping file or a directory containing one or more mapping files. */
+  @Parameter(property = "codeBookPath")
+  private String codeBookPath;
+
   /** Project version. */
   @Parameter(property = "projectVersion")
   private String projectVersion;
@@ -95,7 +99,8 @@ public class GenerateDataDictionaryFromDslMojo extends AbstractMojo {
         var resourceDirPath = String.format("%s/%s", fhirMappingPath, version.name());
         var templatePath = templateFileMap.get(version);
         final RootBean root =
-            ModelUtil.appendFhirElementsToYamlFiles(mappingPath, fhirMappingDir, resourceDirPath);
+            ModelUtil.appendFhirElementsToYamlFiles(
+                mappingPath, fhirMappingDir, resourceDirPath, codeBookPath);
         MojoUtil.validateModel(root); // modify so fits for our use case
 
         if (project != null) {

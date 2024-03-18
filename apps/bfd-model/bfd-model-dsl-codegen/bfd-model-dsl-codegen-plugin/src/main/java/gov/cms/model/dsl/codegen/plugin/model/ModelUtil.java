@@ -1,5 +1,6 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
+import ca.uhn.fhir.model.api.annotation.Child;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
@@ -7,6 +8,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -14,12 +17,23 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import lombok.Builder;
 import lombok.Data;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Patient;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /** Utility methods for use by and with the various model classes. */
 public class ModelUtil {
@@ -125,16 +139,122 @@ public class ModelUtil {
    * @param mappingPath path to a file or directory containing mappings
    * @param fhirEntitiesDirectory stuff
    * @param fhirMappingPath stuff
+   * @param codeBookPath stuff
    * @return consolidated {@link RootBean} containing all mappings
    * @throws IOException if any I/O errors prevent loading
    */
   public static RootBean appendFhirElementsToYamlFiles(
-      String mappingPath, File fhirEntitiesDirectory, String fhirMappingPath) throws IOException {
+      String mappingPath, File fhirEntitiesDirectory, String fhirMappingPath, String codeBookPath)
+      throws IOException {
     if (!isValidMappingSource(mappingPath)) {
       throw new IOException("mappingPath not defined or does not exist");
     }
 
-    return loadFhirElementsFromJsonFiles(mappingPath, fhirEntitiesDirectory, fhirMappingPath);
+    return loadFhirElementsFromJsonFiles(
+        mappingPath, fhirEntitiesDirectory, fhirMappingPath, codeBookPath);
+  }
+
+  /**
+   * Extracts descriptions of each variable from the xml files parsed from the code books.
+   *
+   * @param codeBookPath path of xml files parsed from the code books
+   * @return map that maps variable IDs to descriptions
+   */
+  public static Map<String, String> getDescriptionsFromCodeBook(String codeBookPath) {
+    Map<String, String> variableIdToDescription = new HashMap<>();
+    File file = new File(codeBookPath);
+    var codeBookFiles = file.listFiles(f -> f.getName().endsWith(".xml"));
+    if (codeBookFiles != null) {
+      for (File codeBookFile : codeBookFiles) {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = null;
+        try {
+          db = dbf.newDocumentBuilder();
+          Document document = db.parse(codeBookFile);
+          document.getDocumentElement().normalize();
+
+          NodeList variables = document.getElementsByTagName("variable");
+          for (int variableIndex = 0; variableIndex < variables.getLength(); variableIndex++) {
+            Node variable = variables.item(variableIndex);
+            if (variable.getNodeType() == Node.ELEMENT_NODE) {
+              NodeList childNodes = variable.getChildNodes();
+              for (int index = 0; index < childNodes.getLength(); index++) {
+                Node childNode = childNodes.item(index);
+                if (childNode.getNodeName().equals("description")) {
+                  String description = childNode.getTextContent().replaceAll("\\s+", " ");
+                  Element element = (Element) variable;
+                  String variableId = element.getAttribute("id");
+                  variableIdToDescription.put(variableId, description);
+                }
+              }
+            }
+          }
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+    return variableIdToDescription;
+  }
+
+  /**
+   * this.
+   *
+   * @param fhirElementBean this
+   * @return FhirElementBean
+   */
+  public static FhirElementBean buildFhirPath(FhirElementBean fhirElementBean) {
+    Map<String, Class<?>> fhirClassesMap =
+        new HashMap<>() {
+          {
+            put("Coverage", Coverage.class);
+            put("ExplanationOfBenefit", ExplanationOfBenefit.class);
+            put("Patient", Patient.class);
+          }
+        };
+
+    List<FhirMapping> fhirMappings = fhirElementBean.getFhirMapping();
+    for (FhirMapping fhirMapping : fhirMappings) {
+      String resource = fhirMapping.getResource();
+      if (!resource.isEmpty()) {
+        Set<String> fhirElements = findFields(fhirClassesMap.get(resource), Child.class);
+        String currentElement = fhirMapping.getElement();
+        if (!currentElement.isEmpty()) {
+          String[] splitCurrentElement = currentElement.split("\\.");
+
+          if (fhirElements.contains(splitCurrentElement[0])) {
+            // fhir path is the expression under search parameters in specification
+            fhirMapping.setFhirPath(currentElement);
+          } else {
+            // element is an extension
+            System.out.println("element is an extension");
+          }
+        }
+      }
+    }
+    fhirElementBean.setFhirMapping(fhirMappings);
+    return fhirElementBean;
+  }
+
+  /**
+   * this.
+   *
+   * @param classs this
+   * @param ann this
+   * @return elements of a resource
+   */
+  public static Set<String> findFields(Class<?> classs, Class<? extends Annotation> ann) {
+    Set<String> set = new HashSet<>();
+    Class<?> c = classs;
+    while (c != null) {
+      for (Field field : c.getDeclaredFields()) {
+        if (field.isAnnotationPresent(ann)) {
+          set.add(field.getName());
+        }
+      }
+      c = c.getSuperclass();
+    }
+    return set;
   }
 
   /**
@@ -318,10 +438,14 @@ public class ModelUtil {
    * @param fhirElementBean stuff
    * @param mappingBean stuff
    * @param columnBean stuff
+   * @param ccwMappingToDescriptionMap stuff
    * @return stuff
    */
   private static FhirElementBean updateFhirElements(
-      FhirElementBean fhirElementBean, MappingBean mappingBean, Optional<ColumnBean> columnBean) {
+      FhirElementBean fhirElementBean,
+      MappingBean mappingBean,
+      Optional<ColumnBean> columnBean,
+      Map<String, String> ccwMappingToDescriptionMap) {
     if (columnBean.isPresent()) {
       ColumnBean column = columnBean.get();
       fhirElementBean.setBfdColumnName(column.getColumnName());
@@ -337,7 +461,12 @@ public class ModelUtil {
         transformationsFound.forEach(
             transformationBean -> ccwMappings.add(transformationBean.getFrom()));
         fhirElementBean.setCcwMapping(ccwMappings);
+        if (ccwMappingToDescriptionMap.containsKey(ccwMappings.getFirst())) {
+          fhirElementBean.setDescription(ccwMappingToDescriptionMap.get(ccwMappings.getFirst()));
+        }
       }
+
+      return buildFhirPath(fhirElementBean);
     } else {
       System.out.println(
           "Couldn't find column based off bfdColumnName. Defaults to using values in json");
@@ -351,11 +480,13 @@ public class ModelUtil {
    * @param mappingPath path to a file or directory
    * @param fhirEntitiesDirectory stuff
    * @param fhirMappingPath stuff
+   * @param codeBookPath stuff
    * @return a {@link RootBean} containing the mappings loaded from path
    * @throws IOException if anything could not be loaded
    */
   private static RootBean loadFhirElementsFromJsonFiles(
-      String mappingPath, File fhirEntitiesDirectory, String fhirMappingPath) throws IOException {
+      String mappingPath, File fhirEntitiesDirectory, String fhirMappingPath, String codeBookPath)
+      throws IOException {
     final var file = new File(mappingPath);
     final var fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
     if (fileAttributes.isRegularFile()) {
@@ -369,6 +500,7 @@ public class ModelUtil {
     var mappingFiles = file.listFiles(f -> f.getName().endsWith(".yaml"));
     if (mappingFiles != null) {
       List<FhirElementBean> allFhirElements = convertJsonFilesToFhirElementBeans(fhirMappingPath);
+      Map<String, String> ccwMappingToDescriptionMap = getDescriptionsFromCodeBook(codeBookPath);
 
       Map<String, List<FhirElementBean>> fhirResources =
           new HashMap<>() {
@@ -405,7 +537,11 @@ public class ModelUtil {
                                 // Update Fhir Element fields
                                 fhirElementBean.setMappingId(mappingBean.getId());
                                 fhirElementBean.setBfdTableType(tableName);
-                                updateFhirElements(fhirElementBean, mappingBean, columnFound);
+                                updateFhirElements(
+                                    fhirElementBean,
+                                    mappingBean,
+                                    columnFound,
+                                    ccwMappingToDescriptionMap);
                                 return fhirElementBean;
                               })
                           .collect(Collectors.toList());
