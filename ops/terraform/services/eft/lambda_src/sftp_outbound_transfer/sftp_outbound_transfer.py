@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 from io import StringIO
 from typing import Any
 from urllib.parse import unquote
-from signal import SIGINT, SIGTERM, signal
 import boto3
 import botocore
 import botocore.exceptions
