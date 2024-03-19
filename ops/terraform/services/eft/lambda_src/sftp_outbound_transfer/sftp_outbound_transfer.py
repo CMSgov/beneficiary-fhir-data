@@ -3,12 +3,13 @@ import os
 import re
 import socket
 import sys
+import time
 from base64 import b64decode
 from datetime import datetime, timezone
 from io import StringIO
 from typing import Any
 from urllib.parse import unquote
-
+from signal import SIGINT, SIGTERM, signal
 import boto3
 import botocore
 import botocore.exceptions
@@ -50,6 +51,7 @@ BUCKET = os.environ.get("BUCKET", "")
 BUCKET_ROOT_DIR = os.environ.get("BUCKET_ROOT_DIR", "")
 BFD_SNS_TOPIC_ARN = os.environ.get("BFD_SNS_TOPIC_ARN", "")
 SNS_TOPIC_ARNS_BY_PARTNER_JSON = os.environ.get("SNS_TOPIC_ARNS_BY_PARTNER_JSON", "{}")
+EFT_OUTBOUND_QUEUE_NAME = os.environ.get("EFT_OUTBOUND_QUEUE_NAME", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -302,6 +304,100 @@ def _handle_s3_event(s3_object_key: str):
             send_notification(topic=partner_topic, notification=success_notif)
 
 
+def poll_queue():
+
+    sqs_client = boto3.client("sqs", config=BOTO_CONFIG)
+    url_response = sqs_client.get_queue_url(
+         QueueName=EFT_OUTBOUND_QUEUE_NAME
+     )
+    queue_url = url_response['QueueUrl']
+    while True:
+        try:
+            response = sqs_client.receive_message(
+            QueueUrl=queue_url,
+                MaxNumberOfMessages=1,
+                WaitTimeSeconds=10,
+            )
+            messages = response.get("Messages", [])
+
+            for message in messages:
+                sqs_message = json.loads(message['Body'])
+                s3_message = json.loads(sqs_message['Message'])
+                handle_sqs_message(s3_message)
+
+                sqs_client.delete_message(
+                    QueueUrl=queue_url,
+                    ReceiptHandle=message["ReceiptHandle"]
+                )
+        except botocore.exceptions.ClientError as e:
+            logger.error("Error while polling SQS queue: %s", e)
+        except Exception as e:
+            logger.error("Unexpected error while polling SQS queue: %s", e)
+        finally:
+            # sleep for 5 minutes
+            time.sleep(5*60)
+def handle_sqs_message(s3_message):
+    try:
+        if len(s3_message) == 0:
+            raise ValueError(
+                "Invalid inner S3 event with empty records"
+            )
+        for s3_record in s3_message['Records']:
+            s3_event_time = datetime.fromisoformat(
+                s3_record['eventTime'].removesuffix("Z")
+            ).replace(tzinfo=timezone.utc)
+            s3_object_key = unquote(s3_record['s3']['object']['key'])
+            s3_event_name = s3_record['eventName']
+            s3_event_type = S3EventType.from_event_name(s3_event_name)
+            # Append to all future logs information about the S3 Event
+            logger.append_keys(
+                s3_object_key=s3_object_key,
+                s3_event_name=s3_event_name,
+                s3_event_type=s3_event_type.name,
+                s3_event_time=s3_event_time.isoformat(),
+            )
+
+            _handle_s3_event(s3_object_key=s3_object_key)
+
+    except Exception as exc:
+        sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
+
+        notification: StatusNotification
+        if isinstance(exc, BaseTransferError):
+            notification = StatusNotification(
+                details=TransferFailedDetails(
+                    partner=exc.partner or "unknown",
+                    timestamp=datetime.utcnow(),
+                    object_key=exc.s3_object_key,
+                    error_name=exc.__class__.__name__,
+                    reason=exc.message,
+                )
+            )
+
+            topic_arns_by_partner: dict[str, str] = json.loads(SNS_TOPIC_ARNS_BY_PARTNER_JSON)
+            if exc.partner and exc.partner in topic_arns_by_partner:
+                partner_topic = sns_resource.Topic(topic_arns_by_partner[exc.partner])
+                logger.info(
+                    "%s status notification topic configured. Sending error notification",
+                    exc.partner,
+                )
+                send_notification(topic=partner_topic, notification=notification)
+        else:
+            notification = StatusNotification(
+                details=UnknownErrorDetails(
+                    timestamp=datetime.utcnow(), error_name=exc.__class__.__name__, reason=str(exc)
+                )
+            )
+
+        logger.info("Sending error notification to BFD catch-all topic %s", BFD_SNS_TOPIC_ARN)
+        send_notification(topic=sns_resource.Topic(BFD_SNS_TOPIC_ARN), notification=notification)
+
+        raise
+    finally:
+        _, exception, _ = sys.exc_info()
+        if exception:
+            logger.exception("Unrecoverable exception raised")
+
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=unused-argument
     try:
@@ -385,3 +481,9 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
         _, exception, _ = sys.exc_info()
         if exception:
             logger.exception("Unrecoverable exception raised")
+
+def main():
+    poll_queue()
+
+if __name__ == "__main__":
+    main()
