@@ -49,7 +49,7 @@ NOTE: There is a separate table for each BB2 ENV enviornment (prod, impl).
 
 ## Top Level Metrics Table<a id="top-level-table"></a>
 
-This table contains one row per report dates (`report_date` column). It contains metrics related to the entire API system as a whole. A `sum()` of metrics from the per application table is also included. 
+This table contains one row per report date (`report_date` column). It contains metrics related to the entire API system as a whole. A `sum()` of metrics from the per application table is also included. 
 
 |            |                                                                     |
 | ---------- | ------------------------------------------------------------------- |
@@ -97,6 +97,7 @@ The files in this directory are:
   - Utility to ALTER a TARGET table with schema changes from a SOURCE table (using
 the column differences).
   - After developing new metrics, this utility is used to alter (add new columns) to the main tables used by QuickSight.
+  - NOTE: There is a bug with using this to alter the table when adding a `boolean` field. See the backlog Jira story [BB2-3133](https://jira.cms.gov/browse/BB2-3133) for more details and upcoming fix.
 - `test_lambda_function_local.py`:
   - Utility to test the `lambda_handler()` in `lambda_function.py` in local development.
 
@@ -206,6 +207,8 @@ The following is a general procedure for updating QuickSight datasets. After the
 5. If there are changes to field names, you will be prompted to map the old fields to the new ones.
 
 6. Edit your existing Analyses that are utlizing the dataset related to the changes. Use the SHARE and PUBLISH to update the related dashboard.
+
+  - NOTE: Terraform is now used for `test` and `prod` workspace versions of the DataSets. See this [README](../../../../quicksight/README.md) for more details.
 
 
 # HOW-TO: A Walk-Through Example of Adding New Metrics<a id="how-to-new-metrics"></a>
@@ -632,18 +635,31 @@ In this step we will be verifying that the lambda can update our `_copy1` tables
   - Verify that report date entries are complete per #9 for each table for `impl` and `prod` enviornments.
   - Verify that the related tables have been backed up per #1.
   - Remove the main tables using the following Athena SQL example:
+  - NOTE: Terraform is now used for `test` and `prod` workspace versions of the DataSets. See this [README](../../../../quicksight/README.md) for more details.
+    - Before adding new metrics to the `prod` workspace, use the `test` workspace for your development, testing and review!
+    - The Athena tables with a `_test` appended are connected with the `-test` versions of the DataSets in Quicksight.
+    - When ready to apply to the `prod` workspace, redo the following SQL with the "_test" part removed.
+      - For example, "impl_global_state_test" would become "impl_global_state".
+
   ```sql
-  DROP TABLE bb2.impl_global_state
+  DROP TABLE bb2.impl_global_state_test
   ```
   - Copy the `_copy1` version of the table in to place:
   ```sql
-  CREATE TABLE bb2.impl_global_state AS
+  CREATE TABLE bb2.impl_global_state_test AS
     SELECT * FROM bb2.impl_global_state_copy1
   ```
   - Repeat this for each table that was updated.
 
-11. View the changes in QuickSight dashboards
+11. View the changes in QuickSight analyses
 
   - Follow [HOW-TO: Update QuickSight DataSets](#how-to-update-qs-datasets).
   - Refresh the datasets for each of the tables.
-  - In QuickSight, view the `BB2 DASG Metrics` and `PROD-APPLICATIONS` dashboards to verify that the new metrics are showing.
+  - Update the related Terraform code in the DataSet & Analysis modules "main.tf" files.
+    - Some tipes for working on this:
+      - Look for a similar metric in the related main.tf files and use that as an example for adding the new metric TF code.
+        - The code can vary depending on where inside a sheet a new metric is being located or what type of visual used. So finding a similar metric as an example is useful.
+      - You can also add and place a new metric via the Quicksight UI. Afterward run a "terraform plan" to see what changes match up and use this to create the related TF code in the main.tf files.
+  - In QuickSight, view the `BB2-DASG-Metrics-test` and `PROD-APPLICATIONS-test` analyses to verify that the new metrics are showing.
+    - For production versions, view the `BB2-DASG-Metrics-prod` and `PROD-APPLICATIONS-prod` analyses to verify that the new metrics are showing.
+  - Follow the "Publishing Dashboards Using Analyses" section in the [/quicksight/README.md](../../../../quicksight/README.md) for how to use the resulting analyses to publish the related dashboards.
