@@ -13,13 +13,13 @@ import pytest
 
 from errors import (
     InvalidObjectKeyError,
-    InvalidPendingDirError,
+    InvalidPendingDirError, 
     SFTPConnectionError,
     SFTPTransferError,
     UnknownPartnerError,
     UnrecognizedFileError,
 )
-from sftp_outbound_transfer import handler
+from sftp_outbound_transfer import handler, poll_queue, handle_sqs_message
 from sns import (
     FileDiscoveredDetails,
     StatusNotification,
@@ -47,6 +47,7 @@ DEFAULT_MOCK_PENDING_DIR = "out"
 DEFAULT_MOCK_OBJECT_FILENAME = "file"
 DEFAULT_MOCK_OBJECT_KEY = f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/{DEFAULT_MOCK_OBJECT_FILENAME}"
 DEFAULT_MOCK_BFD_SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:123456789012:mock-topic"
+DEFAULT_MOCK_EFT_OUTBOUND_QUEUE_NAME = "mock"
 DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER = {
     f"{DEFAULT_MOCK_PARTNER_NAME}": f"arn:aws:sns:us-east-1:123456789012:mock-topic-{DEFAULT_MOCK_PARTNER_NAME}"
 }
@@ -80,7 +81,7 @@ SEND_NOTIFICATION_PATCH_PATH = f"{MODULE_UNDER_TEST}.{send_notification.__name__
 GLOBAL_SSM_CONFIG_PATCH_PATH = f"{MODULE_UNDER_TEST}.{GlobalSsmConfig.__name__}"
 PARTNER_SSM_CONFIG_PATCH_PATH = f"{MODULE_UNDER_TEST}.{PartnerSsmConfig.__name__}"
 PARAMIKO_PATCH_PATH = f"{MODULE_UNDER_TEST}.{paramiko.__name__}"
-
+S3_MESSAGE = {"eventName":"ObjectCreated:Put", "eventTime": "2024-03-20T17:44:58.287Z", "s3": {"object": {"key": "test"}}}
 mock_boto3_client = mock.Mock()
 mock_boto3_resource = mock.Mock()
 mock_new_topic: Callable[[str], str] = lambda topic_arn: topic_arn
@@ -98,6 +99,8 @@ mock_sftp_client = mock.Mock()
 mock_ssh_client_open_sftp_func = mock.MagicMock()
 mock_ssh_client_func = mock.MagicMock()
 mock_send_notification = mock.Mock()
+mock_handle_s3_event = mock.Mock()
+mock_handle_sqs_message = mock.Mock()
 
 
 def get_mock_send_notification_calls() -> list[tuple[str, StatusNotification]]:
@@ -139,6 +142,7 @@ def generate_event(
 @mock.patch(f"{MODULE_UNDER_TEST}.BUCKET", DEFAULT_MOCK_BUCKET)
 @mock.patch(f"{MODULE_UNDER_TEST}.BUCKET_ROOT_DIR", DEFAULT_MOCK_BUCKET_ROOT_DIR)
 @mock.patch(f"{MODULE_UNDER_TEST}.BFD_SNS_TOPIC_ARN", DEFAULT_MOCK_BFD_SNS_TOPIC_ARN)
+@mock.patch(f"{MODULE_UNDER_TEST}.EFT_OUTBOUND_QUEUE_NAME", DEFAULT_MOCK_EFT_OUTBOUND_QUEUE_NAME)
 @mock.patch(
     f"{MODULE_UNDER_TEST}.SNS_TOPIC_ARNS_BY_PARTNER_JSON",
     DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER_JSON,
@@ -169,7 +173,8 @@ class TestUpdatePipelineSlisHandler:
         mock_global_ssm.reset_mock(side_effect=True, return_value=True)
         mock_partner_ssm.reset_mock(side_effect=True, return_value=True)
         mock_send_notification.reset_mock(side_effect=True, return_value=True)
-
+        mock_handle_sqs_message.reset_mock(side_effect=True, return_value=True)        
+        mock_handle_s3_event.reset_mock(side_effect=True, return_value=True)
     @pytest.mark.parametrize(
         "event,expected_error",
         [
@@ -481,3 +486,50 @@ class TestUpdatePipelineSlisHandler:
             )
             == 2
         )
+
+    @mock.patch(f"{MODULE_UNDER_TEST}.handle_sqs_message", mock_handle_sqs_message)
+    def test_poll_queue(self):
+        mock_sqs_client = mock.Mock()
+        mock_boto3_client.return_value = mock_sqs_client
+        mock_sqs_client.get_queue_url.return_value = {"QueueUrl": "mock_url"}
+        mock_sqs_client.receive_message.return_value = {
+            "Messages": [
+            {
+                "Body": json.dumps({"Message": json.dumps({"Records": [S3_MESSAGE]})}),
+                "ReceiptHandle": "mock_receipt_handle"
+
+            }
+            ]
+        }
+        poll_queue(False)
+        mock_handle_sqs_message.assert_called_once_with({"Records": [S3_MESSAGE]})
+        mock_sqs_client.get_queue_url.assert_called_once()
+        mock_sqs_client.receive_message.assert_called_once()
+        mock_sqs_client.delete_message.assert_called_once()
+
+    @mock.patch(f"{MODULE_UNDER_TEST}.handle_sqs_message", mock_handle_sqs_message)
+    def test_poll_queue_invalid_message(self):
+        mock_sqs_client = mock.Mock()
+        mock_boto3_client.return_value = mock_sqs_client
+        mock_sqs_client.get_queue_url.return_value = {"QueueUrl": "mock_url"}
+        mock_sqs_client.receive_message.return_value = []
+        poll_queue(False)
+        mock_handle_sqs_message.assert_not_called()
+
+        
+
+    @mock.patch(f"{MODULE_UNDER_TEST}._handle_s3_event", mock_handle_s3_event)
+    def test_handle_sqs_message(self):
+        handle_sqs_message({"Records": [S3_MESSAGE]})
+        mock_handle_s3_event.assert_called_once_with(s3_object_key=S3_MESSAGE["s3"]["object"]["key"])
+    
+    @mock.patch(f"{MODULE_UNDER_TEST}._handle_s3_event", mock_handle_s3_event)
+    def test_handle_sqs_message_invalid_Records(self):
+        with pytest.raises(KeyError) as exc_info:
+            handle_sqs_message({"Records": [{"somekey": "somevalue"}]})    
+            
+
+        
+
+        
+

@@ -303,8 +303,8 @@ def _handle_s3_event(s3_object_key: str):
             send_notification(topic=partner_topic, notification=success_notif)
 
 
-def poll_queue():
-
+def poll_queue(loop_forever):
+    
     sqs_client = boto3.client("sqs", config=BOTO_CONFIG)
     url_response = sqs_client.get_queue_url(
          QueueName=EFT_OUTBOUND_QUEUE_NAME
@@ -318,12 +318,11 @@ def poll_queue():
                 WaitTimeSeconds=10,
             )
             messages = response.get("Messages", [])
-
+            
             for message in messages:
                 sqs_message = json.loads(message['Body'])
                 s3_message = json.loads(sqs_message['Message'])
                 handle_sqs_message(s3_message)
-
                 sqs_client.delete_message(
                     QueueUrl=queue_url,
                     ReceiptHandle=message["ReceiptHandle"]
@@ -334,6 +333,8 @@ def poll_queue():
             logger.error("Unexpected error while polling SQS queue: %s", e)
         finally:
             # sleep for 5 minutes
+            if not loop_forever:
+                break
             time.sleep(5*60)
 def handle_sqs_message(s3_message):
     try:
@@ -482,7 +483,7 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
             logger.exception("Unrecoverable exception raised")
 
 def main():
-    poll_queue()
+    poll_queue(True)
 
 if __name__ == "__main__":
     main()
