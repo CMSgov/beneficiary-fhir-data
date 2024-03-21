@@ -96,7 +96,7 @@ BEGIN
   -- re-enable autovacuum and autoanalyze
   EXECUTE format('ALTER TABLE %I SET (autovacuum_enabled = true);', parent_table);
   FOREACH child_table IN ARRAY child_tables LOOP
-    EXECUTE format('ALTER TABLE %I SET (autovacuum_enabled = true)', child_table);
+    EXECUTE format('ALTER TABLE %I SET (autovacuum_enabled = true);', child_table);
   END LOOP;
 
   -- RAISE NOTICE '% % batch delete job completed successfully', timeofday(), parent_table;
