@@ -94,7 +94,7 @@ BEGIN
   -- EXECUTE format('VACUUM ANALYZE %I', parent_table);
   
   -- re-enable autovacuum and autoanalyze
-  ALTER TABLE parent_table SET (autovacuum_enabled = true);
+  EXECUTE format('ALTER TABLE %I SET (autovacuum_enabled = true);', parent_table);
   FOREACH child_table IN ARRAY child_tables LOOP
     EXECUTE format('ALTER TABLE %I SET (autovacuum_enabled = true)', child_table);
   END LOOP;
