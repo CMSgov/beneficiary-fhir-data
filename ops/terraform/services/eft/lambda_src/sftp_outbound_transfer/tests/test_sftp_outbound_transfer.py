@@ -13,7 +13,7 @@ import pytest
 
 from errors import (
     InvalidObjectKeyError,
-    InvalidPendingDirError, 
+    InvalidPendingDirError,
     SFTPConnectionError,
     SFTPTransferError,
     UnknownPartnerError,
@@ -81,7 +81,11 @@ SEND_NOTIFICATION_PATCH_PATH = f"{MODULE_UNDER_TEST}.{send_notification.__name__
 GLOBAL_SSM_CONFIG_PATCH_PATH = f"{MODULE_UNDER_TEST}.{GlobalSsmConfig.__name__}"
 PARTNER_SSM_CONFIG_PATCH_PATH = f"{MODULE_UNDER_TEST}.{PartnerSsmConfig.__name__}"
 PARAMIKO_PATCH_PATH = f"{MODULE_UNDER_TEST}.{paramiko.__name__}"
-S3_MESSAGE = {"eventName":"ObjectCreated:Put", "eventTime": "2024-03-20T17:44:58.287Z", "s3": {"object": {"key": "test"}}}
+S3_MESSAGE = {
+    "eventName": "ObjectCreated:Put",
+    "eventTime": "2024-03-20T17:44:58.287Z",
+    "s3": {"object": {"key": "test"}},
+}
 mock_boto3_client = mock.Mock()
 mock_boto3_resource = mock.Mock()
 mock_new_topic: Callable[[str], str] = lambda topic_arn: topic_arn
@@ -173,8 +177,9 @@ class TestUpdatePipelineSlisHandler:
         mock_global_ssm.reset_mock(side_effect=True, return_value=True)
         mock_partner_ssm.reset_mock(side_effect=True, return_value=True)
         mock_send_notification.reset_mock(side_effect=True, return_value=True)
-        mock_handle_sqs_message.reset_mock(side_effect=True, return_value=True)        
+        mock_handle_sqs_message.reset_mock(side_effect=True, return_value=True)
         mock_handle_s3_event.reset_mock(side_effect=True, return_value=True)
+
     @pytest.mark.parametrize(
         "event,expected_error",
         [
@@ -494,11 +499,10 @@ class TestUpdatePipelineSlisHandler:
         mock_sqs_client.get_queue_url.return_value = {"QueueUrl": "mock_url"}
         mock_sqs_client.receive_message.return_value = {
             "Messages": [
-            {
-                "Body": json.dumps({"Message": json.dumps({"Records": [S3_MESSAGE]})}),
-                "ReceiptHandle": "mock_receipt_handle"
-
-            }
+                {
+                    "Body": json.dumps({"Message": json.dumps({"Records": [S3_MESSAGE]})}),
+                    "ReceiptHandle": "mock_receipt_handle",
+                }
             ]
         }
         poll_queue(False)
@@ -516,20 +520,14 @@ class TestUpdatePipelineSlisHandler:
         poll_queue(False)
         mock_handle_sqs_message.assert_not_called()
 
-        
-
     @mock.patch(f"{MODULE_UNDER_TEST}._handle_s3_event", mock_handle_s3_event)
     def test_handle_sqs_message(self):
         handle_sqs_message({"Records": [S3_MESSAGE]})
-        mock_handle_s3_event.assert_called_once_with(s3_object_key=S3_MESSAGE["s3"]["object"]["key"])
-    
+        mock_handle_s3_event.assert_called_once_with(
+            s3_object_key=S3_MESSAGE["s3"]["object"]["key"]
+        )
+
     @mock.patch(f"{MODULE_UNDER_TEST}._handle_s3_event", mock_handle_s3_event)
     def test_handle_sqs_message_invalid_Records(self):
         with pytest.raises(KeyError) as exc_info:
-            handle_sqs_message({"Records": [{"somekey": "somevalue"}]})    
-            
-
-        
-
-        
-
+            handle_sqs_message({"Records": [{"somekey": "somevalue"}]})

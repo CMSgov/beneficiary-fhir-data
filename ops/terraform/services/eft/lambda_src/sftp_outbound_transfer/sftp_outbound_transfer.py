@@ -304,28 +304,25 @@ def _handle_s3_event(s3_object_key: str):
 
 
 def poll_queue(loop_forever):
-    
+
     sqs_client = boto3.client("sqs", config=BOTO_CONFIG)
-    url_response = sqs_client.get_queue_url(
-         QueueName=EFT_OUTBOUND_QUEUE_NAME
-     )
-    queue_url = url_response['QueueUrl']
+    url_response = sqs_client.get_queue_url(QueueName=EFT_OUTBOUND_QUEUE_NAME)
+    queue_url = url_response["QueueUrl"]
     while True:
         try:
             response = sqs_client.receive_message(
-            QueueUrl=queue_url,
+                QueueUrl=queue_url,
                 MaxNumberOfMessages=1,
                 WaitTimeSeconds=10,
             )
             messages = response.get("Messages", [])
-            
+
             for message in messages:
-                sqs_message = json.loads(message['Body'])
-                s3_message = json.loads(sqs_message['Message'])
+                sqs_message = json.loads(message["Body"])
+                s3_message = json.loads(sqs_message["Message"])
                 handle_sqs_message(s3_message)
                 sqs_client.delete_message(
-                    QueueUrl=queue_url,
-                    ReceiptHandle=message["ReceiptHandle"]
+                    QueueUrl=queue_url, ReceiptHandle=message["ReceiptHandle"]
                 )
         except botocore.exceptions.ClientError as e:
             logger.error("Error while polling SQS queue: %s", e)
@@ -335,19 +332,19 @@ def poll_queue(loop_forever):
             # sleep for 5 minutes
             if not loop_forever:
                 break
-            time.sleep(5*60)
+            time.sleep(5 * 60)
+
+
 def handle_sqs_message(s3_message):
     try:
         if len(s3_message) == 0:
-            raise ValueError(
-                "Invalid inner S3 event with empty records"
-            )
-        for s3_record in s3_message['Records']:
+            raise ValueError("Invalid inner S3 event with empty records")
+        for s3_record in s3_message["Records"]:
             s3_event_time = datetime.fromisoformat(
-                s3_record['eventTime'].removesuffix("Z")
+                s3_record["eventTime"].removesuffix("Z")
             ).replace(tzinfo=timezone.utc)
-            s3_object_key = unquote(s3_record['s3']['object']['key'])
-            s3_event_name = s3_record['eventName']
+            s3_object_key = unquote(s3_record["s3"]["object"]["key"])
+            s3_event_name = s3_record["eventName"]
             s3_event_type = S3EventType.from_event_name(s3_event_name)
             # Append to all future logs information about the S3 Event
             logger.append_keys(
@@ -397,6 +394,7 @@ def handle_sqs_message(s3_message):
         _, exception, _ = sys.exc_info()
         if exception:
             logger.exception("Unrecoverable exception raised")
+
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=unused-argument
@@ -482,8 +480,10 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
         if exception:
             logger.exception("Unrecoverable exception raised")
 
+
 def main():
     poll_queue(True)
+
 
 if __name__ == "__main__":
     main()
