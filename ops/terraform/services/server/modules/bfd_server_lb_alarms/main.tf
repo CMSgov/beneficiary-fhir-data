@@ -28,7 +28,7 @@ resource "aws_cloudwatch_metric_alarm" "healthy_hosts" {
   # we should always have a measure of the number of healthy hosts - alert if not
   treat_missing_data = "breaching"
   alarm_actions      = local.alarm_actions
-  ok_actions         = local.ok_actions
+  #ok_actions         = local.ok_actions
 }
 
 

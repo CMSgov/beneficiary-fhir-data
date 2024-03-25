@@ -74,7 +74,7 @@ resource "aws_cloudwatch_metric_alarm" "server-log-availability-1hr" {
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.ok_arn
+  #ok_actions    = local.ok_arn
 
   datapoints_to_alarm = local.server_log_availability.datapoints
   treat_missing_data  = "notBreaching"
