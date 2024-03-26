@@ -1,6 +1,6 @@
-# `bft_eft_outbound_o11y` Submodule
+# `bft_eft_outbound_o11y` Module
 
-This Submodule contains the resources and Lambda source code for several Alarms and a Lambda that sends BFD EFT Outbound status notifications to a Slack channel configured in `base` configuration.
+This module contains the resources and Lambda source code for several Alarms and a Lambda that sends BFD EFT Outbound status notifications to a Slack channel configured in `base` configuration.
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
@@ -59,6 +59,7 @@ No outputs.
 | Name | Type |
 |------|------|
 | [aws_cloudwatch_metric_alarm.lambda_errors](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
+| [aws_cloudwatch_metric_alarm.lambda_timeouts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.sns_failures](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_iam_policy.slack_notifier_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.slack_notifier](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -68,6 +69,7 @@ No outputs.
 | [aws_sns_topic_subscription.sns_to_slack_notifier](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
 | [archive_file.slack_notifier_src](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_lambda_function.outbound_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/lambda_function) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_sns_topic.breach_topics](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |
 | [aws_sns_topic.ok_topics](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |
