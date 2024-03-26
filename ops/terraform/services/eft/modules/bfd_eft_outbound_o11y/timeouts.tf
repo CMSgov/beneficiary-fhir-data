@@ -2,10 +2,10 @@ resource "aws_cloudwatch_metric_alarm" "lambda_timeouts" {
   alarm_name          = "${local.alarms_config.lambda_errors.alarm_name}-timeout"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 1
-  # `period` calculated for previous 15 minutes to catch **all** lambda failures
+  # `period` is expressed in minutes, calculated here for previous 15 minutes to catch **all** lambda timeouts
   period    = 60 * 15
   statistic = "Maximum"
-  # `threshold` expressed expressed in milliseconds
+  # `threshold` expressed in milliseconds
   threshold           = data.aws_lambda_function.outbound_lambda.timeout * 1000
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"
