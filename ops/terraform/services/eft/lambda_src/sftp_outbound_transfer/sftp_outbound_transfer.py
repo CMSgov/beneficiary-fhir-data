@@ -249,7 +249,12 @@ def _handle_s3_event(s3_object_key: str):
                     logger.info("Starting upload to %s", staging_dir_path)
                     transfer = sftp_client.putfo(bo, staging_file_path)
 
-                logger.info("Upload of %s to %s successful: %s", filename, staging_dir_path, str(transfer.st_size))
+                logger.info(
+                    "Upload of %s to %s successful: %s",
+                    filename,
+                    staging_dir_path,
+                    str(transfer.st_size),
+                )
 
                 # Once uploaded, we must modify the file permissions such that the SWEEPS automation
                 # user can interact with the file
