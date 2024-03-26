@@ -30,7 +30,6 @@ public abstract class AbstractCleanupJob implements CleanupJob {
           + "  WHERE pt.last_updated < ${cutoffDate}"
           + "  limit ${limit}";
 
-
   /** TransactionManager to use for db operations. */
   private final TransactionManager transactionManager;
 
