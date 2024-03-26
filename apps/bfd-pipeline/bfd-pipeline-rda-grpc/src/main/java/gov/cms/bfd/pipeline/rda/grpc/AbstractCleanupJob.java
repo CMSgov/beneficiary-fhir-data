@@ -25,13 +25,11 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
   /** template for delete query. */
   private static final String DELETE_QUERY_TEMPLATE =
-      "delete from ${tableName} t where t.${parentTableKey} in ("
-          + "  select ${parentTableKey} "
-          + "  from ${parentTableName} "
-          + "  where last_updated < '${cutoffDate}' "
-          + "  order by last_updated "
-          + "  limit ${limit}"
-          + ")";
+      "DELETE t FROM ${tableName} t "
+          + "  JOIN ${parentTableName} pt ON t.${parentTableKey} = pt.${parentTableKey} "
+          + "  WHERE pt.last_updated < ${cutoffDate}"
+          + "  limit ${limit}";
+
 
   /** TransactionManager to use for db operations. */
   private final TransactionManager transactionManager;
