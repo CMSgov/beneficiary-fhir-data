@@ -62,14 +62,6 @@ paths:
                     Example:
                        - `includeTaxNumbers=true`
                   enum: ["true", "false"]
-                isHashed:
-                  type: string
-                  description: |-
-                    Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
-                    
-                    Example:
-                      - `isHashed=true`
-                  enum: ["true", "false"]
                 service-date:
                   type: string
                   description: |-
@@ -206,7 +198,8 @@ paths:
                     (mbi, hicn, etc); the following are all valid values for Identifier, and all might represent the same resource:
                       - `identifier=https://bluebutton.cms.gov/resources/identifier/hicn-hash|<your hicn hash>`
                       - `identifier=https://bluebutton.cms.gov/resources/identifier/mbi-hash|<your mbi hash>`
-                  example: "https://bluebutton.cms.gov/resources/identifier/mbi-hash|<your mbi hash>"
+                      - `identifier=http://hl7.org/fhir/sid/us-mbi|<your mbi>`
+                  example: "http://hl7.org/fhir/sid/us-mbi|<your mbi>"
                 '_has:Coverage.extension':
                   type: string
                   description: |-

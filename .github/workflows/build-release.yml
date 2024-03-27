@@ -209,4 +209,4 @@ jobs:
           artifactErrorsFailBuild: true
           tag: "${{ inputs.releaseVersion }}"
           name: "v${{ inputs.releaseVersion }}"
-          artifacts: "*.csv,*.json,*.xlsx"
+          artifacts: "*.csv,*.json,*.xlsx,*.yaml"
