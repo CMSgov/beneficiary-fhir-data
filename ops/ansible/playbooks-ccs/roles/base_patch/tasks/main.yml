@@ -8,3 +8,6 @@
   args:
     warn: no
   tags: [pre-ami]
+- name: Complete All Transactions
+  become: true
+  shell: yum-complete-transaction
