@@ -272,7 +272,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
   source_code_hash = trimprefix(data.aws_ecr_image.sftp_outbound_transfer.id, "sha256:")
   package_type     = "Image"
   memory_size      = 5120
-  timeout          = 900
+  timeout          = 450
 
   tags = {
     Name = local.outbound_lambda_full_name
