@@ -27,3 +27,4 @@
       - systemd
       - tar
       - unzip
+      - yum-utils
