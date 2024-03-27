@@ -8,15 +8,15 @@ locals {
   kms_key_arn = var.aws_kms_key_arn
   kms_key_id  = var.aws_kms_key_id
 
-  nonsensitive_service_map = zipmap(
-    data.aws_ssm_parameters_by_path.nonsensitive_service.names,
-    nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_service.values)
+  nonsensitive_ccw_map = zipmap(
+    data.aws_ssm_parameters_by_path.nonsensitive_ccw.names,
+    nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_ccw.values)
   )
-  nonsensitive_service_config = {
-    for key, value in local.nonsensitive_service_map
+  nonsensitive_ccw_config = {
+    for key, value in local.nonsensitive_ccw_map
     : element(split("/", key), length(split("/", key)) - 1) => value
   }
-  repeater_invoke_rate = local.nonsensitive_service_config["slis_repeater_lambda_invoke_rate"]
+  repeater_invoke_rate = local.nonsensitive_ccw_config["slis_repeater_lambda_invoke_rate"]
 
   lambda_update_slis = "update_slis" # resources related to this lambda are also named "this" in some cases
   lambda_repeater    = "repeater"

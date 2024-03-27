@@ -817,6 +817,3 @@ bfd:
           VP4SODeRPHXzkzlyRm+cFWCI+GEGH8dy8W+tdKdP+5CTN+rFkvEmcbCcNzg2qyHC
           uasJ/R5hG+geJ+ydxt8EmVKpmA==
           -----END CERTIFICATE-----
-
-#TODO: Remove the following as part of BFD-3296
-bfd/prod-sbx/pipeline/nonsensitive/rda/cleanup/enabled: *rda_cleanup_enabled

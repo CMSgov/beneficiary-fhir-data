@@ -13,17 +13,17 @@ cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 # TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
 aws ssm get-parameters-by-path \
     --with-decryption \
-    --path "/bfd/${env}/pipeline/shared/" \
+    --path "/bfd/${env}/pipeline/nonsensitive/shared/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > pipeline_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > nonsensitive_pipeline_vars.json
 
 aws ssm get-parameters-by-path \
     --with-decryption \
-    --path "/bfd/${env}/pipeline/${pipeline_instance}/" \
+    --path "/bfd/${env}/pipeline/sensitive/shared/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > "pipeline_${pipeline_instance}_vars.json"
+    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > sensitive_pipeline_vars.json
 
 aws ssm get-parameters-by-path \
     --with-decryption \
@@ -47,7 +47,7 @@ EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@pipeline_vars.json' --extra-vars "@pipeline_${pipeline_instance}_vars.json" --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
+ansible-playbook --extra-vars '@nonsensitive_pipeline_vars.json' --extra-vars '@sensitive_pipeline_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-pipeline.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
