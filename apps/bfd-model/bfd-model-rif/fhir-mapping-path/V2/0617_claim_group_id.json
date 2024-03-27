@@ -1,0 +1,46 @@
+{
+    "id": 617,
+    "name": "Claim Group Id",
+    "description": "",
+    "appliesTo": [
+        "PDE",
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "claim_group_id",
+    "bfdDbType": "NUM",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "claimGroupId",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "identifier[N].value",
+            "fhirPath": "identifier.where(system='https://bluebutton.cms.gov/resources/identifier/claim-group').value",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/identifier/claim-group'"
+            ],
+            "additional": [],
+            "derived": "This value is derived within the process from loading CCW data into the BFD database.",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"uc\",\\n          \"display\": \"Unique Claim ID\"\\n        }\\n      ]\\n    },\\n    \"system\": \"https://bluebutton.cms.gov/resources/identifier/claim-group\",\\n    \"value\": \"900\"\\n  }\\n]"
+        }
+    ]
+}

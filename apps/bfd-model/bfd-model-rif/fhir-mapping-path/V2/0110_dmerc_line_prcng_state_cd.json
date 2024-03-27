@@ -1,0 +1,41 @@
+{
+    "id": 110,
+    "name": "Pricing State Code",
+    "description": "The 2-digit SSA state code where the durable medical equipment (DME) supplier was located; used by the Medicare Administrative Contractor (MAC) for pricing the service.",
+    "appliesTo": [
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "dmerc_line_prcng_state_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "pricingStateCode",
+    "ccwMapping": [
+        "DMERC_LINE_PRCNG_STATE_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueCoding.code",
+            "fhirPath": "item[%n].extension.where(url = 'https://bluebutton.cms.gov/resources/variables/dmerc_line_prcng_state_cd').valueCoding.code",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/dmerc_line_prcng_state_cd'"
+            ],
+            "additional": [
+                "eob.item[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/dmerc_line_prcng_state_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/dmerc_line_prcng_state_cd\",\\n      \"code\": \"AL\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

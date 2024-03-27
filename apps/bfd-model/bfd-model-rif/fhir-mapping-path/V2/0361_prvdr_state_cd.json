@@ -1,0 +1,44 @@
+{
+    "id": 361,
+    "name": "Provider State Code",
+    "description": "The two-digit numeric social security administration (SSA) state code where provider or facility is located.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prvdr_state_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "providerStateCode",
+    "ccwMapping": [
+        "PRVDR_STATE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.PRVDR_FAC_FIPS_ST_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].locationAddress.state",
+            "fhirPath": "item[%n].locationAddress.state",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  \"IA\"\\n]"
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "id": 614,
+    "name": "Coverage Class - Group",
+    "description": "The type of classification for which an insurer-specific class label or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "class[N].value",
+            "fhirPath": "class.where(type.coding.where(code='group')).value",
+            "discriminator": [
+                "class[N].type.coding[N].system = 'http://terminology.hl7.org/CodeSystem/coverage-class'",
+                "class[N].type.coding[N].code = 'group'"
+            ],
+            "additional": [
+                "coverage.class[N].type.coding[N].display = 'Group'"
+            ],
+            "derived": "Medicare",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/coverage-class\",\\n          \"code\": \"group\",\\n          \"display\": \"Group\"\\n        }\\n      ]\\n    },\\n    \"value\": \"Medicare\"\\n  }\\n]\\n"
+        }
+    ]
+}

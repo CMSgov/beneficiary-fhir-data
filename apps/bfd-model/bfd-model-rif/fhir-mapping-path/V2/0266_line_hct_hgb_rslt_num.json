@@ -1,0 +1,46 @@
+{
+    "id": 266,
+    "name": "HCT/HGB Test Result",
+    "description": "This is the laboratory value for the most recent hematocrit or hemoglobin reading on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_hct_hgb_rslt_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 4,
+    "bfdJavaFieldName": "hctHgbTestResult",
+    "ccwMapping": [
+        "LINE_HCT_HGB_RSLT_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "contained[N].valueQuantity.value",
+            "fhirPath": "contained.where(resourceType='Observation' and code.coding.system='https://bluebutton.cms.gov/resources/variables/line_hct_hgb_type_cd').valueQuantity.value",
+            "discriminator": [
+                "contained[N].resourceType = 'Observation'",
+                "contained[N].code.coding.system = 'https://bluebutton.cms.gov/resources/variables/line_hct_hgb_type_cd'"
+            ],
+            "additional": [
+                "(eob.contained[N].id = <unique identifier derived 'line-observation-#'> (ie.. line-observation-6)",
+                "eob.contained[N].status = 'unknown') AND ((eob.supportingInfo[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claiminformationcategory'",
+                "eob.supportingInfo[N].category.coding[N].code = 'info',",
+                "eob.supportingInfo[N].category.coding[N].display = 'Information')",
+                "eob.supportingInfo[N].category.coding[N].display = {corresponding description from valueset specified in .system})"
+            ],
+            "derived": "eob.supportingInfo[N].value.valuereference = #<unique identifier derived '#line-observation-#'> (ie.. #line-observation-6)",
+            "note": "The value stored in eob.contained[N].id will match the value stored in eob.supportingInfo[N].valueReference.value. It will be the code generated unique identifier for the observation. Note that this value is also supplied in supportingInfo[N].category.coding[N].code",
+            "example": "[\\n  {\\n    \"resourceType\": \"Observation\",\\n    \"id\": \"line-observation-6\",\\n    \"status\": \"unknown\",\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/line_hct_hgb_type_cd\",\\n          \"code\": \"R1\",\\n          \"display\": \"Hemoglobin Test\"\\n        }\\n      ]\\n    },\\n    \"valueQuantity\": {\\n      \"value\": 42\\n    }\\n  }\\n]"
+        }
+    ]
+}

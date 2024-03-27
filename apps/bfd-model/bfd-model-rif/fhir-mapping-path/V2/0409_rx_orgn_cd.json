@@ -1,0 +1,43 @@
+{
+    "id": 409,
+    "name": "Prescription Origin Code",
+    "description": "This variable indicates whether the prescription was transmitted as an electronic prescription, by phone, by fax, or as a written paper copy.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rx_orgn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "prescriptionOriginationCode",
+    "ccwMapping": [
+        "RX_ORGN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].code.coding[N].code",
+            "fhirPath": "supportingInfo.where(code.coding.where(system='https://bluebutton.cms.gov/resources/variables/rx_orgn_cd')).code.coding.code",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/rx_orgn_cd'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "eob.supportingInfo[N].category.coding[N].code = 'rxorigincode'",
+                "eob.supportingInfo[N].category.coding[N].display = 'RX Origin Code')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 11,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"rxorigincode\",\\n          \"display\": \"Rx Origin Code\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/rx_orgn_cd\",\\n          \"code\": \"3\",\\n          \"display\": \"Electronic\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

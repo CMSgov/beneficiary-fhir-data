@@ -1,0 +1,50 @@
+{
+    "id": 54,
+    "name": "Claim ID",
+    "description": "This is the unique identification number for the claim.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "claimId",
+    "ccwMapping": [
+        "CLM_ID"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "identifier[N].value",
+            "fhirPath": "identifier.where(system='https://bluebutton.cms.gov/resources/variables/clm_id').value",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_id'"
+            ],
+            "additional": [
+                "(eob.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.identifier[N].type.coding[N].code = 'uc'",
+                "eob.identifier[N].type.coding[N].display = 'Unique Claim ID')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"uc\",\\n          \"display\": \"Unique Claim ID\"\\n        }\\n      ]\\n    },\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_id\",\\n    \"value\": \"9991831999\"\\n  }\\n]"
+        }
+    ]
+}

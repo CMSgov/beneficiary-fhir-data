@@ -1,0 +1,44 @@
+{
+    "id": 305,
+    "name": "Noncovered Stay From Date",
+    "description": "The beginning date of the beneficiary's Non-covered stay.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_vrfd_ncvrd_stay_from_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "noncoveredStayFromDate",
+    "ccwMapping": [
+        "NCH_VRFD_NCVRD_STAY_FROM_DT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].timingPeriod.start",
+            "fhirPath": "supportingInfo.where(category.coding.where(code='https://bluebutton.cms.gov/resources/variables/nch_vrfd_ncvrd_stay_from_dt')).timingPeriod.start",
+            "discriminator": [
+                "supportingInfo[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_vrfd_ncvrd_stay_from_dt'"
+            ],
+            "additional": [
+                "(eob.supportingInfo[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claiminformationcategory'",
+                "eob.supportingInfo[N].category.coding[N].code = 'info'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Information')",
+                "eob.supportingInfo[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.supportingInfo[N].category.coding[N].display = 'NCH Verified Non-covered Stay From Date')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

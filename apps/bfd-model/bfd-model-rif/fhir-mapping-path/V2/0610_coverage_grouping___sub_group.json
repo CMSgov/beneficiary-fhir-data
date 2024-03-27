@@ -1,0 +1,38 @@
+{
+    "id": 610,
+    "name": "Coverage Grouping - Sub Group",
+    "description": "Additional coverage classification. Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify a subset of an employer group.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "grouping.subGroup",
+            "fhirPath": "grouping.subGroup",
+            "discriminator": [],
+            "additional": [],
+            "derived": "Medicare",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

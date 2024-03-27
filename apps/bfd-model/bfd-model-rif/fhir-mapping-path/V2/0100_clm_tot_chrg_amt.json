@@ -1,0 +1,53 @@
+{
+    "id": 100,
+    "name": "Total Charge Amount",
+    "description": "The total charges for all services included on the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_tot_chrg_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "totalChargeAmount",
+    "ccwMapping": [
+        "CLM_TOT_CHRG_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_MDCR_INSTNL_TOT_CHRG_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "total[N].amount.value",
+            "fhirPath": "total.where(category.coding.where(code='https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt')).amount.value",
+            "discriminator": [
+                "total[N].category[N].coding.system' : 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "total[N].category[N].coding.code = 'https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt'",
+                ""
+            ],
+            "additional": [
+                "eob.total[N].amount.code = 'USD'",
+                "eob.total[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.total[N].category[N].system = 'http://terminology.hl7.org/CodeSystem/adjudication'",
+                "eob.total[N].category[N].code = 'submitted'",
+                "eob.total[N].category[N].display = 'Submitted Amount'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/adjudication\",\\n          \"code\": \"submitted\",\\n          \"display\": \"Submitted Amount\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt\",\\n          \"display\": \"Claim Total Charge Amount\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 84999.37,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

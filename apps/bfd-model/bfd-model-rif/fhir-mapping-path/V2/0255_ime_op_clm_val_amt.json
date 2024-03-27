@@ -1,0 +1,43 @@
+{
+    "id": 255,
+    "name": "Operating Indirect Medical Education Amount",
+    "description": "This is one component of the total amount that is payable on PPS claims, and reflects the IME (indirect medical education) payments for operating expenses (such as labor) for the claim.",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "ime_op_clm_val_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "indirectMedicalEducationAmount",
+    "ccwMapping": [
+        "IME_OP_CLM_VAL_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_OPRTNL_IME_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "extension.where(url = 'https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt').valueMoney.value",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt\",\\n    \"valueMoney\": {\\n      \"value\": 66125.51,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

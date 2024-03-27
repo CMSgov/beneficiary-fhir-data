@@ -1,0 +1,41 @@
+{
+    "id": 447,
+    "name": "Beneficiary First Name",
+    "description": "The first name of the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_gvn_name",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "nameGiven",
+    "ccwMapping": [
+        "BENE_GVN_NAME"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_1ST_NAME"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "name[N].given[0]",
+            "fhirPath": "name.given[0]",
+            "discriminator": [
+                "name[N].use = 'usual'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"use\": \"usual\",\\n    \"family\": \"Doe\",\\n    \"given\": [\\n      \"John\",\\n      \"A\"\\n    ]\\n  }\\n]\\n"
+        }
+    ]
+}

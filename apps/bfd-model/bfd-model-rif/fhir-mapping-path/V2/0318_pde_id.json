@@ -1,0 +1,43 @@
+{
+    "id": 318,
+    "name": "Event Id",
+    "description": "Identifies a unique Part D event for a beneficiary.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "pde_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "eventId",
+    "ccwMapping": [
+        "PDE_ID"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "identifier[N].value",
+            "fhirPath": "identifier.where(system='https://bluebutton.cms.gov/resources/variables/pde_id').value",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/pde_id'"
+            ],
+            "additional": [
+                "eob.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.identifier[N].type.coding[N].system = 'uc'",
+                "eob.identifier[N].type.coding[N].system = 'Unique Claim ID'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"uc\",\\n          \"display\": \"Unique Claim ID\"\\n        }\\n      ]\\n    },\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/pde_id\",\\n    \"value\": \"89\"\\n  }\\n]"
+        }
+    ]
+}

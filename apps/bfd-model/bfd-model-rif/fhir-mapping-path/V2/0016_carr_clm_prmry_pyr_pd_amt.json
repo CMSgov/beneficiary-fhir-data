@@ -1,0 +1,46 @@
+{
+    "id": 16,
+    "name": "Carrier Primary Payer Paid Amount",
+    "description": "The amount of a payment made on behalf of a Medicare beneficiary by a primary payer other than Medicare, that the provider is applying to covered Medicare charges on a non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_prmry_pyr_pd_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "primaryPayerPaidAmount",
+    "ccwMapping": [
+        "CARR_CLM_PRMRY_PYR_PD_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "total.amount.value",
+            "fhirPath": "total.where(category.coding.where(code='https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt')).amount.value",
+            "discriminator": [
+                "total.category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "total.category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt'"
+            ],
+            "additional": [
+                "eob.total.category.coding[N].display = 'Prior payer paid'",
+                "eob.total.category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "eob.total.category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt'",
+                "eob.total.category.coding[N].display = 'Claim Total Charge Amount')",
+                "eob.total.amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication\",\\n          \"code\": \"priorpayerpaid\",\\n          \"display\": \"Prior payer paid\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt\",\\n          \"display\": \"Claim Total Charge Amount\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 0,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

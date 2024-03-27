@@ -1,0 +1,42 @@
+{
+    "id": 369,
+    "name": "Revenue Center 1st ANSI Code",
+    "description": "The first code used to identify the detailed reason an adjustment was made (e.g., reason for denial or reducing payment).",
+    "appliesTo": [
+        "Outpatient",
+        "HHA"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_1st_ansi_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "revCntr1stAnsiCd",
+    "ccwMapping": [
+        "REV_CNTR_1ST_ANSI_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].reason.coding[N].code",
+            "fhirPath": "item[%n].adjudication.where(reason.coding.where(system='https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd')).reason.coding.code",
+            "discriminator": [
+                "item[N].adjudication.reason.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication.category.coding[N].code = 'denialreason'",
+                "eob.item[N].adjudication.category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator'",
+                "eob.item[N].adjudication.category.coding[N].display = 'Denial Reason'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator\",\\n          \"code\": \"denialreason\",\\n          \"display\": \"Denial Reason\"\\n        }\\n      ]\\n    },\\n    \"reason\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd\",\\n          \"code\": \"CO120\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

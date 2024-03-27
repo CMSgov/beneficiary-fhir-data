@@ -1,0 +1,42 @@
+{
+    "id": 359,
+    "name": "Provider Number",
+    "description": "This variable is the provider identification number.  OR The billing number assigned to the supplier of the Part B service/DMEPOS by the National Supplier Clearinghouse, as reported on the line item for the DMERC claim.",
+    "appliesTo": [
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prvdr_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 6,
+    "bfdJavaFieldName": "providerBillingNumber",
+    "ccwMapping": [
+        "PRVDR_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF1.PRVDR_OSCAR_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueIdentifier",
+            "fhirPath": "item[%n].extension.where(url = 'https://bluebutton.cms.gov/resources/variables/suplrnum').valueIdentifier.value",
+            "discriminator": [
+                "item[N].extension[N].url 'https://bluebutton.cms.gov/resources/variables/suplrnum' ",
+                "item[N].extension[N].system = 'https://bluebutton.cms.gov/resources/variables/suplrnum'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/suplrnum\",\\n    \"valueIdentifier\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/suplrnum\",\\n      \"value\": \"1219966666\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

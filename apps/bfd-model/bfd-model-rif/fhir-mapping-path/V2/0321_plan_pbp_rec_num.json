@@ -1,0 +1,41 @@
+{
+    "id": 321,
+    "name": "Plan Benefit Package ID",
+    "description": "This variable is the unique plan benefit package (PBP) identifier for the beneficiary\u2019s Part D plan of record for the year. CMS assigns an identifier to each PBP within a contract that a Part D plan sponsor has with CMS.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "plan_pbp_rec_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "planBenefitPackageId",
+    "ccwMapping": [
+        "PLAN_PBP_REC_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "insurance[N].coverage.extension[N].valueIdentifier.value",
+            "fhirPath": "insurance.coverage.extension.where(url='https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num').valueIdentifier.value",
+            "discriminator": [
+                "insurance[N].coverage.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num'",
+                "insurance[N].coverage.extension[N].valueIdentifier.system = 'https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num'"
+            ],
+            "additional": [
+                "eob.insurance[N].focal = true"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num\",\\n    \"valueIdentifier\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num\",\\n      \"value\": \"020\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

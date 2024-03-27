@@ -1,0 +1,41 @@
+{
+    "id": 525,
+    "name": "Part D PBP Number - January",
+    "description": "The variable is the Part D plan benefit package (PBP) for the beneficiary\u2019s Part D plan for a given month (January through December). CMS assigns an identifier to each PBP within a contract that a Part D plan sponsor has with CMS.",
+    "appliesTo": [
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "ptd_pbp_id_01",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "partDPbpNumberJanId",
+    "ccwMapping": [
+        "PTD_PBP_ID_01"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/ptdpbpid01').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/ptdpbpid01'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/ptdpbpid01'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "{\\n    \"url\" : \"https://bluebutton.cms.gov/resources/variables/ptdpbpid01\",\\n    \"valueCoding\" : {\\n      \"system\" : \"https://bluebutton.cms.gov/resources/variables/ptdpbpid01\",\\n      \"code\" : \"003\"\\n}"
+        }
+    ]
+}

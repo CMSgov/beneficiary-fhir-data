@@ -1,0 +1,36 @@
+{
+    "id": 627,
+    "name": "Medicare Coverage D End Date",
+    "description": "That date that Medicare Coverage Part D ended for the Beneficiary.",
+    "appliesTo": [
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "ptd_cvrg_end_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "partDCoverageEndDate",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "period.end",
+            "fhirPath": "period.end",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "This attribute is supplied for CARIN conformance.  However, Eob.type is recommended as it provides more detailed information.",
+            "example": "[\\n  {\\n    \"start\": \"2020-03-17\",\\n    \"end\": \"2020-06-17\"\\n  }\\n]\\n"
+        }
+    ]
+}

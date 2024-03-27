@@ -1,0 +1,39 @@
+{
+    "id": 340,
+    "name": "Procedure Code 25 Date",
+    "description": "The date on which the procedure was performed. The date associated with the procedure identified in the corresponding procedure code.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prcdr_dt25",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "procedure25Date",
+    "ccwMapping": [
+        "PRCDR_DT25"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "procedure[N].date",
+            "fhirPath": "procedure[24].date",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "Procedure Date is stored in conjunction with it's related Procedure Code and Procedure Code Version within the eob.procedure[N].procedureCodeableConcept.coding. Ie.. Procedure Date 1 will be stored with the Procedure Code 1 etc\u2026",
+            "example": ""
+        }
+    ]
+}

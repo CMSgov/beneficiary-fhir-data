@@ -1,0 +1,51 @@
+{
+    "id": 99,
+    "name": "Claim Through Date",
+    "description": "The last day on the billing statement covering services rendered to the beneficiary (a.k.a. 'Statement Covers Thru Date').",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_thru_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "dateThrough",
+    "ccwMapping": [
+        "CLM_THRU_DT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_THRU_DT",
+        "CCLF2.CLM_THRU_DT",
+        "CCLF3.CLM_THRU_DT",
+        "CCLF4.CLM_THRU_DT",
+        "CCLF5.CLM_THRU_DT",
+        "CCLF6.CLM_THRU_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "billablePeriod.end",
+            "fhirPath": "billablePeriod.end",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"start\": \"1999-10-27\",\\n    \"end\": \"1999-10-27\"\\n  }\\n]\\n"
+        }
+    ]
+}

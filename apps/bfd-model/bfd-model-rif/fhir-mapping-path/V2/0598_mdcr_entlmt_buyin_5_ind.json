@@ -1,0 +1,45 @@
+{
+    "id": 598,
+    "name": "Medicare Entitlement/Buy-In Indicator \u2014 May - (05)",
+    "description": "Monthly Part A and/or Part B entitlement indicator.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "mdcr_entlmt_buyin_5_ind",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "entitlementBuyInMayInd",
+    "ccwMapping": [
+        "MDCR_ENTLMT_BUYIN_5_IND"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_ENTLMT_BUYIN_IND"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/buyin05').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/buyin05'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/buyin05'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/buyin05\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/buyin05\",\\n      \"code\": \"C\",\\n      \"display\": \"Part A and Part B state buy-in\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

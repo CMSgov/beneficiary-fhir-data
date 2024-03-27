@@ -1,0 +1,41 @@
+{
+    "id": 423,
+    "name": "Beneficiary Id",
+    "description": "The unique CCW identifier for a beneficiary. The CCW assigns a unique beneficiary identification number to each individual who receives Medicare and/or Medicaid and uses that number to identify an individual\u2019s records in all CCW data files. This number does not change during a beneficiary\u2019s lifetime, and CCW uses each number only once. The BENE_ID is specific to the CCW and is not applicable to any other identification system or data source.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "beneficiaryId",
+    "ccwMapping": [
+        "BENE_ID"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "identifier[N].value",
+            "fhirPath": "identifier.where(system='https://bluebutton.cms.gov/resources/variables/bene_id').value",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/bene_id'"
+            ],
+            "additional": [
+                "patient.identifier[N].type.coding[N].system = 'http://terminology.hl7.org/CodeSystem/v2-0203' patient.identifier[N].type.coding[N].code = 'MB' patient.identifier[N].type.coding[N].display = 'Member Number'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/v2-0203\",\\n          \"code\": \"MB\",\\n          \"display\": \"Member Number\"\\n        }\\n      ]\\n    },\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/bene_id\",\\n    \"value\": \"567834\"\\n  }\\n]"
+        }
+    ]
+}

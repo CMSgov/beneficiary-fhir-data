@@ -1,0 +1,45 @@
+{
+    "id": 15,
+    "name": "Claim Payment Denial Code",
+    "description": "The code on a non-institutional claim indicating who receives payment or if the claim was denied.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_pmt_dnl_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "paymentDenialCode",
+    "ccwMapping": [
+        "CARR_CLM_PMT_DNL_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_CARR_PMT_DNL_CD",
+        "CCLF6.CLM_CARR_PMT_DNL_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url = 'https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd\",\\n      \"code\": \"1\",\\n      \"display\": \"Physician/supplier\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

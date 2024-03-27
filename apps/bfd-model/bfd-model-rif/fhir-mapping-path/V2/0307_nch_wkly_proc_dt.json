@@ -1,0 +1,56 @@
+{
+    "id": 307,
+    "name": "Weekly Process Date",
+    "description": "The date the weekly NCH database load process cycle begins, during which the claim records are loaded into the Nearline file. This date will always be a Friday, although the claims will actually be appended to the database subsequent to the date.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_wkly_proc_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "weeklyProcessDate",
+    "ccwMapping": [
+        "NCH_WKLY_PROC_DT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_EFCTV_DT",
+        "CCLF5.CLM_EFCTV_DT",
+        "CCLF6.CLM_EFCTV_DT",
+        "CCLF7.CLM_EFCTV_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].timingDate",
+            "fhirPath": "supportingInfo.where(category.coding.where(code='https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt')).timingDate",
+            "discriminator": [
+                "supportingInfo[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt'"
+            ],
+            "additional": [
+                "(eob.supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "eob.supportingInfo[N].category.coding[N].code = 'clmrecvddate'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Claim Received Date')",
+                "eob.supportingInfo[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.supportingInfo[N].category.coding[N].display = 'NCH Weekly Claim Processing Date')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 1,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"clmrecvddate\",\\n          \"display\": \"Claim Received Date\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/information\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt\",\\n          \"display\": \"NCH Weekly Claim Processing Date\"\\n        }\\n      ]\\n    },\\n    \"timingDate\": \"1999-11-06\"\\n  }\\n]"
+        }
+    ]
+}

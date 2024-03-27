@@ -1,0 +1,46 @@
+{
+    "id": 259,
+    "name": "Line Payment Amount to Beneficiary",
+    "description": "The payment (reimbursement) made to the beneficiary related to the line-item service on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_bene_pmt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "beneficiaryPaymentAmount",
+    "ccwMapping": [
+        "LINE_BENE_PMT_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication' and code = 'https://bluebutton.cms.gov/resources/variables/line_bene_pmt_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/line_bene_pmt_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'paidtoprovider'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Paid to Provider')",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Line Payment Amount to Beneficiary'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication\",\\n          \"code\": \"paidtopatient\",\\n          \"display\": \"Paid to patient\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/line_bene_pmt_amt\",\\n          \"display\": \"Line Payment Amount to Beneficiary\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 0,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "id": 89,
+    "name": "Claim PPS Capital DRG Weight Number",
+    "description": "The number used to determine a transfer adjusted case mix index for capital, under the prospective payment system (PPS). The number is determined by multiplying the Diagnosis Related Group Code (DRG) weight times the discharge fraction.",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pps_cptl_drg_wt_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "claimPPSCapitalDrgWeightNumber",
+    "ccwMapping": [
+        "CLM_PPS_CPTL_DRG_WT_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedUnsignedInt",
+            "fhirPath": "benefitBalance[%n].financial.where(type.coding.where(code='https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_drg_wt_num')).usedUnsignedInt",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_drg_wt_num'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].code = 'Claim PPS Capital DRG Weight Number'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/benefit-balance\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_drg_wt_num\",\\n          \"display\": \"Claim PPS Capital DRG Weight Number\"\\n        }\\n      ]\\n    },\\n    \"usedUnsignedInt\": 1\\n  }\\n]"
+        }
+    ]
+}

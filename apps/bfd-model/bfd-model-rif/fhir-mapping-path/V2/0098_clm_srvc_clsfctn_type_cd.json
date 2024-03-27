@@ -1,0 +1,47 @@
+{
+    "id": 98,
+    "name": "Claim Service Classification Type Code",
+    "description": "The type of service provided to the beneficiary.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_srvc_clsfctn_type_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "claimServiceClassificationTypeCode",
+    "ccwMapping": [
+        "CLM_SRVC_CLSFCTN_TYPE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_BILL_CLSFCTN_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd\",\\n      \"code\": \"1\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

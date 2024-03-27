@@ -1,0 +1,41 @@
+{
+    "id": 13,
+    "name": "Claim Entry Code",
+    "description": "Carrier-generated code describing whether the Part B claim is an original debit, full credit, or replacement debit.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_entry_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "claimEntryCode",
+    "ccwMapping": [
+        "CARR_CLM_ENTRY_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd\",\\n      \"code\": \"1\",\\n      \"display\": \"Original debit; void of original debit (If CLM_DISP_CD = 3, code 1 means voided original debit)\"\\n    }\\n  }\\n]"
+        }
+    ]
+}
