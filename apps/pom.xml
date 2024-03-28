@@ -930,7 +930,7 @@
                     <configuration>
                         <tagNameFormat>v@{project.version}</tagNameFormat>
                         <!-- Automatically push after release. -->
-                        <pushChanges>true</pushChanges>
+                        <pushChanges>false</pushChanges>
                         <localCheckout>true</localCheckout>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <commitByProject>false</commitByProject>
