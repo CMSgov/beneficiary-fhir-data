@@ -317,15 +317,9 @@ public class OpenApiDocs {
           headerRefs.add(createRef("#/components/parameters/BlueButton-User-header"));
           headerRefs.add(createRef("#/components/parameters/BlueButton-BeneficiaryId-header"));
 
-          // add ref for IncludeIdentifiers header for V1 Patient endpoints
-          var getMap = (Map<String, Object>) pathMap.get("get");
-          var tags = (List<String>) getMap.get("tags");
-          if (path.contains("/Patient") && tags.contains(API_VERSION_1)) {
-            headerRefs.add(createRef("#/components/parameters/IncludeIdentifiers-header"));
-          }
-
-          // add ref for IncludeAddressFields for Patient endpoints
+          // add ref for IncludeAddressFields and IncludeIdentifiers headers for Patient endpoints
           if (path.contains("/Patient")) {
+            headerRefs.add(createRef("#/components/parameters/IncludeIdentifiers-header"));
             headerRefs.add(createRef("#/components/parameters/IncludeAddressFields-header"));
           }
 
