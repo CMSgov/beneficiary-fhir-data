@@ -118,7 +118,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
           // execute all queries in order, use the count from the last query (parent table)
           // to track the number of claims deleted.
           var count = 0;
-            count = query.executeUpdate();
+          count = query.executeUpdate();
           return count;
         });
   }
@@ -135,15 +135,15 @@ public abstract class AbstractCleanupJob implements CleanupJob {
     String parentTableName = getParentTableName();
     tm.executeProcedure(
         entityManager -> {
-            Map<String, String> params =
-                Map.of(
-                    "parentTableName", parentTableName,
-                    "parentTableKey", getParentTableKey(),
-                    "cutoffDate", cutoffDate.toString(),
-                    "limit", Integer.toString(cleanupTransactionSize));
-            StringSubstitutor strSub = new StringSubstitutor(params);
-            String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
-            atomicQuery.set(entityManager.createNativeQuery(queryStr));
+          Map<String, String> params =
+              Map.of(
+                  "parentTableName", parentTableName,
+                  "parentTableKey", getParentTableKey(),
+                  "cutoffDate", cutoffDate.toString(),
+                  "limit", Integer.toString(cleanupTransactionSize));
+          StringSubstitutor strSub = new StringSubstitutor(params);
+          String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
+          atomicQuery.set(entityManager.createNativeQuery(queryStr));
         });
     return atomicQuery.get();
   }

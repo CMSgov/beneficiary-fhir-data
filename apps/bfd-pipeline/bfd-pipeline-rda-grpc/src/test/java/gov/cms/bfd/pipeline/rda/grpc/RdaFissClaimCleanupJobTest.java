@@ -26,7 +26,6 @@ class RdaFissClaimCleanupJobTest {
   @Test
   void getTableNames() {
     assertNotNull(job.getParentTableName());
-
   }
 
   /** Verifies the getParentTableKey method. */
