@@ -18,6 +18,10 @@ data "aws_sqs_queue" "outbound_lambda_dlq" {
   name = var.outbound_lambda_dlq_name
 }
 
+data "aws_lambda_function" "outbound_lambda" {
+  function_name = var.outbound_lambda_name
+}
+
 data "aws_ssm_parameter" "slack_webhook" {
   name            = local.slack_webhook_ssm_path
   with_decryption = true
