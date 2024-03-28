@@ -151,7 +151,7 @@ bfd:
           starting_fiss_seq_num: &rda_job_starting_fiss UNDEFINED
           starting_mcs_seq_num: &rda_job_starting_mcs UNDEFINED
         cleanup:
-          enabled: &rda_cleanup_enabled true
+          enabled: &rda_cleanup_enabled false
           run_size: &rda_cleanup_run_size 50000
           transaction_size: &rda_cleanup_transaction_size 5000
         data_pipeline_rda_grpc_inproc_server_mode: *grpc_inprocess_mode
