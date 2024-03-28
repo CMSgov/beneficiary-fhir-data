@@ -7,34 +7,40 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: "The branch from which images will be built from"
+        description: "The branch on which the build is based."
         type: string
-        required: false
-        default: master
+        required: true
       versionTag:
-        description: "Version to be used as tag for built images"
+        description: "The string to be used for the container image tag."
         type: string
         required: true
-        default: X.Y.Z
       awsRegion:
-        description: "AWS Region to push images to"
+        description: "Override the AWS Region destination for uploaded artifacts. Default to `us-east-1`."
+        default: us-east-1
         type: string
         required: true
-        default: us-east-1
   workflow_dispatch:
     inputs:
       branch:
-        description: "The branch from which images will be built from"
+        description: >-
+          branch: Override the branch on which the build is based.
+          Default to selected reference in the `Use workflow from` drop-down when empty.
         required: false
-        default: master
       versionTag:
-        description: "Version to be used as tag for built images"
+        description: >-
+          versionTag: the string to be used for the container image tag.
         required: true
         default: X.Y.Z
       awsRegion:
-        description: "AWS Region to push images to"
-        required: true
+        description: >-
+          awsRegion: Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
         default: us-east-1
+        type: choice
+        options:
+         - us-east-1
+         - us-west-2
+        required: true
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
@@ -70,14 +76,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.branch }}
+          ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: build-images
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ inputs.awsRegion }}
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
