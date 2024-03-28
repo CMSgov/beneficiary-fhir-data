@@ -37,7 +37,7 @@ of maven arguments.
 -a          Build all. Same as -ijs.  Use before commit!
 -t          Enable unit tests.
 -i          Enable unit and IT tests.
--j          Enable javadoc generation.
+-j          Enable swagger and javadoc generation.
 -J          Builds docker image using jib plugin.
 -s          Enable checkstyle.
 -c          Once to use write-only build cache.  Twice to disable build cache.
@@ -79,6 +79,7 @@ execute() {
 run_tests=false
 run_its=false
 javadoc=false
+apidoc=false
 checkstyle=false
 cache_flag_count=0  # 0=enabled, 1=write-only, 2+=disabled
 prevent_full_cache=false
@@ -102,7 +103,7 @@ while getopts "atijJscmxXp:P:I:T:r:zdDFh-:" option ; do
   a) run_tests=true ; run_its=true ; javadoc=true ; checkstyle=true ; prevent_full_cache=true ;;
   t) run_tests=true ; prevent_full_cache=true ;;
   i) run_tests=true ; run_its=true ; prevent_full_cache=true ;;
-  j) javadoc=true ; prevent_full_cache=true ;;
+  j) javadoc=true ; apidoc=true ; prevent_full_cache=true ;;
   J) build_image=true ;;
   s) checkstyle=true ; prevent_full_cache=true ;;
   c) cache_flag_count=$(($cache_flag_count + 1)) ;;
@@ -139,6 +140,7 @@ args=""
 [[ $run_tests == "false" ]] && args="$args -DskipTests=true"
 [[ $run_its == "false" ]] && args="$args -DskipITs"
 [[ $javadoc == "false" ]] && args="$args -Dmaven.javadoc.skip=true"
+[[ $apidoc == "true" ]] && args="$args -Dapidocgen.skip=false"
 [[ $checkstyle == "false" ]] && args="$args -Dcheckstyle.skip"
 [[ $use_minio == "true" ]] && args="$args -Ds3.local=true"
 [[ $projects != "" ]] && args="$args$projects"
