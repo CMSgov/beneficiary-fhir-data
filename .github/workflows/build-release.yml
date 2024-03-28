@@ -1,212 +1,217 @@
 ---
-name: "Build Release"
-on:
-  workflow_dispatch:
-    inputs:
-      releaseBranch:
-        description: "The branch on which a release is based"
-        required: false
-        default: master
-      releaseVersion:
-        description: "Version to be used as tag and release"
-        required: true
-        default: X.Y.Z
-      developmentVersion:
-        description: 'Post-release Development version. Should be "(releaseVersion + 1)-SNAPSHOT"'
-        required: true
-        default: X.Y.Z-SNAPSHOT
-      awsRegion:
-        description: "AWS Region to upload artifacts to"
-        required: true
-        default: us-east-1
-
-permissions:
-  id-token: write # This is required for requesting the AWS IAM OIDC JWT
-  contents: write # This is required for actions/checkout
-
-env:
-  # AWS Code Artifact Repository
-  CA_REPOSITORY: bfd-mgmt
-  CA_DOMAIN: bfd-mgmt
-  AWS_REGION: ${{ inputs.awsRegion }}
-
-defaults:
-  run:
-    shell: bash
-
-jobs:
-  run-mvn-release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Validate Inputs
-        run: |
-          echo "Validating inputs to ensure they conform to expected formats..."
-          echo "${{ inputs.releaseVersion }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
-          echo "${{ inputs.developmentVersion }}" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT$'
-
-      - name: "Generate an App Token"
-        id: generate_token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
-          private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: run-mvn-release
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Checkout
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ inputs.releaseBranch }}
-          token: ${{ steps.generate_token.outputs.token }}
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: corretto
-
-      - name: Configure the git user
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-
-      - name: Set Authorization Token
-        run: |
-          CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain "$CA_DOMAIN" --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text --region us-east-1)"
-          echo "::add-mask::$CODEARTIFACT_AUTH_TOKEN"
-          echo CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN >> $GITHUB_ENV
-
-      - name: Get Repository Endpoint
-        run: |
-          CA_REPOSITORY_ENDPOINT="$(aws codeartifact get-repository-endpoint --domain "$CA_DOMAIN" --repository "$CA_REPOSITORY" --format maven --query repositoryEndpoint --output text)"
-          echo "::add-mask::$CA_REPOSITORY_ENDPOINT"
-          echo CA_REPOSITORY_ENDPOINT=$CA_REPOSITORY_ENDPOINT >> $GITHUB_ENV
-
-      - name: Get ECR Registry Namespace
-        run: |
-          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
-          echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
-          echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
-
-      - name: Configure additional maven settings.xml
-        run: |-
-          cat <<"EOF" > ~/.m2/settings.xml
-          <settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
-          xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <servers>
-              <server>
-                <username>aws</username>
-                <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
-                <id>${env.CA_DOMAIN}-${env.CA_REPOSITORY}</id>
-              </server>
-              <server>
-                <id>github</id>
-                <username>${env.GITHUB_ACTOR}</username>
-                <password>${env.GITHUB_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
-
-      - name: "Prepare and Perform Release"
-        if: github.event_name == 'workflow_dispatch'
-        run: |-
-          mvn --batch-mode --activate-profiles release \
-              -Dtag="$BFD_RELEASE" \
-              -DreleaseVersion="$BFD_RELEASE" \
-              -DdevelopmentVersion="$BFD_DEV_VERSION" \
-              release:prepare release:perform
-        working-directory: ./apps
-        env:
-          BFD_RELEASE: ${{ inputs.releaseVersion }}
-          BFD_DEV_VERSION: ${{ inputs.developmentVersion }}
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-
-      - name: "Perform Exceptional Rollback"
-        if: failure()
-        run: mvn release:rollback
-        working-directory: ./apps
-
-  build-docker-images:
-    uses: ./.github/workflows/build-docker-images.yml
-    needs: run-mvn-release
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      branch: ${{ inputs.releaseBranch }}
-      versionTag: ${{ inputs.releaseVersion }}
-      awsRegion: ${{ inputs.awsRegion }}
-    secrets: inherit
-
-  create-gh-release:
-    # Naively, only generate GitHub Releases for purported non-release versions
-    if: ${{ !contains(inputs.releaseVersion, '-') }}
-    runs-on: ubuntu-latest
-    needs: build-docker-images
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: create-gh-release
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Pull Release Files
-        run: |
-          readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -r -c '.[]')
-          for asset in "${assets[@]}"
-          do
-            aws codeartifact get-package-version-asset \
-              --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} \
-              --domain "$CA_DOMAIN" \
-              --repository "$CA_REPOSITORY" \
-              --asset "$asset" \
-              --package-version "${{ inputs.releaseVersion }}" \
-              --package "$CA_PACKAGE" \
-              --namespace "$CA_NAMESPACE" \
-              --format maven \
-              --region "$AWS_REGION" \
-              "${asset/$CA_PACKAGE-${{ inputs.releaseVersion }}-/}" 1>/dev/null
-          done
-
-          # rename data dictionary release assets to follow historical naming conventions
-          for item in ./*data-dictionary*
-          do
-            filename=$(basename -- "$item")
-            extension="${filename##*.}"
-            filename="$(echo "${filename%.*}" | sed -E 's/^v([0-9]+.*)$/V\1/')"
-
-            mv "$item" "$filename-${{ inputs.releaseVersion }}.$extension"
-          done
-        env:
-          CA_NAMESPACE: gov.cms.bfd
-          CA_PACKAGE: bfd-server-war
-          CA_DATA_DICTIONARY_ASSETS: |
-            [
-              "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.csv",
-              "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.csv",
-              "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.json",
-              "bfd-server-war-${{ inputs.releaseVersion }}-data-dictionary.xlsx"
-            ]
-
-      - name: Release
-        uses: ncipollo/release-action@v1
-        with:
-          makeLatest: true
-          generateReleaseNotes: true
-          artifactErrorsFailBuild: true
-          tag: "${{ inputs.releaseVersion }}"
-          name: "v${{ inputs.releaseVersion }}"
-          artifacts: "*.csv,*.json,*.xlsx,*.yaml"
+  name: "Build Release"
+  on:
+    workflow_dispatch:
+      inputs:
+        releaseBranch:
+          description: "The branch on which a release is based"
+          required: false
+          default: master
+        releaseVersion:
+          description: "Version to be used as tag and release"
+          required: true
+          default: X.Y.Z
+        developmentVersion:
+          description: 'Post-release Development version. Should be "(releaseVersion + 1)-SNAPSHOT"'
+          required: true
+          default: X.Y.Z-SNAPSHOT
+        awsRegion:
+          description: "AWS Region to upload artifacts to"
+          required: true
+          default: us-east-1
+  
+  permissions:
+    id-token: write # This is required for requesting the AWS IAM OIDC JWT
+    contents: write # This is required for actions/checkout
+  
+  env:
+    # AWS Code Artifact Repository
+    CA_REPOSITORY: bfd-mgmt
+    CA_DOMAIN: bfd-mgmt
+    AWS_REGION: ${{ inputs.awsRegion }}
+  
+  defaults:
+    run:
+      shell: bash
+  
+  jobs:
+    run-mvn-release:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Validate Inputs
+          run: |
+            echo "Validating inputs to ensure they conform to expected formats..."
+            echo "${{ inputs.releaseVersion }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+            echo "${{ inputs.developmentVersion }}" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT$'
+  
+        - name: "Generate an App Token"
+          id: generate_token
+          uses: actions/create-github-app-token@v1
+          with:
+            app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
+            private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
+  
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+            role-session-name: run-mvn-release
+            aws-region: ${{ env.AWS_REGION }}
+  
+        - name: Login to ECR
+          uses: aws-actions/amazon-ecr-login@v2
+  
+        - name: Checkout
+          if: github.event_name == 'workflow_dispatch'
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            ref: ${{ inputs.releaseBranch }}
+            token: ${{ steps.generate_token.outputs.token }}
+  
+        - name: Setup JDK
+          uses: actions/setup-java@v4
+          with:
+            java-version: "21"
+            distribution: corretto
+  
+        - name: Configure the git user
+          run: |
+            git config --global user.email "actions@github.com"
+            git config --global user.name "GitHub Actions"
+  
+        - name: Set Authorization Token
+          run: |
+            CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain "$CA_DOMAIN" --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text --region us-east-1)"
+            echo "::add-mask::$CODEARTIFACT_AUTH_TOKEN"
+            echo CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN >> $GITHUB_ENV
+  
+        - name: Get Repository Endpoint
+          run: |
+            CA_REPOSITORY_ENDPOINT="$(aws codeartifact get-repository-endpoint --domain "$CA_DOMAIN" --repository "$CA_REPOSITORY" --format maven --query repositoryEndpoint --output text)"
+            echo "::add-mask::$CA_REPOSITORY_ENDPOINT"
+            echo CA_REPOSITORY_ENDPOINT=$CA_REPOSITORY_ENDPOINT >> $GITHUB_ENV
+  
+        - name: Get ECR Registry Namespace
+          run: |
+            ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
+            echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
+            echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
+  
+        - name: Configure additional maven settings.xml
+          run: |-
+            cat <<"EOF" > ~/.m2/settings.xml
+            <settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
+            xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <servers>
+                <server>
+                  <username>aws</username>
+                  <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
+                  <id>${env.CA_DOMAIN}-${env.CA_REPOSITORY}</id>
+                </server>
+                <server>
+                  <id>github</id>
+                  <username>${env.GITHUB_ACTOR}</username>
+                  <password>${env.GITHUB_TOKEN}</password>
+                </server>
+              </servers>
+            </settings>
+            EOF
+  
+        - name: "Prepare and Perform Release"
+          if: github.event_name == 'workflow_dispatch'
+          run: |-
+            mvn --batch-mode --activate-profiles release \
+                -Dtag="$BFD_RELEASE" \
+                -DreleaseVersion="$BFD_RELEASE" \
+                -DdevelopmentVersion="$BFD_DEV_VERSION" \
+                release:prepare release:perform
+          working-directory: ./apps
+          env:
+            BFD_RELEASE: ${{ inputs.releaseVersion }}
+            BFD_DEV_VERSION: ${{ inputs.developmentVersion }}
+            GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+  
+        - name: "Perform Exceptional Rollback"
+          if: failure()
+          run: mvn release:rollback
+          working-directory: ./apps
+  
+    build-docker-images:
+      uses: ./.github/workflows/build-docker-images.yml
+      needs: run-mvn-release
+      permissions:
+        contents: read
+        id-token: write
+      with:
+        branch: ${{ inputs.releaseBranch }}
+        versionTag: ${{ inputs.releaseVersion }}
+        awsRegion: ${{ inputs.awsRegion }}
+      secrets: inherit
+  
+    create-gh-release:
+      # Naively, only generate GitHub Releases for purported non-release versions
+      if: ${{ !contains(inputs.releaseVersion, '-') }}
+      runs-on: ubuntu-latest
+      needs: build-docker-images
+      steps:
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+            role-session-name: create-gh-release
+            aws-region: ${{ env.AWS_REGION }}
+  
+        - name: Pull Release Files
+          run: |
+            readarray -t assets < <(echo "$CA_ASSETS" | jq -r -c '.[]')
+            for asset in "${assets[@]}"
+            do
+              aws codeartifact get-package-version-asset \
+                --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} \
+                --domain "$CA_DOMAIN" \
+                --repository "$CA_REPOSITORY" \
+                --asset "$asset" \
+                --package-version "${{ inputs.releaseVersion }}" \
+                --package "$CA_PACKAGE" \
+                --namespace "$CA_NAMESPACE" \
+                --format maven \
+                --region "$AWS_REGION" \
+                "${asset/$CA_PACKAGE-${{ inputs.releaseVersion }}-/}" 1>/dev/null
+            done
+  
+            # rename data dictionary release assets to follow historical naming conventions
+            for item in ./*data-dictionary*
+            do
+              filename=$(basename -- "$item")
+              extension="${filename##*.}"
+              filename="$(echo "${filename%.*}" | sed -E 's/^v([0-9]+.*)$/V\1/')"
+  
+              mv "$item" "$filename-${{ inputs.releaseVersion }}.$extension"
+            done
+  
+            mv ./openapi.yaml openapi-${{ inputs.releaseVersion }}.yaml
+  
+          env:
+            CA_NAMESPACE: gov.cms.bfd
+            CA_PACKAGE: bfd-server-war
+            CA_ASSETS: |
+              [
+                "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.csv",
+                "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.csv",
+                "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.json",
+                "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.json",
+                "bfd-server-war-${{ inputs.releaseVersion }}-data-dictionary.xlsx",
+                "bfd-server-war-${{ inputs.releaseVersion }}-openapi.yaml"
+              ]
+  
+        - name: Release
+          uses: ncipollo/release-action@v1
+          with:
+            makeLatest: true
+            generateReleaseNotes: true
+            artifactErrorsFailBuild: true
+            tag: "${{ inputs.releaseVersion }}"
+            name: "v${{ inputs.releaseVersion }}"
+            artifacts: "*.csv,*.json,*.xlsx,*.yaml"
+  
