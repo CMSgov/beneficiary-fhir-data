@@ -188,7 +188,7 @@ jobs:
             mv "$item" "$filename-${{ inputs.releaseVersion }}.$extension"
           done
 
-          mv "$CA_PACKAGE-${{ inputs.releaseVersion }}-openapi.yaml" openapi-${{ inputs.releaseVersion }}.yaml
+          mv ./openapi.yaml openapi-${{ inputs.releaseVersion }}.yaml
 
         env:
           CA_NAMESPACE: gov.cms.bfd
