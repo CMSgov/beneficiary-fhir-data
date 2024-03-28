@@ -202,7 +202,7 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          makeLatest: true
+          makeLatest: false
           generateReleaseNotes: true
           artifactErrorsFailBuild: true
           tag: "${{ inputs.releaseVersion }}"
