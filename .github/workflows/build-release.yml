@@ -189,9 +189,9 @@
   
               mv "$item" "$filename-${{ inputs.releaseVersion }}.$extension"
             done
-  
+
             mv ./openapi.yaml openapi-${{ inputs.releaseVersion }}.yaml
-  
+
           env:
             CA_NAMESPACE: gov.cms.bfd
             CA_PACKAGE: bfd-server-war
