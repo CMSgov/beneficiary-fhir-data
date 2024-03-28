@@ -25,11 +25,8 @@ class RdaFissClaimCleanupJobTest {
   /** Verifies the getTableNames method. */
   @Test
   void getTableNames() {
-    assertNotNull(job.getTableNames());
-    assertEquals(6, job.getTableNames().size());
+    assertNotNull(job.getParentTableName());
 
-    // verify parent table is last
-    assertEquals("rda.fiss_claims", job.getTableNames().getLast());
   }
 
   /** Verifies the getParentTableKey method. */

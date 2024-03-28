@@ -11,15 +11,8 @@ public class RdaMcsClaimCleanupJob extends AbstractCleanupJob {
   /** logger to use. */
   static final Logger LOGGER = LoggerFactory.getLogger(RdaMcsClaimCleanupJob.class);
 
-  /** List of table names for use in native queries. Parent claims table must be last. */
-  private static final List<String> TABLE_NAMES =
-      List.of(
-          "rda.mcs_adjustments",
-          "rda.mcs_audits",
-          "rda.mcs_details",
-          "rda.mcs_diagnosis_codes",
-          "rda.mcs_locations",
-          "rda.mcs_claims");
+  /** Parent table name of the query */
+  private static final String PARENT_TABLE_NAME = "rda.mcs_claims";
 
   /** Key column name for the parent table for use in native queries. */
   private static final String KEY_COLUMN = "idr_clm_hd_icn";
@@ -42,8 +35,8 @@ public class RdaMcsClaimCleanupJob extends AbstractCleanupJob {
 
   /** {@inheritDoc} */
   @Override
-  List<String> getTableNames() {
-    return TABLE_NAMES;
+  String getParentTableName() {
+    return PARENT_TABLE_NAME;
   }
 
   /** {@inheritDoc} */

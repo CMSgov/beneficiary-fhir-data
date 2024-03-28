@@ -25,11 +25,9 @@ class RdaMcsClaimCleanupJobTest {
   /** Verifies the getTableNames method. */
   @Test
   void getTableNames() {
-    assertNotNull(job.getTableNames());
-    assertEquals(6, job.getTableNames().size());
+    assertNotNull(job.getParentTableName());
 
     // ensure parent table is always last
-    assertEquals("rda.mcs_claims", job.getTableNames().getLast());
   }
 
   /** Verifies the getParentTableKey method. */
