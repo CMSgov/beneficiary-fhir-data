@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Objects;
 import javax.persistence.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -123,25 +123,19 @@ public abstract class AbstractCleanupJob implements CleanupJob {
   /**
    * Build a list of native sql delete queries to remove claims.
    *
-   * @param cutoffDate the Instant used to identify queries for deletion.
    * @param tm the TransactionManager to use to create queries.
    * @return the list of queries.
    */
   private Query buildDeleteQuery(TransactionManager tm) {
-    AtomicReference<Query> atomicQuery = new AtomicReference<>();
     String parentTableName = getParentTableName();
-    tm.executeProcedure(
-        entityManager -> {
-          Map<String, String> params =
-              Map.of(
-                  "parentTableName", parentTableName,
-                  "parentTableKey", getParentTableKey(),
-                  "interval", String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
-                  "limit", Integer.toString(cleanupTransactionSize));
-          StringSubstitutor strSub = new StringSubstitutor(params);
-          String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
-          atomicQuery.set(entityManager.createNativeQuery(queryStr));
-        });
-    return atomicQuery.get();
+    Map<String, String> params =
+        Map.of(
+            "parentTableName", parentTableName,
+            "parentTableKey", getParentTableKey(),
+            "interval", String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
+            "limit", Integer.toString(cleanupTransactionSize));
+    StringSubstitutor strSub = new StringSubstitutor(params);
+    String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
+    return Objects.requireNonNull(tm.getEntityManager()).createNativeQuery(queryStr);
   }
 }
