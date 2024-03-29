@@ -10,7 +10,7 @@ public class RdaMcsClaimCleanupJob extends AbstractCleanupJob {
   /** logger to use. */
   static final Logger LOGGER = LoggerFactory.getLogger(RdaMcsClaimCleanupJob.class);
 
-  /** Parent table name of the query */
+  /** Parent table name of the query. */
   private static final String PARENT_TABLE_NAME = "rda.mcs_claims";
 
   /** Key column name for the parent table for use in native queries. */

@@ -24,12 +24,12 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
   /** template for delete query. */
   private static final String DELETE_QUERY_TEMPLATE =
-      "delete from ${parentTableName} t where t.${parentTableKey} in ("
+      "  delete from ${parentTableName} t where t.${parentTableKey} in ( "
           + "  select ${parentTableKey} "
           + "  from ${parentTableName} "
-          + "  where last_updated < '${cutoffDate}' "
-          + "  limit ${limit}"
-          + ")";
+          + "  where last_updated between "
+          + "  (select min(last_updated) from ${parentTableName}) and (Now() -Interval '${interval} days') "
+          + "  limit ${limit})";
 
   /** TransactionManager to use for db operations. */
   private final TransactionManager transactionManager;
@@ -77,8 +77,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
       final long startMillis = System.currentTimeMillis();
 
       try {
-        Instant cutoffDate = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
-        Query query = buildDeleteQueries(cutoffDate, transactionManager);
+        Query query = buildDeleteQueries(transactionManager);
         var numberOfTransactions = Math.floorDiv(cleanupRunSize, cleanupTransactionSize);
 
         for (int i = 0; i < numberOfTransactions; i++) {
@@ -130,7 +129,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
    * @param tm the TransactionManager to use to create queries.
    * @return the list of queries.
    */
-  private Query buildDeleteQueries(Instant cutoffDate, TransactionManager tm) {
+  private Query buildDeleteQueries(TransactionManager tm) {
     AtomicReference<Query> atomicQuery = new AtomicReference<>();
     String parentTableName = getParentTableName();
     tm.executeProcedure(
@@ -139,7 +138,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
               Map.of(
                   "parentTableName", parentTableName,
                   "parentTableKey", getParentTableKey(),
-                  "cutoffDate", cutoffDate.toString(),
+                  "interval", String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
                   "limit", Integer.toString(cleanupTransactionSize));
           StringSubstitutor strSub = new StringSubstitutor(params);
           String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);

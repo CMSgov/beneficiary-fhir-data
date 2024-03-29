@@ -10,7 +10,7 @@ public class RdaFissClaimCleanupJob extends AbstractCleanupJob {
   /** logger to use. */
   static final Logger LOGGER = LoggerFactory.getLogger(RdaFissClaimCleanupJob.class);
 
-  /** Parent table name of the query */
+  /** Parent table name of the query. */
   private static final String PARENT_TABLE_NAME = "rda.fiss_claims";
 
   /** Key column name for the parent table for use in native queries. */

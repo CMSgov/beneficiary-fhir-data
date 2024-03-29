@@ -47,3 +47,53 @@ ALTER TABLE rda.fiss_revenue_lines
             REFERENCES rda.fiss_claims
                 (claim_id)
             ON DELETE CASCADE;
+
+ALTER TABLE rda.mcs_adjustments
+DROP CONSTRAINT IF EXISTS mcs_adjustments_parent;
+
+ALTER TABLE rda.mcs_adjustments
+    ADD CONSTRAINT mcs_adjustments_parent
+        FOREIGN KEY (idr_clm_hd_icn)
+            REFERENCES rda.mcs_claims
+                (idr_clm_hd_icn)
+            ON DELETE CASCADE;
+
+ALTER TABLE rda.mcs_audits
+DROP CONSTRAINT IF EXISTS mcs_audits_parent;
+
+ALTER TABLE rda.mcs_audits
+    ADD CONSTRAINT mcs_audits_parent
+        FOREIGN KEY (idr_clm_hd_icn)
+            REFERENCES rda.mcs_claims
+                (idr_clm_hd_icn)
+            ON DELETE CASCADE;
+
+ALTER TABLE rda.mcs_details
+DROP CONSTRAINT IF EXISTS mcs_details_parent;
+
+ALTER TABLE rda.mcs_details
+    ADD CONSTRAINT mcs_details_parent
+        FOREIGN KEY (idr_clm_hd_icn)
+            REFERENCES rda.mcs_claims
+                (idr_clm_hd_icn)
+            ON DELETE CASCADE;
+
+ALTER TABLE rda.mcs_diagnosis_codes
+DROP CONSTRAINT IF EXISTS mcs_diagnosis_codes_parent;
+
+ALTER TABLE rda.mcs_diagnosis_codes
+    ADD CONSTRAINT mcs_diagnosis_codes_parent
+        FOREIGN KEY (idr_clm_hd_icn)
+            REFERENCES rda.mcs_claims
+                (idr_clm_hd_icn)
+            ON DELETE CASCADE;
+
+ALTER TABLE rda.mcs_locations
+DROP CONSTRAINT IF EXISTS mcs_locations_parent;
+
+ALTER TABLE rda.mcs_locations
+    ADD CONSTRAINT mcs_locations_parent
+        FOREIGN KEY (idr_clm_hd_icn)
+            REFERENCES rda.mcs_claims
+                (idr_clm_hd_icn)
+            ON DELETE CASCADE;
