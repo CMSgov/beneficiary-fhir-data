@@ -22,7 +22,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
   /** template for delete query. */
   private static final String DELETE_QUERY_TEMPLATE =
-      "  delete from ${parentTableName} t where t.${parentTableKey} in ( "
+      "delete from ${parentTableName} t where t.${parentTableKey} in ( "
           + "  select ${parentTableKey} "
           + "  from ${parentTableName} "
           + "  where last_updated between "
@@ -75,7 +75,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
       final long startMillis = System.currentTimeMillis();
 
       try {
-        Query query = buildDeleteQueries(transactionManager);
+        Query query = buildDeleteQuery(transactionManager);
         var numberOfTransactions = Math.floorDiv(cleanupRunSize, cleanupTransactionSize);
 
         for (int i = 0; i < numberOfTransactions; i++) {
@@ -127,7 +127,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
    * @param tm the TransactionManager to use to create queries.
    * @return the list of queries.
    */
-  private Query buildDeleteQueries(TransactionManager tm) {
+  private Query buildDeleteQuery(TransactionManager tm) {
     AtomicReference<Query> atomicQuery = new AtomicReference<>();
     String parentTableName = getParentTableName();
     tm.executeProcedure(
