@@ -14,14 +14,10 @@ on:
         description: "The string to be used for the container image tag."
         type: string
         required: true
-        default: X.Y.Z
       awsRegion:
         description: "Override the AWS Region destination for uploaded artifacts. Default to `us-east-1`."
         default: us-east-1
-        type: choice
-        options:
-         - us-east-1
-         - us-west-2
+        type: string
         required: true
   workflow_dispatch:
     inputs:
