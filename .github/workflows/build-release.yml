@@ -188,12 +188,12 @@ jobs:
       id-token: write
     with:
       branch: ${{ inputs.releaseBranch || github.ref_name }}
-      versionTag: ${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}
+      versionTag: ${{ needs.run-mvn-release.outputs.BFD_RELEASE }}
       awsRegion: ${{ inputs.awsRegion }}
     secrets: inherit
 
   create-gh-release:
-    if: ${{ !contains(needs.bfd-version-strings.outputs.BFD_RELEASE, '-') || inputs.forceRelease }}
+    if: ${{ !contains(run-mvn-release.outputs.BFD_RELEASE, '-') || inputs.forceRelease }}
     runs-on: ubuntu-latest
     needs: build-docker-images
     steps:
@@ -239,21 +239,21 @@ jobs:
           CA_PACKAGE: bfd-server-war
           CA_ASSETS: |
             [
-              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-v1-data-dictionary.csv",
-              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-v2-data-dictionary.csv",
-              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-v2-data-dictionary.json",
-              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-data-dictionary.xlsx",
-              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-openapi.yaml"
+              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-v1-data-dictionary.csv",
+              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-v2-data-dictionary.csv",
+              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-v1-data-dictionary.json",
+              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-v2-data-dictionary.json",
+              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-data-dictionary.xlsx",
+              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-openapi.yaml"
             ]
 
       - name: Release
         uses: ncipollo/release-action@v1
         with:
           # NOTE: Prevent automatic promotion of pre-release objects to latest
-          makeLatest: "${{ !contains(needs.bfd-version-strings.outputs.BFD_RELEASE, '-') }}"
+          makeLatest: "${{ !contains(run-mvn-release.outputs.BFD_RELEASE, '-') }}"
           generateReleaseNotes: true
           artifactErrorsFailBuild: true
-          tag: ${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}
-          name: "v${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}"
+          tag: ${{ run-mvn-release.outputs.BFD_RELEASE }}
+          name: "v${{ run-mvn-release.outputs.BFD_RELEASE }}"
           artifacts: "*.csv,*.json,*.xlsx,*.yaml"
