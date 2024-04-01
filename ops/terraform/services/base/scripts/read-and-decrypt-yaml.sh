@@ -132,8 +132,8 @@ if test -f "${YAML_FILE}"; then
       | (
         if .[3] == "nonsensitive" then
           (["/" + .[0], .[1], .[2], $value.sensitivity] + .[4:length]) | join("/")
-        elif .[2] == "pipeline" and (.[3] == "shared" or .[3] == "rda" or .[3] == "ccw") then
-          (["/" + .[0], .[1], .[2], .[3], $value.sensitivity] + .[4:length]) | join("/")
+        elif .[2] == "pipeline" then
+          (["/" + .[0], .[1], .[2], $value.sensitivity, .[3]] + .[4:length]) | join("/")
         else
           (["/" + .[0], .[1], .[2], $value.sensitivity] + .[3:length]) | join("/")
         end
