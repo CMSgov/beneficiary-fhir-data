@@ -109,7 +109,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: run-mvn-release
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ inputs.awsRegion }}
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
@@ -189,7 +189,7 @@ jobs:
     with:
       branch: ${{ inputs.releaseBranch || github.ref_name }}
       versionTag: ${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}
-      awsRegion: ${{ env.AWS_REGION }}
+      awsRegion: ${{ inputs.awsRegion }}
     secrets: inherit
 
   create-gh-release:
@@ -202,7 +202,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: create-gh-release
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ inputs.awsRegion }}
 
       - name: Pull Release Files
         run: |

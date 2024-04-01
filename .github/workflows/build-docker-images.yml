@@ -87,7 +87,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: build-images
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ inputs.awsRegion }}
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
