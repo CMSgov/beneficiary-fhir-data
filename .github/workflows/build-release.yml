@@ -193,7 +193,7 @@ jobs:
     secrets: inherit
 
   create-gh-release:
-    if: ${{ !contains(run-mvn-release.outputs.BFD_RELEASE, '-') || inputs.forceRelease }}
+    if: ${{ !contains(needs.run-mvn-release.outputs.BFD_RELEASE, '-') || inputs.forceRelease }}
     runs-on: ubuntu-latest
     needs: build-docker-images
     steps:
@@ -239,21 +239,21 @@ jobs:
           CA_PACKAGE: bfd-server-war
           CA_ASSETS: |
             [
-              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-v1-data-dictionary.csv",
-              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-v2-data-dictionary.csv",
-              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-v2-data-dictionary.json",
-              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-data-dictionary.xlsx",
-              "bfd-server-war-${{ run-mvn-release.outputs.BFD_RELEASE }}-openapi.yaml"
+              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-v1-data-dictionary.csv",
+              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-v2-data-dictionary.csv",
+              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-v1-data-dictionary.json",
+              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-v2-data-dictionary.json",
+              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-data-dictionary.xlsx",
+              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-openapi.yaml"
             ]
 
       - name: Release
         uses: ncipollo/release-action@v1
         with:
           # NOTE: Prevent automatic promotion of pre-release objects to latest
-          makeLatest: "${{ !contains(run-mvn-release.outputs.BFD_RELEASE, '-') }}"
+          makeLatest: "${{ !contains(needs.run-mvn-release.outputs.BFD_RELEASE, '-') }}"
           generateReleaseNotes: true
           artifactErrorsFailBuild: true
-          tag: ${{ run-mvn-release.outputs.BFD_RELEASE }}
-          name: "v${{ run-mvn-release.outputs.BFD_RELEASE }}"
+          tag: ${{ needs.run-mvn-release.outputs.BFD_RELEASE }}
+          name: "v${{ needs.run-mvn-release.outputs.BFD_RELEASE }}"
           artifacts: "*.csv,*.json,*.xlsx,*.yaml"
