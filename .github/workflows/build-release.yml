@@ -251,7 +251,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           # NOTE: Prevent automatic promotion of pre-release objects to latest
-          makeLatest: "${{ !contains(needs.bfd-version-strings.outputs.BFD_RELEASE, '-' }}"
+          makeLatest: "${{ !contains(needs.bfd-version-strings.outputs.BFD_RELEASE, '-') }}"
           generateReleaseNotes: true
           artifactErrorsFailBuild: true
           tag: ${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}
