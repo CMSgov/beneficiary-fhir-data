@@ -59,6 +59,8 @@ defaults:
 jobs:
   run-mvn-release:
     runs-on: ubuntu-latest
+    outputs:
+      BFD_RELEASE: ${{ steps.bfd-version-strings.outputs.BFD_RELEASE }}
     steps:
       - name: "Generate an App Token"
         id: generate_token
@@ -81,6 +83,7 @@ jobs:
           sudo chmod +x /usr/bin/yq
 
       - name: Set and Validate Version Strings
+        id: bfd-version-strings
         run: |
           # Set default values for bfd-parent version based on existing version string in apps/pom.xml
           BFD_PARENT_POM_VERSION="$(yq --output-format=yaml .project.version apps/pom.xml)"
@@ -95,10 +98,11 @@ jobs:
 
           # Validate and set BFD_RELASE and BFD_DEV_VERSION
           echo "$BFD_RELEASE" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
-          echo BFD_RELEASE="${BFD_RELEASE}" >> $GITHUB_ENV
+          echo BFD_RELEASE="${BFD_RELEASE}" >> "$GITHUB_ENV"
+          echo BFD_RELEASE="${BFD_RELEASE}" >> "$GITHUB_OUTPUT"
 
           echo "$BFD_DEV_VERSION" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT$'
-          echo BFD_DEV_VERSION="${BFD_DEV_VERSION_OVERRIDE:-$BFD_DEV_VERSION_DEFAULT}" >> $GITHUB_ENV
+          echo BFD_DEV_VERSION="${BFD_DEV_VERSION_OVERRIDE:-$BFD_DEV_VERSION_DEFAULT}" >> "$GITHUB_ENV"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -184,7 +188,7 @@ jobs:
       id-token: write
     with:
       branch: ${{ inputs.releaseBranch || github.ref_name }}
-      versionTag: ${{ env.BFD_RELEASE }}
+      versionTag: ${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}
       awsRegion: ${{ env.AWS_REGION }}
     secrets: inherit
 
@@ -235,12 +239,12 @@ jobs:
           CA_PACKAGE: bfd-server-war
           CA_ASSETS: |
             [
-              "bfd-server-war-${{ env.BFD_RELEASE }}-v1-data-dictionary.csv",
-              "bfd-server-war-${{ env.BFD_RELEASE }}-v2-data-dictionary.csv",
-              "bfd-server-war-${{ env.BFD_RELEASE }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ env.BFD_RELEASE }}-v2-data-dictionary.json",
-              "bfd-server-war-${{ env.BFD_RELEASE }}-data-dictionary.xlsx",
-              "bfd-server-war-${{ env.BFD_RELEASE }}-openapi.yaml"
+              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-v1-data-dictionary.csv",
+              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-v2-data-dictionary.csv",
+              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-v1-data-dictionary.json",
+              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-v2-data-dictionary.json",
+              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-data-dictionary.xlsx",
+              "bfd-server-war-${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}-openapi.yaml"
             ]
 
       - name: Release
@@ -250,6 +254,6 @@ jobs:
           makeLatest: "${{ !contains(env.BFD_RELEASE, '-' }}"
           generateReleaseNotes: true
           artifactErrorsFailBuild: true
-          tag: "${{ env.BFD_RELEASE }}"
-          name: "v${{ env.BFD_RELEASE}}"
+          tag: ${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}
+          name: "v${{ needs.bfd-version-strings.outputs.BFD_RELEASE }}"
           artifacts: "*.csv,*.json,*.xlsx,*.yaml"
