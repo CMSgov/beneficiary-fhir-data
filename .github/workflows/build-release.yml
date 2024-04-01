@@ -164,7 +164,7 @@ jobs:
 
       - name: Pull Release Files
         run: |
-          readarray -t assets < <(echo "$CA_DATA_DICTIONARY_ASSETS" | jq -r -c '.[]')
+          readarray -t assets < <(echo "$CA_ASSETS" | jq -r -c '.[]')
           for asset in "${assets[@]}"
           do
             aws codeartifact get-package-version-asset \
@@ -189,16 +189,20 @@ jobs:
 
             mv "$item" "$filename-${{ inputs.releaseVersion }}.$extension"
           done
+
+          mv ./openapi.yaml openapi-${{ inputs.releaseVersion }}.yaml
+
         env:
           CA_NAMESPACE: gov.cms.bfd
           CA_PACKAGE: bfd-server-war
-          CA_DATA_DICTIONARY_ASSETS: |
+          CA_ASSETS: |
             [
               "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.csv",
               "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.csv",
               "bfd-server-war-${{ inputs.releaseVersion }}-v1-data-dictionary.json",
               "bfd-server-war-${{ inputs.releaseVersion }}-v2-data-dictionary.json",
-              "bfd-server-war-${{ inputs.releaseVersion }}-data-dictionary.xlsx"
+              "bfd-server-war-${{ inputs.releaseVersion }}-data-dictionary.xlsx",
+              "bfd-server-war-${{ inputs.releaseVersion }}-openapi.yaml"
             ]
 
       - name: Release
@@ -209,4 +213,4 @@ jobs:
           artifactErrorsFailBuild: true
           tag: "${{ inputs.releaseVersion }}"
           name: "v${{ inputs.releaseVersion }}"
-          artifacts: "*.csv,*.json,*.xlsx"
+          artifacts: "*.csv,*.json,*.xlsx,*.yaml"
