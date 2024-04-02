@@ -195,7 +195,7 @@ jobs:
   create-gh-release:
     if: ${{ !contains(needs.run-mvn-release.outputs.BFD_RELEASE, '-') || inputs.forceRelease }}
     runs-on: ubuntu-latest
-    needs: build-docker-images
+    needs: [run-mvn-release, build-docker-images]
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
