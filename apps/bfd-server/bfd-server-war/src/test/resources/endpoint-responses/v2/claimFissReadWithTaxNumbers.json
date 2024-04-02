@@ -116,6 +116,14 @@
       }
     ]
   },
+  "subType":{
+    "coding": [
+      {
+        "system": "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+        "code": "3"
+      }
+    ]
+  },
   "use": "claim",
   "patient": {
     "reference": "#patient"
@@ -417,6 +425,23 @@
       "servicedDate": "1980-12-05",
       "quantity": {
         "value": 5
+      }
+    },
+    {
+      "sequence": 2,
+      "productOrService": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/ndc",
+            "code": "00777310502"
+          }
+        ]
+      },
+      "quantity": {
+        "unit" : "ML",
+        "value" : 1,
+        "system" : "https://resdac.org/cms-data/variables/ndc-unit-measure-code",
+        "code" : "ML"
       }
     }
   ],

@@ -14,12 +14,14 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.RecordSource;
+import gov.cms.mpsm.rda.v1.fiss.FissAdmTypeCode;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
+import gov.cms.mpsm.rda.v1.fiss.FissNdcQtyQual;
 import gov.cms.mpsm.rda.v1.fiss.FissNonBillRevCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
@@ -277,6 +279,9 @@ public class FissTransformerIT {
                     .setNonBillRevCodeEnum(FissNonBillRevCode.NON_BILL_ESRD)
                     .setServDtCymd("1970-01-01")
                     .setServDtCymdText("1970-01-01")
+                    .setNdc("00777310502")
+                    .setNdcQty("1.5")
+                    .setNdcQtyQualEnum(FissNdcQtyQual.NDC_QTY_QUAL_ML)
                     .build())
             .build();
     FissClaimChange expectedClaimChange = createFissClaimChange(expectedClaim);
@@ -530,6 +535,18 @@ public class FissTransformerIT {
     /** Hardcoded Received Date. */
     private static final String HARDCODED_RECEIVED_DATE_CYMD = "1970-01-01";
 
+    /** Hardcoded Claim Inpatient Admission Type Code. */
+    private static final String HARDCODED_CLM_IP_ADMSN_TYPE_CD = "2";
+
+    /** Hardcoded NDC. */
+    private static final String NDC = "00777310502";
+
+    /** Hardcoded NDC-QTY. */
+    public static final String NDC_QTY = "1.5";
+
+    /** Hardcoded NDC-QTY-QUAL. */
+    public static final FissNdcQtyQual NDC_QTY_QUAL = FissNdcQtyQual.NDC_QTY_QUAL_ML;
+
     /** Fiss Sample ID. */
     private static final int FISS_SAMPLE_ID = 0;
 
@@ -555,6 +572,7 @@ public class FissTransformerIT {
           .setFedTaxNb(HARDCODED_FED_TAX_NUMBER)
           .setIntermediaryNb(HARDCODED_INTERMEDIARY_NB)
           .setRecdDtCymd(HARDCODED_RECEIVED_DATE_CYMD)
+          .setAdmTypCdEnum(FissAdmTypeCode.ADM_TYPE_URGENT)
           .addFissPayers(
               FissPayer.newBuilder()
                   .setBeneZPayer(
@@ -598,6 +616,9 @@ public class FissTransformerIT {
                   .setNonBillRevCodeEnum(FissNonBillRevCode.NON_BILL_ESRD)
                   .setServDtCymd("1970-01-01")
                   .setServDtCymdText("1970-01-01")
+                  .setNdc(NDC)
+                  .setNdcQty(NDC_QTY)
+                  .setNdcQtyQualEnum(NDC_QTY_QUAL)
                   .build());
     }
 
@@ -657,7 +678,8 @@ public class FissTransformerIT {
           Map.entry("CLM_POA_IND_SW1", String.valueOf(CLM_POA_IND_SW1)),
           Map.entry("ICD_PRCDR_CD1", ICD_PRCDR_CD1),
           Map.entry("PRCDR_DT1", PRCDR_DT1),
-          Map.entry("CLM_LINE_NUM", CLM_LINE_NUM));
+          Map.entry("CLM_LINE_NUM", CLM_LINE_NUM),
+          Map.entry("CLM_IP_ADMSN_TYPE_CD", HARDCODED_CLM_IP_ADMSN_TYPE_CD));
     }
 
     /**

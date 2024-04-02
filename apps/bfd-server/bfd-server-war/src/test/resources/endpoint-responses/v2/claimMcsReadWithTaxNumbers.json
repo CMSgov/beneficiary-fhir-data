@@ -191,6 +191,18 @@
       "servicedPeriod": {
         "end": "1970-07-30"
       }
+    },
+    {
+      "productOrService" : {
+        "coding" : [ {
+          "code" : "00777310502",
+          "system" : "http://hl7.org/fhir/sid/ndc"
+        } ]
+      },
+      "quantity" : {
+        "value" : 1
+      },
+      "sequence" : 3
     }
   ],
   "total": {

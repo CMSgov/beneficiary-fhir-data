@@ -131,6 +131,12 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setProcedure(getProcedure(claimGroup, isIcd9));
     claim.setInsurance(getInsurance(claimGroup));
     claim.setItem(getClaimItems(claimGroup));
+    if (Strings.isNotBlank(claimGroup.getAdmTypCd())) {
+      claim.setSubType(
+          createCodeableConcept(
+              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD),
+              claimGroup.getAdmTypCd()));
+    }
 
     claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
     claim.setCreated(new Date());
@@ -394,7 +400,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
               }
 
               if (Strings.isNotBlank(revenueLine.getHcpcCd())
-                  || Strings.isNotBlank(revenueLine.getApcHcpcsApc())) {
+                  || Strings.isNotBlank(revenueLine.getApcHcpcsApc())
+                  || Strings.isNotBlank(revenueLine.getNdc())) {
                 CodeableConcept productOrService = new CodeableConcept();
 
                 if (Strings.isNotBlank(revenueLine.getHcpcCd())) {
@@ -416,6 +423,12 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                               null)));
                 }
 
+                if (Strings.isNotBlank(revenueLine.getNdc())) {
+                  productOrService.setCoding(
+                      List.of(
+                          new Coding(TransformerConstants.CODING_NDC, revenueLine.getNdc(), null)));
+                }
+
                 itemComponent.setProductOrService(productOrService);
               }
 
@@ -430,6 +443,17 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier2(), "2"));
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier3(), "3"));
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier4(), "4"));
+
+              if (Strings.isNotBlank(revenueLine.getNdcQty())
+                  && Strings.isNotBlank(revenueLine.getNdcQtyQual())) {
+                Quantity quantity = new Quantity();
+                quantity.setValue((long) Double.parseDouble(revenueLine.getNdcQty()));
+                quantity.setUnit(revenueLine.getNdcQtyQual());
+                quantity.setSystem(TransformerConstants.RESDAC_NDC_UNIT_MEASURE_CODE_SYSTEM);
+                quantity.setCode(revenueLine.getNdcQtyQual());
+
+                itemComponent.setQuantity(quantity);
+              }
 
               return itemComponent;
             })

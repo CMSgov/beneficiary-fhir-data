@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.PositiveIntType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
@@ -249,6 +250,17 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
                           item.setDiagnosisSequence(
                               List.of(new PositiveIntType(dxCode.getRdaPosition()))));
                 }
+              } else if (Strings.isNotBlank(detail.getIdrDtlNdc())
+                  && Strings.isNotBlank(detail.getIdrDtlNdcUnitCount())) {
+                item =
+                    new Claim.ItemComponent()
+                        .setSequence(detail.getIdrDtlNumber())
+                        .setProductOrService(
+                            createCodeableConcept(
+                                TransformerConstants.CODING_NDC, detail.getIdrDtlNdc()))
+                        .setQuantity(
+                            new Quantity(
+                                (long) Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
               } else {
                 item = null;
               }
