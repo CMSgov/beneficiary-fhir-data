@@ -140,6 +140,8 @@ public class RandomMcsClaimGeneratorTest {
     "idrDtlAmbDropoffCity": "ds",
     "idrDtlAmbDropoffState": "01",
     "idrDtlAmbDropoffZipcode": "88jcc14",
+    "idrDtlNdc": "hbqxc3p79vg4bfjkqsr5rgjv7pcvgjqr1zp9pqgcr",
+    "idrDtlNdcUnitCount": "rp34mptht4wr",
     "idrDtlNumber": 1
   }, {
     "idrDtlFromDate": "2021-04-12",
@@ -179,6 +181,8 @@ public class RandomMcsClaimGeneratorTest {
     "idrDtlAmbDropoffCity": "9hrhpnjnw8tq3c0m7jt4",
     "idrDtlAmbDropoffState": "hj",
     "idrDtlAmbDropoffZipcode": "r",
+    "idrDtlNdc": "6dpzf1d5bmmgrdkzvph0r0kxqzxr",
+    "idrDtlNdcUnitCount": "nnm1p1",
     "idrDtlNumber": 2
   }, {
     "idrDtlFromDate": "2021-03-29",
@@ -218,6 +222,8 @@ public class RandomMcsClaimGeneratorTest {
     "idrDtlAmbDropoffCity": "k435qcfd53whjf5txf",
     "idrDtlAmbDropoffState": "gs",
     "idrDtlAmbDropoffZipcode": "qqwq",
+    "idrDtlNdc": "dmt6kw5bj7qsnzshvq1c91vv33fh7km81",
+    "idrDtlNdcUnitCount": "7",
     "idrDtlNumber": 3
   }],
   "idrClaimTypeUnrecognized": "h",

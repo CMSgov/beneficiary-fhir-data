@@ -467,6 +467,10 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator<McsCla
                   optional(
                       "idrDtlAmbDropoffZipcode",
                       (() -> detail.setIdrDtlAmbDropoffZipcode(randomAlphaNumeric(1, 9))));
+                  optional("idrDtlNdc", (() -> detail.setIdrDtlNdc(randomAlphaNumeric(1, 48))));
+                  optional(
+                      "idrDtlNdcUnitCount",
+                      (() -> detail.setIdrDtlNdcUnitCount(randomAlphaNumeric(1, 15))));
                 });
 
             claim.addMcsDetails(detail.build());

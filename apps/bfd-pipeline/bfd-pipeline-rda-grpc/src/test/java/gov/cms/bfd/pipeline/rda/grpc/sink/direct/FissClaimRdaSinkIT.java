@@ -19,6 +19,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.fiss.FissAdmTypeCode;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
@@ -67,6 +68,7 @@ public class FissClaimRdaSinkIT {
           claim.setCurrLoc2("1A");
           claim.setPracLocCity("city name can be very long indeed");
           claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
+          claim.setAdmTypCd("1");
 
           final RdaFissProcCode procCode0 = new RdaFissProcCode();
           procCode0.setClaimId(claim.getClaimId());
@@ -112,6 +114,7 @@ public class FissClaimRdaSinkIT {
                   .addFissProcCodes(0, procCodeMessage)
                   .addFissDiagCodes(0, diagCodeMessage)
                   .setMbi(claim.getMbi())
+                  .setAdmTypCdEnum(FissAdmTypeCode.ADM_TYPE_EMERGENCY)
                   .build();
 
           final FissClaimChange message =
@@ -149,6 +152,7 @@ public class FissClaimRdaSinkIT {
           assertEquals(expectedMbiHash, resultClaim.getMbiHash());
           assertEquals(claim.getProcCodes().size(), resultClaim.getProcCodes().size());
           assertEquals(claim.getDiagCodes().size(), resultClaim.getDiagCodes().size());
+          assertEquals(claim.getAdmTypCd(), resultClaim.getAdmTypCd());
 
           assertEquals(
               Optional.of(claim.getSequenceNumber()), sink.readMaxExistingSequenceNumber());

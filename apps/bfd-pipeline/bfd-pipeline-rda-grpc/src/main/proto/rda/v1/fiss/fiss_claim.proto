@@ -25,6 +25,7 @@ import "rda/v1/fiss/fiss_repository_indicator.proto";
 import "rda/v1/fiss/fiss_source_of_admission.proto";
 import "rda/v1/fiss/fiss_revenue_line.proto";
 import "rda/v1/fiss/fiss_claim_type_indicator.proto";
+import "rda/v1/fiss/fiss_adm_type_code.proto";
 
 // FISS (Fiscal Intermediary Shared Systems) Claim
 message FissClaim {
@@ -355,6 +356,12 @@ message FissClaim {
     FissClaimTypeIndicator clm_typ_ind_enum = 108;
     string clm_typ_ind_unrecognized = 109;
   };
+
+ // Adm Type Code
+ oneof adm_typ_cd {
+   FissAdmTypeCode adm_typ_cd_enum = 114;
+   string adm_typ_cd_unrecognized = 115;
+ };
 
   // Adjustment Medicare Beneficiary Identifier
   optional string adj_mbi = 100;

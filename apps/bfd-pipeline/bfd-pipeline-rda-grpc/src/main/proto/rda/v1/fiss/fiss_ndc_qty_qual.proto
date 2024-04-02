@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS NDC quantity qualifier:
+//
+// This field identifies the NDC quantity qualifier
+enum FissNdcQtyQual {
+  NDC_QTY_QUAL_F2 = 0     [(string_value) = "F2"];
+  NDC_QTY_QUAL_GR = 1     [(string_value) = "GR"];
+  NDC_QTY_QUAL_ME = 2     [(string_value) = "ME"];
+  NDC_QTY_QUAL_ML = 3     [(string_value) = "ML"];
+  NDC_QTY_QUAL_UN = 4     [(string_value) = "UN"];
+}
