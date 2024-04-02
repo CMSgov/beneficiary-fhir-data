@@ -235,6 +235,7 @@ jobs:
           mv ./openapi.yaml "openapi-${BFD_RELEASE}.yaml"
 
         env:
+          BFD_RELEASE: ${{ needs.run-mvn-release.outputs.BFD_RELEASE }}
           CA_NAMESPACE: gov.cms.bfd
           CA_PACKAGE: bfd-server-war
           CA_ASSETS: |
