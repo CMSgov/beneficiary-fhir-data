@@ -6,6 +6,8 @@ option java_multiple_files = true;
 
 import "rda/v1/fiss/fiss_non_bill_rev_code.proto";
 import "rda/v1/fiss/fiss_claim_type_indicator.proto";
+import "rda/v1/fiss/fiss_adm_type_code.proto";
+import "rda/v1/fiss/fiss_ndc_qty_qual.proto";
 
 // FISS Revenue Line
 message FissRevenueLine {
@@ -20,6 +22,12 @@ message FissRevenueLine {
     FissNonBillRevCode non_bill_rev_code_enum = 16;
     string non_bill_rev_code_unrecognized = 17;
   }
+
+ // NDC Quantity Qual
+ oneof ndc_qty_qual {
+   FissNdcQtyQual ndc_qty_qual_enum = 34;
+   string ndc_qty_qual_unrecognized = 35;
+ }
 
   // Revenue Code
   optional string rev_cd = 18;
@@ -66,4 +74,10 @@ message FissRevenueLine {
 
   // Pioneer Accountable Care Organization (ACO) Reduction Group Code
   optional string aco_red_cagc = 33;
+
+ // NDC assigned to each medication
+ optional string ndc = 36;
+
+ // Quantity of NDC medication assigned
+ optional string ndc_qty = 37;
 }

@@ -3,8 +3,11 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableSet;
+import gov.cms.mpsm.rda.v1.fiss.FissAdmTypeCode;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissNdcQtyQual;
+import gov.cms.mpsm.rda.v1.fiss.FissRevenueLine;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,11 +37,39 @@ public class EnumStringExtractorTest {
           ImmutableSet.of(McsStatusCode.STATUS_CODE_NOT_USED),
           ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
 
+  /** Test extractor for FissAdmTypeCode for Fiss claims. */
+  private final EnumStringExtractor<FissClaim, FissAdmTypeCode> fissAdmTypeCodeExtractor =
+      new EnumStringExtractor<>(
+          FissClaim::hasAdmTypCdEnum,
+          FissClaim::getAdmTypCdEnum,
+          FissClaim::hasAdmTypCdUnrecognized,
+          FissClaim::getAdmTypCdUnrecognized,
+          FissAdmTypeCode.UNRECOGNIZED,
+          ImmutableSet.of(
+              FissAdmTypeCode
+                  .ADM_TYPE_9), // TODO: check if i'm right about this code being used to generate
+          // an unsupported value
+          ImmutableSet.of());
+
+  /** Test extractor for FissNdcQtyQual for FissRevenueLine. */
+  private final EnumStringExtractor<FissRevenueLine, FissNdcQtyQual> fissNdcQtyQualExtractor =
+      new EnumStringExtractor<>(
+          FissRevenueLine::hasNdcQtyQualEnum,
+          FissRevenueLine::getNdcQtyQualEnum,
+          FissRevenueLine::hasNdcQtyQualUnrecognized,
+          FissRevenueLine::getNdcQtyQualUnrecognized,
+          FissNdcQtyQual.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
+
   /** The test Fiss claim to extract from. */
   private FissClaim.Builder fissClaim;
 
   /** The test MCS claim to extract from. */
   private McsClaim.Builder mcsClaim;
+
+  /** The test FissRevenueLine to extract from. */
+  private FissRevenueLine.Builder fissRevenueLine;
 
   /**
    * Sets up the test dependencies.
@@ -49,6 +80,7 @@ public class EnumStringExtractorTest {
   public void setUp() throws Exception {
     fissClaim = FissClaim.newBuilder();
     mcsClaim = McsClaim.newBuilder();
+    fissRevenueLine = FissRevenueLine.newBuilder();
   }
 
   /**
@@ -64,6 +96,14 @@ public class EnumStringExtractorTest {
     assertEquals(
         new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
         mcsStatusExtractor.getEnumString(mcsClaim.build()));
+
+    assertEquals(
+        new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
+        fissAdmTypeCodeExtractor.getEnumString(fissClaim.build()));
+
+    assertEquals(
+        new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
+        fissNdcQtyQualExtractor.getEnumString(fissRevenueLine.build()));
   }
 
   /**
@@ -81,6 +121,16 @@ public class EnumStringExtractorTest {
     assertEquals(
         new EnumStringExtractor.Result(EnumStringExtractor.Status.InvalidValue),
         mcsStatusExtractor.getEnumString(mcsClaim.build()));
+
+    fissClaim.setAdmTypCdEnumValue(-1);
+    assertEquals(
+        new EnumStringExtractor.Result(EnumStringExtractor.Status.InvalidValue),
+        fissAdmTypeCodeExtractor.getEnumString(fissClaim.build()));
+
+    fissRevenueLine.setNdcQtyQualEnumValue(-1);
+    assertEquals(
+        new EnumStringExtractor.Result(EnumStringExtractor.Status.InvalidValue),
+        fissNdcQtyQualExtractor.getEnumString(fissRevenueLine.build()));
   }
 
   /**
@@ -98,6 +148,16 @@ public class EnumStringExtractorTest {
     assertEquals(
         new EnumStringExtractor.Result(EnumStringExtractor.Status.UnsupportedValue, "boo!"),
         mcsStatusExtractor.getEnumString(mcsClaim.build()));
+
+    fissClaim.setAdmTypCdUnrecognized("boo!");
+    assertEquals(
+        new EnumStringExtractor.Result("boo!"),
+        fissAdmTypeCodeExtractor.getEnumString(fissClaim.build()));
+
+    fissRevenueLine.setNdcQtyQualUnrecognized("boo!");
+    assertEquals(
+        new EnumStringExtractor.Result("boo!"),
+        fissNdcQtyQualExtractor.getEnumString(fissRevenueLine.build()));
   }
 
   /** Verifies that if a valid value is set for the status, the corresponding enum is returned. */
@@ -110,6 +170,16 @@ public class EnumStringExtractorTest {
     mcsClaim.setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A);
     assertEquals(
         new EnumStringExtractor.Result("A"), mcsStatusExtractor.getEnumString(mcsClaim.build()));
+
+    fissClaim.setAdmTypCdEnum(FissAdmTypeCode.ADM_TYPE_ELECTIVE);
+    assertEquals(
+        new EnumStringExtractor.Result("3"),
+        fissAdmTypeCodeExtractor.getEnumString(fissClaim.build()));
+
+    fissRevenueLine.setNdcQtyQualEnum(FissNdcQtyQual.NDC_QTY_QUAL_UN);
+    assertEquals(
+        new EnumStringExtractor.Result("UN"),
+        fissNdcQtyQualExtractor.getEnumString(fissRevenueLine.build()));
   }
 
   /**
@@ -122,5 +192,10 @@ public class EnumStringExtractorTest {
     assertEquals(
         new EnumStringExtractor.Result(EnumStringExtractor.Status.UnsupportedValue, "6"),
         mcsStatusExtractor.getEnumString(mcsClaim.build()));
+
+    fissClaim.setAdmTypCdEnum(FissAdmTypeCode.ADM_TYPE_9);
+    assertEquals(
+        new EnumStringExtractor.Result(EnumStringExtractor.Status.UnsupportedValue, "9"),
+        fissAdmTypeCodeExtractor.getEnumString(fissClaim.build()));
   }
 }

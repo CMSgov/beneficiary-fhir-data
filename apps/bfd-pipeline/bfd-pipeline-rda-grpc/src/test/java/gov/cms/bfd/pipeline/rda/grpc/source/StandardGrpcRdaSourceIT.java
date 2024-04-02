@@ -85,7 +85,8 @@ public class StandardGrpcRdaSourceIT {
               "rdaPosition": 4
             }
           ],
-          "medaProvId": "oducjgzt67joc"
+          "medaProvId": "oducjgzt67joc",
+          "admTypCdEnum": "3"
         }
       }
       """
@@ -133,7 +134,8 @@ public class StandardGrpcRdaSourceIT {
               "procFlag": "g",
               "rdaPosition": 3
             }
-          ]
+          ],
+          "admTypCdEnum": "3"
         }
       }
       """
@@ -142,6 +144,7 @@ public class StandardGrpcRdaSourceIT {
   /** Expected paid claim. */
   public static final String EXPECTED_CLAIM_1 =
       "{\n"
+          + "  \"admTypCd\" : \"3\",\n"
           + "  \"apiSource\" : \""
           + RdaService.RDA_PROTO_VERSION
           + "\",\n"
@@ -196,6 +199,7 @@ public class StandardGrpcRdaSourceIT {
   /** Example rejected claim. */
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
+          + "  \"admTypCd\" : \"3\",\n"
           + "  \"apiSource\" : \""
           + RdaService.RDA_PROTO_VERSION
           + "\",\n"
