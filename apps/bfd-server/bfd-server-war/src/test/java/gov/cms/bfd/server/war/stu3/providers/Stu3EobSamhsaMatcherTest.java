@@ -23,17 +23,26 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Unit tests for {@link Stu3EobSamhsaMatcherTest}. Integration with {@link
@@ -41,6 +50,8 @@ import org.junit.jupiter.params.provider.MethodSource;
  * ExplanationOfBenefitE2E#testEobByPatientIdWithExcludeSamhsaTrueExpectFiltering} and related E2E
  * tests.
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class Stu3EobSamhsaMatcherTest {
   /** The SAMHSA CPT code. */
   public static final String SAMPLE_SAMHSA_CPT_CODE = "G0137";
@@ -63,6 +74,44 @@ public final class Stu3EobSamhsaMatcherTest {
   /** The DRG reference url. */
   private static final String DRG =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
+
+  /** The NPI org lookup to use for the test. */
+  private MockedStatic<NPIOrgLookup> npiOrgLookup;
+
+  /** The mock FdaDrugCodeDisplayLookup. */
+  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
+
+  /** One-time setup of objects that are normally injected. */
+  @BeforeEach
+  void setup() {
+    npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
+    npiOrgLookup
+        .when(NPIOrgLookup::createNpiOrgLookup)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> npiOrgMap = new HashMap<>();
+              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+              return new NPIOrgLookup(npiOrgMap);
+            });
+    fdaDrugCodeDisplayLookup = Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
+    fdaDrugCodeDisplayLookup
+        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
+              fdaDrugCodeMap.put(
+                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
+                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
+              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
+            });
+  }
+
+  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
+  @AfterEach
+  public void after() {
+    npiOrgLookup.close();
+    fdaDrugCodeDisplayLookup.close();
+  }
 
   /**
    * Sets the data for use in the parameterized tests.
@@ -138,10 +187,10 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void nonSamhsaRelatedClaims() throws IOException {
+      NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
       FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
           FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-      NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
       // Note: none of our SAMPLE_A claims have SAMHSA-related codes (by default).
       List<Object> sampleRifRecords =
           ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -153,7 +202,7 @@ public final class Stu3EobSamhsaMatcherTest {
                     if (r instanceof Beneficiary || r instanceof BeneficiaryHistory) return null;
 
                     return TransformerTestUtils.transformRifRecordToEob(
-                        r, new MetricRegistry(), false, fdaDrugCodeDisplayLookup, npiOrgLookup);
+                        r, new MetricRegistry(), false, fdaDrugCodeDisplayLookup, localNpiLookup);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -834,7 +883,7 @@ public final class Stu3EobSamhsaMatcherTest {
               new MetricRegistry(),
               false,
               FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-              new NPIOrgLookup());
+              NPIOrgLookup.createNpiOrgLookup());
 
       return sampleEobForClaimType;
     }

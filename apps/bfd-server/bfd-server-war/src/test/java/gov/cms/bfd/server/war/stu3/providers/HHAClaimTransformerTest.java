@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,16 +19,20 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -51,18 +54,31 @@ public final class HHAClaimTransformerTest {
   @Mock Timer.Context metricsTimerContext;
 
   /** The NPI org lookup to use for the test. */
-  @Mock NPIOrgLookup npiOrgLookup;
+  private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
-  protected void setup() {
+  public void setup() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
+    npiOrgLookup
+        .when(NPIOrgLookup::createNpiOrgLookup)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> npiOrgMap = new HashMap<>();
+              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+              return new NPIOrgLookup(npiOrgMap);
+            });
 
-    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
-        .thenReturn(Optional.of("UNKNOWN"));
+    hhaClaimTransformer =
+        new HHAClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+  }
 
-    hhaClaimTransformer = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
+  /** Releases the static mock NPIOrgLookup. */
+  @AfterEach
+  public void after() {
+    npiOrgLookup.close();
   }
 
   /**
@@ -120,11 +136,12 @@ public final class HHAClaimTransformerTest {
    *     HHAClaim}
    * @throws FHIRException (indicates test failure)
    */
-  public static void assertMatches(HHAClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  public static void assertMatches(HHAClaim claim, ExplanationOfBenefit eob)
+      throws FHIRException, IOException {
     // interesting conumdrum here....we should be using Mock(s) for unit tests, but this static
     // method is invoked from ITs (integration tests) which means that our BeforeEach setup will
     // not create the NPIOrgLookup so we need to explicitly create one here.
-    NPIOrgLookup localNpiLookup = new NPIOrgLookup();
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
 
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(

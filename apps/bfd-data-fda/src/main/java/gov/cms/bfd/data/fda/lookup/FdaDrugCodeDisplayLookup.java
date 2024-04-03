@@ -84,6 +84,15 @@ public class FdaDrugCodeDisplayLookup {
   }
 
   /**
+   * Constructs a {@link FdaDrugCodeDisplayLookup} for testing purposes only.
+   *
+   * @param npiOrgMap Drug code lookup map to populate FdaDrugCodeDisplayLookup
+   */
+  public FdaDrugCodeDisplayLookup(Map<String, String> npiOrgMap) {
+    ndcProductHashMap.putAll(npiOrgMap);
+  }
+
+  /**
    * Constructs an {@link FdaDrugCodeDisplayLookup}.
    *
    * @param includeFakeDrugCode whether to include the fake testing drug code or not

@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -56,10 +57,13 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -89,6 +93,9 @@ public final class HospiceClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  /** The NPI org lookup to use for the test. */
+  private MockedStatic<NPIOrgLookup> npiOrgLookup;
+
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -98,8 +105,18 @@ public final class HospiceClaimTransformerV2Test {
   public void generateClaim() throws FHIRException, IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
+    npiOrgLookup
+        .when(NPIOrgLookup::createNpiOrgLookup)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> npiOrgMap = new HashMap<>();
+              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+              return new NPIOrgLookup(npiOrgMap);
+            });
 
-    hospiceClaimTransformer = new HospiceClaimTransformerV2(metricRegistry, new NPIOrgLookup());
+    hospiceClaimTransformer =
+        new HospiceClaimTransformerV2(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -111,6 +128,12 @@ public final class HospiceClaimTransformerV2Test {
             .get();
     claim.setLastUpdated(Instant.now());
     createEOB();
+  }
+
+  /** Releases the static mock NPIOrgLookup. */
+  @AfterEach
+  public void after() {
+    npiOrgLookup.close();
   }
 
   /** Creates an eob for the test. */
@@ -206,7 +229,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(resource.isPresent());
 
     Organization actualEobContainedOrganizationResource = (Organization) resource.get();
-    assertEquals("Fake ORG Name", actualEobContainedOrganizationResource.getName());
+    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, actualEobContainedOrganizationResource.getName());
     assertTrue(actualEobContainedOrganizationResource.hasActive());
     assertTrue(
         actualEobContainedOrganizationResource.getMeta().getProfile().stream()

@@ -22,6 +22,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -29,10 +30,13 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -54,13 +58,32 @@ public final class OutpatientClaimTransformerTest {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  /** The NPI org lookup to use for the test. */
+  private MockedStatic<NPIOrgLookup> npiOrgLookup;
+
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
-  protected void setup() {
+  public void setup() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
+    npiOrgLookup
+        .when(NPIOrgLookup::createNpiOrgLookup)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> npiOrgMap = new HashMap<>();
+              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+              return new NPIOrgLookup(npiOrgMap);
+            });
 
-    outpatientClaimTransformer = new OutpatientClaimTransformer(metricRegistry, new NPIOrgLookup());
+    outpatientClaimTransformer =
+        new OutpatientClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+  }
+
+  /** Releases the static mock NPIOrgLookup. */
+  @AfterEach
+  public void after() {
+    npiOrgLookup.close();
   }
 
   /**
@@ -119,7 +142,10 @@ public final class OutpatientClaimTransformerTest {
    *     OutpatientClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(OutpatientClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(OutpatientClaim claim, ExplanationOfBenefit eob)
+      throws FHIRException, IOException {
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -161,7 +187,7 @@ public final class OutpatientClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        (new NPIOrgLookup()).retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        localNpiLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

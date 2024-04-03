@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
@@ -50,10 +51,13 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -82,6 +86,12 @@ public final class OutpatientClaimTransformerV2Test {
 
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
+
+  /** The NPI org lookup to use for the test. */
+  private MockedStatic<NPIOrgLookup> npiOrgLookup;
+
+  /** The mock FdaDrugCodeDisplayLookup. */
+  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -112,17 +122,44 @@ public final class OutpatientClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
+    npiOrgLookup
+        .when(NPIOrgLookup::createNpiOrgLookup)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> npiOrgMap = new HashMap<>();
+              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+              return new NPIOrgLookup(npiOrgMap);
+            });
+    fdaDrugCodeDisplayLookup = Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
+    fdaDrugCodeDisplayLookup
+        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
+              fdaDrugCodeMap.put(
+                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
+                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
+              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
+            });
 
     outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(
             metricRegistry,
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+            NPIOrgLookup.createNpiOrgLookup());
     claim = generateClaim();
     ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
+  }
+
+  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
+  @AfterEach
+  public void after() {
+    npiOrgLookup.close();
+    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
