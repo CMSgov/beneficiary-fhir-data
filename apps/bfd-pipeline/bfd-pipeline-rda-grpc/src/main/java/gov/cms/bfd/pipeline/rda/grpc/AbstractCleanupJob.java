@@ -1,11 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.persistence.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,12 +22,12 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
   /** template for delete query. */
   private static final String DELETE_QUERY_TEMPLATE =
-      "delete from ${tableName} t where t.${parentTableKey} in ("
+      "delete from ${parentTableName} t where t.${parentTableKey} in ( "
           + "  select ${parentTableKey} "
           + "  from ${parentTableName} "
-          + "  where last_updated < '${cutoffDate}' "
-          + "  limit ${limit}"
-          + ")";
+          + "  where last_updated between "
+          + "  (select min(last_updated) from ${parentTableName}) and (Now() -Interval '${interval} days') "
+          + "  limit ${limit})";
 
   /** TransactionManager to use for db operations. */
   private final TransactionManager transactionManager;
@@ -50,9 +47,9 @@ public abstract class AbstractCleanupJob implements CleanupJob {
   /**
    * Returns a list of table names for use in native queries.
    *
-   * @return list of database table names.
+   * @return The parent table name
    */
-  abstract List<String> getTableNames();
+  abstract String getParentTableName();
 
   /**
    * Returns the key column of the database table mapped to the parent entity class.
@@ -78,12 +75,11 @@ public abstract class AbstractCleanupJob implements CleanupJob {
       final long startMillis = System.currentTimeMillis();
 
       try {
-        Instant cutoffDate = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
-        List<Query> queries = buildDeleteQueries(cutoffDate, transactionManager);
+        Query query = buildDeleteQuery(transactionManager);
         var numberOfTransactions = Math.floorDiv(cleanupRunSize, cleanupTransactionSize);
 
         for (int i = 0; i < numberOfTransactions; i++) {
-          var result = executeDeleteTransaction(queries, transactionManager);
+          var result = executeDeleteTransaction(query, transactionManager);
           claimsDeleted += result;
 
           // If no claims deleted this iteration, or total claims deleted
@@ -109,19 +105,17 @@ public abstract class AbstractCleanupJob implements CleanupJob {
    * Executes a single delete transaction. The list of queries are passed in execution order, last
    * query must delete from the parent table, all other queries are child table deletes.
    *
-   * @param queries the queries to execute in each transaction.
+   * @param query the queries to execute in each transaction.
    * @param tm the TransactionManager to use with the deletion.
    * @return the number of claims deleted by the transaction.
    */
-  private int executeDeleteTransaction(List<Query> queries, TransactionManager tm) {
+  private int executeDeleteTransaction(Query query, TransactionManager tm) {
     return tm.executeFunction(
         entityManager -> {
           // execute all queries in order, use the count from the last query (parent table)
           // to track the number of claims deleted.
           var count = 0;
-          for (Query query : queries) {
-            count = query.executeUpdate();
-          }
+          count = query.executeUpdate();
           return count;
         });
   }
@@ -129,28 +123,24 @@ public abstract class AbstractCleanupJob implements CleanupJob {
   /**
    * Build a list of native sql delete queries to remove claims.
    *
-   * @param cutoffDate the Instant used to identify queries for deletion.
    * @param tm the TransactionManager to use to create queries.
    * @return the list of queries.
    */
-  private List<Query> buildDeleteQueries(Instant cutoffDate, TransactionManager tm) {
-    List<Query> queries = new ArrayList<>();
-    String parentTableName = getTableNames().getLast();
+  private Query buildDeleteQuery(TransactionManager tm) {
+    String parentTableName = getParentTableName();
+    AtomicReference<Query> atomicQuery = new AtomicReference<>();
     tm.executeProcedure(
         entityManager -> {
-          for (String tableName : getTableNames()) {
-            Map<String, String> params =
-                Map.of(
-                    "tableName", tableName,
-                    "parentTableName", parentTableName,
-                    "parentTableKey", getParentTableKey(),
-                    "cutoffDate", cutoffDate.toString(),
-                    "limit", Integer.toString(cleanupTransactionSize));
-            StringSubstitutor strSub = new StringSubstitutor(params);
-            String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
-            queries.add(entityManager.createNativeQuery(queryStr));
-          }
+          Map<String, String> params =
+              Map.of(
+                  "parentTableName", parentTableName,
+                  "parentTableKey", getParentTableKey(),
+                  "interval", String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
+                  "limit", Integer.toString(cleanupTransactionSize));
+          StringSubstitutor strSub = new StringSubstitutor(params);
+          String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
+          atomicQuery.set(entityManager.createNativeQuery(queryStr));
         });
-    return queries;
+    return atomicQuery.get();
   }
 }
