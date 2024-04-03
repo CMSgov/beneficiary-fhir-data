@@ -28,3 +28,17 @@
       - tar
       - unzip
       - yum-utils
+      - yum-plugin-versionlock
+
+- name: Establish Version Locking (BFD-3382)
+  shell:
+    cmd: |
+      yum versionlock add {{item}}
+  loop:
+    - grub2-2.06-14.amzn2.0.3*
+    - grub2-common-2.06-14.amzn2.0.3*
+    - grub2-pc-2.06-14.amzn2.0.3.*
+    - grub2-tools-2.06-14.amzn2.0.3
+    - grub2-tools-minimal-2.06-14.amzn2.0.3*
+    - grub2-tools-extra-2.06-14.amzn2.0.3*
+    - grub2-tools-efi-2.06-14.amzn2.0.3*
