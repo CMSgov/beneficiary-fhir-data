@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.persistence.Query;
 import lombok.AllArgsConstructor;
@@ -131,17 +130,17 @@ public abstract class AbstractCleanupJob implements CleanupJob {
     String parentTableName = getParentTableName();
     AtomicReference<Query> atomicQuery = new AtomicReference<>();
     tm.executeProcedure(
-            entityManager -> {
-                Map<String, String> params =
-                        Map.of(
-                                "parentTableName", parentTableName,
-                                "parentTableKey", getParentTableKey(),
-                                "interval", String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
-                                "limit", Integer.toString(cleanupTransactionSize));
-                StringSubstitutor strSub = new StringSubstitutor(params);
-                String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
-                atomicQuery.set(entityManager.createNativeQuery(queryStr));
-            });
+        entityManager -> {
+          Map<String, String> params =
+              Map.of(
+                  "parentTableName", parentTableName,
+                  "parentTableKey", getParentTableKey(),
+                  "interval", String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
+                  "limit", Integer.toString(cleanupTransactionSize));
+          StringSubstitutor strSub = new StringSubstitutor(params);
+          String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
+          atomicQuery.set(entityManager.createNativeQuery(queryStr));
+        });
     return atomicQuery.get();
   }
 }
