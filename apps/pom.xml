@@ -139,7 +139,7 @@
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
         <org.apache.spark.version>3.5.0</org.apache.spark.version>
-        <hapi-fhir.version>6.10.0</hapi-fhir.version>
+        <hapi-fhir.version>7.0.2</hapi-fhir.version>
         <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
         <jersey.version>2.25.1</jersey.version>
         <org.apache.poi.version>5.2.5</org.apache.poi.version>
@@ -166,7 +166,7 @@
         <protoc.version>3.25.1</protoc.version>
         <protobuf.version>3.25.1</protobuf.version>
         <jacoco.version>0.8.11</jacoco.version>
-
+        <jakarta.servlet.version>6.1.0-M2</jakarta.servlet.version>
         <!-- The default DB that will be used in integration tests. -->
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
@@ -243,6 +243,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <dependency>
                 <!-- Functional-reactive programming api for concurrent claim ingestion. -->
                 <groupId>io.projectreactor</groupId>
