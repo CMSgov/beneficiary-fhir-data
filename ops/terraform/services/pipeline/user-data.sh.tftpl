@@ -10,27 +10,26 @@ exec > >(
 
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-# TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
 aws ssm get-parameters-by-path \
     --with-decryption \
-    --path "/bfd/${env}/pipeline/nonsensitive/shared/" \
+    --path "/bfd/${env}/pipeline/nonsensitive/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > nonsensitive_pipeline_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > nonsensitive_pipeline_vars.json
 
 aws ssm get-parameters-by-path \
     --with-decryption \
-    --path "/bfd/${env}/pipeline/sensitive/shared/" \
+    --path "/bfd/${env}/pipeline/sensitive/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[6]): .Value})|add' > sensitive_pipeline_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > sensitive_pipeline_vars.json
 
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/common/nonsensitive/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > common_vars.json
 
 # JVM heap size is 80% of total memory minus 2GB for other system processes and overhead (security tools et al.)
 # Ie. For an 8GB instance, the heap size will be ~4.4GB (6.4 - 2)
