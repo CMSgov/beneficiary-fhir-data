@@ -56,7 +56,6 @@ resource "aws_cloudwatch_metric_alarm" "this" {
   namespace   = local.namespace
 
   alarm_actions = [aws_sns_topic.this.arn]
-  ok_actions    = [aws_sns_topic.this.arn]
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
