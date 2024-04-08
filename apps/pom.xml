@@ -89,7 +89,7 @@
         <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
         but not all (in particular, entity-manager does not have a 6.0 version available yet).
         Staying on latest 5.x version until all components have 6.0 versions available. -->
-        <hibernate.version>5.6.15.Final</hibernate.version>
+        <hibernate.version>6.4.4.Final</hibernate.version>
         <junit.version>5.10.1</junit.version>
         <javadoc.version>3.6.3</javadoc.version>
         <testcontainers.version>1.19.3</testcontainers.version>
@@ -483,6 +483,17 @@
                 <groupId>org.hibernate.javax.persistence</groupId>
                 <version>${hibernate.jpa.2.1.api.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-community-dialects</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.2.0-M2</version>
+            </dependency>
 
             <dependency>
                 <!-- Hibernate's JPA implementation is used to manage most database usage
@@ -494,7 +505,7 @@
             <dependency>
                 <!-- This is included as a transitive dependency of org.hibernate:hibernate-entitymanager,
                     but may occassionally be needed separately. -->
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
