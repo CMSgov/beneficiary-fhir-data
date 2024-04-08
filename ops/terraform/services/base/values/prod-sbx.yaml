@@ -156,7 +156,7 @@ bfd:
         data_pipeline_rda_grpc_host: UNDEFINED
         data_pipeline_rda_grpc_inproc_server_mode: *grpc_inprocess_mode
         data_pipeline_rda_grpc_max_idle_seconds: *rda_grpc_idle_secs
-        data_pipeline_rda_grpc_port: UNDEFINE
+        data_pipeline_rda_grpc_port: UNDEFINED
         data_pipeline_rda_grpc_server_type: *rda_grpc_server_type
         data_pipeline_rda_job_batch_size: *rda_job_batch_size
         data_pipeline_rda_job_enabled: *rda_job_enabled
