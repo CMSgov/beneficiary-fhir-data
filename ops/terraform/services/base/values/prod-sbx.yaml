@@ -148,13 +148,18 @@ bfd:
           starting_fiss_seq_num: &rda_job_starting_fiss UNDEFINED
           starting_mcs_seq_num: &rda_job_starting_mcs UNDEFINED
         cleanup:
-          enabled: &rda_cleanup_enabled false
+          enabled: false
+          run_size: UNDEFINED
+          transaction_size: UNDEFINED
+        data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
+        data_pipeline_rda_grpc_auth_token: UNDEFINED
+        data_pipeline_rda_grpc_host: UNDEFINED
         data_pipeline_rda_grpc_inproc_server_mode: *grpc_inprocess_mode
         data_pipeline_rda_grpc_max_idle_seconds: *rda_grpc_idle_secs
+        data_pipeline_rda_grpc_port: UNDEFINED
         data_pipeline_rda_grpc_server_type: *rda_grpc_server_type
         data_pipeline_rda_job_batch_size: *rda_job_batch_size
         data_pipeline_rda_job_enabled: *rda_job_enabled
-        data_pipeline_ccw_rif_job_enabled: false
         data_pipeline_rda_job_interval_seconds: *rda_job_interval
         data_pipeline_rda_job_starting_fiss_seq_num: *rda_job_starting_fiss
         data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
@@ -162,7 +167,7 @@ bfd:
         data_pipeline_rda_process_dlq: *rda_job_process_dlq
         instance_type: m6a.large
       shared:
-        bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
+        bfd_pipeline_dir: *bfdPipelineDir
         data_pipeline_dir: *bfdPipelineDir
         data_pipeline_new_relic_metric_host: *newRelicMetricHost
         data_pipeline_new_relic_metric_path: *newRelicMetricPath

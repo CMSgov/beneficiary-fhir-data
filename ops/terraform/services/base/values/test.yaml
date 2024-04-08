@@ -149,13 +149,18 @@ bfd:
           starting_fiss_seq_num: &rda_job_starting_fiss 0
           starting_mcs_seq_num: &rda_job_starting_mcs 0
         cleanup:
-          enabled: &rda_cleanup_enabled false
+          enabled: false
+          run_size: UNDEFINED
+          transaction_size: UNDEFINED
         data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
-        data_pipeline_rda_job_enabled: *rda_job_enabled
+        data_pipeline_rda_grpc_auth_token: *rda_grpc_auth_token
+        data_pipeline_rda_grpc_host: *rda_grpc_host
         data_pipeline_rda_grpc_inproc_server_mode: UNDEFINED
         data_pipeline_rda_grpc_max_idle_seconds: *rda_grpc_idle_secs
+        data_pipeline_rda_grpc_port: *rda_grpc_port
         data_pipeline_rda_grpc_server_type: *rda_grpc_server_type
         data_pipeline_rda_job_batch_size: *rda_job_batch_size
+        data_pipeline_rda_job_enabled: *rda_job_enabled
         data_pipeline_rda_job_interval_seconds: *rda_job_interval
         data_pipeline_rda_job_starting_fiss_seq_num: *rda_job_starting_fiss
         data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
@@ -182,10 +187,6 @@ bfd:
         # lines uncommented.
         data_pipeline_db_username: *pipeline_db_username
         data_pipeline_db_password: *pipeline_db_password
-        ## PIPELINE+RDA VALUES
-        data_pipeline_rda_grpc_auth_token: *rda_grpc_auth_token
-        data_pipeline_rda_grpc_host: *rda_grpc_host
-        data_pipeline_rda_grpc_port: *rda_grpc_port
     server:
       ref_dir: &bfdServerDir /usr/local/bfd-server
       db:
