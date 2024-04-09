@@ -665,7 +665,7 @@ public class RDATestUtils {
   /**
    * Mocks an FdaDrugCodeDisplayLookup object.
    *
-   * @returns mocked FdaDrugCodeDisplayLookup
+   * @return mocked FdaDrugCodeDisplayLookup
    */
   public static @NotNull MockedStatic<FdaDrugCodeDisplayLookup> mockFdaDrugCodeDisplayLookup() {
     MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup =
@@ -686,7 +686,7 @@ public class RDATestUtils {
   /**
    * Mocks an NPIOrgLookup object.
    *
-   * @returns mocked NPIOrgLookup
+   * @return mocked NPIOrgLookup
    */
   public static @NotNull MockedStatic<NPIOrgLookup> mockNPIOrgLookup() {
     MockedStatic<NPIOrgLookup> npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
