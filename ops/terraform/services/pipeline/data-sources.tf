@@ -92,20 +92,20 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 }
 
 data "aws_ssm_parameters_by_path" "nonsensitive_shared" {
-  path = "/bfd/${local.env}/${local.service}/shared/nonsensitive"
+  path = "/bfd/${local.env}/${local.service}/nonsensitive/shared"
 }
 
 data "aws_ssm_parameters_by_path" "sensitive_ccw" {
-  path            = "/bfd/${local.env}/${local.service}/ccw/sensitive"
+  path            = "/bfd/${local.env}/${local.service}/sensitive/ccw"
   with_decryption = true
 }
 
 data "aws_ssm_parameters_by_path" "nonsensitive_ccw" {
-  path = "/bfd/${local.env}/${local.service}/ccw/nonsensitive"
+  path = "/bfd/${local.env}/${local.service}/nonsensitive/ccw"
 }
 
 data "aws_ssm_parameters_by_path" "nonsensitive_rda" {
-  path = "/bfd/${local.env}/${local.service}/rda/nonsensitive"
+  path = "/bfd/${local.env}/${local.service}/nonsensitive/rda"
 }
 
 # TODO: this needs to be defined in common

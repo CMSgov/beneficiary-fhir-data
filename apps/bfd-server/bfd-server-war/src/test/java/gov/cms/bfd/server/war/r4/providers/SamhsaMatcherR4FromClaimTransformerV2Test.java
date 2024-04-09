@@ -21,12 +21,12 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -38,7 +38,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 /** Verifies that transformations that contain SAMHSA codes are filtered as expected. */
 public class SamhsaMatcherR4FromClaimTransformerV2Test {
@@ -108,26 +107,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @BeforeEach
   public void setup() {
     samhsaMatcherV2 = new R4EobSamhsaMatcher();
-    npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
-    npiOrgLookup
-        .when(NPIOrgLookup::createNpiOrgLookup)
-        .thenAnswer(
-            i -> {
-              HashMap<String, String> npiOrgMap = new HashMap<>();
-              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
-              return new NPIOrgLookup(npiOrgMap);
-            });
-    fdaDrugCodeDisplayLookup = Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
-    fdaDrugCodeDisplayLookup
-        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
-        .thenAnswer(
-            i -> {
-              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
-              fdaDrugCodeMap.put(
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
-              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
-            });
+    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
+    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */

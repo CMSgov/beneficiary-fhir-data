@@ -5,7 +5,7 @@ import socket
 import sys
 from base64 import b64decode
 from datetime import datetime, timezone
-from io import StringIO
+from io import StringIO, BytesIO
 from typing import Any
 from urllib.parse import unquote
 
@@ -236,14 +236,25 @@ def _handle_s3_event(s3_object_key: str):
                 # from sweeping partially uploaded files as we will move this file to the SWEEPS
                 # input folder only once it has fully uploaded
                 logger.info(
-                    "Starting upload of %s to the staging path %s",
+                    "Starting initial download from %s and upload to the staging path %s",
                     filename,
                     staging_dir_path,
                 )
                 staging_file_path = f"{staging_dir_path}/{filename}"
-                with sftp_client.open(filename=staging_file_path, mode="wb", bufsize=32768) as f:
-                    s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=f)
-                logger.info("Upload of %s to %s successful", filename, staging_dir_path)
+
+                with BytesIO() as bo:
+                    logger.info("Starting initial download of object %s", filename)
+                    s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=bo)
+                    bo.seek(0)
+                    logger.info("Starting upload to %s", staging_dir_path)
+                    transfer = sftp_client.putfo(bo, staging_file_path)
+
+                logger.info(
+                    "Upload of %s to %s successful: %s",
+                    filename,
+                    staging_dir_path,
+                    str(transfer.st_size),
+                )
 
                 # Once uploaded, we must modify the file permissions such that the SWEEPS automation
                 # user can interact with the file

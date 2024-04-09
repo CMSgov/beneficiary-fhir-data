@@ -19,10 +19,10 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -66,15 +65,7 @@ public final class OutpatientClaimTransformerTest {
   public void setup() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
-    npiOrgLookup
-        .when(NPIOrgLookup::createNpiOrgLookup)
-        .thenAnswer(
-            i -> {
-              HashMap<String, String> npiOrgMap = new HashMap<>();
-              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
-              return new NPIOrgLookup(npiOrgMap);
-            });
+    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     outpatientClaimTransformer =
         new OutpatientClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());

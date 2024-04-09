@@ -29,7 +29,6 @@ public abstract class AbstractCleanupJob implements CleanupJob {
           + "  select ${parentTableKey} "
           + "  from ${parentTableName} "
           + "  where last_updated < '${cutoffDate}' "
-          + "  order by last_updated "
           + "  limit ${limit}"
           + ")";
 

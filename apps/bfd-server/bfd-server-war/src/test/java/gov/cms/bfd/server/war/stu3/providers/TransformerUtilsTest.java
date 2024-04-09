@@ -31,6 +31,7 @@ import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -55,7 +56,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -76,26 +76,8 @@ public final class TransformerUtilsTest {
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   public void setup() {
-    npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
-    npiOrgLookup
-        .when(NPIOrgLookup::createNpiOrgLookup)
-        .thenAnswer(
-            i -> {
-              HashMap<String, String> npiOrgMap = new HashMap<>();
-              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
-              return new NPIOrgLookup(npiOrgMap);
-            });
-    fdaDrugCodeDisplayLookup = Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
-    fdaDrugCodeDisplayLookup
-        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
-        .thenAnswer(
-            i -> {
-              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
-              fdaDrugCodeMap.put(
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
-              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
-            });
+    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
+    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
