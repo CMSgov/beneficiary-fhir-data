@@ -37,6 +37,7 @@
             <!-- Used for annotating JPA model entities. -->
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.api.version}</version>
         </dependency>
         <dependency>
             <!-- Provides BOMInputStream, and other basic I/O utilities. -->
@@ -145,6 +146,11 @@
         <groupId>org.hibernate.orm</groupId>
         <artifactId>hibernate-community-dialects</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-ant</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

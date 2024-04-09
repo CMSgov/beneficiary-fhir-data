@@ -106,7 +106,7 @@
 
         <jakarta.xml.bind.api.version>4.0.1</jakarta.xml.bind.api.version>
         <org.glassfish.jaxb.runtime.version>4.0.4</org.glassfish.jaxb.runtime.version>
-        <jakarta.annotation.api.version>1.3.5</jakarta.annotation.api.version>
+        <jakarta.annotation.api.version>3.0.0-M1</jakarta.annotation.api.version>
 
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logback.json.classic.version>0.1.5</logback.json.classic.version>
@@ -488,6 +488,11 @@
                 <artifactId>hibernate-community-dialects</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-ant</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>jakarta.persistence</groupId>
@@ -495,13 +500,6 @@
                 <version>3.2.0-M2</version>
             </dependency>
 
-            <dependency>
-                <!-- Hibernate's JPA implementation is used to manage most database usage
-                    in our applications. -->
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
             <dependency>
                 <!-- This is included as a transitive dependency of org.hibernate:hibernate-entitymanager,
                     but may occassionally be needed separately. -->

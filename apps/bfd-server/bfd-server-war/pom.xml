@@ -22,11 +22,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-        </dependency>
-        <dependency>
             <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                 for details. -->
             <groupId>com.zaxxer</groupId>

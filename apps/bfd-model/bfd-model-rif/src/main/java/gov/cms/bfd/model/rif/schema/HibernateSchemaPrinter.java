@@ -10,7 +10,6 @@ import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
-import org.hibernate.tool.hbm2ddl.SchemaExport.Action;
 import org.hibernate.tool.schema.TargetType;
 
 /** Uses Hibernate's HBM2DDL {@link SchemaExport} utility to generate SQL database schemas. */
@@ -51,7 +50,7 @@ public final class HibernateSchemaPrinter {
     schemaExport.setHaltOnError(true);
     schemaExport.setFormat(true);
     schemaExport.setDelimiter(";");
-    schemaExport.execute(EnumSet.of(TargetType.STDOUT), Action.CREATE, metadata);
+    schemaExport.execute(EnumSet.of(TargetType.STDOUT), SchemaExport.Action.CREATE, metadata);
   }
 
   /**
