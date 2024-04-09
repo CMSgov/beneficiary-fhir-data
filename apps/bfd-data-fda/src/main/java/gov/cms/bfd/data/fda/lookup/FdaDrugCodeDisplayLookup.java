@@ -86,10 +86,10 @@ public class FdaDrugCodeDisplayLookup {
   /**
    * Constructs a {@link FdaDrugCodeDisplayLookup} for testing purposes only.
    *
-   * @param npiOrgMap Drug code lookup map to populate FdaDrugCodeDisplayLookup
+   * @param ndcProdMap Drug code lookup map to populate FdaDrugCodeDisplayLookup
    */
-  public FdaDrugCodeDisplayLookup(Map<String, String> npiOrgMap) {
-    ndcProductHashMap.putAll(npiOrgMap);
+  public FdaDrugCodeDisplayLookup(Map<String, String> ndcProdMap) {
+    ndcProductHashMap.putAll(ndcProdMap);
   }
 
   /**
