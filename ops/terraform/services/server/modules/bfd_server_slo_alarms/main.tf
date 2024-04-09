@@ -200,7 +200,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -260,7 +259,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_bulk_latency_99p_15m_alert"
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -326,7 +324,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_nonbulk_latency_99p_15m_ale
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -383,7 +380,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_al
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -431,7 +427,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_me
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -489,7 +484,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_bulk_latency_99p_
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -557,7 +551,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_nonbulk_latency_p
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -625,7 +618,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_bulk_latency_99p
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -691,7 +683,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_no_contract_nonbulk_latency_
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -748,7 +739,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -806,7 +796,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -863,7 +852,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_claim_no_resources_latency_mean_15m_
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -945,8 +933,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_claimresponse_no_resources_latency_m
   namespace   = local.namespace
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
-
+  
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
 }

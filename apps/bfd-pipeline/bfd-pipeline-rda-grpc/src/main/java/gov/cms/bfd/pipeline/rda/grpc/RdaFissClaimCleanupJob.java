@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,15 +10,8 @@ public class RdaFissClaimCleanupJob extends AbstractCleanupJob {
   /** logger to use. */
   static final Logger LOGGER = LoggerFactory.getLogger(RdaFissClaimCleanupJob.class);
 
-  /** List of table names for use in native queries. Parent claims table must be last. */
-  private static final List<String> TABLE_NAMES =
-      List.of(
-          "rda.fiss_revenue_lines",
-          "rda.fiss_payers",
-          "rda.fiss_diagnosis_codes",
-          "rda.fiss_proc_codes",
-          "rda.fiss_audit_trails",
-          "rda.fiss_claims");
+  /** Parent table name of the query. */
+  private static final String PARENT_TABLE_NAME = "rda.fiss_claims";
 
   /** Key column name for the parent table for use in native queries. */
   private static final String KEY_COLUMN = "claim_id";
@@ -42,8 +34,8 @@ public class RdaFissClaimCleanupJob extends AbstractCleanupJob {
 
   /** {@inheritDoc} */
   @Override
-  List<String> getTableNames() {
-    return TABLE_NAMES;
+  String getParentTableName() {
+    return PARENT_TABLE_NAME;
   }
 
   /** {@inheritDoc} */

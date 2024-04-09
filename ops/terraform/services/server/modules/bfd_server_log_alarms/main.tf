@@ -43,7 +43,6 @@ locals {
   # is the ARN of the SNS topic. Functionally equivalent to [for o in data.aws_sns_topic.sns : o.arn]
   alert_arn       = data.aws_sns_topic.alert_sns[*].arn
   notify_arn      = data.aws_sns_topic.notify_sns[*].arn
-  ok_arn          = data.aws_sns_topic.ok_sns[*].arn
 
   server_log_availability = {
     period       = 1 * 60 * 60 # 1 hour 
@@ -74,7 +73,6 @@ resource "aws_cloudwatch_metric_alarm" "server-log-availability-1hr" {
   }
 
   alarm_actions = local.alert_arn
-  ok_actions    = local.ok_arn
 
   datapoints_to_alarm = local.server_log_availability.datapoints
   treat_missing_data  = "notBreaching"
