@@ -13,9 +13,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.concurrent.GuardedBy;
+import jakarta.annotation.concurrent.ThreadSafe;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.utils.ThreadFactoryBuilder;
 

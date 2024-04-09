@@ -167,12 +167,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Used for annotating RDA API. -->
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
-            <version>${jakarta.annotation.api.version}</version>
-        </dependency>
-        <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-pipeline-shared-test-utils</artifactId>
             <version>${project.version}</version>

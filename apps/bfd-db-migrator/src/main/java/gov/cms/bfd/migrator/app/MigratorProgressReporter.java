@@ -9,7 +9,7 @@ import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.sqs.model.SqsException;

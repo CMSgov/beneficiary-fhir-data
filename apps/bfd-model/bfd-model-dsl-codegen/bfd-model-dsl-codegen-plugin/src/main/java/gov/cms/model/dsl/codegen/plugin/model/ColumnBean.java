@@ -7,10 +7,10 @@ import gov.cms.model.dsl.codegen.plugin.model.validation.EnumExistsInSameMapping
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaType;
 import gov.cms.model.dsl.codegen.plugin.model.validation.SqlType;
+import jakarta.persistence.GenerationType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.regex.Pattern;
-import javax.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -89,7 +89,7 @@ public class ColumnBean implements ModelBean {
   @Builder.Default private boolean identity = false;
 
   /**
-   * Indicates whether to add the updatable argument to the {@link javax.persistence.Column}
+   * Indicates whether to add the updatable argument to the {@link jakarta.persistence.Column}
    * annotation.
    */
   @Builder.Default private boolean updatable = true;
@@ -117,8 +117,8 @@ public class ColumnBean implements ModelBean {
 
   /**
    * This enum is used to define the type of annotation to use for the field. RIF uses some {@link
-   * javax.persistence.Transient} fields. Otherwise all are normal {@link
-   * javax.persistence.Column}s.
+   * jakarta.persistence.Transient} fields. Otherwise all are normal {@link
+   * jakarta.persistence.Column}s.
    */
   public enum FieldType {
     /** Normal column field. */
@@ -149,7 +149,7 @@ public class ColumnBean implements ModelBean {
   }
 
   /**
-   * Computes an appropriate length argument for the {@link javax.persistence.Column} annotation.
+   * Computes an appropriate length argument for the {@link jakarta.persistence.Column} annotation.
    *
    * @return zero if no length is needed, otherwise a valid length
    */
@@ -227,8 +227,8 @@ public class ColumnBean implements ModelBean {
   }
 
   /**
-   * Computes an appropriate {@code precision} argument value for a {@link javax.persistence.Column}
-   * annotation.
+   * Computes an appropriate {@code precision} argument value for a {@link
+   * jakarta.persistence.Column} annotation.
    *
    * @return 0 if none is needed, otherwise the value for the argument
    */
@@ -244,7 +244,7 @@ public class ColumnBean implements ModelBean {
   }
 
   /**
-   * Computes an appropriate {@code scale} argument value for a {@link javax.persistence.Column}
+   * Computes an appropriate {@code scale} argument value for a {@link jakarta.persistence.Column}
    * annotation.
    *
    * @return 0 if none is needed, otherwise the value for the argument

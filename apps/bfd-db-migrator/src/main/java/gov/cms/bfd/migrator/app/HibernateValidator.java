@@ -3,7 +3,7 @@ package gov.cms.bfd.migrator.app;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import javax.sql.DataSource;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;

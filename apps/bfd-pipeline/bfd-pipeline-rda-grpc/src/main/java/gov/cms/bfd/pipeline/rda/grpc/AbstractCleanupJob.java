@@ -1,12 +1,12 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import jakarta.persistence.Query;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.text.StringSubstitutor;

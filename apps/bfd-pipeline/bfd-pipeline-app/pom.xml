@@ -17,6 +17,15 @@
 
     <dependencies>
         <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-pipeline-ccw-rif</artifactId>
             <version>${project.version}</version>

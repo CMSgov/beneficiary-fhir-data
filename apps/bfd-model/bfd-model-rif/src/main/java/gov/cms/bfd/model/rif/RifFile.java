@@ -1,8 +1,8 @@
 package gov.cms.bfd.model.rif;
 
+import jakarta.annotation.Nullable;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import javax.annotation.Nullable;
 
 /** Represents a RIF file that can be read and deleted. */
 public interface RifFile {

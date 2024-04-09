@@ -2,8 +2,8 @@ package gov.cms.bfd.server.war.r4.providers.pac.common;
 
 import gov.cms.bfd.server.war.r4.providers.pac.AbstractR4ResourceProvider;
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**

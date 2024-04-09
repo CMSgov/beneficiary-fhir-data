@@ -54,10 +54,10 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceUnit;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceUnit;
 import jakarta.servlet.ServletContext;
 import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -315,7 +315,7 @@ public class SpringConfiguration {
     // This limits how long each query will run before being terminated. We've seen
     // long running queries cause the application to respond poorly to other
     // requests.
-    extraProperties.put("javax.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
+    extraProperties.put("jakarta.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
 
     return extraProperties;
   }

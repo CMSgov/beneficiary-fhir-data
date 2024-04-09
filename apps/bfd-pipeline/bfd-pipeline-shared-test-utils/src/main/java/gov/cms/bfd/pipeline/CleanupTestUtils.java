@@ -11,6 +11,8 @@ import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,8 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.sql.DataSource;
 import lombok.Getter;
 

@@ -477,13 +477,6 @@
             </dependency>
 
             <dependency>
-                <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
-                    Hibernate is used for that in our projects.) -->
-                <artifactId>hibernate-jpa-2.1-api</artifactId>
-                <groupId>org.hibernate.javax.persistence</groupId>
-                <version>${hibernate.jpa.2.1.api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-community-dialects</artifactId>
                 <version>${hibernate.version}</version>
