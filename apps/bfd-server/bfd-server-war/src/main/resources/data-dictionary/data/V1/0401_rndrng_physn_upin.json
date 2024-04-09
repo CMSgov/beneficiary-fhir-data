@@ -1,0 +1,40 @@
+{
+    "id": 401,
+    "name": "Rendering Physician UPIN",
+    "description": "This variable is the unique physician identification number (UPIN) for the physician who rendered the services on the revenue center record.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rndrng_physn_upin",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "revenueCenterRenderingPhysicianUPIN",
+    "ccwMapping": [
+        "RNDRNG_PHYSN_UPIN"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "id": 365,
+    "name": "Patient Pay Amount",
+    "description": "This variable is the dollar amount that the beneficiary paid for the PDE without being reimbursed by a third party.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "ptnt_pay_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "patientPaidAmount",
+    "ccwMapping": [
+        "PTNT_PAY_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_BENE_PMT_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/ptnt_pay_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Amount Paid by Patient'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

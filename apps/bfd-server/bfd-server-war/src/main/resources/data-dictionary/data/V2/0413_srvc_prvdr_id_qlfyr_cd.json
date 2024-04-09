@@ -1,0 +1,41 @@
+{
+    "id": 413,
+    "name": "Service Provider Qualifier Code",
+    "description": "This variable indicates the type of pharmacy provider identifier that was used in the SRVC_PRVDR_ID field, as reported by the Part D sponsor on the PDE record submitted to CMS.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "srvc_prvdr_id_qlfyr_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "serviceProviderIdQualiferCode",
+    "ccwMapping": [
+        "SRVC_PRVDR_ID_QLFYR_CD"
+    ],
+    "cclfMapping": [
+        "CCLF7.PRVDR_PRSBNG_ID_QLFYR_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "facility.identifier[N].system",
+            "fhirPath": "facility.identifier.where(type.coding.where(code='npi')).type.coding.code",
+            "discriminator": [],
+            "additional": [
+                "eob.facility.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "If serviceProviderIdQualiferCode = 01  then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi' else if serviceProviderIdQualifierCode = 06 then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-upin' else if serviceProviderIdQualifierCode = 07 then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-ncpdp' else if serviceProviderIdQualifierCode = 08 then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-sl' else if serviceProviderIdQualifierCode = 11 then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-tax'",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\"\\n        }\\n      ]\\n    },\\n    \"value\": \"1023011079\"\\n  }\\n]"
+        }
+    ]
+}

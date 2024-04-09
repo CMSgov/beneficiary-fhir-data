@@ -1,0 +1,47 @@
+{
+    "id": 276,
+    "name": "Processing Indicator Code",
+    "description": "The code on a non-institutional claim indicating to whom payment was made or if the claim was denied.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_prcsg_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "processingIndicatorCode",
+    "ccwMapping": [
+        "LINE_PRCSG_IND_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_PRCSG_IND_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].reason.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].reason.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].reason.coding.display = {corresponding description from valueset specified in .system}",
+                "eob.item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Line Processing Indicator Code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

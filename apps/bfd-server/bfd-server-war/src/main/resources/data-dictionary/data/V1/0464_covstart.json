@@ -1,0 +1,42 @@
+{
+    "id": 464,
+    "name": "Medicare Coverage Start Date",
+    "description": "That date that Medicare Coverage began for the Beneficiary.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "covstart",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "covstart",
+    "ccwMapping": [
+        "COVSTART"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_PART_A_ENRLMT_BGN_DT",
+        " CCLF8. BENE_PART_B_ENRLMT_BGN_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "period.start",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

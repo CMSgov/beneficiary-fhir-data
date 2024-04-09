@@ -1,0 +1,38 @@
+{
+    "id": 438,
+    "name": "City for Beneficiary",
+    "description": "The name of the city for the beneficiary mailing address.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "city_name",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 100,
+    "bfdJavaFieldName": "derivedCityName",
+    "ccwMapping": [
+        "CITY_NAME"
+    ],
+    "cclfMapping": [
+        "CCLF8.GEO_ZIP_PLC_NAME"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "address[N].city",
+            "fhirPath": "address[%n].city",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "This will only be populated if the request header parameter includeAddressFields is set to True.",
+            "example": "[\\n  \"PODUNK\"\\n]"
+        }
+    ]
+}

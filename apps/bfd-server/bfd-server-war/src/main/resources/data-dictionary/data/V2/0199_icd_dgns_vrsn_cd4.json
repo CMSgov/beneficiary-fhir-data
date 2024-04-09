@@ -1,0 +1,46 @@
+{
+    "id": 199,
+    "name": "Diagnosis Code 4 Version",
+    "description": "The code used to indicate if the diagnosis code is ICD-9/ICD-10.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_dgns_vrsn_cd4",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosis4CodeVersion",
+    "ccwMapping": [
+        "ICD_DGNS_VRSN_CD4"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].system",
+            "fhirPath": "diagnosis.where(type.coding.where(code='secondary' or code='other'))[3].diagnosisCodeableConcept.coding.where(system='http://hl7.org/fhir/sid/icd-10-cm').system",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'http://terminology.hl7.org/CodeSystem/ex-diagnosistype'",
+                "diagnosis[N].type[N].coding[N].code IN ('other','secondary') "
+            ],
+            "additional": [],
+            "derived": "IF eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' THEN diagnosis code is ICD-9.  IF eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10-cm' THEN diagnosis code is ICD-10",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n    \"code\": \"B05\",\\n    \"display\": \"MEASLES\"\\n  },\\n  {\\n    \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n    \"code\": \"B05\",\\n    \"display\": \"MEASLES\"\\n  }\\n]"
+        }
+    ]
+}

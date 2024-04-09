@@ -1,0 +1,41 @@
+{
+    "id": 30,
+    "name": "Claim Admission Date",
+    "description": "On an institutional claim, the date the beneficiary was admitted to the hospital, skilled nursing facility, or religious non-medical health care institution. When this variable appears in the HHA claims (Short Name = HHSTRTDT), it is the date the care began for the HHA services reported on the claim.",
+    "appliesTo": [
+        "Inpatient",
+        "HHA",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_admsn_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "claimAdmissionDate",
+    "ccwMapping": [
+        "CLM_ADMSN_DT"
+    ],
+    "cclfMapping": [
+        "CCLFA.CLM_ACTV_CARE_FROM_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "hospitalization.period.start",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

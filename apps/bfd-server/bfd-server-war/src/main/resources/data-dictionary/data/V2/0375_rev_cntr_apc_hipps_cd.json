@@ -1,0 +1,34 @@
+{
+    "id": 375,
+    "name": "APC/HIPPS Code",
+    "description": "This field contains one of two potential pieces of data; the Ambulatory Payment Classification (APC) code or the Health Insurance Prospective Payment System (HIPPS) code, which corresponds with the revenue center line for the claim.",
+    "appliesTo": [
+        "Outpatient",
+        "HHA"
+    ],
+    "suppliedIn": [],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_apc_hipps_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "apcOrHippsCode",
+    "ccwMapping": [
+        "REV_CNTR_APC_HIPPS_CD"
+    ],
+    "cclfMapping": [
+        "CCLF2.CLM_REV_APC_HIPPS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

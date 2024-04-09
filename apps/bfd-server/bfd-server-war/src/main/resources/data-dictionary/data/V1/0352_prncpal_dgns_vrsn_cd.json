@@ -1,0 +1,46 @@
+{
+    "id": 352,
+    "name": "Principal Diagnosis Code Version",
+    "description": "The code used to indicate if the diagnosis code is ICD-9/ICD-10.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prncpal_dgns_vrsn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisPrincipalCodeVersion",
+    "ccwMapping": [
+        "PRNCPAL_DGNS_VRSN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].system",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/diagnosis-type'",
+                "diagnosis[N].type[N].coding[N].code = 'principal' "
+            ],
+            "additional": [],
+            "derived": "IF = 9 then eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' IF = 0  eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

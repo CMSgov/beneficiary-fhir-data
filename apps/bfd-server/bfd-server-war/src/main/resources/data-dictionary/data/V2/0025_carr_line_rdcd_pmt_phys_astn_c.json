@@ -1,0 +1,43 @@
+{
+    "id": 25,
+    "name": "Reduced Payment Physician Assistant Code",
+    "description": "The code on the carrier (non-DMERC) line item that identifies the line items that have been paid a reduced fee schedule amount (65%, 75% or 85%) because a physician's assistant performed the service.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "carr_line_rdcd_pmt_phys_astn_c",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "reducedPaymentPhysicianAsstCode",
+    "ccwMapping": [
+        "CARR_LINE_RDCD_PMT_PHYS_ASTN_C"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].reason.coding[N].code",
+            "fhirPath": "item[%n].adjudication.reason.where(coding.system = 'https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c').coding.code",
+            "discriminator": [
+                "item[N].adjudication[N].reason.coding.system = 'https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator'",
+                "eob.item[N].adjudication[N].category.code = 'denialreason'",
+                "eob.item[N].adjudication[N].category.display = 'Denial Reason'",
+                "eob.item[N].adjudication[N].reason.coding.display = 'N/A'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"coding\": [\\n      {\\n        \"system\": \"https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c\",\\n        \"code\": \"0\",\\n        \"display\": \"N/A\"\\n      }\\n    ]\\n  }\\n]"
+        }
+    ]
+}

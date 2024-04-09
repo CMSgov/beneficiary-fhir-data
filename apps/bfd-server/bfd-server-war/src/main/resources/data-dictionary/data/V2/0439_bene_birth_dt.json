@@ -1,0 +1,39 @@
+{
+    "id": 439,
+    "name": "Beneficiary Birth Date",
+    "description": "This is the beneficiary's date of birth.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_birth_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "birthDate",
+    "ccwMapping": [
+        "BENE_BIRTH_DT"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_DOB"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "birthDate",
+            "fhirPath": "birthDate",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "Date Format: YYYY-MM-DD",
+            "example": "[\\n  \"1981-03-17\"\\n]"
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "id": 434,
+    "name": "Beneficiary Derived Mailing Line Three Address",
+    "description": "The third line of the street address.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "drvd_line_3_adr",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 40,
+    "bfdJavaFieldName": "derivedMailingAddress3",
+    "ccwMapping": [
+        "DRVD_LINE_3_ADR"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_LINE_3_ADR"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "address[N].line[N]",
+            "fhirPath": "address[%n].line[2]",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "This will only be populated if the request header parameter includeAddressFields is set to True.",
+            "example": "[\\n  \"SURREY\"\\n]"
+        }
+    ]
+}

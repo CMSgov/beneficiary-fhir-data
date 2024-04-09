@@ -1,0 +1,40 @@
+{
+    "id": 430,
+    "name": "State Code for Beneficiary",
+    "description": "The social security administration (SSA) standard 2-digit state code of a beneficiary's residence.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_state_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "stateCode",
+    "ccwMapping": [
+        "BENE_STATE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_FIPS_STATE_CD",
+        " CCLF8. GEO_USPS_STATE_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "address[N].state",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "This is always populated regardless of the request header parameter includeAddressFields (True or False)",
+            "example": ""
+        }
+    ]
+}

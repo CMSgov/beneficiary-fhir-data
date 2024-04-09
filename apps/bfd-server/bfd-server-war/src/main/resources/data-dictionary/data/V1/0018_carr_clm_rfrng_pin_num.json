@@ -1,0 +1,37 @@
+{
+    "id": 18,
+    "name": "Referring Provider Id Number",
+    "description": "The provider identification number (PIN) of the physician/supplier (assigned by the MAC) who referred the beneficiary to the physician who ordered these services.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_rfrng_pin_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 14,
+    "bfdJavaFieldName": "referringProviderIdNumber",
+    "ccwMapping": [
+        "CARR_CLM_RFRNG_PIN_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

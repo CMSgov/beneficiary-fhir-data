@@ -1,0 +1,53 @@
+{
+    "id": 131,
+    "name": "Diagnosis Code 1",
+    "description": "The diagnosis code identifying the beneficiary's diagnosis.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_dgns_cd1",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosis1Code",
+    "ccwMapping": [
+        "ICD_DGNS_CD1"
+    ],
+    "cclfMapping": [
+        "CCLF4.CLM_DGNS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/diagnosis-type'",
+                "diagnosis[N].type[N].coding[N].code = 'principal'"
+            ],
+            "additional": [
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis"
+            ],
+            "derived": "",
+            "note": "The first diagnosis in the list is also marked as the Principal Diagnosis within the list of diagnosis even if there is a supplied principal diagnosis and they have different values.",
+            "example": ""
+        }
+    ]
+}

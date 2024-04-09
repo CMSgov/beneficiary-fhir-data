@@ -1,0 +1,98 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "C4BBAdjudication",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system <code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication</code> defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">coinsurance<a name=\"C4BBAdjudication-coinsurance\"> </a></td><td>Co-insurance</td><td>The amount the insured individual pays, as a set percentage of the cost of covered medical services, as an out-of-pocket payment to the provider. Example: Insured pays 20% and the insurer pays 80%.</td></tr><tr><td style=\"white-space:nowrap\">noncovered<a name=\"C4BBAdjudication-noncovered\"> </a></td><td>Noncovered</td><td>The portion of the cost of this service that was deemed not eligible by the insurer because the service or member was not covered by the subscriber contract.</td></tr><tr><td style=\"white-space:nowrap\">priorpayerpaid<a name=\"C4BBAdjudication-priorpayerpaid\"> </a></td><td>Prior payer paid</td><td>The reduction in the payment amount to reflect the carrier as a secondary payer.</td></tr><tr><td style=\"white-space:nowrap\">paidbypatient<a name=\"C4BBAdjudication-paidbypatient\"> </a></td><td>Paid by patient</td><td>The total amount paid by the patient without specifying the source.</td></tr><tr><td style=\"white-space:nowrap\">paidbypatientcash<a name=\"C4BBAdjudication-paidbypatientcash\"> </a></td><td>Paid by patient - cash</td><td>The amount paid by the patient using cash, check, or other personal account.</td></tr><tr><td style=\"white-space:nowrap\">paidbypatientother<a name=\"C4BBAdjudication-paidbypatientother\"> </a></td><td>Paid by patient - other</td><td>The amount paid by the patient using a method different than cash (cash, check, or personal account) or health account.</td></tr><tr><td style=\"white-space:nowrap\">paidbypatienthealthaccount<a name=\"C4BBAdjudication-paidbypatienthealthaccount\"> </a></td><td>Paid by patient - health account</td><td>The amount paid by the patient using another method like HSA, HRA, FSA or other type of health account.</td></tr><tr><td style=\"white-space:nowrap\">paidtoprovider<a name=\"C4BBAdjudication-paidtoprovider\"> </a></td><td>Paid to provider</td><td>The amount paid to the provider.</td></tr><tr><td style=\"white-space:nowrap\">paidtopatient<a name=\"C4BBAdjudication-paidtopatient\"> </a></td><td>Paid to patient</td><td>paid to patient</td></tr><tr><td style=\"white-space:nowrap\">memberliability<a name=\"C4BBAdjudication-memberliability\"> </a></td><td>Member liability</td><td>The amount of the member's liability.</td></tr><tr><td style=\"white-space:nowrap\">discount<a name=\"C4BBAdjudication-discount\"> </a></td><td>Discount</td><td>The amount of the discount</td></tr><tr><td style=\"white-space:nowrap\">drugcost<a name=\"C4BBAdjudication-drugcost\"> </a></td><td>Drug cost</td><td>Price paid for the drug excluding mfr or other discounts.  It typically is the sum of the following components: ingredient cost, dispensing fee, sales tax, and vaccine administration</td></tr></table></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+  "version": "2.0.0",
+  "name": "C4BBAdjudication",
+  "title": "C4BB Adjudication Code System",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "Describes the various amount fields used when payers receive and adjudicate a claim.  It complements the values defined in http://terminology.hl7.org/CodeSystem/adjudication.\n\nThis is a code system defined locally by the CARIN BlueButton IG. As this IG matures, it is expected that this CodeSystem will be migrated to THO (terminology.hl7.org). The current CodeSystem url should be considered temporary and subject to change in a future version.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This CodeSystem is not copyrighted.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 12,
+  "concept": [
+    {
+      "code": "coinsurance",
+      "display": "Co-insurance",
+      "definition": "The amount the insured individual pays, as a set percentage of the cost of covered medical services, as an out-of-pocket payment to the provider. Example: Insured pays 20% and the insurer pays 80%."
+    },
+    {
+      "code": "noncovered",
+      "display": "Noncovered",
+      "definition": "The portion of the cost of this service that was deemed not eligible by the insurer because the service or member was not covered by the subscriber contract."
+    },
+    {
+      "code": "priorpayerpaid",
+      "display": "Prior payer paid",
+      "definition": "The reduction in the payment amount to reflect the carrier as a secondary payer."
+    },
+    {
+      "code": "paidbypatient",
+      "display": "Paid by patient",
+      "definition": "The total amount paid by the patient without specifying the source."
+    },
+    {
+      "code": "paidbypatientcash",
+      "display": "Paid by patient - cash",
+      "definition": "The amount paid by the patient using cash, check, or other personal account."
+    },
+    {
+      "code": "paidbypatientother",
+      "display": "Paid by patient - other",
+      "definition": "The amount paid by the patient using a method different than cash (cash, check, or personal account) or health account."
+    },
+    {
+      "code": "paidbypatienthealthaccount",
+      "display": "Paid by patient - health account",
+      "definition": "The amount paid by the patient using another method like HSA, HRA, FSA or other type of health account."
+    },
+    {
+      "code": "paidtoprovider",
+      "display": "Paid to provider",
+      "definition": "The amount paid to the provider."
+    },
+    {
+      "code": "paidtopatient",
+      "display": "Paid to patient",
+      "definition": "paid to patient"
+    },
+    {
+      "code": "memberliability",
+      "display": "Member liability",
+      "definition": "The amount of the member's liability."
+    },
+    {
+      "code": "discount",
+      "display": "Discount",
+      "definition": "The amount of the discount"
+    },
+    {
+      "code": "drugcost",
+      "display": "Drug cost",
+      "definition": "Price paid for the drug excluding mfr or other discounts.  It typically is the sum of the following components: ingredient cost, dispensing fee, sales tax, and vaccine administration"
+    }
+  ]
+}

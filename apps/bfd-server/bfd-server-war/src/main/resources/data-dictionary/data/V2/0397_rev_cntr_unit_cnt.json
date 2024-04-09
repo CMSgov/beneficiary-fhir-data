@@ -1,0 +1,45 @@
+{
+    "id": 397,
+    "name": "Revenue Center Unit Count",
+    "description": "A quantitative measure (unit) of the number of times the service or procedure being reported was performed according to the revenue center/HCPCS code definition as described on an institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_unit_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "unitCount",
+    "ccwMapping": [
+        "REV_CNTR_UNIT_CNT"
+    ],
+    "cclfMapping": [
+        "CCLF2.CLM_LINE_SRVC_UNIT_QTY"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N]extension[N].valueQuantity.value",
+            "fhirPath": "item[%n].extension.where(url='https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt').valueQuantity.value",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_unit_cnt'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "Technically speaking, this field should be in the eob.item.quantity, but since there is another value that was mapped, at least in V2, to this location, we are using an extension to store this value.",
+            "example": ""
+        }
+    ]
+}

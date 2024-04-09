@@ -1,0 +1,45 @@
+{
+    "id": 267,
+    "name": "HCT/HGB Test Type Code",
+    "description": "The type of test that was performed \u2014 hematocrit or hemoglobin.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_hct_hgb_type_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "hctHgbTestTypeCode",
+    "ccwMapping": [
+        "LINE_HCT_HGB_TYPE_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "contained[N].code.coding.code",
+            "fhirPath": "contained.where(resourceType='Observation' and code.coding.system='https://bluebutton.cms.gov/resources/variables/line_hct_hgb_type_cd').code.coding.code",
+            "discriminator": [
+                "contained[N].resourceType = 'Observation'",
+                "contained[N].code.coding.system = 'https://bluebutton.cms.gov/resources/variables/line_hct_hgb_type_cd'"
+            ],
+            "additional": [
+                "eob.contained[N].id = <unique identifier derived 'line-observation-#'> (ie.. line-observation-6)",
+                "eob.contained[N].status = 'unknown'",
+                "eob.contained[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].value.valuereference = #<unique identifier derived '#line-observation-#'> (ie.. #line-observation-6)"
+            ],
+            "derived": "",
+            "note": "The value stored in eob.contained[N].id will match the value stored in eob.supportingInfo[N].valueReference.value. It will be the code generated unique identifier for the observation.",
+            "example": "[\\n  {\\n    \"resourceType\": \"Observation\",\\n    \"id\": \"line-observation-6\",\\n    \"status\": \"unknown\",\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/line_hct_hgb_type_cd\",\\n          \"code\": \"R1\",\\n          \"display\": \"Hemoglobin Test\"\\n        }\\n      ]\\n    },\\n    \"valueQuantity\": {\\n      \"value\": 42\\n    }\\n  }\\n]"
+        }
+    ]
+}

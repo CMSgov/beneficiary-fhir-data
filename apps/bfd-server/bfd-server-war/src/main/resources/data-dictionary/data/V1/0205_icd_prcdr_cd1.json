@@ -1,0 +1,42 @@
+{
+    "id": 205,
+    "name": "Procedure Code 1",
+    "description": "The code that indicates the procedure performed during the period covered by the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_prcdr_cd1",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "procedure1Code",
+    "ccwMapping": [
+        "ICD_PRCDR_CD1"
+    ],
+    "cclfMapping": [
+        "CCLF3.CLM_PRCDR_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "procedure[N].procedureCodeableConcept.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "IF = 9 then eob.procedure[N].procedureCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' IF = 0  eob.procedure[N].procedureCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

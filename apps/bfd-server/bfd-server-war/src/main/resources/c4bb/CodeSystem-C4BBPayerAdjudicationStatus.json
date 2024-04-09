@@ -1,0 +1,68 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "C4BBPayerAdjudicationStatus",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system <code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus</code> defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">innetwork<a name=\"C4BBPayerAdjudicationStatus-innetwork\"> </a></td><td>In Network</td><td>Indicates an in network status in relation to a patient's coverage</td></tr><tr><td style=\"white-space:nowrap\">outofnetwork<a name=\"C4BBPayerAdjudicationStatus-outofnetwork\"> </a></td><td>Out Of Network</td><td>Indicates a not in network status in relation to a patient's coverage</td></tr><tr><td style=\"white-space:nowrap\">other<a name=\"C4BBPayerAdjudicationStatus-other\"> </a></td><td>Other</td><td>Indicates other network status or when a network does not apply</td></tr><tr><td style=\"white-space:nowrap\">paid<a name=\"C4BBPayerAdjudicationStatus-paid\"> </a></td><td>Paid</td><td>Indicates if the claim was approved for payment</td></tr><tr><td style=\"white-space:nowrap\">denied<a name=\"C4BBPayerAdjudicationStatus-denied\"> </a></td><td>Denied</td><td>Indicates if the claim was denied</td></tr><tr><td style=\"white-space:nowrap\">partiallypaid<a name=\"C4BBPayerAdjudicationStatus-partiallypaid\"> </a></td><td>Partially Paid</td><td>Indicates that some line items on the claim were denied</td></tr></table></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+  "version": "2.0.0",
+  "name": "C4BBPayerAdjudicationStatus",
+  "title": "C4BB Payer Adjudication Status Code System",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "Describes the various status fields used when payers adjudicate a claim, such as whether the claim was adjudicated in or out of network, if the provider was in or not in network for the service.\n\nThis is a code system defined locally by the CARIN BlueButton IG. As this IG matures, it is expected that this CodeSystem will be migrated to THO (terminology.hl7.org). The current CodeSystem url should be considered temporary and subject to change in a future version.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This CodeSystem is not copyrighted.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 6,
+  "concept": [
+    {
+      "code": "innetwork",
+      "display": "In Network",
+      "definition": "Indicates an in network status in relation to a patient's coverage"
+    },
+    {
+      "code": "outofnetwork",
+      "display": "Out Of Network",
+      "definition": "Indicates a not in network status in relation to a patient's coverage"
+    },
+    {
+      "code": "other",
+      "display": "Other",
+      "definition": "Indicates other network status or when a network does not apply"
+    },
+    {
+      "code": "paid",
+      "display": "Paid",
+      "definition": "Indicates if the claim was approved for payment"
+    },
+    {
+      "code": "denied",
+      "display": "Denied",
+      "definition": "Indicates if the claim was denied"
+    },
+    {
+      "code": "partiallypaid",
+      "display": "Partially Paid",
+      "definition": "Indicates that some line items on the claim were denied"
+    }
+  ]
+}

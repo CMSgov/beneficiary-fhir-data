@@ -1,0 +1,49 @@
+{
+    "id": 314,
+    "name": "Other Physician NPI",
+    "description": "On an institutional claim, the National Provider Identifier (NPI) number assigned to uniquely identify the other physician associated with the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "ot_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "otherPhysicianNpi",
+    "ccwMapping": [
+        "OT_PHYSN_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF1.OTHR_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "careTeam.where(role.coding.where(code = 'otheroperating')).provider.identifier.where(type.coding.where(code='npi')).value",
+            "discriminator": [
+                "careTeam[N].role.coding[N].code = 'otheroperating'",
+                "careTeam[N].provider.identifier[N].type.coding[N].code = 'npi'"
+            ],
+            "additional": [
+                "(eob.careTeam[N].provider.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'National Provider Identifier')",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole'",
+                "eob.careTeam[N].role.coding[N].display = 'Other Operating')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"161943433\"\\n  }\\n]"
+        }
+    ]
+}

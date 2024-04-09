@@ -1,0 +1,41 @@
+{
+    "id": 62,
+    "name": "Pass Through Per Diem Amount",
+    "description": "Medicare establishes a daily payment amount to reimburse IPPS hospitals for certain \u201cpass-through\u201d expenses, such as capital-related costs, direct medical education costs, kidney acquisition costs for hospitals that are renal transplant centers, and bad debts. This variable is the daily payment rate for pass-through expenses.",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pass_thru_per_diem_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "passThruPerDiemAmount",
+    "ccwMapping": [
+        "CLM_PASS_THRU_PER_DIEM_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_pass_thru_per_diem_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

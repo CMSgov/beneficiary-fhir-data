@@ -1,0 +1,45 @@
+{
+    "id": 289,
+    "name": "Blood Pints Furnished Quantity",
+    "description": "Number of whole pints of blood furnished to the beneficiary, as reported on the carrier claim (non-DMERC).",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_blood_pnts_frnshd_qty",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "bloodPintsFurnishedQty",
+    "ccwMapping": [
+        "NCH_BLOOD_PNTS_FRNSHD_QTY"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].valueQuantity.value",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty'"
+            ],
+            "additional": [
+                "eob.information[N].category.coding[N].display = 'NCH Blood Pints Furnished Quantity'",
+                "eob.information[N].valueQuality.unit = 'pint'",
+                "eob.information[N].valueQuality.system = 'http://unitsofmeasure.org'",
+                "eob.information[N].valueQuality.code = '[pt_us]'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

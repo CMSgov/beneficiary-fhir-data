@@ -1,0 +1,42 @@
+{
+    "id": 412,
+    "name": "Service Provider Id",
+    "description": "This variable is the identification number for the pharmacy or physicians' office that dispensed the drug, as reported by the Part D sponsor on the PDE record submitted to CMS.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "srvc_prvdr_id",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "serviceProviderId",
+    "ccwMapping": [
+        "SRVC_PRVDR_ID"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_SRVC_PRVDR_GNRC_ID_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "facility.identifier[N].value;organization.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [
+                "eob.facility.display = {corresponding description from valueset specified in .system}",
+                "eob.organization.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "If serviceProviderIdQualiferCode = 01  then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi' AND eob.organization.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi' else if serviceProviderIdQualifierCode = 06 then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-upin' AND eob.organization.identifier[N].system = 'http://hl7.org/fhir/sid/us-upin' else if serviceProviderIdQualifierCode = 07 then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-ncpdp' AND eob.organization.identifier[N].system = 'http://hl7.org/fhir/sid/us-ncpdp' else if serviceProviderIdQualifierCode = 08 then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-sl' AND eob.organization.identifier[N].system = 'http://hl7.org/fhir/sid/us-sl' else if serviceProviderIdQualifierCode = 11 then eob.facility.identifier[N].system = 'http://hl7.org/fhir/sid/us-tax' AND eob.organization.identifier[N].system = 'http://hl7.org/fhir/sid/us-tax'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

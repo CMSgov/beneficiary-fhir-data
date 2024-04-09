@@ -1,0 +1,35 @@
+{
+    "id": 608,
+    "name": "Contract Identifier",
+    "description": "Identifier for the policy(s) which constitute this insurance coverage.",
+    "appliesTo": [
+        "Part-A"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "id": 415,
+    "name": "Provider Tax Number",
+    "description": "The federal taxpayer identification number (TIN) that identifies the physician/practice/supplier to whom payment is made for the line-item service.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "tax_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "providerTaxNumber",
+    "ccwMapping": [
+        "TAX_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_RNDRG_PRVDR_TAX_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].system = 'http://terminology.hl7.org/CodeSystem/v2-0203'",
+                "careTeam[N].role.coding[N].code = 'other'"
+            ],
+            "additional": [
+                "eob.careTeam[N].role.coding[N].display = 'Other'",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/claimcareteamrole'"
+            ],
+            "derived": "",
+            "note": "The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamLinkId list.",
+            "example": ""
+        }
+    ]
+}

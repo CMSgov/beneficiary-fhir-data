@@ -1,0 +1,47 @@
+{
+    "id": 396,
+    "name": "Revenue Center Total Charge Amount",
+    "description": "The total charges (covered and non-covered) for all accommodations and services (related to the revenue code) for a billing period before reduction for the deductible and coinsurance amounts and before an adjustment for the cost of services provided.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_tot_chrg_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "totalChargeAmount",
+    "ccwMapping": [
+        "REV_CNTR_TOT_CHRG_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_tot_chrg_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Revenue Center Total Charge Amount'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

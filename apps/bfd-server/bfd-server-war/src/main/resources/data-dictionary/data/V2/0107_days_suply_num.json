@@ -1,0 +1,44 @@
+{
+    "id": 107,
+    "name": "Days Supply",
+    "description": "This field indicates the number of days' supply of medication dispensed by the pharmacy and consists of the amount the pharmacy enters for the prescription.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "days_suply_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "daysSupply",
+    "ccwMapping": [
+        "DAYS_SUPLY_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_DAYS_SUPLY_QTY"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].valueQuantity.value",
+            "fhirPath": "supportingInfo.where(category.coding.where(code='dayssupply')).valueQuantity.value",
+            "discriminator": [
+                "supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "supportingInfo[N].category.coding[N].code = 'dayssupply'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].category.coding[N].display = 'Days Supply'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 3,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"dayssupply\",\\n          \"display\": \"Days Supply\"\\n        }\\n      ]\\n    },\\n    \"valueQuantity\": {\\n      \"value\": 30\\n    }\\n  }\\n]"
+        }
+    ]
+}

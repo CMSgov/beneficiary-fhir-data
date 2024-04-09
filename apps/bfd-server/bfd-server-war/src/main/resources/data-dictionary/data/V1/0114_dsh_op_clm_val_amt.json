@@ -1,0 +1,44 @@
+{
+    "id": 114,
+    "name": "Operating Disproportionate Share Amount",
+    "description": "This is one component of the total amount that is payable on prospective payment system (PPS) claims and reflects the DSH (disproportionate share hospital) payments for operating expenses (such as labor) for the claim.",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "dsh_op_clm_val_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "disproportionateShareAmount",
+    "ccwMapping": [
+        "DSH_OP_CLM_VAL_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_OPRTNL_DSPRTNT_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/dsh_op_clm_val_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].valueMoney.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

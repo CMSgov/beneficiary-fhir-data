@@ -1,0 +1,50 @@
+{
+    "id": 129,
+    "name": "HCPCS Code",
+    "description": "The Healthcare Common Procedure Coding System (HCPCS) is a collection of codes that represent procedures, supplies, products, and services which may be provided to Medicare beneficiaries and to individuals enrolled in private health insurance programs.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "hcpcs_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "hcpcsCode",
+    "ccwMapping": [
+        "HCPCS_CD"
+    ],
+    "cclfMapping": [
+        "CCLF2.CLM_LINE_HCPCS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].service.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].service.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/hcpcs'"
+            ],
+            "additional": [
+                "eob.item[N].service.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

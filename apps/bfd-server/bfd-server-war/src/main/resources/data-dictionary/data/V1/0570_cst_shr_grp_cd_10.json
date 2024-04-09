@@ -1,0 +1,41 @@
+{
+    "id": 570,
+    "name": "Part D Low Income Cost Share Group Code - October",
+    "description": "This variable indicates the beneficiary\u2019s Part D low-income subsidy cost sharing group for a given month (January). The Part D benefit requires enrollees to pay both premiums and cost-sharing, but the program also has a low-income subsidy (LIS) that covers some or all of those costs for certain lowincome individuals, including deductibles and cost-sharing during the coverage gap.",
+    "appliesTo": [
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "cst_shr_grp_cd_10",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "partDLowIncomeCostShareGroupOctCode",
+    "ccwMapping": [
+        "CST_SHR_GRP_CD_10"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/cstshr10'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/cstshr10'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

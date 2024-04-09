@@ -1,0 +1,49 @@
+{
+  "resourceType": "ValueSet",
+  "id": "C4BBTransportationServiceCategories",
+  "text": {
+    "status": "extensions",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Include these codes as defined in <a href=\"CodeSystem-C4BBSupportingInfoType.html\"><code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType</code></a><table class=\"none\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td><a href=\"CodeSystem-C4BBSupportingInfoType.html#C4BBSupportingInfoType-patientweight\">patientweight</a></td><td>Patient Weight</td><td>Patient weight (for transportation services)</td></tr><tr><td><a href=\"CodeSystem-C4BBSupportingInfoType.html#C4BBSupportingInfoType-ambulancetransportreason\">ambulancetransportreason</a></td><td>Ambulance Transport Reason</td><td>Reason ambulance transport was needed (for transportation services)</td></tr><tr><td><a href=\"CodeSystem-C4BBSupportingInfoType.html#C4BBSupportingInfoType-transportationdistance\">transportationdistance</a></td><td>Transportation Distance</td><td>Distance traveled (for transportation services)</td></tr><tr><td><a href=\"CodeSystem-C4BBSupportingInfoType.html#C4BBSupportingInfoType-roudtrippurpose\">roudtrippurpose</a></td><td>Round Trip Purpose</td><td>Reason for round trip (for transportation services)</td></tr><tr><td><a href=\"CodeSystem-C4BBSupportingInfoType.html#C4BBSupportingInfoType-stretcherpurpose\">stretcherpurpose</a></td><td>Stretcher Purpose</td><td>Purpose of using a stretcher (for transportation services)</td></tr><tr><td><a href=\"CodeSystem-C4BBSupportingInfoType.html#C4BBSupportingInfoType-pickuplocation\">pickuplocation</a></td><td>Pick-up Location</td><td>Patient pick-up Location (for transportation services)</td></tr><tr><td><a href=\"CodeSystem-C4BBSupportingInfoType.html#C4BBSupportingInfoType-dropofflocation\">dropofflocation</a></td><td>Drop-off Location</td><td>Patient drop-off location (for transportation services)</td></tr></table></li></ul></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBTransportationServiceCategories",
+  "version": "2.0.0",
+  "name": "C4BBTransportationServiceCategories",
+  "title": "C4BB Transportation Services Categories Value Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "Transportation Services Supporting Info Category Codes",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This Valueset is not copyrighted.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "concept": [
+          { "code": "patientweight" },
+          { "code": "ambulancetransportreason" },
+          { "code": "transportationdistance" },
+          { "code": "roudtrippurpose" },
+          { "code": "stretcherpurpose" },
+          { "code": "pickuplocation" },
+          { "code": "dropofflocation" }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+    "id": 323,
+    "name": "Procedure Code 1 Date",
+    "description": "The date on which the procedure was performed. The date associated with the procedure identified in the corresponding procedure code.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prcdr_dt1",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "procedure1Date",
+    "ccwMapping": [
+        "PRCDR_DT1"
+    ],
+    "cclfMapping": [
+        "CCLF3.CLM_PRCDR_PRFRM_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "procedure[N].date",
+            "fhirPath": "procedure[0].date",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "Procedure Date is stored in conjunction with it's related Procedure Code and Procedure Code Version within the eob.procedure[N].procedureCodeableConcept.coding. Ie.. Procedure Date 1 will be stored with the Procedure Code 1 etc\u2026",
+            "example": "[\\n  \"2016-01-16T00:00:00+00:00\"\\n]"
+        }
+    ]
+}

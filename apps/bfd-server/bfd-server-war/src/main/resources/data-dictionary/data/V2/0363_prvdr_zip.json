@@ -1,0 +1,39 @@
+{
+    "id": 363,
+    "name": "Provider Zip Code",
+    "description": "The ZIP code of the physician/supplier who performed the Part B service for this line item on the carrier claim (non-DMERC).",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prvdr_zip",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 9,
+    "bfdJavaFieldName": "providerZipCode",
+    "ccwMapping": [
+        "PRVDR_ZIP"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].locationCodeableConcept.extension[N].valueCoding.code",
+            "fhirPath": "item[%n].locationCodeableConcept.extension.where(url = 'https://bluebutton.cms.gov/resources/variables/prvdr_zip').valueCoding.code",
+            "discriminator": [
+                "item[N].locationCodeableConcept.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/prvdr_zip'",
+                "item[N].locationCodeableConcept.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/prvdr_zip'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/prvdr_zip\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/prvdr_zip\",\\n      \"code\": \"555558202\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

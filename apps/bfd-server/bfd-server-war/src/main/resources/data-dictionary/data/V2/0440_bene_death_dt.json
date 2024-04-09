@@ -1,0 +1,39 @@
+{
+    "id": 440,
+    "name": "Beneficiary Death Date",
+    "description": "This variable indicates the date of death of the beneficiary. A null value means that no death date was reported for the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_death_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "beneficiaryDateOfDeath",
+    "ccwMapping": [
+        "BENE_DEATH_DT"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_DEATH_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "deceasedDateTime",
+            "fhirPath": "deceasedDateTime",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "Date Format: YYYY-MM-DD",
+            "example": "[\\n  \"1981-03-17\"\\n]"
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "id": 135,
+    "name": "Diagnosis Code 13",
+    "description": "The diagnosis code identifying the beneficiary's diagnosis.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_dgns_cd13",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosis13Code",
+    "ccwMapping": [
+        "ICD_DGNS_CD13"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

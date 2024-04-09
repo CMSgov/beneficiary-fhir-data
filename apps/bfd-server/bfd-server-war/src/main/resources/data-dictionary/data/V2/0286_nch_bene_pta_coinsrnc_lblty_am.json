@@ -1,0 +1,43 @@
+{
+    "id": 286,
+    "name": "Part A Coinsurance Liability Amount",
+    "description": "The amount of money for which the intermediary has determined that the beneficiary is liable for Part A coinsurance on the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_bene_pta_coinsrnc_lblty_am",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "partACoinsuranceLiabilityAmount",
+    "ccwMapping": [
+        "NCH_BENE_PTA_COINSRNC_LBLTY_AM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedMoney.value",
+            "fhirPath": "benefitBalance[%n].financial.where(type.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/benefit-balance' and code='https://bluebutton.cms.gov/resources/variables/nch_bene_pta_coinsrnc_lblty_amt')).usedMoney.value",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_bene_pta_coinsrnc_lblty_amt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'NCH Beneficiary Part A Coinsurance Liability Amount'",
+                "eob.benefitBalance[N].financial[N].usedMoney.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/benefit-balance\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/nch_bene_pta_coinsrnc_lblty_amt\",\\n          \"display\": \"NCH Beneficiary Part A Coinsurance Liability Amount\"\\n        }\\n      ]\\n    },\\n    \"usedMoney\": {\\n      \"value\": 5,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

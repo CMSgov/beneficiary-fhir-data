@@ -1,0 +1,38 @@
+{
+    "id": 315,
+    "name": "Other Physician UPIN",
+    "description": "On an institutional claim, the unique physician identification number (UPIN) of the other physician associated with the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "ot_physn_upin",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 6,
+    "bfdJavaFieldName": "otherPhysicianUpin",
+    "ccwMapping": [
+        "OT_PHYSN_UPIN"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

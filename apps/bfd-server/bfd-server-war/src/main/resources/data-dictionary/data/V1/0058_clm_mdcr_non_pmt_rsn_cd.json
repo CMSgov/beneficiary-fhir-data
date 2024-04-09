@@ -1,0 +1,46 @@
+{
+    "id": 58,
+    "name": "Claim Non Payment Reason Code",
+    "description": "The reason that no Medicare payment is made for services on an institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_mdcr_non_pmt_rsn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "claimNonPaymentReasonCode",
+    "ccwMapping": [
+        "CLM_MDCR_NON_PMT_RSN_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_MDCR_NPMT_RSN_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

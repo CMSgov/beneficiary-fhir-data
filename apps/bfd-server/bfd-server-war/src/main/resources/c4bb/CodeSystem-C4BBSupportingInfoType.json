@@ -1,0 +1,178 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "C4BBSupportingInfoType",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system <code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType</code> defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">admissionperiod<a name=\"C4BBSupportingInfoType-admissionperiod\"> </a></td><td>Admission Period</td><td>Dates corresponding with the admission and discharge of the beneficiary to a facility</td></tr><tr><td style=\"white-space:nowrap\">pointoforigin<a name=\"C4BBSupportingInfoType-pointoforigin\"> </a></td><td>Point Of Origin</td><td>UB-04 Source of Admission (FL-15) identifies the place where the patient was identified as needing admission to a facility.</td></tr><tr><td style=\"white-space:nowrap\">admtype<a name=\"C4BBSupportingInfoType-admtype\"> </a></td><td>Admission Type</td><td>UB-04 Priority of the admission (FL-14) indicates, for example, an admission type of elective indicates that the patient's condition permitted time for medical services to be scheduled.</td></tr><tr><td style=\"white-space:nowrap\">brandgenericindicator<a name=\"C4BBSupportingInfoType-brandgenericindicator\"> </a></td><td>Brand Generic Indicator</td><td>NCPDP code indicating whether the plan adjudicated the claim as a brand or generic drug.</td></tr><tr><td style=\"white-space:nowrap\">clmrecvddate<a name=\"C4BBSupportingInfoType-clmrecvddate\"> </a></td><td>Claim Received Date</td><td>Date the claim was received by the payer.</td></tr><tr><td style=\"white-space:nowrap\">compoundcode<a name=\"C4BBSupportingInfoType-compoundcode\"> </a></td><td>Compound Code</td><td>NCPDP code indicating whether or not the prescription is a compound.</td></tr><tr><td style=\"white-space:nowrap\">dawcode<a name=\"C4BBSupportingInfoType-dawcode\"> </a></td><td>DAW (Dispense As Written) Code</td><td>NCPDP code indicating the prescriber's instruction regarding substitution of generic equivalents or order to dispense the specific prescribed medication.</td></tr><tr><td style=\"white-space:nowrap\">dayssupply<a name=\"C4BBSupportingInfoType-dayssupply\"> </a></td><td>Days Supply</td><td>NCPDP value indicating the Number of days supply of medication dispensed by the pharmacy.</td></tr><tr><td style=\"white-space:nowrap\">discharge-status<a name=\"C4BBSupportingInfoType-discharge-status\"> </a></td><td>Discharge Status</td><td>UB-04 Discharge Status (FL-17) indicates the patient’s status as of the discharge date for a facility stay.</td></tr><tr><td style=\"white-space:nowrap\">drg<a name=\"C4BBSupportingInfoType-drg\"> </a></td><td>DRG</td><td>DRG (Diagnosis Related Group), including the code system, the DRG version and the code value</td></tr><tr><td style=\"white-space:nowrap\">refillnum<a name=\"C4BBSupportingInfoType-refillnum\"> </a></td><td>Refill Number</td><td>NCPDP value indicating the number fill of the current dispensed supply (0, 1, 2, etc.)</td></tr><tr><td style=\"white-space:nowrap\">refillsauthorized<a name=\"C4BBSupportingInfoType-refillsauthorized\"> </a></td><td>Refills Authorized</td><td>NCPDP value indicating the number of refills authorized by the subscriber (0, 1, 2, etc.)</td></tr><tr><td style=\"white-space:nowrap\">rxorigincode<a name=\"C4BBSupportingInfoType-rxorigincode\"> </a></td><td>Rx Origin Code</td><td>NCPDP code indicating whether the prescription was transmitted as an electronic prescription, by phone, by fax, or as a written paper copy.</td></tr><tr><td style=\"white-space:nowrap\">servicefacility<a name=\"C4BBSupportingInfoType-servicefacility\"> </a></td><td>Service Facility</td><td>The facility where the service occurred.  Examples include hospitals, nursing homes, laboratories or homeless shelters.</td></tr><tr><td style=\"white-space:nowrap\">typeofbill<a name=\"C4BBSupportingInfoType-typeofbill\"> </a></td><td>Type of Bill</td><td>UB-04 Type of Bill (FL-04) provides specific information for payer purposes.</td></tr><tr><td style=\"white-space:nowrap\">medicalrecordnumber<a name=\"C4BBSupportingInfoType-medicalrecordnumber\"> </a></td><td>Medical Record Number</td><td>Patient Medical Record Number associated with the specific claim.</td></tr><tr><td style=\"white-space:nowrap\">patientaccountnumber<a name=\"C4BBSupportingInfoType-patientaccountnumber\"> </a></td><td>Patient Account Number</td><td>Patient Account Number associated with the specific claim.</td></tr><tr><td style=\"white-space:nowrap\">orthodontics<a name=\"C4BBSupportingInfoType-orthodontics\"> </a></td><td>Orthodontics</td><td>Orthodontics treatment indicator.</td></tr><tr><td style=\"white-space:nowrap\">prosthesis<a name=\"C4BBSupportingInfoType-prosthesis\"> </a></td><td>Prosthesis</td><td>Prosthesis replacement indicator.</td></tr><tr><td style=\"white-space:nowrap\">additionalbodysite<a name=\"C4BBSupportingInfoType-additionalbodysite\"> </a></td><td>Additional Body Site</td><td>Additional tooth number or oral cavity. Additional body sites are specific to line item and have to be linked by ExplanationOfBenefit.item.informationSequence.</td></tr><tr><td style=\"white-space:nowrap\">missingtoothnumber<a name=\"C4BBSupportingInfoType-missingtoothnumber\"> </a></td><td>Missing Tooth Number</td><td>Missing tooth number.</td></tr><tr><td style=\"white-space:nowrap\">patientweight<a name=\"C4BBSupportingInfoType-patientweight\"> </a></td><td>Patient Weight</td><td>Patient weight (for transportation services)</td></tr><tr><td style=\"white-space:nowrap\">ambulancetransportreason<a name=\"C4BBSupportingInfoType-ambulancetransportreason\"> </a></td><td>Ambulance Transport Reason</td><td>Reason ambulance transport was needed (for transportation services)</td></tr><tr><td style=\"white-space:nowrap\">transportationdistance<a name=\"C4BBSupportingInfoType-transportationdistance\"> </a></td><td>Transportation Distance</td><td>Distance traveled (for transportation services)</td></tr><tr><td style=\"white-space:nowrap\">roudtrippurpose<a name=\"C4BBSupportingInfoType-roudtrippurpose\"> </a></td><td>Round Trip Purpose</td><td>Reason for round trip (for transportation services)</td></tr><tr><td style=\"white-space:nowrap\">stretcherpurpose<a name=\"C4BBSupportingInfoType-stretcherpurpose\"> </a></td><td>Stretcher Purpose</td><td>Purpose of using a stretcher (for transportation services)</td></tr><tr><td style=\"white-space:nowrap\">pickuplocation<a name=\"C4BBSupportingInfoType-pickuplocation\"> </a></td><td>Pick-up Location</td><td>Patient pick-up Location (for transportation services)</td></tr><tr><td style=\"white-space:nowrap\">dropofflocation<a name=\"C4BBSupportingInfoType-dropofflocation\"> </a></td><td>Drop-off Location</td><td>Patient drop-off location (for transportation services)</td></tr></table></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+  "version": "2.0.0",
+  "name": "C4BBSupportingInfoType",
+  "title": "C4BB Supporting Info Type Code System",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "Claim Information Category - Used as the discriminator for supportingInfo.\n\nThis is a code system defined locally by the CARIN BlueButton IG. As this IG matures, it is expected that this CodeSystem will be migrated to THO (terminology.hl7.org). The current CodeSystem url should be considered temporary and subject to change in a future version.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This CodeSystem is not copyrighted.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 28,
+  "concept": [
+    {
+      "code": "admissionperiod",
+      "display": "Admission Period",
+      "definition": "Dates corresponding with the admission and discharge of the beneficiary to a facility"
+    },
+    {
+      "code": "pointoforigin",
+      "display": "Point Of Origin",
+      "definition": "UB-04 Source of Admission (FL-15) identifies the place where theß patient was identified as needing admission to a facility."
+    },
+    {
+      "code": "admtype",
+      "display": "Admission Type",
+      "definition": "UB-04 Priority of the admission (FL-14) indicates, for example, an admission type of elective indicates that the patient's condition permitted time for medical services to be scheduled."
+    },
+    {
+      "code": "brandgenericindicator",
+      "display": "Brand Generic Indicator",
+      "definition": "NCPDP code indicating whether the plan adjudicated the claim as a brand or generic drug."
+    },
+    {
+      "code": "clmrecvddate",
+      "display": "Claim Received Date",
+      "definition": "Date the claim was received by the payer."
+    },
+    {
+      "code": "compoundcode",
+      "display": "Compound Code",
+      "definition": "NCPDP code indicating whether or not the prescription is a compound."
+    },
+    {
+      "code": "dawcode",
+      "display": "DAW (Dispense As Written) Code",
+      "definition": "NCPDP code indicating the prescriber's instruction regarding substitution of generic equivalents or order to dispense the specific prescribed medication."
+    },
+    {
+      "code": "dayssupply",
+      "display": "Days Supply",
+      "definition": "NCPDP value indicating the Number of days supply of medication dispensed by the pharmacy."
+    },
+    {
+      "code": "discharge-status",
+      "display": "Discharge Status",
+      "definition": "UB-04 Discharge Status (FL-17) indicates the patient’s status as of the discharge date for a facility stay."
+    },
+    {
+      "code": "drg",
+      "display": "DRG",
+      "definition": "DRG (Diagnosis Related Group), including the code system, the DRG version and the code value"
+    },
+    {
+      "code": "refillnum",
+      "display": "Refill Number",
+      "definition": "NCPDP value indicating the number fill of the current dispensed supply (0, 1, 2, etc.)"
+    },
+    {
+      "code": "refillsauthorized",
+      "display": "Refills Authorized",
+      "definition": "NCPDP value indicating the number of refills authorized by the subscriber (0, 1, 2, etc.)"
+    },
+    {
+      "code": "rxorigincode",
+      "display": "Rx Origin Code",
+      "definition": "NCPDP code indicating whether the prescription was transmitted as an electronic prescription, by phone, by fax, or as a written paper copy."
+    },
+    {
+      "code": "servicefacility",
+      "display": "Service Facility",
+      "definition": "The facility where the service occurred.  Examples include hospitals, nursing homes, laboratories or homeless shelters."
+    },
+    {
+      "code": "typeofbill",
+      "display": "Type of Bill",
+      "definition": "UB-04 Type of Bill (FL-04) provides specific information for payer purposes."
+    },
+    {
+      "code": "medicalrecordnumber",
+      "display": "Medical Record Number",
+      "definition": "Patient Medical Record Number associated with the specific claim."
+    },
+    {
+      "code": "patientaccountnumber",
+      "display": "Patient Account Number",
+      "definition": "Patient Account Number associated with the specific claim."
+    },
+    {
+      "code": "orthodontics",
+      "display": "Orthodontics",
+      "definition": "Orthodontics treatment indicator."
+    },
+    {
+      "code": "prosthesis",
+      "display": "Prosthesis",
+      "definition": "Prosthesis replacement indicator."
+    },
+    {
+      "code": "additionalbodysite",
+      "display": "Additional Body Site",
+      "definition": "Additional tooth number or oral cavity. Additional body sites are specific to line item and have to be linked by ExplanationOfBenefit.item.informationSequence."
+    },
+    {
+      "code": "missingtoothnumber",
+      "display": "Missing Tooth Number",
+      "definition": "Missing tooth number."
+    },
+    {
+      "code": "patientweight",
+      "display": "Patient Weight",
+      "definition": "Patient weight (for transportation services)"
+    },
+    {
+      "code": "ambulancetransportreason",
+      "display": "Ambulance Transport Reason",
+      "definition": "Reason ambulance transport was needed (for transportation services)"
+    },
+    {
+      "code": "transportationdistance",
+      "display": "Transportation Distance",
+      "definition": "Distance traveled (for transportation services)"
+    },
+    {
+      "code": "roudtrippurpose",
+      "display": "Round Trip Purpose",
+      "definition": "Reason for round trip (for transportation services)"
+    },
+    {
+      "code": "stretcherpurpose",
+      "display": "Stretcher Purpose",
+      "definition": "Purpose of using a stretcher (for transportation services)"
+    },
+    {
+      "code": "pickuplocation",
+      "display": "Pick-up Location",
+      "definition": "Patient pick-up Location (for transportation services)"
+    },
+    {
+      "code": "dropofflocation",
+      "display": "Drop-off Location",
+      "definition": "Patient drop-off location (for transportation services)"
+    }
+  ]
+}

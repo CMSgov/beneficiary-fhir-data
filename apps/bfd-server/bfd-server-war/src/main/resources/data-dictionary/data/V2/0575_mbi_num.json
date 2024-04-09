@@ -1,0 +1,54 @@
+{
+    "id": 575,
+    "name": "Medicare Beneficiary Identifier",
+    "description": "A Medicare Beneficiary Identifier (MBI) assigned to a beneficiary.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "mbi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 11,
+    "bfdJavaFieldName": "medicareBeneficiaryId",
+    "ccwMapping": [
+        "MBI_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF1.BENE_MBI_ID",
+        " CCLF2. BENE_MBI_ID",
+        " CCLF3. BENE_MBI_ID",
+        " CCLF4. BENE_MBI_ID",
+        " CCLF5. BENE_MBI_ID",
+        " CCLF6. BENE_MBI_ID",
+        " CCLF7. BENE_MBI_ID",
+        " CCLF8. BENE_MBI_ID",
+        " CCLF9. CRNT_NUM",
+        " CCLFA. BENE_MBI_ID",
+        " CCLFB. BENE_MBI_ID"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "subscriberId",
+            "fhirPath": "subscriberId",
+            "discriminator": [],
+            "additional": [
+                "coverage.relationship.coding[N].system = 'http://terminology.hl7.org/CodeSystem/subscriber-relationship'",
+                "coverage.relationship.coding[N].code = 'self' coverage.relationship.coding[N].display = 'Self'"
+            ],
+            "derived": "",
+            "note": "The Coverage Relationship is always set to 'Self' for Medicare Beneficiaries.",
+            "example": "[\\n  \"3456789\"\\n]"
+        }
+    ]
+}

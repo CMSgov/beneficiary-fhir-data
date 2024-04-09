@@ -1,0 +1,41 @@
+{
+    "id": 23,
+    "name": "Line Pricing Locality Code",
+    "description": "Code denoting the carrier-specific locality used for pricing the service for this line item on the carrier claim (non-DMERC).",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "carr_line_prcng_lclty_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "linePricingLocalityCode",
+    "ccwMapping": [
+        "CARR_LINE_PRCNG_LCLTY_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].locationCodeableConcept.extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].locationCodeableConcept.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_line_prcng_lclty_cd'"
+            ],
+            "additional": [
+                "eob.item[N].locationCodeableConcept.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "id": 11,
+    "name": "Brand Generic Code",
+    "description": "Plan reported value indicating whether the plan adjudicated the claim as a brand or generic drug.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "brnd_gnrc_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "brandGenericCode",
+    "ccwMapping": [
+        "BRND_GNRC_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd'"
+            ],
+            "additional": [
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd'",
+                "eob.information[N].category.coding[N].display = 'Brand-Generic Code Reported by Submitting Plan'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

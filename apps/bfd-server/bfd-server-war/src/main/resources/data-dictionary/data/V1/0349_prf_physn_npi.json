@@ -1,0 +1,47 @@
+{
+    "id": 349,
+    "name": "Performing Physician NPI",
+    "description": "The National Provider Identifier (NPI) assigned to the performing provider.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prf_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "performingPhysicianNpi",
+    "ccwMapping": [
+        "PRF_PHYSN_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF5.RNDRG_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi'",
+                "careTeam[N].role.coding[N].code = 'primary'"
+            ],
+            "additional": [
+                "eob.careTeam[N].responsible = true",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/claimcareteamrole'",
+                "eob.careTeam[N].role.coding[N].display = 'Primary Provider'"
+            ],
+            "derived": "",
+            "note": "The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamLinkId list.",
+            "example": ""
+        }
+    ]
+}

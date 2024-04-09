@@ -1,0 +1,38 @@
+{
+    "id": 424,
+    "name": "Previous Identifier Effective Date",
+    "description": "The date the previous identifier became active.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "efctv_bgn_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "mbiEffectiveDate",
+    "ccwMapping": [
+        "EFCTV_BGN_DT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "identifier[N].period.start",
+            "fhirPath": "",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/identifier/mbi-hash'"
+            ],
+            "additional": [],
+            "derived": "If mbiEffectiveDate and mbiObsolete Date are both null/empty, then the patient.identifier[N].period will not be present",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

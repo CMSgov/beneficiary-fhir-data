@@ -1,0 +1,45 @@
+{
+    "id": 90,
+    "name": "Claim PPS Capital Disproportionate Share Amount",
+    "description": "The amount of disproportionate share (rate reflecting indigent population served) portion of the PPS payment for capital.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pps_cptl_dsprprtnt_shr_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "claimPPSCapitalDisproportionateShareAmt",
+    "ccwMapping": [
+        "CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

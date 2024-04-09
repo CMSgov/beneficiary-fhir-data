@@ -12,7 +12,7 @@ import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.MetaModel;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
@@ -92,8 +92,9 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
    */
   private ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
-
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
+    String c4bbProfUrl = MetaModel.getC4BBProfile("ExplanationOfBenefit", "Pharmacy", "url");
+    eob.getMeta().addProfile(c4bbProfUrl);
+    //    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID

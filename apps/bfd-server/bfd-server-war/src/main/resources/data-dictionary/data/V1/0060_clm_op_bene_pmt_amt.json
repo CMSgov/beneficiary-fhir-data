@@ -1,0 +1,41 @@
+{
+    "id": 60,
+    "name": "Outpatient Beneficiary Payment Amount",
+    "description": "The amount paid, from the Medicare trust fund, to the beneficiary for the services reported on the outpatient claim.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_op_bene_pmt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "beneficiaryPaymentAmount",
+    "ccwMapping": [
+        "CLM_OP_BENE_PMT_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_op_bene_pmt_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

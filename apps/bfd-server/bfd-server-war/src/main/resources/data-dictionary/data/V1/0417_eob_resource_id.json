@@ -1,0 +1,43 @@
+{
+    "id": 417,
+    "name": "EOB Resource ID",
+    "description": "Each resource has an id element which contains the 'logical id' of the resource assigned by the server responsible for storing it.",
+    "appliesTo": [
+        "PDE",
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "id",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "<claim type> - Claim Id  OR <claim type> - Event Id",
+            "note": "<claim type> Is the short textual form of the claim type (ie\u2026 carrier, dme, or pde). For PDE (Part-D Event claims) this will use the Event Id which is the unique claim identifier, but for all other claims the Claim Id will be used for this composite field.",
+            "example": ""
+        }
+    ]
+}

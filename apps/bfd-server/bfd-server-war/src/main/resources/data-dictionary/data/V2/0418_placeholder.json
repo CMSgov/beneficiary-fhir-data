@@ -1,0 +1,31 @@
+{
+    "id": 418,
+    "name": "Placeholder",
+    "description": "",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "",
+            "element": "",
+            "fhirPath": "resourceType",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

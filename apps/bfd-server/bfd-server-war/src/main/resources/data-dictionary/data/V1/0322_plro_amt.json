@@ -1,0 +1,43 @@
+{
+    "id": 322,
+    "name": "Patient Liability Reduction Other Paid Amount",
+    "description": "This is the amount of any payment by other third-party payers that reduces the beneficiary\u2019s liability for the PDE but does not count towards Part D\u2019s true out-of-pocket (TrOOP) requirement. Examples include payments by group health plans, worker's compensation, and governmental programs like the Veterans Administration and TRICARE.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "plro_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "patientLiabilityReductionOtherPaidAmount",
+    "ccwMapping": [
+        "PLRO_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/plro_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Reduction in patient liability due to payments by other payers (PLRO)'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

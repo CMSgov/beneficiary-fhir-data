@@ -1,0 +1,45 @@
+{
+    "id": 360,
+    "name": "Provider Speciality Code",
+    "description": "CMS (previously called HCFA) specialty code used for pricing the line-item service on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prvdr_spclty",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "providerSpecialityCode",
+    "ccwMapping": [
+        "PRVDR_SPCLTY"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_PRVDR_SPCLTY_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].qualification.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].qualification.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/prvdr_spclty'"
+            ],
+            "additional": [
+                "eob.careTeam[N].qualification.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "This is only set for the 'Performing' Provider in the list of CareTeam members, if one exists.",
+            "example": ""
+        }
+    ]
+}

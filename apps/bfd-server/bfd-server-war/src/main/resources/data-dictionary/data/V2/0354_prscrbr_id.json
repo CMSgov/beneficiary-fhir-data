@@ -1,0 +1,48 @@
+{
+    "id": 354,
+    "name": "Prescriber Id",
+    "description": "This variable contains the prescriber identification number as reported by the Part D sponsor on the PDE record submitted to CMS.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prscrbr_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "prescriberId",
+    "ccwMapping": [
+        "PRSCRBR_ID"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_PRSBNG_PRVDR_GNRC_ID_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "careTeam.where(role.coding.where(code='prescribing')).provider.identifier.where(type.coding.where(code='npi')).value",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].type.coding[N].code = 'npi'",
+                "careTeam[N].role.coding[N].code = 'prescribing'"
+            ],
+            "additional": [
+                "eob.careTeam[N].provider.display = {corresponding description from valueset specified in .system}",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'National Provider Identifier')",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole'",
+                "eob.careTeam[N].role.coding[N].display = 'Prescribing provider')"
+            ],
+            "derived": "",
+            "note": "This eob.careTeam element will only be supplied if the Prescriber Id is populated and the Prescriber Id Qualifier Code = '01'.  The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamSequence list for every single item.",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"1750384806\"\\n  }\\n]"
+        }
+    ]
+}

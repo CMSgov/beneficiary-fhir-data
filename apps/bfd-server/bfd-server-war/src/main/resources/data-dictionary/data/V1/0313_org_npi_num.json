@@ -1,0 +1,45 @@
+{
+    "id": 313,
+    "name": "Organization NPI",
+    "description": "The National Provider Identifier (NPI) of the organization or group practice.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "org_npi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "organizationNpi",
+    "ccwMapping": [
+        "ORG_NPI_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF1.FAC_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].extension[N].url = 'http://hl7.org/fhir/sid/us-npi'",
+                "careTeam[N].extension[N].valueCoding.system = 'http://hl7.org/fhir/sid/us-npi'"
+            ],
+            "additional": [
+                "eob.careTeam[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,31 @@
+{
+    "id": 381,
+    "name": "Revenue Center Discount Indicator Code",
+    "description": "This code represents a factor that specifies the amount of any Ambulatory payment classification (APC) discount.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_dscnt_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "discountCode",
+    "ccwMapping": [
+        "REV_CNTR_DSCNT_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

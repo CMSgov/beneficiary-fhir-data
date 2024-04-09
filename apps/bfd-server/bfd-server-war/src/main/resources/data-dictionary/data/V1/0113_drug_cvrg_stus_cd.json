@@ -1,0 +1,50 @@
+{
+    "id": 113,
+    "name": "Drug Coverage Status Code",
+    "description": "This field indicates whether or not the drug is covered by Medicare Part D.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "drug_cvrg_stus_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "drugCoverageStatusCode",
+    "ccwMapping": [
+        "DRUG_CVRG_STUS_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code; item[N].adjudication[N].reason.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd'",
+                "item[N].adjudication[N].reason.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd'"
+            ],
+            "additional": [
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd'",
+                "eob.information[N].category.coding[N].display = 'Drug Coverage Status Code')",
+                "eob.item[N].adjudication[N].reason.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "If drugCoverageStatusCode = 'C' then (eob.item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/cvrd_d_plan_pd_amt'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Amount paid by Part D plan for the PDE (drug is covered by Part D)'",
+                "else (eob.item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/ncvrd_plan_pd_amt'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Amount paid by Part D plan for the PDE (drug is not covered by Part D)'))"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

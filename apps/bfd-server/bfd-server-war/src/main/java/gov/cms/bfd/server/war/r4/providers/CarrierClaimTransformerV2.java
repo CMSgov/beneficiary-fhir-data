@@ -14,7 +14,7 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.MetaModel;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -100,7 +100,10 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_NONCLINICIAN_PROFILE_URL);
+    String c4bbProfUrl =
+        MetaModel.getC4BBProfile("ExplanationOfBenefit", "Professional-NonClinician", "url");
+    eob.getMeta().addProfile(c4bbProfUrl);
+    //    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_NONCLINICIAN_PROFILE_URL);
 
     // TODO: ExplanationOfBenefit.outcome is a required field. Needs to be mapped.
     // eob.setOutcome(?)

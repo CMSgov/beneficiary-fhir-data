@@ -1,0 +1,36 @@
+{
+    "id": 8,
+    "name": "Lifetime Reserved Days Used Count",
+    "description": "The number of lifetime reserve days that the beneficiary has elected to use during the period covered by the institutional claim.",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "bene_lrd_used_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "lifetimeReservedDaysUsedCount",
+    "ccwMapping": [
+        "BENE_LRD_USED_CNT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

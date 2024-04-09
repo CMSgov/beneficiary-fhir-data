@@ -1,0 +1,41 @@
+{
+    "id": 285,
+    "name": "Medicare Benefits Exhausted Date",
+    "description": "The last date for which the beneficiary has Medicare coverage.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_bene_mdcr_bnfts_exhtd_dt_i",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "medicareBenefitsExhaustedDate",
+    "ccwMapping": [
+        "NCH_BENE_MDCR_BNFTS_EXHTD_DT_I"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].timingDate",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].category.coding[N].system ='https://bluebutton.cms.gov/resources/variables/nch_bene_mdcr_bnfts_exhtd_dt_i'"
+            ],
+            "additional": [
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].display = 'NCH Beneficiary Medicare Benefits Exhausted Date'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

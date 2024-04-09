@@ -1,0 +1,43 @@
+{
+    "id": 353,
+    "name": "Product Service National Drug Code",
+    "description": "This field identifies the dispensed drug product using a National Drug Code (NDC).",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prod_srvc_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 19,
+    "bfdJavaFieldName": "nationalDrugCode",
+    "ccwMapping": [
+        "PROD_SRVC_ID"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_NDC_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].service.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].service.coding[N].system = 'http://hl7.org/fhir/sid/ndc'"
+            ],
+            "additional": [
+                "eob.item[N].service.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

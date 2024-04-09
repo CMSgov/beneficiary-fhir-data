@@ -1,0 +1,50 @@
+{
+    "id": 294,
+    "name": "Claim Type Code",
+    "description": "The type of claim that was submitted. There are different claim types for each major category of health care provider.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_clm_type_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "claimTypeCode",
+    "ccwMapping": [
+        "NCH_CLM_TYPE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_TYPE_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "type.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "type.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/nch_clm_type_cd'"
+            ],
+            "additional": [
+                "eob.type.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

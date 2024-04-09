@@ -1,0 +1,41 @@
+{
+    "id": 61,
+    "name": "Outpatient Provider Payment Amount",
+    "description": "The amount paid, from the Medicare trust fund, to the provider for the services reported on the outpatient claim.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_op_prvdr_pmt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "providerPaymentAmount",
+    "ccwMapping": [
+        "CLM_OP_PRVDR_PMT_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_op_prvdr_pmt_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

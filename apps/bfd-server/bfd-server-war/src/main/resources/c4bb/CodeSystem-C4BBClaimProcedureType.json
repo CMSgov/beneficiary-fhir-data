@@ -1,0 +1,48 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "C4BBClaimProcedureType",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system <code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimProcedureType</code> defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">principal<a name=\"C4BBClaimProcedureType-principal\"> </a></td><td>Principal</td><td>The Principal Procedure is based on the relation of the procedure to the Principal Diagnosis</td></tr><tr><td style=\"white-space:nowrap\">other<a name=\"C4BBClaimProcedureType-other\"> </a></td><td>Other</td><td>Other procedures performed during the inpatient institutional admission</td></tr></table></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimProcedureType",
+  "version": "2.0.0",
+  "name": "C4BBClaimProcedureType",
+  "title": "C4BB Claim Procedure Type Code System",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "Indicates if the inpatient institutional procedure (ICD-PCS) is the principal procedure or another procedure.\n\nThis is a code system defined locally by the CARIN BlueButton IG. As this IG matures, it is expected that this CodeSystem will be migrated to THO (terminology.hl7.org). The current CodeSystem url should be considered temporary and subject to change in a future version.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This CodeSystem is not copyrighted.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 2,
+  "concept": [
+    {
+      "code": "principal",
+      "display": "Principal",
+      "definition": "The Principal Procedure is based on the relation of the procedure to the Principal Diagnosis"
+    },
+    {
+      "code": "other",
+      "display": "Other",
+      "definition": "Other procedures performed during the inpatient institutional admission"
+    }
+  ]
+}

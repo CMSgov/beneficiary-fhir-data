@@ -1,0 +1,46 @@
+{
+    "id": 122,
+    "name": "External Diagnosis First Code Version",
+    "description": "The code used to indicate if the diagnosis E code is ICD-9 or ICD-10.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "fst_dgns_e_vrsn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisExternalFirstCodeVersion",
+    "ccwMapping": [
+        "FST_DGNS_E_VRSN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].system",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/diagnosis-type'",
+                "diagnosis[N].type[N].coding[N].code = 'external-first'"
+            ],
+            "additional": [
+                "eob.diagnosis[N].type[N].coding[N].display = 'The code used to identify the 1st external cause of injury, poisoning, or other adverse effect.'"
+            ],
+            "derived": "IF = 9 then eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' IF = 0  eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "id": 518,
+    "name": "Part D Contract Number - June (Historic)",
+    "description": "This variable is the Medicare Part C contract number for the beneficiary\u2019s Medicare Advantage (MA) plan for a given month (January through December). CMS assigns an identifier to each contract that a managed care plan has with CMS.",
+    "appliesTo": [
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARYMONTHLY",
+    "bfdColumnName": "partd_contract_number_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "partDContractNumberId",
+    "ccwMapping": [
+        "PTD_CNTRCT_ID_06"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/ptdcntrct06-<year>-6'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/ptdcntrct06'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "The discriminator is derived using the year and month from the beneficiaryMonthly.yearMonth column.   coverage.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/ptdcntrct01-<year>-<month>'  the above <year> is pulled from the beneficiaryMonthly table and the yearMonthly column. The <month> is also pulled from this table and column.",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

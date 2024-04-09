@@ -1,0 +1,38 @@
+{
+    "id": 622,
+    "name": "Medicare Coverage A Start Date",
+    "description": "That date that Medicare Coverage Part A started for the Beneficiary.",
+    "appliesTo": [
+        "Part-A"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "pta_cvrg_strt_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "partACoverageStartDate",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_PART_A_ENRLMT_BGN_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "period.start",
+            "fhirPath": "period.start",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"start\": \"2020-03-17\",\\n    \"end\": \"2020-06-17\"\\n  }\\n]\\n"
+        }
+    ]
+}

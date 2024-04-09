@@ -1,0 +1,43 @@
+{
+    "id": 377,
+    "name": "Revenue Center Blood Deductible Amount",
+    "description": "This variable is the dollar amount the beneficiary is responsible for related to the deductible for blood products that appear on the revenue center record.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_blood_ddctbl_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "bloodDeductibleAmount",
+    "ccwMapping": [
+        "REV_CNTR_BLOOD_DDCTBL_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_blood_ddctbl_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Revenue Center Blood Deductible Amount'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+{
+    "id": 4,
+    "name": "Attending Physician NPI",
+    "description": "On an institutional claim, the national provider identifier (NPI) is a unique number assigned to identify the physician who has overall responsibility for the beneficiary's care and treatment.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "at_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "attendingPhysicianNpi",
+    "ccwMapping": [
+        "AT_PHYSN_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF1.ATNDG_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "careTeam.where(role.coding.where(code = 'attending')).provider.identifier.where(type.coding.where(code='npi')).value",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "careTeam[N].provider.identifier[N].type.coding[N].code = 'npi'",
+                "careTeam[N].role.coding[N].code = 'attending'"
+            ],
+            "additional": [
+                "eob.careTeam[N].role.coding[N].display = 'Attending'",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole')",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'National Provider Identifier'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"161999999\"\\n  }\\n]"
+        }
+    ]
+}

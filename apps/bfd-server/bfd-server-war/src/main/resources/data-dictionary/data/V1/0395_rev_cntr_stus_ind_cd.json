@@ -1,0 +1,42 @@
+{
+    "id": 395,
+    "name": "Revenue Center Status Indicator Code",
+    "description": "This variable indicates how the service listed on the revenue center record was priced for payment purposes.",
+    "appliesTo": [
+        "Outpatient",
+        "HHA"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_stus_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "statusCode",
+    "ccwMapping": [
+        "REV_CNTR_STUS_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].revenue.extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].revenue.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd'",
+                "item[N].revenue.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd'"
+            ],
+            "additional": [
+                "eob.item[N].revenue.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "id": 403,
+    "name": "Reason For Visit Diagnosis Code 1",
+    "description": "The diagnosis code used to identify the patient's reason for the Hospital Outpatient visit.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rsn_visit_cd1",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosisAdmission1Code",
+    "ccwMapping": [
+        "RSN_VISIT_CD1"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "diagnosis.where(type.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType' and code='patientreasonforvisit')).diagnosisCodeableConcept.coding.where(system='http://hl7.org/fhir/sid/icd-10-cm').code",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType'",
+                "diagnosis[N].type[N].coding[N].code = 'patientreasonforvisit'"
+            ],
+            "additional": [
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10-cm'",
+                "eob.diagnosis[N].type[N].coding[N].display = 'Patient Reason for Visit'",
+                "eob.diagnosis[N].sequence = ?"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n    \"code\": \"A37\",\\n    \"display\": \"WHOOPING COUGH\"\\n  }\\n]"
+        }
+    ]
+}

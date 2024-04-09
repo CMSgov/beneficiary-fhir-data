@@ -1,0 +1,46 @@
+{
+    "id": 312,
+    "name": "Organization NPI",
+    "description": "The National Provider Identifier (NPI) of the organization or group practice.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "org_npi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "organizationNpi",
+    "ccwMapping": [
+        "ORG_NPI_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF1.FAC_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "organization.identifier.value; facility.identifier.value",
+            "fhirPath": "",
+            "discriminator": [
+                "organization.identifier.system = 'http://hl7.org/fhir/sid/us-npi'",
+                "facility.identifier.system = 'http://hl7.org/fhir/sid/us-npi'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

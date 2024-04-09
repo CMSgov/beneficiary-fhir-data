@@ -1,0 +1,36 @@
+{
+    "id": 445,
+    "name": "Hashed MBI",
+    "description": "A hashed version of the Medicare Beneficiary Identifier to protect the PII for the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "mbi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 64,
+    "bfdJavaFieldName": "mbiHash",
+    "ccwMapping": [
+        "MBI_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

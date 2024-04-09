@@ -1,0 +1,47 @@
+{
+    "id": 258,
+    "name": "Line Allowed Charge Amount",
+    "description": "The amount of allowed charges for the line-item service on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_alowd_chrg_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "allowedChargeAmount",
+    "ccwMapping": [
+        "LINE_ALOWD_CHRG_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_LINE_ALOWD_CHRG_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Line Allowed Charge Amount'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

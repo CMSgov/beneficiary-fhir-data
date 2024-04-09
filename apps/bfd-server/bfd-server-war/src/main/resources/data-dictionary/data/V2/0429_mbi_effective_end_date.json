@@ -1,0 +1,35 @@
+{
+    "id": 429,
+    "name": "MBI Effective End Date",
+    "description": "The date that an Medicare Beneficiary Identifier became inactive. In cases where the MBI has changed for a patient, this date will be supplied. This date will be empty if the MBI in question is the current MBI.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "MEDICAREBENEFICIARYIDHISTORY",
+    "bfdColumnName": "",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "mbiEndDate",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "If this field is not populated for a MedicareBeneficiaryIdHistory record then that record will not be added as an Historic MBI in the patient.identifier[N].",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

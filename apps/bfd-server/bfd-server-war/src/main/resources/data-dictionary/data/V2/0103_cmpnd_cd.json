@@ -1,0 +1,43 @@
+{
+    "id": 103,
+    "name": "Compound Code",
+    "description": "This field indicates whether or not the dispensed drug was compounded or mixed.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "cmpnd_cd",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "compoundCode",
+    "ccwMapping": [
+        "CMPND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].code.coding[N].code",
+            "fhirPath": "supportingInfo.where(code.coding.where(system = 'http://terminology.hl7.org/CodeSystem/v3-ActCode')).code.coding.code",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'http://terminology.hl7.org/CodeSystem/v3-ActCode'"
+            ],
+            "additional": [
+                "(eob.supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "eob.supportingInfo[N].category.coding[N].code = 'compoundcode'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Compound Code')",
+                "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "If Compound Code = 1 then eob.supportingInfo[N].code.coding[N].code = 'RXCINV'.  If Compound Code = 2 then eob.supportingInfo[N].code.coding[N].code = 'RXDINV'.  If Compound Code = 0 then none of the fields in FHIR are set",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 1,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"compoundcode\",\\n          \"display\": \"Compound Code\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/v3-ActCode\",\\n          \"code\": \"RXDINV\",\\n          \"display\": \"Rx dispense invoice\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

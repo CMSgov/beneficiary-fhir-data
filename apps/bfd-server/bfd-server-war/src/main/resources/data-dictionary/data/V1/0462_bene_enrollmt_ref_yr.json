@@ -1,0 +1,38 @@
+{
+    "id": 462,
+    "name": "Reference Year",
+    "description": "This field indicates the reference year of the enrollment data.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_enrollmt_ref_yr",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 4,
+    "bfdJavaFieldName": "beneEnrollmentReferenceYear",
+    "ccwMapping": [
+        "BENE_ENROLLMT_REF_YR"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "extension[N].valueDate",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/rfrnc_yr'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "Date Format: YYYY",
+            "example": ""
+        }
+    ]
+}

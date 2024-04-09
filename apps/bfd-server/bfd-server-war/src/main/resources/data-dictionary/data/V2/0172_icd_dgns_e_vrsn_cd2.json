@@ -1,0 +1,44 @@
+{
+    "id": 172,
+    "name": "External Diagnosis Code 2 Version",
+    "description": "The code used to indicate if the external diagnosis code is ICD-9/ICD-10.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_dgns_e_vrsn_cd2",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisExternal2CodeVersion",
+    "ccwMapping": [
+        "ICD_DGNS_E_VRSN_CD2"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].system",
+            "fhirPath": "diagnosis.where(type.coding.where(code='secondary' or code='externalcauseofinjury')).diagnosisCodeableConcept.coding.where(system='http://hl7.org/fhir/sid/icd-10-cm').system",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType'",
+                "diagnosis[N].type[N].coding[N].code IN ('externalcauseofinjury','secondary')",
+                ""
+            ],
+            "additional": [],
+            "derived": "IF eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' THEN diagnosis code is ICD-9.  IF eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10-cm' THEN diagnosis code is ICD-10",
+            "note": "",
+            "example": "[\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw1\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw1\",\\n          \"code\": \"N\",\\n          \"display\": \"Diagnosis was not present at the time of admission\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 7,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"A01\",\\n          \"display\": \"TYPHOID AND PARATYPHOID FEVERS\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"A01\",\\n          \"display\": \"TYPHOID AND PARATYPHOID FEVERS\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType\",\\n            \"code\": \"externalcauseofinjury\",\\n            \"display\": \"External Cause of Injury\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw2\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw2\",\\n          \"code\": \"Y\",\\n          \"display\": \"Diagnosis was present at the time of admission (POA)\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 8,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"A02\",\\n          \"display\": \"OTHER SALMONELLA INFECTIONS\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"A02\",\\n          \"display\": \"OTHER SALMONELLA INFECTIONS\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType\",\\n            \"code\": \"externalcauseofinjury\",\\n            \"display\": \"External Cause of Injury\"\\n          }\\n        ]\\n      }\\n    ]\\n  }\\n]"
+        }
+    ]
+}

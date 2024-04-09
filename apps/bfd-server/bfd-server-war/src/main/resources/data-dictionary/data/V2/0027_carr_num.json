@@ -1,0 +1,41 @@
+{
+    "id": 27,
+    "name": "Carrier Number",
+    "description": "The identification number assigned by CMS to a carrier authorized to process claims from a physician or supplier.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "carrierNumber",
+    "ccwMapping": [
+        "CARR_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/carr_num').valueIdentifier.value",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_num'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/carr_num\",\\n    \"valueIdentifier\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/carr_num\",\\n      \"value\": \"61026\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

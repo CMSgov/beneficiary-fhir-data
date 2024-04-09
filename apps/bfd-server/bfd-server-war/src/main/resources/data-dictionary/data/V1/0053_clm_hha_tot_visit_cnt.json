@@ -1,0 +1,40 @@
+{
+    "id": 53,
+    "name": "Claim Total Visit Count",
+    "description": "The count of the number of HHA visits as derived by CMS.",
+    "appliesTo": [
+        "HHA"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_hha_tot_visit_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "totalVisitCount",
+    "ccwMapping": [
+        "CLM_HHA_TOT_VISIT_CNT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedUnsignedInt",
+            "fhirPath": "",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance' benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_hha_tot_visit_cnt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'Claim HHA Total Visit Count'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+{
+    "id": 274,
+    "name": "Place Of Service Code",
+    "description": "The code indicating the place of service, as defined in the Medicare Carrier Manual, for this line item on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_place_of_srvc_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "placeOfServiceCode",
+    "ccwMapping": [
+        "LINE_PLACE_OF_SRVC_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_POS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].locationCodeableConcept.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].locationCodeableConcept.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/line_place_of_srvc_cd'"
+            ],
+            "additional": [
+                "eob.item[N].locationCodeableConcept.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "id": 362,
+    "name": "Provider State Code",
+    "description": "The two-digit numeric social security administration (SSA) state code where provider or facility is located.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prvdr_state_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "providerStateCode",
+    "ccwMapping": [
+        "PRVDR_STATE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.PRVDR_FAC_FIPS_ST_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].locationCodeableConcept.extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].locationCodeableConcept.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/prvdr_state_cd'",
+                ""
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

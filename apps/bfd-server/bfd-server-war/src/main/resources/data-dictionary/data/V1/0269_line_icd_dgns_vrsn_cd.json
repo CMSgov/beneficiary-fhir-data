@@ -1,0 +1,40 @@
+{
+    "id": 269,
+    "name": "Line Item Diagnosis Code Version",
+    "description": "The code used to indicate if the diagnosis code is ICD-9/ICD-10.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_icd_dgns_vrsn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisCodeVersion",
+    "ccwMapping": [
+        "LINE_ICD_DGNS_VRSN_CD"
+    ],
+    "cclfMapping": [
+        "CCLF3.DGNS_PRCDR_ICD_IND"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].diagnosisLinkId",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "Using the Line Item Diagnosis Code and the Line Item Diagnosis Code Version find the eob.diagnosis[N].sequence of the list of diagnosis where the eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system matches to the Line Item Diagnosis Code Version and the eob.diagnosis[N].diagnosisCodeableConcept.coding[N]code matches the Line Item Diagnosis Code.",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

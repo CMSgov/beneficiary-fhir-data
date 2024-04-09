@@ -1,0 +1,31 @@
+{
+    "id": 26,
+    "name": "RX Number",
+    "description": "The number used to identify the prescription order number for drugs and biologicals purchased through the competitive acquisition program (CAP).",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "carr_line_rx_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 30,
+    "bfdJavaFieldName": "rxNumber",
+    "ccwMapping": [
+        "CARR_LINE_RX_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

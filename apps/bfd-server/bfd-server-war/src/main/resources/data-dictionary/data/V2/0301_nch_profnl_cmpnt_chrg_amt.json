@@ -1,0 +1,43 @@
+{
+    "id": 301,
+    "name": "Professional Component Charge",
+    "description": "This field is the amount of physician and other professional charges covered under Medicare Part B.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_profnl_cmpnt_chrg_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "professionalComponentCharge",
+    "ccwMapping": [
+        "NCH_PROFNL_CMPNT_CHRG_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedMoney.value",
+            "fhirPath": "benefitBalance[%n].financial.where(type.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/benefit-balance' and code='https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt')).usedMoney.value",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'Professional Component Charge Amount'",
+                "eob.benefitBalance[N].financial[N].usedMoney.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/benefit-balance\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt\",\\n          \"display\": \"Professional Component Charge Amount\"\\n        }\\n      ]\\n    },\\n    \"usedMoney\": {\\n      \"value\": 4,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

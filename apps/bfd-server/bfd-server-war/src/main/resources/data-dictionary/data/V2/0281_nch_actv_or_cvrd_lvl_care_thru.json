@@ -1,0 +1,43 @@
+{
+    "id": 281,
+    "name": "Covered Care Through Date",
+    "description": "The date on a claim for which the covered level of care ended in a general hospital or the active care ended in a psychiatric/tuberculosis hospital.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_actv_or_cvrd_lvl_care_thru",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "coveredCareThroughDate",
+    "ccwMapping": [
+        "NCH_ACTV_OR_CVRD_LVL_CARE_THRU"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].timingDate",
+            "fhirPath": "supportingInfo.where(code.coding.where(system='https://bluebutton.cms.gov/resources/variables/nch_actv_or_cvrd_lvl_care_thru')).timingDate",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/nch_actv_or_cvrd_lvl_care_thru'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].category.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claiminformationcategory'",
+                "eob.supportingInfo[N].category.coding[N].code = 'info'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Information')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

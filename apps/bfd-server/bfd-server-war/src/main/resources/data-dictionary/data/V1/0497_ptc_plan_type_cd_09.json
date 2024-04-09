@@ -1,0 +1,40 @@
+{
+    "id": 497,
+    "name": "Part C Plan Type Code - September",
+    "description": "This variable is the type of Medicare Part C plan for the beneficiary for a given month (January through December).",
+    "appliesTo": [
+        "Part-C"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "ptc_plan_type_cd_09",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "partCPlanTypeSepCode",
+    "ccwMapping": [
+        "PTC_PLAN_TYPE_CD_09"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_09'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_09'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "C4BBAmbulanceTransportReasonCodes",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Include all codes defined in <a href=\"CodeSystem-X12AmbulanceTransportReasonCodes.html\"><code>https://x12.org/codesystem.x12.org/ambulance-transport-reason-codes</code></a></li></ul></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAmbulanceTransportReasonCodes",
+  "version": "2.0.0",
+  "name": "C4BBAmbulanceTransportReasonCodes",
+  "title": "C4BB Ambulance Transport Reasons Value Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "Transportation Services Ambulatory Transport Reason Codes",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This Valueset is not copyrighted.",
+  "compose": {
+    "include": [
+      {
+        "system": "https://x12.org/codesystem.x12.org/ambulance-transport-reason-codes"
+      }
+    ]
+  }
+}

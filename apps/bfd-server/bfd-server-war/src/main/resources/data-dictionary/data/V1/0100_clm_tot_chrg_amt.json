@@ -1,0 +1,46 @@
+{
+    "id": 100,
+    "name": "Total Charge Amount",
+    "description": "The total charges for all services included on the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_tot_chrg_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "totalChargeAmount",
+    "ccwMapping": [
+        "CLM_TOT_CHRG_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_MDCR_INSTNL_TOT_CHRG_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "totalCost.value",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [
+                "eob.totalCost.code = 'USD'",
+                "eob.totalCost.system = 'urn:iso:std:iso:4217'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

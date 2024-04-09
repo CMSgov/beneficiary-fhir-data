@@ -1,0 +1,31 @@
+{
+    "id": 388,
+    "name": "Revenue Center Packaging Indicator Code",
+    "description": "The code used to identify those services that are packaged/bundled with another service.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_packg_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "packagingCode",
+    "ccwMapping": [
+        "REV_CNTR_PACKG_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

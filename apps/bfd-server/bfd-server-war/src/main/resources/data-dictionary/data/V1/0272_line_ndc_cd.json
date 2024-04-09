@@ -1,0 +1,42 @@
+{
+    "id": 272,
+    "name": "Line National Drug Code",
+    "description": "On the DMERC claim, the National Drug Code identifying the oral anti-cancer drugs. This line-item field was added as a placeholder on the Carrier claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_ndc_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 11,
+    "bfdJavaFieldName": "nationalDrugCode",
+    "ccwMapping": [
+        "LINE_NDC_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension.valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].extension[N].url = 'http://hl7.org/fhir/sid/ndc'"
+            ],
+            "additional": [
+                "eob.item[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

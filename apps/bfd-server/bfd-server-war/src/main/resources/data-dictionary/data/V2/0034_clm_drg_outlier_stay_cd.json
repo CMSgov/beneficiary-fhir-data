@@ -1,0 +1,33 @@
+{
+    "id": 34,
+    "name": "Related Diagnosis Group Outlier Stay Code",
+    "description": "On an institutional claim, the code that indicates the beneficiary stay under the prospective payment system (PPS) which, although classified into a specific diagnosis related group, has an unusually long length (day outlier) or exceptionally high cost (cost outlier).",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_drg_outlier_stay_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisRelatedGroupOutlierStayCd",
+    "ccwMapping": [
+        "CLM_DRG_OUTLIER_STAY_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

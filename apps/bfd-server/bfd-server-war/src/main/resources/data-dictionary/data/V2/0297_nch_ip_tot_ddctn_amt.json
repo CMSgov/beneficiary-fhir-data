@@ -1,0 +1,43 @@
+{
+    "id": 297,
+    "name": "Inpatient Total Deduction Amount",
+    "description": "The total of all Part A and blood deductibles and coinsurance amounts on the claim.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_ip_tot_ddctn_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "totalDeductionAmount",
+    "ccwMapping": [
+        "NCH_IP_TOT_DDCTN_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedMoney.value",
+            "fhirPath": "benefitBalance[%n].financial.where(type.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/benefit-balance' and code='https://bluebutton.cms.gov/resources/variables/nch_ip_tot_ddctn_amt')).usedMoney.value",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_ip_tot_ddctn_amt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'NCH Inpatient (or other Part A) Total Deductible/Coinsurance Amount'",
+                "eob.benefitBalance[N].financial[N].usedMoney.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/benefit-balance\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/nch_ip_tot_ddctn_amt\",\\n          \"display\": \"NCH Inpatient (or other Part A) Total Deductible/Coinsurance Amount\"\\n        }\\n      ]\\n    },\\n    \"usedMoney\": {\\n      \"value\": 14,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

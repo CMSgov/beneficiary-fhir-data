@@ -1,0 +1,45 @@
+{
+    "id": 15,
+    "name": "Claim Payment Denial Code",
+    "description": "The code on a non-institutional claim indicating who receives payment or if the claim was denied.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_pmt_dnl_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "paymentDenialCode",
+    "ccwMapping": [
+        "CARR_CLM_PMT_DNL_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_CARR_PMT_DNL_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd'",
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

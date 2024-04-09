@@ -1,0 +1,48 @@
+{
+    "id": 289,
+    "name": "Blood Pints Furnished Quantity",
+    "description": "Number of whole pints of blood furnished to the beneficiary, as reported on the carrier claim (non-DMERC).",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_blood_pnts_frnshd_qty",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "bloodPintsFurnishedQty",
+    "ccwMapping": [
+        "NCH_BLOOD_PNTS_FRNSHD_QTY"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].valueQuantity.value",
+            "fhirPath": "supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/information' and code='https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty')).valueQuantity.value",
+            "discriminator": [
+                "supportingInfo[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "supportingInfo[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty'"
+            ],
+            "additional": [
+                "(eob.supportingInfo[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claiminformationcategory'",
+                "eob.supportingInfo[N].category.coding[N].code = 'info'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Information')",
+                "eob.supportingInfo[N].category.coding[N].display = 'NCH Blood Pints Furnished Quantity'",
+                "eob.supportingInfo[N].valueQuality.unit = 'pint'",
+                "eob.supportingInfo[N].valueQuality.system = 'http://unitsofmeasure.org'",
+                "eob.supportingInfo[N].valueQuality.code = '[pt_us]'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 6,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/claiminformationcategory\",\\n          \"code\": \"info\",\\n          \"display\": \"Information\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/information\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty\",\\n          \"display\": \"NCH Blood Pints Furnished Quantity\"\\n        }\\n      ]\\n    },\\n    \"valueQuantity\": {\\n      \"value\": 19,\\n      \"unit\": \"pint\",\\n      \"system\": \"http://unitsofmeasure.org\",\\n      \"code\": \"[pt_us]\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

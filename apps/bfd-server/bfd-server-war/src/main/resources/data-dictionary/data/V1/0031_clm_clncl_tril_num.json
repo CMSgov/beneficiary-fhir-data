@@ -1,0 +1,40 @@
+{
+    "id": 31,
+    "name": "Clinical Trial Number",
+    "description": "The number used to identify all items and line-item services provided to a beneficiary during their participation in a clinical trial.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_clncl_tril_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "clinicalTrialNumber",
+    "ccwMapping": [
+        "CLM_CLNCL_TRIL_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_clncl_tril_num'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

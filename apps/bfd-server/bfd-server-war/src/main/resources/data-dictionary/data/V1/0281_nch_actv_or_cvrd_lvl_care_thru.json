@@ -1,0 +1,40 @@
+{
+    "id": 281,
+    "name": "Covered Care Through Date",
+    "description": "The date on a claim for which the covered level of care ended in a general hospital or the active care ended in a psychiatric/tuberculosis hospital.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_actv_or_cvrd_lvl_care_thru",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "coveredCareThroughDate",
+    "ccwMapping": [
+        "NCH_ACTV_OR_CVRD_LVL_CARE_THRU"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].timingDate",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/nch_actv_or_cvrd_lvl_care_thru'"
+            ],
+            "additional": [
+                "eob.information[N].category.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

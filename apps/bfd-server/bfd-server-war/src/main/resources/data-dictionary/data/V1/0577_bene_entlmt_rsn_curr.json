@@ -1,0 +1,41 @@
+{
+    "id": 577,
+    "name": "Current Reason for Entitlement Code",
+    "description": "Current reason for Medicare entitlement.",
+    "appliesTo": [
+        "Part-A"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_entlmt_rsn_curr",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "entitlementCodeCurrent",
+    "ccwMapping": [
+        "BENE_ENTLMT_RSN_CURR"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/crec'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/crec'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -44,6 +45,7 @@ import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.MetaModel;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -1755,9 +1757,11 @@ public final class TransformerUtilsV2 {
 
     if (claimType.equals(ClaimType.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
+      JsonNode fhirMapping = MetaModel.getFhirMapping("pde_id", 2);
       eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
     } else {
       // CLM_ID => ExplanationOfBenefit.identifier
+      JsonNode fhirMapping = MetaModel.getFhirMapping("clm_id", 2);
       eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
     }
 

@@ -1,0 +1,43 @@
+{
+    "id": 291,
+    "name": "Submitted Charge Amount",
+    "description": "The total submitted charges on the claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_carr_clm_sbmtd_chrg_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "submittedChargeAmount",
+    "ccwMapping": [
+        "NCH_CARR_CLM_SBMTD_CHRG_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedMoney.value",
+            "fhirPath": "benefitBalance[%n].financial.where(type.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/benefit-balance' and code='https://bluebutton.cms.gov/resources/variables/nch_carr_clm_sbmtd_chrg_amt')).usedMoney.value",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_carr_clm_sbmtd_chrg_amt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'NCH Carrier Claim Submitted Charge Amount (sum of all line-level submitted charges)'",
+                "eob.benefitBalance[N].financial[N].usedMoney.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/benefit-balance\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/nch_carr_clm_sbmtd_chrg_amt\",\\n          \"display\": \"NCH Carrier Claim Submitted Charge Amount (sum of all line-level submitted charges)\"\\n        }\\n      ]\\n    },\\n    \"usedMoney\": {\\n      \"value\": 245.04,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

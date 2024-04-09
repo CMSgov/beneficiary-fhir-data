@@ -1,0 +1,39 @@
+{
+    "id": 618,
+    "name": "Benefit Payment Status",
+    "description": "Categorized monetary totals for the adjudication. To provide the requestor with financial totals by category for the adjudication. Indicates the in network or out of network payment status of the claim.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "SyntheticData"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "total[N].category.coding.code",
+            "fhirPath": "total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus')).amount.value",
+            "discriminator": [
+                "total[N].category.coding.system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus'"
+            ],
+            "additional": [
+                "eob.total[N].category.coding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "IF Claim Type 'PDE' = 'other'",
+            "note": "The benefitPaymentStatus slice is required by CARIN in the eob.total. The eob.total[N].amount.value will always be set to 0.",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus\",\\n          \"code\": \"other\",\\n          \"display\": \"Other\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 0,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

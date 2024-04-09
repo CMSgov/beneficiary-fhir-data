@@ -1,0 +1,39 @@
+{
+    "id": 318,
+    "name": "Event Id",
+    "description": "Identifies a unique Part D event for a beneficiary.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "pde_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "eventId",
+    "ccwMapping": [
+        "PDE_ID"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/pde_id'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

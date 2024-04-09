@@ -1,0 +1,49 @@
+{
+    "id": 400,
+    "name": "Rendering Physician NPI",
+    "description": "This variable is the National Provider Identifier (NPI) for the physician who rendered the services.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rndrng_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "revenueCenterRenderingPhysicianNPI",
+    "ccwMapping": [
+        "RNDRNG_PHYSN_NPI"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value AND item[N].careTeamSequence",
+            "fhirPath": "careTeam.where(role.coding.where(code='performing')).provider.identifier.where(type.coding.where(code='npi')).value",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N]type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "careTeam[N].provider.identifier[N]type.coding[N].code = 'npi'",
+                "careTeam[N].role.coding[N].code = 'performing'"
+            ],
+            "additional": [
+                "(eob.careTeam[N].role.coding[N].display = 'Performing provider'",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole')",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'National Provider Identifier'"
+            ],
+            "derived": "",
+            "note": "The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamSequence list for the line item.",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"345345345\"\\n  }\\n]"
+        }
+    ]
+}

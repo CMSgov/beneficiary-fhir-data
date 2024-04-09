@@ -1,0 +1,36 @@
+{
+    "id": 95,
+    "name": "Prospective Payment Indicator Code",
+    "description": "The code indicating whether or not: (1) the claim is from the prospective payment system (PPS), and/or (2) the beneficiary is a deemed insured MQGE (Medicare Qualified Government Employee)",
+    "appliesTo": [
+        "HHA",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pps_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "prospectivePaymentCode",
+    "ccwMapping": [
+        "CLM_PPS_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,31 @@
+{
+    "id": 130,
+    "name": "HPSA Scarcity Code",
+    "description": "The code used to track health professional shortage area (HPSA) and physician scarcity bonus payments on carrier claims.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "hpsa_scrcty_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "hpsaScarcityCode",
+    "ccwMapping": [
+        "HPSA_SCRCTY_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

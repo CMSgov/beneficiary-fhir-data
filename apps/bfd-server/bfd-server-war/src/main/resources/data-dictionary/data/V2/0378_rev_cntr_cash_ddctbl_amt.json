@@ -1,0 +1,45 @@
+{
+    "id": 378,
+    "name": "Revenue Center Cash Deductible Amount",
+    "description": "This variable is the beneficiary\u2019s liability under the annual Part B deductible for the revenue center record. The Part B deductible applies to both institutional (e.g., HOP) and non-institutional (e.g., Carrier and DME) services.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_cash_ddctbl_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "cashDeductibleAmount",
+    "ccwMapping": [
+        "REV_CNTR_CASH_DDCTBL_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/adjudication' and code='https://bluebutton.cms.gov/resources/variables/rev_cntr_cash_ddctbl_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_cash_ddctbl_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/adjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'deductible'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Deductible')",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Revenue Center Cash Deductible Amount'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/adjudication\",\\n          \"code\": \"deductible\",\\n          \"display\": \"Deductible\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/rev_cntr_cash_ddctbl_amt\",\\n          \"display\": \"Revenue Center Cash Deductible Amount\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 12.89,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

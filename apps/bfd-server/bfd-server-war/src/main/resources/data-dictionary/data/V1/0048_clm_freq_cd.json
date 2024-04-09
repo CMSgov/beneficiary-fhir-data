@@ -1,0 +1,50 @@
+{
+    "id": 48,
+    "name": "Claim Frequency Code",
+    "description": "The third digit of the type of bill (TOB3) submitted on an institutional claim record to indicate the sequence of a claim in the beneficiary's current episode of care",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_freq_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "claimFrequencyCode",
+    "ccwMapping": [
+        "CLM_FREQ_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_BILL_FREQ_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_freq_cd'"
+            ],
+            "additional": [
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_freq_cd'",
+                "eob.information[N].category.coding[N].display = 'Claim Frequency Code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

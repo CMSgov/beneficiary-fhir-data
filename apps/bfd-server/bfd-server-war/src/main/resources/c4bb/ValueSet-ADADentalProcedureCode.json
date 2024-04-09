@@ -1,0 +1,42 @@
+{
+  "resourceType": "ValueSet",
+  "id": "ADADentalProcedureCode",
+  "text": {
+    "status": "extensions",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This value set includes codes based on the following rules:</p><ul><li>Include all codes defined in <a href=\"http://terminology.hl7.org/5.0.0/CodeSystem-CDT.html\"><code>http://www.ada.org/cdt</code></a></li><li>Include these codes as defined in <a href=\"http://terminology.hl7.org/5.0.0/CodeSystem-data-absent-reason.html\"><code>http://terminology.hl7.org/CodeSystem/data-absent-reason</code></a><table class=\"none\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td><a href=\"http://terminology.hl7.org/5.0.0/CodeSystem-data-absent-reason.html#data-absent-reason-not-applicable\">not-applicable</a></td><td>Not Applicable</td><td>There is no proper value for this element (e.g. last menstrual period for a male).</td></tr></table></li></ul></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/ValueSet/ADADentalProcedureCode",
+  "version": "2.0.0",
+  "name": "ADADentalProcedureCode",
+  "title": "ADA Code on Dental Procedures and Nomenclature Value Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "The purpose of the CDT Code is to achieve uniformity, consistency and specificity in accurately documenting dental treatment. One use of the CDT Code is to provide for the efficient processing of dental claims, and another is to populate an Electronic Health Record.\n\nOn August 17, 2000 the CDT Code was named as a HIPAA standard code set. Any claim submitted on a HIPAA standard electronic dental claim must use dental procedure codes from the version of the CDT Code in effect on the date of service. The CDT Code is also used on paper dental claims, and the ADA's paper claim form data content reflects the HIPAA electronic standard.\n\nCDT is published Annually. Versions should refect the YYYY of the release.\n\nThe Council on Dental Benefit Programs (CDBP) has ADA Bylaws responsibility for CDT Code maintenance. To fulfill this obligation CDBP established its Code Maintenance Committee (CMC), a body that includes representatives from various sectors of the dental community (e.g., ADA; dental specialty organizations; third-party payers). CMC members, by their votes, determine which of the requested actions are incorporated into the CDT Code.\n\nPlease see Code Maintenance Committee (CMC) page for information about the CMC's members and activities.\n\nTo obtain the underlying code systems, please see information [here](https://www.nubc.org/subscription-information)",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "American Dental Association (ADA) developed Current Dental Terminology (CDT®) as a standardized language to help dentists and other members of the healthcare industry communicate effectively. CDT is revised and updated every year.\n\nThe ADA is the exclusive copyright owner of CDT, the Code on Dental Procedures and Nomenclature (the Code), and the ADA Dental Claim Form. Except as permitted by law, all use, copying or distribution of CDT, or any portion thereof (including the Code on Dental Procedures and Nomenclature) in any product or services (including works prepared for clients by consultants and other professionals), whether in printed, electronic or other format, requires a valid commercial user license from the ADA.\n\nFor more information : https://www.ada.org/en/publications/ada-catalog/cdt-products/licensing-for-commercial-users",
+  "compose": {
+    "include": [
+      { "system": "http://www.ada.org/cdt" },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+        "concept": [{ "code": "not-applicable", "display": "Not Applicable" }]
+      }
+    ]
+  }
+}

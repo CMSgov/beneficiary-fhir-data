@@ -1,0 +1,41 @@
+{
+    "id": 118,
+    "name": "FI Number",
+    "description": "The identification number assigned by CMS to a fiscal intermediary (FI) authorized to process institutional claim records.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "fi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "fiscalIntermediaryNumber",
+    "ccwMapping": [
+        "FI_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueIdentifier.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/fi_num'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

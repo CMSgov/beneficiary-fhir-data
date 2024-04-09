@@ -1,0 +1,38 @@
+{
+    "id": 50,
+    "name": "Claim Hospice Start Date",
+    "description": "On an institutional claim, the date the beneficiary was admitted to the hospice care.",
+    "appliesTo": [
+        "Hospice"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_hospc_start_dt_id",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "claimHospiceStartDate",
+    "ccwMapping": [
+        "CLM_HOSPC_START_DT_ID"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_RNG_BGN_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "hospitalization.period.start",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

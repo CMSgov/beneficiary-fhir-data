@@ -1,0 +1,36 @@
+{
+    "id": 399,
+    "name": "Referring Physician UPIN",
+    "description": "The unique physician identification number (UPIN) of the physician who referred the beneficiary or the physician who ordered the Part B services or durable medical equipment (DME).",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rfr_physn_upin",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "referringPhysicianUpin",
+    "ccwMapping": [
+        "RFR_PHYSN_UPIN"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

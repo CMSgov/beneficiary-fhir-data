@@ -14,7 +14,7 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.MetaModel;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
@@ -99,7 +99,10 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_OUTPATIENT_PROFILE_URL);
+    String c4bbProfUrl =
+        MetaModel.getC4BBProfile("ExplanationOfBenefit", "Outpatient-Institutional", "url");
+    eob.getMeta().addProfile(c4bbProfUrl);
+    // eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_OUTPATIENT_PROFILE_URL);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

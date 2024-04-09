@@ -1,0 +1,41 @@
+{
+    "id": 257,
+    "name": "First Expense Date",
+    "description": "Beginning date (1st expense) for this line-item service on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_1st_expns_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "firstExpenseDate",
+    "ccwMapping": [
+        "LINE_1ST_EXPNS_DT"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_LINE_FROM_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].servicedPeriod.start",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "IF both firstExpenseDate and lastExpenseDate are populated then eob.item[N].servicedPeriod will be populated, otherwise this will be missing.",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

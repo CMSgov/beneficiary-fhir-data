@@ -1,0 +1,47 @@
+{
+    "id": 298,
+    "name": "Near Line Record Identification Code",
+    "description": "A code defining the type of claim record being processed.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_near_line_rec_ident_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "nearLineRecordIdCode",
+    "ccwMapping": [
+        "NCH_NEAR_LINE_REC_IDENT_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "type.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "type.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd'"
+            ],
+            "additional": [
+                "eob.type.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,42 @@
+{
+    "id": 24,
+    "name": "Provider Type Code",
+    "description": "Code identifying the type of provider furnishing the service for this line item on the carrier claim.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "carr_line_prvdr_type_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "providerTypeCode",
+    "ccwMapping": [
+        "CARR_LINE_PRVDR_TYPE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.RNDRG_PRVDR_TYPE_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

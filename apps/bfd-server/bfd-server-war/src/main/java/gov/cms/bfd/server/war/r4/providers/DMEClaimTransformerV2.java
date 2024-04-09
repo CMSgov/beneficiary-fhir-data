@@ -13,7 +13,7 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.MetaModel;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -90,8 +90,13 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, boolean includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
+    // DME as Inpatient?
+    // 0019 - Durable Medical Equipment Billed while Inpatient
     // Required values not directly mapped
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
+    String c4bbProfUrl =
+        MetaModel.getC4BBProfile("ExplanationOfBenefit", "Inpatient-Institutional", "url");
+    eob.getMeta().addProfile(c4bbProfUrl);
+    // eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

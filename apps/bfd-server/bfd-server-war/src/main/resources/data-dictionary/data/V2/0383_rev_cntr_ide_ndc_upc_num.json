@@ -1,0 +1,41 @@
+{
+    "id": 383,
+    "name": "Revenue Center National Drug Code",
+    "description": "This field may contain one of three types of identifiers: the National Drug Code (NDC), the Universal Product Code (UPC), or the number assigned by the Food and Drug Administration (FDA) to an investigational device (IDE) after the manufacturer has approval to conduct a clinical trial.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_ide_ndc_upc_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 24,
+    "bfdJavaFieldName": "nationalDrugCode",
+    "ccwMapping": [
+        "REV_CNTR_IDE_NDC_UPC_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].productOrService.extension[N].valuecoding.code",
+            "fhirPath": "item[%n].productOrService.extension.where(url = 'http://hl7.org/fhir/sid/ndc').valueCoding.code",
+            "discriminator": [
+                "item[N].productOrService.extension[N].url = 'http://hl7.org/fhir/sid/ndc'"
+            ],
+            "additional": [
+                "eob.item[N].productOrService.extension[N].valuecoding.system = 'https://bluebutton.cms.gov/resources/variables/hcpcs_cd'",
+                "eob.item[N].productOrService.extension[N].valuecoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "For information about list elements and discriminators, see 'Slicing' in the Glossary tab",
+            "example": "[\\n  {\\n    \"url\": \"http://hl7.org/fhir/sid/ndc\",\\n    \"valueCoding\": {\\n      \"system\": \"http://hl7.org/fhir/sid/ndc\",\\n      \"code\": \"000000000\",\\n      \"display\": \"Fake Diluent - WATER\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "id": 398,
+    "name": "Referring Physician NPI",
+    "description": "The national provider identifier (NPI) number assigned to uniquely identify the referring physician.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rfr_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "referringPhysicianNpi",
+    "ccwMapping": [
+        "RFR_PHYSN_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF6.ORDRG_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "contained[N].requester.agent.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "contained[N].resourceType = 'ReferralRequest'",
+                "contained[N].requester.agent.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi'"
+            ],
+            "additional": [
+                "eob.contained[N].id = <unique identifier derived '#'> (ie.. 5)",
+                "eob.referral.reference = #<unique identifier derived '#'> (ie.. #5)"
+            ],
+            "derived": "",
+            "note": "For information about list elements and discriminators, see 'Slicing' in the Glossary tab  The eob.contained[N].id will be used/stored in the other element:  eob.referral.eference (ie.. #5)",
+            "example": ""
+        }
+    ]
+}

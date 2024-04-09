@@ -1,0 +1,68 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "C4BBAdjudicationDiscriminator",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system <code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator</code> defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">allowedunits<a name=\"C4BBAdjudicationDiscriminator-allowedunits\"> </a></td><td>allowed units</td><td>defines the adjudication slice to define allowed units</td></tr><tr><td style=\"white-space:nowrap\">adjustmentreason<a name=\"C4BBAdjudicationDiscriminator-adjustmentreason\"> </a></td><td>Adjustment Reason</td><td>Defines the adjudication slice to identify the adjustment reason</td></tr><tr><td style=\"white-space:nowrap\">rejectreason<a name=\"C4BBAdjudicationDiscriminator-rejectreason\"> </a></td><td>Reject Reason</td><td>Defines the adjudication slice to identify the reject reason</td></tr><tr><td style=\"white-space:nowrap\">billingnetworkstatus<a name=\"C4BBAdjudicationDiscriminator-billingnetworkstatus\"> </a></td><td>Billing Network Status</td><td>Indicates the Billing Provider network status in relation to a patient's coverage as of the effective date of service or admission.</td></tr><tr><td style=\"white-space:nowrap\">renderingnetworkstatus<a name=\"C4BBAdjudicationDiscriminator-renderingnetworkstatus\"> </a></td><td>Rendering Network Status</td><td>Indicates the Rendering Provider network status in relation to a patient's coverage as of the effective date of service or admission.</td></tr><tr><td style=\"white-space:nowrap\">benefitpaymentstatus<a name=\"C4BBAdjudicationDiscriminator-benefitpaymentstatus\"> </a></td><td>Benefit Payment Status</td><td>Indicates the network payment status in relation to a patient's coverage as of the effective date of service or admission.</td></tr></table></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+  "version": "2.0.0",
+  "name": "C4BBAdjudicationDiscriminator",
+  "title": "C4BB Adjudication Discriminator Code System",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "Used as the discriminator for the data elements in adjudication and item.adjudication.\n\nThis is a code system defined locally by the CARIN BlueButton IG. As this IG matures, it is expected that this CodeSystem will be migrated to THO (terminology.hl7.org). The current CodeSystem url should be considered temporary and subject to change in a future version.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This CodeSystem is not copyrighted.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 6,
+  "concept": [
+    {
+      "code": "allowedunits",
+      "display": "allowed units",
+      "definition": "defines the adjudication slice to define allowed units"
+    },
+    {
+      "code": "adjustmentreason",
+      "display": "Adjustment Reason",
+      "definition": "Defines the adjudication slice to identify the adjustment reason"
+    },
+    {
+      "code": "rejectreason",
+      "display": "Reject Reason",
+      "definition": "Defines the adjudication slice to identify the reject reason"
+    },
+    {
+      "code": "billingnetworkstatus",
+      "display": "Billing Network Status",
+      "definition": "Indicates the Billing Provider network status in relation to a patient's coverage as of the effective date of service or admission."
+    },
+    {
+      "code": "renderingnetworkstatus",
+      "display": "Rendering Network Status",
+      "definition": "Indicates the Rendering Provider network status in relation to a patient's coverage as of the effective date of service or admission."
+    },
+    {
+      "code": "benefitpaymentstatus",
+      "display": "Benefit Payment Status",
+      "definition": "Indicates the network payment status in relation to a patient's coverage as of the effective date of service or admission."
+    }
+  ]
+}

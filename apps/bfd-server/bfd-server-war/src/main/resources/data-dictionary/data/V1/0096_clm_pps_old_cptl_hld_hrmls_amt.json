@@ -1,0 +1,42 @@
+{
+    "id": 96,
+    "name": "Claim PPS Old Capital Hold Harmless Amount",
+    "description": "This amount is the hold harmless amount payable for old capital as computed by PRICER for providers with a payment code equal to 'A'.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pps_old_cptl_hld_hrmls_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "claimPPSOldCapitalHoldHarmlessAmount",
+    "ccwMapping": [
+        "CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_pps_old_cptl_hld_hrmls_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].valueMoney.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "id": 300,
+    "name": "Primary Payer Paid Amount",
+    "description": "The amount of a payment made on behalf of a Medicare beneficiary by a primary payer other than Medicare, that the provider is applying to covered Medicare charges on a non-institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_prmry_pyr_clm_pd_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "primaryPayerPaidAmount",
+    "ccwMapping": [
+        "NCH_PRMRY_PYR_CLM_PD_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedMoney.value",
+            "fhirPath": "benefitBalance[%n].financial.where(type.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/benefit-balance' and code='https://bluebutton.cms.gov/resources/variables/prpayamt')).usedMoney.value",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/prpayamt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'NCH Primary Payer (if not Medicare) Claim Paid Amount'",
+                "eob.benefitBalance[N].financial[N].usedMoney.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/benefit-balance\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/prpayamt\",\\n          \"display\": \"NCH Primary Payer (if not Medicare) Claim Paid Amount\"\\n        }\\n      ]\\n    },\\n    \"usedMoney\": {\\n      \"value\": 11,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

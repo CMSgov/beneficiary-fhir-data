@@ -1,0 +1,44 @@
+{
+    "id": 453,
+    "name": "Monthly Medicare-Medicaid dual eligibility code \u2013 April",
+    "description": "This variable indicates whether the beneficiary was eligible for both Medicare and Medicaid in a given month (January through December).",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "dual_stus_cd_04",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "medicaidDualEligibilityAprCode",
+    "ccwMapping": [
+        "DUAL_STUS_CD_04"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_DUAL_STUS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/dual_04'"
+            ],
+            "additional": [
+                "patient.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/dual_04'",
+                "patient.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

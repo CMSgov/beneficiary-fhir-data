@@ -1,0 +1,41 @@
+{
+    "id": 119,
+    "name": "Fill Number",
+    "description": "This field indicates the number fill of the current dispensed supply.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "fill_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "fillNumber",
+    "ccwMapping": [
+        "FILL_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_RX_FILL_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].quantity.extension[N].valueQuantity.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].quantity.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/fill_num'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

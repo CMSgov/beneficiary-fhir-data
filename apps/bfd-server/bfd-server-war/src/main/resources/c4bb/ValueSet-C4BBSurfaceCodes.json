@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "C4BBSurfaceCodes",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Include all codes defined in <a href=\"CodeSystem-C4BBSurfaceCodes.html\"><code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSurfaceCodes</code></a></li></ul></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBSurfaceCodes",
+  "version": "2.0.0",
+  "name": "C4BBSurfaceCodes",
+  "title": "US Surface Codes Set Value Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "This value set includes FDI tooth surface codes localized for the US Realm.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This ValueSet is not copyrighted.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSurfaceCodes"
+      }
+    ]
+  }
+}

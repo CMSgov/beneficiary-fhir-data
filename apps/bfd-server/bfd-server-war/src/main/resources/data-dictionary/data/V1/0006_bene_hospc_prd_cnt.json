@@ -1,0 +1,37 @@
+{
+    "id": 6,
+    "name": "Hospice Period Count",
+    "description": "The count of the number of hospice period trailers present for the beneficiary's record.",
+    "appliesTo": [
+        "Hospice"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "bene_hospc_prd_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "hospicePeriodCount",
+    "ccwMapping": [
+        "BENE_HOSPC_PRD_CNT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "hospitalization.extension[N].valueQuantity.value",
+            "fhirPath": "",
+            "discriminator": [
+                "hospitalization.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

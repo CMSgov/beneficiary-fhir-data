@@ -1,0 +1,44 @@
+{
+    "id": 454,
+    "name": "Monthly Medicare-Medicaid dual eligibility code \u2013 May",
+    "description": "This variable indicates whether the beneficiary was eligible for both Medicare and Medicaid in a given month (January through December).",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "dual_stus_cd_05",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "medicaidDualEligibilityMayCode",
+    "ccwMapping": [
+        "DUAL_STUS_CD_05"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_DUAL_STUS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/dual_05').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/dual_05'"
+            ],
+            "additional": [
+                "patient.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/dual_05'",
+                "patient.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/dual_05\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/dual_05\",\\n      \"code\": \"**\",\\n      \"display\": \"Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,31 @@
+{
+    "id": 387,
+    "name": "Revenue Center Obligation to Accept As Full Payment Code",
+    "description": "The code used to indicate that the provider was obligated to accept as full payment the amount received from the primary (or secondary) payer.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_otaf_pmt_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "obligationToAcceptAsFullPaymentCode",
+    "ccwMapping": [
+        "REV_CNTR_OTAF_PMT_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

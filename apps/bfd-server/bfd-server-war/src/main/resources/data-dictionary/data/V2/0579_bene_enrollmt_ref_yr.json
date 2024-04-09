@@ -1,0 +1,44 @@
+{
+    "id": 579,
+    "name": "Reference Year",
+    "description": "This field indicates the reference year of the enrollment data.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_enrollmt_ref_yr",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 4,
+    "bfdJavaFieldName": "beneEnrollmentReferenceYear",
+    "ccwMapping": [
+        "BENE_ENROLLMT_REF_YR"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/rfrnc_yr').valueDate",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/rfrnc_yr'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/rfrnc_yr'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/rfrnc_yr\",\\n    \"valueDate\": \"2018\"\\n  }\\n]"
+        }
+    ]
+}

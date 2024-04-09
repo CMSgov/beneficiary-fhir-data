@@ -1,0 +1,43 @@
+{
+    "id": 283,
+    "name": "Beneficiary Discharge Date",
+    "description": "On an inpatient or Home Health claim, the date the beneficiary was discharged from the facility, or died.",
+    "appliesTo": [
+        "Inpatient",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_bene_dschrg_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "beneficiaryDischargeDate",
+    "ccwMapping": [
+        "NCH_BENE_DSCHRG_DT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].timingPeriod.end",
+            "fhirPath": "supportingInfo.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and code='admissionperiod')).timingPeriod.end",
+            "discriminator": [
+                "supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "supportingInfo[N].category.coding[N].code = 'admissionperiod'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].category.coding[N].display = 'Admission Period'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 2,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"admissionperiod\",\\n          \"display\": \"Admission Period\"\\n        }\\n      ]\\n    },\\n    \"timingPeriod\": {\\n      \"start\": \"2016-01-15\",\\n      \"end\": \"2016-01-27\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

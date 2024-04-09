@@ -1,0 +1,46 @@
+{
+    "id": 90,
+    "name": "Claim PPS Capital Disproportionate Share Amount",
+    "description": "The amount of disproportionate share (rate reflecting indigent population served) portion of the PPS payment for capital.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pps_cptl_dsprprtnt_shr_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "claimPPSCapitalDisproportionateShareAmt",
+    "ccwMapping": [
+        "CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedMoney.value",
+            "fhirPath": "benefitBalance[%n].financial.where(type.coding.where(code='https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt')).usedMoney.value",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'Claim PPS Capital Disproportionate Share Amount'",
+                "eob.benefitBalance[N].financial[N].usedMoney.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/benefit-balance\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt\",\\n          \"display\": \"Claim PPS Capital Disproportionate Share Amount\"\\n        }\\n      ]\\n    },\\n    \"usedMoney\": {\\n      \"value\": 25.09,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

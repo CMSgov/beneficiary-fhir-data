@@ -1,0 +1,48 @@
+{
+    "id": 63,
+    "name": "Payment Amount",
+    "description": "The Medicare claim payment amount.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pmt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "paymentAmount",
+    "ccwMapping": [
+        "CLM_PMT_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_PMT_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "payment.amount.value",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [
+                "eob.payment.amount.code = 'USD'",
+                "eob.payment.amount.system = 'urn:iso:std:iso:4217'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}
