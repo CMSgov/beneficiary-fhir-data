@@ -1,6 +1,6 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
-import jakarta.annotation.Nullable;
+import javax.annotation.Nullable;
 
 /** Common interface for all model objects. */
 public interface ModelBean {

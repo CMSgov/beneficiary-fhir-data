@@ -17,6 +17,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>${antlr4.version}</version>
+        </dependency>
+
+        <dependency>
             <!-- contains the data transformation library classes needed to transform incoming data -->
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-model-dsl-codegen-library</artifactId>
@@ -54,6 +60,12 @@
             <artifactId>poi</artifactId>
         </dependency>
         <dependency>
+            <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
+                Hibernate is used for that in the BFD projects.) -->
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <groupId>org.hibernate.javax.persistence</groupId>
+        </dependency>
+        <dependency>
             <!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
                 for JPA entities. This happens happens automagically via javac's annotation
                 processor. -->
@@ -67,11 +79,6 @@
             </exclusions>
 
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>4.13.1</version>
         </dependency>
         <dependency>
             <!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's
@@ -107,6 +114,10 @@
                 <exclusion>
                     <groupId>org.jboss.logging</groupId>
                     <artifactId>jboss-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>antlr</groupId>
+                    <artifactId>antlr</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

@@ -239,6 +239,9 @@
         <fmt.maven.plugin.version>2.21.1</fmt.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <versions.maven.plugin.version>2.16.2</versions.maven.plugin.version>
+        <antlr4.version>4.13.1</antlr4.version>
+        <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
+        <jakarta.persistence-api.version>3.2.0-M2</jakarta.persistence-api.version>
     </properties>
 
     <dependencyManagement>
@@ -477,6 +480,13 @@
             </dependency>
 
             <dependency>
+                <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
+                    Hibernate is used for that in our projects.) -->
+                <artifactId>hibernate-jpa-2.1-api</artifactId>
+                <groupId>org.hibernate.javax.persistence</groupId>
+                <version>${hibernate.jpa.2.1.api.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-community-dialects</artifactId>
                 <version>${hibernate.version}</version>
@@ -490,7 +500,7 @@
             <dependency>
                 <groupId>jakarta.persistence</groupId>
                 <artifactId>jakarta.persistence-api</artifactId>
-                <version>3.2.0-M2</version>
+                <version>${jakarta.persistence-api.version}</version>
             </dependency>
 
             <dependency>
@@ -515,7 +525,11 @@
                 <artifactId>activation</artifactId>
                 <version>${javax.activation.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${javax.annotation-api.version}</version>
+            </dependency>
             <!-- BFD currently uses Jetty 10 which is compatible with Java EE 8 and predates the move to the
             jakarta namespace that comes with Jakarta EE 9. For the sake of consistency, the other EE APIs
             and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
@@ -535,6 +549,11 @@
                 <groupId>jakarta.annotation</groupId>
                 <artifactId>jakarta.annotation-api</artifactId>
                 <version>${jakarta.annotation.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4</artifactId>
+                <version>${antlr4.version}</version>
             </dependency>
 
             <dependency>
@@ -833,7 +852,7 @@
                             to specify environment-specific JVM arguments for tests. For example, one
                             might want to configure the max heap size and/or proxy server settings for
                             tests run on a system. -->
-                        <argLine>${maven-test.jvm-args.env-specific}</argLine>
+                        <argLine>$maven-test.jvm-args.env-specific}</argLine>
                         <trimStackTrace>false</trimStackTrace>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <!-- run ITs w/multiple threads -->

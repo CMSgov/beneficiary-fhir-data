@@ -12,9 +12,9 @@ import gov.cms.model.dsl.codegen.plugin.accessor.Setter;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
-import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 
 /**

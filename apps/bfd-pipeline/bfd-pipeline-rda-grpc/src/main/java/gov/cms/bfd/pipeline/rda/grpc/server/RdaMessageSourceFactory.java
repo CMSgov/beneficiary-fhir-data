@@ -12,11 +12,11 @@ import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
-import jakarta.annotation.Nullable;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 

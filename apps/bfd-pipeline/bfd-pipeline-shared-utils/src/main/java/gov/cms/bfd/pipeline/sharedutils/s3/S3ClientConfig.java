@@ -2,8 +2,8 @@ package gov.cms.bfd.pipeline.sharedutils.s3;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
-import jakarta.annotation.Nullable;
 import java.net.URI;
+import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

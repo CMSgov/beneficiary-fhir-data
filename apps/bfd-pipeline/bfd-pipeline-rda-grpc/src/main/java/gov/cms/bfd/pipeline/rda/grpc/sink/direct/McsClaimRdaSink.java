@@ -13,10 +13,10 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds MCS claim specific methods. */
 public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, RdaMcsClaim> {

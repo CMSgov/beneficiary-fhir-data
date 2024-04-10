@@ -27,7 +27,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.metamodel.PluralAttribute;
-import jakarta.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.SingularAttribute;
 
 /**
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by

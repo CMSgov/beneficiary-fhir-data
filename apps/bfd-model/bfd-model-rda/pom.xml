@@ -23,6 +23,12 @@
 
     <dependencies>
         <!-- Hibernate / JPA -->
+        <dependency>
+            <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
+                Hibernate is used for that in the BFD projects.) -->
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <groupId>org.hibernate.javax.persistence</groupId>
+        </dependency>
         <!-- Compile Time -->
         <dependency>
             <groupId>org.projectlombok</groupId>

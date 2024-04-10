@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import jakarta.annotation.Nullable;
+import javax.annotation.Nullable;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 /**

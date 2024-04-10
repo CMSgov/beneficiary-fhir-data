@@ -3,12 +3,12 @@ package gov.cms.bfd.pipeline.rda.grpc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;

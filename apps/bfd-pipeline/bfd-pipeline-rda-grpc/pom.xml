@@ -16,6 +16,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>${javax.annotation-api.version}</version>
+        </dependency>
+        <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-pipeline-shared-utils</artifactId>
             <version>${project.version}</version>
@@ -167,6 +172,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Used for annotating RDA API. -->
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>${jakarta.persistence-api.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-pipeline-shared-test-utils</artifactId>
             <version>${project.version}</version>
@@ -187,6 +204,11 @@
             <groupId>software.amazon.awssdk.crt</groupId>
             <artifactId>aws-crt</artifactId>
             <version>${aws.crt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.2.0-M2</version>
         </dependency>
     </dependencies>
 

@@ -1,10 +1,10 @@
 package gov.cms.model.dsl.codegen.library;
 
 import com.google.protobuf.ProtocolMessageEnum;
-import jakarta.annotation.Nullable;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import lombok.Data;
 
 /**

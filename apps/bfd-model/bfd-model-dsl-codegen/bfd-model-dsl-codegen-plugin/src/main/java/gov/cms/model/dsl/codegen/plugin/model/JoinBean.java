@@ -89,14 +89,14 @@ public class JoinBean implements ModelBean {
   @NotNull @Builder.Default private List<CascadeType> cascadeTypes = new ArrayList<>();
 
   /**
-   * Optionally specifies an order by expression to add using an {@link jakarta.persistence.OrderBy}
+   * Optionally specifies an order by expression to add using an {@link javax.persistence.OrderBy}
    * annotation.
    */
   private String orderBy;
 
   /**
    * Optionally specifies a foreign key constraint to reference in the {@link
-   * jakarta.persistence.JoinColumn} annotation.
+   * javax.persistence.JoinColumn} annotation.
    */
   private String foreignKey;
 
@@ -167,10 +167,9 @@ public class JoinBean implements ModelBean {
   }
 
   /**
-   * Determine if there is a value defined for the {@link jakarta.persistence.ForeignKey}
-   * annotation.
+   * Determine if there is a value defined for the {@link javax.persistence.ForeignKey} annotation.
    *
-   * @return true if there is a value defined for the {@link jakarta.persistence.ForeignKey}
+   * @return true if there is a value defined for the {@link javax.persistence.ForeignKey}
    *     annotation.
    */
   public boolean hasForeignKey() {
