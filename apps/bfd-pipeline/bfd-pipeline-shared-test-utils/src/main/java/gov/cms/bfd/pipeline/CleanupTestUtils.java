@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline;
 
+import static java.time.Instant.now;
+
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
@@ -94,7 +96,9 @@ public class CleanupTestUtils {
     dateSeq.addAll(Collections.nCopies(newClaims, cutoff.plus(1, ChronoUnit.DAYS)));
     Mbi mbi =
         transactionManager.executeFunction(
-            entityManager -> entityManager.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).build()));
+            entityManager ->
+                entityManager.merge(
+                    Mbi.builder().mbi(MBI).hash(MBI_HASH).lastUpdated(now()).build()));
     transactionManager.executeProcedure(
         entityManager -> {
           int baseClaimId = 1;

@@ -12,7 +12,7 @@ import io.restassured.authentication.CertificateAuthSettings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterEach;
