@@ -3,6 +3,7 @@
         "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 <!-- Checkstyle for BFD, see https://checkstyle.sourceforge.io/checks.html for full documentation of checks and options -->
 <module name="Checker">
+    <module name="SuppressWarningsFilter" />
     <module name="TreeWalker">
         <!-- Javadoc Rules -->
         <!-- Ensures docs exist for all methods/constructors -->
@@ -45,7 +46,10 @@
             <property name="checks" value="JavadocVariable"/>
             <property name="query" value="//VARIABLE_DEF[./IDENT[@text='serialVersionUID']]"/>
         </module>
-
+        <module name="JavadocMethod">
+            <property name="allowedAnnotations" value="Override, Test, Before, BeforeClass"/>
+        </module>
+        <module name="SuppressWarningsHolder" />
         <!-- Style Rules -->
     </module>
 </module>

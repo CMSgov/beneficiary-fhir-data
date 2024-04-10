@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -10,6 +11,9 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
+import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMapper;
+import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMappingBuilder;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -20,7 +24,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 
 /** MetaModel a container for FHIR resources to CCW VARs (Fields). */
 public class MetaModel {
@@ -71,6 +79,9 @@ public class MetaModel {
 
   /** FHIR to CCW VARs (bfd fields) mapping in json model - V2 R4. */
   @Getter private static ArrayNode fhir2CCWMappingV2 = null;
+
+  /** FHIR to CCW VARs (bfd fields) mapping: ccw var name keyed mapping POJO - V2 R4. */
+  @Getter private static Map<String, FHIR2CCWMappingBuilder> fhir2CCWMappingBuildersV2 = null;
 
   static {
     Configuration.setDefaults(
@@ -129,6 +140,14 @@ public class MetaModel {
           Level.INFO, "Exception when load fhir to ccw mapping v2 files (json): " + e.toString());
       throw new RuntimeException(e);
     }
+
+    if (fhir2CCWMappingV2 != null) {
+      try {
+        fhir2CCWMappingBuildersV2 = loadMappingBuilders(fhir2CCWMappingV2);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   /**
@@ -160,9 +179,9 @@ public class MetaModel {
     // dump fhir schema
     dump(fhirJsonSchema, "FHIR_SCHEMA_JSON.json");
     // dump v2 fhir to bfd mapping
-    dump(fhir2CCWMappingV1, "fhir2ccwV1.json");
-    // dump v1 fhir to bfd mapping
     dump(fhir2CCWMappingV2, "fhir2ccwV2.json");
+    // dump v1 fhir to bfd mapping
+    dump(fhir2CCWMappingV1, "fhir2ccwV1.json");
   }
 
   /**
@@ -263,7 +282,7 @@ public class MetaModel {
    */
   private static ArrayNode loadFHIR2CCWMapping(String path) throws IOException, Exception {
     URL resourceDictionaryData = MetaModel.class.getResource(path);
-    assert resourceDictionaryData != null;
+    if (resourceDictionaryData == null) return null;
     File dictionaryDataDir = Paths.get(resourceDictionaryData.toURI()).toFile();
     ArrayNode fhir2ccwMapping = null;
     if (dictionaryDataDir.isDirectory()) {
@@ -277,12 +296,36 @@ public class MetaModel {
       assert dictionFldJson != null;
       fhir2ccwMapping = jacksonMapper.createArrayNode();
       for (File f : dictionFldJson) {
+        FHIR2CCWMapper pojo = null;
+        if (path.endsWith("V2")) {
+          pojo = jacksonMapper.readValue(f, FHIR2CCWMappingBuilder.class);
+        }
         fhir2ccwMapping.add(jacksonMapper.readTree(f));
       }
     } else {
       fhir2ccwMapping = (ArrayNode) jacksonMapper.readTree(dictionaryDataDir);
     }
     return fhir2ccwMapping;
+  }
+
+  /**
+   * Build POJO based mapper from JsonNode based.
+   *
+   * @param mappingJsonArray json based mapper
+   * @return map of pojo based mapper keyed by ccw var name (bfd column name)
+   * @throws JsonProcessingException malformed json
+   */
+  private static Map<String, FHIR2CCWMappingBuilder> loadMappingBuilders(ArrayNode mappingJsonArray)
+      throws JsonProcessingException {
+    Map<String, FHIR2CCWMappingBuilder> mapper = new HashMap<String, FHIR2CCWMappingBuilder>();
+    for (JsonNode n : mappingJsonArray) {
+      FHIR2CCWMappingBuilder pojo = jacksonMapper.treeToValue(n, FHIR2CCWMappingBuilder.class);
+      if (pojo.getBfdColumnName().isEmpty()) {
+        throw new IllegalStateException("CCW VAR name required...");
+      }
+      mapper.put(pojo.getBfdColumnName(), pojo);
+    }
+    return mapper;
   }
 
   /**
@@ -303,6 +346,81 @@ public class MetaModel {
       }
     }
     return mapping;
+  }
+
+  // "identifier": [
+  //  {
+  //    "system": "https://bluebutton.cms.gov/resources/variables/clm_id",
+  //          "type": {
+  //    "coding": [
+  //    {
+  //      "code": "uc",
+  //            "display": "Unique Claim ID",
+  //            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
+  //    }
+  //              ]
+  //  },
+  //    "value": "-10000930037832"
+  //  },
+  //  {
+  //    "system": "https://bluebutton.cms.gov/resources/identifier/claim-group",
+  //          "type": {
+  //    "coding": [
+  //    {
+  //      "code": "uc",
+  //            "display": "Unique Claim ID",
+  //            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
+  //    }
+  //              ]
+  //  },
+  //    "value": "-1632178179"
+  //  }
+  // ],
+  /**
+   * Create codeable concept using fhir mapping.
+   *
+   * @param bfdFldName bfd fld name
+   * @param version version of fhir 1 - STU3, 2 - R4
+   * @return CodeableConcept object
+   */
+  public static CodeableConcept createCodeableConcept(String bfdFldName, int version) {
+    Pattern pattern = Pattern.compile("([a-z])");
+    Matcher matcher = pattern.matcher("expression here");
+    boolean matchFound = matcher.find();
+    CodeableConcept cc = null;
+    ArrayNode mappings = (version == 1) ? fhir2CCWMappingV1 : fhir2CCWMappingV2;
+    for (JsonNode n : mappings) {
+      String fldName = n.get("bfdColumnName").textValue();
+      if (fldName.equals(bfdFldName)) {
+        JsonNode fhirMapping = n.get("fhirMapping");
+        JsonNode element = n.get("element");
+        JsonNode fhirPath = n.get("fhirPath");
+        JsonNode discriminator = n.get("discriminator");
+        JsonNode additional = n.get("additional");
+        cc =
+            new CodeableConcept()
+                .setCoding(
+                    Arrays.asList(
+                        new Coding(
+                            C4BBClaimIdentifierType.UC.getSystem(),
+                            C4BBClaimIdentifierType.UC.toCode(),
+                            C4BBClaimIdentifierType.UC.getDisplay())));
+
+        break;
+      }
+    }
+    //    "element" : "identifier[N].value", <= EOB identifier is array
+    //    "fhirPath" :
+    // "identifier.where(system='https://bluebutton.cms.gov/resources/variables/clm_id').value",
+    //    "discriminator" : [ "identifier[N].system =
+    // 'https://bluebutton.cms.gov/resources/variables/clm_id'" ], <= discriminator of each
+    // identifier
+    //    "additional" : [  <=== CodeableConcept type of the identifier C4BB
+    //    "(eob.identifier[N].type.coding[N].system =
+    // 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+    //    "eob.identifier[N].type.coding[N].code = 'uc'",
+    //    "eob.identifier[N].type.coding[N].display = 'Unique Claim ID')" ],
+    return cc;
   }
 
   /**

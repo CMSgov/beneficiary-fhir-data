@@ -32,8 +32,8 @@
             ],
             "additional": [
                 "eob.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
-                "eob.identifier[N].type.coding[N].system = 'uc'",
-                "eob.identifier[N].type.coding[N].system = 'Unique Claim ID'"
+                "eob.identifier[N].type.coding[N].code = 'uc'",
+                "eob.identifier[N].type.coding[N].display = 'Unique Claim ID'"
             ],
             "derived": "",
             "note": "",

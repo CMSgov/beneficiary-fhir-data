@@ -436,7 +436,6 @@ public final class TransformerUtilsV2 {
     if (identifierValue == null) {
       throw new IllegalArgumentException();
     }
-
     Identifier identifier =
         new Identifier()
             .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
@@ -1755,15 +1754,17 @@ public final class TransformerUtilsV2 {
     // "claim" => ExplanationOfBenefit.use
     eob.setUse(Use.CLAIM);
 
+    Identifier identifier = null;
     if (claimType.equals(ClaimType.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
       JsonNode fhirMapping = MetaModel.getFhirMapping("pde_id", 2);
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
+      identifier = createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId));
     } else {
       // CLM_ID => ExplanationOfBenefit.identifier
       JsonNode fhirMapping = MetaModel.getFhirMapping("clm_id", 2);
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
+      identifier = createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId));
     }
+    eob.addIdentifier(identifier);
 
     // CLM_GRP_ID => ExplanationOfBenefit.identifier
     eob.addIdentifier()
