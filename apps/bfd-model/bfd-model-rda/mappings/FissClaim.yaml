@@ -443,7 +443,7 @@ mappings:
         the patient''s medical/health record by the provider.'
       dbName: medical_record_no
     - name: admTypCd
-      sqlType: char
+      sqlType: varchar(1)
       comment: 'Indicates the type and priority of inpatient services.'
       dbName: adm_typ_cd
     - name: mbiId

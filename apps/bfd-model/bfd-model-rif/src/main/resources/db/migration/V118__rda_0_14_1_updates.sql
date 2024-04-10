@@ -3,7 +3,7 @@
 /*
 * fiss_claims
 */
-ALTER TABLE rda.fiss_claims ADD adm_typ_cd char;
+ALTER TABLE rda.fiss_claims ADD adm_typ_cd varchar(1);
 
 /*
 * fiss_revenue_lines
