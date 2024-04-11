@@ -3,11 +3,12 @@ package gov.cms.bfd.server.war.commons.fhir.ccw.mapper;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.*;
 
 /** converter generated, add logic in subclass. */
 @Getter
 @SuppressWarnings("all")
-public class FHIR2CCWMapper {
+public abstract class FHIR2CCWMapper {
   private Integer id;
   private String name;
   private String description;

@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -63,6 +62,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
+import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMappingBuilder;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -1755,15 +1755,16 @@ public final class TransformerUtilsV2 {
     eob.setUse(Use.CLAIM);
 
     Identifier identifier = null;
-    if (claimType.equals(ClaimType.PDE)) {
-      // PDE_ID => ExplanationOfBenefit.identifier
-      JsonNode fhirMapping = MetaModel.getFhirMapping("pde_id", 2);
-      identifier = createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId));
-    } else {
-      // CLM_ID => ExplanationOfBenefit.identifier
-      JsonNode fhirMapping = MetaModel.getFhirMapping("clm_id", 2);
-      identifier = createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId));
-    }
+    FHIR2CCWMappingBuilder b = null;
+    // PDE_ID => ExplanationOfBenefit.identifier or
+    // CLM_ID => ExplanationOfBenefit.identifier
+    MetaModel.getFhirMapping(claimType.equals(ClaimType.PDE) ? "pde_id" : "clm_id").enrich(eob);
+    identifier =
+        createClaimIdentifier(
+            claimType.equals(ClaimType.PDE)
+                ? CcwCodebookVariable.PDE_ID
+                : CcwCodebookVariable.CLM_ID,
+            String.valueOf(claimId));
     eob.addIdentifier(identifier);
 
     // CLM_GRP_ID => ExplanationOfBenefit.identifier

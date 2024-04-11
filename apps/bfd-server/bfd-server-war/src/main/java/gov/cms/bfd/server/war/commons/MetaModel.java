@@ -11,7 +11,6 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
-import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
 import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMapper;
 import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMappingBuilder;
 import java.io.File;
@@ -24,14 +23,16 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 
 /** MetaModel a container for FHIR resources to CCW VARs (Fields). */
 public class MetaModel {
+  /** map of fhir 2 ccw mapper element path component to HAPI FHIR model FQCN. */
+  public static Map<String, String> elementToClazz =
+      Map.ofEntries(
+          Map.entry("identifier", "org.hl7.fhir.r4.model.Identifier"),
+          Map.entry("codeableConcept", "org.hl7.fhir.r4.model.CodeableConcept"));
+
   /** logger used to log messages etc. */
   private static Logger logger = Logger.getLogger("MetaModelLogger");
 
@@ -158,24 +159,6 @@ public class MetaModel {
   public static void main(String[] args) {
     // dump all the dd components
     jacksonMapper.enable(SerializationFeature.INDENT_OUTPUT);
-    JsonNode theMap = getFhirMapping("line_alowd_chrg_amt", 2);
-
-    //    "resource" : "ExplanationOfBenefit",
-    //    "element" : "item[N].adjudication[N].amount.value",
-    //    "fhirPath" : "item[%n].adjudication.where(category.coding.where(system =
-    // 'https://bluebutton.cms.gov/resources/codesystem/adjudication' and code =
-    // 'https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt')).amount.value",
-    //    "discriminator" : [ "item[N].adjudication[N].category.coding[N].system =
-    // 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
-    // "item[N].adjudication[N].category.coding[N].code =
-    // 'https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt'" ],
-    //    "additional" : [ "(eob.item[N].adjudication[N].category.coding[N].system =
-    // 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication'",
-    // "eob.item[N].adjudication[N].category.coding[N].code = 'eligible'",
-    // "eob.item[N].adjudication[N].category.coding[N].display = 'Eligible Amount')",
-    // "eob.item[N].adjudication[N].category.coding[N].display = 'Line Allowed Charge Amount'",
-    // "eob.item[N].adjudication[N].amount.currency = 'USD'" ],
-
     // dump fhir schema
     dump(fhirJsonSchema, "FHIR_SCHEMA_JSON.json");
     // dump v2 fhir to bfd mapping
@@ -248,30 +231,6 @@ public class MetaModel {
   // keyed by: resource name, fhir path
   // for now just keep the whole descriptor (v), extract only used bits and save in the map later
   // in V1, for now, use col name + element as place holder, total 628
-
-  // in V2, the fhir path is unique and always present
-  // note, there are ccw vars with empty fhir path, 20 out of 629 (total), need to create them
-  // ./0390_rev_cntr_pmt_mthd_ind_cd.json:            "fhirPath": "",
-  // ./0388_rev_cntr_packg_ind_cd.json:            "fhirPath": "",
-  // ./0443_bene_crnt_hic_num.json:            "fhirPath": "",
-  // ./0444_bene_crnt_hic_num.json:            "fhirPath": "",
-  // ./0034_clm_drg_outlier_stay_cd.json:            "fhirPath": "",
-  // ./0581_bene_ptb_trmntn_cd.json:            "fhirPath": "",
-  // ./0422_bene_id.json:            "fhirPath": "",
-  // ./0446_bene_crnt_hic_num.json:            "fhirPath": "",
-  // ./0381_rev_cntr_dscnt_ind_cd.json:            "fhirPath": "",
-  // ./0573_bene_id.json:            "fhirPath": "",
-  // ./0026_carr_line_rx_num.json:            "fhirPath": "",
-  // ./0375_rev_cntr_apc_hipps_cd.json:            "fhirPath": "",
-  // ./0355_prscrbr_id_qlfyr_cd.json:            "fhirPath": "",
-  // ./0429_mbi_effective_end_date.json:            "fhirPath": "",
-  // ./0130_hpsa_scrcty_ind_cd.json:            "fhirPath": "",
-  // ./0028_carr_prfrng_pin_num.json:            "fhirPath": "",
-  // ./0609_contract_reference.json:            "fhirPath": "",
-  // ./0608_contract_identifier.json:            "fhirPath": "",
-  // ./0387_rev_cntr_otaf_pmt_cd.json:            "fhirPath": "",
-  // ./0445_mbi_num.json:            "fhirPath": "",
-
   /**
    * Load FHIR to CCW VARs (bfd fields) mapping descriptor json files from a folder.
    *
@@ -320,9 +279,13 @@ public class MetaModel {
     Map<String, FHIR2CCWMappingBuilder> mapper = new HashMap<String, FHIR2CCWMappingBuilder>();
     for (JsonNode n : mappingJsonArray) {
       FHIR2CCWMappingBuilder pojo = jacksonMapper.treeToValue(n, FHIR2CCWMappingBuilder.class);
-      if (pojo.getBfdColumnName().isEmpty()) {
-        throw new IllegalStateException("CCW VAR name required...");
-      }
+      // there are ccw mappings that do not have BFD column:
+      // e.g. id = 610, 611, 614, 615 etc. coverage group, sub group
+      // in such case, use id + name as key
+      String key =
+          pojo.getBfdColumnName().isEmpty()
+              ? pojo.getId() + ":" + pojo.getName()
+              : pojo.getBfdColumnName();
       mapper.put(pojo.getBfdColumnName(), pojo);
     }
     return mapper;
@@ -332,108 +295,10 @@ public class MetaModel {
    * lookup fhir mapping by bfd fld name.
    *
    * @param bfdFldName bfd fld name
-   * @param version version of fhir 1 - STU3, 2 - R4
    * @return fhirMappiong node
    */
-  public static JsonNode getFhirMapping(String bfdFldName, int version) {
-    JsonNode mapping = null;
-    ArrayNode mappings = (version == 1) ? fhir2CCWMappingV1 : fhir2CCWMappingV2;
-    for (JsonNode n : mappings) {
-      String fldName = n.get("bfdColumnName").textValue();
-      if (fldName.equals(bfdFldName)) {
-        mapping = n;
-        break;
-      }
-    }
-    return mapping;
-  }
-
-  // "identifier": [
-  //  {
-  //    "system": "https://bluebutton.cms.gov/resources/variables/clm_id",
-  //          "type": {
-  //    "coding": [
-  //    {
-  //      "code": "uc",
-  //            "display": "Unique Claim ID",
-  //            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
-  //    }
-  //              ]
-  //  },
-  //    "value": "-10000930037832"
-  //  },
-  //  {
-  //    "system": "https://bluebutton.cms.gov/resources/identifier/claim-group",
-  //          "type": {
-  //    "coding": [
-  //    {
-  //      "code": "uc",
-  //            "display": "Unique Claim ID",
-  //            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
-  //    }
-  //              ]
-  //  },
-  //    "value": "-1632178179"
-  //  }
-  // ],
-  /**
-   * Create codeable concept using fhir mapping.
-   *
-   * @param bfdFldName bfd fld name
-   * @param version version of fhir 1 - STU3, 2 - R4
-   * @return CodeableConcept object
-   */
-  public static CodeableConcept createCodeableConcept(String bfdFldName, int version) {
-    Pattern pattern = Pattern.compile("([a-z])");
-    Matcher matcher = pattern.matcher("expression here");
-    boolean matchFound = matcher.find();
-    CodeableConcept cc = null;
-    ArrayNode mappings = (version == 1) ? fhir2CCWMappingV1 : fhir2CCWMappingV2;
-    for (JsonNode n : mappings) {
-      String fldName = n.get("bfdColumnName").textValue();
-      if (fldName.equals(bfdFldName)) {
-        JsonNode fhirMapping = n.get("fhirMapping");
-        JsonNode element = n.get("element");
-        JsonNode fhirPath = n.get("fhirPath");
-        JsonNode discriminator = n.get("discriminator");
-        JsonNode additional = n.get("additional");
-        cc =
-            new CodeableConcept()
-                .setCoding(
-                    Arrays.asList(
-                        new Coding(
-                            C4BBClaimIdentifierType.UC.getSystem(),
-                            C4BBClaimIdentifierType.UC.toCode(),
-                            C4BBClaimIdentifierType.UC.getDisplay())));
-
-        break;
-      }
-    }
-    //    "element" : "identifier[N].value", <= EOB identifier is array
-    //    "fhirPath" :
-    // "identifier.where(system='https://bluebutton.cms.gov/resources/variables/clm_id').value",
-    //    "discriminator" : [ "identifier[N].system =
-    // 'https://bluebutton.cms.gov/resources/variables/clm_id'" ], <= discriminator of each
-    // identifier
-    //    "additional" : [  <=== CodeableConcept type of the identifier C4BB
-    //    "(eob.identifier[N].type.coding[N].system =
-    // 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
-    //    "eob.identifier[N].type.coding[N].code = 'uc'",
-    //    "eob.identifier[N].type.coding[N].display = 'Unique Claim ID')" ],
-    return cc;
-  }
-
-  /**
-   * Given resource name and claim type, return the c4bb structure definition json object, to e.g.
-   * extract url etc.
-   *
-   * @param resourceName the resource name
-   * @param claimType the claim type
-   * @return json node for the structure definition resource
-   */
-  public static JsonNode getC4BBProfile(String resourceName, String claimType) {
-    return c4bbProfiles.get(
-        String.format("StructureDefinition-C4BB-%s-%s", resourceName, claimType));
+  public static FHIR2CCWMappingBuilder getFhirMapping(String bfdFldName) {
+    return fhir2CCWMappingBuildersV2.get(bfdFldName);
   }
 
   /**
@@ -452,23 +317,6 @@ public class MetaModel {
         .textValue();
   }
 
-  // Wrap JsonNode with jsTree node for tree rendering
-  // in js
-  //
-  //  {
-  //    id          : "string" // will be autogenerated if omitted
-  //    text        : "string" // node text
-  //    icon        : "string" // string for custom
-  //    state       : {
-  //      opened    : boolean  // is the node open
-  //      disabled  : boolean  // is the node disabled
-  //      selected  : boolean  // is the node selected
-  //    },
-  //    children    : []  // array of strings or objects
-  //    li_attr     : {}  // attributes for the generated LI node
-  //    a_attr      : {}  // attributes for the generated A node
-  //  }
-
   /**
    * Helper generate jsTree node tree from data json tree.
    *
@@ -481,7 +329,6 @@ public class MetaModel {
       while (fieldNames.hasNext()) {
         String fieldName = fieldNames.next();
         JsonNode fieldValue = root.get(fieldName);
-
         traverse(fieldValue, jsTree);
       }
     } else if (root.isArray()) {
@@ -492,7 +339,6 @@ public class MetaModel {
       }
     } else {
       // JsonNode root represents a single value field - do something with it.
-
     }
   }
 }
