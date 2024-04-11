@@ -19,43 +19,66 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
   // 3. eob.identifier[N].type.coding[N].display = 'Unique Claim ID'
   // fhirMapping -> discriminator for ccw var: pde_id
   // 1. identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/pde_id'
-  private static final String REGEX_SYSTEM =
-      "[A-Za-z]+\\.[A-Za-z]+\\[N\\]\\.type\\.coding\\[N\\]\\.system";
-  private static final String REGEX_CODE =
-      "[A-Za-z]+\\.[A-Za-z]+\\[N\\]\\.type\\.coding\\[N\\]\\.code";
-  private static final String REGEX_DISPLAY =
-      "[A-Za-z]+\\.[A-Za-z]+\\[N\\]\\.type\\.coding\\[N\\]\\.display";
+  private static final Pattern REGEX_CC_PROPS =
+      Pattern.compile(
+          "(eob)\\.(identifier|extension|supportingInfo)([\\[N\\]])\\.type\\.coding([\\[N\\]])\\.(system|code|display)");
+  private static final Pattern REGEX_DISCRIMINATOR =
+      Pattern.compile("(identifier|extension|supportingInfo)([\\[N\\]])\\.system");
 
   /**
    * Enrich the eob based on fhir mapping info.
    *
    * @param eob the eob with relevant element(s) enriched
    */
-  public ExplanationOfBenefit enrich(ExplanationOfBenefit eob) {
-    return eob;
-  }
-
-  /**
-   * Create codeable concept using fhir mapping.
-   *
-   * @return CodeableConcept object
-   */
-  public CodeableConcept createCodeableConcept() {
-    Pattern pattern = Pattern.compile("([a-z])");
-    Matcher matcher = pattern.matcher("expression here");
-    boolean matchFound = matcher.find();
-    CodeableConcept cc = null;
+  public ExplanationOfBenefit enrich(ExplanationOfBenefit eob, String val) {
     List<FhirMapping> mappings = getFhirMapping();
     FhirMapping mapping = mappings.get(0);
     // handle one mapping case for POC
-    Map<String, String> discriminator = parseExpressionList(mapping.getDiscriminator());
-    Map<String, String> additional = parseExpressionList(mapping.getAdditional());
+    Map<String, String> discriminatorMap = parseExpressionList(mapping.getDiscriminator());
+    Map<String, String> additionalMap = parseExpressionList(mapping.getAdditional());
     // extract system, code, display from additionals
-    String sys = "";
-    String code = "";
-    String display = "";
-    cc = new CodeableConcept().setCoding(Arrays.asList(new Coding(sys, code, display)));
-    return cc;
+    Map<String, String> discriminators = new HashMap<String, String>();
+    String element = null;
+    String elemCardinal = null;
+    String typeCodingCardinal = null;
+    for (Map.Entry<String, String> e : discriminatorMap.entrySet()) {
+      Matcher m = REGEX_DISCRIMINATOR.matcher(e.getKey());
+      if (m.matches()) {
+        element = m.group(1); // assert element stay same
+        elemCardinal = m.group(2); // when cardinal is [N] add element to array
+        String valSysURL = m.group(5);
+        discriminators.put("system", e.getValue());
+      }
+    }
+    Map<String, String> ccProps = new HashMap<String, String>();
+    for (Map.Entry<String, String> e : additionalMap.entrySet()) {
+      Matcher m = REGEX_CC_PROPS.matcher(e.getKey());
+      if (m.matches()) {
+        String resource = m.group(1); // assert resource name stay same, now it's eob
+        element = m.group(2); // assert element stay same
+        elemCardinal = m.group(3); // when cardinal is [N] add element to array
+        typeCodingCardinal =
+            m.group(4); // when typeCoding cardinal is [N] type -> coding is an array of cc
+        String ccPropName = m.group(5);
+        ccProps.put(ccPropName, e.getValue());
+      }
+    }
+    if (elemCardinal != null && elemCardinal.equals("[N]")) {
+      Identifier identifier = new Identifier();
+      CodeableConcept cc =
+          new CodeableConcept()
+              .setCoding(
+                  Arrays.asList(
+                      new Coding(
+                          ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
+      identifier.setSystem(discriminators.get("system"));
+      identifier.setType(cc);
+      identifier.setValue(val);
+      // to do: use reflection
+      eob.addIdentifier(identifier);
+    }
+
+    return eob;
   }
 
   /**
@@ -68,7 +91,9 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
     Map<String, String> r = new HashMap<String, String>();
     for (String e : l) {
       String[] kv = e.split("=");
-      r.put(kv[0], kv[1]);
+      String k = kv[0].trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "");
+      String v = kv[1].trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "");
+      r.put(k, v);
     }
     return r;
   }

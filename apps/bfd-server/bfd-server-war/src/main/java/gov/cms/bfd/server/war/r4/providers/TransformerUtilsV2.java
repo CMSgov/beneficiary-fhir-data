@@ -1758,7 +1758,9 @@ public final class TransformerUtilsV2 {
     FHIR2CCWMappingBuilder b = null;
     // PDE_ID => ExplanationOfBenefit.identifier or
     // CLM_ID => ExplanationOfBenefit.identifier
-    MetaModel.getFhirMapping(claimType.equals(ClaimType.PDE) ? "pde_id" : "clm_id").enrich(eob);
+    ExplanationOfBenefit eobEnriched =
+        MetaModel.getFhirMapping(claimType.equals(ClaimType.PDE) ? "pde_id" : "clm_id")
+            .enrich(eob, String.valueOf(claimId));
     identifier =
         createClaimIdentifier(
             claimType.equals(ClaimType.PDE)
