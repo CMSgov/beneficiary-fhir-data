@@ -125,6 +125,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate.common</groupId>
+            <artifactId>hibernate-commons-annotations</artifactId>
+            <version>${hibernate-commons-annotations.version}</version>
+        </dependency>
 
         <dependency>
             <!-- Provides the @Inject annotation. Does NOT provide dependency injection;
@@ -138,6 +143,7 @@
                 managed. -->
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <!-- We're really not using much of the Spring Data JPA framework; we
