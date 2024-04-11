@@ -21,9 +21,9 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
   // 1. identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/pde_id'
   private static final Pattern REGEX_CC_PROPS =
       Pattern.compile(
-          "(eob)\\.(identifier|extension|supportingInfo)([\\[N\\]])\\.type\\.coding([\\[N\\]])\\.(system|code|display)");
+          "(eob)\\.(identifier|extension|supportingInfo)(\\[N\\])\\.type\\.coding(\\[N\\])\\.(system|code|display)");
   private static final Pattern REGEX_DISCRIMINATOR =
-      Pattern.compile("(identifier|extension|supportingInfo)([\\[N\\]])\\.system");
+      Pattern.compile("(identifier|extension|supportingInfo)(\\[N\\])\\.system");
 
   /**
    * Enrich the eob based on fhir mapping info.
@@ -46,7 +46,6 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       if (m.matches()) {
         element = m.group(1); // assert element stay same
         elemCardinal = m.group(2); // when cardinal is [N] add element to array
-        String valSysURL = m.group(5);
         discriminators.put("system", e.getValue());
       }
     }

@@ -1761,13 +1761,14 @@ public final class TransformerUtilsV2 {
     ExplanationOfBenefit eobEnriched =
         MetaModel.getFhirMapping(claimType.equals(ClaimType.PDE) ? "pde_id" : "clm_id")
             .enrich(eob, String.valueOf(claimId));
-    identifier =
-        createClaimIdentifier(
-            claimType.equals(ClaimType.PDE)
-                ? CcwCodebookVariable.PDE_ID
-                : CcwCodebookVariable.CLM_ID,
-            String.valueOf(claimId));
-    eob.addIdentifier(identifier);
+    // now replaced by meta model based enrichment.
+    //    identifier =
+    //        createClaimIdentifier(
+    //            claimType.equals(ClaimType.PDE)
+    //                ? CcwCodebookVariable.PDE_ID
+    //                : CcwCodebookVariable.CLM_ID,
+    //            String.valueOf(claimId));
+    //    eob.addIdentifier(identifier);
 
     // CLM_GRP_ID => ExplanationOfBenefit.identifier
     eob.addIdentifier()
