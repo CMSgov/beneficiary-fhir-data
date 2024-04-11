@@ -20,6 +20,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -53,10 +54,12 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -85,6 +88,9 @@ public final class InpatientClaimTransformerV2Test {
 
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
+
+  /** The NPI org lookup to use for the test. */
+  private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -115,13 +121,21 @@ public final class InpatientClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
-    inpatientClaimTransformer = new InpatientClaimTransformerV2(metricRegistry, new NPIOrgLookup());
+    inpatientClaimTransformer =
+        new InpatientClaimTransformerV2(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
     claim = generateClaim();
     ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
+  }
+
+  /** Releases the static mock NPIOrgLookup. */
+  @AfterEach
+  public void after() {
+    npiOrgLookup.close();
   }
 
   /**

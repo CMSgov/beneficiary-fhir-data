@@ -49,6 +49,15 @@ public class NPIOrgLookup {
   }
 
   /**
+   * Constructs an {@link NPIOrgLookup} used for testing purposes only.
+   *
+   * @param npiOrgMap map for test data
+   */
+  public NPIOrgLookup(Map<String, String> npiOrgMap) {
+    npiOrgHashMap.putAll(npiOrgMap);
+  }
+
+  /**
    * Constructs an {@link NPIOrgLookup}.
    *
    * @param npiDataStream input stream for npi org
