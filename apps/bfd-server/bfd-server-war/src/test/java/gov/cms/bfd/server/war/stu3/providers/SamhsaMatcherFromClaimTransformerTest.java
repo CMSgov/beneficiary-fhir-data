@@ -21,6 +21,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,10 +32,12 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 
 /** Verifies that transformations that contain SAMHSA codes are filtered as expected. */
 public class SamhsaMatcherFromClaimTransformerTest {
@@ -88,10 +91,25 @@ public class SamhsaMatcherFromClaimTransformerTest {
   /** Claim indicator for Carrier. */
   private static final String CARRIER_CLAIM = "CARRIER";
 
+  /** The NPI org lookup to use for the test. */
+  private MockedStatic<NPIOrgLookup> npiOrgLookup;
+
+  /** The mock FdaDrugCodeDisplayLookup. */
+  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
+
   /** Sets up the test. */
   @BeforeEach
   public void setup() {
     samhsaMatcher = new Stu3EobSamhsaMatcher();
+    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
+    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
+  }
+
+  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
+  @AfterEach
+  public void after() {
+    npiOrgLookup.close();
+    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -100,16 +118,17 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @return the collection
    */
   public static Stream<Arguments> data() throws IOException {
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
 
     // Load and transform the various claim types for testing
     ClaimTransformerInterface claimTransformerInterface =
-        new InpatientClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
+        new InpatientClaimTransformer(new MetricRegistry(), localNpiLookup);
     ExplanationOfBenefit inpatientEob =
         claimTransformerInterface.transform(getClaim(InpatientClaim.class), false);
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
 
     claimTransformerInterface =
-        new OutpatientClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
+        new OutpatientClaimTransformer(new MetricRegistry(), localNpiLookup);
     ExplanationOfBenefit outpatientEob =
         claimTransformerInterface.transform(getClaim(OutpatientClaim.class), false);
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
@@ -121,18 +140,17 @@ public class SamhsaMatcherFromClaimTransformerTest {
         claimTransformerInterface.transform(getClaim(DMEClaim.class), false);
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
-    claimTransformerInterface = new HHAClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
+    claimTransformerInterface = new HHAClaimTransformer(new MetricRegistry(), localNpiLookup);
     ExplanationOfBenefit hhaEob =
         claimTransformerInterface.transform(getClaim(HHAClaim.class), false);
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
-    claimTransformerInterface =
-        new HospiceClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
+    claimTransformerInterface = new HospiceClaimTransformer(new MetricRegistry(), localNpiLookup);
     ExplanationOfBenefit hospiceEob =
         claimTransformerInterface.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
-    claimTransformerInterface = new SNFClaimTransformer(new MetricRegistry(), new NPIOrgLookup());
+    claimTransformerInterface = new SNFClaimTransformer(new MetricRegistry(), localNpiLookup);
     ExplanationOfBenefit snfEob =
         claimTransformerInterface.transform(getClaim(SNFClaim.class), false);
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
@@ -141,7 +159,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
         new CarrierClaimTransformer(
             new MetricRegistry(),
             FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            new NPIOrgLookup());
+            localNpiLookup);
     ExplanationOfBenefit carrierEob =
         claimTransformerInterface.transform(getClaim(CarrierClaim.class), false);
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();

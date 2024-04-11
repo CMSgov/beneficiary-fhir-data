@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.war.utils;
 
 import gov.cms.bfd.DatabaseTestUtils;
+import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
@@ -19,6 +21,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +34,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
+import org.jetbrains.annotations.NotNull;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 /** Supplies test data for the RDA based unit tests. */
 public class RDATestUtils {
@@ -654,5 +660,44 @@ public class RDATestUtils {
     final Root<Mbi> root = criteria.from(Mbi.class);
     criteria.select(root).where(builder.equal(root.get(Mbi.Fields.mbi), MBI));
     return em.createQuery(criteria).getSingleResult();
+  }
+
+  /**
+   * Mocks an FdaDrugCodeDisplayLookup object.
+   *
+   * @return mocked FdaDrugCodeDisplayLookup
+   */
+  public static @NotNull MockedStatic<FdaDrugCodeDisplayLookup> mockFdaDrugCodeDisplayLookup() {
+    MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup =
+        Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
+    fdaDrugCodeDisplayLookup
+        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
+              fdaDrugCodeMap.put(
+                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
+                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
+              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
+            });
+    return fdaDrugCodeDisplayLookup;
+  }
+
+  /**
+   * Mocks an NPIOrgLookup object.
+   *
+   * @return mocked NPIOrgLookup
+   */
+  public static @NotNull MockedStatic<NPIOrgLookup> mockNPIOrgLookup() {
+    MockedStatic<NPIOrgLookup> npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
+    npiOrgLookup
+        .when(NPIOrgLookup::createNpiOrgLookup)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> npiOrgMap = new HashMap<>();
+              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+              return new NPIOrgLookup(npiOrgMap);
+            });
+    return npiOrgLookup;
   }
 }
