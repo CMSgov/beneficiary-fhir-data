@@ -157,22 +157,29 @@
                 at runtime. -->
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jvm</artifactId>
+            <version>${metrics.version}</version>
         </dependency>
+<!--            &lt;!&ndash; Provides a Servlet filter which has meters for status codes, a counter-->
+<!--                for the number of active requests, and a timer for request duration. Enabled-->
+<!--                via `web.xml`. &ndash;&gt;-->
         <dependency>
-            <!-- Provides a Servlet filter which has meters for status codes, a counter
-                for the number of active requests, and a timer for request duration. Enabled
-                via `web.xml`. -->
             <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-servlet</artifactId>
+            <artifactId>metrics-jakarta-servlets</artifactId>
             <version>${metrics.version}</version>
         </dependency>
         <dependency>
-            <!-- Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled
-                via `web.xml`. -->
             <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-servlets</artifactId>
+            <artifactId>metrics-jakarta-servlet</artifactId>
             <version>${metrics.version}</version>
         </dependency>
+
+<!--        <dependency>-->
+<!--            &lt;!&ndash; Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled-->
+<!--                via `web.xml`. &ndash;&gt;-->
+<!--            <groupId>io.dropwizard.metrics</groupId>-->
+<!--            <artifactId>metrics-servlets</artifactId>-->
+<!--            <version>${metrics.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <!-- Allows us to provide New Relic with additional information on requests. -->

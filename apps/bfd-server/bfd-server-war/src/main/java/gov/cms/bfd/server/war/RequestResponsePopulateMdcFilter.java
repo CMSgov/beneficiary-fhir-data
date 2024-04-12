@@ -266,7 +266,7 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
    */
   private static X509Certificate getClientCertificate(HttpServletRequest request) {
     X509Certificate[] certs =
-        (X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate");
+        (X509Certificate[]) request.getAttribute("jakarta.servlet.request.X509Certificate");
     if (certs == null || certs.length <= 0) {
       LOGGER.debug("No client certificate found for request.");
       return null;

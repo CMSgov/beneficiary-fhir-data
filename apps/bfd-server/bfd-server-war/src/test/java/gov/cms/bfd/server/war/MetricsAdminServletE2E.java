@@ -2,7 +2,7 @@ package gov.cms.bfd.server.war;
 
 import static io.restassured.RestAssured.given;
 
-import com.codahale.metrics.servlets.AdminServlet;
+import io.dropwizard.metrics.servlets.AdminServlet;
 import org.junit.jupiter.api.Test;
 
 /** Verifies that the metrics {@link AdminServlet} works as expected (as configured in web.xml). */

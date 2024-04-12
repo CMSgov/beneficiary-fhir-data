@@ -112,7 +112,14 @@ public class RDATestUtils {
     doTransaction(
         em -> {
           String oldHash = includeOldHash ? MBI_OLD_HASH : null;
-          Mbi mbi = em.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(oldHash).build());
+          Mbi mbi =
+              em.merge(
+                  Mbi.builder()
+                      .mbi(MBI)
+                      .hash(MBI_HASH)
+                      .lastUpdated(Instant.now())
+                      .oldHash(oldHash)
+                      .build());
           em.merge(fissTestDataA(mbi));
           em.merge(fissTestDataB(mbi));
           em.merge(mcsTestDataA(mbi));
@@ -122,7 +129,13 @@ public class RDATestUtils {
 
   /** Inserts an MBI cache record for use with test case claims. */
   public void seedMbiRecord() {
-    final var mbi = Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(MBI_OLD_HASH).build();
+    final var mbi =
+        Mbi.builder()
+            .mbi(MBI)
+            .hash(MBI_HASH)
+            .lastUpdated(Instant.now())
+            .oldHash(MBI_OLD_HASH)
+            .build();
     doTransaction(em -> em.merge(mbi));
   }
 

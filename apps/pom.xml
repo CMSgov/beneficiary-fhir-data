@@ -78,13 +78,13 @@
             **/*.java
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
         <micrometer.version>1.12.1</micrometer.version>
-        <metrics.version>4.2.23</metrics.version>
+        <metrics.version>4.2.25</metrics.version>
         <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.21.44</aws-java-sdk-bom.version>
         <aws.crt.version>0.28.12</aws.crt.version>
         <spring-data-jpa.version>3.2.0</spring-data-jpa.version>
-        <spring-framework.version>6.1.3</spring-framework.version>
+        <spring-framework.version>6.1.5</spring-framework.version>
 
         <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
         but not all (in particular, entity-manager does not have a 6.0 version available yet).
@@ -115,7 +115,7 @@
         <rest-assured.version>5.4.0</rest-assured.version>
         <assertj.version>3.24.2</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
-        <postgresql.version>42.7.2</postgresql.version>
+        <postgresql.version>42.7.3</postgresql.version>
         <slf4j.version>2.0.9</slf4j.version>
         <log4j.version>2.22.0</log4j.version>
         <hikari.version>5.1.0</hikari.version>
@@ -134,7 +134,7 @@
         <poi.version>5.2.5</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
         <!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
-        <jetty.version>10.0.16</jetty.version>
+        <jetty.version>11.0.20</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
@@ -239,9 +239,9 @@
         <fmt.maven.plugin.version>2.21.1</fmt.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <versions.maven.plugin.version>2.16.2</versions.maven.plugin.version>
-        <antlr4.version>4.13.1</antlr4.version>
+        <antlr4.version>4.10.1</antlr4.version>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
-        <jakarta.persistence-api.version>3.2.0-M2</jakarta.persistence-api.version>
+        <jakarta.persistence-api.version>3.1.0</jakarta.persistence-api.version>
         <hibernate-commons-annotations.version>6.0.6.Final</hibernate-commons-annotations.version>
     </properties>
 
@@ -394,6 +394,23 @@
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.classic.version}</version>
             </dependency>
+            <dependency>
+                <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
+                    at runtime. -->
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-jvm</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-jakarta-servlets</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-jakarta-servlet</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
 
             <dependency>
                 <!-- Used to measure performance and collect other runtime statistics
@@ -402,13 +419,12 @@
                 <artifactId>metrics-core</artifactId>
                 <version>${metrics.version}</version>
             </dependency>
-            <dependency>
-                <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
-                    at runtime. -->
-                <groupId>io.dropwizard.metrics</groupId>
-                <artifactId>metrics-jvm</artifactId>
-                <version>${metrics.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>io.dropwizard.metrics</groupId>-->
+<!--                <artifactId>metrics-servlets</artifactId>-->
+<!--                <version>${metrics.version}</version>-->
+<!--            </dependency>-->
+
             <dependency>
                 <!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
                 <groupId>io.micrometer</groupId>
