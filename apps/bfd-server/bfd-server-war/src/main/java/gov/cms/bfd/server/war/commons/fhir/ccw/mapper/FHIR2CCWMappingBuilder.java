@@ -21,6 +21,14 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
   // 3. eob.identifier[N].type.coding[N].display = 'Unique Claim ID'
   // fhirMapping -> discriminator for ccw var: pde_id
   // 1. identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/pde_id'
+
+  // All fhir path like expressions in DD can be categorized into
+  // set of patterns and can be parsed and processed like ExplanationOfBenefit.identifier
+  // being processed (enriched) here.
+  /**
+   * use regex here to parse and process fhir path like expressions
+   * seen in FHIR2CCW mappings
+   */
   private static final Pattern REGEX_CC_PROPS =
       Pattern.compile(
           "(eob)\\.(identifier|extension|supportingInfo)(\\[N\\])\\.type\\.coding(\\[N\\])\\.(system|code|display)");
@@ -70,7 +78,9 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       Object fhirComponent = null;
       String elemUpperCase1st = element.substring(0, 1).toUpperCase() + element.substring(1);
 
+      // flat code just for demo of idea
       try {
+        // this is for r4, should also applicable to stu3
         fhirComponent =
             Class.forName("org.hl7.fhir.r4.model." + elemUpperCase1st)
                 .getConstructor()
@@ -86,10 +96,11 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(e);
       }
-      //      Identifier identifier = new Identifier();
+
       Method method = null;
+
       try {
-        // figure out the setter / getter / add methods
+        // figure out the setter / getter / add methods by fhir model conventions
         method = eob.getClass().getMethod("add" + elemUpperCase1st, fhirComponent.getClass());
       } catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
@@ -103,19 +114,18 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
         throw new RuntimeException(e);
       }
 
-      // heuristic: type.coding[N].system/code/display indicates a CodeableConcept
-      CodeableConcept cc =
-          new CodeableConcept()
-              .setCoding(
-                  Arrays.asList(
-                      new Coding(
-                          ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
-      // FHIR Identifier is special:
-      // it's type is a CodeableConcept - setType(cc), it has a name space (URI) for its value -
-      // setSystem
       Method sysMethod = null;
       Method typeMethod = null;
       Method valMethod = null;
+
+      // probe current fhirComponent's declared methods:
+      // setType requires a parameter of CodeableConcept
+      CodeableConcept cc =
+              new CodeableConcept()
+                      .setCoding(
+                              Arrays.asList(
+                                      new Coding(
+                                              ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
       try {
         // figure out the setter / getter / add methods
         sysMethod = fhirComponent.getClass().getMethod("setSystem", String.class);
@@ -124,6 +134,7 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       } catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
       }
+
       Object ret = null;
       try {
         ret = sysMethod.invoke(fhirComponent, discriminators.get("system"));
@@ -134,11 +145,6 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       } catch (InvocationTargetException e) {
         throw new RuntimeException(e);
       }
-      //      identifier.setSystem(discriminators.get("system"));
-      //      identifier.setType(cc);
-      //      identifier.setValue(val);
-      // to do: use reflection
-      //      eob.addIdentifier(identifier);
     }
 
     return eob;
