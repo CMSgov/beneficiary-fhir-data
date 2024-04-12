@@ -25,13 +25,11 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
   // All fhir path like expressions in DD can be categorized into
   // set of patterns and can be parsed and processed like ExplanationOfBenefit.identifier
   // being processed (enriched) here.
-  /**
-   * use regex here to parse and process fhir path like expressions
-   * seen in FHIR2CCW mappings
-   */
+  /** use regex here to parse and process fhir path like expressions seen in FHIR2CCW mappings */
   private static final Pattern REGEX_CC_PROPS =
       Pattern.compile(
           "(eob)\\.(identifier|extension|supportingInfo)(\\[N\\])\\.type\\.coding(\\[N\\])\\.(system|code|display)");
+
   private static final Pattern REGEX_DISCRIMINATOR =
       Pattern.compile("(identifier|extension|supportingInfo)(\\[N\\])\\.system");
 
@@ -121,11 +119,11 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       // probe current fhirComponent's declared methods:
       // setType requires a parameter of CodeableConcept
       CodeableConcept cc =
-              new CodeableConcept()
-                      .setCoding(
-                              Arrays.asList(
-                                      new Coding(
-                                              ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
+          new CodeableConcept()
+              .setCoding(
+                  Arrays.asList(
+                      new Coding(
+                          ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
       try {
         // figure out the setter / getter / add methods
         sysMethod = fhirComponent.getClass().getMethod("setSystem", String.class);
