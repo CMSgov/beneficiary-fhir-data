@@ -419,12 +419,6 @@
                 <artifactId>metrics-core</artifactId>
                 <version>${metrics.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>io.dropwizard.metrics</groupId>-->
-<!--                <artifactId>metrics-servlets</artifactId>-->
-<!--                <version>${metrics.version}</version>-->
-<!--            </dependency>-->
-
             <dependency>
                 <!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
                 <groupId>io.micrometer</groupId>
@@ -524,10 +518,7 @@
                 <artifactId>jakarta.persistence-api</artifactId>
                 <version>${jakarta.persistence-api.version}</version>
             </dependency>
-
             <dependency>
-                <!-- This is included as a transitive dependency of org.hibernate:hibernate-entitymanager,
-                    but may occassionally be needed separately. -->
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
@@ -552,11 +543,6 @@
                 <artifactId>javax.annotation-api</artifactId>
                 <version>${javax.annotation-api.version}</version>
             </dependency>
-            <!-- BFD currently uses Jetty 10 which is compatible with Java EE 8 and predates the move to the
-            jakarta namespace that comes with Jakarta EE 9. For the sake of consistency, the other EE APIs
-            and implementations are also being held at their Java EE 8 compatible, pre-jakarta namespaced versions.
-            Once BFD moves to Jetty 11 (which is dependent on the HAPI dependency becoming compliant with Jakarta EE 9),
-            these dependencies below should be updated as well which will necessitate moving all BFD javax imports to the jakarta versions. -->
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>

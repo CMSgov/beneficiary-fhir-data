@@ -173,14 +173,6 @@
             <version>${metrics.version}</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            &lt;!&ndash; Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled-->
-<!--                via `web.xml`. &ndash;&gt;-->
-<!--            <groupId>io.dropwizard.metrics</groupId>-->
-<!--            <artifactId>metrics-servlets</artifactId>-->
-<!--            <version>${metrics.version}</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <!-- Allows us to provide New Relic with additional information on requests. -->
             <groupId>com.newrelic.agent.java</groupId>
