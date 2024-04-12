@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.commons.fhir.ccw.mapper;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -63,18 +65,80 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       }
     }
     if (elemCardinal != null && elemCardinal.equals("[N]")) {
-      Identifier identifier = new Identifier();
+      // cardinal is N indicate that the codeable concept needs to be
+      // added vs set, expecting a method like eob.addIdentifier(...)
+      Object fhirComponent = null;
+      String elemUpperCase1st = element.substring(0, 1).toUpperCase() + element.substring(1);
+
+      try {
+        fhirComponent =
+            Class.forName("org.hl7.fhir.r4.model." + elemUpperCase1st)
+                .getConstructor()
+                .newInstance();
+      } catch (InstantiationException e) {
+        throw new RuntimeException(e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+      //      Identifier identifier = new Identifier();
+      Method method = null;
+      try {
+        // figure out the setter / getter / add methods
+        method = eob.getClass().getMethod("add" + elemUpperCase1st, fhirComponent.getClass());
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      }
+
+      try {
+        method.invoke(eob, fhirComponent);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
+      }
+
+      // heuristic: type.coding[N].system/code/display indicates a CodeableConcept
       CodeableConcept cc =
           new CodeableConcept()
               .setCoding(
                   Arrays.asList(
                       new Coding(
                           ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
-      identifier.setSystem(discriminators.get("system"));
-      identifier.setType(cc);
-      identifier.setValue(val);
+      // FHIR Identifier is special:
+      // it's type is a CodeableConcept - setType(cc), it has a name space (URI) for its value -
+      // setSystem
+      Method sysMethod = null;
+      Method typeMethod = null;
+      Method valMethod = null;
+      try {
+        // figure out the setter / getter / add methods
+        sysMethod = fhirComponent.getClass().getMethod("setSystem", String.class);
+        typeMethod = fhirComponent.getClass().getMethod("setType", cc.getClass());
+        valMethod = fhirComponent.getClass().getMethod("setValue", String.class);
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      }
+      Object ret = null;
+      try {
+        ret = sysMethod.invoke(fhirComponent, discriminators.get("system"));
+        ret = typeMethod.invoke(fhirComponent, cc);
+        ret = valMethod.invoke(fhirComponent, val);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
+      }
+      //      identifier.setSystem(discriminators.get("system"));
+      //      identifier.setType(cc);
+      //      identifier.setValue(val);
       // to do: use reflection
-      eob.addIdentifier(identifier);
+      //      eob.addIdentifier(identifier);
     }
 
     return eob;

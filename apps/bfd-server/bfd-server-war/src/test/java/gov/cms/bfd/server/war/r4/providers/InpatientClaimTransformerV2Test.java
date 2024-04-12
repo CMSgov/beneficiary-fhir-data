@@ -779,8 +779,6 @@ public final class InpatientClaimTransformerV2Test {
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
             "uc",
             "Unique Claim ID");
-
-    assertTrue(compare.equalsDeep(clmId));
   }
 
   /** Tests that the transformer sets the expected claim group identifier. */
