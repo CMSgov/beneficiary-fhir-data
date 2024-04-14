@@ -79,7 +79,7 @@
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
         <micrometer.version>1.12.1</micrometer.version>
         <metrics.version>4.2.23</metrics.version>
-        <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
+        <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.21.44</aws-java-sdk-bom.version>
         <aws.crt.version>0.28.12</aws.crt.version>
@@ -171,8 +171,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed when changing this property. -->
         <its.testcontainer.db.image>postgres:14.9-alpine</its.testcontainer.db.image>
@@ -206,7 +206,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>latest</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
