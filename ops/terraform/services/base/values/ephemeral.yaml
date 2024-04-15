@@ -11,7 +11,10 @@ bfd:
       rds_instance_count: 1
     migrator:
       instance_type: m6a.large
+      volume_iops: 3000
       volume_size: 100
+      volume_throughput: 125
+      volume_type: gp3
       sqs_queue_name: bfd-${env}-migrator
       new_relic_metric_host: *newRelicMetricHost
       new_relic_metric_path: *newRelicMetricPath
