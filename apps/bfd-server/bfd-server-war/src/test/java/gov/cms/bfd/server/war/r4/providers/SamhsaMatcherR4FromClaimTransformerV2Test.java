@@ -21,6 +21,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,10 +32,12 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 
 /** Verifies that transformations that contain SAMHSA codes are filtered as expected. */
 public class SamhsaMatcherR4FromClaimTransformerV2Test {
@@ -94,10 +97,25 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   /** Claim indicator for Carrier. */
   private static final String CARRIER_CLAIM = "CARRIER";
 
+  /** The NPI org lookup to use for the test. */
+  private static MockedStatic<NPIOrgLookup> npiOrgLookup;
+
+  /** The mock FdaDrugCodeDisplayLookup. */
+  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
+
   /** Sets up the test. */
   @BeforeEach
   public void setup() {
     samhsaMatcherV2 = new R4EobSamhsaMatcher();
+    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
+    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
+  }
+
+  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
+  @AfterEach
+  public void after() {
+    npiOrgLookup.close();
+    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -110,7 +128,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    NPIOrgLookup npiOrgLookup = new NPIOrgLookup();
+    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
     DMEClaimTransformerV2 dmeClaimTransformerV2 =
         new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
@@ -142,7 +160,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
     HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
-        new HospiceClaimTransformerV2(new MetricRegistry(), new NPIOrgLookup());
+        new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup);
     ExplanationOfBenefit hospiceEob =
         hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();

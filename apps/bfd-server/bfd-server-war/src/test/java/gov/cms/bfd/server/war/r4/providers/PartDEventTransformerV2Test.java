@@ -27,6 +27,7 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -46,10 +47,13 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -75,6 +79,9 @@ public final class PartDEventTransformerV2Test {
 
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
+
+  /** The mock FdaDrugCodeDisplayLookup. */
+  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -105,12 +112,29 @@ public final class PartDEventTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    fdaDrugCodeDisplayLookup = Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
+    fdaDrugCodeDisplayLookup
+        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
+        .thenAnswer(
+            i -> {
+              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
+              fdaDrugCodeMap.put(
+                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
+                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
+              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
+            });
 
     partdEventTransformer =
         new PartDEventTransformerV2(
             metricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
     claim = generateClaim();
     eob = partdEventTransformer.transform(claim, false);
+  }
+
+  /** Releases the static mock fdaDrugCodeDisplayLookup. */
+  @AfterEach
+  public void after() {
+    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
