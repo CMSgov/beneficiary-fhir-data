@@ -1,18 +1,28 @@
 package gov.cms.bfd.server.war.commons.fhir.ccw.mapper;
 
+import gov.cms.bfd.server.war.commons.MetaModel;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.r4.model.*;
 
 /** Builder to fabricate FHIR resources and elements and values based on fhir mapping meta info. */
 @SuppressWarnings("all")
 public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
+  private static final Map<String, String> elemName2FhirModelClazzFQN =
+      Map.ofEntries(
+          Map.entry("identifier", "org.hl7.fhir.r4.model.Identifier"),
+          Map.entry(
+              "supportingInfo",
+              "org.hl7.fhir.r4.model.ExplanationOfBenefit$SupportingInformationComponent"));
+  private static final Map<String, String> elemName2C4BBCodeSystem =
+      Map.ofEntries(
+          Map.entry("identifier", "C4BBIdentifierType"),
+          Map.entry("supportingInfo", "C4BBSupportingInfoType"));
+
   // sample fhir expressions to recognize:
   // fhirMapping -> additional for ccw var: pde_id
   // 1. eob.identifier[N].type.coding[N].system =
@@ -25,10 +35,14 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
   // All fhir path like expressions in DD can be categorized into
   // set of patterns and can be parsed and processed like ExplanationOfBenefit.identifier
   // being processed (enriched) here.
-  /** use regex here to parse and process fhir path like expressions seen in FHIR2CCW mappings */
+  /**
+   * use regex here to parse and process fhir path like expressions seen in FHIR2CCW mappings,
+   * <elem>[N].type.coding <elem>[N].category.coding <elem>[N}.code.coding ... now only handle a sub
+   * set for demo purpose
+   */
   private static final Pattern REGEX_CC_PROPS =
       Pattern.compile(
-          "(eob)\\.(identifier|extension|supportingInfo)(\\[N\\])\\.type\\.coding(\\[N\\])\\.(system|code|display)");
+          "(eob)\\.(identifier|extension|supportingInfo)(\\[N\\])\\.(type|category)\\.coding(\\[N\\])\\.(system|code|display)");
 
   private static final Pattern REGEX_DISCRIMINATOR =
       Pattern.compile("(identifier|extension|supportingInfo)(\\[N\\])\\.system");
@@ -48,7 +62,8 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
     Map<String, String> discriminators = new HashMap<String, String>();
     String element = null;
     String elemCardinal = null;
-    String typeCodingCardinal = null;
+    String childName = null;
+    String childCodingCardinal = null;
     for (Map.Entry<String, String> e : discriminatorMap.entrySet()) {
       Matcher m = REGEX_DISCRIMINATOR.matcher(e.getKey());
       if (m.matches()) {
@@ -64,9 +79,10 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
         String resource = m.group(1); // assert resource name stay same, now it's eob
         element = m.group(2); // assert element stay same
         elemCardinal = m.group(3); // when cardinal is [N] add element to array
-        typeCodingCardinal =
-            m.group(4); // when typeCoding cardinal is [N] type -> coding is an array of cc
-        String ccPropName = m.group(5);
+        childName = m.group(4); // child of the element
+        childCodingCardinal =
+            m.group(5); // when typeCoding cardinal is [N] type -> coding is an array of cc
+        String ccPropName = m.group(6);
         ccProps.put(ccPropName, e.getValue());
       }
     }
@@ -80,9 +96,7 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       try {
         // this is for r4, should also applicable to stu3
         fhirComponent =
-            Class.forName("org.hl7.fhir.r4.model." + elemUpperCase1st)
-                .getConstructor()
-                .newInstance();
+            Class.forName(elemName2FhirModelClazzFQN.get(element)).getConstructor().newInstance();
       } catch (InstantiationException e) {
         throw new RuntimeException(e);
       } catch (IllegalAccessException e) {
@@ -112,39 +126,71 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
         throw new RuntimeException(e);
       }
 
-      Method sysMethod = null;
-      Method typeMethod = null;
-      Method valMethod = null;
-
-      // probe current fhirComponent's declared methods:
-      // setType requires a parameter of CodeableConcept
       CodeableConcept cc =
-          new CodeableConcept()
-              .setCoding(
-                  Arrays.asList(
-                      new Coding(
-                          ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
-      try {
-        // figure out the setter / getter / add methods
-        sysMethod = fhirComponent.getClass().getMethod("setSystem", String.class);
-        typeMethod = fhirComponent.getClass().getMethod("setType", cc.getClass());
-        valMethod = fhirComponent.getClass().getMethod("setValue", String.class);
-      } catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
+          MetaModel.getC4BBCodeSystem(
+              MetaModel.C4BBProfile.CODESYSTEM, ccProps.get("system"), ccProps.get("code"));
+      if (cc == null) {
+        // try C4BB CodeSystem first, then probe the expressions in meta
+        // probe current fhirComponent's declared methods:
+        // setType requires a parameter of CodeableConcept
+        cc =
+            new CodeableConcept()
+                .setCoding(
+                    Arrays.asList(
+                        new Coding(
+                            ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
       }
 
-      Object ret = null;
-      try {
-        ret = sysMethod.invoke(fhirComponent, discriminators.get("system"));
-        ret = typeMethod.invoke(fhirComponent, cc);
-        ret = valMethod.invoke(fhirComponent, val);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(e);
+      if (element.equals("identifier")) {
+        try {
+          // call setters per type of the element
+          fhirComponent
+              .getClass()
+              .getMethod("setSystem", String.class)
+              .invoke(fhirComponent, discriminators.get("system"));
+          fhirComponent.getClass().getMethod("setType", cc.getClass()).invoke(fhirComponent, cc);
+          fhirComponent.getClass().getMethod("setValue", String.class).invoke(fhirComponent, val);
+        } catch (NoSuchMethodException e) {
+          throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException(e);
+        }
+      } else if (element.equals("supportingInfo")) {
+        try {
+          CodeableConcept valCode =
+              new CodeableConcept()
+                  .setCoding(
+                      Arrays.asList(
+                          new Coding(
+                              discriminators.get("system"), val, "Find out from Value Set...")));
+          // call setters per type of the element
+          fhirComponent
+              .getClass()
+              .getMethod("setCategory", cc.getClass())
+              .invoke(fhirComponent, cc);
+          // fake a seq here
+          fhirComponent.getClass().getMethod("setSequence", int.class).invoke(fhirComponent, 1);
+          fhirComponent
+              .getClass()
+              .getMethod("setCode", valCode.getClass())
+              .invoke(fhirComponent, valCode);
+          fhirComponent
+              .getClass()
+              .getMethod("setTiming", org.hl7.fhir.r4.model.Type.class)
+              .invoke(fhirComponent, new org.hl7.fhir.r4.model.DateType());
+        } catch (NoSuchMethodException e) {
+          throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        throw new NotImplementedException("to be implemented");
       }
     }
-
     return eob;
   }
 
@@ -160,6 +206,11 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
       String[] kv = e.split("=");
       String k = kv[0].trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "");
       String v = kv[1].trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "");
+      // fhir mapping expressions need cleansing and normalization:
+      // e.g. there are paranteisis quoted expressions with OR operator, e.g. icd-9 OR icd-10
+      // strip off the ( and ) for now
+      if (k.startsWith("(")) k = k.substring(1);
+      if (k.endsWith(")")) k = k.substring(0, k.length() - 1);
       r.put(k, v);
     }
     return r;

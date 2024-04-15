@@ -10,6 +10,7 @@ import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMappingBuilder;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,9 +19,25 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 
 /** MetaModel a container for FHIR resources to CCW VARs (Fields). */
+@SuppressWarnings("all")
 public class MetaModel {
+  public enum C4BBProfile {
+    CODESYSTEM("CodeSystem"),
+    VALUESET("ValueSet"),
+    SEARCHPARAMETER("SearchParameter"),
+    STRUCTUREDEFINITION("StructureDefinition");
+
+    public final String label;
+
+    private C4BBProfile(String label) {
+      this.label = label;
+    }
+  }
+
   /** map of fhir 2 ccw mapper element path component to HAPI FHIR model FQCN. */
   public static Map<String, String> elementToClazz =
       Map.ofEntries(
@@ -96,7 +113,7 @@ public class MetaModel {
     // load Dictionary
     try {
       // try consolidated if exists
-      fhir2CCWMappingV1 = loadFHIR2CCWMapping("/fhir2ccwV1.json");
+      fhir2CCWMappingV1 = loadFHIR2CCWMapping("/fhir2ccw.v1.json");
       if (fhir2CCWMappingV1 == null) {
         fhir2CCWMappingV1 = loadFHIR2CCWMapping(DD_BASE_DIR + "/V1");
       }
@@ -106,7 +123,7 @@ public class MetaModel {
       throw new RuntimeException(e);
     }
     try {
-      fhir2CCWMappingV2 = loadFHIR2CCWMapping("/fhir2ccwV2.json");
+      fhir2CCWMappingV2 = loadFHIR2CCWMapping("/fhir2ccw.v2.json");
       if (fhir2CCWMappingV2 == null) {
         fhir2CCWMappingV2 = loadFHIR2CCWMapping(DD_BASE_DIR + "/V2");
       }
@@ -136,9 +153,9 @@ public class MetaModel {
     // dump fhir schema
     dump(fhirJsonSchema, "FHIR_SCHEMA_JSON.json");
     // dump v2 fhir to bfd mapping
-    dump(fhir2CCWMappingV2, "fhir2ccwV2.json");
+    dump(fhir2CCWMappingV2, "fhir2ccw.v2.json");
     // dump v1 fhir to bfd mapping
-    dump(fhir2CCWMappingV1, "fhir2ccwV1.json");
+    dump(fhir2CCWMappingV1, "fhir2ccw.v1.json");
   }
 
   /**
@@ -196,7 +213,7 @@ public class MetaModel {
     assert c4bbProfiles != null;
     for (File f : c4bbProfiles) {
       JsonNode r = jacksonMapper.readTree(f);
-      c4bbProfileMap.put(r.get("id").textValue(), r);
+      c4bbProfileMap.put(r.get("resourceType").textValue() + "-" + r.get("id").textValue(), r);
     }
     return c4bbProfileMap;
   }
@@ -284,11 +301,36 @@ public class MetaModel {
    * @param propertyName the prop of the struct def
    * @return the prop value
    */
-  public static String getC4BBProfile(String resourceName, String claimType, String propertyName) {
-    return c4bbProfiles
-        .get(String.format("C4BB-%s-%s", resourceName, claimType))
-        .get(propertyName)
-        .textValue();
+  public static String getC4BBProfile(
+      C4BBProfile c4bbProfile, String resourceName, String claimType, String propertyName) {
+    String k = String.format("%s-C4BB-%s-%s", c4bbProfile.label, resourceName, claimType);
+    JsonNode r = c4bbProfiles.get(k);
+    return r.get(propertyName).textValue();
+  }
+
+  /**
+   * Get CC from C4BB profiles.
+   *
+   * @param systemUrl system url of the code
+   * @param conceptCode the code value
+   * @return the CC
+   */
+  public static CodeableConcept getC4BBCodeSystem(
+      C4BBProfile c4bbProfile, String systemUrl, String conceptCode) {
+    JsonNode cc4bCodeSystem = c4bbProfiles.get(c4bbProfile.label + "-" + getURLLast(systemUrl));
+    JsonNode concepts = cc4bCodeSystem.get("concept");
+    CodeableConcept cc = new CodeableConcept();
+    if (concepts.isArray()) {
+      for (JsonNode c : concepts) {
+        if (c.get("code").textValue().equals(conceptCode)) {
+          cc.setCoding(
+              List.of(
+                  new Coding(systemUrl, c.get("code").textValue(), c.get("display").textValue())));
+          break;
+        }
+      }
+    }
+    return cc;
   }
 
   /**
@@ -314,5 +356,23 @@ public class MetaModel {
     } else {
       // JsonNode root represents a single value field - do something with it.
     }
+  }
+
+  /**
+   * helper get the last part of cc4b url which is the id of the resource, and also the key of the
+   * profile map.
+   *
+   * @param url the system url.
+   * @return the last part of url.
+   */
+  private static String getURLLast(String url) {
+    URL urlObj = null;
+    try {
+      urlObj = new URL(url);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
+    String[] comps = urlObj.getPath().split("/");
+    return comps[comps.length - 1];
   }
 }

@@ -100,7 +100,11 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
 
     // Required values not directly mapped
     String c4bbProfUrl =
-        MetaModel.getC4BBProfile("ExplanationOfBenefit", "Outpatient-Institutional", "url");
+        MetaModel.getC4BBProfile(
+            MetaModel.C4BBProfile.STRUCTUREDEFINITION,
+            "ExplanationOfBenefit",
+            "Outpatient-Institutional",
+            "url");
     eob.getMeta().addProfile(c4bbProfUrl);
     // eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_OUTPATIENT_PROFILE_URL);
 

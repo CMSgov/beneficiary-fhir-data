@@ -90,7 +90,11 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     // Required values not directly mapped
     String c4bbProfUrl =
-        MetaModel.getC4BBProfile("ExplanationOfBenefit", "Inpatient-Institutional", "url");
+        MetaModel.getC4BBProfile(
+            MetaModel.C4BBProfile.STRUCTUREDEFINITION,
+            "ExplanationOfBenefit",
+            "Inpatient-Institutional",
+            "url");
     eob.getMeta().addProfile(c4bbProfUrl);
     // eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 

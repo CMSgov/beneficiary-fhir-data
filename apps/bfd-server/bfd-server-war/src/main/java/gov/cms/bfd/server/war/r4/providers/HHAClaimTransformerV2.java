@@ -86,7 +86,11 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     // Required values not directly mapped
     String c4bbProfUrl =
-        MetaModel.getC4BBProfile("ExplanationOfBenefit", "Professional-NonClinician", "url");
+        MetaModel.getC4BBProfile(
+            MetaModel.C4BBProfile.STRUCTUREDEFINITION,
+            "ExplanationOfBenefit",
+            "Professional-NonClinician",
+            "url");
     eob.getMeta().addProfile(c4bbProfUrl);
     // eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_NONCLINICIAN_PROFILE_URL);
 

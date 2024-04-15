@@ -1758,23 +1758,23 @@ public final class TransformerUtilsV2 {
     FHIR2CCWMappingBuilder b = null;
     // PDE_ID => ExplanationOfBenefit.identifier or
     // CLM_ID => ExplanationOfBenefit.identifier
-    ExplanationOfBenefit eobEnriched =
+    eob =
         MetaModel.getFhirMapping(claimType.equals(ClaimType.PDE) ? "pde_id" : "clm_id")
             .enrich(eob, String.valueOf(claimId));
-    // now replaced by meta model based enrichment.
-    //    identifier =
-    //        createClaimIdentifier(
-    //            claimType.equals(ClaimType.PDE)
-    //                ? CcwCodebookVariable.PDE_ID
-    //                : CcwCodebookVariable.CLM_ID,
-    //            String.valueOf(claimId));
-    //    eob.addIdentifier(identifier);
-
     // CLM_GRP_ID => ExplanationOfBenefit.identifier
-    eob.addIdentifier()
-        .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
-        .setValue(claimGroupId)
-        .setType(createC4BBClaimCodeableConcept());
+    // createC4BBClaimCodeableConcept() here is harded coded with UC CodeableConcept
+    // for meta info driven enrichment, need to patch the ccw var "claim_group_id" with
+    // fhirMapping -> additional from [] to:
+    // "additional" : [ "eob.identifier[N].type.coding[N].system =
+    // 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+    // "eob.identifier[N].type.coding[N].code = 'uc'", "eob.identifier[N].type.coding[N].display =
+    // 'Unique Claim ID'" ],
+    // DERIVED during CCW loading, no CCW VAR
+    eob = MetaModel.getFhirMapping("claim_group_id").enrich(eob, String.valueOf(claimGroupId));
+    //    eob.addIdentifier()
+    //        .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
+    //        .setValue(claimGroupId)
+    //        .setType(createC4BBClaimCodeableConcept());
 
     // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage (ref)
     // There is always just one insurance coverage documented, since they are hard coded by
