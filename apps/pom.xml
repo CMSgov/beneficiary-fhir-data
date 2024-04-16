@@ -165,7 +165,7 @@
         <protoc.version>3.25.1</protoc.version>
         <protobuf.version>3.25.1</protobuf.version>
         <jacoco.version>0.8.11</jacoco.version>
-        <jakarta.servlet.version>6.1.0-M2</jakarta.servlet.version>
+        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
         <!-- The default DB that will be used in integration tests. -->
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
