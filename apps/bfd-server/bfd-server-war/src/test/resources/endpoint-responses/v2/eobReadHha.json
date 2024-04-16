@@ -67,7 +67,14 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
       "code" : "15999"
     }
-  } ],
+  }, {
+    "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueIdentifier": {
+      "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "value": "15999"
+    }
+  }
+  ],
   "identifier" : [ {
     "type" : {
       "coding" : [ {

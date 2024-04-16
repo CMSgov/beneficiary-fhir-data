@@ -80,7 +80,14 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "code" : "15444"
         }
-      } ],
+      }, {
+        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier": {
+          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value": "15444"
+        }
+      }
+      ],
       "identifier" : [ {
         "type" : {
           "coding" : [ {
@@ -1653,7 +1660,14 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "code" : "15999"
         }
-      } ],
+      }, {
+        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier": {
+          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value": "15999"
+        }
+      }
+      ],
       "identifier" : [ {
         "type" : {
           "coding" : [ {
@@ -2289,6 +2303,12 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "code" : "8299"
+        }
+      }, {
+        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier": {
+          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value": "8299"
         }
       } ],
       "identifier" : [ {
@@ -3393,6 +3413,12 @@
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "code" : "11111"
+        }
+      }, {
+        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier": {
+          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value": "11111"
         }
       } ],
       "identifier" : [ {
@@ -5615,6 +5641,12 @@
           "code" : "6666"
         }
       }, {
+        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier": {
+          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value": "6666"
+        }
+      },{
         "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
         "valueQuantity" : {
           "value" : 2
