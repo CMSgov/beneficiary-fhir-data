@@ -55,7 +55,7 @@ bfd:
               bucket:
               dir:
         job:
-          enabled: &rda_job_enabled false
+          enabled: true
           process_dlq: &rda_job_process_dlq true
           starting_fiss_seq_num: 2041459
           starting_mcs_seq_num: 5313949
@@ -67,7 +67,7 @@ bfd:
         data_pipeline_rda_grpc_auth_token: *rda_grpc_auth_token
         data_pipeline_rda_grpc_host: *rda_grpc_host
         data_pipeline_rda_grpc_port: *rda_grpc_port
-        data_pipeline_rda_job_enabled: *rda_job_enabled
+        data_pipeline_rda_job_enabled: true
         data_pipeline_rda_process_dlq: *rda_job_process_dlq
         instance_type: m6a.large
         # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
