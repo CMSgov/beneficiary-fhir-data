@@ -1,0 +1,40 @@
+{
+    "id": 449,
+    "name": "Beneficiary Middle Name",
+    "description": "The middle name of the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_mdl_name",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "nameMiddleInitial",
+    "ccwMapping": [
+        "BENE_MDL_NAME"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_MIDL_NAME"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "name[N].given[1]",
+            "fhirPath": "name.given[1]",
+            "discriminator": [
+                "name[N].use = 'usual'"
+            ],
+            "additional": [],
+            "derived": "If middle initial doesn't exist then just the first element of patient.name.given will be supplied.",
+            "note": "",
+            "example": "[\\n  {\\n    \"use\": \"usual\",\\n    \"family\": \"Doe\",\\n    \"given\": [\\n      \"John\",\\n      \"A\"\\n    ]\\n  }\\n]\\n"
+        }
+    ]
+}

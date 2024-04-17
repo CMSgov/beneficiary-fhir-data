@@ -1,0 +1,44 @@
+{
+    "id": 87,
+    "name": "Diagnosis Code 8 Present On Admission",
+    "description": "The present on admission (POA) indicator code associated with the diagnosis codes (principal and secondary).",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_poa_ind_sw8",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosis8PresentOnAdmissionCode",
+    "ccwMapping": [
+        "CLM_POA_IND_SW8"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].extension[N].valueCoding.code",
+            "fhirPath": "diagnosis.where(type.coding.where(code = 'principal' or code = 'other')).extension.where(url = 'https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw8').valueCoding.code",
+            "discriminator": [
+                "diagnosis[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw8'",
+                ""
+            ],
+            "additional": [
+                "eob.diagnosis[N].extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw8'",
+                "eob.diagnosis[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}",
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis'"
+            ],
+            "derived": "",
+            "note": "The POA code correlates to the diagnosis code based upon the number. Ie 'Diagnosis Code 3 Present on Admission' relates to 'Diagnosis Code 3'.",
+            "example": "[\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1\",\\n          \"code\": \"Y\",\\n          \"display\": \"Diagnosis was present at the time of admission (POA)\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 2,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"A40\",\\n          \"display\": \"STREPTOCOCCAL SEPSIS\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"A40\",\\n          \"display\": \"STREPTOCOCCAL SEPSIS\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://terminology.hl7.org/CodeSystem/ex-diagnosistype\",\\n            \"code\": \"principal\",\\n            \"display\": \"Principal Diagnosis\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw2\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw2\",\\n          \"code\": \"N\",\\n          \"display\": \"Diagnosis was not present at the time of admission\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 3,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"A52\",\\n          \"display\": \"LATE SYPHILIS\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"A52\",\\n          \"display\": \"LATE SYPHILIS\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType\",\\n            \"code\": \"other\",\\n            \"display\": \"Other\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw3\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw3\",\\n          \"code\": \"N\",\\n          \"display\": \"Diagnosis was not present at the time of admission\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 4,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"A06\",\\n          \"display\": \"AMEBIASIS\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"A06\",\\n          \"display\": \"AMEBIASIS\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType\",\\n            \"code\": \"other\",\\n            \"display\": \"Other\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw4\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw4\",\\n          \"code\": \"N\",\\n          \"display\": \"Diagnosis was not present at the time of admission\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 5,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"A15\",\\n          \"display\": \"RESPIRATORY TUBERCULOSIS\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"A15\",\\n          \"display\": \"RESPIRATORY TUBERCULOSIS\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType\",\\n            \"code\": \"other\",\\n            \"display\": \"Other\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw5\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw5\",\\n          \"code\": \"N\",\\n          \"display\": \"Diagnosis was not present at the time of admission\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 6,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"B01\",\\n          \"display\": \"VARICELLA [CHICKENPOX]\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"B01\",\\n          \"display\": \"VARICELLA [CHICKENPOX]\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType\",\\n            \"code\": \"other\",\\n            \"display\": \"Other\"\\n          }\\n        ]\\n      }\\n    ]\\n  }\\n]"
+        }
+    ]
+}

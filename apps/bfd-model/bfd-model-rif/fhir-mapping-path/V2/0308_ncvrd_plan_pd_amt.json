@@ -1,0 +1,45 @@
+{
+    "id": 308,
+    "name": "Part D Plan Noncovered Paid Amount",
+    "description": "This is the net amount paid by the Part D plan (i.e., for enhanced alternative benefits) including cost sharing fill-in and/or non-Part D drugs. This dollar amount is excluded from risk corridor calculations.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "ncvrd_plan_pd_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "partDPlanNonCoveredPaidAmount",
+    "ccwMapping": [
+        "NCVRD_PLAN_PD_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/resources/variables/ncvrd_plan_pd_amt')).reason.coding.code",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/ncvrd_plan_pd_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/adjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'benefit'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Benefit Amount')",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Amount paid by Part D plan for the PDE (drug is not covered by Part D)'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "This value is only supplied if Drug Coverage Status Code = 'C'.  See \"Drug Coverage Status Code\" and https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd/",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

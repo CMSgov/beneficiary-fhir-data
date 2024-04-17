@@ -1,0 +1,48 @@
+{
+    "id": 427,
+    "name": "Medicare Beneficiary Identifier (Historic)",
+    "description": "A Medicare Beneficiary Identifier (MBI) assigned to a beneficiary. This particular (MBI) is the a former/historic identifier assigned to the beneficiary that is no longer used.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "MEDICAREBENEFICIARYIDHISTORY",
+    "bfdColumnName": "mbi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 11,
+    "bfdJavaFieldName": "medicareBeneficiaryId",
+    "ccwMapping": [
+        "MBI_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF9.PRVS_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "identifier[N].value",
+            "fhirPath": "identifier.where(system='http://hl7.org/fhir/sid/us-mbi').where(type.coding.extension.where(url='https://bluebutton.cms.gov/resources/codesystem/identifier-currency' and valueCoding.code='historic')).value",
+            "discriminator": [
+                "identifier[N].system = 'http://hl7.org/fhir/sid/us-mbi'",
+                "identifier[N].type.coding[N].extension[N].url = 'https://bluebutton.cms.gov/resources/codesystem/identifier-currency'",
+                "identifier[N].type.coding[N].extension[N].valueCoding.code = 'historic'"
+            ],
+            "additional": [
+                "patient.identifier[N].type.coding[N].extension[N].valueCoding.display = 'Historic'",
+                "patient.identifier[N].type.coding[N].system = 'http://terminology.hl7.org/CodeSystem/v2-0203'",
+                "patient.identifier[N].type.coding[N].code = 'MC'",
+                "patient.identifier[N].type.coding[N].display = 'Patient's Medicare number')"
+            ],
+            "derived": "If the MedicareBeneficiaryIdHistory.MBIEndDate is null/empty then this entire patient.identifier will not be present.",
+            "note": "",
+            "example": "{\\n    \"system\": \"http://hl7.org/fhir/sid/us-mbi\",\\n    \"type\": {\\n        \"coding\": [\\n            {\\n                \"code\": \"MC\",\\n                \"display\": \"Patient's Medicare number\",\\n                \"extension\": [\\n                    {\\n                        \"url\": \"https://bluebutton.cms.gov/resources/codesystem/identifier-currency\",\\n                        \"valueCoding\": {\\n                            \"code\": \"historic\",\\n                            \"display\": \"Historic\",\\n                            \"system\": \"https://bluebutton.cms.gov/resources/codesystem/identifier-currency\"\\n                        }\\n                    }\\n                ],\\n                \"system\": \"http://terminology.hl7.org/CodeSystem/v2-0203\"\\n            }\\n        ]\\n    },\\n    \"value\": \"A1B2C3D4E50\"\\n}\\n"
+        }
+    ]
+}

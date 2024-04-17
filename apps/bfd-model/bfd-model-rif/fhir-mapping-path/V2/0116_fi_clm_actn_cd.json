@@ -1,0 +1,41 @@
+{
+    "id": 116,
+    "name": "FI Claim Action Code",
+    "description": "The type of action requested by the intermediary to be taken on an institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "fi_clm_actn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "fiscalIntermediaryClaimActionCode",
+    "ccwMapping": [
+        "FI_CLM_ACTN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd\",\\n      \"code\": \"1\",\\n      \"display\": \"Original debit action (always a 1 for all regular bills)\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

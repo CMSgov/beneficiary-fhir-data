@@ -1,0 +1,45 @@
+{
+    "id": 628,
+    "name": "Claim Sub Type",
+    "description": "The sub type of claim that was submitted. See the CARIN IG and specifically this valueset for more information: http://www.hl7.org/fhir/us/carin-bb/ValueSet-C4BBInstitutionalClaimSubType.html",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "subType.coding[N].code",
+            "fhirPath": "subType.coding.code",
+            "discriminator": [
+                "type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType'"
+            ],
+            "additional": [
+                "eob.subType.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "Note that the value of this field is rule-based, and is not stored in the BFD database",
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType\",\\n    \"code\": \"inpatient\"\\n  }\\n]\\n"
+        }
+    ]
+}

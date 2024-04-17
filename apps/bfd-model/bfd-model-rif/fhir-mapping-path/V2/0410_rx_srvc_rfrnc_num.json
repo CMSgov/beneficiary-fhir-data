@@ -1,0 +1,45 @@
+{
+    "id": 410,
+    "name": "Prescription Reference Number",
+    "description": "This field contains the prescription reference number assigned by the pharmacy at the time the prescription is filled.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rx_srvc_rfrnc_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "prescriptionReferenceNumber",
+    "ccwMapping": [
+        "RX_SRVC_RFRNC_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_RX_SRVC_RFRNC_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "identifier[N].value",
+            "fhirPath": "identifier.where(system='https://bluebutton.cms.gov/resources/variables/rx_srvc_rfrnc_num').value",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/rx_srvc_rfrnc_num'"
+            ],
+            "additional": [
+                "eob.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.identifier[N].type.coding[N].system = 'uc'",
+                "eob.identifier[N].type.coding[N].system = 'Unique Claim ID'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"uc\",\\n          \"display\": \"Unique Claim ID\"\\n        }\\n      ]\\n    },\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/rx_srvc_rfrnc_num\",\\n    \"value\": \"799999\"\\n  }\\n]"
+        }
+    ]
+}

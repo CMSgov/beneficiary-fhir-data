@@ -1,0 +1,45 @@
+{
+    "id": 18,
+    "name": "Referring Provider Id Number",
+    "description": "The provider identification number (PIN) of the physician/supplier (assigned by the MAC) who referred the beneficiary to the physician who ordered these services.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_rfrng_pin_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 14,
+    "bfdJavaFieldName": "referringProviderIdNumber",
+    "ccwMapping": [
+        "CARR_CLM_RFRNG_PIN_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "careTeam.where(role.coding.where(code = 'referring')).provider.identifier.where(type.coding.where(code='npi')).value",
+            "discriminator": [
+                "careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole'",
+                "careTeam[N].role.coding[N].code = 'referring'",
+                "careTeam[N].provider.identifier[N].type.coding[N].code = 'npi'"
+            ],
+            "additional": [
+                "eob.careTeam[N].role.coding[N].display = 'Referring'",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'National Provvider Identifier'"
+            ],
+            "derived": "",
+            "note": "There may be multiple referring providers, some of which may not be from this field in the database.",
+            "example": "[\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"8765676\"\\n  },\\n  {\\n    \"type\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\\n          \"code\": \"npi\",\\n          \"display\": \"National Provider Identifier\"\\n        }\\n      ]\\n    },\\n    \"value\": \"K25852\"\\n  }\\n]"
+        }
+    ]
+}

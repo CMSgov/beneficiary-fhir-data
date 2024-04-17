@@ -1,0 +1,52 @@
+{
+    "id": 299,
+    "name": "Primary Payer Code",
+    "description": "The code, on an institutional claim, specifying a federal non-Medicare program or other source that has primary responsibility for the payment of the Medicare beneficiary's health insurance bills.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_prmry_pyr_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "claimPrimaryPayerCode",
+    "ccwMapping": [
+        "NCH_PRMRY_PYR_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_NCH_PRMRY_PYR_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].code.coding[N].code",
+            "fhirPath": "supportingInfo.where(code.coding.where(system='https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd')).code.coding.code",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claiminformationcategory'",
+                "eob.supportingInfo[N].category.coding[N].code = 'info'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Information')",
+                "eob.supportingInfo[N].category.coding[N].system = https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.supportingInfo[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd'",
+                "eob.supportingInfo[N].category.coding[N].display = 'NCH Primary Payer Code (if not Medicare)')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 10,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/claiminformationcategory\",\\n          \"code\": \"info\",\\n          \"display\": \"Information\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/information\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd\",\\n          \"display\": \"NCH Primary Payer Code (if not Medicare)\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd\",\\n          \"code\": \"A\",\\n          \"display\": \"Employer group health plan (EGHP) insurance for an aged beneficiary\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

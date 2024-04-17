@@ -1,0 +1,46 @@
+{
+    "id": 30,
+    "name": "Claim Admission Date",
+    "description": "On an institutional claim, the date the beneficiary was admitted to the hospital, skilled nursing facility, or religious non-medical health care institution. When this variable appears in the HHA claims (Short Name = HHSTRTDT), it is the date the care began for the HHA services reported on the claim.",
+    "appliesTo": [
+        "Inpatient",
+        "HHA",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_admsn_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "claimAdmissionDate",
+    "ccwMapping": [
+        "CLM_ADMSN_DT"
+    ],
+    "cclfMapping": [
+        "CCLFA.CLM_ACTV_CARE_FROM_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].timingPeriod.start",
+            "fhirPath": "supportingInfo.where(category.coding.where(code='admissionperiod')).timingPeriod.start",
+            "discriminator": [
+                "supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "supportingInfo[N].category.coding[N].code = 'admissionperiod'"
+            ],
+            "additional": [
+                ".supportingInfo[N].category.coding[N].display = 'Admission Period'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 2,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"admissionperiod\",\\n          \"display\": \"Admission Period\"\\n        }\\n      ]\\n    },\\n    \"timingPeriod\": {\\n      \"start\": \"2016-01-15\",\\n      \"end\": \"2016-01-27\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

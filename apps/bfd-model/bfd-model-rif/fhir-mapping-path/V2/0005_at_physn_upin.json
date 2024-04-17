@@ -1,0 +1,48 @@
+{
+    "id": 5,
+    "name": "Attending Physician UPIN",
+    "description": "On an institutional claim, the unique physician identification number (UPIN) of the physician who would normally be expected to certify and recertify the medical necessity of the services rendered and/or who has primary responsibility for the beneficiary's medical care and treatment (attending physician).",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "at_physn_upin",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 6,
+    "bfdJavaFieldName": "attendingPhysicianUpin",
+    "ccwMapping": [
+        "AT_PHYSN_UPIN"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "careTeam.where(role.coding.where(code = 'attending')).provider.identifier.where(type.coding.where(code='upin')).value",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].type.coding[N].system = 'http://terminology.hl7.org/CodeSystem/v2-0203'",
+                "careTeam[N].provider.identifier[N].type.coding[N].code = 'UPIN'",
+                "careTeam[N].role.coding[N].code = 'attending'"
+            ],
+            "additional": [
+                "eob.careTeam[N].role.coding[N].display = 'Attending'",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole')",
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'Medicare/CMS (formerly HCFA)'s Universal Physician Identification numbers'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

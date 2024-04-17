@@ -1,0 +1,39 @@
+{
+    "id": 223,
+    "name": "Procedure Code 3",
+    "description": "The code that indicates the procedure performed during the period covered by the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_prcdr_cd3",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "procedure3Code",
+    "ccwMapping": [
+        "ICD_PRCDR_CD3"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "procedure[N].procedureCodeableConcept.coding[N].code",
+            "fhirPath": "procedure[2].procedureCodeableConcept.coding.where(system='http://www.cms.gov/Medicare/Coding/ICD10').code",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"http://www.cms.gov/Medicare/Coding/ICD10\",\\n    \"code\": \"2W52X6Z\",\\n    \"display\": \"REMOVAL OF PRESSURE DRESSING ON NECK\"\\n  }\\n]"
+        }
+    ]
+}

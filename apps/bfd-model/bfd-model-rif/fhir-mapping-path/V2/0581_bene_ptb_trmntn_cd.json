@@ -1,0 +1,41 @@
+{
+    "id": 581,
+    "name": "Part B Termination Code",
+    "description": "This code specifies the reason Part B entitlement was terminated.",
+    "appliesTo": [
+        "Part-B"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_ptb_trmntn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "partBTerminationCode",
+    "ccwMapping": [
+        "BENE_PTB_TRMNTN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "status AND extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/b_trm_cd'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/b_trm_cd'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "If Part B Termination Code = 0 then 'active' else 'cancelled'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

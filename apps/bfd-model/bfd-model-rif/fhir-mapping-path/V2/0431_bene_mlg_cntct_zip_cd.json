@@ -1,0 +1,41 @@
+{
+    "id": 431,
+    "name": "Zip Code for Beneficiary",
+    "description": "This field specifies the zip code identified as the beneficiary mailing address.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_mlg_cntct_zip_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 9,
+    "bfdJavaFieldName": "postalCode",
+    "ccwMapping": [
+        "BENE_MLG_CNTCT_ZIP_CD"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_ZIP_CD",
+        " CCLF8. GEO_ZIP4_CD",
+        " CCLF8. GEO_ZIP5_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "address[N].postalCode",
+            "fhirPath": "address[%n].postalCode",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "This is always populated regardless of the request header parameter includeAddressFields (True or False)",
+            "example": "[\\n  \"12345\"\\n]"
+        }
+    ]
+}

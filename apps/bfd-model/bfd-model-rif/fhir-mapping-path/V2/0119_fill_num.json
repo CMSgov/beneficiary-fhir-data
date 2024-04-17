@@ -1,0 +1,44 @@
+{
+    "id": 119,
+    "name": "Fill Number",
+    "description": "This field indicates the number fill of the current dispensed supply.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "fill_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "fillNumber",
+    "ccwMapping": [
+        "FILL_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_RX_FILL_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].valueQuantity.value",
+            "fhirPath": "supportingInfo.where(category.coding.where(code='refillnum')).valueQuantity.value",
+            "discriminator": [
+                "supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "supportingInfo[N].category.coding[N].code = 'refillnum'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].category.coding[N].display = 'Refill Number'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 2,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"refillnum\",\\n          \"display\": \"Refill Number\"\\n        }\\n      ]\\n    },\\n    \"valueQuantity\": {\\n      \"value\": 3\\n    }\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "id": 258,
+    "name": "Line Allowed Charge Amount",
+    "description": "The amount of allowed charges for the line-item service on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_alowd_chrg_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "allowedChargeAmount",
+    "ccwMapping": [
+        "LINE_ALOWD_CHRG_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_LINE_ALOWD_CHRG_AMT",
+        "CCLF6.CLM_LINE_ALOWD_CHRG_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication' and code = 'https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'eligible'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Eligible Amount')",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Line Allowed Charge Amount'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/adjudication\",\\n          \"code\": \"eligible\",\\n          \"display\": \"Eligible Amount\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt\",\\n          \"display\": \"Line Allowed Charge Amount\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 47.84,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

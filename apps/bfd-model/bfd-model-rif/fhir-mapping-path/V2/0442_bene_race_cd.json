@@ -1,0 +1,50 @@
+{
+    "id": 442,
+    "name": "Beneficiary Race Code",
+    "description": "The race of the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_race_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "race",
+    "ccwMapping": [
+        "BENE_RACE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_RACE_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Patient",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/race').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/race'"
+            ],
+            "additional": [
+                "patient.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/race'",
+                "patient.extension[N].valueCoding.display = {corresponding description from valueset specified in .system})",
+                "patient.extension[N].url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'",
+                "patient.extension[N].extension[N].url = 'ombCategory'",
+                "patient.extension[N].extension[N].valueCoding.system = 'http://terminology.hl7.org/CodeSystem/v3-NullFlavor'",
+                "patient.extension[N].extension[N].valueCoding.code = 'UNK'",
+                "patient.extension[N].extension[N].valueCoding.display = 'Unknown'",
+                "patient.extension[N].extension[N].url = 'text' patient.extension[N].extension[N].valueString = 'Unknown')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/race\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/race\",\\n      \"code\": \"1\",\\n      \"display\": \"White\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

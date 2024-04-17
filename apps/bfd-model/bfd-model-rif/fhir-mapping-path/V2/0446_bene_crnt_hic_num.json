@@ -1,0 +1,36 @@
+{
+    "id": 446,
+    "name": "Hashed HICN",
+    "description": "A hashed version of the Health Insurance Claim Number to protect the PII for the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_crnt_hic_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 64,
+    "bfdJavaFieldName": "hicn",
+    "ccwMapping": [
+        "BENE_CRNT_HIC_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

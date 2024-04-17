@@ -1,0 +1,46 @@
+{
+    "id": 277,
+    "name": "Line Provider Payment Amount",
+    "description": "The payment made by Medicare to the provider for the line-item service on the non-institutional claim. Additional payments may have been made to the provider \u2014 including beneficiary deductible and coinsurance amounts and/or other primary payer amounts.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_prvdr_pmt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "providerPaymentAmount",
+    "ccwMapping": [
+        "LINE_PRVDR_PMT_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/adjudication' and code='https://bluebutton.cms.gov/resources/variables/line_prvdr_pmt_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/line_prvdr_pmt_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'paidtoprovider'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Paid to provider'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Line Provider Payment Amount'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication\",\\n          \"code\": \"paidtoprovider\",\\n          \"display\": \"Paid to provider\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/line_prvdr_pmt_amt\",\\n          \"display\": \"Line Provider Payment Amount\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 37.5,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

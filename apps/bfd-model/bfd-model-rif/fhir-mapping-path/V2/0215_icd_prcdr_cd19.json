@@ -1,0 +1,39 @@
+{
+    "id": 215,
+    "name": "Procedure Code 19",
+    "description": "The code that indicates the procedure performed during the period covered by the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_prcdr_cd19",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "procedure19Code",
+    "ccwMapping": [
+        "ICD_PRCDR_CD19"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "procedure[N].procedureCodeableConcept.coding[N].code",
+            "fhirPath": "procedure[18].procedureCodeableConcept.coding.where(system='http://www.cms.gov/Medicare/Coding/ICD10').code",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

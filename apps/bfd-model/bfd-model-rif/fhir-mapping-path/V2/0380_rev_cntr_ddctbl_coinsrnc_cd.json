@@ -1,0 +1,43 @@
+{
+    "id": 380,
+    "name": "Revenue Center Deductible Coinsurance Code",
+    "description": "Code indicating whether the revenue center charges are subject to deductible and/or coinsurance.",
+    "appliesTo": [
+        "Inpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_ddctbl_coinsrnc_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "deductibleCoinsuranceCd",
+    "ccwMapping": [
+        "REV_CNTR_DDCTBL_COINSRNC_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].revenue.coding[N].code",
+            "fhirPath": "item[%n].revenue.coding.where(system='https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd').code",
+            "discriminator": [
+                "item[N].revenue.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd'"
+            ],
+            "additional": [
+                "eob.item[N].revenue.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd\",\\n    \"code\": \"A\"\\n  }\\n]"
+        }
+    ]
+}

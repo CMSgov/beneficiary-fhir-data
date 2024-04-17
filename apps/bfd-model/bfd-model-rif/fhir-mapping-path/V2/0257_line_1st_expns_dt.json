@@ -1,0 +1,42 @@
+{
+    "id": 257,
+    "name": "First Expense Date",
+    "description": "Beginning date (1st expense) for this line-item service on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_1st_expns_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "firstExpenseDate",
+    "ccwMapping": [
+        "LINE_1ST_EXPNS_DT"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_LINE_FROM_DT",
+        "CCLF6.CLM_LINE_FROM_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].servicedPeriod.start OR  item[N].servicedDate",
+            "fhirPath": "iif(item.servicedPeriod.exists(),item.servicedPeriod,item.servicedDate)",
+            "discriminator": [],
+            "additional": [],
+            "derived": "IF both firstExpenseDate and lastExpenseDate are populated then it will be stored in eob.item[N].servicedPeriod.start. IF only firstExpenseDate is populated then it will be stored in eob.item[N].servicedDate.",
+            "note": "",
+            "example": "[\\n  {\\n    \"start\": \"1999-10-27\",\\n    \"end\": \"1999-10-27\"\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "id": 48,
+    "name": "Claim Frequency Code",
+    "description": "The third digit of the type of bill (TOB3) submitted on an institutional claim record to indicate the sequence of a claim in the beneficiary's current episode of care",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_freq_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "claimFrequencyCode",
+    "ccwMapping": [
+        "CLM_FREQ_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_BILL_FREQ_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].code.coding[N].code",
+            "fhirPath": "supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/resources/variables/clm_freq_cd').code.coding.code",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_freq_cd'"
+            ],
+            "additional": [
+                "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "eob.supportingInfo[N].category.coding[N].code = 'typeofbill'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Type of Bill'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 8,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"typeofbill\",\\n          \"display\": \"Type of Bill\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_freq_cd\",\\n          \"code\": \"1\",\\n          \"display\": \"Admit thru discharge claim\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

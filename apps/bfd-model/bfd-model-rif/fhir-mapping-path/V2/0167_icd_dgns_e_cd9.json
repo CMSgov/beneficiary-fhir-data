@@ -1,0 +1,49 @@
+{
+    "id": 167,
+    "name": "External Diagnosis Code 9",
+    "description": "The code used to identify the external cause of injury, poisoning, or other adverse effect.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_dgns_e_cd9",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosisExternal9Code",
+    "ccwMapping": [
+        "ICD_DGNS_E_CD9"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "diagnosis.where(type.coding.where(code='externalcauseofinjury' or code='secondary'))[8].diagnosisCodeableConcept.coding.where(system='http://hl7.org/fhir/sid/icd-10-cm').code",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType'",
+                "diagnosis[N].type[N].coding[N].code IN ('externalcauseofinjury','secondary')",
+                ""
+            ],
+            "additional": [
+                "(eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' OR",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10-cm')",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis"
+            ],
+            "derived": "",
+            "note": "External diagnosis codes are distinguished by the code \"externalcauseofinjury\".  However, for HHA claims, the code for an external diagnosis code will appear as \"secondary\"",
+            "example": "[\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw1\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw1\",\\n          \"code\": \"N\",\\n          \"display\": \"Diagnosis was not present at the time of admission\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 7,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"A01\",\\n          \"display\": \"TYPHOID AND PARATYPHOID FEVERS\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"A01\",\\n          \"display\": \"TYPHOID AND PARATYPHOID FEVERS\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType\",\\n            \"code\": \"externalcauseofinjury\",\\n            \"display\": \"External Cause of Injury\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  {\\n    \"extension\": [\\n      {\\n        \"url\": \"https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw2\",\\n        \"valueCoding\": {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw2\",\\n          \"code\": \"Y\",\\n          \"display\": \"Diagnosis was present at the time of admission (POA)\"\\n        }\\n      }\\n    ],\\n    \"sequence\": 8,\\n    \"diagnosisCodeableConcept\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n          \"code\": \"A02\",\\n          \"display\": \"OTHER SALMONELLA INFECTIONS\"\\n        },\\n        {\\n          \"system\": \"http://hl7.org/fhir/sid/icd-10\",\\n          \"code\": \"A02\",\\n          \"display\": \"OTHER SALMONELLA INFECTIONS\"\\n        }\\n      ]\\n    },\\n    \"type\": [\\n      {\\n        \"coding\": [\\n          {\\n            \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType\",\\n            \"code\": \"externalcauseofinjury\",\\n            \"display\": \"External Cause of Injury\"\\n          }\\n        ]\\n      }\\n    ]\\n  }\\n]"
+        }
+    ]
+}

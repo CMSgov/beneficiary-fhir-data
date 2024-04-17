@@ -1,0 +1,41 @@
+{
+    "id": 399,
+    "name": "Referring Physician UPIN",
+    "description": "The unique physician identification number (UPIN) of the physician who referred the beneficiary or the physician who ordered the Part B services or durable medical equipment (DME).",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rfr_physn_upin",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "referringPhysicianUpin",
+    "ccwMapping": [
+        "RFR_PHYSN_UPIN"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "referral.identifier[N].value",
+            "fhirPath": "referral.identifier.where(type.coding.where(code='upin')).value",
+            "discriminator": [
+                "referral.identifier[N].type.coding.system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+                "referral.identifier[N].type.coding.code = 'upin'"
+            ],
+            "additional": [
+                "eob.careTeam[N].provider.identifier[N].type.coding[N].display = 'Medicare/CMS (formerly HCFA)'s Universal Physician Identification numbers'"
+            ],
+            "derived": "If Referring Physician NPI is not supplied and Referring Physician UPIN is supplied then Referring Physician UPIN will be used for the eob.referral.identifier.",
+            "note": "For information about list elements and discriminators, see 'Slicing' in the Glossary tab ",
+            "example": ""
+        }
+    ]
+}

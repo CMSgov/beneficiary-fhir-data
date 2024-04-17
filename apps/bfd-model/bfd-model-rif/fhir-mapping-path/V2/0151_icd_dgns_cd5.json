@@ -1,0 +1,53 @@
+{
+    "id": 151,
+    "name": "Diagnosis Code 5",
+    "description": "The diagnosis code identifying the beneficiary's diagnosis.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_dgns_cd5",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosis5Code",
+    "ccwMapping": [
+        "ICD_DGNS_CD5"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_DGNS_5_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "diagnosis.where(type.coding.where(code='secondary' or code='other'))[4].diagnosisCodeableConcept.coding.where(system='http://hl7.org/fhir/sid/icd-10-cm').code",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'http://terminology.hl7.org/CodeSystem/ex-diagnosistype'",
+                "diagnosis[N].type[N].coding[N].code IN ('other','secondary') "
+            ],
+            "additional": [
+                "(eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' OR",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10-cm')",
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/sid/icd-10-cm\",\\n    \"code\": \"A52\",\\n    \"display\": \"LATE SYPHILIS\"\\n  }\\n]"
+        }
+    ]
+}

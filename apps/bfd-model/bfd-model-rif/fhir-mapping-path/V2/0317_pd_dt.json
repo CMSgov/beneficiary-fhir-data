@@ -1,0 +1,36 @@
+{
+    "id": 317,
+    "name": "Payment Date",
+    "description": "The date on which the plan originally paid the pharmacy for the prescription drug.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "pd_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "paymentDate",
+    "ccwMapping": [
+        "PD_DT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "payment.date",
+            "fhirPath": "payment.date",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  \"2015-05-27\"\\n]"
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "id": 607,
+    "name": "Part A Termination Code",
+    "description": "This code specifies the reason Part A entitlement was terminated.",
+    "appliesTo": [
+        "Part-A"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_pta_trmntn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "partATerminationCode",
+    "ccwMapping": [
+        "BENE_PTA_TRMNTN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "Coverage",
+            "element": "status AND extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/a_trm_cd').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/a_trm_cd'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/a_trm_cd'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "If Part A Termination Code = 0 then 'active' else 'cancelled'",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/a_trm_cd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/a_trm_cd\",\\n      \"code\": \"9\",\\n      \"display\": \"Other Termination\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

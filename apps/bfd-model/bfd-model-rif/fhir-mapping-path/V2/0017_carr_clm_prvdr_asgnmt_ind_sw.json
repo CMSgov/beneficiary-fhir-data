@@ -1,0 +1,41 @@
+{
+    "id": 17,
+    "name": "Provider Assignement Indicator",
+    "description": "Variable indicates whether or not the provider accepts assignment for the noninstitutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_prvdr_asgnmt_ind_sw",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "providerAssignmentIndicator",
+    "ccwMapping": [
+        "CARR_CLM_PRVDR_ASGNMT_IND_SW"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/asgmntcd').valueCoding.code",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/asgmntcd'"
+            ],
+            "additional": [
+                "eob.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/asgmntcd\",\\n    \"valueCoding\": {\\n      \"system\": \"https://bluebutton.cms.gov/resources/variables/asgmntcd\",\\n      \"code\": \"A\",\\n      \"display\": \"Assigned claim\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

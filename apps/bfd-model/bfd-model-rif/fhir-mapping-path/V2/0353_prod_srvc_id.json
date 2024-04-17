@@ -1,0 +1,43 @@
+{
+    "id": 353,
+    "name": "Product Service National Drug Code",
+    "description": "This field identifies the dispensed drug product using a National Drug Code (NDC).",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prod_srvc_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 19,
+    "bfdJavaFieldName": "nationalDrugCode",
+    "ccwMapping": [
+        "PROD_SRVC_ID"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_NDC_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].productOrService.coding[N].code",
+            "fhirPath": "item[%n].productOrService.coding.where(system='http://hl7.org/fhir/sid/ndc').code",
+            "discriminator": [
+                "item[N].productOrService.coding[N].system = 'http://hl7.org/fhir/sid/ndc'"
+            ],
+            "additional": [
+                "eob.item[N].productOrService.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"system\": \"http://hl7.org/fhir/sid/ndc\",\\n    \"code\": \"000000000\",\\n    \"display\": \"Fake Diluent - WATER\"\\n  }\\n]"
+        }
+    ]
+}

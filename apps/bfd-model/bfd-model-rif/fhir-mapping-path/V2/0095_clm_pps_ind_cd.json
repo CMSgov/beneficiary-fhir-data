@@ -1,0 +1,45 @@
+{
+    "id": 95,
+    "name": "Prospective Payment Indicator Code",
+    "description": "The code indicating whether or not: (1) the claim is from the prospective payment system (PPS), and/or (2) the beneficiary is a deemed insured MQGE (Medicare Qualified Government Employee)",
+    "appliesTo": [
+        "HHA",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pps_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "prospectivePaymentCode",
+    "ccwMapping": [
+        "CLM_PPS_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "supportingInfo[N].code.coding[N].code",
+            "fhirPath": "supportingInfo.where(code.coding.where(system='https://bluebutton.cms.gov/resources/variables/clm_pps_ind_cd')).code.coding.code",
+            "discriminator": [
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_pps_ind_cd'",
+                ""
+            ],
+            "additional": [
+                "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "eob.supportingInfo[N].category.coding[N].code = 'info'",
+                "eob.supportingInfo[N].category.coding[N].display = 'Information')",
+                "eob.supportingInfo[N].category.coding[N].display = 'Claim PPS Indicator Code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"sequence\": 5,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/claiminformationcategory\",\\n          \"code\": \"info\",\\n          \"display\": \"Information\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/information\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_pps_ind_cd\",\\n          \"display\": \"Claim PPS Indicator Code\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_pps_ind_cd\",\\n          \"code\": \"2\",\\n          \"display\": \"PPS bill; claim contains PPS indicator\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,42 @@
+{
+    "id": 117,
+    "name": "FI Claim Process Date",
+    "description": "The date the fiscal intermediary completes processing and releases the institutional claim to the CMS common working file (CWF; stored in the NCH).",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "fi_clm_proc_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "fiscalIntermediaryClaimProcessDate",
+    "ccwMapping": [
+        "FI_CLM_PROC_DT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueDate",
+            "fhirPath": "extension.where(url='https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt').valueDate",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt/'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"url\": \"https://bluebutton.cms.gov/resources/variables/fi_clm_proc_dt\",\\n    \"valueDate\": \"2016-02-19\"\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,51 @@
+{
+    "id": 391,
+    "name": "Revenue Center Provider Payment Amount",
+    "description": "The amount Medicare paid for the services reported on the revenue center record.",
+    "appliesTo": [
+        "Outpatient",
+        "Hospice"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_prvdr_pmt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "providerPaymentAmount",
+    "ccwMapping": [
+        "REV_CNTR_PRVDR_PMT_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF2.CLM_LINE_CVRD_PD_AMT",
+        "CCLF5.CLM_LINE_CVRD_PD_AMT",
+        "CCLF6.CLM_LINE_CVRD_PD_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "item[%n].adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/resources/codesystem/adjudication' and code='https://bluebutton.cms.gov/resources/variables/rev_cntr_prvdr_pmt_amt')).amount.value",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_prvdr_pmt_amt'"
+            ],
+            "additional": [
+                "(eob.item[N].adjudication[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication'",
+                "eob.item[N].adjudication[N].category.coding[N].code = 'paidtoprovider'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Paid to provider'",
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Revenue Center (Medicare) Provider Payment Amount'",
+                "eob.item[N].adjudication[N].amount.currency = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": "[\\n  {\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication\",\\n          \"code\": \"paidtoprovider\",\\n          \"display\": \"Paid to provider\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/adjudication\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/rev_cntr_prvdr_pmt_amt\",\\n          \"display\": \"Revenue Center (Medicare) Provider Payment Amount\"\\n        }\\n      ]\\n    },\\n    \"amount\": {\\n      \"value\": 200,\\n      \"currency\": \"USD\"\\n    }\\n  }\\n]"
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "id": 127,
+    "name": "HCPCS Third Modifier Code",
+    "description": "A third modifier to the Healthcare Common Procedure Coding System (HCPCS) procedure code to make it more specific than the first or second modifier codes to identify the revenue center or line-item services for the claim.",
+    "appliesTo": [
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "hcpcs_3rd_mdfr_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "hcpcsThirdModifierCode",
+    "ccwMapping": [
+        "HCPCS_3RD_MDFR_CD"
+    ],
+    "cclfMapping": [
+        "CCLF2.HCPCS_3_MDFR_CD",
+        "CCLF5.HCPCS_3_MDFR_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "R4",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].modifier[N].coding[N].code",
+            "fhirPath": "item[%n].modifier.where(coding.where(system = 'https://bluebutton.cms.gov/resources/codesystem/hcpcs')).coding.code",
+            "discriminator": [
+                "item[N].modifier[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/hcpcs'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "The eob.item[N].modifier[N].coding[N].version is set by the hcpcs year.",
+            "example": "[\\n  {\\n    \"coding\": [\\n      {\\n        \"system\": \"https://bluebutton.cms.gov/resources/codesystem/hcpcs\",\\n        \"version\": \"3\",\\n        \"code\": \"YY\"\\n      }\\n    ]\\n  }\\n]"
+        }
+    ]
+}
