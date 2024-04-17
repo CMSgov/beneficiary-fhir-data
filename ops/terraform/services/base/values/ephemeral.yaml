@@ -92,6 +92,9 @@ bfd:
       lb_is_public: false
       lb_ingress_port: 443
       lb_egress_port: 7443
+      launch_template_volume_iops: 3000
+      launch_template_volume_throughput: 125
+      launch_template_volume_type: gp3
       # NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
       # Terraservice into a list. The ephemeral variant is purposefully empty to ensure there are no
       # peerings to ephemeral environments
