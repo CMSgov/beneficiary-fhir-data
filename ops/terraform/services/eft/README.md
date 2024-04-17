@@ -34,7 +34,9 @@ terraform destroy $(for r in `terraform state list | grep -vE "aws_ec2_subnet_ci
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_bfd_version_override"></a> [bfd\_version\_override](#input\_bfd\_version\_override) | BFD release version override. When empty, defaults to attempting to resolve the release version from GitHub. | `string` | `null` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
