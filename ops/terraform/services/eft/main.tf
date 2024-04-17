@@ -207,7 +207,7 @@ locals {
   outbound_lambda_name         = "sftp-outbound-transfer"
   outbound_lambda_full_name    = "${local.full_name}-${local.outbound_lambda_name}"
   outbound_lambda_src          = replace(local.outbound_lambda_name, "-", "_")
-  outbound_lambda_image_uri    = "${data.aws_ecr_repository.ecr.repository_url}:${local.latest_version}"
+  outbound_lambda_image_uri    = "${data.aws_ecr_repository.ecr.repository_url}:${local.bfd_version}"
   outbound_notifs_topic_prefix = "${local.full_name}-outbound-events"
   # For some reason, the transfer server endpoint service does not support us-east-1b and instead
   # opts to support us-east-1d. In order to enable support for this sub-az in the future
