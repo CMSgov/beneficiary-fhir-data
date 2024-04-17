@@ -250,7 +250,10 @@ try {
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
 							env: bfdEnv,
-							directory: "ops/terraform/services/eft"
+							directory: "ops/terraform/services/eft",
+							tfVars: [
+								bfd_version_override: gitBranchName
+							]
 						)
 					}
 				}
@@ -564,7 +567,10 @@ try {
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
 								env: bfdEnv,
-								directory: "ops/terraform/services/eft"
+								directory: "ops/terraform/services/eft",
+								tfVars: [
+									bfd_version_override: gitBranchName
+								]
 							)
 						}
 					}
