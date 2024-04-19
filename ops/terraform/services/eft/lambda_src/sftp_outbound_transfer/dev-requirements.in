@@ -5,5 +5,5 @@ black==24.3.0
 isort
 pylint
 setuptools>=69.0.2
-aiohttp>=3.9.2
+aiohttp==3.9.4
 idna>=3.7
