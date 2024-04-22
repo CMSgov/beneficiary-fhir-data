@@ -440,7 +440,7 @@
       "quantity": {
         "unit" : "ML",
         "value" : 1,
-        "system" : "https://resdac.org/cms-data/variables/ndc-unit-measure-code",
+        "system" : "http://unitsofmeasure.org",
         "code" : "ML"
       }
     }

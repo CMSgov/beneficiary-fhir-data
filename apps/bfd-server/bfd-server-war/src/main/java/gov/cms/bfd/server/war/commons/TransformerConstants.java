@@ -462,10 +462,6 @@ public final class TransformerConstants {
   public static final String C4BB_Institutional_Claim_SubType =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType";
 
-  /** RESDAC NDC Unit Measure Code System. */
-  public static final String RESDAC_NDC_UNIT_MEASURE_CODE_SYSTEM =
-      "https://resdac.org/cms-data/variables/ndc-unit-measure-code";
-
   /** Enumerates the options for the currency of an {@link org.hl7.fhir.r4.model.Identifier}. */
   public enum CurrencyIdentifier {
     /** Represents a current identifier. */

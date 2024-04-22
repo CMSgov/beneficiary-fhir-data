@@ -8,11 +8,11 @@
   "kind" : "instance",
   "software" : {
     "name" : "Blue Button API: Direct",
-    "version" : "1.0.0-SNAPSHOT"
+    "version" : "2.124.0-SNAPSHOT"
   },
   "implementation" : {
     "description" : "gov.cms.bfd:bfd-server-war",
-    "url" : "https://localhost:IGNORED_FIELD/v2/fhir"
+    "url" : "https://localhost:IGNORED_FIELD7/v2/fhir"
   },
   "fhirVersion" : "4.0.1",
   "format" : [ "application/fhir+xml", "xml", "application/fhir+json", "json" ],

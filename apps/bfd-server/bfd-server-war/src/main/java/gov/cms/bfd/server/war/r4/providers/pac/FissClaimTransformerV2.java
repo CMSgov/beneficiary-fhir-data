@@ -449,7 +449,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                 Quantity quantity = new Quantity();
                 quantity.setValue((long) Double.parseDouble(revenueLine.getNdcQty()));
                 quantity.setUnit(revenueLine.getNdcQtyQual());
-                quantity.setSystem(TransformerConstants.RESDAC_NDC_UNIT_MEASURE_CODE_SYSTEM);
+                quantity.setSystem(TransformerConstants.CODING_SYSTEM_UCUM);
                 quantity.setCode(revenueLine.getNdcQtyQual());
 
                 itemComponent.setQuantity(quantity);
