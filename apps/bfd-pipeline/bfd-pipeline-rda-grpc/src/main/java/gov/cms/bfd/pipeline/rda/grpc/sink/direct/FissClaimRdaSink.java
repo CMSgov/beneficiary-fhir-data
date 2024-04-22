@@ -12,10 +12,10 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
 
 /** Implementation of AbstractClaimRdaSink that adds FISS claim specific methods. */
 public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, RdaFissClaim> {

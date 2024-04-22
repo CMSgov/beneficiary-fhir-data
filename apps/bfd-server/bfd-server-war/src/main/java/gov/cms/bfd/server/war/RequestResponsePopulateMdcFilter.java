@@ -1,6 +1,10 @@
 package gov.cms.bfd.server.war;
 
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.EOFException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
@@ -11,10 +15,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.security.auth.x500.X500Principal;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -266,7 +266,7 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
    */
   private static X509Certificate getClientCertificate(HttpServletRequest request) {
     X509Certificate[] certs =
-        (X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate");
+        (X509Certificate[]) request.getAttribute("jakarta.servlet.request.X509Certificate");
     if (certs == null || certs.length <= 0) {
       LOGGER.debug("No client certificate found for request.");
       return null;

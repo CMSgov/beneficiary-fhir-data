@@ -1,7 +1,7 @@
 package gov.cms.bfd.migrator.app;
 
 import gov.cms.bfd.sharedutils.database.DatabaseMigrationProgress;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 
 /** Embodies facts related to completion of some milestone or stage of processing by the app. */

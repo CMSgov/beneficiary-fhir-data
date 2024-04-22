@@ -1,9 +1,9 @@
 package gov.cms.bfd.sharedutils.config;
 
+import jakarta.annotation.Nullable;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

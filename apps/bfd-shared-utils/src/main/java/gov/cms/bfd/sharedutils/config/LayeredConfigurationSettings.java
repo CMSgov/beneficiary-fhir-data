@@ -2,8 +2,8 @@ package gov.cms.bfd.sharedutils.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
+import jakarta.annotation.Nullable;
 import java.util.List;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

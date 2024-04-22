@@ -2,9 +2,7 @@ package gov.cms.bfd.migrator.app;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -14,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
+import org.hibernate.annotations.TimeZoneStorageType;
 import org.hibernate.boot.cfgxml.spi.CfgXmlAccessService;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
@@ -23,6 +22,7 @@ import org.hibernate.boot.registry.selector.spi.StrategySelector;
 import org.hibernate.boot.spi.SessionFactoryOptions;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.TimeZoneSupport;
 import org.hibernate.engine.config.spi.ConfigurationService;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
@@ -99,6 +99,14 @@ public class HibernateValidatorTest {
     when(jdbcService.getDialect()).thenReturn(dialect);
     JdbcEnvironment jdbcEnv = mock(JdbcEnvironment.class);
     when(mockRegistry.getService(JdbcEnvironment.class)).thenReturn(jdbcEnv);
+    when(jdbcService.getJdbcEnvironment()).thenReturn(jdbcEnv);
+    when(jdbcEnv.getDialect()).thenReturn(dialect);
+    when(dialect.getTimeZoneSupport()).thenReturn(TimeZoneSupport.NATIVE);
+    when(configurationService.getSetting(
+            matches("hibernate.timezone.default_storage"),
+            any(ConfigurationService.Converter.class),
+            any(TimeZoneStorageType.class)))
+        .thenReturn(TimeZoneStorageType.DEFAULT);
   }
 
   /**

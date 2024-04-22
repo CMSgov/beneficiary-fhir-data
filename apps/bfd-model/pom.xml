@@ -27,6 +27,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+            </dependency>
+
+            <dependency>
                 <!-- Used to read the Excel file that provides the RIF column/field definitions. -->
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>

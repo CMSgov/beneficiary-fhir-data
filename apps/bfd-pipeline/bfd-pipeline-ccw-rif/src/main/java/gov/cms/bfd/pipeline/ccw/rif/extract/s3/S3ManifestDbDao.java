@@ -4,12 +4,12 @@ import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import lombok.Getter;
 
 /** Data access object for working with S3 manifest database entities. */
