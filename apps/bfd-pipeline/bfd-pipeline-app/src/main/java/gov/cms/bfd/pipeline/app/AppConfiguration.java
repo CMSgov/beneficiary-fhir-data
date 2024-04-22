@@ -29,12 +29,12 @@ import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
+import jakarta.annotation.Nullable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 /**

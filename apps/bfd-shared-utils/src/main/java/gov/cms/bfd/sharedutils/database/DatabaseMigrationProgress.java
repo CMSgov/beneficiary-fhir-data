@@ -2,7 +2,7 @@ package gov.cms.bfd.sharedutils.database;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.flywaydb.core.Flyway;

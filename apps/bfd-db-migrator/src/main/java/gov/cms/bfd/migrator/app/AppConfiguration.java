@@ -6,7 +6,7 @@ import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import software.amazon.awssdk.services.sqs.SqsClient;
 

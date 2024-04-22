@@ -7,10 +7,10 @@ import gov.cms.model.dsl.codegen.plugin.model.validation.EnumExistsInSameMapping
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaType;
 import gov.cms.model.dsl.codegen.plugin.model.validation.SqlType;
+import jakarta.persistence.GenerationType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.regex.Pattern;
-import javax.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
