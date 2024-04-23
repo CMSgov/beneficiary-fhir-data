@@ -8,7 +8,7 @@
   "total" : 8,
   "link" : [ {
     "relation" : "self",
-    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ExplanationOfBenefit?_format=json&patient=Patient%2F567834"
+    "url" : "https://localhost:IGNORED_FIELD1/v2/fhir/ExplanationOfBenefit/?patient=567834"
   } ],
   "entry" : [ {
     "resource" : {
@@ -81,13 +81,12 @@
           "code" : "15444"
         }
       }, {
-        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
-        "valueIdentifier": {
-          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
-          "value": "15444"
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value" : "15444"
         }
-      }
-      ],
+      } ],
       "identifier" : [ {
         "type" : {
           "coding" : [ {
@@ -1661,13 +1660,12 @@
           "code" : "15999"
         }
       }, {
-        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
-        "valueIdentifier": {
-          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
-          "value": "15999"
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value" : "15999"
         }
-      }
-      ],
+      } ],
       "identifier" : [ {
         "type" : {
           "coding" : [ {
@@ -2305,10 +2303,10 @@
           "code" : "8299"
         }
       }, {
-        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
-        "valueIdentifier": {
-          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
-          "value": "8299"
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value" : "8299"
         }
       } ],
       "identifier" : [ {
@@ -3415,10 +3413,10 @@
           "code" : "11111"
         }
       }, {
-        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
-        "valueIdentifier": {
-          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
-          "value": "11111"
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value" : "11111"
         }
       } ],
       "identifier" : [ {
@@ -5641,12 +5639,12 @@
           "code" : "6666"
         }
       }, {
-        "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
-        "valueIdentifier": {
-          "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
-          "value": "6666"
+        "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+          "value" : "6666"
         }
-      },{
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
         "valueQuantity" : {
           "value" : 2

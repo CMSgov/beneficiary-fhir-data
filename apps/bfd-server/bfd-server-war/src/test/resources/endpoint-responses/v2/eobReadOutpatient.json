@@ -68,13 +68,12 @@
       "code" : "15444"
     }
   }, {
-    "url": "https://bluebutton.cms.gov/resources/variables/fi_num",
-    "valueIdentifier": {
-      "system": "https://bluebutton.cms.gov/resources/variables/fi_num",
-      "value": "15444"
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "value" : "15444"
     }
-  }
-  ],
+  } ],
   "identifier" : [ {
     "type" : {
       "coding" : [ {
