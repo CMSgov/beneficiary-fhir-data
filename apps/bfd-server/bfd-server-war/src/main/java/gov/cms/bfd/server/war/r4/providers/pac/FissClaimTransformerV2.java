@@ -403,14 +403,15 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                   || Strings.isNotBlank(revenueLine.getApcHcpcsApc())
                   || Strings.isNotBlank(revenueLine.getNdc())) {
                 CodeableConcept productOrService = new CodeableConcept();
+                List<Coding> codings = new ArrayList<>();
 
                 if (Strings.isNotBlank(revenueLine.getHcpcCd())) {
-                  productOrService.setCoding(
-                      List.of(
-                          new Coding(
-                              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
-                              revenueLine.getHcpcCd(),
-                              null)));
+                  codings.add(
+                      new Coding(
+                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
+                          revenueLine.getHcpcCd(),
+                          null));
+                  productOrService.setCoding(codings);
                 }
 
                 if (Strings.isNotBlank(revenueLine.getApcHcpcsApc())) {
@@ -424,9 +425,11 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                 }
 
                 if (Strings.isNotBlank(revenueLine.getNdc())) {
-                  productOrService.setCoding(
-                      List.of(
-                          new Coding(TransformerConstants.CODING_NDC, revenueLine.getNdc(), null)));
+                  // Both NDC and HCPCS_CD can exist in same sequence. In that case, multiple
+                  // codings are allowed
+                  codings.add(
+                      new Coding(TransformerConstants.CODING_NDC, revenueLine.getNdc(), null));
+                  productOrService.setCoding(codings);
                 }
 
                 itemComponent.setProductOrService(productOrService);
@@ -446,6 +449,11 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
 
               if (Strings.isNotBlank(revenueLine.getNdcQty())
                   && Strings.isNotBlank(revenueLine.getNdcQtyQual())) {
+                // Both rev_units_billed and ndc_qty can exist in the same sequence. Since
+                // rev_serv_unit_cnt serves
+                // the same purpose as rev_units_billed and since rev_serv_unit_cnt is set as an
+                // extension, ndc_qty
+                // can be as the quantity thus being fine with overwriting rev_units_billed
                 Quantity quantity = new Quantity();
                 quantity.setValue((long) Double.parseDouble(revenueLine.getNdcQty()));
                 quantity.setUnit(revenueLine.getNdcQtyQual());
