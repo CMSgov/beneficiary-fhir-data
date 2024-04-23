@@ -9,7 +9,7 @@ services:
       bash -c "mkdir -p .github/scripts && touch .github/scripts/pre-push.sh && touch .github/scripts/pre-commit.sh &&
                cd /apps && export PROJ_VER=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout` &&
                export BFD_PATHS_FILES_WAR=$${BFD_SVR_WAR_DIR}bfd-server-war-$${PROJ_VER}.war &&
-               cp toolchains.xml ~/.m2/ && mvn clean install -Dgitbuildhook.skip=true -DskipITs -DskipTests=true -Dmaven.build.cache.enabled=false &&
+               cp toolchains.xml ~/.m2/ && mvn install -Dgitbuildhook.skip=true -DskipITs -DskipTests=true &&
                export CLASSPATH=$${BFD_MIGRATOR_DIR}/bfd-db-migrator-$${PROJ_VER}/lib/*:$${BFD_MIGRATOR_DIR}/bfd-db-migrator-$${PROJ_VER}/bfd-db-migrator-$${PROJ_VER}.jar &&
                echo $${CLASSPATH} &&
                java -Xms512m -Xmx512m -Dorg.jboss.logging.provider=slf4j gov.cms.bfd.migrator.app.MigratorApp &&
