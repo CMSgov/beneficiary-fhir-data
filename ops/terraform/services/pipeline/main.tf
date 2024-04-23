@@ -91,10 +91,10 @@ locals {
   # The log availability alarm will post an incident in prod; in other envs it will get posted
   # to #bfd-test
   # TODO: Replace testing SNS topic in BFD-2244
-  log_availability_alarm_actions = local.is_ephemeral_env ? [] : local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm[0].arn]
+  log_availability_alarm_actions = local.is_ephemeral_env ? [] : local.is_prod ? [data.aws_sns_topic.bfd_notices_slack_alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm[0].arn]
 
-  # The max claim latency alarm sends notifications to #bfd-notices upon entering the ALARM state
-  max_claim_latency_alarm_actions = local.is_ephemeral_env ? [] : [data.aws_sns_topic.bfd_notices_slack_alarm[0].arn]
+  # For alarms that need attention but aren't an emergency worth waking someone up in the middle of the night for.
+  notice_alarm_actions = local.is_ephemeral_env ? [] : [data.aws_sns_topic.bfd_notices_slack_alarm[0].arn]
 
   # data-source resolution
   ami_id                = data.aws_ami.main.image_id

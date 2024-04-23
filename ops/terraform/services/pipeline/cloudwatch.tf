@@ -47,7 +47,7 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
   metric_name = "messages/count/error"
   namespace   = "bfd-${local.env}/bfd-pipeline"
 
-  alarm_actions = local.alarm_actions
+  alarm_actions = local.notice_alarm_actions
 
   datapoints_to_alarm = local.pipeline_messages_error.datapoints
   treat_missing_data  = "notBreaching"
@@ -66,7 +66,7 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-datasetfailed" {
   metric_name = "messages/count/datasetfailed"
   namespace   = "bfd-${local.env}/bfd-pipeline"
 
-  alarm_actions = local.alarm_actions
+  alarm_actions = local.notice_alarm_actions
 
   datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
   treat_missing_data  = "notBreaching"
@@ -87,7 +87,7 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-max-claim-latency-exceeded" {
   metric_name = "${local.rda_pipeline_latency_alert.metrics[count.index].sink_name}.change.latency.millis.avg"
   namespace   = "bfd-${local.env}/bfd-pipeline"
 
-  alarm_actions = local.max_claim_latency_alarm_actions
+  alarm_actions = local.notice_alarm_actions
 
   datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
   treat_missing_data  = "notBreaching"
