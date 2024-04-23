@@ -1,9 +1,5 @@
 package gov.cms.bfd.server.war;
 
-import com.codahale.metrics.servlets.HealthCheckServlet;
-import com.codahale.metrics.servlets.MetricsServlet;
-import com.codahale.metrics.servlets.PingServlet;
-import com.codahale.metrics.servlets.ThreadDumpServlet;
 import com.newrelic.api.agent.NewRelic;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
@@ -14,9 +10,13 @@ import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
+import io.dropwizard.metrics.servlets.HealthCheckServlet;
+import io.dropwizard.metrics.servlets.MetricsServlet;
+import io.dropwizard.metrics.servlets.PingServlet;
+import io.dropwizard.metrics.servlets.ThreadDumpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 
 /**

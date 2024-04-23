@@ -34,10 +34,11 @@ resource "aws_security_group" "aurora_cluster" {
 }
 
 resource "aws_rds_cluster" "aurora_cluster" {
-  engine            = "aurora-postgresql"
-  engine_mode       = "provisioned"
-  engine_version    = "14.9"
-  apply_immediately = local.rds_apply_immediately
+  allow_major_version_upgrade = false
+  engine                      = "aurora-postgresql"
+  engine_mode                 = "provisioned"
+  engine_version              = "14.9"
+  apply_immediately           = local.rds_apply_immediately
 
   backtrack_window                    = 0
   backup_retention_period             = local.rds_backup_retention_period
@@ -117,7 +118,7 @@ resource "aws_db_parameter_group" "aurora_cluster" {
 
 resource "aws_rds_cluster_instance" "nodes" {
   count                           = local.rds_instance_count
-  auto_minor_version_upgrade      = false # minor cluster upgrades can cause downtime
+  auto_minor_version_upgrade      = true
   ca_cert_identifier              = "rds-ca-rsa4096-g1"
   cluster_identifier              = aws_rds_cluster.aurora_cluster.id
   copy_tags_to_snapshot           = true

@@ -3,7 +3,7 @@ package gov.cms.model.dsl.codegen.plugin.model;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import javax.persistence.FetchType;
+import jakarta.persistence.FetchType;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for the {@link JoinBean} class. */
