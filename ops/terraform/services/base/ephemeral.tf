@@ -23,10 +23,10 @@ locals {
 
   # Targeted PIPELINE hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
   pipeline_seed_paths = local.is_ephemeral_env ? {
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_db_password"          = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_db_password"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_db_username"          = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_db_username"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_iterations"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"
+    "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_db_password"          = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_db_password"
+    "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_db_username"          = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_db_username"
+    "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations"
+    "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"
   } : {}
 
   # FUTURE: Fix this when hierarchies are supported with Terraform module.

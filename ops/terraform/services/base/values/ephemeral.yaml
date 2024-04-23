@@ -1,3 +1,4 @@
+# CIPHER FILE HEADER, DO NOT REMOVE: <<CIPHER>>AgV4wCYoE580UxS5VbF6Xnqo8GjTwdnJiZ0I0l1RhhzSg5YAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE4cnAvS2RZRU13eGY2VUt3ZkxCZkVpM1ZEZno4bGNkemc5dzRzakhNNXZoWEZMd0FtcGpNMHVmWnc5L0VubEVaZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEA46egFuOJH-_7D5AY5T5fAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMMDLdOHXXYdj5_eyNAgEQgDtaGv5Z3awF4O1cLfpiCukEdk64o2wfghQh6JNgm49842OaU3nnMMvExlWmntVYvxfsDmClbdqqcy9JjgIAABAAI-0H2NDJCNypG7qy4zRj1bR8t6YDgm1k-YHVDjXMF4pYocOmrNsAhWgl_xwOLltE_____wAAAAEAAAAAAAAAAAAAAAEAAAAEQ2mrRYTK6v42FOSiiTDXHEBNOAYAZzBlAjEAzVV0FZTXGoe13LN3_OTFfm_jASxlJL3cPj5dA5MXKgXA_diICP47qawxNRSkCjCRAjBy5RwC-wW3Ru1AwX_He_EU_OAsLQwvkXViNBelq3gxK5hxRMUYxlu7zoUYihjbwVE=<</CIPHER>>
 ---
 bfd: 
   ${env}:
@@ -11,7 +12,10 @@ bfd:
       rds_instance_count: 1
     migrator:
       instance_type: m6a.large
+      volume_iops: 3000
       volume_size: 100
+      volume_throughput: 125
+      volume_type: gp3
       sqs_queue_name: bfd-${env}-migrator
       new_relic_metric_host: *newRelicMetricHost
       new_relic_metric_path: *newRelicMetricPath
@@ -40,8 +44,31 @@ bfd:
         slis_repeater_lambda_invoke_rate: 15 minutes
       rda:
         ## PIPELINE RDA
+        grpc:
+          host: &rda_grpc_host <<CIPHER>>AgV4Cff44_FckzVYopUJKKNtwb0L_FZ9Uyf_2FAob3L3qt4AdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREF4VEpvay9wOXh4RHdZR2NQS2sraUtNaEZJaDhqTDA2cVBsckViVlR1dmF1c2FKRHgzczlMeE9oZ0QxaGRXT2ljdz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEDk0Gi_I22MgptoTrIblhPAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMFvuQXIUvADN4oAxVAgEQgDu4c5Md5pIYsn9x6SvN0aToWfM-n9nxxJbLK3KBYuijqS7rH9bDrQ8CQSRMZ7AKGpPymyU5-H_ZRR2L7AIAABAAkGOhe-r9bVPCci0qNIRBlpPq8vwpzSq2hSf-XpdTLuUeiL8kELP4T3zgYm0URLvW_____wAAAAEAAAAAAAAAAAAAAAEAAAAVt0mHYzAb3CBcxOA283fC5wUbwrb2gU4_nwbTYjVG7XaAkEnq8QBnMGUCMQCrRXRJpUN27LvKQwpfgsZGIe26LPUIRfb4RHynw44TYEuy9yFe_A4-JmxwwQH8E-MCMGxExHjS72oLs_daRIeo93bVv3r-QVyakGFRP4aoWlJ9GcduiXPZDVDk7tjCnBGdIg==<</CIPHER>>
+          port: &rda_grpc_port <<CIPHER>>AgV4UasRFSHdS3Ahmw-2Ufyl8GuiQQIQyhffE1Y3ObduZOYAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE0SngrTnBPSVlhT0k2b3RTUlIyLyt2RFdRUjJQSzRmRWZZMGxxQmIwcGFEUGNqald3N2l0UFVqUWFQTm16aUhFUT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAEsHoVO0LzQoTPhZjnPwhPVAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQME3LfheQdPsqDBQoKAgEQgDuYw1FTSfn8Zo1PN6XPKwNXxYQ6rJmA8wc67LuosX1i_AMyCbBjPg07E8nEsv30WBiHL9gFwq0X3Th1uwIAABAAvsKcywRbRTUWPwkpRpyyM1IxPm1EbkbW0EaGr7F-exJUyzzZBd-L1GKGPHKMS-tF_____wAAAAEAAAAAAAAAAAAAAAEAAAADXRs-gmYRwivn7ju0OfLeHSci6ABnMGUCMCvoq7fGWrNdnNFNae0HnFkkAS3sPUs0UnXEAzFA8aoISy6FsgQiLXGqueKECKtHYwIxAKLB5yFAdB6EZXYRWRaf5_ZgMmPQKxZ07xX1tP6lR27jpMpapmgbOMdjH5IsmlP7Dg==<</CIPHER>>
+          auth_token: &rda_grpc_auth_token <<CIPHER>>AgV4EGcZxzy6VDRZQ6cs_rQKi2MQumeZdo0AOP7RLLPggdEAdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREE4aXdhdEdjOStxZERqY3pTbmVEWXQxckdoMFBicEtWdjRZYkdDUGx4dU1IRVZKMXU3SnFGZlM3eHczMHJ5K2FUQT09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay0xNWZhNGU2MzcxOTI0YmZmYTk3NjRjMjE4ZjdhNzY3YQC4AQIBAHic22-xSw25t2N5FjIsl0BfswHAJC80QDtF4qY0HagMgAFL4xM9yo1wyrfJya_PfO1bAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM0UVeSAtYDsOkxN7nAgEQgDu24d4I6M_8p7mwG3Qu9JLp2XwrdCDn-6nf62ObqCPXUpeZuwxaE-LnC2zL_jPNIevGnc4oa9R7y2cUNgIAABAAMq4iv2pRE2Q9zkQvDZNhF6K0L13Qt_IcwAM84sP8FNQSiKaEYaPnXO4HJ0L_TU6u_____wAAAAEAAAAAAAAAAAAAAAEAAAH_xNhkesAsQLRXg3J7wCnHlVqo3TXzfA4vvIbEoc_wfYl_GuLeo7tH8t9Pl-AuDY7q0GEkDa0DPTSG_TpC1OXyelSTEApBhhg4L6bgmqmGfsR8UUlQGlZyCfRmfv7xMt-MTa6yRePUkfFhB9EQwdDticmQYP_HWfY5ntVNDupsynyiC6LIe8EStq9kKQMXDAh960qROm8Bls1kFqsiOfh2eGiFT-zLZ8y6zP5zapIiesO14KAdxC_DQIXZwNgmokiySp_0ZwOxqUW_rYWn9GtR2l9tFkmbymy-2zfnKMftUvZoa2fvsuVu3vOj4PxyFvNuC_WEaaQGPE6mz4E_FuIezUofpcdPgxUW-Wr96KdNJPees-ArtfPndgT0HMoGYwr-R9X5aB77qCsOCry3ObDi0tDXVnRgp32WFFOlkXZ_r3r3G6EMDO7r7eFZ8XIYfMBLThRQyEWYdz5FcM3-OO0mjRBztbypd4UrQ7RAyg-IKv_niS-7Pe4LpPaXxCZAL0-MnPOkJLC2eFgCkMEOKZ9d9JD5Lw3cdxYfE8XoIF9808S2YqA2FJWYBSmczUxVWwJvLKvLDuiznI-ceiu2_27zp-TCundkcJ-o9S3owk-VhUFqMkxIJWN91UXLn21ElwAHCHlsLJ1GSUlwZGK5o3CtANjBW9x-4AdadI10iEDJzlRkEYPOTCfPEMbjGXYm75YAZzBlAjBBbWiWXWapTj2TBEzDjanav-lzMjyMfM6-JAhF5GM4Ir_WRWfbRxT4Iv5tRStbiusCMQDPJzqBC4Tid99-EKh2cqf5uo9x_61mgy1AJ-4KnA8ZXPi2Vd7pHF21FrFg2sbYFS8=<</CIPHER>>
+          inprocess_server:
+            mode: UNDEFINED
+            s3:
+              region: us-east-1
+              bucket:
+              dir:
+        job:
+          enabled: true
+          process_dlq: &rda_job_process_dlq true
+          starting_fiss_seq_num: 2041459
+          starting_mcs_seq_num: 5313949
+        cleanup:
+          enabled: false
+          run_size: UNDEFINED
+          transaction_size: UNDEFINED
         data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
-        data_pipeline_rda_job_enabled: false
+        data_pipeline_rda_grpc_auth_token: *rda_grpc_auth_token
+        data_pipeline_rda_grpc_host: *rda_grpc_host
+        data_pipeline_rda_grpc_port: *rda_grpc_port
+        data_pipeline_rda_job_enabled: true
+        data_pipeline_rda_process_dlq: *rda_job_process_dlq
         instance_type: m6a.large
         # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
         # data_pipeline_rda_grpc_max_idle_seconds: 600
@@ -65,6 +92,9 @@ bfd:
       lb_is_public: false
       lb_ingress_port: 443
       lb_egress_port: 7443
+      launch_template_volume_iops: 3000
+      launch_template_volume_throughput: 125
+      launch_template_volume_type: gp3
       # NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
       # Terraservice into a list. The ephemeral variant is purposefully empty to ensure there are no
       # peerings to ephemeral environments
