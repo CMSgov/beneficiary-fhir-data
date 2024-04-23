@@ -798,9 +798,7 @@
                     </configuration>
                     <executions>
                         <execution>
-                            <goals>
-                                <goal>install</goal>
-                            </goals>
+                            <phase>install${gitbuildhook.skip}</phase>
                         </execution>
                     </executions>
                 </plugin>

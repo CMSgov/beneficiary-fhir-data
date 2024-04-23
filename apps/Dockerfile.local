@@ -1,0 +1,61 @@
+ARG JAVA_VERSION=21
+ARG MAVEN_VERSION=3.9.6
+
+FROM maven:${MAVEN_VERSION}-amazoncorretto-${JAVA_VERSION}
+
+RUN yum update -y --security && \
+    amazon-linux-extras install epel -y && \
+    yum install net-tools -y && \
+    yum install curl -y && \
+    yum clean metadata && \
+    yum -y groupinstall "Development Tools"
+
+RUN cat <<EOF > /usr/local/bin/loadSampleA.sh
+#!/bin/bash
+cd /apps/bfd-pipeline/bfd-pipeline-ccw-rif/
+mvn -Dits.db.url=jdbc:postgresql://db:5432/fhirdb -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dmaven.build.cache.enabled=false -Dit.test=RifLoaderIT#loadSampleA clean verify
+EOF
+
+RUN chmod +x /usr/local/bin/loadSampleA.sh
+
+RUN cat <<EOF > /usr/local/bin/getClaimsV2.sh
+#!/bin/bash
+curl --insecure --cert /apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://bfd:6500/v2/fhir/ExplanationOfBenefit/?patient=567834&_format=json"
+EOF
+
+RUN chmod +x /usr/local/bin/getClaimsV2.sh
+
+RUN cat <<EOF > /usr/local/bin/getPatientV2.sh
+#!/bin/bash
+curl --insecure --cert /apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://bfd:6500/v2/fhir/Patient/567834"
+EOF
+
+RUN chmod +x /usr/local/bin/getPatientV2.sh
+
+RUN cat <<EOF > /usr/local/bin/getCoverageV2.sh
+#!/bin/bash
+curl --insecure --cert /apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://bfd:6500/v2/fhir/Coverage/?beneficiary=Patient/567834&_format=json"
+EOF
+
+RUN chmod +x /usr/local/bin/getCoverageV2.sh
+
+RUN cat <<EOF > /usr/local/bin/getClaimsV1.sh
+#!/bin/bash
+curl --insecure --cert /apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://bfd:6500/v1/fhir/ExplanationOfBenefit/?patient=567834&_format=json"
+EOF
+
+RUN chmod +x /usr/local/bin/getClaimsV1.sh
+
+RUN cat <<EOF > /usr/local/bin/getPatientV1.sh
+#!/bin/bash
+curl --insecure --cert /apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://bfd:6500/v1/fhir/Patient/567834"
+EOF
+
+RUN chmod +x /usr/local/bin/getPatientV1.sh
+
+RUN cat <<EOF > /usr/local/bin/getCoverageV1.sh
+#!/bin/bash
+curl --insecure --cert /apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://bfd:6500/v1/fhir/Coverage/?beneficiary=Patient/567834&_format=json"
+EOF
+
+RUN chmod +x /usr/local/bin/getCoverageV1.sh
