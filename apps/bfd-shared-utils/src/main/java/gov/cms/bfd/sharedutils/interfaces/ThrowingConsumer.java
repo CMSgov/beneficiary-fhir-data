@@ -1,7 +1,7 @@
 package gov.cms.bfd.sharedutils.interfaces;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /**
  * Functional Interface for creating {@link java.util.function.Consumer} lambdas that throw.

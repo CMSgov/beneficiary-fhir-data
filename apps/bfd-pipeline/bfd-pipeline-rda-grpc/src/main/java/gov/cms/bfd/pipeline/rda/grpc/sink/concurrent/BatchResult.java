@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
+import jakarta.annotation.Nullable;
 import java.util.List;
-import javax.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -11,11 +11,12 @@ module "terraservice" {
 }
 
 locals {
-  default_tags     = module.terraservice.default_tags
-  env              = module.terraservice.env
-  seed_env         = module.terraservice.seed_env
-  is_ephemeral_env = module.terraservice.is_ephemeral_env
-  latest_version   = module.terraservice.latest_bfd_release
+  default_tags       = module.terraservice.default_tags
+  env                = module.terraservice.env
+  seed_env           = module.terraservice.seed_env
+  is_ephemeral_env   = module.terraservice.is_ephemeral_env
+  latest_bfd_release = module.terraservice.latest_bfd_release
+  bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
 
   service   = "eft"
   layer     = "data"
@@ -206,7 +207,7 @@ locals {
   outbound_lambda_name         = "sftp-outbound-transfer"
   outbound_lambda_full_name    = "${local.full_name}-${local.outbound_lambda_name}"
   outbound_lambda_src          = replace(local.outbound_lambda_name, "-", "_")
-  outbound_lambda_image_uri    = "${data.aws_ecr_repository.ecr.repository_url}:${local.latest_version}"
+  outbound_lambda_image_uri    = "${data.aws_ecr_repository.ecr.repository_url}:${local.bfd_version}"
   outbound_notifs_topic_prefix = "${local.full_name}-outbound-events"
   # For some reason, the transfer server endpoint service does not support us-east-1b and instead
   # opts to support us-east-1d. In order to enable support for this sub-az in the future

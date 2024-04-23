@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war;
 
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import org.springframework.core.env.PropertySource;
 
 /** A {@link PropertySource} that gets properties from a {@link ConfigLoader}. */

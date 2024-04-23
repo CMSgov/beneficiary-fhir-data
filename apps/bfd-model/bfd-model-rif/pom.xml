@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-model-parent</artifactId>
-        <version>2.122.0-SNAPSHOT</version>
+        <version>2.125.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-model-rif</artifactId>
@@ -16,6 +16,12 @@
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>${antlr4.version}</version>
+        </dependency>
+
         <dependency>
             <!-- contains the data transformation library classes needed to transform incoming data -->
             <groupId>gov.cms.bfd</groupId>
@@ -37,6 +43,7 @@
             <!-- Used for annotating JPA model entities. -->
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.api.version}</version>
         </dependency>
         <dependency>
             <!-- Provides BOMInputStream, and other basic I/O utilities. -->
@@ -77,7 +84,7 @@
             <!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's
                 only brought into this project for the extra ORM mapping annotations that
                 it provides (hence all of the exclusions). -->
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <exclusions>
                 <exclusion>
@@ -141,6 +148,15 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-community-dialects</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-ant</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

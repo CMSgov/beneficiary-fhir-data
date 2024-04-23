@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-server-parent</artifactId>
-        <version>2.122.0-SNAPSHOT</version>
+        <version>2.125.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-server-war</artifactId>
@@ -20,11 +20,6 @@
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-server-shared-utils</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
         </dependency>
         <dependency>
             <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
@@ -130,6 +125,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate.common</groupId>
+            <artifactId>hibernate-commons-annotations</artifactId>
+            <version>${hibernate-commons-annotations.version}</version>
+        </dependency>
 
         <dependency>
             <!-- Provides the @Inject annotation. Does NOT provide dependency injection;
@@ -143,6 +143,7 @@
                 managed. -->
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <!-- We're really not using much of the Spring Data JPA framework; we
@@ -156,20 +157,19 @@
                 at runtime. -->
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jvm</artifactId>
+            <version>${metrics.version}</version>
         </dependency>
+<!--            &lt;!&ndash; Provides a Servlet filter which has meters for status codes, a counter-->
+<!--                for the number of active requests, and a timer for request duration. Enabled-->
+<!--                via `web.xml`. &ndash;&gt;-->
         <dependency>
-            <!-- Provides a Servlet filter which has meters for status codes, a counter
-                for the number of active requests, and a timer for request duration. Enabled
-                via `web.xml`. -->
             <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-servlet</artifactId>
+            <artifactId>metrics-jakarta-servlets</artifactId>
             <version>${metrics.version}</version>
         </dependency>
         <dependency>
-            <!-- Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled
-                via `web.xml`. -->
             <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-servlets</artifactId>
+            <artifactId>metrics-jakarta-servlet</artifactId>
             <version>${metrics.version}</version>
         </dependency>
 
