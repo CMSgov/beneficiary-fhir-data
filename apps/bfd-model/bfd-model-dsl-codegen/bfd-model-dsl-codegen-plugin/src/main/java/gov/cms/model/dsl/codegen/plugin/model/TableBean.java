@@ -2,6 +2,7 @@ package gov.cms.model.dsl.codegen.plugin.model;
 
 import com.google.common.base.Strings;
 import gov.cms.model.dsl.codegen.plugin.model.validation.JavaName;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

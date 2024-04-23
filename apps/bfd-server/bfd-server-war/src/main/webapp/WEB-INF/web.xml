@@ -16,7 +16,7 @@
 		duration are collected. See http://metrics.dropwizard.io/2.2.0/manual/webapps/. -->
     <filter>
         <filter-name>instrumentedFilter</filter-name>
-        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <filter-class>io.dropwizard.metrics.servlet.InstrumentedFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>instrumentedFilter</filter-name>
@@ -27,7 +27,7 @@
 		See https://metrics.dropwizard.io/4.0.0/manual/servlets.html for details. -->
     <servlet>
         <servlet-name>metrics</servlet-name>
-        <servlet-class>com.codahale.metrics.servlets.AdminServlet</servlet-class>
+        <servlet-class>io.dropwizard.metrics.servlets.AdminServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>metrics</servlet-name>
