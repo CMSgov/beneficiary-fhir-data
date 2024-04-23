@@ -94,6 +94,16 @@ Run codebook data tests:
 docker exec -it apps-bfd-1 bash -c "cd /apps/bfd-model/bfd-model-codebook-data;mvn clean -Dmaven.build.cache.enabled=false test"
 ```
 
+### Other tasks
+
+Doing other tasks e.g. debug an integration test, is the same as on native OS:
+
+```bash
+docker exec -it apps-bfd-1 bash -c 'mvnDebug -Dits.db.url=jdbc:postgresql://db:5432/fhirdb -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dmaven.build.cache.enabled=false -Dit.test=RifLoaderIT#loadSampleA clean verify'
+```
+
+Maven will wait in port 8000, create a java remote debug profile in your IDE and attach.
+
 ### Customize the docker container
 
 Look at the docker file and docker compose yaml, you can customize it to have your own container
