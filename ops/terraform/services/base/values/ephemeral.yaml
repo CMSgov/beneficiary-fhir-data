@@ -57,8 +57,8 @@ bfd:
         job:
           enabled: true
           process_dlq: &rda_job_process_dlq true
-          starting_fiss_seq_num: 2041459
-          starting_mcs_seq_num: 5313949
+          starting_fiss_seq_num: 0
+          starting_mcs_seq_num: 0
         cleanup:
           enabled: false
           run_size: UNDEFINED
