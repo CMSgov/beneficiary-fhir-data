@@ -2,9 +2,9 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.bfd.sharedutils.events.EventPublisher;
+import jakarta.annotation.Nullable;
 import java.time.Instant;
 import java.util.Comparator;
-import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;

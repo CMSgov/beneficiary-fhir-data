@@ -216,7 +216,7 @@ public class DiagnosisUtilV2 {
    * @param presentOnAdms The mapping of diagnosis "PresentOnAdmissionCode" codes by their property
    *     name and respective value
    * @return the {@link Diagnosis} that can be extracted from the specified {@link
-   *     gov.cms.bfd.model.rif.InpatientClaim}
+   *     gov.cms.bfd.model.rif.entities.InpatientClaim}
    */
   static List<Diagnosis> extractDiagnoses(
       Map<String, Optional<String>> codes,

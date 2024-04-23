@@ -1,8 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import java.util.concurrent.Semaphore;
-import javax.annotation.Nonnull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
