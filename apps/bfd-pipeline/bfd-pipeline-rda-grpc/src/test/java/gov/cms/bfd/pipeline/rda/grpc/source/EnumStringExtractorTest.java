@@ -45,10 +45,7 @@ public class EnumStringExtractorTest {
           FissClaim::hasAdmTypCdUnrecognized,
           FissClaim::getAdmTypCdUnrecognized,
           FissAdmTypeCode.UNRECOGNIZED,
-          ImmutableSet.of(
-              FissAdmTypeCode
-                  .ADM_TYPE_9), // TODO: check if i'm right about this code being used to generate
-          // an unsupported value
+          ImmutableSet.of(FissAdmTypeCode.ADM_TYPE_9),
           ImmutableSet.of());
 
   /** Test extractor for FissNdcQtyQual for FissRevenueLine. */
