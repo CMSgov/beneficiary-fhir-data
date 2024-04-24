@@ -13,6 +13,7 @@ import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -221,16 +222,22 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
               Claim.ItemComponent item;
 
               if (Strings.isNotBlank(detail.getIdrProcCode())) {
+                List<Coding> codings = new ArrayList<>();
+                CodeableConcept productOrService = new CodeableConcept();
+
+                codings.add(
+                    new Coding(
+                        TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
+                        detail.getIdrProcCode(),
+                        null));
+                productOrService.setCoding(codings);
                 item =
                     new Claim.ItemComponent()
                         .setSequence(detail.getIdrDtlNumber())
                         // The FHIR spec requires productOrService to exist even if there is
                         // no product code, so printing out the system regardless because
                         // HAPI won't serialize it unless there is some sort of value inside.
-                        .setProductOrService(
-                            createCodeableConcept(
-                                TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
-                                detail.getIdrProcCode()))
+                        .setProductOrService(productOrService)
                         .setServiced(
                             createPeriod(detail.getIdrDtlFromDate(), detail.getIdrDtlToDate()))
                         .setModifier(getModifiers(detail));
@@ -249,6 +256,18 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
                       dxCode ->
                           item.setDiagnosisSequence(
                               List.of(new PositiveIntType(dxCode.getRdaPosition()))));
+                }
+
+                // case for when idr_proc_code and idr_dtl_ndc are both populated on the same
+                // sequence number
+                if (Strings.isNotBlank(detail.getIdrDtlNdc())
+                    && Strings.isNotBlank(detail.getIdrDtlNdcUnitCount())) {
+                  codings.add(
+                      new Coding(TransformerConstants.CODING_NDC, detail.getIdrDtlNdc(), null));
+                  productOrService.setCoding(codings);
+                  item.setProductOrService(productOrService);
+                  item.setQuantity(
+                      new Quantity((long) Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
                 }
               } else if (Strings.isNotBlank(detail.getIdrDtlNdc())
                   && Strings.isNotBlank(detail.getIdrDtlNdcUnitCount())) {
