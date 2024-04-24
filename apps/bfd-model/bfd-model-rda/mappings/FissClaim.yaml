@@ -442,6 +442,10 @@ mappings:
       comment: 'Medical Record Number: This field identifies the number assigned to
         the patient''s medical/health record by the provider.'
       dbName: medical_record_no
+    - name: admTypCd
+      sqlType: varchar(2)
+      comment: 'Indicates the type and priority of inpatient services.'
+      dbName: adm_typ_cd
     - name: mbiId
       dbName: mbi_id
       sqlType: bigint
@@ -701,5 +705,9 @@ mappings:
   - from: fissRevenueLines
     to: revenueLines
     transformer: Array
+  - from: admTypCd
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissAdmTypeCode
   externalTransformations:
   - applyMbiCache

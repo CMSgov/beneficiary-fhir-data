@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentRequestorCode;
+import gov.cms.mpsm.rda.v1.fiss.FissAdmTypeCode;
 import gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissAuditTrail;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
@@ -21,6 +22,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier;
 import gov.cms.mpsm.rda.v1.fiss.FissInsuredPayer;
+import gov.cms.mpsm.rda.v1.fiss.FissNdcQtyQual;
 import gov.cms.mpsm.rda.v1.fiss.FissNonBillRevCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
@@ -160,6 +162,14 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   /** A list of the enums for the fiss non bill rev codes. */
   private static final List<FissNonBillRevCode> FissNonBillRevCodeEnums =
       enumValues(FissNonBillRevCode.values());
+
+  /** A list of the enums for the fiss claim admission type codes. */
+  private static final List<FissAdmTypeCode> FissAdmTypeCodeEnums =
+      enumValues(FissAdmTypeCode.values());
+
+  /** A list of the enums for the fiss NDC measurement qualifiers. */
+  private static final List<FissNdcQtyQual> FissNdcQtyQualEnums =
+      enumValues(FissNdcQtyQual.values());
 
   /** Max length of a FISS claim id. */
   private static final int FissClaimIdLength = 32;
@@ -372,6 +382,10 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
         () -> claim.setAdjMbiIndUnrecognized(randomAlphaNumeric(1, 1)));
     optional("adjMbi", () -> claim.setAdjMbi(randomAlphaNumeric(1, 11)));
     optional("medicalRecordNo", () -> claim.setMedicalRecordNo(randomAlphaNumeric(1, 17)));
+    optionalOneOf(
+        "admTypCd",
+        () -> claim.setAdmTypCdEnum(randomEnum(FissAdmTypeCodeEnums)),
+        () -> claim.setAdmTypCdUnrecognized(randomAlphaNumeric(1, 1)));
   }
 
   /**
@@ -619,6 +633,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
   private void addRandomRevenueLines(FissClaim.Builder claim) {
     final int MAX_UNITS_BILLED = 50;
     final int MAX_SERV_UNIT_COUNT = 50;
+    final int MAX_NDC_QTY = 11;
 
     always(
         "revenue",
@@ -663,6 +678,11 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator<FissC
                   optional("acoRedRarc", () -> revenue.setAcoRedRarc(randomAlphaNumeric(1, 5)));
                   optional("acoRedCarc", () -> revenue.setAcoRedCarc(randomAlphaNumeric(1, 3)));
                   optional("acoRedCagc", () -> revenue.setAcoRedCagc(randomAlphaNumeric(1, 2)));
+                  optional("ndc", () -> revenue.setNdc(randomAlphaNumeric(1, 11)));
+                  optional("ndcQty", () -> revenue.setNdcQty(randomDigit(1, MAX_NDC_QTY)));
+                  optional(
+                      "ndcQtyQual",
+                      () -> revenue.setNdcQtyQualEnum(randomEnum(FissNdcQtyQualEnums)));
                 });
 
             revenue.setRdaPosition(i);

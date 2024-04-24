@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS Adm Type Code
+enum FissAdmTypeCode {
+  ADM_TYPE_0 = 0 	        	  [(string_value) = "0"];
+  ADM_TYPE_EMERGENCY = 1      [(string_value) = "1"];
+  ADM_TYPE_URGENT = 2   		  [(string_value) = "2"];
+  ADM_TYPE_ELECTIVE = 3  		  [(string_value) = "3"];
+  ADM_TYPE_NEWBORN = 4        [(string_value) = "4"];
+  ADM_TYPE_TRAUMA_CENTER = 5  [(string_value) = "5"];
+  ADM_TYPE_9 = 6 		          [(string_value) = "9"];
+}

@@ -59,5 +59,7 @@ message McsDetail {
   optional string idr_dtl_amb_dropoff_city = 59;
   optional string idr_dtl_amb_dropoff_state = 60;
   optional string idr_dtl_amb_dropoff_zipcode = 61;
+  optional string idr_dtl_ndc = 62;
+  optional string idr_dtl_ndc_unit_count = 63;
   uint32 idr_dtl_number = 67;
 }

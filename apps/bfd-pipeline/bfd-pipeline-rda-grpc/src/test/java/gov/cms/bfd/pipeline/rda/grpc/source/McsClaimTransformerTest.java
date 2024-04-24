@@ -234,6 +234,8 @@ public class McsClaimTransformerTest {
     detail.setIdrKPosCity("123456789012345678901234567890");
     detail.setIdrKPosState("12");
     detail.setIdrKPosZip("123456789012345");
+    detail.setIdrDtlNdc("00002060440");
+    detail.setIdrDtlNdcUnitCount("UN");
     claim.getDetails().add(detail);
     claimBuilder
         .setIdrClmHdIcn("123456789012345")
@@ -260,6 +262,8 @@ public class McsClaimTransformerTest {
                 .setIdrKPosCity("123456789012345678901234567890")
                 .setIdrKPosState("12")
                 .setIdrKPosZip("123456789012345")
+                .setIdrDtlNdc("00002060440")
+                .setIdrDtlNdcUnitCount("UN")
                 .build());
     changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
@@ -1933,6 +1937,34 @@ public class McsClaimTransformerTest {
             McsLocation.Builder::setRdaPosition,
             RdaMcsLocation::getRdaPosition,
             RdaMcsLocation.Fields.rdaPosition);
+  }
+
+  /**
+   * Tests the idrDtlNdc field is properly copied when a message object is passed through the
+   * transformer.
+   */
+  @Test
+  public void testDetailIdrDtlNdc() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlNdc,
+            RdaMcsDetail::getIdrDtlNdc,
+            RdaMcsDetail.Fields.idrDtlNdc,
+            48);
+  }
+
+  /**
+   * Tests the idrDtlNdcUnitCount field is properly copied when a message object is passed through
+   * the transformer.
+   */
+  @Test
+  public void testDetailIdrDtlNdcUnitCount() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .verifyStringFieldCopiedCorrectly(
+            McsDetail.Builder::setIdrDtlNdcUnitCount,
+            RdaMcsDetail::getIdrDtlNdcUnitCount,
+            RdaMcsDetail.Fields.idrDtlNdcUnitCount,
+            15);
   }
 
   // endregion McsLocation
