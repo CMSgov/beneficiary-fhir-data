@@ -3,9 +3,9 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
+import jakarta.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
 import lombok.Getter;
 
 /** Models the user-configurable options for extraction of RIF data from S3. */

@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /**
  * Wrapper for exceptions thrown during batch processing. Intended to capture the number of objects

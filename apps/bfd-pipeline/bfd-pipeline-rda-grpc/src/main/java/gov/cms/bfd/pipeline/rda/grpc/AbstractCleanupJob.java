@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import jakarta.persistence.Query;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.persistence.Query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.text.StringSubstitutor;
