@@ -115,6 +115,19 @@ mappings:
         or the service is for home health Part B; this field will identify the applicable 
         adjustment group code that defines the liability for adjustments in charges
         occurring from this payment reduction.'
+    - name: ndc
+      sqlType: varchar(11)
+      dbName: ndc
+      comment: 'This field identifies the NDC assigned to each medication.'
+    - name: ndcQty
+      sqlType: varchar(11)
+      dbName: ndc_qty
+      comment: 'This field identifies the quantity of the NDC medication administered.'
+    - name: ndcQtyQual
+      sqlType: varchar(2)
+      dbName: ndc_qty_qual
+      comment: 'This field identifies the measurement qualifier for the quantity of the NDC medication administered.'
+    
   transformations:
   - from: PARENT
     to: claimId
@@ -143,3 +156,9 @@ mappings:
   - from: acoRedRarc
   - from: acoRedCarc
   - from: acoRedCagc
+  - from: ndc
+  - from: ndcQty
+  - from: ndcQtyQual
+    transformer: MessageEnum
+    transformerOptions:
+      enumClass: gov.cms.mpsm.rda.v1.fiss.FissNdcQtyQual

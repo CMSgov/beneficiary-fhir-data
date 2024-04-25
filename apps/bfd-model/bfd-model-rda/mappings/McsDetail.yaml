@@ -274,6 +274,17 @@ mappings:
       dbName: idr_dtl_amb_dropoff_zipcode
       comment: 'Ambulance Drop-off Location ZIP Code: This field contains the ambulance
         drop-off location''s zip code.'
+    - name: idrDtlNdc
+      sqlType: varchar(48)
+      dbName: idr_dtl_ndc
+      comment: 'Detail level NDC (National Drug Code): This field holds the data from 
+        segment 2410-LIN03 of claims submitted in 5010A1 format.'
+    - name: idrDtlNdcUnitCount
+      sqlType: varchar(15)
+      dbName: idr_dtl_ndc_unit_count
+      comment: 'Detail level NDC (National Drug Code) Units: This field holds the data
+        from 5010A format 2410 CTP04 claims.'
+
   transformations:
   - from: PARENT
     to: idrClmHdIcn
@@ -333,3 +344,5 @@ mappings:
   - from: idrDtlAmbDropoffCity
   - from: idrDtlAmbDropoffState
   - from: idrDtlAmbDropoffZipcode
+  - from: idrDtlNdc
+  - from: idrDtlNdcUnitCount

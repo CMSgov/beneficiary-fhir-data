@@ -354,7 +354,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "f",
     "acoRedRarc": "1x4",
     "acoRedCarc": "g",
-    "acoRedCagc": "nz"
+    "acoRedCagc": "nz",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_GR",
+    "ndc": "jcmf6sx",
+    "ndcQty": "7936840010"
   }, {
     "rdaPosition": 2,
     "nonBillRevCodeUnrecognized": "m",
@@ -372,7 +375,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "df",
     "acoRedRarc": "p",
     "acoRedCarc": "t0",
-    "acoRedCagc": "tm"
+    "acoRedCagc": "tm",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_F2",
+    "ndc": "dnmvqsj",
+    "ndcQty": "1309901"
   }, {
     "rdaPosition": 3,
     "nonBillRevCodeEnum": "NON_BILL_INVALID_REV_CODE",
@@ -390,7 +396,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "8",
     "acoRedRarc": "c1c7",
     "acoRedCarc": "67",
-    "acoRedCagc": "tv"
+    "acoRedCagc": "tv",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_F2",
+    "ndc": "nt4chn640z0",
+    "ndcQty": "6727587507"
   }, {
     "rdaPosition": 4,
     "nonBillRevCodeEnum": "NON_BILL_INVALID_HCPCS_HC",
@@ -408,7 +417,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "rg",
     "acoRedRarc": "ntq",
     "acoRedCarc": "z7",
-    "acoRedCagc": "3x"
+    "acoRedCagc": "3x",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_UN",
+    "ndc": "p4g",
+    "ndcQty": "4149"
   }, {
     "rdaPosition": 5,
     "nonBillRevCodeEnum": "NON_BILL_S",
@@ -426,7 +438,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "f",
     "acoRedRarc": "x",
     "acoRedCarc": "s95",
-    "acoRedCagc": "k2"
+    "acoRedCagc": "k2",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_F2",
+    "ndc": "612jg4h6gx",
+    "ndcQty": "253"
   }, {
     "rdaPosition": 6,
     "nonBillRevCodeEnum": "NON_BILL_ESRD",
@@ -444,7 +459,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "x",
     "acoRedRarc": "svf7",
     "acoRedCarc": "5",
-    "acoRedCagc": "xv"
+    "acoRedCagc": "xv",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_ME",
+    "ndc": "ps",
+    "ndcQty": "14975409"
   }, {
     "rdaPosition": 7,
     "nonBillRevCodeEnum": "NON_BILL_T",
@@ -462,7 +480,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "8m",
     "acoRedRarc": "sh1zj",
     "acoRedCarc": "054",
-    "acoRedCagc": "93"
+    "acoRedCagc": "93",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_ML",
+    "ndc": "9nrj",
+    "ndcQty": "98448896"
   }, {
     "rdaPosition": 8,
     "nonBillRevCodeEnum": "NON_BILL_INVALID_HCPCS_EMC",
@@ -480,7 +501,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "6",
     "acoRedRarc": "df57b",
     "acoRedCarc": "rt",
-    "acoRedCagc": "q"
+    "acoRedCagc": "q",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_ME",
+    "ndc": "36g",
+    "ndcQty": "36115325290"
   }, {
     "rdaPosition": 9,
     "nonBillRevCodeEnum": "NON_BILL_INVALID_REV_CODE",
@@ -498,7 +522,10 @@ public class RandomFissClaimGeneratorTest {
     "hcpcModifier5": "9",
     "acoRedRarc": "rjfgw",
     "acoRedCarc": "2xb",
-    "acoRedCagc": "1"
+    "acoRedCagc": "1",
+    "ndcQtyQualEnum": "NDC_QTY_QUAL_UN",
+    "ndc": "dksxpmx1dt",
+    "ndcQty": "09102"
   }],
   "drgCd": "0",
   "groupCode": "1",
@@ -506,7 +533,8 @@ public class RandomFissClaimGeneratorTest {
   "recdDtCymdText": "2021-01-15",
   "currTranDtCymdText": "2021-05-07",
   "rdaClaimKey": "79173353508803659401417553844541",
-  "intermediaryNb": "82320"
+  "intermediaryNb": "82320",
+  "admTypCdEnum": "ADM_TYPE_9"
 }""",
         json);
   }
