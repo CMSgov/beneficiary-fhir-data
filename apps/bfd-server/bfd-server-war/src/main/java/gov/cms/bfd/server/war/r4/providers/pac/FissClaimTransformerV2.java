@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.r4.model.Claim;
@@ -46,6 +47,7 @@ import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
+@Slf4j
 @Component
 public class FissClaimTransformerV2 extends AbstractTransformerV2
     implements ResourceTransformer<Claim> {
@@ -455,7 +457,13 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                 // extension, ndc_qty
                 // can be as the quantity thus being fine with overwriting rev_units_billed
                 Quantity quantity = new Quantity();
-                quantity.setValue((long) Double.parseDouble(revenueLine.getNdcQty()));
+                try {
+                  quantity.setValue(Double.parseDouble(revenueLine.getNdcQty()));
+                } catch (NumberFormatException ex) {
+                  // If the NDC_QTY isn't a valid number, do not set quantity value. Awaiting
+                  // upstream RDA test data changes
+                  log.error("captured exception: message={}", ex.getMessage(), ex);
+                }
                 quantity.setUnit(revenueLine.getNdcQtyQual());
                 quantity.setSystem(TransformerConstants.CODING_SYSTEM_UCUM);
                 quantity.setCode(revenueLine.getNdcQtyQual());

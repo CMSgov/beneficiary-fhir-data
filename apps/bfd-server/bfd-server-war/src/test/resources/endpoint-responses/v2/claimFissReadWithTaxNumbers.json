@@ -439,7 +439,7 @@
       },
       "quantity": {
         "unit" : "ML",
-        "value" : 1,
+        "value" : 1.5,
         "system" : "http://unitsofmeasure.org",
         "code" : "ML"
       }

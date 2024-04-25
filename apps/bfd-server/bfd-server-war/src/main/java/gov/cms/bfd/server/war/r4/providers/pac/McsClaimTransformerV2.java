@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.r4.model.Claim;
@@ -37,6 +38,7 @@ import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
+@Slf4j
 @Component
 public class McsClaimTransformerV2 extends AbstractTransformerV2
     implements ResourceTransformer<Claim> {
@@ -266,8 +268,14 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
                       new Coding(TransformerConstants.CODING_NDC, detail.getIdrDtlNdc(), null));
                   productOrService.setCoding(codings);
                   item.setProductOrService(productOrService);
-                  item.setQuantity(
-                      new Quantity((long) Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
+                  try {
+                    item.setQuantity(
+                        new Quantity(Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
+                  } catch (NumberFormatException ex) {
+                    // If the NDC_UNIT_COUNT isn't a valid number, do not set quantity value.
+                    // Awaiting upstream RDA test data changes
+                    log.error("captured exception: message={}", ex.getMessage(), ex);
+                  }
                 }
               } else if (Strings.isNotBlank(detail.getIdrDtlNdc())
                   && Strings.isNotBlank(detail.getIdrDtlNdcUnitCount())) {
@@ -276,10 +284,15 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
                         .setSequence(detail.getIdrDtlNumber())
                         .setProductOrService(
                             createCodeableConcept(
-                                TransformerConstants.CODING_NDC, detail.getIdrDtlNdc()))
-                        .setQuantity(
-                            new Quantity(
-                                (long) Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
+                                TransformerConstants.CODING_NDC, detail.getIdrDtlNdc()));
+                try {
+                  item.setQuantity(
+                      new Quantity(Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
+                } catch (NumberFormatException ex) {
+                  // If the NDC_UNIT_COUNT isn't a valid number, do not set quantity value. Awaiting
+                  // upstream RDA test data changes
+                  log.error("captured exception: message={}", ex.getMessage(), ex);
+                }
               } else {
                 item = null;
               }
