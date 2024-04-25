@@ -41,6 +41,17 @@ import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.metamodel.SingularAttribute;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
@@ -53,19 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.jpa.QueryHints;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -933,11 +932,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
             "query",
             "benes_by_year_month_part_d_contract_id");
     try {
-      matchingBenes =
-          entityManager
-              .createQuery(beneCriteria)
-              .setHint(QueryHints.HINT_PASS_DISTINCT_THROUGH, false)
-              .getResultList();
+      matchingBenes = entityManager.createQuery(beneCriteria).getResultList();
       return matchingBenes;
     } finally {
       long beneMatchesTimerQueryNanoSeconds = beneIdTimer.stop();

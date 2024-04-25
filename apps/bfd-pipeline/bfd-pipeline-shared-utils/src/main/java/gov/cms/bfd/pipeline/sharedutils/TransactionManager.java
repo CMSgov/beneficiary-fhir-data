@@ -3,12 +3,12 @@ package gov.cms.bfd.pipeline.sharedutils;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.security.SecureRandom;
 import java.util.function.Predicate;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import lombok.Data;
 import org.hibernate.exception.ConstraintViolationException;
 

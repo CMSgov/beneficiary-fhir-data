@@ -12,10 +12,10 @@ import static org.mockito.Mockito.mock;
 
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
+import jakarta.servlet.ServletContext;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.servlet.ServletContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

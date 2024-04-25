@@ -1,4 +1,4 @@
-black
+black==24.3.0
 isort
 pylint
 setuptools>=69.0.2

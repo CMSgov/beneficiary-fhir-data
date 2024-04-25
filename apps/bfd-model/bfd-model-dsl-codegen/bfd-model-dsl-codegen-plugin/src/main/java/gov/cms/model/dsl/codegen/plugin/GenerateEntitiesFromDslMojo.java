@@ -21,6 +21,23 @@ import gov.cms.model.dsl.codegen.plugin.model.ModelUtil;
 import gov.cms.model.dsl.codegen.plugin.model.RootBean;
 import gov.cms.model.dsl.codegen.plugin.model.TableBean;
 import gov.cms.model.dsl.codegen.plugin.transformer.TransformerUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -31,24 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.OrderBy;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -796,8 +796,8 @@ public class GenerateEntitiesFromDslMojo extends AbstractMojo {
 
   /**
    * Creates a {@link AnnotationSpec} for a join field. The type of the annotation is based on the
-   * {@link JoinBean} joinType but will be one of {@link javax.persistence.OneToMany}, {@link
-   * javax.persistence.ManyToOne}, or {@link javax.persistence.OneToOne}.
+   * {@link JoinBean} joinType but will be one of {@link jakarta.persistence.OneToMany}, {@link
+   * jakarta.persistence.ManyToOne}, or {@link jakarta.persistence.OneToOne}.
    *
    * @param mapping {@link MappingBean} containing the join
    * @param join {@link JoinBean} the join

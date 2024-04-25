@@ -12,6 +12,11 @@ import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,11 +33,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 import org.jetbrains.annotations.NotNull;
 import org.mockito.MockedStatic;
@@ -118,7 +118,14 @@ public class RDATestUtils {
     doTransaction(
         em -> {
           String oldHash = includeOldHash ? MBI_OLD_HASH : null;
-          Mbi mbi = em.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(oldHash).build());
+          Mbi mbi =
+              em.merge(
+                  Mbi.builder()
+                      .mbi(MBI)
+                      .hash(MBI_HASH)
+                      .lastUpdated(Instant.now())
+                      .oldHash(oldHash)
+                      .build());
           em.merge(fissTestDataA(mbi));
           em.merge(fissTestDataB(mbi));
           em.merge(mcsTestDataA(mbi));
@@ -128,7 +135,13 @@ public class RDATestUtils {
 
   /** Inserts an MBI cache record for use with test case claims. */
   public void seedMbiRecord() {
-    final var mbi = Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(MBI_OLD_HASH).build();
+    final var mbi =
+        Mbi.builder()
+            .mbi(MBI)
+            .hash(MBI_HASH)
+            .lastUpdated(Instant.now())
+            .oldHash(MBI_OLD_HASH)
+            .build();
     doTransaction(em -> em.merge(mbi));
   }
 
