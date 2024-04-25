@@ -27,6 +27,11 @@ locals {
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_db_username"          = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_db_username"
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations"
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"           = "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/auth_token"                       = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/auth_token"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/port"                             = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/port"
+    "/bfd/${local.env}/test/pipeline/sensitive/rda/grpc/host"                        = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/host"
+
   } : {}
 
   # FUTURE: Fix this when hierarchies are supported with Terraform module.
@@ -89,11 +94,8 @@ data "aws_db_cluster_snapshot" "seed" {
 
   db_cluster_identifier = "bfd-${local.seed_env}-aurora-cluster"
   most_recent           = true
-  db_cluster_snapshot_identifier = lookup(
-    local.common_nonsensitive_ssm,
-    "/bfd/${local.env}/common/nonsensitive/rds_snapshot_identifier",
-    var.ephemeral_rds_snapshot_id_override
-  )
+  # default to latest snapshot if no override is provided
+  db_cluster_snapshot_identifier = var.ephemeral_rds_snapshot_id_override
 }
 
 # NOTE: Contains *all* seed environment hierarchies including sensitive and nonsensitive values
