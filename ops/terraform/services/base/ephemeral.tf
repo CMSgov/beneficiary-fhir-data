@@ -28,6 +28,8 @@ locals {
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations"
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"
     "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"           = "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token"     = "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token"
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"           = "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"
     "/bfd/${local.env}/pipeline/sensitive/rda/grpc/auth_token"                       = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/auth_token"
     "/bfd/${local.env}/pipeline/sensitive/rda/grpc/port"                             = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/port"
     "/bfd/${local.env}/test/pipeline/sensitive/rda/grpc/host"                        = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/host"
