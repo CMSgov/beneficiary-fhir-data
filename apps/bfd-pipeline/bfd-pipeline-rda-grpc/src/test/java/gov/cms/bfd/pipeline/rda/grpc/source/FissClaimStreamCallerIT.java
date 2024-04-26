@@ -46,7 +46,8 @@ public class FissClaimStreamCallerIT {
           "mbi": "c1ihk7q0g3i",
           "fissProcCodes": [],
           "medaProvId": "oducjgzt67joc",
-          "clmTypIndEnum": "CLAIM_TYPE_INPATIENT"
+          "clmTypIndEnum": "CLAIM_TYPE_INPATIENT",
+          "admTypCdEnum": "3"
         }
       }
       """
@@ -78,7 +79,8 @@ public class FissClaimStreamCallerIT {
           "mbi": "0vtc7u321x0",
           "fedTaxNb": "2845244764",
           "fissProcCodes": [],
-          "clmTypIndEnum": "CLAIM_TYPE_OUTPATIENT"
+          "clmTypIndEnum": "CLAIM_TYPE_OUTPATIENT",
+          "admTypCdEnum": "3"
         }
       }
       """
@@ -122,12 +124,14 @@ public class FissClaimStreamCallerIT {
                 assertEquals("NjM4NDM0NzBpZA", claim.getClaimId());
                 assertEquals("63843470", claim.getDcn());
                 assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+                assertEquals("3", claim.getAdmTypCd());
                 assertTrue(results.hasNext());
 
                 claim = transform(results.next());
                 assertEquals("MjY0MzYwMmlk", claim.getClaimId());
                 assertEquals("2643602", claim.getDcn());
                 assertEquals(Long.valueOf(2), claim.getSequenceNumber());
+                assertEquals("3", claim.getAdmTypCd());
                 assertFalse(results.hasNext());
               }
             });
