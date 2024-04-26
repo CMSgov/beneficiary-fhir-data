@@ -274,7 +274,10 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
                   } catch (NumberFormatException ex) {
                     // If the NDC_UNIT_COUNT isn't a valid number, do not set quantity value.
                     // Awaiting upstream RDA test data changes
-                    log.error("captured exception: message={}", ex.getMessage(), ex);
+                    log.error(
+                        "Failed to parse IdrDtlNdcUnitCount as a number: message={}",
+                        ex.getMessage(),
+                        ex);
                   }
                 }
               } else if (Strings.isNotBlank(detail.getIdrDtlNdc())

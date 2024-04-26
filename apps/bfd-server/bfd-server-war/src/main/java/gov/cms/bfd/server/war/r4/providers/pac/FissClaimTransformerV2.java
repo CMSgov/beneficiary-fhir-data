@@ -449,8 +449,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier3(), "3"));
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier4(), "4"));
 
-              if (Strings.isNotBlank(revenueLine.getNdcQty())
-                  && Strings.isNotBlank(revenueLine.getNdcQtyQual())) {
+              if (Strings.isNotBlank(revenueLine.getNdcQty())) {
                 // Both rev_units_billed and ndc_qty can exist in the same sequence. Since
                 // rev_serv_unit_cnt serves
                 // the same purpose as rev_units_billed and since rev_serv_unit_cnt is set as an
@@ -462,11 +461,21 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                 } catch (NumberFormatException ex) {
                   // If the NDC_QTY isn't a valid number, do not set quantity value. Awaiting
                   // upstream RDA test data changes
-                  log.error("captured exception: message={}", ex.getMessage(), ex);
+                  log.error("Failed to parse ndcQty as a number: message={}", ex.getMessage(), ex);
                 }
-                quantity.setUnit(revenueLine.getNdcQtyQual());
-                quantity.setSystem(TransformerConstants.CODING_SYSTEM_UCUM);
-                quantity.setCode(revenueLine.getNdcQtyQual());
+
+                if (Strings.isNotBlank(revenueLine.getNdcQtyQual())) {
+                  quantity.setUnit(revenueLine.getNdcQtyQual());
+                  quantity.setSystem(TransformerConstants.CODING_SYSTEM_UCUM);
+
+                  switch (revenueLine.getNdcQtyQual()) {
+                    case "F2" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE);
+                    case "GR" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE);
+                    case "ML" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE);
+                    case "ME" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE);
+                    case "UN" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE);
+                  }
+                }
 
                 itemComponent.setQuantity(quantity);
               }

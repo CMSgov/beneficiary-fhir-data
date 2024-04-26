@@ -73,8 +73,6 @@ public class Mcs {
   public static final int MAX_DIAGNOSIS_CODES =
       Math.min(ICD_DGNS_CD.size(), ICD_DGNS_VRSN_CD.size());
 
-  /*public static final String DTL_NDC = CarrierClaimColumn.LINE_NDC_CD.name();*/
-
   /** Private constructor method. */
   private Mcs() {}
 }
