@@ -266,7 +266,6 @@ public class McsTransformer extends AbstractTransformer {
         .ifPresent(detailBuilder::setIdrDtlFromDate);
     data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)
         .ifPresent(detailBuilder::setIdrDtlToDate);
-    // data.get(Mcs.DTL_NDC).ifPresent(detailBuilder::setIdrDtlNdc);
     detailBuilder.setIdrDtlNdc(DEFAULT_HARDCODED_DTL_NDC);
     detailBuilder.setIdrDtlNdcUnitCount(DEFAULT_HARDCODED_NDC_UNIT_COUNT);
     detailBuilder.setIdrDtlNumber(lineNumber);

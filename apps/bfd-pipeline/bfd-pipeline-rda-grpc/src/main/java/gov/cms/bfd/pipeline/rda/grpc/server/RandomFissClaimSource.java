@@ -67,7 +67,7 @@ public class RandomFissClaimSource implements MessageSource<FissClaimChange> {
 
     final Timestamp timestamp =
         Timestamp.newBuilder().setSeconds(clock.instant().getEpochSecond()).build();
-    final var claim = generator.randomClaim(); // here
+    final var claim = generator.randomClaim();
     final var source =
         RecordSource.newBuilder()
             .setPhase("P1")
