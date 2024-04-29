@@ -53,14 +53,16 @@ bfd:
         job:
           enabled: &rda_job_enabled true
           process_dlq: &rda_job_process_dlq true
-          starting_fiss_seq_num: 0
-          starting_mcs_seq_num: 0
+          starting_fiss_seq_num: &rda_job_starting_fiss 0
+          starting_mcs_seq_num: &rda_job_starting_mcs 0
         cleanup:
           enabled: false
           run_size: UNDEFINED
           transaction_size: UNDEFINED
         data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
         data_pipeline_rda_job_enabled: *rda_job_enabled
+        data_pipeline_rda_job_starting_fiss_seq_num: *rda_job_starting_fiss
+        data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
         data_pipeline_rda_process_dlq: *rda_job_process_dlq
         instance_type: m6a.large
         # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
