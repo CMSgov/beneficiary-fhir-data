@@ -51,7 +51,7 @@ bfd:
               bucket:
               dir:
         job:
-          enabled: true
+          enabled: &rda_job_enabled true
           process_dlq: &rda_job_process_dlq true
           starting_fiss_seq_num: 0
           starting_mcs_seq_num: 0
