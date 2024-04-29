@@ -10,7 +10,7 @@
   },
   "implementation" : {
     "description" : "gov.cms.bfd:bfd-server-war",
-    "url" : "https://localhost:IGNORED_FIELD7/v1/fhir"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir"
   },
   "fhirVersion" : "3.0.2",
   "acceptUnknown" : "extensions",
