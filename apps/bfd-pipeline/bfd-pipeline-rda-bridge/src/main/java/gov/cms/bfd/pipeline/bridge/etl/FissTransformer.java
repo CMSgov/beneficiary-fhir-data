@@ -47,10 +47,10 @@ public class FissTransformer extends AbstractTransformer {
 
   /** Hardcoded NDC quantity qualifier unit that can't be extracted from RIF. */
   public static final FissNdcQtyQual DEFAULT_HARDCODED_NDC_QTY_QUAL =
-      FissNdcQtyQual.NDC_QTY_QUAL_ML;
+      FissNdcQtyQual.NDC_QTY_QUAL_ME;
 
   /** Hardcoded NDC quantity that can't be extracted from RIF. */
-  public static final String DEFAULT_HARDCODED_NDC_QTY = "1.5";
+  public static final String DEFAULT_HARDCODED_NDC_QTY = "20";
 
   /** Hardcoded NDC that can't be extracted from RIF. */
   public static final String DEFAULT_HARDCODED_NDC = "00777310502";

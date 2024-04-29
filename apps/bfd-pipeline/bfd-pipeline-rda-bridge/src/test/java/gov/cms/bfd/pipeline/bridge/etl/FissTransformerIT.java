@@ -280,8 +280,8 @@ public class FissTransformerIT {
                     .setServDtCymd("1970-01-01")
                     .setServDtCymdText("1970-01-01")
                     .setNdc("00777310502")
-                    .setNdcQty("1.5")
-                    .setNdcQtyQualEnum(FissNdcQtyQual.NDC_QTY_QUAL_ML)
+                    .setNdcQty("20")
+                    .setNdcQtyQualEnum(FissNdcQtyQual.NDC_QTY_QUAL_ME)
                     .build())
             .build();
     FissClaimChange expectedClaimChange = createFissClaimChange(expectedClaim);
@@ -542,10 +542,10 @@ public class FissTransformerIT {
     private static final String NDC = "00777310502";
 
     /** Hardcoded NDC-QTY. */
-    public static final String NDC_QTY = "1.5";
+    public static final String NDC_QTY = "20";
 
     /** Hardcoded NDC-QTY-QUAL. */
-    public static final FissNdcQtyQual NDC_QTY_QUAL = FissNdcQtyQual.NDC_QTY_QUAL_ML;
+    public static final FissNdcQtyQual NDC_QTY_QUAL = FissNdcQtyQual.NDC_QTY_QUAL_ME;
 
     /** Fiss Sample ID. */
     private static final int FISS_SAMPLE_ID = 0;

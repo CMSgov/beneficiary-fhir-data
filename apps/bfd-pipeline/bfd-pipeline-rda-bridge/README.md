@@ -21,7 +21,7 @@ mvn clean package
 ## Run
 Execute the shell script
 ```shell
-./run_bridge.sh <Path to Rif Dir> <Snapshot Version Number> [options]
+./run_bridge.sh <Path to Rif Dir> [options]
 ```
 
 ## Optional Parameters

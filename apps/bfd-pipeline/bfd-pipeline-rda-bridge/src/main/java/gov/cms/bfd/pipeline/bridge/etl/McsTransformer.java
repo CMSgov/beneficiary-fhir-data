@@ -36,7 +36,7 @@ public class McsTransformer extends AbstractTransformer {
   public static final String DEFAULT_HARDCODED_DTL_NDC = "00777310502";
 
   /** Hardcoded DETAIL NDC UNIT COUNT that can't be extracted from RIF. */
-  public static final String DEFAULT_HARDCODED_NDC_UNIT_COUNT = "1";
+  public static final String DEFAULT_HARDCODED_NDC_UNIT_COUNT = "20";
 
   /** {@inheritDoc} */
   @Override

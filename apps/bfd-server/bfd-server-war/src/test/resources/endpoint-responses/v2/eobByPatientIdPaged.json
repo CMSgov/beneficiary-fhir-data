@@ -8,13 +8,13 @@
   "total" : 8,
   "link" : [ {
     "relation" : "first",
-    "url" : "https://localhost:IGNORED_FIELD7/v2/fhir/ExplanationOfBenefit?patient=567834&startIndex=0&_count=8"
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ExplanationOfBenefit?_format=json&startIndex=0&_count=8&patient=Patient%2F567834"
   }, {
     "relation" : "last",
-    "url" : "https://localhost:IGNORED_FIELD7/v2/fhir/ExplanationOfBenefit?patient=567834&startIndex=0&_count=8"
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ExplanationOfBenefit?_format=json&startIndex=0&_count=8&patient=Patient%2F567834"
   }, {
     "relation" : "self",
-    "url" : "https://localhost:IGNORED_FIELD7/v2/fhir/ExplanationOfBenefit/?_count=8&patient=567834"
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ExplanationOfBenefit?_count=8&_format=json&patient=Patient%2F567834"
   } ],
   "entry" : [ {
     "resource" : {

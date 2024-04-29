@@ -8,7 +8,7 @@
   "total" : 1,
   "link" : [ {
     "relation" : "self",
-    "url" : "https://localhost:IGNORED_FIELD7/v1/fhir/Patient/?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fhicn-hash%7C99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/Patient?_format=json&identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fhicn-hash%7C99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
   } ],
   "entry" : [ {
     "resource" : {

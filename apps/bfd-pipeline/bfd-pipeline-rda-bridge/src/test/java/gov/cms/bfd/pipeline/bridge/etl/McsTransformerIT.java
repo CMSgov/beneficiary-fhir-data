@@ -272,7 +272,7 @@ public class McsTransformerIT {
                     .setIdrDtlDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
                     .setIdrDtlNumber(2)
                     .setIdrDtlNdc("00777310502")
-                    .setIdrDtlNdcUnitCount("1")
+                    .setIdrDtlNdcUnitCount("20")
                     .build())
             .build();
     McsClaimChange expectedClaimChange = createMcsClaimChange(expectedClaim);
@@ -328,7 +328,7 @@ public class McsTransformerIT {
                     .setIdrDtlPrimaryDiagCode(TestData.LINE_ICD_DGNS_CD)
                     .setIdrDtlDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
                     .setIdrDtlNdc("00777310502")
-                    .setIdrDtlNdcUnitCount("1")
+                    .setIdrDtlNdcUnitCount("20")
                     .build())
             .build();
     McsClaimChange expectedClaimChange = createMcsClaimChange(expectedClaim);
@@ -546,7 +546,7 @@ public class McsTransformerIT {
     private static final String DTL_NDC = "00777310502";
 
     /** Hardcoded NDC-UNIT-COUNT. */
-    private static final String HARDCODED_NDC_UNIT_COUNT = "1";
+    private static final String HARDCODED_NDC_UNIT_COUNT = "20";
 
     /**
      * Returns the default claim builder.
