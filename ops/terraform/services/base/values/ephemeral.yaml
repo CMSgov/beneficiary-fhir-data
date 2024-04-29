@@ -60,7 +60,7 @@ bfd:
           run_size: UNDEFINED
           transaction_size: UNDEFINED
         data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
-        data_pipeline_rda_job_enabled: true
+        data_pipeline_rda_job_enabled: *rda_job_enabled
         data_pipeline_rda_process_dlq: *rda_job_process_dlq
         instance_type: m6a.large
         # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
