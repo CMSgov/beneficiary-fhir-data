@@ -41,7 +41,7 @@ permit_user_ssh() {
   ssh_public_key=$(echo "$user" | jq -r '.ssh_public_key')
   user_ssh_dir="/home/$user_name/.ssh"
 
-  adduser --comment '' "$user_name"
+  id -u "$user_name" &>/dev/null || adduser --comment '' "$user_name"
   mkdir -p "$user_ssh_dir"
   echo "$ssh_public_key" > "$user_ssh_dir"/authorized_keys
   chown -R "$user_name":"$user_name" "$user_ssh_dir"

@@ -65,6 +65,8 @@ public class McsClaimRdaSinkIT {
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
           detail.setIdrDtlNumber((short) 0);
           detail.setIdrDtlStatus("P");
+          detail.setIdrDtlNdc("00002060440");
+          detail.setIdrDtlNdcUnitCount("UN");
           claim.getDetails().add(detail);
 
           final RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
@@ -75,7 +77,11 @@ public class McsClaimRdaSinkIT {
           claim.getDiagCodes().add(diagCode);
 
           final McsDetail detailMessage =
-              McsDetail.newBuilder().setIdrDtlStatusUnrecognized(detail.getIdrDtlStatus()).build();
+              McsDetail.newBuilder()
+                  .setIdrDtlStatusUnrecognized(detail.getIdrDtlStatus())
+                  .setIdrDtlNdc(detail.getIdrDtlNdc())
+                  .setIdrDtlNdcUnitCount(detail.getIdrDtlNdcUnitCount())
+                  .build();
 
           final McsDiagnosisCode diagCodeMessage =
               McsDiagnosisCode.newBuilder()
@@ -127,6 +133,12 @@ public class McsClaimRdaSinkIT {
           assertEquals(expectedMbiHash, resultClaim.getIdrClaimMbiHash());
           assertEquals(claim.getDetails().size(), resultClaim.getDetails().size());
           assertEquals(claim.getDiagCodes().size(), resultClaim.getDiagCodes().size());
+          Optional<RdaMcsDetail> rdaMcsDetail = resultClaim.getDetails().stream().findFirst();
+          rdaMcsDetail.ifPresent(
+              mcsDetail -> assertEquals(mcsDetail.getIdrDtlNdc(), detail.getIdrDtlNdc()));
+          rdaMcsDetail.ifPresent(
+              mcsDetail ->
+                  assertEquals(mcsDetail.getIdrDtlNdcUnitCount(), detail.getIdrDtlNdcUnitCount()));
 
           assertEquals(
               Optional.of(claim.getSequenceNumber()), sink.readMaxExistingSequenceNumber());
@@ -171,6 +183,8 @@ public class McsClaimRdaSinkIT {
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
           detail.setIdrDtlNumber((short) 0);
           detail.setIdrDtlStatus("P");
+          detail.setIdrDtlNdc("00002060440");
+          detail.setIdrDtlNdcUnitCount("UN");
           claim.getDetails().add(detail);
 
           final RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
