@@ -6,6 +6,7 @@ mappings:
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
   table:
+    schema: ccw
     columns:
     - dbName: clm_id
       name: claimId

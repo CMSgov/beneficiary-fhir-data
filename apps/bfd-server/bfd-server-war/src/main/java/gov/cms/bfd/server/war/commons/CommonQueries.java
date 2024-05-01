@@ -25,7 +25,7 @@ public class CommonQueries {
    * value that shows if a given claim type will have any data.
    */
   public static final String CHECK_CLAIMS_FOR_DATA_SQL =
-      "SELECT * FROM check_claims_mask(:beneIdValue)";
+      "SELECT * FROM ccw.check_claims_mask(:beneIdValue)";
 
   /**
    * Database function that takes in a patient identifier type and value and returns a bigint
@@ -33,7 +33,7 @@ public class CommonQueries {
    * mbi-hash, hicn-hash.
    */
   public static final String FIND_BENE_ID_FROM_IDENTIFIER_SQL =
-      "SELECT * FROM find_beneficiary(:searchIdType, :searchIdValue)";
+      "SELECT * FROM ccw.find_beneficiary(:searchIdType, :searchIdValue)";
 
   /** preclude construction from outsiders. */
   private CommonQueries() {}

@@ -8,6 +8,7 @@ mappings:
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
   table:
+    schema: ccw
     columns:
     - comment: 723 PDE ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt)
       dbName: pde_id
