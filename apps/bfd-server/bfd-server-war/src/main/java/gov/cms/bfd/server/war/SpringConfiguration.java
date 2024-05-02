@@ -315,7 +315,7 @@ public class SpringConfiguration {
     // This limits how long each query will run before being terminated. We've seen
     // long running queries cause the application to respond poorly to other
     // requests.
-    extraProperties.put("javax.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
+    extraProperties.put("jakarta.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
 
     return extraProperties;
   }

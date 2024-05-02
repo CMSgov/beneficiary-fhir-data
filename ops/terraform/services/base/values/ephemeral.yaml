@@ -11,7 +11,10 @@ bfd:
       rds_instance_count: 1
     migrator:
       instance_type: m6a.large
+      volume_iops: 3000
       volume_size: 100
+      volume_throughput: 125
+      volume_type: gp3
       sqs_queue_name: bfd-${env}-migrator
       new_relic_metric_host: *newRelicMetricHost
       new_relic_metric_path: *newRelicMetricPath
@@ -40,8 +43,27 @@ bfd:
         slis_repeater_lambda_invoke_rate: 15 minutes
       rda:
         ## PIPELINE RDA
+        grpc:
+          inprocess_server:
+            mode: UNDEFINED
+            s3:
+              region: us-east-1
+              bucket:
+              dir:
+        job:
+          enabled: &rda_job_enabled true
+          process_dlq: &rda_job_process_dlq true
+          starting_fiss_seq_num: &rda_job_starting_fiss 0
+          starting_mcs_seq_num: &rda_job_starting_mcs 0
+        cleanup:
+          enabled: false
+          run_size: UNDEFINED
+          transaction_size: UNDEFINED
         data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
-        data_pipeline_rda_job_enabled: false
+        data_pipeline_rda_job_enabled: *rda_job_enabled
+        data_pipeline_rda_job_starting_fiss_seq_num: *rda_job_starting_fiss
+        data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
+        data_pipeline_rda_process_dlq: *rda_job_process_dlq
         instance_type: m6a.large
         # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
         # data_pipeline_rda_grpc_max_idle_seconds: 600
@@ -65,6 +87,9 @@ bfd:
       lb_is_public: false
       lb_ingress_port: 443
       lb_egress_port: 7443
+      launch_template_volume_iops: 3000
+      launch_template_volume_throughput: 125
+      launch_template_volume_type: gp3
       # NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
       # Terraservice into a list. The ephemeral variant is purposefully empty to ensure there are no
       # peerings to ephemeral environments

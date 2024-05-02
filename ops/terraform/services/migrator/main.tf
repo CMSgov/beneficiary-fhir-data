@@ -20,10 +20,9 @@ locals {
   layer   = "data"
 
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
-  nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : split("/", key)[5] => value }
+  nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : basename(key) => value }
   nonsensitive_map           = zipmap(data.aws_ssm_parameters_by_path.nonsensitive.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive.values))
-  nonsensitive_config        = { for key, value in local.nonsensitive_map : split("/", key)[5] => value }
-
+  nonsensitive_config        = { for key, value in local.nonsensitive_map : basename(key) => value }
   # SSM Lookup
   enterprise_tools_security_group = local.nonsensitive_common_config["enterprise_tools_security_group"]
   instance_type                   = local.nonsensitive_config["instance_type"]
