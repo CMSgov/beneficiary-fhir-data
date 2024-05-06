@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.commons.fhir.ccw.mapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -16,7 +17,7 @@ public class FhirMapping {
   private List<String> additional = new ArrayList<String>();
   private String derived;
   private String note;
-  private String example;
+  @JsonIgnore private String example;
 
   public void setVersion(String version) {
     this.version = version;

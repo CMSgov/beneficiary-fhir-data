@@ -4,7 +4,6 @@ import gov.cms.bfd.server.war.commons.MetaModel;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.r4.model.*;
@@ -56,36 +55,41 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
     List<FhirMapping> mappings = getFhirMapping();
     FhirMapping mapping = mappings.get(0);
     // handle one mapping case for POC
-    Map<String, String> discriminatorMap = parseExpressionList(mapping.getDiscriminator());
-    Map<String, String> additionalMap = parseExpressionList(mapping.getAdditional());
+    //    Map<String, String> discriminatorMap = parseExpressionList(mapping.getDiscriminator());
+    //    Map<String, String> additionalMap = parseExpressionList(mapping.getAdditional());
     // extract system, code, display from additionals
     Map<String, String> discriminators = new HashMap<String, String>();
     String element = null;
     String elemCardinal = null;
     String childName = null;
     String childCodingCardinal = null;
-    for (Map.Entry<String, String> e : discriminatorMap.entrySet()) {
-      Matcher m = REGEX_DISCRIMINATOR.matcher(e.getKey());
-      if (m.matches()) {
-        element = m.group(1); // assert element stay same
-        elemCardinal = m.group(2); // when cardinal is [N] add element to array
-        discriminators.put("system", e.getValue());
-      }
-    }
+    String elementExpr = mapping.getElement();
+    String pathExpr = mapping.getFhirPath();
+    String resourceName = mapping.getResource();
+    List<String> discriminatorList = mapping.getDiscriminator();
+    List<String> additionalList = mapping.getAdditional();
+    //    for (Map.Entry<String, String> e : discriminatorMap.entrySet()) {
+    //      Matcher m = REGEX_DISCRIMINATOR.matcher(e.getKey());
+    //      if (m.matches()) {
+    //        element = m.group(1); // assert element stay same
+    //        elemCardinal = m.group(2); // when cardinal is [N] add element to array
+    //        discriminators.put("system", e.getValue());
+    //      }
+    //    }
     Map<String, String> ccProps = new HashMap<String, String>();
-    for (Map.Entry<String, String> e : additionalMap.entrySet()) {
-      Matcher m = REGEX_CC_PROPS.matcher(e.getKey());
-      if (m.matches()) {
-        String resource = m.group(1); // assert resource name stay same, now it's eob
-        element = m.group(2); // assert element stay same
-        elemCardinal = m.group(3); // when cardinal is [N] add element to array
-        childName = m.group(4); // child of the element
-        childCodingCardinal =
-            m.group(5); // when typeCoding cardinal is [N] type -> coding is an array of cc
-        String ccPropName = m.group(6);
-        ccProps.put(ccPropName, e.getValue());
-      }
-    }
+    //    for (Map.Entry<String, String> e : additionalMap.entrySet()) {
+    //      Matcher m = REGEX_CC_PROPS.matcher(e.getKey());
+    //      if (m.matches()) {
+    //        String resource = m.group(1); // assert resource name stay same, now it's eob
+    //        element = m.group(2); // assert element stay same
+    //        elemCardinal = m.group(3); // when cardinal is [N] add element to array
+    //        childName = m.group(4); // child of the element
+    //        childCodingCardinal =
+    //            m.group(5); // when typeCoding cardinal is [N] type -> coding is an array of cc
+    //        String ccPropName = m.group(6);
+    //        ccProps.put(ccPropName, e.getValue());
+    //      }
+    //    }
     if (elemCardinal != null && elemCardinal.equals("[N]")) {
       // cardinal is N indicate that the codeable concept needs to be
       // added vs set, expecting a method like eob.addIdentifier(...)

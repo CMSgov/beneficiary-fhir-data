@@ -1,10 +1,13 @@
 package gov.cms.bfd.server.war.commons;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMapper;
 import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMappingBuilder;
 import java.io.File;
@@ -18,6 +21,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -149,6 +154,7 @@ public class MetaModel {
    */
   public static void main(String[] args) {
     // dump all the dd components
+    jacksonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     jacksonMapper.enable(SerializationFeature.INDENT_OUTPUT);
     // dump fhir schema
     dump(fhirJsonSchema, "FHIR_SCHEMA_JSON.json");
@@ -156,6 +162,19 @@ public class MetaModel {
     dump(fhir2CCWMappingV2, "fhir2ccw.v2.json");
     // dump v1 fhir to bfd mapping
     dump(fhir2CCWMappingV1, "fhir2ccw.v1.json");
+    // normalize fhir to ccw mapping section of fhir2ccw.v1.json and fhir2ccw.v2.json
+    // and dump the results to fhir2ccw.v1.normalized.json and fhir2ccw.v2.normalized.json
+    // respectively
+    //    try {
+    //      dump(normalizeFHIR2CCWMapping("/fhir2ccw.v1.json"), "fhir2ccw.v1.normalized.json");
+    //    } catch (Exception e) {
+    //      throw new RuntimeException(e);
+    //    }
+    try {
+      dump(normalizeFHIR2CCWMapping("/fhir2ccw.v2.json"), "fhir2ccw.v2.normalized.json");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -256,6 +275,119 @@ public class MetaModel {
       fhir2ccwMapping = (ArrayNode) jacksonMapper.readTree(dictionaryDataDir);
     }
     return fhir2ccwMapping;
+  }
+
+  /**
+   * Load FHIR to CCW VARs (bfd fields) mapping descriptor json files from a folder. Parse the path
+   * expressions in fhirMapping and re-construct them into FHIRPaths, and wrap them in
+   * fhirMappingNormalized structure.
+   *
+   * @param path to the fhir to ccw mapping json (consolidated)
+   * @return a json array of fhir to ccw mapping models with the normalized "fhirMappingNormalized"
+   *     structure attached
+   * @throws IOException Error when reading json files
+   * @throws Exception Error when resolving json files location
+   */
+  private static ArrayNode normalizeFHIR2CCWMapping(String path) throws IOException, Exception {
+    URL fhir2ccwMappingsURL = MetaModel.class.getResource(path);
+    if (fhir2ccwMappingsURL == null) return null;
+    File jsonFile = Paths.get(fhir2ccwMappingsURL.toURI()).toFile();
+    ArrayNode fhir2ccwMappings = (ArrayNode) jacksonMapper.readTree(jsonFile);
+    for (JsonNode n : fhir2ccwMappings) {
+      String ccwVarStr = n.get("bfdColumnName").textValue();
+      JsonNode fmList = n.get("fhirMapping");
+      JsonNode fmObj = fmList.get(0);
+      String resource = fmObj.get("resource").textValue();
+      // element e.g. item[N].adjudication[N].amount.value
+      // convert to fhir path: ExplanationOfBenefit.item.adjudication.amount.value
+      JsonNode element = fmObj.get("element");
+      JsonNode fhirPath = fmObj.get("fhirPath");
+      JsonNode additional = fmObj.get("additional");
+      JsonNode derived = fmObj.get("derived");
+      // after normalization, "example" ignored by jackson
+      JsonNode example = fmObj.get("example");
+      if (example != null) {
+        String exampleStr = example.textValue().replaceAll("\\\\n", "");
+        JsonNode exampleJson = jacksonMapper.readTree(exampleStr);
+        ((ObjectNode) fmObj).put("example", exampleJson == null ? new TextNode("") : exampleJson);
+      } else {
+        System.out.println("example is null" + ccwVarStr);
+      }
+      JsonNode fmCopy = fmList.deepCopy();
+      ArrayList listDiscriminator =
+          convertExpressionList("discriminator", fmObj.get("discriminator"));
+      ArrayList listAdditional = convertExpressionList("additional", fmObj.get("additional"));
+      ((ObjectNode) fmCopy.get(0))
+          .set("discriminator", jacksonMapper.valueToTree(listDiscriminator));
+      ((ObjectNode) fmCopy.get(0)).set("additional", jacksonMapper.valueToTree(listAdditional));
+      ((ObjectNode) n).put("fhirMapping", fmCopy);
+    }
+    return fhir2ccwMappings;
+  }
+
+  private static ArrayList convertExpressionList(String listName, JsonNode list) {
+    Map<String, Map<String, String>> kv = new HashMap();
+    Pattern p = Pattern.compile("[\s]*([a-zA-Z0-9.]+)[\s]*=[\s]*(.*)[\s]*");
+    if (list.isArray()) {
+      ArrayList result = new ArrayList();
+      for (JsonNode d : list) {
+        String elemStr = d.textValue();
+        Matcher m = p.matcher(elemStr);
+        if (m.matches()) {
+          String l = m.group(1);
+          String r = m.group(2);
+          System.out.println(listName + ":L: " + l);
+          System.out.println(listName + ":R: " + r);
+          boolean hit = false;
+          for (String arg : new String[] {"system", "code", "display"}) {
+            String tail = String.format(".%s", arg);
+            if (l.endsWith(tail)) {
+              hit = true;
+              String prefix = getPrefix(l, tail);
+              if (kv.get(prefix) == null) {
+                kv.put(prefix, new HashMap<>());
+              }
+              kv.get(prefix).put(arg, r);
+            }
+          }
+          if (!hit) {
+            System.err.println(
+                listName + ":Keep as is: left side has no system / code / display..." + l);
+          }
+        } else {
+          // skip a line
+          System.err.println(listName + ":Keep as is: no match the pattern L=R" + elemStr);
+          result.add(elemStr);
+        }
+      }
+      // generate discriminator list and set it
+      for (String k : kv.keySet()) {
+        Map obj = kv.get(k);
+        String args = null;
+        for (String arg : new String[] {"system", "code", "display"}) {
+          if (obj.get(arg) != null) {
+            if (args == null) {
+              args = String.format("%s=%s", arg, obj.get(arg));
+            } else {
+              args = args + String.format(", %s=%s", arg, obj.get(arg));
+            }
+          }
+        }
+        String dStr = String.format("%s(%s)", k, args);
+        result.add(dStr);
+      }
+      return result;
+    }
+    throw new RuntimeException(String.format("listName = %s, Malformed : not an array.", listName));
+  }
+
+  private static String getPrefix(String str, String tail) {
+    String r = null;
+    int index = str.lastIndexOf(tail);
+    if (index > 0) {
+      r = str.substring(0, index);
+    }
+    return r;
   }
 
   /**
