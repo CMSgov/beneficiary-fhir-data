@@ -39,12 +39,13 @@ locals {
   # FUTURE: Fix this when hierarchies are supported with Terraform module.
   seed_env_certs = {
     prod = {
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"          = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_prod_client"            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_prod_client"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"           = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_client"             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_client"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_client"            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_client"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_prod_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_client"                                 = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"                     = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test"
     }
     prod-sbx = {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test"
