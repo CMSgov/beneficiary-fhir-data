@@ -23,18 +23,6 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
           Map.entry("identifier", "C4BBIdentifierType"),
           Map.entry("supportingInfo", "C4BBSupportingInfoType"));
 
-  // sample fhir expressions to recognize:
-  // fhirMapping -> additional for ccw var: pde_id
-  // 1. eob.identifier[N].type.coding[N].system =
-  // 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'
-  // 2. eob.identifier[N].type.coding[N].code = 'uc'
-  // 3. eob.identifier[N].type.coding[N].display = 'Unique Claim ID'
-  // fhirMapping -> discriminator for ccw var: pde_id
-  // 1. identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/pde_id'
-
-  // All fhir path like expressions in DD can be categorized into
-  // set of patterns and can be parsed and processed like ExplanationOfBenefit.identifier
-  // being processed (enriched) here.
   /**
    * use regex here to parse and process fhir path like expressions seen in FHIR2CCW mappings,
    * <elem>[N].type.coding <elem>[N].category.coding <elem>[N}.code.coding ... now only handle a sub
@@ -65,7 +53,6 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
     List<String> discriminatorList = mapping.getDiscriminator();
     List<String> additionalList = mapping.getAdditional();
     String[] elemSplit = elementExpr.split("\\.");
-
     String elemName = elemSplit[0];
     // take ccw var: clm_id for example:
     // from the meta data infering the below code:
@@ -147,8 +134,9 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
     if (m.matches()) {
       String elemName = m.group(1); // element name
       String arg = m.group(2); // args
+      arg = arg.trim();
       if (arg.startsWith("system")) {
-        return arg.replaceFirst("system\\s*=\\s*", "");
+        return arg.replaceFirst("system\\s*=\\s*", "").replaceAll("^'|'$", "");
       }
     } else {
       // try supportingInfo.code.coding regex
