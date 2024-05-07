@@ -18,12 +18,14 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > nonsensitive_pipeline_vars.json
 
+%{ if pipeline_instance == "rda" }
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/pipeline/sensitive/${pipeline_instance}" \
     --recursive \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > sensitive_pipeline_vars.json
+%{ endif ~}
 
 # shared pipeline variables
 aws ssm get-parameters-by-path \
@@ -68,7 +70,9 @@ ansible-playbook \
   --extra-vars '@common_vars.json' \
   --extra-vars '@nonsensitive_pipeline_vars.json' \
   --extra-vars '@nonsensitive_shared_pipeline_vars.json' \
+%{ if pipeline_instance == "rda" }
   --extra-vars '@sensitive_pipeline_vars.json' \
+%{ endif ~}
   --extra-vars '@sensitive_shared_pipeline_vars.json' \
   --extra-vars '@extra_vars.json' \
   --tags "post-ami" launch_bfd-pipeline.yml
