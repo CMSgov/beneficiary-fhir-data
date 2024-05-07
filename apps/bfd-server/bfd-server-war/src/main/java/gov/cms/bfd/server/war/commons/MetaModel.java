@@ -500,7 +500,7 @@ public class MetaModel {
   private static String getURLLast(String url) {
     URL urlObj = null;
     try {
-      urlObj = new URL(url);
+      urlObj = new URL(url.replace("'", ""));
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }

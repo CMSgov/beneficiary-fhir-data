@@ -4,6 +4,7 @@ import gov.cms.bfd.server.war.commons.MetaModel;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.r4.model.*;
@@ -41,10 +42,13 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
    */
   private static final Pattern REGEX_CC_PROPS =
       Pattern.compile(
-          "(eob)\\.(identifier|extension|supportingInfo)(\\[N\\])\\.(type|category)\\.coding(\\[N\\])\\.(system|code|display)");
+          "(identifier|extension|supportingInfo)\\.(code|type|category)\\.coding\\((.*)\\)");
 
+  // expression in discriminator is for the element's value and it's URL
+  // e.g. for ccw var: clm_id, it's value's URL is:
+  // system='https://bluebutton.cms.gov/resources/variables/clm_id'
   private static final Pattern REGEX_DISCRIMINATOR =
-      Pattern.compile("(identifier|extension|supportingInfo)(\\[N\\])\\.system");
+      Pattern.compile("(identifier|extension|supportingInfo)\\((.*)\\)");
 
   /**
    * Enrich the eob based on fhir mapping info.
@@ -54,169 +58,198 @@ public class FHIR2CCWMappingBuilder extends FHIR2CCWMapper {
   public ExplanationOfBenefit enrich(ExplanationOfBenefit eob, String val) {
     List<FhirMapping> mappings = getFhirMapping();
     FhirMapping mapping = mappings.get(0);
-    // handle one mapping case for POC
-    //    Map<String, String> discriminatorMap = parseExpressionList(mapping.getDiscriminator());
-    //    Map<String, String> additionalMap = parseExpressionList(mapping.getAdditional());
-    // extract system, code, display from additionals
     Map<String, String> discriminators = new HashMap<String, String>();
-    String element = null;
-    String elemCardinal = null;
-    String childName = null;
-    String childCodingCardinal = null;
     String elementExpr = mapping.getElement();
     String pathExpr = mapping.getFhirPath();
     String resourceName = mapping.getResource();
     List<String> discriminatorList = mapping.getDiscriminator();
     List<String> additionalList = mapping.getAdditional();
-    //    for (Map.Entry<String, String> e : discriminatorMap.entrySet()) {
-    //      Matcher m = REGEX_DISCRIMINATOR.matcher(e.getKey());
-    //      if (m.matches()) {
-    //        element = m.group(1); // assert element stay same
-    //        elemCardinal = m.group(2); // when cardinal is [N] add element to array
-    //        discriminators.put("system", e.getValue());
-    //      }
-    //    }
-    Map<String, String> ccProps = new HashMap<String, String>();
-    //    for (Map.Entry<String, String> e : additionalMap.entrySet()) {
-    //      Matcher m = REGEX_CC_PROPS.matcher(e.getKey());
-    //      if (m.matches()) {
-    //        String resource = m.group(1); // assert resource name stay same, now it's eob
-    //        element = m.group(2); // assert element stay same
-    //        elemCardinal = m.group(3); // when cardinal is [N] add element to array
-    //        childName = m.group(4); // child of the element
-    //        childCodingCardinal =
-    //            m.group(5); // when typeCoding cardinal is [N] type -> coding is an array of cc
-    //        String ccPropName = m.group(6);
-    //        ccProps.put(ccPropName, e.getValue());
-    //      }
-    //    }
-    if (elemCardinal != null && elemCardinal.equals("[N]")) {
-      // cardinal is N indicate that the codeable concept needs to be
-      // added vs set, expecting a method like eob.addIdentifier(...)
-      Object fhirComponent = null;
-      String elemUpperCase1st = element.substring(0, 1).toUpperCase() + element.substring(1);
+    String[] elemSplit = elementExpr.split("\\.");
 
-      // flat code just for demo of idea
+    String elemName = elemSplit[0];
+    // take ccw var: clm_id for example:
+    // from the meta data infering the below code:
+    // element = identifier.value, need to create an identifer object and set its value as below:
+    // the element = "identifier" -> eob.getIdentifier() <== a list of identifier ->
+    // eob.getIdentifier().add(id = new Identifier())
+    // then id.setValue(String val),
+    // the discriminator =
+    // identifier(system='https://bluebutton.cms.gov/resources/variables/pde_id'), it provides info
+    // to set "system" property of the value:
+    // eob.getIdentifier().add(new
+    // Identifier().setSystem("https://bluebutton.cms.gov/resources/variables/pde_id"))
+    // id.setType(CodeableConcept cc)
+    // where the
+    // eob.getIdentifier().add(new Identifier().setType(CodeableConcept cc))
+    // where the CodeableConcept is derived fron additional =
+    // identifier.type.coding(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType', code='uc', display='Unique Claim ID')
+    Object elementObj = createElement(elemName);
+    Method getterMethod = getGetterMethod(eob, elemName);
+    Object r = callMethod(getterMethod, eob);
+    Coding coding = extractCoding(additionalList);
+    // check first if it's C4BB
+    CodeableConcept cc =
+        MetaModel.getC4BBCodeSystem(
+            MetaModel.C4BBProfile.CODESYSTEM, coding.getSystem(), coding.getCode());
+    if (cc == null) {
+      cc = new CodeableConcept().setCoding(Arrays.asList(coding));
+    }
+    String systemURLStr = extractSystemURL(discriminatorList);
+    // exhausted list of elements - e.g. here for EOB resources for POC demo
+    if (elemName.equals("identifier")) {
       try {
-        // this is for r4, should also applicable to stu3
-        fhirComponent =
-            Class.forName(elemName2FhirModelClazzFQN.get(element)).getConstructor().newInstance();
-      } catch (InstantiationException e) {
-        throw new RuntimeException(e);
-      } catch (IllegalAccessException e) {
+        // EOB.identifier is a collection, call add to add element
+        r.getClass().getMethod("add", Object.class).invoke(r, elementObj);
+        // call setters per type of the element
+        elementObj.getClass().getMethod("setSystem", String.class).invoke(elementObj, systemURLStr);
+        elementObj.getClass().getMethod("setType", cc.getClass()).invoke(elementObj, cc);
+        elementObj.getClass().getMethod("setValue", String.class).invoke(elementObj, val);
+      } catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
       } catch (InvocationTargetException e) {
         throw new RuntimeException(e);
-      } catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
-      } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
-      }
-
-      Method method = null;
-
-      try {
-        // figure out the setter / getter / add methods by fhir model conventions
-        method = eob.getClass().getMethod("add" + elemUpperCase1st, fhirComponent.getClass());
-      } catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
-      }
-
-      try {
-        method.invoke(eob, fhirComponent);
       } catch (IllegalAccessException e) {
         throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(e);
       }
-
-      CodeableConcept cc =
-          MetaModel.getC4BBCodeSystem(
-              MetaModel.C4BBProfile.CODESYSTEM, ccProps.get("system"), ccProps.get("code"));
-      if (cc == null) {
-        // try C4BB CodeSystem first, then probe the expressions in meta
-        // probe current fhirComponent's declared methods:
-        // setType requires a parameter of CodeableConcept
-        cc =
+    } else if (elemName.equals("supportingInfo")) {
+      try {
+        CodeableConcept valCode =
             new CodeableConcept()
                 .setCoding(
-                    Arrays.asList(
-                        new Coding(
-                            ccProps.get("system"), ccProps.get("code"), ccProps.get("display"))));
+                    Arrays.asList(new Coding(systemURLStr, val, "Find out from Value Set...")));
+        // EOB.supportingInfo is a collection, call add to add element
+        r.getClass().getMethod("add", Object.class).invoke(r, elementObj);
+        // call setters per type of the element
+        elementObj.getClass().getMethod("setCategory", cc.getClass()).invoke(elementObj, cc);
+        // fake a seq here
+        elementObj.getClass().getMethod("setSequence", int.class).invoke(elementObj, 1);
+        elementObj.getClass().getMethod("setCode", valCode.getClass()).invoke(elementObj, valCode);
+        elementObj
+            .getClass()
+            .getMethod("setTiming", org.hl7.fhir.r4.model.Type.class)
+            .invoke(elementObj, new org.hl7.fhir.r4.model.DateType());
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
       }
-
-      if (element.equals("identifier")) {
-        try {
-          // call setters per type of the element
-          fhirComponent
-              .getClass()
-              .getMethod("setSystem", String.class)
-              .invoke(fhirComponent, discriminators.get("system"));
-          fhirComponent.getClass().getMethod("setType", cc.getClass()).invoke(fhirComponent, cc);
-          fhirComponent.getClass().getMethod("setValue", String.class).invoke(fhirComponent, val);
-        } catch (NoSuchMethodException e) {
-          throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-          throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException(e);
-        }
-      } else if (element.equals("supportingInfo")) {
-        try {
-          CodeableConcept valCode =
-              new CodeableConcept()
-                  .setCoding(
-                      Arrays.asList(
-                          new Coding(
-                              discriminators.get("system"), val, "Find out from Value Set...")));
-          // call setters per type of the element
-          fhirComponent
-              .getClass()
-              .getMethod("setCategory", cc.getClass())
-              .invoke(fhirComponent, cc);
-          // fake a seq here
-          fhirComponent.getClass().getMethod("setSequence", int.class).invoke(fhirComponent, 1);
-          fhirComponent
-              .getClass()
-              .getMethod("setCode", valCode.getClass())
-              .invoke(fhirComponent, valCode);
-          fhirComponent
-              .getClass()
-              .getMethod("setTiming", org.hl7.fhir.r4.model.Type.class)
-              .invoke(fhirComponent, new org.hl7.fhir.r4.model.DateType());
-        } catch (NoSuchMethodException e) {
-          throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-          throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException(e);
-        }
-      } else {
-        throw new NotImplementedException("to be implemented");
-      }
+    } else {
+      throw new NotImplementedException("to be implemented");
     }
     return eob;
   }
 
-  /**
-   * helper to parse the fhirMapping -> discriminator, and fhirMapping -> additional
-   *
-   * @param l list of expressions in the form of path = value
-   * @return map of <path, value>
-   */
-  private Map<String, String> parseExpressionList(List<String> l) {
-    Map<String, String> r = new HashMap<String, String>();
-    for (String e : l) {
-      String[] kv = e.split("=");
-      String k = kv[0].trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "");
-      String v = kv[1].trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "");
-      // fhir mapping expressions need cleansing and normalization:
-      // e.g. there are paranteisis quoted expressions with OR operator, e.g. icd-9 OR icd-10
-      // strip off the ( and ) for now
-      if (k.startsWith("(")) k = k.substring(1);
-      if (k.endsWith(")")) k = k.substring(0, k.length() - 1);
-      r.put(k, v);
+  private String extractSystemURL(List<String> exprList) {
+    String expr = exprList.get(0);
+    Matcher m = REGEX_DISCRIMINATOR.matcher(expr);
+    if (m.matches()) {
+      String elemName = m.group(1); // element name
+      String arg = m.group(2); // args
+      if (arg.startsWith("system")) {
+        return arg.replaceFirst("system\\s*=\\s*", "");
+      }
+    } else {
+      // try supportingInfo.code.coding regex
+      Coding c = extractCoding(exprList);
+      return c.getSystem();
     }
-    return r;
+    throw new RuntimeException(
+        "Unknown/Unexpected expression in fhir mapping -> discriminator: " + exprList.toString());
+  }
+
+  /**
+   * Given a list of FHIR code expression, derive a CodeableConcept from it. e.g. for ccw var -
+   * clm_id: "additional" : [
+   * "identifier.type.coding(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType',
+   * code='uc', display='Unique Claim ID'))" ],
+   *
+   * @param exprList list of code spec e.g.
+   * @return codeable concept object.
+   */
+  private Coding extractCoding(List<String> exprList) {
+    Coding coding = new Coding();
+    // assume only one expression in the list
+    Matcher m = REGEX_CC_PROPS.matcher(exprList.get(0));
+    if (m.matches()) {
+      String elemName = m.group(1); // element of resource, e.g. extension, supportingInfo, category
+      String elemPropName = m.group(2); // property name (setter / getter) of the element
+      String argName =
+          m.group(3); // arg of the coding infers to FHIR Coding type which accepts system, code,
+      // display
+      String[] args = argName.split(",");
+      for (String arg : args) {
+        String a = arg.trim();
+        if (a.startsWith("system")) {
+          coding.setSystem(a.replaceFirst("^system\\s*=\\s*", "").replaceAll("^'|'$", ""));
+        } else if (a.startsWith("code")) {
+          coding.setCode(a.replaceFirst("^code\\s*=\\s*", "").replaceAll("^'|'$", ""));
+        } else if (a.startsWith("display")) {
+          coding.setDisplay(a.replaceFirst("^display\\s*=\\s*", "").replaceAll("^'|'$", ""));
+        }
+      }
+    } else {
+      throw new RuntimeException(
+          "Unknown/Unexpected expression in fhir mapping -> additional: " + exprList.toString());
+    }
+    return coding;
+  }
+
+  /**
+   * Call the getter on the resource.
+   *
+   * @param getterMethod
+   * @param eob
+   * @return getter returned object
+   */
+  private Object callMethod(Method getterMethod, ExplanationOfBenefit eob) {
+    try {
+      return getterMethod.invoke(eob);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Giben resource instance and its element name, figure out the getter for the element.
+   *
+   * @param eob fhir resource
+   * @param elemName the element name
+   * @return the method
+   */
+  private Method getGetterMethod(ExplanationOfBenefit eob, String elemName) {
+    try {
+      // figure out the setter / getter / add methods by fhir model conventions
+      return eob.getClass()
+          .getMethod("get" + elemName.substring(0, 1).toUpperCase() + elemName.substring(1));
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Given element name of a resource e.g. EOB, look up its FHIR class and create a new instance.
+   *
+   * @param elemName - name of the element, e.g. "identifier" of ExplanationOfBenefit
+   * @return the instance.
+   */
+  private Object createElement(String elemName) {
+    try {
+      // this is for r4, should also applicable to stu3
+      return Class.forName(elemName2FhirModelClazzFQN.get(elemName)).getConstructor().newInstance();
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(e);
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
