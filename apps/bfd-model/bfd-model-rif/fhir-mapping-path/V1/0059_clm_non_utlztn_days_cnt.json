@@ -1,0 +1,42 @@
+{
+    "id": 59,
+    "name": "Non Utilization Day Count",
+    "description": "On an institutional claim, the number of days of care that are not chargeable to Medicare facility utilization.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_non_utlztn_days_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "nonUtilizationDayCount",
+    "ccwMapping": [
+        "CLM_NON_UTLZTN_DAYS_CNT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedUnsignedInt",
+            "fhirPath": "",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_non_utlztn_days_cnt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'Claim Medicare Non Utilization Days Count'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

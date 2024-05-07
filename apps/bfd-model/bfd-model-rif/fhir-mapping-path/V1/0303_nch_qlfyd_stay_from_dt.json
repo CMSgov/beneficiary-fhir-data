@@ -1,0 +1,40 @@
+{
+    "id": 303,
+    "name": "Qualified Stay From Date",
+    "description": "The beginning date of the beneficiary's qualifying Medicare stay.",
+    "appliesTo": [
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_qlfyd_stay_from_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "qualifiedStayFromDate",
+    "ccwMapping": [
+        "NCH_QLFYD_STAY_FROM_DT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].timingPeriod.start",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_qlfyd_stay_from_dt'"
+            ],
+            "additional": [
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].display = 'NCH Qualified Stay From Date'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

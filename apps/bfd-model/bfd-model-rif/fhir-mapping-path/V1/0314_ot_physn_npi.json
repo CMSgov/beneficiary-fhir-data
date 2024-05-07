@@ -1,0 +1,47 @@
+{
+    "id": 314,
+    "name": "Other Physician NPI",
+    "description": "On an institutional claim, the National Provider Identifier (NPI) number assigned to uniquely identify the other physician associated with the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "ot_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "otherPhysicianNpi",
+    "ccwMapping": [
+        "OT_PHYSN_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF1.OTHR_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].role.coding[N].code = 'other'",
+                "careTeam[N].provider.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi'"
+            ],
+            "additional": [
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/claimcareteamrole'",
+                "eob.careTeam[N].role.coding[N].display = 'Other'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

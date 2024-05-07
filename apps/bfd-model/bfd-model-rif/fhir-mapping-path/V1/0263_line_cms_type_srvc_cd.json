@@ -1,0 +1,44 @@
+{
+    "id": 263,
+    "name": "CMS Service Type Code",
+    "description": "Code indicating the type of service, as defined in the CMS Medicare Carrier Manual, for this line item on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_cms_type_srvc_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "cmsServiceTypeCode",
+    "ccwMapping": [
+        "LINE_CMS_TYPE_SRVC_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_FED_TYPE_SRVC_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].category.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/line_cms_type_srvc_cd'"
+            ],
+            "additional": [
+                "eob.item[N].category.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

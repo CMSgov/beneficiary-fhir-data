@@ -1,0 +1,39 @@
+{
+    "id": 407,
+    "name": "Reason For Visit Diagnosis Code 2 Version",
+    "description": "The code used to indicate if the reason for visit diagnosis code is ICD-9 or ICD-10.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rsn_visit_vrsn_cd2",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisAdmission2CodeVersion",
+    "ccwMapping": [
+        "RSN_VISIT_VRSN_CD2"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].system",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/diagnosis-type'",
+                "diagnosis[N].type[N].coding[N].code = 'reason-for-visit'"
+            ],
+            "additional": [],
+            "derived": "IF = 9 then eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' IF = 0  eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

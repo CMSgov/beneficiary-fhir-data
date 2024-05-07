@@ -1,0 +1,36 @@
+{
+    "id": 621,
+    "name": "Carrier Claim Billing NPI Number",
+    "description": "The CMS National Provider Identifier (NPI) number assigned to the billing provider",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_blg_npi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "carrierClaimBlgNpiNumber",
+    "ccwMapping": [
+        "CARR_CLM_BLG_NPI_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "id": 124,
+    "name": "Gross Drug Cost Below Out Of Pocket Threshold",
+    "description": "This variable is the portion of the gross drug cost for the prescription drug fill that was not covered by Part D\u2019s catastrophic coverage.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "gdc_blw_oopt_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "grossCostBelowOutOfPocketThreshold",
+    "ccwMapping": [
+        "GDC_BLW_OOPT_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/gdc_blw_oopt_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Gross Drug Cost Below Part D Out-of-Pocket Threshold (GDCB)'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

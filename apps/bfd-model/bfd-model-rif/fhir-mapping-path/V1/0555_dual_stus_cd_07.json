@@ -1,0 +1,47 @@
+{
+    "id": 555,
+    "name": "Medicare Medicaid Dual Eligibility Code - July",
+    "description": "This variable indicates whether the beneficiary was eligible for both Medicare and Medicaid in a given month (January through December).",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "dual_stus_cd_07",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "medicaidDualEligibilityJulCode",
+    "ccwMapping": [
+        "DUAL_STUS_CD_07"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_DUAL_STUS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/dual_07'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/dual_07'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

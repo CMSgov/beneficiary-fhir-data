@@ -1,0 +1,35 @@
+{
+    "id": 428,
+    "name": "Coverage Resource Last Updated Date",
+    "description": "The date that this record was last updated within the database.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES;MEDICAREBENEFICIARYIDHISTORY",
+    "bfdColumnName": "lastupdated",
+    "bfdDbType": "TIMESTAMP",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "lastUpdated",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "meta.lastUpdated",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "The value will either be from the Beneficiary or MedicareBeneficiaryIdHistory table, depending upon which one is the latest date.",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

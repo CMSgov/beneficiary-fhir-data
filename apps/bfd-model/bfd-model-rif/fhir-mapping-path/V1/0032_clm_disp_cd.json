@@ -1,0 +1,40 @@
+{
+    "id": 32,
+    "name": "Claim Disposition Code",
+    "description": "Code indicating the disposition or outcome of the processing of the claim record. In the source CMS National Claims History (NCH), claims are transactional records, and several iterations of the claim may exist (e.g., original claim, an edited/updated version \u2014 which also cancels the original claim, etc.). The final reconciled version of the claim is contained in CCW-produced data files, unless otherwise requested. For final claims (at least those that are final at the time of the data file), this value will always be '01'.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_disp_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "claimDispositionCode",
+    "ccwMapping": [
+        "CLM_DISP_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_DISP_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "disposition",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

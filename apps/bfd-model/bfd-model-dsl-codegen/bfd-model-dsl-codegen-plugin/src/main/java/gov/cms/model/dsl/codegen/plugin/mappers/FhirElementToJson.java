@@ -2,14 +2,14 @@ package gov.cms.model.dsl.codegen.plugin.mappers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import gov.cms.model.dsl.codegen.plugin.model.FhirElement;
+import gov.cms.model.dsl.codegen.plugin.model.FhirElementBean;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.function.Function;
 
 /** Processor that takes a stream of FhirElements and writes them to a single JSON file. */
-public class FhirElementToJson implements Function<FhirElement, FhirElement>, Closeable {
+public class FhirElementToJson implements Function<FhirElementBean, FhirElementBean>, Closeable {
 
   /** JSON array element separator. */
   private static final String SEPARATOR = ",";
@@ -52,7 +52,7 @@ public class FhirElementToJson implements Function<FhirElement, FhirElement>, Cl
    * @return a FhirElement
    */
   @Override
-  public FhirElement apply(FhirElement element) {
+  public FhirElementBean apply(FhirElementBean element) {
     try {
       if (started) {
         writer.write(SEPARATOR);

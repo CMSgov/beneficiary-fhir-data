@@ -1,0 +1,42 @@
+{
+    "id": 12,
+    "name": "Part B Deductible Applied Amount",
+    "description": "The amount of the cash deductible as submitted on the claim. This variable is the beneficiary\u2019s liability under the annual Part B deductible for all line items on the claim; it is the sum of all line-level deductible amounts.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_clm_cash_ddctbl_apld_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "beneficiaryPartBDeductAmount",
+    "ccwMapping": [
+        "CARR_CLM_CASH_DDCTBL_APLD_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_clm_cash_ddctbl_apld_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].valueMoney.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "id": 305,
+    "name": "Noncovered Stay From Date",
+    "description": "The beginning date of the beneficiary's Non-covered stay.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_vrfd_ncvrd_stay_from_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "noncoveredStayFromDate",
+    "ccwMapping": [
+        "NCH_VRFD_NCVRD_STAY_FROM_DT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].timingPeriod.start",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/nch_vrfd_ncvrd_stay_from_dt'"
+            ],
+            "additional": [
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].display = 'NCH Verified Non-covered Stay From Date'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "id": 354,
+    "name": "Prescriber Id",
+    "description": "This variable contains the prescriber identification number as reported by the Part D sponsor on the PDE record submitted to CMS.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prscrbr_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "prescriberId",
+    "ccwMapping": [
+        "PRSCRBR_ID"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_PRSBNG_PRVDR_GNRC_ID_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi'",
+                "careTeam[N].role.coding[N].code = 'primary'"
+            ],
+            "additional": [
+                "eob.careTeam[N].provider.display = {corresponding description from valueset specified in .system}",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/claimcareteamrole'",
+                "eob.careTeam[N].role.coding[N].display = 'Primary provider'"
+            ],
+            "derived": "",
+            "note": "This eob.careTeam element will only be supplied if the Prescriber Id is populated and the Prescriber Id Qualifier Code = '01'  The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamLinkId list for every single item.",
+            "example": ""
+        }
+    ]
+}

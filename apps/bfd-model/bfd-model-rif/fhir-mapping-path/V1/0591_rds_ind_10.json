@@ -1,0 +1,41 @@
+{
+    "id": 591,
+    "name": "Monthly Part D Retiree Drug Subsidy Indicator \u2014 October - (10)",
+    "description": "This variable indicates if the beneficiary was enrolled in an employer-sponsored prescription drug plan that qualified for Part D\u2019s retiree drug subsidy (RDS) for a given month (January\u2013December).",
+    "appliesTo": [
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "rds_ind_10",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "partDRetireeDrugSubsidyOctInd",
+    "ccwMapping": [
+        "RDS_IND_10"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/rdsnind10'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/rdsnind10'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

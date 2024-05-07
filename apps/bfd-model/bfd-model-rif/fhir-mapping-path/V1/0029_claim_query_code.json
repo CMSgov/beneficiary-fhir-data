@@ -1,0 +1,48 @@
+{
+    "id": 29,
+    "name": "Claim Query Code",
+    "description": "Code indicating the type of claim record being processed with respect to payment (debit/credit indicator; interim/final indicator).",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF",
+        "HHA",
+        "Hospice"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "claim_query_code",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "claimQueryCode",
+    "ccwMapping": [
+        "CLAIM_QUERY_CODE"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_QUERY_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "billablePeriod.extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "billablePeriod.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/claim_query_cd'"
+            ],
+            "additional": [
+                "eob.billablePeriod.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "id": 4,
+    "name": "Attending Physician NPI",
+    "description": "On an institutional claim, the national provider identifier (NPI) is a unique number assigned to identify the physician who has overall responsibility for the beneficiary's care and treatment.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "at_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "attendingPhysicianNpi",
+    "ccwMapping": [
+        "AT_PHYSN_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF1.ATNDG_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi'",
+                "careTeam[N].role.coding[N].code = 'primary'"
+            ],
+            "additional": [
+                "eob.careTeam[N].role.coding[N].display = 'Primary Provider'",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/claimcareteamrole'"
+            ],
+            "derived": "",
+            "note": "There may be multiple primary providers within the care team.",
+            "example": ""
+        }
+    ]
+}

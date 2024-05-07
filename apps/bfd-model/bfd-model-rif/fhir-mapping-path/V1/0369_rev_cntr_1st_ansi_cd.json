@@ -1,0 +1,42 @@
+{
+    "id": 369,
+    "name": "Revenue Center 1st ANSI Code",
+    "description": "The first code used to identify the detailed reason an adjustment was made (e.g., reason for denial or reducing payment).",
+    "appliesTo": [
+        "Outpatient",
+        "HHA"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_1st_ansi_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "revCntr1stAnsiCd",
+    "ccwMapping": [
+        "REV_CNTR_1ST_ANSI_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].reason.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication.reason.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication.category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd' ",
+                "eob.item[N].adjudication.category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "eob.item[N].adjudication.category.coding[N].display = 'Revenue Center 1st ANSI Code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

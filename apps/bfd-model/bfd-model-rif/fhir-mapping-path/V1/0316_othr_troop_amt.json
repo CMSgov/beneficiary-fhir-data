@@ -1,0 +1,43 @@
+{
+    "id": 316,
+    "name": "Other True Out Of Pocket Paid Amount",
+    "description": "This is the amount of any payment made by other third-party payers that reduces the beneficiary\u2019s liability for the PDE and counts towards Part D\u2019s true out-of-pocket (TrOOP) requirement. Two examples are payments by qualified state pharmacy assistance programs or charities. This variable does not include amounts covered by the Part D low-income subsidy.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "othr_troop_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "otherTrueOutOfPocketPaidAmount",
+    "ccwMapping": [
+        "OTHR_TROOP_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/othr_troop_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Other True Out-of-Pocket (TrOOP) Amount'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

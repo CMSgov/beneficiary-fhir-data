@@ -1,0 +1,41 @@
+{
+    "id": 280,
+    "name": "Service Count",
+    "description": "The count of the total number of services processed for the line item on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_srvc_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 4,
+    "bfdJavaFieldName": "serviceCount",
+    "ccwMapping": [
+        "LINE_SRVC_CNT"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_LINE_SRVC_UNIT_QTY"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].quantity.value",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

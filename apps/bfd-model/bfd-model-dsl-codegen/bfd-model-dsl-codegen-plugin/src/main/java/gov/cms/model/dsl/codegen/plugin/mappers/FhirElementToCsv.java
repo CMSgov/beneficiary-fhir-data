@@ -3,7 +3,7 @@ package gov.cms.model.dsl.codegen.plugin.mappers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import gov.cms.model.dsl.codegen.plugin.model.FhirElement;
+import gov.cms.model.dsl.codegen.plugin.model.FhirElementBean;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 /** Processor for a stream of FhirElements. Converts FhirElements to CSV format and writes them. */
-public class FhirElementToCsv implements Function<FhirElement, List<String>>, Closeable {
+public class FhirElementToCsv implements Function<FhirElementBean, List<String>>, Closeable {
 
   /** ObjectMapper for deserializing CSV template JSON. */
   private static final ObjectMapper objectMapper = JsonMapper.builder().build();
@@ -61,7 +61,7 @@ public class FhirElementToCsv implements Function<FhirElement, List<String>>, Cl
    * @return a List of CSV formatted String values
    */
   @Override
-  public List<String> apply(FhirElement element) {
+  public List<String> apply(FhirElementBean element) {
     // returns list as the first row returns more than one line.
     try {
       if (started) {
@@ -129,7 +129,7 @@ public class FhirElementToCsv implements Function<FhirElement, List<String>>, Cl
    * @return the value of the CSV line written
    * @throws IOException upon write errors
    */
-  private String writeElement(FhirElement element) throws IOException {
+  private String writeElement(FhirElementBean element) throws IOException {
     var row = new ArrayList<>();
     for (String field : fields.keySet()) {
       var fieldValue = getFieldValue(element, field);
@@ -182,7 +182,7 @@ public class FhirElementToCsv implements Function<FhirElement, List<String>>, Cl
    * @param field the name of the field to retrieve
    * @return an Object (String or Integer) retrieved from the FhirElement
    */
-  private Object getFieldValue(FhirElement element, String field) {
+  private Object getFieldValue(FhirElementBean element, String field) {
     return switch (field) {
       case "id" -> element.getId();
       case "name" -> element.getName();

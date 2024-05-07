@@ -1,0 +1,39 @@
+{
+    "id": 320,
+    "name": "Plan Contract ID",
+    "description": "This variable is the unique Part D contract identifier for the beneficiary\u2019s Part D plan of record for the year. CMS assigns an identifier to each contract that a Part D plan has with CMS.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "plan_cntrct_rec_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "planContractId",
+    "ccwMapping": [
+        "PLAN_CNTRCT_REC_ID"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "insurance.coverage.extension[N].valueIdentifier.value",
+            "fhirPath": "",
+            "discriminator": [
+                "insurance.coverage.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id'",
+                "insurance.coverage.extension[N].valueIdentifier.system = 'https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

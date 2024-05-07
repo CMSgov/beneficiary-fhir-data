@@ -1,0 +1,39 @@
+{
+    "id": 212,
+    "name": "Procedure Code 16",
+    "description": "The code that indicates the procedure performed during the period covered by the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_prcdr_cd16",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "procedure16Code",
+    "ccwMapping": [
+        "ICD_PRCDR_CD16"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "procedure[N].procedureCodeableConcept.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "IF = 9 then eob.procedure[N].procedureCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' IF = 0  eob.procedure[N].procedureCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

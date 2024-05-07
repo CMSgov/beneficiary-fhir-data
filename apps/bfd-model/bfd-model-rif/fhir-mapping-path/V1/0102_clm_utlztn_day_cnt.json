@@ -1,0 +1,43 @@
+{
+    "id": 102,
+    "name": "Utilization Day Count",
+    "description": "On an institutional claim, the number of covered days of care that are chargeable to Medicare facility utilization that includes full days, coinsurance days, and lifetime reserve days. It excludes any days classified as non-covered, leave of absence days, and the day of discharge or death.",
+    "appliesTo": [
+        "Inpatient",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_utlztn_day_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "utilizationDayCount",
+    "ccwMapping": [
+        "CLM_UTLZTN_DAY_CNT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "benefitBalance[N].financial[N].usedUnsignedInt",
+            "fhirPath": "",
+            "discriminator": [
+                "benefitBalance[N].financial[N].type.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/benefit-balance'",
+                "benefitBalance[N].financial[N].type.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_utlztn_day_cnt'"
+            ],
+            "additional": [
+                "eob.benefitBalance[N].financial[N].type.coding[N].display = 'Claim Medicare Utilization Day Count'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "id": 250,
+    "name": "Procedure Code 5 Version",
+    "description": "The code used to indicate if the procedure code is ICD-9 or ICD-10.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_prcdr_vrsn_cd5",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "procedure5CodeVersion",
+    "ccwMapping": [
+        "ICD_PRCDR_VRSN_CD5"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "procedure[N].procedureCodeableConcept.coding[N].system",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "IF = 9 then eob.procedure[N].procedureCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm' IF = 0  eob.procedure[N].procedureCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

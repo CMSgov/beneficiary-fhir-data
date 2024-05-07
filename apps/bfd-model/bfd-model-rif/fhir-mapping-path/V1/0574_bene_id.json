@@ -1,0 +1,39 @@
+{
+    "id": 574,
+    "name": "Coverage Resource ID",
+    "description": "Each resource has an id element which contains the 'logical id' of the resource assigned by the server responsible for storing it.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "beneficiaryId",
+    "ccwMapping": [
+        "BENE_ID"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "id",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "coverage.id = 'medicare coverage part-beneficiaryId' (ie. 'part-a-555888', 'part-b-7889873')",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "id": 477,
+    "name": "Part C PBP Number - January",
+    "description": "The variable is the Medicare Part C plan benefit package (PBP) for the beneficiary\u2019s Medicare Advantage (MA) plan for a given month (January through December). CMS assigns an identifier to each PBP within a contract that a Part C plan sponsor has with CMS.",
+    "appliesTo": [
+        "Part-C"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "ptc_pbp_id_01",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "partCPbpNumberJanId",
+    "ccwMapping": [
+        "PTC_PBP_ID_01"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_01'"
+            ],
+            "additional": [
+                "coverage.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_01'",
+                "coverage.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

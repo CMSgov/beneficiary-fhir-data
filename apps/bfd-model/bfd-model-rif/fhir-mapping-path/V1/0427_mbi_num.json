@@ -1,0 +1,45 @@
+{
+    "id": 427,
+    "name": "Medicare Beneficiary Identifier (Historic)",
+    "description": "A Medicare Beneficiary Identifier (MBI) assigned to a beneficiary. This particular (MBI) is the a former/historic identifier assigned to the beneficiary that is no longer used.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "MEDICAREBENEFICIARYIDHISTORY",
+    "bfdColumnName": "mbi_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 11,
+    "bfdJavaFieldName": "medicareBeneficiaryId",
+    "ccwMapping": [
+        "MBI_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF9.PRVS_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "identifier[N].system = 'http://hl7.org/fhir/sid/us-mbi'",
+                "identifier[N].extension[N].url = 'https://bluebutton.cms.gov/resources/codesystem/identifier-currency'",
+                "identifier[N].extension[N].valueCoding.code = 'historic'"
+            ],
+            "additional": [
+                "patient.identifier[N].extension[N].valueCoding.display = 'Historic'"
+            ],
+            "derived": "If the MedicareBeneficiaryIdHistory.MBIEndDate is null/empty then this entire patient.identifier will not be present.",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

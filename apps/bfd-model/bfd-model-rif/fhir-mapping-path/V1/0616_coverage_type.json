@@ -1,0 +1,40 @@
+{
+    "id": 616,
+    "name": "Coverage Type",
+    "description": "The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "type.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "type.coding[N].system = 'Medicare'"
+            ],
+            "additional": [],
+            "derived": "Medicare Coverage Part (ie. If Part-A then 'Part A', if Part-D then 'Part D', etc..)",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

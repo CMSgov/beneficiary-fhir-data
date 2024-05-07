@@ -1,0 +1,45 @@
+{
+    "id": 93,
+    "name": "Claim PPS Capital IME Amount",
+    "description": "The amount of the indirect medical education (IME) (reimbursable amount for teaching hospitals only; an added amount passed by Congress to augment normal prospective payment system [PPS] payments for teaching hospitals to compensate them for higher patient costs resulting from medical education programs for interns and residents) portion of the PPS payment for capital.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_pps_cptl_ime_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "claimPPSCapitalIMEAmount",
+    "ccwMapping": [
+        "CLM_PPS_CPTL_IME_AMT"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_MDCR_IP_PPS_CPTL_IME_AMT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_ime_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

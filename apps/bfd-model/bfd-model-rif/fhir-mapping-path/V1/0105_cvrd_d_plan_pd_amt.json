@@ -1,0 +1,43 @@
+{
+    "id": 105,
+    "name": "Covered D Plan Paid Amount",
+    "description": "This is the net amount that the Part D plan paid for a PDE that was covered by the Medicare Part D benefit.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "cvrd_d_plan_pd_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "partDPlanCoveredPaidAmount",
+    "ccwMapping": [
+        "CVRD_D_PLAN_PD_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/cvrd_d_plan_pd_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Amount paid by Part D plan for the PDE (drug is covered by Part D)'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "IF drugCoverageStatusCode = 'C' then this value is used",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "id": 441,
+    "name": "Beneficiary Sex Code",
+    "description": "This variable indicates the sex of the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_sex_ident_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "sex",
+    "ccwMapping": [
+        "BENE_SEX_IDENT_CD"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_SEX_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "gender",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "Based upon the code the values will either be 'Male', 'Female', or 'Unknown'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

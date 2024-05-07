@@ -1,0 +1,42 @@
+{
+    "id": 36,
+    "name": "External Diagnosis Code 10 Present On Admission",
+    "description": "The present on admission (POA) indicator code associated with the diagnosis E codes (principal and secondary).",
+    "appliesTo": [
+        "Inpatient"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_e_poa_ind_sw10",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "diagnosisExternal10PresentOnAdmissionCode",
+    "ccwMapping": [
+        "CLM_E_POA_IND_SW10"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw10'"
+            ],
+            "additional": [
+                "eob.diagnosis[N].extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/clm_e_poa_ind_sw10'",
+                "eob.diagnosis[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}",
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

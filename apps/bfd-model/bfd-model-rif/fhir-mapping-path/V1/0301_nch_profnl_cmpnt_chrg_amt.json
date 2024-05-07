@@ -1,0 +1,42 @@
+{
+    "id": 301,
+    "name": "Professional Component Charge",
+    "description": "This field is the amount of physician and other professional charges covered under Medicare Part B.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_profnl_cmpnt_chrg_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "professionalComponentCharge",
+    "ccwMapping": [
+        "NCH_PROFNL_CMPNT_CHRG_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url =: 'https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

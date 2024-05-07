@@ -1,0 +1,46 @@
+{
+    "id": 54,
+    "name": "Claim ID",
+    "description": "This is the unique identification number for the claim.",
+    "appliesTo": [
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_id",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "claimId",
+    "ccwMapping": [
+        "CLM_ID"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_id'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

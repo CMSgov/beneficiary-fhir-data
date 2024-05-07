@@ -1,0 +1,45 @@
+{
+    "id": 115,
+    "name": "Dispensing Status Code",
+    "description": "This field indicates how the pharmacy dispensed the complete quantity of the prescription.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "dspnsng_stus_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "dispensingStatusCode",
+    "ccwMapping": [
+        "DSPNSNG_STUS_CD"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_DSPNSNG_STUS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/dspnsng_stus_cd'"
+            ],
+            "additional": [
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/dspnsng_stus_cd'",
+                "eob.information[N].category.coding[N].display = 'Dispensing Status Code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

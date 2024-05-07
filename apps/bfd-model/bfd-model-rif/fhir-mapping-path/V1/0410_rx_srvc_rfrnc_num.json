@@ -1,0 +1,41 @@
+{
+    "id": 410,
+    "name": "Prescription Reference Number",
+    "description": "This field contains the prescription reference number assigned by the pharmacy at the time the prescription is filled.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rx_srvc_rfrnc_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "prescriptionReferenceNumber",
+    "ccwMapping": [
+        "RX_SRVC_RFRNC_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_RX_SRVC_RFRNC_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/rx_srvc_rfrnc_num'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

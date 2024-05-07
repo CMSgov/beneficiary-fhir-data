@@ -1,0 +1,43 @@
+{
+    "id": 409,
+    "name": "Prescription Origin Code",
+    "description": "This variable indicates whether the prescription was transmitted as an electronic prescription, by phone, by fax, or as a written paper copy.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rx_orgn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "prescriptionOriginationCode",
+    "ccwMapping": [
+        "RX_ORGN_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/rx_orgn_cd'"
+            ],
+            "additional": [
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "(eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/rx_orgn_cd'",
+                "eob.information[N].category.coding[N].display = 'Prescription Origination Code')"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

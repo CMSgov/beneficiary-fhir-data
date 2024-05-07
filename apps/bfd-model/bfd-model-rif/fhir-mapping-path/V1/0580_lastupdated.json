@@ -1,0 +1,38 @@
+{
+    "id": 580,
+    "name": "Last Updated Date",
+    "description": "The date that this record was last updated within the database.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "lastupdated",
+    "bfdDbType": "TIMESTAMP",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "lastUpdated",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "meta.lastUpdated",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

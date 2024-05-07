@@ -1,0 +1,43 @@
+{
+    "id": 419,
+    "name": "EOB Resource Last Updated Date",
+    "description": "The date that this record was last updated within the database.",
+    "appliesTo": [
+        "PDE",
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "",
+    "bfdDbType": "TIMESTAMP",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "lastUpdated",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "meta.lastUpdated",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "Format of the timestamp with time zone, of this field is as follows:  YYYY-MM-DDTHH24:MI:SS.TIMEZONE",
+            "example": ""
+        }
+    ]
+}

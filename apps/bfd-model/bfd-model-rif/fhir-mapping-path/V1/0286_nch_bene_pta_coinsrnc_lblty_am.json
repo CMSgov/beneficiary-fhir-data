@@ -1,0 +1,42 @@
+{
+    "id": 286,
+    "name": "Part A Coinsurance Liability Amount",
+    "description": "The amount of money for which the intermediary has determined that the beneficiary is liable for Part A coinsurance on the institutional claim.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_bene_pta_coinsrnc_lblty_am",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "partACoinsuranceLiabilityAmount",
+    "ccwMapping": [
+        "NCH_BENE_PTA_COINSRNC_LBLTY_AM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "extension[N].valueMoney.value",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/nch_bene_pta_coinsrnc_lblty_amt'"
+            ],
+            "additional": [
+                "eob.extension[N].valueMoney.system = 'urn:iso:std:iso:4217'",
+                "eob.extension[N].valueMoney.code = 'USD'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

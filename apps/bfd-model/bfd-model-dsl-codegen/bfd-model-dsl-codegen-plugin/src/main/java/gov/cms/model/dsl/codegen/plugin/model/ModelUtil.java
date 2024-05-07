@@ -1,15 +1,13 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
-import ca.uhn.fhir.model.api.annotation.Child;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import gov.cms.model.dsl.codegen.plugin.util.Version;
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -17,19 +15,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import lombok.Builder;
 import lombok.Data;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Patient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -41,14 +33,16 @@ public class ModelUtil {
   private static final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
   /**
-   * Map mapping id and table type to categories in appliesTo collection in FhirElementBean.
+   * Map FHIR Elements to Claim type based off mapping id, table type, and the appliesTo collection
+   * within an FhirElementBean.
    *
    * @param mappingId s
    * @param fhirElementBean s
    * @param tableType stuff
    * @return boolean stuff
    */
-  private static boolean map(String mappingId, FhirElementBean fhirElementBean, String tableType) {
+  private static boolean mapFhirElementsToClaimType(
+      String mappingId, FhirElementBean fhirElementBean, String tableType) {
     List<String> appliesTo = fhirElementBean.getAppliesTo();
     if ((mappingId.equals("InpatientClaim") && tableType.equals("CLAIM"))
         || (mappingId.equals("InpatientClaimLine") && tableType.equals("CLAIM LINE"))) {
@@ -99,7 +93,7 @@ public class ModelUtil {
         // Coverage Payer, Coverage Resource Profile, CoverageType
         return true;
       }*/
-    // TODO: ask about how to handle these cases ^
+    // TODO: ask about how to better handle these cases ^
 
     return false;
   }
@@ -123,39 +117,37 @@ public class ModelUtil {
     return loadMappingsFromYamlFileOrDirectory(mappingPath);
   }
 
-  /*public static RootBean loadModelFromYamlFileAndJsonFiles(
-      String mappingPath, String fhirMappingPath) throws IOException {
-    if (!isValidMappingSource(mappingPath)) {
-      throw new IOException("mappingPath not defined or does not exist");
-    }
-
-    return loadMappingsFromYamlFileAndJsonFiles(mappingPath, fhirMappingPath);
-  }*/
-
   /**
    * Load all mappings from the provided file or directory. If a directory is provided all YAML
    * files in that directory will be loaded.
    *
    * @param mappingPath path to a file or directory containing mappings
-   * @param fhirEntitiesDirectory stuff
-   * @param fhirMappingPath stuff
+   * @param fhirEntitiesDirectory path to a file or directory containing FHIR resource mappings
+   * @param dataDictionaryDataPath data dictionary data path
    * @param codeBookPath stuff
-   * @return consolidated {@link RootBean} containing all mappings
+   * @param dataDictionary dataDictionary
+   * @return a DataDictionary
    * @throws IOException if any I/O errors prevent loading
    */
-  public static RootBean appendFhirElementsToYamlFiles(
-      String mappingPath, File fhirEntitiesDirectory, String fhirMappingPath, String codeBookPath)
+  public static DataDictionary createDataDictionary(
+      String mappingPath,
+      File fhirEntitiesDirectory,
+      String dataDictionaryDataPath,
+      String codeBookPath,
+      DataDictionary dataDictionary)
       throws IOException {
     if (!isValidMappingSource(mappingPath)) {
       throw new IOException("mappingPath not defined or does not exist");
+    } else if (!isValidMappingSource(dataDictionaryDataPath)) {
+      throw new IOException("dataDictionaryDataPath not defined or does not exist");
     }
 
-    return loadFhirElementsFromJsonFiles(
-        mappingPath, fhirEntitiesDirectory, fhirMappingPath, codeBookPath);
+    return loadFhirElementsToDataDictionary(
+        mappingPath, fhirEntitiesDirectory, dataDictionaryDataPath, codeBookPath, dataDictionary);
   }
 
   /**
-   * Extracts descriptions of each variable from the xml files parsed from the code books.
+   * Extracts descriptions of each variable from the xml files parsed from the code book.
    *
    * @param codeBookPath path of xml files parsed from the code books
    * @return map that maps variable IDs to descriptions
@@ -195,66 +187,6 @@ public class ModelUtil {
       }
     }
     return variableIdToDescription;
-  }
-
-  /**
-   * this.
-   *
-   * @param fhirElementBean this
-   * @return FhirElementBean
-   */
-  public static FhirElementBean buildFhirPath(FhirElementBean fhirElementBean) {
-    Map<String, Class<?>> fhirClassesMap =
-        new HashMap<>() {
-          {
-            put("Coverage", Coverage.class);
-            put("ExplanationOfBenefit", ExplanationOfBenefit.class);
-            put("Patient", Patient.class);
-          }
-        };
-
-    List<FhirMapping> fhirMappings = fhirElementBean.getFhirMapping();
-    for (FhirMapping fhirMapping : fhirMappings) {
-      String resource = fhirMapping.getResource();
-      if (!resource.isEmpty()) {
-        Set<String> fhirElements = findFields(fhirClassesMap.get(resource), Child.class);
-        String currentElement = fhirMapping.getElement();
-        if (!currentElement.isEmpty()) {
-          String[] splitCurrentElement = currentElement.split("\\.");
-
-          if (fhirElements.contains(splitCurrentElement[0])) {
-            // fhir path is the expression under search parameters in specification
-            fhirMapping.setFhirPath(currentElement);
-          } else {
-            // element is an extension
-            System.out.println("element is an extension");
-          }
-        }
-      }
-    }
-    fhirElementBean.setFhirMapping(fhirMappings);
-    return fhirElementBean;
-  }
-
-  /**
-   * this.
-   *
-   * @param classs this
-   * @param ann this
-   * @return elements of a resource
-   */
-  public static Set<String> findFields(Class<?> classs, Class<? extends Annotation> ann) {
-    Set<String> set = new HashSet<>();
-    Class<?> c = classs;
-    while (c != null) {
-      for (Field field : c.getDeclaredFields()) {
-        if (field.isAnnotationPresent(ann)) {
-          set.add(field.getName());
-        }
-      }
-      c = c.getSuperclass();
-    }
-    return set;
   }
 
   /**
@@ -339,59 +271,6 @@ public class ModelUtil {
     return combinedRoot;
   }
 
-  /*private static RootBean loadMappingsFromYamlFileAndJsonFiles(
-      String mappingPath, String fhirMappingPath) throws IOException {
-    final var file = new File(mappingPath);
-    final var fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-    if (fileAttributes.isRegularFile()) {
-      return objectMapper.readValue(file, RootBean.class);
-    }
-    if (!fileAttributes.isDirectory()) {
-      throw new IOException("expected a file or directory: " + mappingPath);
-    }
-
-    var combinedRoot = new RootBean(new ArrayList<>());
-    var mappingFiles = file.listFiles(f -> f.getName().endsWith(".yaml"));
-    if (mappingFiles != null) {
-      List<FhirElementBean> allFhirElements = convertJsonFilesToFhirElementBeans(fhirMappingPath);
-      for (File mappingFile : mappingFiles) {
-        RootBean rootBean = objectMapper.readValue(mappingFile, RootBean.class);
-        rootBean.getMappings().stream()
-            .forEach(
-                mappingBean -> {
-                  // collect corresponding fhir elements for mapping
-                  List<FhirElementBean> fhirElements =
-                      allFhirElements.stream()
-                          .filter(
-                              fhirElementBean ->
-                                  map(
-                                      mappingBean.getId(),
-                                      fhirElementBean,
-                                      fhirElementBean.getBfdTableType()))
-                          .map(
-                              fhirElementBean -> {
-                                // identify column that contains data corresponding to json file
-                                TableBean tableBean = mappingBean.getTable();
-                                String tableName = tableBean.getName();
-                                Optional<ColumnBean> columnFound =
-                                    findColumn(fhirElementBean, tableBean);
-
-                                // Update Fhir Element fields
-                                fhirElementBean.setBfdTableType(tableName);
-                                updateFhirElements(fhirElementBean, mappingBean, columnFound);
-                                return fhirElementBean;
-                              })
-                          .collect(Collectors.toList());
-
-                  mappingBean.setR4FhirElements(fhirElements);
-                });
-
-        combinedRoot.addMappingsFrom(rootBean);
-      }
-    }
-    return combinedRoot;
-  }*/
-
   /**
    * hi.
    *
@@ -433,13 +312,13 @@ public class ModelUtil {
   }
 
   /**
-   * hi.
+   * Updates FhirElementBean from data existing on BFD.
    *
-   * @param fhirElementBean stuff
-   * @param mappingBean stuff
-   * @param columnBean stuff
-   * @param ccwMappingToDescriptionMap stuff
-   * @return stuff
+   * @param fhirElementBean fhirElementBean
+   * @param mappingBean mappingBean
+   * @param columnBean columnBean
+   * @param ccwMappingToDescriptionMap ccwMappingToDescriptionMap
+   * @return updated FhirElementBean
    */
   private static FhirElementBean updateFhirElements(
       FhirElementBean fhirElementBean,
@@ -466,7 +345,7 @@ public class ModelUtil {
         }
       }
 
-      return buildFhirPath(fhirElementBean);
+      return fhirElementBean;
     } else {
       System.out.println(
           "Couldn't find column based off bfdColumnName. Defaults to using values in json");
@@ -477,40 +356,34 @@ public class ModelUtil {
   /**
    * Load mappings from the given path.
    *
-   * @param mappingPath path to a file or directory
-   * @param fhirEntitiesDirectory stuff
-   * @param fhirMappingPath stuff
-   * @param codeBookPath stuff
-   * @return a {@link RootBean} containing the mappings loaded from path
+   * @param mappingPath path mapping files
+   * @param fhirEntitiesDirectory path to a file or directory containing FHIR resource mappings
+   * @param dataDictionaryDataPath path to data dictionary data
+   * @param codeBookPath path to a directory containing the codebook xml files
+   * @param dataDictionary data dictionary pojo
+   * @return data dictionary pojo
    * @throws IOException if anything could not be loaded
    */
-  private static RootBean loadFhirElementsFromJsonFiles(
-      String mappingPath, File fhirEntitiesDirectory, String fhirMappingPath, String codeBookPath)
+  private static DataDictionary loadFhirElementsToDataDictionary(
+      String mappingPath,
+      File fhirEntitiesDirectory,
+      String dataDictionaryDataPath,
+      String codeBookPath,
+      DataDictionary dataDictionary)
       throws IOException {
     final var file = new File(mappingPath);
     final var fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-    if (fileAttributes.isRegularFile()) {
-      return objectMapper.readValue(file, RootBean.class);
-    }
     if (!fileAttributes.isDirectory()) {
-      throw new IOException("expected a file or directory: " + mappingPath);
+      throw new IOException("expected a directory: " + mappingPath);
     }
 
-    var combinedRoot = new RootBean(new ArrayList<>());
     var mappingFiles = file.listFiles(f -> f.getName().endsWith(".yaml"));
     if (mappingFiles != null) {
-      List<FhirElementBean> allFhirElements = convertJsonFilesToFhirElementBeans(fhirMappingPath);
+      List<FhirElementBean> allFhirElements =
+          convertJsonFilesToFhirElementBeans(dataDictionaryDataPath);
       Map<String, String> ccwMappingToDescriptionMap = getDescriptionsFromCodeBook(codeBookPath);
 
-      Map<String, List<FhirElementBean>> fhirResources =
-          new HashMap<>() {
-            {
-              put("", new ArrayList<>());
-              put("Coverage", new ArrayList<>());
-              put("ExplanationOfBenefit", new ArrayList<>());
-              put("Patient", new ArrayList<>());
-            }
-          };
+      List<FhirElementBean> updatedFhirElements = new ArrayList<>();
 
       for (File mappingFile : mappingFiles) {
         // collect corresponding fhir elements for mapping
@@ -522,7 +395,7 @@ public class ModelUtil {
                       allFhirElements.stream()
                           .filter(
                               fhirElementBean ->
-                                  map(
+                                  mapFhirElementsToClaimType(
                                       mappingBean.getId(),
                                       fhirElementBean,
                                       fhirElementBean.getBfdTableType()))
@@ -534,8 +407,7 @@ public class ModelUtil {
                                 Optional<ColumnBean> columnFound =
                                     findColumn(fhirElementBean, tableBean);
 
-                                // Update Fhir Element fields
-                                fhirElementBean.setMappingId(mappingBean.getId());
+                                // Update data dictionary fields
                                 fhirElementBean.setBfdTableType(tableName);
                                 updateFhirElements(
                                     fhirElementBean,
@@ -544,34 +416,30 @@ public class ModelUtil {
                                     ccwMappingToDescriptionMap);
                                 return fhirElementBean;
                               })
-                          .collect(Collectors.toList());
+                          .toList();
 
                   if (!fhirElements.isEmpty()) {
-                    mappingBean.setR4FhirElements(fhirElements);
-                    // fhirElements group by fhir resource
-                    aggregateFhirResourceGroups(fhirElements, fhirResources);
+                    updatedFhirElements.addAll(fhirElements);
                   }
                 });
-        combinedRoot.addMappingsFrom(rootBean);
       }
-
-      // create yaml files
-      for (Map.Entry<String, List<FhirElementBean>> entry : fhirResources.entrySet()) {
-        FhirResourceMapping fhirResourceMapping =
-            FhirResourceMapping.builder().fhirVersion("R4").fhirElements(entry.getValue()).build();
-        objectMapper.writeValue(
-            new File(fhirEntitiesDirectory + "/" + entry.getKey() + ".yaml"), fhirResourceMapping);
-      }
+      addFhirElementsByResourceToDataDictionary(
+          updatedFhirElements, dataDictionary, fhirEntitiesDirectory);
     }
-    return combinedRoot;
+    return dataDictionary;
   }
 
-  /** Utility methods for use by and with the various model classes. */
+  /**
+   * Data transfer object used for creating the FHIR resource yaml files and data dictionary POJO.
+   */
   @Builder
   @Data
   public static class FhirResourceMapping {
     /** FHIR Version. */
     private String fhirVersion;
+
+    /** FHIR Resource Class Type. */
+    private String fhirResourceClassType;
 
     /** List of FHIR elements. */
     private List<FhirElementBean> fhirElements;
@@ -581,29 +449,60 @@ public class ModelUtil {
    * Compute the appropriate {@link TypeName} to use for the given {@code javaType}.
    *
    * @param fhirElements hi
-   * @param fhirResources hi
+   * @param dataDictionary hi
+   * @param fhirEntitiesDirectory path to a file or directory containing FHIR resource mappings
    */
-  private static void aggregateFhirResourceGroups(
-      List<FhirElementBean> fhirElements, Map<String, List<FhirElementBean>> fhirResources) {
+  private static void addFhirElementsByResourceToDataDictionary(
+      List<FhirElementBean> fhirElements, DataDictionary dataDictionary, File fhirEntitiesDirectory)
+      throws IOException {
     Map<String, List<FhirElementBean>> fhirResourceGroups =
-        fhirElements.stream()
-            .collect(
-                Collectors.groupingBy(
-                    element -> {
-                      List<FhirMapping> fhirMappings = element.getFhirMapping();
-                      if (!fhirMappings.isEmpty()) {
-                        return element.getFhirMapping().getFirst().getResource();
-                      }
-                      return ""; // todo: investigate case where R4 resource not specified
-                    }));
+        dataDictionary.groupFhirElementsByResource(fhirElements);
+
+    dataDictionary.setAllFhirElements(fhirElements);
 
     for (Map.Entry<String, List<FhirElementBean>> entry : fhirResourceGroups.entrySet()) {
-      List<FhirElementBean> currentFhirResources = fhirResources.get(entry.getKey());
-      if (currentFhirResources != null) {
-        currentFhirResources.addAll(entry.getValue());
-        fhirResources.put(entry.getKey(), currentFhirResources);
+      FhirResourceMapping fhirResourceMapping =
+          FhirResourceMapping.builder()
+              .fhirVersion(dataDictionary.getVersion().label)
+              .fhirElements(entry.getValue())
+              .build();
+      switch (entry.getKey()) {
+        case "Patient":
+          fhirResourceMapping.setFhirResourceClassType(
+              constructFhirResourceClassType(dataDictionary.getVersion(), entry.getKey()));
+          dataDictionary.setPatientFhirElements(entry.getValue());
+          objectMapper.writeValue(
+              new File(fhirEntitiesDirectory + "/" + entry.getKey() + ".yaml"),
+              fhirResourceMapping);
+        case "Coverage":
+          fhirResourceMapping.setFhirResourceClassType(
+              constructFhirResourceClassType(dataDictionary.getVersion(), entry.getKey()));
+          dataDictionary.setCoverageFhirElements(entry.getValue());
+          objectMapper.writeValue(
+              new File(fhirEntitiesDirectory + "/" + entry.getKey() + ".yaml"),
+              fhirResourceMapping);
+        case "ExplanationOfBenefit":
+          fhirResourceMapping.setFhirResourceClassType(
+              constructFhirResourceClassType(dataDictionary.getVersion(), entry.getKey()));
+          dataDictionary.setExplanationOfBenefitFhirElements(entry.getValue());
+          objectMapper.writeValue(
+              new File(fhirEntitiesDirectory + "/" + entry.getKey() + ".yaml"),
+              fhirResourceMapping);
+        default:
+          System.out.println("FHIR Resource " + entry.getKey() + " is not supported.");
       }
     }
+  }
+
+  /**
+   * Constructs FHIR resource class type.
+   *
+   * @param version version
+   * @param fhirResource fhirResource
+   * @return fhirResourceClassType
+   */
+  public static String constructFhirResourceClassType(Version version, String fhirResource) {
+    return "org.hl7.fhir." + version.label + ".model." + fhirResource;
   }
 
   /**

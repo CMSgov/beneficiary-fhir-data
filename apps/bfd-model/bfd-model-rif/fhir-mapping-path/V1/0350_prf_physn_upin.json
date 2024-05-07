@@ -1,0 +1,36 @@
+{
+    "id": 350,
+    "name": "Performing Physician UPIN",
+    "description": "The unique physician identification number (UPIN) of the physician who performed the service for this line item on the carrier claim (non-DMERC).",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prf_physn_upin",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "performingPhysicianUpin",
+    "ccwMapping": [
+        "PRF_PHYSN_UPIN"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

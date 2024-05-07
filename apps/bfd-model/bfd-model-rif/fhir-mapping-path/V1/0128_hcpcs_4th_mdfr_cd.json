@@ -1,0 +1,40 @@
+{
+    "id": 128,
+    "name": "HCPCS Fourth Modifier Code",
+    "description": "A fourth modifier to the Healthcare Common Procedure Coding System (HCPCS) procedure code to make it more specific than the first, second, or third modifier codes identify the revenue center or line-item services for the claim.",
+    "appliesTo": [
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "hcpcs_4th_mdfr_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "hcpcsFourthModifierCode",
+    "ccwMapping": [
+        "HCPCS_4TH_MDFR_CD"
+    ],
+    "cclfMapping": [
+        "CCLF2.HCPCS_4_MDFR_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].modifier[N].coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].modifier[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/hcpcs'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "The eob.item[N].modifier[N].coding[N].version is set by the hcpcs year.",
+            "example": ""
+        }
+    ]
+}

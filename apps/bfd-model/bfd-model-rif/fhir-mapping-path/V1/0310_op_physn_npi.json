@@ -1,0 +1,48 @@
+{
+    "id": 310,
+    "name": "Operating Physician NPI",
+    "description": "On an institutional claim, the National Provider Identifier (NPI) number assigned to uniquely identify the physician with the primary responsibility for performing the surgical procedure(s).",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "op_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "operatingPhysicianNpi",
+    "ccwMapping": [
+        "OP_PHYSN_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF1.OPRTG_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].role.coding[N].code = 'assist'",
+                "careTeam[N].provider.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi'"
+            ],
+            "additional": [
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/claimcareteamrole'",
+                "eob.careTeam[N].role.coding[N].display = 'Assisting Provider'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

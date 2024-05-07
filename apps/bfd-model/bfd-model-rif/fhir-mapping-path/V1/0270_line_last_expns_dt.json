@@ -1,0 +1,41 @@
+{
+    "id": 270,
+    "name": "Last Expense Date",
+    "description": "The ending date (last expense) for the line-item service on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_last_expns_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "lastExpenseDate",
+    "ccwMapping": [
+        "LINE_LAST_EXPNS_DT"
+    ],
+    "cclfMapping": [
+        "CCLF5.CLM_LINE_THRU_DT"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].servicedPeriod.end",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "IF both firstExpenseDate and lastExpenseDate are populated then eob.item[N].servicedPeriod will be populated, otherwise this will be missing.",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

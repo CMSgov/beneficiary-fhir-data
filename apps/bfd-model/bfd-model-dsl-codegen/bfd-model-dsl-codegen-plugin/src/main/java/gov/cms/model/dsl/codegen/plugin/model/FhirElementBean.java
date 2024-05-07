@@ -1,6 +1,8 @@
 package gov.cms.model.dsl.codegen.plugin.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +15,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FhirElementBean implements ModelBean {
 
-  /** Mapping Id. */
-  private String mappingId;
-
   /** Id. */
   private int id;
 
@@ -27,6 +26,14 @@ public class FhirElementBean implements ModelBean {
 
   /** List of String, Applies To. */
   private List<String> appliesTo;
+
+  /** Maps fields from appliesTo to source entity class types. */
+  private Map<String, String> sourceEntityClassNames =
+      new HashMap<>() {
+        {
+          put("DME", "gov.cms.bfd.model.rif.entities.DMEClaim");
+        }
+      };
 
   /** List of String, Supplied In. */
   private List<String> suppliedIn;

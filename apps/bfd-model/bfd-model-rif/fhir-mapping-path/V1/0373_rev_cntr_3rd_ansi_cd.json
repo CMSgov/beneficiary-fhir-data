@@ -1,0 +1,41 @@
+{
+    "id": 373,
+    "name": "Revenue Center 3rd ANSI Code",
+    "description": "The third code used to identify the detailed reason an adjustment was made (e.g., reason for denial or reducing payment).",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_3rd_ansi_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 5,
+    "bfdJavaFieldName": "revCntr3rdAnsiCd",
+    "ccwMapping": [
+        "REV_CNTR_3RD_ANSI_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].reason.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication.reason.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_3rd_ansi_cd'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication.category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_3rd_ansi_cd' ",
+                "eob.item[N].adjudication.category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "eob.item[N].adjudication.category.coding[N].display = 'Revenue Center 3rd ANSI Code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

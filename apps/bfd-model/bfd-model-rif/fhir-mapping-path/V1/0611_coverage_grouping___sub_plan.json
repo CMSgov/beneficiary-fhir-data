@@ -1,0 +1,38 @@
+{
+    "id": 611,
+    "name": "Coverage Grouping - Sub Plan",
+    "description": "Additional coverage classification. Identifies a sub-style or sub-collective of coverage issued by the underwriter, for example may be used to identify a subset of a collection of benefits provided to employees.",
+    "appliesTo": [
+        "Part-A",
+        "Part-B",
+        "Part-C",
+        "Part-D"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Coverage",
+            "element": "grouping.subPlan",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "Medicare Coverage Part (ie. If Part-A then 'Part A', if Part-D then 'Part D', etc..)",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

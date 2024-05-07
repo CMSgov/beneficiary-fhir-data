@@ -1,0 +1,38 @@
+{
+    "id": 22,
+    "name": "Carrier MTUS Count",
+    "description": "The count of the total units associated with services needing unit reporting such as transportation, miles, anesthesia time units, number of services, volume of oxygen or blood units.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "carr_line_mtus_cnt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 11,
+    "bfdJavaFieldName": "mtusCount",
+    "ccwMapping": [
+        "CARR_LINE_MTUS_CNT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueQuantity.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

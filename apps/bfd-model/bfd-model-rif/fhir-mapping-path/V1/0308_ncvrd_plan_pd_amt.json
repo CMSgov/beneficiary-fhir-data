@@ -1,0 +1,43 @@
+{
+    "id": 308,
+    "name": "Part D Plan Noncovered Paid Amount",
+    "description": "This is the net amount paid by the Part D plan (i.e., for enhanced alternative benefits) including cost sharing fill-in and/or non-Part D drugs. This dollar amount is excluded from risk corridor calculations.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "ncvrd_plan_pd_amt",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 10,
+    "bfdJavaFieldName": "partDPlanNonCoveredPaidAmount",
+    "ccwMapping": [
+        "NCVRD_PLAN_PD_AMT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].adjudication[N].amount.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].adjudication[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/adjudication'",
+                "item[N].adjudication[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/ncvrd_plan_pd_amt'"
+            ],
+            "additional": [
+                "eob.item[N].adjudication[N].category.coding[N].display = 'Amount paid by Part D plan for the PDE (drug is not covered by Part D)'",
+                "eob.item[N].adjudication[N].amount.system = 'urn:iso:std:iso:4217'",
+                "eob.item[N].adjudication[N].amount.code = 'USD'"
+            ],
+            "derived": "IF drugCoverageStatusCode != 'C' then this value is used",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

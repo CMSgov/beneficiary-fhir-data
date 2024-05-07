@@ -1,0 +1,44 @@
+{
+    "id": 10,
+    "name": "BETOS Code",
+    "description": "The Berenson-Eggers type of service (BETOS) for the procedure code based on generally agreed upon clinically meaningful groupings of procedures and services.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "betos_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "betosCode",
+    "ccwMapping": [
+        "BETOS_CD"
+    ],
+    "cclfMapping": [
+        "CCLF5.HCPCS_BETOS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/betos_cd'"
+            ],
+            "additional": [
+                "eob.item[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

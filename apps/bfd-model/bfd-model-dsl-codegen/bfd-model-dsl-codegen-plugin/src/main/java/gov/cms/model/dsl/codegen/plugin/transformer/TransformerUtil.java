@@ -3,6 +3,7 @@ package gov.cms.model.dsl.codegen.plugin.transformer;
 import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import gov.cms.model.dsl.codegen.plugin.GenerateDataDictionaryFromDslMojo;
 import gov.cms.model.dsl.codegen.plugin.model.ColumnBean;
 import gov.cms.model.dsl.codegen.plugin.model.MappingBean;
 import gov.cms.model.dsl.codegen.plugin.model.TransformationBean;
@@ -108,6 +109,9 @@ public class TransformerUtil {
    */
   public static final String Base64TransformerName = "Base64";
 
+  /** Fixed name for {@code transformer} field. */
+  public static final String IdentifierTransformName = "Identifier";
+
   /**
    * Regex used to detect special values in the {@code from} field of a {@link TransformationBean}
    * that indicate there is no corresponding {@link FieldTransformer}.
@@ -170,6 +174,9 @@ public class TransformerUtil {
   /** Shared instance of {@link Base64FieldTransformer}. */
   private static final Base64FieldTransformer Base64Instance = new Base64FieldTransformer();
 
+  /** Shared instance of {@link IdentifierTransformer}. */
+  private static final IdentifierTransformer IdentifierInstance = new IdentifierTransformer();
+
   /**
    * {@link Map} used internally to recognized standard {@link TransformationBean} {@code
    * transformer} values and their corresponding {@link FieldTransformer} instances.
@@ -196,6 +203,13 @@ public class TransformerUtil {
           UintToShortInstance,
           Base64TransformerName,
           Base64Instance);
+
+  /**
+   * {@link Map} used internally to recognize standard transformer values and their corresponding
+   * {@link FhirElementTransformer} instances.
+   */
+  private static final Map<String, FhirElementTransformer> fhirElementTransformersByName =
+      ImmutableMap.of(IdentifierTransformName, IdentifierInstance);
 
   /**
    * {@link Map} used internally to recognized standard {@link TransformationBean} {@code from}
@@ -291,6 +305,19 @@ public class TransformerUtil {
     }
 
     return answer;
+  }
+
+  /**
+   * Apply heuristics to select a {@link FhirElementTransformer} instance for the provided
+   * FhirTransformationDto.
+   *
+   * @param fhirTransformationDto model object describing the fhir element
+   * @return an {@link Optional} containing the {@link FhirElementTransformer} if one is appropriate
+   */
+  public static Optional<FhirElementTransformer> selectFhirElementTransformer(
+      GenerateDataDictionaryFromDslMojo.FhirTransformationDto fhirTransformationDto) {
+    String transformer = fhirTransformationDto.getFhirElementTransformer();
+    return Optional.ofNullable(fhirElementTransformersByName.get(transformer));
   }
 
   /**

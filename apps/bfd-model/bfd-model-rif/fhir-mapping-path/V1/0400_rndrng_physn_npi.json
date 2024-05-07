@@ -1,0 +1,47 @@
+{
+    "id": 400,
+    "name": "Rendering Physician NPI",
+    "description": "This variable is the National Provider Identifier (NPI) for the physician who rendered the services.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rndrng_physn_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "revenueCenterRenderingPhysicianNPI",
+    "ccwMapping": [
+        "RNDRNG_PHYSN_NPI"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value;item[N].careTeamLinkId",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi'",
+                "careTeam[N].role.coding[N].code = 'primary'"
+            ],
+            "additional": [
+                "eob.careTeam[N].role.coding[N].display = 'Primary Provider'",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/claimcareteamrole'"
+            ],
+            "derived": "",
+            "note": "There may be multiple primary providers within the care team.  The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamLinkId list for the line item.",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "id": 364,
+    "name": "Patient Discharge Status Code",
+    "description": "The code used to identify the status of the patient as of the Claim Through Date.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "ptnt_dschrg_stus_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "patientDischargeStatusCode",
+    "ccwMapping": [
+        "PTNT_DSCHRG_STUS_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.BENE_PTNT_STUS_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd'"
+            ],
+            "additional": [
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd'",
+                "eob.information[N].category.coding[N].display = 'Patient Discharge Status Code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

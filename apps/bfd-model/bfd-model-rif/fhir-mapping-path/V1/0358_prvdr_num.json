@@ -1,0 +1,45 @@
+{
+    "id": 358,
+    "name": "Provider Number",
+    "description": "This variable is the provider identification number.  OR The billing number assigned to the supplier of the Part B service/DMEPOS by the National Supplier Clearinghouse, as reported on the line item for the DMERC claim.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prvdr_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 6,
+    "bfdJavaFieldName": "providerNumber",
+    "ccwMapping": [
+        "PRVDR_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF1.PRVDR_OSCAR_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "provider.identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "provider.identifier[N].system = 'https://bluebutton.cms.gov/resources/variables/prvdr_num'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "For information about list elements and discriminators, see 'Slicing' in the Glossary tab",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "id": 283,
+    "name": "Beneficiary Discharge Date",
+    "description": "On an inpatient or Home Health claim, the date the beneficiary was discharged from the facility, or died.",
+    "appliesTo": [
+        "Inpatient",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "nch_bene_dschrg_dt",
+    "bfdDbType": "DATE",
+    "bfdDbSize": 8,
+    "bfdJavaFieldName": "beneficiaryDischargeDate",
+    "ccwMapping": [
+        "NCH_BENE_DSCHRG_DT"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "hospitalization.period.end",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

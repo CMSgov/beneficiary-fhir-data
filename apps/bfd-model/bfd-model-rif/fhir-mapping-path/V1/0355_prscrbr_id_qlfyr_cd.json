@@ -1,0 +1,39 @@
+{
+    "id": 355,
+    "name": "Prescriber Id Qualifier Code",
+    "description": "This variable contains information regarding the type of prescriber identification number that was submitted on the original PDE data, as reported by the Part D sponsor on the PDE record submitted to CMS.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "prscrbr_id_qlfyr_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "prescriberIdQualifierCode",
+    "ccwMapping": [
+        "PRSCRBR_ID_QLFYR_CD"
+    ],
+    "cclfMapping": [
+        "CCLF7.PRVDR_SRVC_ID_QLFYR_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "The eob.careTeam element, for this prescriber id qualifier code, will only be supplied if the Prescriber Id is populated and the Prescriber Id Qualifier Code = '01'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

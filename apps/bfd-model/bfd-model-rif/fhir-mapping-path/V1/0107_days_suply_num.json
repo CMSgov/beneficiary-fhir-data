@@ -1,0 +1,41 @@
+{
+    "id": 107,
+    "name": "Days Supply",
+    "description": "This field indicates the number of days' supply of medication dispensed by the pharmacy and consists of the amount the pharmacy enters for the prescription.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "days_suply_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 3,
+    "bfdJavaFieldName": "daysSupply",
+    "ccwMapping": [
+        "DAYS_SUPLY_NUM"
+    ],
+    "cclfMapping": [
+        "CCLF7.CLM_LINE_DAYS_SUPLY_QTY"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].quantity.extension[N].valueQuantity.value",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].quantity.extension[N].url = 'https://bluebutton.cms.gov/resources/variables/days_suply_num'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "id": 156,
+    "name": "External Diagnosis Code 1",
+    "description": "The code used to identify the external cause of injury, poisoning, or other adverse effect.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "icd_dgns_e_cd1",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosisExternal1Code",
+    "ccwMapping": [
+        "ICD_DGNS_E_CD1"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/diagnosis-type'",
+                "diagnosis[N].type[N].coding[N].code = 'external'"
+            ],
+            "additional": [
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.diagnosis[N].type.coding[N].display' = 'The code used to identify the 1st external cause of injury, poisoning, or other adverse effect.'",
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

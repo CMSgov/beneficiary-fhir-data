@@ -1,0 +1,44 @@
+{
+    "id": 120,
+    "name": "Final Action",
+    "description": "Indicator to demonstrate if a claim is still 'active' or not ('cancelled'). Final action records are only indicative of the latest accepted record within a claim family that has been linked by the Medicare Advantage Organization (MAO) and may not be indicative of risk-adjustment eligibility.",
+    "appliesTo": [
+        "PDE",
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "final_action",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "finalAction",
+    "ccwMapping": [
+        "FINAL_ACTION"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "status",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "If = 'F' then 'ACTIVE' else if = 'N' then 'CANCELLED'",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+{
+    "id": 28,
+    "name": "Performing Provider Id Number",
+    "description": "The provider identification number (PIN) of the physician/supplier (assigned by the Medicare Administrative Contractor [MAC]) who performed the service for this line item.",
+    "appliesTo": [
+        "Carrier"
+    ],
+    "suppliedIn": [
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "carr_prfrng_pin_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 15,
+    "bfdJavaFieldName": "performingProviderIdNumber",
+    "ccwMapping": [
+        "CARR_PRFRNG_PIN_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

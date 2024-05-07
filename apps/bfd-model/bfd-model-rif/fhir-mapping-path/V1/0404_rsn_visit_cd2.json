@@ -1,0 +1,45 @@
+{
+    "id": 404,
+    "name": "Reason For Visit Diagnosis Code 2",
+    "description": "The diagnosis code used to identify the patient's reason for the Hospital Outpatient visit.",
+    "appliesTo": [
+        "Outpatient"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "rsn_visit_cd2",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosisAdmission2Code",
+    "ccwMapping": [
+        "RSN_VISIT_CD2"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/diagnosis-type'",
+                "diagnosis[N].type[N].coding[N].code = 'reason-for-visit'"
+            ],
+            "additional": [
+                "Depending upon the related Diagnosis Code Version:",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10')",
+                "eob.diagnosis[N].type[N].coding[N].display = 'A diagnosis code used to identify the patient's reason for the visit.'",
+                "eob.diagnosis[N].sequence = ?"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

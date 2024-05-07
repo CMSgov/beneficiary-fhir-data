@@ -1,0 +1,34 @@
+{
+    "id": 390,
+    "name": "Revenue Center Payment Method Indicator Code",
+    "description": "The code used to identify how the service is priced for payment.",
+    "appliesTo": [
+        "Outpatient",
+        "HHA"
+    ],
+    "suppliedIn": [
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "rev_cntr_pmt_mthd_ind_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "paymentMethodCode",
+    "ccwMapping": [
+        "REV_CNTR_PMT_MTHD_IND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "",
+            "element": "",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

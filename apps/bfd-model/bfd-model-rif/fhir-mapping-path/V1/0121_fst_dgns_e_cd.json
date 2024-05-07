@@ -1,0 +1,50 @@
+{
+    "id": 121,
+    "name": "External Diagnosis First Code",
+    "description": "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect. This diagnosis E code is also stored as the 1st occurrence of the diagnosis E code trailer.",
+    "appliesTo": [
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "fst_dgns_e_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 7,
+    "bfdJavaFieldName": "diagnosisExternalFirstCode",
+    "ccwMapping": [
+        "FST_DGNS_E_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].diagnosisCodeableConcept.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].type[N].coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/diagnosis-type'",
+                "diagnosis[N].type[N].coding[N].code = 'external-first'"
+            ],
+            "additional": [
+                "eob.diagnosis[N].sequence = # selected by the code depending upon order of diagnosis'",
+                "eob.diagnosis[N].type[N].coding[N].display = 'The code used to identify the 1st external cause of injury, poisoning, or other adverse effect.'",
+                "Depending upon the related External First Diagnosis Code Version: ",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-9-cm'",
+                "eob.diagnosis[N].diagnosisCodeableConcept.coding[N].system = 'http://hl7.org/fhir/sid/icd-10'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

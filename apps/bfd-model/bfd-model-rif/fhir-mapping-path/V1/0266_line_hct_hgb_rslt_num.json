@@ -1,0 +1,43 @@
+{
+    "id": 266,
+    "name": "HCT/HGB Test Result",
+    "description": "This is the laboratory value for the most recent hematocrit or hemoglobin reading on the non-institutional claim.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_hct_hgb_rslt_num",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 4,
+    "bfdJavaFieldName": "hctHgbTestResult",
+    "ccwMapping": [
+        "LINE_HCT_HGB_RSLT_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueReference.value; contained[N].valueQuantity.value",
+            "fhirPath": "",
+            "discriminator": [
+                "contained[N].resourceType = 'Observation'",
+                "contained[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/line_hct_hgb_type_cd'"
+            ],
+            "additional": [
+                "eob.contained[N].id = <unique identifier derived '#'> (ie.. 6)",
+                "eob.contained[N].status = 'unknown'"
+            ],
+            "derived": "eob.item[N].extension[N].valueReference.value = <unique identifier derived '#'> (ie.. 6)",
+            "note": "The value stored in eob.contained[N].id will match the value stored in eob.item[N].extension[N].valueReference.value. It will be the code generated unique identifier for the observation.",
+            "example": ""
+        }
+    ]
+}

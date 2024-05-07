@@ -1,0 +1,47 @@
+{
+    "id": 357,
+    "name": "Provider NPI",
+    "description": "The National Provider Identifier (NPI) assigned to the supplier of the Part B service/DMEPOS line item.",
+    "appliesTo": [
+        "DME"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "prvdr_npi",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 12,
+    "bfdJavaFieldName": "providerNPI",
+    "ccwMapping": [
+        "PRVDR_NPI"
+    ],
+    "cclfMapping": [
+        "CCLF6.PAYTO_PRVDR_NPI_NUM"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "careTeam[N].provider.identifier[N].value;item[N].careTeamLinkId",
+            "fhirPath": "",
+            "discriminator": [
+                "careTeam[N].provider.identifier[N].system = 'http://hl7.org/fhir/sid/us-npi'",
+                "careTeam[N].role.coding[N].code = 'primary'"
+            ],
+            "additional": [
+                "eob.careTeam[N].responsible = true",
+                "eob.careTeam[N].role.coding[N].system = 'http://hl7.org/fhir/claimcareteamrole'",
+                "eob.careTeam[N].role.coding[N].system = 'Primary Provider'"
+            ],
+            "derived": "",
+            "note": "The eob.careTeam[N].sequence will be stored in the eob.item[N].careTeamLinkId list.",
+            "example": ""
+        }
+    ]
+}

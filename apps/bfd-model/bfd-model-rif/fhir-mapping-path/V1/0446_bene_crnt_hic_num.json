@@ -1,0 +1,38 @@
+{
+    "id": 446,
+    "name": "Hashed HICN",
+    "description": "A hashed version of the Health Insurance Claim Number to protect the PII for the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_crnt_hic_num",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 64,
+    "bfdJavaFieldName": "hicn",
+    "ccwMapping": [
+        "BENE_CRNT_HIC_NUM"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "identifier[N].value",
+            "fhirPath": "",
+            "discriminator": [
+                "identifier[N].system = 'https://bluebutton.cms.gov/resources/identifier/hicn-hash'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "id": 448,
+    "name": "Beneficiary Middle Name",
+    "description": "The middle name of the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_srnm_name",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 24,
+    "bfdJavaFieldName": "nameSurname",
+    "ccwMapping": [
+        "BENE_SRNM_NAME"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_LAST_NAME"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "name[N].family",
+            "fhirPath": "",
+            "discriminator": [
+                "name[N].use = 'usual'"
+            ],
+            "additional": [],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

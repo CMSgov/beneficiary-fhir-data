@@ -1,0 +1,44 @@
+{
+    "id": 442,
+    "name": "Beneficiary Race Code",
+    "description": "The race of the beneficiary.",
+    "appliesTo": [
+        ""
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "BENEFICIARIES",
+    "bfdColumnName": "bene_race_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "race",
+    "ccwMapping": [
+        "BENE_RACE_CD"
+    ],
+    "cclfMapping": [
+        "CCLF8.BENE_RACE_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "Patient",
+            "element": "extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "extension[N].url = 'https://bluebutton.cms.gov/resources/variables/race'"
+            ],
+            "additional": [
+                "patient.extension[N].valueCoding.system = 'https://bluebutton.cms.gov/resources/variables/race'",
+                "patient.extension[N].valueCoding.display = {corresponding description from valueset specified in .system}+P448"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

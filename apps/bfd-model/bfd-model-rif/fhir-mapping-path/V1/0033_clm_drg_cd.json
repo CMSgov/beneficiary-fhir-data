@@ -1,0 +1,45 @@
+{
+    "id": 33,
+    "name": "Related Diagnosis Group Code",
+    "description": "The diagnostic related group to which a hospital claim belongs for prospective payment purposes.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "AB2D",
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_drg_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 4,
+    "bfdJavaFieldName": "diagnosisRelatedGroupCd",
+    "ccwMapping": [
+        "CLM_DRG_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.DGNS_DRG_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "diagnosis[N].packageCode.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "diagnosis[N].packageCode.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_drg_cd'"
+            ],
+            "additional": [
+                "eob.diagnosis[N].packageCode.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

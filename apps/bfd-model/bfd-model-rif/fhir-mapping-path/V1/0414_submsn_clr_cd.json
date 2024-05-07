@@ -1,0 +1,42 @@
+{
+    "id": 414,
+    "name": "Submission Clarification Code",
+    "description": "For beneficiaries living in long-term care (LTC) facilities, this variable indicates how many days\u2019 supply of the medication was dispensed by the long-term care pharmacy and provides some details about the dispensing event.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "submsn_clr_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "submissionClarificationCode",
+    "ccwMapping": [
+        "SUBMSN_CLR_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/submsn_clr_cd'"
+            ],
+            "additional": [
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/ptnt_rsdnc_cd'",
+                "eob.information[N].category.coding[N].display = 'Submission clarification code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

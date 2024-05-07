@@ -1,0 +1,47 @@
+{
+    "id": 97,
+    "name": "Source Admission Code",
+    "description": "The code indicating the source of the referral for the admission or visit.",
+    "appliesTo": [
+        "Inpatient",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BCDA",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "clm_src_ip_admsn_cd",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "sourceAdmissionCd",
+    "ccwMapping": [
+        "CLM_SRC_IP_ADMSN_CD"
+    ],
+    "cclfMapping": [
+        "CCLF1.CLM_ADMSN_SRC_CD"
+    ],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "information[N].code.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd'"
+            ],
+            "additional": [
+                "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
+                "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd'",
+                "eob.information[N].category.coding[N].display = 'Claim Source Inpatient Admission Code'"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

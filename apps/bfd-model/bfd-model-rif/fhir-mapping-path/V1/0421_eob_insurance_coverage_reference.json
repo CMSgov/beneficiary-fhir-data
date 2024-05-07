@@ -1,0 +1,42 @@
+{
+    "id": 421,
+    "name": "EOB Insurance Coverage Reference",
+    "description": "Reference to the insurance card level information contained in the Coverage resource. The coverage issuing insurer will use these details to locate the patient's actual coverage within the insurer's information system.",
+    "appliesTo": [
+        "PDE",
+        "Carrier",
+        "Inpatient",
+        "Outpatient",
+        "HHA",
+        "DME",
+        "Hospice",
+        "SNF"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "",
+    "bfdColumnName": "",
+    "bfdDbType": "",
+    "bfdDbSize": null,
+    "bfdJavaFieldName": "",
+    "ccwMapping": [
+        ""
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "insurance.coverage.reference",
+            "fhirPath": "",
+            "discriminator": [],
+            "additional": [],
+            "derived": "Coverage/'<medicare coverage part>'-'<bene id>  ie... 'Coverage/part-b-1234567'  The medicare coverage part depends upon the claim type, for example PDE claims would be part-d.  The bene id is the CMS created beneficiary id.",
+            "note": "This reference allows one to pull data from the Coverage FHIR resource for a beneficiary.",
+            "example": ""
+        }
+    ]
+}

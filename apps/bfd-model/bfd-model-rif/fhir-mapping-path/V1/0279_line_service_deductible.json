@@ -1,0 +1,40 @@
+{
+    "id": 279,
+    "name": "Service Deductible Code",
+    "description": "Switch indicating whether or not the line-item service on the non-institutional claim is subject to a deductible.",
+    "appliesTo": [
+        "Carrier",
+        "DME"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC"
+    ],
+    "bfdTableType": "CLAIM LINE",
+    "bfdColumnName": "line_service_deductible",
+    "bfdDbType": "CHAR",
+    "bfdDbSize": 1,
+    "bfdJavaFieldName": "serviceDeductibleCode",
+    "ccwMapping": [
+        "LINE_SERVICE_DEDUCTIBLE"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "item[N].extension[N].valueCoding.code",
+            "fhirPath": "",
+            "discriminator": [
+                "item[N].extension[N].url = 'https://bluebutton.cms.gov/resources/variables/line_service_deductible'"
+            ],
+            "additional": [
+                "eob.item[N].extension[N].valueCoding.display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "",
+            "note": "",
+            "example": ""
+        }
+    ]
+}

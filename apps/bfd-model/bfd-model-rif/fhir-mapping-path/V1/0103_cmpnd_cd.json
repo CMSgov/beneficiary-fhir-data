@@ -1,0 +1,40 @@
+{
+    "id": 103,
+    "name": "Compound Code",
+    "description": "This field indicates whether or not the dispensed drug was compounded or mixed.",
+    "appliesTo": [
+        "PDE"
+    ],
+    "suppliedIn": [
+        "BB2",
+        "BFD",
+        "DPC",
+        "SyntheticData"
+    ],
+    "bfdTableType": "CLAIM",
+    "bfdColumnName": "cmpnd_cd",
+    "bfdDbType": "NUM",
+    "bfdDbSize": 2,
+    "bfdJavaFieldName": "compoundCode",
+    "ccwMapping": [
+        "CMPND_CD"
+    ],
+    "cclfMapping": [],
+    "fhirMapping": [
+        {
+            "version": "STU3",
+            "resource": "ExplanationOfBenefit",
+            "element": "detail.type.coding[N].code",
+            "fhirPath": "",
+            "discriminator": [
+                "detail.type.coding[N].system = 'http://hl7.org/fhir/v3/ActCode'"
+            ],
+            "additional": [
+                "eob.detail.type.coding[N].display = {corresponding description from valueset specified in .system}"
+            ],
+            "derived": "If Compound Code = 1 then eob.detail.type.coding.code = 'RXCINV' if Compound Code = 2 then eob.detail.type.coding.code = 'RXDINV' if Compound Code = 0 then none of the fields in FHIR are set",
+            "note": "",
+            "example": ""
+        }
+    ]
+}
