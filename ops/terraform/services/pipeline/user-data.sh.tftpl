@@ -18,7 +18,7 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > nonsensitive_pipeline_vars.json
 
-%{ if pipeline_instance == "rda" }
+%{ if pipeline_instance == "rda" ~}
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/pipeline/sensitive/${pipeline_instance}" \
