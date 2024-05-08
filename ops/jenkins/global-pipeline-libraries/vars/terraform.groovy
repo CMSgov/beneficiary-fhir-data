@@ -22,12 +22,16 @@ void deployTerraservice(Map args = [:]) {
     // to standardize on a name, otherwise whenever this PAT is updated we will need to also update
     // this reference.
     // TODO: Replace this with a static ID when we switch from user-PATs to bfd-release
-    githubTokenCredential = 'bfd-jenkins-vaish-ch'
-    withCredentials([usernamePassword(
-        credentialsId: githubTokenCredential,
-        usernameVariable: 'GITHUB_USERNAME', 
-        passwordVariable: 'GITHUB_TOKEN'
-    )]) {
+    githubAppId = '884195'
+    githubAppPrivateKey = 'key'
+
+    withCredentials([string(
+        credentialsId: 'githubAppId',
+        variable: 'GITHUB_APP_ID'
+    ), file(
+        credentialsId: 'githubAppPrivateKey',
+        variable: 'GITHUB_APP_PRIVATE_KEY'
+    )]){
         dir("${workspace}/${serviceDirectory}") {
             // Debug output terraform version
             sh 'terraform --version'
