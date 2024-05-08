@@ -97,15 +97,17 @@ locals {
   notice_alarm_actions = local.is_ephemeral_env ? [] : [data.aws_sns_topic.bfd_notices_slack_alarm[0].arn]
 
   # data-source resolution
-  ami_id                = data.aws_ami.main.image_id
-  availability_zone     = data.external.rds.result["WriterAZ"]
-  kms_key_id            = data.aws_kms_key.cmk.arn
-  rds_security_group_id = data.aws_security_group.rds.id
-  rds_writer_endpoint   = data.external.rds.result["Endpoint"]
-  vpc_id                = data.aws_vpc.main.id
-  vpn_security_group_id = data.aws_security_group.vpn.id
-  ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
-  subnet_id             = data.aws_subnet.main.id
+  ami_id                 = data.aws_ami.main.image_id
+  availability_zone      = data.external.rds.result["WriterAZ"]
+  kms_key_id             = data.aws_kms_key.cmk.arn
+  db_cluster_identifier  = var.db_environment_override != null ? "bfd-${var.db_environment_override}-aurora-cluster" : "bfd-${local.seed_env}-aurora-cluster"
+  db_environment         = var.db_environment_override != null ? var.db_environment_override : local.seed_env
+  rds_security_group_ids = data.aws_security_groups.rds.ids
+  rds_writer_endpoint    = data.external.rds.result["Endpoint"]
+  vpc_id                 = data.aws_vpc.main.id
+  vpn_security_group_id  = data.aws_security_group.vpn.id
+  ent_tools_sg_id        = data.aws_security_group.enterprise_tools.id
+  subnet_id              = data.aws_subnet.main.id
   mgmt_kms_config_key_arns = flatten(
     [
       for v in data.aws_kms_key.mgmt_config_cmk.multi_region_configuration :

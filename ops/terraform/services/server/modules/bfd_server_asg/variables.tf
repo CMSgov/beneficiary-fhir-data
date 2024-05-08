@@ -8,6 +8,13 @@ variable "seed_env" {
   sensitive   = false
 }
 
+# TODO: Move this into the db_config object instead
+variable "db_environment" {
+  description = "FIXME: Environment name."
+  sensitive   = false
+  type        = string
+}
+
 variable "kms_key_alias" {
   description = "Key alias of environment's KMS key"
   type        = string
@@ -28,8 +35,8 @@ variable "asg_config" {
 
 variable "db_config" {
   description = "Setup a db ingress rules if defined"
-  type        = object({ db_sg = string, role = string, db_cluster_identifier = string })
-  default     = null
+  type        = object({ db_sg = list(string), role = string, db_cluster_identifier = string })
+  default     = { db_sg = [], role = null, db_cluster_identifier = null }
 }
 
 variable "lb_config" {

@@ -22,10 +22,11 @@ resource "aws_security_group" "app" {
 }
 
 resource "aws_security_group_rule" "allow_db_primary_access" {
+  for_each                 = toset(local.rds_security_group_ids)
   description              = "Allows BFD Pipeline access to the primary DB."
   from_port                = 5432
   protocol                 = "tcp"
-  security_group_id        = local.rds_security_group_id
+  security_group_id        = each.value
   source_security_group_id = aws_security_group.app.id
   to_port                  = 5432
   type                     = "ingress"
