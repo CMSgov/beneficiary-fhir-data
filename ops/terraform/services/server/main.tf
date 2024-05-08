@@ -12,9 +12,12 @@ locals {
   is_ephemeral_env   = module.terraservice.is_ephemeral_env
   latest_bfd_release = module.terraservice.latest_bfd_release
 
-  azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  legacy_service = "fhir"
-  service        = "server"
+  db_environment = var.db_environment_override != null ? var.db_environment_override : local.seed_env
+  # db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"
+  db_cluster_identifier = var.db_environment_override != null ? "bfd-${var.db_environment_override}-aurora-cluster" : "bfd-${local.seed_environment}-aurora-cluster"
+  azs                   = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  legacy_service        = "fhir"
+  service               = "server"
 
   # NOTE: nonsensitive service-oriented and common config
   nonsensitive_common_map = zipmap(
@@ -141,12 +144,13 @@ module "lb_alarms" {
 module "fhir_asg" {
   source = "./modules/bfd_server_asg"
 
-  kms_key_alias = local.kms_key_alias
-  env_config    = local.env_config
-  role          = local.legacy_service
-  layer         = "app"
-  lb_config     = module.fhir_lb.lb_config
-  seed_env      = local.seed_env
+  kms_key_alias  = local.kms_key_alias
+  env_config     = local.env_config
+  role           = local.legacy_service
+  layer          = "app"
+  lb_config      = module.fhir_lb.lb_config
+  seed_env       = local.seed_env
+  db_environment = local.db_environment
 
   # Initial size is one server per AZ
   asg_config = {
@@ -174,9 +178,9 @@ module "fhir_asg" {
   }
 
   db_config = {
-    db_sg                 = data.aws_security_group.aurora_cluster.id
+    db_sg                 = data.aws_security_groups.aurora_cluster.ids
     role                  = "aurora cluster"
-    db_cluster_identifier = local.nonsensitive_common_config["rds_cluster_identifier"]
+    db_cluster_identifier = local.db_cluster_identifier
   }
 
   mgmt_config = {

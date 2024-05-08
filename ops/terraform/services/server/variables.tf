@@ -51,3 +51,10 @@ variable "force_create_server_error_alerts" {
   default     = false
   type        = bool
 }
+
+variable "db_environment_override" {
+  default     = null
+  description = "For use in database maintenance contexts only."
+  sensitive   = false
+  type        = string
+}

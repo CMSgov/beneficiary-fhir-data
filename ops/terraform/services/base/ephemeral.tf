@@ -27,12 +27,13 @@ locals {
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_db_username"          = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_db_username"
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations"
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"
-    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"           = "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"
-    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token"     = "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token"
-    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"           = "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"
-    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/auth_token"                       = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/auth_token"
-    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/port"                             = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/port"
-    "/bfd/${local.env}/test/pipeline/sensitive/rda/grpc/host"                        = "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/host"
+
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token" = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token"
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/auth_token"                   = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/auth_token"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/port"                         = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/port"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/host"                         = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/host"
 
   } : {}
 
@@ -49,7 +50,8 @@ locals {
     }
     prod-sbx = {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca_test"                        = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca_test"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca_sbx"                         = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca_sbx"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bb2_local_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bb2_local_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_dev_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_dev_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_test_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_test_client"
@@ -132,7 +134,7 @@ resource "aws_ssm_parameter" "ephemeral_migrator" {
 
 # Copy targeted PIPELINE hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_pipeline" {
-  for_each  = local.pipeline_seed_paths
+  for_each  = { for k, v in local.pipeline_seed_paths : k => v if v != "" }
   key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
   overwrite = true
