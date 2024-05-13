@@ -3,6 +3,7 @@ mappings:
   id: S3ManifestFile
   nullableFieldAccessorType: Optional
   table:
+    schema: ccw
     name: s3_manifest_files
     primaryKeyColumns:
     - manifestId

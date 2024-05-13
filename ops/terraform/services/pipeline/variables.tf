@@ -63,3 +63,10 @@ variable "warning_ok_sns_override" {
   type        = string
   default     = null
 }
+
+variable "db_environment_override" {
+  default     = null
+  description = "For use in database maintenance contexts only."
+  sensitive   = false
+  type        = string
+}
