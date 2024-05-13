@@ -75,14 +75,6 @@ data "aws_subnet" "main" {
   }
 }
 
-# data "aws_security_group" "rds" {
-#   vpc_id = data.aws_vpc.main.id
-#   filter {
-#     name   = "tag:Name"
-#     values = ["bfd-${local.env}-aurora-cluster"]
-#   }
-# }
-
 data "aws_security_groups" "rds" {
   filter {
     name = "tag:Name"
