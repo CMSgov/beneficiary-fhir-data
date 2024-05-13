@@ -13,7 +13,6 @@ locals {
   latest_bfd_release = module.terraservice.latest_bfd_release
 
   db_environment = var.db_environment_override != null ? var.db_environment_override : local.seed_env
-  # db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"
   db_cluster_identifier = var.db_environment_override != null ? "bfd-${var.db_environment_override}-aurora-cluster" : "bfd-${local.seed_env}-aurora-cluster"
   azs                   = ["us-east-1a", "us-east-1b", "us-east-1c"]
   legacy_service        = "fhir"
