@@ -27,9 +27,9 @@ terraform apply
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.22 |
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Inputs
@@ -37,6 +37,7 @@ https://terraform-docs.io/user-guide/configuration/
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Server override ami-id. Defaults to latest server/fhir AMI from `master`. | `string` | `null` | no |
+| <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts only. | `string` | `null` | no |
 | <a name="input_force_create_server_dashboards"></a> [force\_create\_server\_dashboards](#input\_force\_create\_server\_dashboards) | Forces the creation of bfd\_server\_dashboards for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_disk_alarms"></a> [force\_create\_server\_disk\_alarms](#input\_force\_create\_server\_disk\_alarms) | Forces the creation of bfd\_server\_disk\_alarms for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_error_alerts"></a> [force\_create\_server\_error\_alerts](#input\_force\_create\_server\_error\_alerts) | Forces the creation of bfd\_server\_error\_alerts for ephemeral environments | `bool` | `false` | no |
@@ -47,9 +48,9 @@ https://terraform-docs.io/user-guide/configuration/
 | <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix) | boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging | `string` | `"?logServerErrorDetail=false"` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Resources
@@ -61,10 +62,10 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_ec2_managed_prefix_list.jenkins](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_managed_prefix_list) | data source |
 | [aws_ec2_managed_prefix_list.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_managed_prefix_list) | data source |
 | [aws_s3_bucket.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket) | data source |
-| [aws_security_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.remote](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_security_groups.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_groups) | data source |
 | [aws_ssm_parameters_by_path.nonsensitive_common](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_ssm_parameters_by_path.nonsensitive_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
@@ -72,9 +73,9 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_vpc_peering_connection.peers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc_peering_connection) | data source |
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Outputs
