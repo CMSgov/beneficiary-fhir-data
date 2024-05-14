@@ -22,8 +22,8 @@
     ],
     "bfdTableType": "CLAIM",
     "bfdColumnName": "bene_id",
-    "bfdDbType": "CHAR",
-    "bfdDbSize": 15,
+    "bfdDbType": "BIGINT",
+    "bfdDbSize": 8,
     "bfdJavaFieldName": "beneficiaryId",
     "ccwMapping": [
         "BENE_ID"
