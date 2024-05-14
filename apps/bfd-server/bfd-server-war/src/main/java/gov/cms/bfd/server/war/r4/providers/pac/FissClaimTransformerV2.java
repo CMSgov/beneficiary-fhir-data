@@ -133,12 +133,6 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setProcedure(getProcedure(claimGroup, isIcd9));
     claim.setInsurance(getInsurance(claimGroup));
     claim.setItem(getClaimItems(claimGroup));
-    if (Strings.isNotBlank(claimGroup.getAdmTypCd())) {
-      claim.setSubType(
-          createCodeableConcept(
-              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD),
-              claimGroup.getAdmTypCd()));
-    }
 
     claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
     claim.setCreated(new Date());
@@ -193,6 +187,23 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                           CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD),
                           claimGroup.getDrgCd(),
                           null))));
+
+      ++sequenceNumber;
+    }
+
+    if (Strings.isNotBlank(claimGroup.getAdmTypCd())) {
+      supportingInfo.add(
+          new Claim.SupportingInformationComponent()
+              .setSequence(sequenceNumber)
+              .setCategory(
+                  createCodeableConceptForCategory(
+                      TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
+                      CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD))
+              .setCode(
+                  createCodeableConcept(
+                      CCWUtils.calculateVariableReferenceUrl(
+                          CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD),
+                      claimGroup.getAdmTypCd())));
     }
 
     return supportingInfo;
@@ -426,15 +437,16 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                               null)));
                 }
 
-                if (Strings.isNotBlank(revenueLine.getNdc())) {
-                  // Both NDC and HCPCS_CD can exist in same sequence. In that case, multiple
-                  // codings are allowed
-                  codings.add(
-                      new Coding(TransformerConstants.CODING_NDC, revenueLine.getNdc(), null));
-                  productOrService.setCoding(codings);
-                }
-
                 itemComponent.setProductOrService(productOrService);
+
+                if (Strings.isNotBlank(revenueLine.getNdc())) {
+                  Claim.DetailComponent detailComponent = new Claim.DetailComponent();
+                  int sequenceNumber = 1;
+                  detailComponent.setSequence(sequenceNumber);
+                  detailComponent.setProductOrService(
+                      new CodeableConcept(
+                          new Coding(TransformerConstants.CODING_NDC, revenueLine.getNdc(), null)));
+                }
               }
 
               if (Strings.isNotBlank(revenueLine.getHcpcInd())) {
@@ -449,13 +461,16 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier3(), "3"));
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier4(), "4"));
 
-              if (Strings.isNotBlank(revenueLine.getNdcQty())) {
-                // Both rev_units_billed and ndc_qty can exist in the same sequence. Since
-                // rev_serv_unit_cnt serves
-                // the same purpose as rev_units_billed and since rev_serv_unit_cnt is set as an
-                // extension, ndc_qty
-                // can be as the quantity thus being fine with overwriting rev_units_billed
+              if (Strings.isNotBlank(revenueLine.getNdc())
+                  && Strings.isNotBlank(revenueLine.getNdcQty())) {
+                Claim.DetailComponent detailComponent = new Claim.DetailComponent();
                 Quantity quantity = new Quantity();
+                int sequenceNumber = 1;
+                detailComponent.setSequence(sequenceNumber);
+                detailComponent.setProductOrService(
+                    new CodeableConcept(
+                        new Coding(TransformerConstants.CODING_NDC, revenueLine.getNdc(), null)));
+
                 try {
                   quantity.setValue(Double.parseDouble(revenueLine.getNdcQty()));
                 } catch (NumberFormatException ex) {
@@ -477,7 +492,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                   }
                 }
 
-                itemComponent.setQuantity(quantity);
+                detailComponent.setQuantity(quantity);
+                itemComponent.addDetail(detailComponent);
               }
 
               return itemComponent;

@@ -116,14 +116,6 @@
       }
     ]
   },
-  "subType":{
-    "coding": [
-      {
-        "system": "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
-        "code": "3"
-      }
-    ]
-  },
   "use": "claim",
   "patient": {
     "reference": "#patient"
@@ -201,6 +193,25 @@
           }
         ]
       }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "code" : "info",
+          "display" : "Information",
+          "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+        }, {
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+          "display" : "Claim Inpatient Admission Type Code",
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/information"
+        } ]
+      },
+      "code" : {
+        "coding" : [ {
+          "code" : "3",
+          "system" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd"
+        } ]
+      },
+      "sequence" : 3
     }
   ],
   "diagnosis": [
@@ -429,20 +440,21 @@
     },
     {
       "sequence": 2,
-      "productOrService": {
-        "coding": [
-          {
-            "system": "http://hl7.org/fhir/sid/ndc",
-            "code": "00777310502"
-          }
-        ]
-      },
-      "quantity": {
-        "unit" : "ML",
-        "value" : 1.5,
-        "system" : "http://unitsofmeasure.org",
-        "code" : "mL"
-      }
+      "detail" : [ {
+        "productOrService" : {
+          "coding" : [ {
+            "code" : "00777310502",
+            "system" : "http://hl7.org/fhir/sid/ndc"
+          } ]
+        },
+        "quantity" : {
+          "code" : "mL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "ML",
+          "value" : 1.5
+        },
+        "sequence" : 1
+      } ]
     }
   ],
   "total": {

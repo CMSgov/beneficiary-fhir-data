@@ -260,16 +260,18 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
                               List.of(new PositiveIntType(dxCode.getRdaPosition()))));
                 }
 
-                // case for when idr_proc_code and idr_dtl_ndc are both populated on the same
-                // sequence number
                 if (Strings.isNotBlank(detail.getIdrDtlNdc())
                     && Strings.isNotBlank(detail.getIdrDtlNdcUnitCount())) {
-                  codings.add(
-                      new Coding(TransformerConstants.CODING_NDC, detail.getIdrDtlNdc(), null));
-                  productOrService.setCoding(codings);
-                  item.setProductOrService(productOrService);
+                  System.out.println("HERE");
+                  Claim.DetailComponent detailComponent = new Claim.DetailComponent();
+                  int sequenceNumber = 1;
+                  detailComponent.setSequence(sequenceNumber);
+                  detailComponent.setProductOrService(
+                      createCodeableConcept(
+                          TransformerConstants.CODING_NDC, detail.getIdrDtlNdc()));
+
                   try {
-                    item.setQuantity(
+                    detailComponent.setQuantity(
                         new Quantity(Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
                   } catch (NumberFormatException ex) {
                     // If the NDC_UNIT_COUNT isn't a valid number, do not set quantity value.
@@ -279,22 +281,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
                         ex.getMessage(),
                         ex);
                   }
-                }
-              } else if (Strings.isNotBlank(detail.getIdrDtlNdc())
-                  && Strings.isNotBlank(detail.getIdrDtlNdcUnitCount())) {
-                item =
-                    new Claim.ItemComponent()
-                        .setSequence(detail.getIdrDtlNumber())
-                        .setProductOrService(
-                            createCodeableConcept(
-                                TransformerConstants.CODING_NDC, detail.getIdrDtlNdc()));
-                try {
-                  item.setQuantity(
-                      new Quantity(Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
-                } catch (NumberFormatException ex) {
-                  // If the NDC_UNIT_COUNT isn't a valid number, do not set quantity value. Awaiting
-                  // upstream RDA test data changes
-                  log.error("captured exception: message={}", ex.getMessage(), ex);
+                  item.addDetail(detailComponent);
                 }
               } else {
                 item = null;

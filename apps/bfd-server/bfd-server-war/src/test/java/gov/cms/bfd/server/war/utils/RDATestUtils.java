@@ -506,17 +506,13 @@ public class RDATestUtils {
                 .idrProcCode("FDSAE")
                 .idrDtlPrimaryDiagCode("HF3IJIF")
                 .idrModOne("A")
+                .idrDtlNdc("00777310502")
+                .idrDtlNdcUnitCount("1.5")
                 .build(),
             RdaMcsDetail.builder()
                 .idrDtlNumber((short) 2)
                 .idrClmHdIcn("654321")
                 .idrModTwo("B")
-                .build(),
-            RdaMcsDetail.builder()
-                .idrDtlNumber((short) 3)
-                .idrClmHdIcn("654321")
-                .idrDtlNdc("00777310502")
-                .idrDtlNdcUnitCount("1.5")
                 .build());
 
     claim.setDetails(details);
