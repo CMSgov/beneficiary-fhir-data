@@ -29,7 +29,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "skipped_rif_records")
+@Table(name = "skipped_rif_records", schema = "ccw")
 public class SkippedRifRecord {
   /** The unique (sequence-generated) ID for this {@link SkippedRifRecord} instance. */
   @Id
@@ -39,7 +39,7 @@ public class SkippedRifRecord {
       generator = "skipped_rif_records_record_id_seq")
   @SequenceGenerator(
       name = "skipped_rif_records_record_id_seq",
-      sequenceName = "skipped_rif_records_record_id_seq",
+      sequenceName = "ccw.skipped_rif_records_record_id_seq",
       allocationSize = 1)
   private long recordId;
 

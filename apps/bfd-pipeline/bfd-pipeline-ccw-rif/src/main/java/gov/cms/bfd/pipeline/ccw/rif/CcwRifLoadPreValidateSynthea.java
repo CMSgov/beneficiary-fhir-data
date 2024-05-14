@@ -34,7 +34,8 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
 
   /** SQL used to perform range checking on provided begin-end bene_id values. */
   private static final String CHECK_BENE_RANGE =
-      "select count(bene_id) from beneficiaries " + "where bene_id <= ? and bene_id > ? limit 1";
+      "select count(bene_id) from ccw.beneficiaries "
+          + "where bene_id <= ? and bene_id > ? limit 1";
 
   /**
    * SQL used to check for collision of CARR_CLM_CNTL_NUM in CARRIER_CLAIMS table. This is sort of
@@ -46,18 +47,18 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
    * depending on Synthea generation.
    */
   private static final String CHECK_CARR_CLAIM_CNTL_NUM =
-      "select count(clm_id) from carrier_claims "
+      "select count(clm_id) from ccw.carrier_claims "
           + "where clm_id <= ? and carr_clm_cntl_num <= ? limit 1";
 
   /** array of db table names that will be used to check range for CLM_GRP_ID values. */
   private static final String[] CLAIMS_TABLES_GRP = {
-    "carrier_claims",
-    "inpatient_claims",
-    "outpatient_claims",
-    "snf_claims",
-    "dme_claims",
-    "hha_claims",
-    "hospice_claims"
+    "ccw.carrier_claims",
+    "ccw.inpatient_claims",
+    "ccw.outpatient_claims",
+    "ccw.snf_claims",
+    "ccw.dme_claims",
+    "ccw.hha_claims",
+    "ccw.hospice_claims"
   };
 
   /** SQL used to check potential collision of CLM_GRP_ID in several of the claims tables. */
@@ -66,7 +67,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
 
   /** SQL used to check potential collision of CLM_GRP_ID in PARTD_EVENTS tables. */
   private static final String CHECK_PDE_CLAIMS_GROUP_ID =
-      "select count (pde_id) from partd_events "
+      "select count (pde_id) from ccw.partd_events "
           + "where pde_id <= ? "
           + "or (clm_grp_id <= ? and clm_grp_id > ?) limit 1";
 
@@ -74,12 +75,16 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
    * SQL used to check for potential collision of HICN_UNHASHED or MBI_NUM in BENEFICIARIES tables.
    */
   private static final String CHECK_HICN_MBI_HASH =
-      "select count (bene_id) from beneficiaries "
+      "select count (bene_id) from ccw.beneficiaries "
           + "where (hicn_unhashed = ? or mbi_num = ?) limit 1 ";
 
   /** array of db table names that will be used to check range for FI_DOC_CLM_CNTL_NUM values. */
   private static final String[] CLAIMS_TABLES_DOC_CNTL = {
-    "inpatient_claims", "outpatient_claims", "snf_claims", "hha_claims", "hospice_claims"
+    "ccw.inpatient_claims",
+    "ccw.outpatient_claims",
+    "ccw.snf_claims",
+    "ccw.hha_claims",
+    "ccw.hospice_claims"
   };
 
   /** SQL used to check for potential collision of FI_DOC_CLM_CNTL_NUM in various claims tables. */
@@ -90,7 +95,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
   private static final String CHECK_MBI_DUPES =
       "select count(*) from ( "
           + "select count(*) bene_id_count from ("
-          + "select distinct bene_id, mbi_num from public.beneficiaries_history "
+          + "select distinct bene_id, mbi_num from ccw.beneficiaries_history "
           + "where bene_id < 0 and mbi_num IS NOT NULL "
           + ") as foo group by mbi_num "
           + "having count(*) > 1) as s";

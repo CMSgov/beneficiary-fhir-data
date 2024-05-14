@@ -23,25 +23,35 @@ locals {
 
   # Targeted PIPELINE hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
   pipeline_seed_paths = local.is_ephemeral_env ? {
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_db_password"          = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_db_password"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_db_username"          = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_db_username"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_iterations"
-    "/bfd/${local.env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/shared/sensitive/data_pipeline_hicn_hash_pepper"
+    "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_db_password"          = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_db_password"
+    "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_db_username"          = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_db_username"
+    "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations"
+    "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"
+# The prod-sbx environment includes an in-process server instead of a communicating with an external, gRPC host
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token" = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token"
+    "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/auth_token"                   = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/auth_token"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/port"                         = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/port"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/host"                         = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/host"
+
   } : {}
 
   # FUTURE: Fix this when hierarchies are supported with Terraform module.
   seed_env_certs = {
     prod = {
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"          = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_prod_client"            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_prod_client"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"           = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_client"             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_client"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_client"            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_client"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_prod_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_client"                                 = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"                     = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test"
     }
     prod-sbx = {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                             = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca_test"                        = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca_test"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca_sbx"                         = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca_sbx"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bb2_local_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bb2_local_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_dev_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_dev_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_test_client"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_test_client"
@@ -89,11 +99,8 @@ data "aws_db_cluster_snapshot" "seed" {
 
   db_cluster_identifier = "bfd-${local.seed_env}-aurora-cluster"
   most_recent           = true
-  db_cluster_snapshot_identifier = lookup(
-    local.common_nonsensitive_ssm,
-    "/bfd/${local.env}/common/nonsensitive/rds_snapshot_identifier",
-    var.ephemeral_rds_snapshot_id_override
-  )
+  # default to latest snapshot if no override is provided
+  db_cluster_snapshot_identifier = var.ephemeral_rds_snapshot_id_override
 }
 
 # NOTE: Contains *all* seed environment hierarchies including sensitive and nonsensitive values
@@ -127,7 +134,7 @@ resource "aws_ssm_parameter" "ephemeral_migrator" {
 
 # Copy targeted PIPELINE hierarchy paths from seed environment into requested ephemeral environment
 resource "aws_ssm_parameter" "ephemeral_pipeline" {
-  for_each  = local.pipeline_seed_paths
+  for_each  = { for k, v in local.pipeline_seed_paths : k => v if v != "" }
   key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
   overwrite = true

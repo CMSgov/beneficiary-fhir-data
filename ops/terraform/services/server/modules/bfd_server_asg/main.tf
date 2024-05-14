@@ -78,14 +78,14 @@ resource "aws_security_group" "app" {
 
 # database
 resource "aws_security_group_rule" "allow_db_access" {
-  count       = var.db_config == null ? 0 : 1
+  for_each    = var.db_config != null ? toset(var.db_config.db_sg) : []
   type        = "ingress"
   from_port   = 5432
   to_port     = 5432
   protocol    = "tcp"
   description = "Allows access to the ${var.db_config.role} db"
 
-  security_group_id        = var.db_config.db_sg          # The SG associated with each replica
+  security_group_id        = each.value                   # The SG associated with each replica
   source_security_group_id = aws_security_group.app[0].id # Every instance in the ASG
 }
 

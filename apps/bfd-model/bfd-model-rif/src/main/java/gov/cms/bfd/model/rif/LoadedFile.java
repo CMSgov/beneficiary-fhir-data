@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "loaded_files")
+@Table(name = "loaded_files", schema = "ccw")
 public class LoadedFile {
   /** The file identifier. */
   @Id
@@ -23,7 +23,7 @@ public class LoadedFile {
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedfiles_loadedfileid_seq")
   @SequenceGenerator(
       name = "loadedfiles_loadedfileid_seq",
-      sequenceName = "loadedfiles_loadedfileid_seq",
+      sequenceName = "ccw.loadedfiles_loadedfileid_seq",
       allocationSize = 1)
   private long loadedFileId;
 

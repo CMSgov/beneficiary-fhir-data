@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "loaded_batches")
+@Table(name = "loaded_batches", schema = "ccw")
 public class LoadedBatch {
   /** Separator for joining and splitting data. */
   public static final String SEPARATOR = ",";
@@ -28,7 +28,7 @@ public class LoadedBatch {
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedbatches_loadedbatchid_seq")
   @SequenceGenerator(
       name = "loadedbatches_loadedbatchid_seq",
-      sequenceName = "loadedbatches_loadedbatchid_seq",
+      sequenceName = "ccw.loadedbatches_loadedbatchid_seq",
       allocationSize = 20)
   private long loadedBatchId;
 
