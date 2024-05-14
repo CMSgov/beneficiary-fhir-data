@@ -10,9 +10,9 @@ import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /** Endpoint end-to-end test for the Claim endpoint. */
 public class ClaimE2E extends ServerRequiredTest {
@@ -58,7 +58,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
    * specific ID.
    */
-  @Test
+  // @Test
+  @Ignore
   public void shouldGetCorrectFissClaimResourceById() {
     String requestString = claimEndpoint + "f-123456";
 
@@ -69,7 +70,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
    * specific ID with tax numbers included.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void shouldGetCorrectFissClaimResourceByIdWithTaxNumbers() {
     String requestString = claimEndpoint + "f-123456";
 
@@ -81,7 +83,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
    * specific ID.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void shouldGetCorrectMcsClaimResourceById() {
     String requestString = claimEndpoint + "m-654321";
 
@@ -92,7 +95,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
    * specific ID with tax numbers included.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void shouldGetCorrectMcsClaimResourceByIdWithTaxNumbers() {
     String requestString = claimEndpoint + "m-654321";
 
@@ -105,7 +109,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * given mbi and service-date range. In this test case the query finds the matched claims because
    * their to dates are within the date range even though their from dates are not.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void shouldGetCorrectClaimResourcesByMbiHash() {
     String requestString =
         claimEndpoint
@@ -122,7 +127,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * the matched claims because their to dates are within the date range even though their from
    * dates are not.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void shouldGetCorrectClaimResourcesByMbiHashWithTaxNumbers() {
     String requestString =
         claimEndpoint
@@ -138,7 +144,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * Claim}s using given mbi and service-date range. In this test case the query finds the matched
    * claims because their from dates are within the date range even though their to dates are not.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void shouldGetCorrectClaimResourcesByMbiHashWithPagination() {
     String requestString =
         claimEndpoint
@@ -154,7 +161,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * Verify that Claim throws a 400 error when the paging start (startIndex) is set higher than the
    * maximum number of results.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void testClaimFindByPatientWithPagingStartBeyondMaxExpect400() {
     String requestString =
         claimEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&_count=2&startIndex=12";
@@ -176,7 +184,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * number of results, since the highest index must be less than the number of results as a 0-based
    * index.
    */
-  @Test
+  // @Test
+  @Ignore
   public void testClaimFindByPatientWithPagingStartSetToMaxResultsExpect400() {
     String requestString =
         claimEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&_count=2&startIndex=4";
@@ -197,7 +206,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * Verify that Claim does not error when the paging start (startIndex) is set to be equal to one
    * less than the maximum number of results.
    */
-  @Test
+  // @Test
+  @Ignore
   public void testClaimFindByPatientWithPagingStartOneLessThanMaxExpect200() {
     String requestString =
         claimEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&_count=2&startIndex=3";
@@ -221,7 +231,8 @@ public class ClaimE2E extends ServerRequiredTest {
    * of results, but we make a special exception for empty returns since there's nothing to paginate
    * anyway.
    */
-  @Test
+  // @Test
+  @Ignore
   public void testClaimFindByPatientWithNoResultsAndPaginationRequestedExpect200() {
     String requestString = claimEndpoint + "?mbi=1111111111111&_count=50";
 

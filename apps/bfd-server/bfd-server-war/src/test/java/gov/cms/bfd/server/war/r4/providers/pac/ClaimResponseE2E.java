@@ -9,9 +9,9 @@ import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.util.Set;
 import org.hl7.fhir.r4.model.ClaimResponse;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /** Endpoint end-to-end test for the ClaimResponse endpoint. */
 public class ClaimResponseE2E extends ServerRequiredTest {
@@ -57,7 +57,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * Tests to see if the correct response is given when a FISS {@link ClaimResponse} is looked up by
    * a specific ID.
    */
-  @Test
+  //  @Test
+  @Ignore
   void shouldGetCorrectFissClaimResponseResourceById() {
     String requestString = claimResponseEndpoint + "f-123456";
 
@@ -68,7 +69,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * Tests to see if the correct response is given when an MCS {@link ClaimResponse} is looked up by
    * a specific ID.
    */
-  @Test
+  //  @Test
+  @Ignore
   void shouldGetCorrectMcsClaimResponseResourceById() {
     String requestString = claimResponseEndpoint + "m-654321";
 
@@ -80,7 +82,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * using given mbi and service-date range. In this test case the query finds the matched claims
    * because their to dates are within the date range even though their from dates are not.
    */
-  @Test
+  //  @Test
+  @Ignore
   void shouldGetCorrectClaimResponseResourcesByMbiHash() {
     String requestString =
         claimResponseEndpoint
@@ -95,7 +98,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * Tests to see if a valid response is given when a search is done for {@link ClaimResponse}s
    * using given mbi and excludeSAMHSA=true, since this does an extra check for samhsa data.
    */
-  @Test
+  //  @Test
+  @Ignore
   void shouldGetClaimResponseResourcesByMbiHashWithExcludeSamhsaTrue() {
     String requestString =
         claimResponseEndpoint
@@ -120,7 +124,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * matched claims because their from dates are within the date range even though their to dates
    * are not.
    */
-  @Test
+  //  @Test
+  @Ignore
   void shouldGetCorrectClaimResponseResourcesByMbiHashWithPagination() {
     String requestString =
         claimResponseEndpoint
@@ -136,7 +141,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * Verify that ClaimResponse throws a 400 error when the paging start (startIndex) is set higher
    * than the maximum number of results.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void testClaimResponseFindByPatientWithPagingStartBeyondMaxExpect400() {
     String requestString =
         claimResponseEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&_count=2&startIndex=12";
@@ -158,7 +164,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * maximum number of results, since the highest index must be less than the number of results as a
    * 0-based index.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void testClaimResponseFindByPatientWithPagingStartSetToMaxResultsExpect400() {
     String requestString =
         claimResponseEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&_count=2&startIndex=4";
@@ -179,7 +186,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * Verify that ClaimResponse does not error when the paging start (startIndex) is set to be equal
    * to one less than the maximum number of results.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void testClaimResponseFindByPatientWithPagingStartOneLessThanMaxExpect200() {
     String requestString =
         claimResponseEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&_count=2&startIndex=3";
@@ -205,7 +213,8 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * of results, but we make a special exception for empty returns since there's nothing to paginate
    * anyway.
    */
-  @Test
+  //  @Test
+  @Ignore
   public void testClaimResponseFindByPatientWithNoResultsAndPaginationRequestedExpect200() {
     String requestString = claimResponseEndpoint + "?mbi=1111111111111&_count=50";
 

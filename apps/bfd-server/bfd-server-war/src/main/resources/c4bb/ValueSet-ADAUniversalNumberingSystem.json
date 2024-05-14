@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "ADAUniversalNumberingSystem",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Include all codes defined in <a href=\"http://terminology.hl7.org/5.0.0/CodeSystem-ADAUniversalToothDesignationSystem.html\"><code>http://terminology.hl7.org/CodeSystem/ADAUniversalToothDesignationSystem</code></a></li></ul></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/ValueSet/ADAUniversalNumberingSystem",
+  "version": "2.0.0",
+  "name": "ADAUniversalNumberingSystem",
+  "title": "American Dental Association Universal Numbering Value Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "The American Dental Association Universal Numbering System is a tooth notation system primarily used in the United States.\n\nTeeth are numbered from the viewpoint of the dental practitioner looking into the open mouth, clockwise starting from the distalmost right maxillary teeth.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "American Dental Association (ADA) developed Current Dental Terminology (CDT®) as a standardized language to help dentists and other members of the healthcare industry communicate effectively. CDT is revised and updated every year.\n\nThe ADA is the exclusive copyright owner of CDT, the Code on Dental Procedures and Nomenclature (the Code), and the ADA Dental Claim Form. Except as permitted by law, all use, copying or distribution of CDT, or any portion thereof (including the Code on Dental Procedures and Nomenclature) in any product or services (including works prepared for clients by consultants and other professionals), whether in printed, electronic or other format, requires a valid commercial user license from the ADA.\n\nFor more information : https://www.ada.org/en/publications/ada-catalog/cdt-products/licensing-for-commercial-users",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/ADAUniversalToothDesignationSystem"
+      }
+    ]
+  }
+}

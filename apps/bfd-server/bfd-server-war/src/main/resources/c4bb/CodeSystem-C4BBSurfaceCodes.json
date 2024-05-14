@@ -1,0 +1,73 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "C4BBSurfaceCodes",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system <code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSurfaceCodes</code> defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">M<a name=\"C4BBSurfaceCodes-M\"> </a></td><td>Mesial</td><td>The surface of a tooth that is closest to the midline (middle) of the face.</td></tr><tr><td style=\"white-space:nowrap\">O<a name=\"C4BBSurfaceCodes-O\"> </a></td><td>Occlusal</td><td>The chewing surface of posterior teeth.</td></tr><tr><td style=\"white-space:nowrap\">I<a name=\"C4BBSurfaceCodes-I\"> </a></td><td>Incisal</td><td>The biting edge of anterior teeth.</td></tr><tr><td style=\"white-space:nowrap\">D<a name=\"C4BBSurfaceCodes-D\"> </a></td><td>Distal</td><td>The surface of a tooth that faces away from the midline of the face.</td></tr><tr><td style=\"white-space:nowrap\">B<a name=\"C4BBSurfaceCodes-B\"> </a></td><td>Buccal</td><td>The surface of a posterior tooth facing the cheeks.</td></tr><tr><td style=\"white-space:nowrap\">F<a name=\"C4BBSurfaceCodes-F\"> </a></td><td>Facial</td><td>The surface of a tooth facing the lips.</td></tr><tr><td style=\"white-space:nowrap\">L<a name=\"C4BBSurfaceCodes-L\"> </a></td><td>Lingual</td><td>The surface of a tooth facing the tongue.</td></tr></table></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSurfaceCodes",
+  "version": "2.0.0",
+  "name": "C4BBSurfaceCodes",
+  "title": "US Surface Codes System",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "This value set includes FDI tooth surface codes localized for the US Realm.\n\nThis is a code system defined locally by the CARIN BlueButton IG. As this IG matures, it is expected that this CodeSystem will be migrated to THO (terminology.hl7.org). The current CodeSystem url should be considered temporary and subject to change in a future version.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This CodeSystem is not copyrighted.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 7,
+  "concept": [
+    {
+      "code": "M",
+      "display": "Mesial",
+      "definition": "The surface of a tooth that is closest to the midline (middle) of the face."
+    },
+    {
+      "code": "O",
+      "display": "Occlusal",
+      "definition": "The chewing surface of posterior teeth."
+    },
+    {
+      "code": "I",
+      "display": "Incisal",
+      "definition": "The biting edge of anterior teeth."
+    },
+    {
+      "code": "D",
+      "display": "Distal",
+      "definition": "The surface of a tooth that faces away from the midline of the face."
+    },
+    {
+      "code": "B",
+      "display": "Buccal",
+      "definition": "The surface of a posterior tooth facing the cheeks."
+    },
+    {
+      "code": "F",
+      "display": "Facial",
+      "definition": "The surface of a tooth facing the lips."
+    },
+    {
+      "code": "L",
+      "display": "Lingual",
+      "definition": "The surface of a tooth facing the tongue."
+    }
+  ]
+}

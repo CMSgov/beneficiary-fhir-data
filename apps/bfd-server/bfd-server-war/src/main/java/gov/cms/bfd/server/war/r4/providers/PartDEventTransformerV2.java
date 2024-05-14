@@ -12,7 +12,7 @@ import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.MetaModel;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
@@ -92,8 +92,11 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
    */
   private ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
-
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
+    String c4bbProfUrl =
+        MetaModel.getC4BBProfile(
+            MetaModel.C4BBProfile.STRUCTUREDEFINITION, "ExplanationOfBenefit", "Pharmacy", "url");
+    eob.getMeta().addProfile(c4bbProfUrl);
+    //    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID
@@ -452,12 +455,28 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getPrescriptionOriginationCode());
 
     // BRND_GNRC_CD => ExplanationOfBenefit.supportingInfo:brandgenericcode
-    TransformerUtilsV2.addInformationSliceWithCode(
-        eob,
-        C4BBSupportingInfoType.BRAND_GENERIC_CODE,
-        CcwCodebookVariable.BRND_GNRC_CD,
-        CcwCodebookVariable.BRND_GNRC_CD,
-        claimGroup.getBrandGenericCode());
+    //    "element" : "supportingInfo[N].code.coding[N].code",
+    //    "fhirPath" :
+    // "supportingInfo.where(code.coding.where(system='https://bluebutton.cms.gov/resources/variables/rx_orgn_cd')).code.coding.code",
+    //    "discriminator" : [ "supportingInfo[N].code.coding[N].system =
+    // 'https://bluebutton.cms.gov/resources/variables/rx_orgn_cd'" ],
+    //    "additional" : [
+    //    "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset
+    // specified in .system}",
+    //    "eob.supportingInfo[N].category.coding[N].system =
+    // 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+    //    "eob.supportingInfo[N].category.coding[N].code = 'rxorigincode'",
+    //    "eob.supportingInfo[N].category.coding[N].display = 'RX Origin Code')" ],
+    eob =
+        MetaModel.getFhirMapping("rx_orgn_cd")
+            .enrich(eob, claimGroup.getBrandGenericCode().get().toString());
+
+    //    TransformerUtilsV2.addInformationSliceWithCode(
+    //        eob,
+    //        C4BBSupportingInfoType.BRAND_GENERIC_CODE,
+    //        CcwCodebookVariable.BRND_GNRC_CD,
+    //        CcwCodebookVariable.BRND_GNRC_CD,
+    //        claimGroup.getBrandGenericCode());
 
     // PHRMCY_SRVC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()

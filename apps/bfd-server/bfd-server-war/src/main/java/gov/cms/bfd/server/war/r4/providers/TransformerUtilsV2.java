@@ -44,6 +44,7 @@ import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.MetaModel;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -61,6 +62,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
+import gov.cms.bfd.server.war.commons.fhir.ccw.mapper.FHIR2CCWMappingBuilder;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -434,7 +436,6 @@ public final class TransformerUtilsV2 {
     if (identifierValue == null) {
       throw new IllegalArgumentException();
     }
-
     Identifier identifier =
         new Identifier()
             .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
@@ -1753,19 +1754,27 @@ public final class TransformerUtilsV2 {
     // "claim" => ExplanationOfBenefit.use
     eob.setUse(Use.CLAIM);
 
-    if (claimType.equals(ClaimType.PDE)) {
-      // PDE_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, String.valueOf(claimId)));
-    } else {
-      // CLM_ID => ExplanationOfBenefit.identifier
-      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, String.valueOf(claimId)));
-    }
-
+    Identifier identifier = null;
+    FHIR2CCWMappingBuilder b = null;
+    // PDE_ID => ExplanationOfBenefit.identifier or
+    // CLM_ID => ExplanationOfBenefit.identifier
+    eob =
+        MetaModel.getFhirMapping(claimType.equals(ClaimType.PDE) ? "pde_id" : "clm_id")
+            .enrich(eob, String.valueOf(claimId));
     // CLM_GRP_ID => ExplanationOfBenefit.identifier
-    eob.addIdentifier()
-        .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
-        .setValue(claimGroupId)
-        .setType(createC4BBClaimCodeableConcept());
+    // createC4BBClaimCodeableConcept() here is harded coded with UC CodeableConcept
+    // for meta info driven enrichment, need to patch the ccw var "claim_group_id" with
+    // fhirMapping -> additional from [] to:
+    // "additional" : [ "eob.identifier[N].type.coding[N].system =
+    // 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType'",
+    // "eob.identifier[N].type.coding[N].code = 'uc'", "eob.identifier[N].type.coding[N].display =
+    // 'Unique Claim ID'" ],
+    // DERIVED during CCW loading, no CCW VAR
+    eob = MetaModel.getFhirMapping("claim_group_id").enrich(eob, String.valueOf(claimGroupId));
+    //    eob.addIdentifier()
+    //        .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
+    //        .setValue(claimGroupId)
+    //        .setType(createC4BBClaimCodeableConcept());
 
     // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage (ref)
     // There is always just one insurance coverage documented, since they are hard coded by

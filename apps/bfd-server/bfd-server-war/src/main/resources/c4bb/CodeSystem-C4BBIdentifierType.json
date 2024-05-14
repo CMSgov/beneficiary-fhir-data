@@ -1,0 +1,63 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "C4BBIdentifierType",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system <code>http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType</code> defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">payerid<a name=\"C4BBIdentifierType-payerid\"> </a></td><td>Payer ID</td><td>Payer ID used in HIPAA covered claims submission transactions</td></tr><tr><td style=\"white-space:nowrap\">naiccode<a name=\"C4BBIdentifierType-naiccode\"> </a></td><td>NAIC Code</td><td>An identifier assigned to licensed and authorized insurance companies by the National Association of Insurance Commissioners (NAIC).</td></tr><tr><td style=\"white-space:nowrap\">pat<a name=\"C4BBIdentifierType-pat\"> </a></td><td>Patient Account Number</td><td>Patient Account Number</td></tr><tr><td style=\"white-space:nowrap\">um<a name=\"C4BBIdentifierType-um\"> </a></td><td>Unique Member ID</td><td>Indicates that the patient identifier is a unique member identifier assigned by a payer across all lines of business</td></tr><tr><td style=\"white-space:nowrap\">uc<a name=\"C4BBIdentifierType-uc\"> </a></td><td>Unique Claim ID</td><td>Indicates that the claim identifier is that assigned by a payer for a claim received from a provider or subscriber</td></tr></table></div>"
+  },
+  "url": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+  "version": "2.0.0",
+  "name": "C4BBIdentifierType",
+  "title": "C4BB Identifier Type Code System",
+  "status": "active",
+  "experimental": false,
+  "date": "2023-08-02T12:35:50+00:00",
+  "publisher": "HL7 Financial Management Working Group",
+  "contact": [
+    {
+      "name": "HL7 Financial Management Working Group",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        },
+        { "system": "email", "value": "fm@lists.HL7.org" }
+      ]
+    }
+  ],
+  "description": "Identifier Type codes that extend those defined in http://terminology.hl7.org/CodeSystem/v2-0203 to define the type of identifier payers and providers assign to claims and patients.\n\nThis is a code system defined locally by the CARIN BlueButton IG. As this IG matures, it is expected that this CodeSystem will be migrated to THO (terminology.hl7.org). The current CodeSystem url should be considered temporary and subject to change in a future version.",
+  "jurisdiction": [
+    { "coding": [{ "system": "urn:iso:std:iso:3166", "code": "US" }] }
+  ],
+  "copyright": "This CodeSystem is not copyrighted.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 5,
+  "concept": [
+    {
+      "code": "payerid",
+      "display": "Payer ID",
+      "definition": "Payer ID used in HIPAA covered claims submission transactions"
+    },
+    {
+      "code": "naiccode",
+      "display": "NAIC Code",
+      "definition": "An identifier assigned to licensed and authorized insurance companies by the National Association of Insurance Commissioners (NAIC)."
+    },
+    {
+      "code": "pat",
+      "display": "Patient Account Number",
+      "definition": "Patient Account Number"
+    },
+    {
+      "code": "um",
+      "display": "Unique Member ID",
+      "definition": "Indicates that the patient identifier is a unique member identifier assigned by a payer across all lines of business"
+    },
+    {
+      "code": "uc",
+      "display": "Unique Claim ID",
+      "definition": "Indicates that the claim identifier is that assigned by a payer for a claim received from a provider or subscriber"
+    }
+  ]
+}
