@@ -1,7 +1,7 @@
 data "external" "rds" {
   program = [
     "${path.module}/scripts/rds-cluster-config.sh", # helper script
-    data.aws_rds_cluster.rds.cluster_identifier     # verified, positional argument to script
+    local.db_cluster_identifier                     # verified, positional argument to script
   ]
 }
 
@@ -75,11 +75,17 @@ data "aws_subnet" "main" {
   }
 }
 
-data "aws_security_group" "rds" {
-  vpc_id = data.aws_vpc.main.id
+data "aws_security_groups" "rds" {
   filter {
-    name   = "tag:Name"
-    values = ["bfd-${local.env}-aurora-cluster"]
+    name = "tag:Name"
+    values = toset([
+      "bfd-${local.db_environment}-aurora-cluster",
+      "bfd-${local.seed_env}-aurora-cluster"
+    ])
+  }
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
   }
 }
 

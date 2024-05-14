@@ -8,6 +8,7 @@ mappings:
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
   table:
+    schema: ccw
     columns:
     - dbName: bene_history_id
       javaType: long
