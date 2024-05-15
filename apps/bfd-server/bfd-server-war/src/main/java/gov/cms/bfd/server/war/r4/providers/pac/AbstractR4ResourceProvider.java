@@ -67,7 +67,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
    * e.g. <code>f-1234</code> or <code>m--1234</code> (for negative IDs).
    */
-  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Digit}+)");
+  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?[A-Za-z0-9]+)");
 
   /** The metric registry. */
   private final MetricRegistry metricRegistry;
