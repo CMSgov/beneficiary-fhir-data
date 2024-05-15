@@ -213,7 +213,7 @@ SELECT beneficiar0_.bene_id::text AS bene_id1_13_0_,
        skippedrif2_.skip_reason AS skip_rea7_32_2_,
        skippedrif2_.bene_id AS bene_id2_32_1__,
        skippedrif2_.record_id AS record_i1_32_1__
-FROM beneficiaries beneficiar0_
-       LEFT OUTER JOIN skipped_rif_records skippedrif2_
+FROM ccw.beneficiaries beneficiar0_
+       LEFT OUTER JOIN ccw.skipped_rif_records skippedrif2_
                     ON beneficiar0_.bene_id::text=skippedrif2_.bene_id::text
 WHERE beneficiar0_.bene_id::text IN ($1)
