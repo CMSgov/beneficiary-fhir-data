@@ -27,7 +27,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
           + "  from ${parentTableName} "
           + "  where last_updated between "
           + "  (select min(last_updated) from ${parentTableName}) and (Now() -Interval '${interval} days') "
-          + "  and t.${parentTableKey} not like '-%'"
+          + "  and t.${parentTableKey} not like '-%' "
           + "  limit ${limit})";
 
   /** TransactionManager to use for db operations. */
