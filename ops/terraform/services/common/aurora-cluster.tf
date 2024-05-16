@@ -123,6 +123,7 @@ resource "aws_rds_cluster_instance" "nodes" {
   cluster_identifier              = aws_rds_cluster.aurora_cluster.id
   copy_tags_to_snapshot           = true
   db_subnet_group_name            = aws_rds_cluster.aurora_cluster.db_subnet_group_name
+  db_parameter_group_name         = aws_rds_cluster.aurora_cluster.db_instance_parameter_group_name
   engine                          = aws_rds_cluster.aurora_cluster.engine
   engine_version                  = aws_rds_cluster.aurora_cluster.engine_version
   identifier                      = "${aws_rds_cluster.aurora_cluster.id}-node-${count.index}"
