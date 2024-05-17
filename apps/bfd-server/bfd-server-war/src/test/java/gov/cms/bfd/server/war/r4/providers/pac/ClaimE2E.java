@@ -8,9 +8,12 @@ import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,6 +55,42 @@ public class ClaimE2E extends ServerRequiredTest {
   public static void tearDown() {
     rdaTestUtils.truncateTables();
     rdaTestUtils.destroy();
+  }
+
+  /**
+   * Tests invalid claim IDs throw expected exceptions, for FISS / MCS claim {@link Claim} is looked
+   * up using a malformed ID.
+   */
+  @Test
+  public void testGetClaimResourceByIdThrowException() {
+    List<String> invalid_claim_ids =
+        Arrays.asList(
+            "F-LTA0M2E0NWY5ZGU3ZjI5MzJmYWFiYmI", // upper case resource type
+            "f-MWkrjfrkejfk-98000", // dash in id value
+            "f123456", // no separator '-' between resource type and id value
+            "fLTA0M2E0NWY5ZGU3ZjI5MzJmYWFiYmI", // no separator
+            "-m-XYZ001", // malformed mcs id
+            "m----123456", // extra dash mcs id value part
+            "M-123456", // upper case resource type
+            "K-H123456", // invalid resource type 'K'
+            "f-1*23456", // star char in id value
+            "m-1*23456", // invalid chars in mcs id value
+            "f--123456"); // dash in front of fiss id value
+    for (String idStr : invalid_claim_ids) {
+      String requestString = claimEndpoint + idStr;
+      // expect exception
+      String resp = getResponseByID(requestString);
+      Assertions.assertTrue(resp.contains("OperationOutcome"));
+      Assertions.assertTrue(resp.contains("error"));
+      Assertions.assertTrue(resp.contains("diagnostics"));
+      System.err.println(resp);
+      String errStr =
+          "ID pattern: '"
+              + idStr
+              + "' does not match expected pattern: {singleCharacter}-{claimIdNumber}";
+      System.err.println(errStr);
+      Assertions.assertTrue(resp.contains(errStr));
+    }
   }
 
   /**
@@ -276,5 +315,25 @@ public class ClaimE2E extends ServerRequiredTest {
     String expected = rdaTestUtils.expectedResponseFor(expectedResponseFileName);
 
     AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
+  }
+
+  /**
+   * Verifies the Claim response for the given requestString returns a 200 and the json response
+   * matches the expected response file.
+   *
+   * @param requestString the request string to search with.
+   * @return the string of the response.
+   */
+  private String getResponseByID(String requestString) {
+    return given()
+        .spec(requestAuth)
+        .expect()
+        .statusCode(400)
+        .when()
+        .get(requestString)
+        .then()
+        .extract()
+        .response()
+        .asString();
   }
 }
