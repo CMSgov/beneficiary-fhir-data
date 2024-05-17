@@ -58,11 +58,11 @@ public class ClaimE2E extends ServerRequiredTest {
   }
 
   /**
-   * Tests invalid claim IDs throw expected exceptions, for FISS / MCS claim {@link Claim} is looked
-   * up using a malformed ID.
+   * Tests invalid claim IDs, for FISS / MCS claim {@link Claim} is looked up with and got 400
+   * response with FHIR OperationOutcome-> diagnostics match ID validation error message.
    */
   @Test
-  public void testGetClaimResourceByIdThrowException() {
+  public void testGetClaimResourceById400Error() {
     List<String> invalid_claim_ids =
         Arrays.asList(
             "F-LTA0M2E0NWY5ZGU3ZjI5MzJmYWFiYmI", // upper case resource type
@@ -78,18 +78,32 @@ public class ClaimE2E extends ServerRequiredTest {
             "f--123456"); // dash in front of fiss id value
     for (String idStr : invalid_claim_ids) {
       String requestString = claimEndpoint + idStr;
-      // expect exception
-      String resp = getResponseByID(requestString);
+      String resp = getResponseByIDWith400Error(requestString);
       Assertions.assertTrue(resp.contains("OperationOutcome"));
       Assertions.assertTrue(resp.contains("error"));
       Assertions.assertTrue(resp.contains("diagnostics"));
-      System.err.println(resp);
-      String errStr =
-          "ID pattern: '"
-              + idStr
-              + "' does not match expected pattern: {singleCharacter}-{claimIdNumber}";
-      System.err.println(errStr);
-      Assertions.assertTrue(resp.contains(errStr));
+      Assertions.assertTrue(
+          resp.contains(
+              "ID pattern: '"
+                  + idStr
+                  + "' does not match expected pattern: {singleCharacter}-{claimIdNumber}"));
+    }
+  }
+
+  /**
+   * Tests wel-formed but non-exist claim IDs, for FISS / MCS claim {@link Claim} is looked up using
+   * a well-formed claim ID, expect 404 with FHIR OperationOutcome.
+   */
+  @Test
+  public void testGetClaimResourceById404Error() {
+    List<String> invalid_claim_ids = Arrays.asList("f-123456nonexist", "m-654321nonexist");
+    for (String idStr : invalid_claim_ids) {
+      String requestString = claimEndpoint + idStr;
+      String resp = getResponseByIDWith404Error(requestString);
+      Assertions.assertTrue(resp.contains("OperationOutcome"));
+      Assertions.assertTrue(resp.contains("error"));
+      Assertions.assertTrue(resp.contains("diagnostics"));
+      Assertions.assertTrue(resp.contains(idStr + " is not known"));
     }
   }
 
@@ -318,17 +332,39 @@ public class ClaimE2E extends ServerRequiredTest {
   }
 
   /**
-   * Verifies the Claim response for the given requestString returns a 200 and the json response
-   * matches the expected response file.
+   * Verifies the Claim response for the given requestString returns a 400 and the json response of
+   * FHIR OperationOutcome.
    *
    * @param requestString the request string to search with.
    * @return the string of the response.
    */
-  private String getResponseByID(String requestString) {
+  private String getResponseByIDWith400Error(String requestString) {
+    return getResponseByIDWith4XX(requestString, 400);
+  }
+
+  /**
+   * Verifies the Claim response for the given requestString returns a 404 and the json response of
+   * FHIR OperationOutcome.
+   *
+   * @param requestString the request string to search with.
+   * @return the string of the response.
+   */
+  private String getResponseByIDWith404Error(String requestString) {
+    return getResponseByIDWith4XX(requestString, 404);
+  }
+
+  /**
+   * Helper common func for 4XX get response.
+   *
+   * @param requestString - request url
+   * @param expected4XXCode - the expected error code
+   * @return string of the response json.
+   */
+  private String getResponseByIDWith4XX(String requestString, int expected4XXCode) {
     return given()
         .spec(requestAuth)
         .expect()
-        .statusCode(400)
+        .statusCode(expected4XXCode)
         .when()
         .get(requestString)
         .then()
