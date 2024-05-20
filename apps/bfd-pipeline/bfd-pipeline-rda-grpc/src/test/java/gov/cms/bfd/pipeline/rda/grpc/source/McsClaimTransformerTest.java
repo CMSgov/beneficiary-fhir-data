@@ -235,7 +235,7 @@ public class McsClaimTransformerTest {
     detail.setIdrKPosState("12");
     detail.setIdrKPosZip("123456789012345");
     detail.setIdrDtlNdc("00002060440");
-    detail.setIdrDtlNdcUnitCount("UN");
+    detail.setIdrDtlNdcUnitCount("1");
     claim.getDetails().add(detail);
     claimBuilder
         .setIdrClmHdIcn("123456789012345")
@@ -263,7 +263,7 @@ public class McsClaimTransformerTest {
                 .setIdrKPosState("12")
                 .setIdrKPosZip("123456789012345")
                 .setIdrDtlNdc("00002060440")
-                .setIdrDtlNdcUnitCount("UN")
+                .setIdrDtlNdcUnitCount("1")
                 .build());
     changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);

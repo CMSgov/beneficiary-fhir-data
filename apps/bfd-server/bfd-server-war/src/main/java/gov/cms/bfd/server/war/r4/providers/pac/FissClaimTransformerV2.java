@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.r4.model.Claim;
@@ -46,6 +47,7 @@ import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
+@Slf4j
 @Component
 public class FissClaimTransformerV2 extends AbstractTransformerV2
     implements ResourceTransformer<Claim> {
@@ -185,6 +187,23 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                           CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD),
                           claimGroup.getDrgCd(),
                           null))));
+
+      ++sequenceNumber;
+    }
+
+    if (Strings.isNotBlank(claimGroup.getAdmTypCd())) {
+      supportingInfo.add(
+          new Claim.SupportingInformationComponent()
+              .setSequence(sequenceNumber)
+              .setCategory(
+                  createCodeableConceptForCategory(
+                      TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
+                      CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD))
+              .setCode(
+                  createCodeableConcept(
+                      CCWUtils.calculateVariableReferenceUrl(
+                          CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD),
+                      claimGroup.getAdmTypCd())));
     }
 
     return supportingInfo;
@@ -394,16 +413,18 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
               }
 
               if (Strings.isNotBlank(revenueLine.getHcpcCd())
-                  || Strings.isNotBlank(revenueLine.getApcHcpcsApc())) {
+                  || Strings.isNotBlank(revenueLine.getApcHcpcsApc())
+                  || Strings.isNotBlank(revenueLine.getNdc())) {
                 CodeableConcept productOrService = new CodeableConcept();
+                List<Coding> codings = new ArrayList<>();
 
                 if (Strings.isNotBlank(revenueLine.getHcpcCd())) {
-                  productOrService.setCoding(
-                      List.of(
-                          new Coding(
-                              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
-                              revenueLine.getHcpcCd(),
-                              null)));
+                  codings.add(
+                      new Coding(
+                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
+                          revenueLine.getHcpcCd(),
+                          null));
+                  productOrService.setCoding(codings);
                 }
 
                 if (Strings.isNotBlank(revenueLine.getApcHcpcsApc())) {
@@ -417,6 +438,15 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                 }
 
                 itemComponent.setProductOrService(productOrService);
+
+                if (Strings.isNotBlank(revenueLine.getNdc())) {
+                  Claim.DetailComponent detailComponent = new Claim.DetailComponent();
+                  int sequenceNumber = 1;
+                  detailComponent.setSequence(sequenceNumber);
+                  detailComponent.setProductOrService(
+                      new CodeableConcept(
+                          new Coding(TransformerConstants.CODING_NDC, revenueLine.getNdc(), null)));
+                }
               }
 
               if (Strings.isNotBlank(revenueLine.getHcpcInd())) {
@@ -430,6 +460,41 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier2(), "2"));
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier3(), "3"));
               itemComponent.addModifier(createModifierCoding(revenueLine.getHcpcModifier4(), "4"));
+
+              if (Strings.isNotBlank(revenueLine.getNdc())
+                  && Strings.isNotBlank(revenueLine.getNdcQty())) {
+                Claim.DetailComponent detailComponent = new Claim.DetailComponent();
+                Quantity quantity = new Quantity();
+                int sequenceNumber = 1;
+                detailComponent.setSequence(sequenceNumber);
+                detailComponent.setProductOrService(
+                    new CodeableConcept(
+                        new Coding(TransformerConstants.CODING_NDC, revenueLine.getNdc(), null)));
+
+                try {
+                  quantity.setValue(Double.parseDouble(revenueLine.getNdcQty()));
+                } catch (NumberFormatException ex) {
+                  // If the NDC_QTY isn't a valid number, do not set quantity value. Awaiting
+                  // upstream RDA test data changes
+                  log.error("Failed to parse ndcQty as a number: message={}", ex.getMessage(), ex);
+                }
+
+                if (Strings.isNotBlank(revenueLine.getNdcQtyQual())) {
+                  quantity.setUnit(revenueLine.getNdcQtyQual());
+                  quantity.setSystem(TransformerConstants.CODING_SYSTEM_UCUM);
+
+                  switch (revenueLine.getNdcQtyQual()) {
+                    case "F2" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE);
+                    case "GR" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE);
+                    case "ML" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE);
+                    case "ME" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE);
+                    case "UN" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE);
+                  }
+                }
+
+                detailComponent.setQuantity(quantity);
+                itemComponent.addDetail(detailComponent);
+              }
 
               return itemComponent;
             })
