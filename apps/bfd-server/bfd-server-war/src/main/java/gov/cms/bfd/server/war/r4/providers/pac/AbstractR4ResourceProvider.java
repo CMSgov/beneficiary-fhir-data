@@ -207,7 +207,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     }
     final boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
-    //    if (claimId == null) throw new IllegalArgumentException("Resource ID can not be null");
     if (claimId.getVersionIdPartAsLong() != null)
       throw new IllegalArgumentException("Resource ID must not define a version.");
 
