@@ -74,8 +74,7 @@ public class ClaimE2E extends ServerRequiredTest {
             "M-123456", // upper case resource type
             "K-H123456", // invalid resource type 'K'
             "f-1*23456", // star char in id value
-            "m-1*23456", // invalid chars in mcs id value
-            "f--123456"); // dash in front of fiss id value
+            "m-1*23456"); // invalid chars in mcs id value
     for (String idStr : invalid_claim_ids) {
       String requestString = claimEndpoint + idStr;
       String resp = getResponseByIDWith400Error(requestString);

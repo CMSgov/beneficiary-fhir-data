@@ -73,8 +73,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * char(15): -00009127422efa, -100000103 fiss_claim table, column claim_id char(43):
    * LTA0M2EyNWU2YjM0MmRmOTczY2YyYjU, MjIzMzYzMDQzOTIyMDdDQUFZICAgICAwMTAxMQ
    */
-  private static final Pattern CLAIM_ID_PATTERN =
-      Pattern.compile("^(f)-(\\p{Alnum}+)$|^(m)-(-?\\p{Alnum}+)$");
+  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("^([fm])-(-?\\p{Alnum}+)$");
 
   // note, per observation: the mcs claim id (column idr_clm_hd_idn) is not digit only as shown
   // above sample values
@@ -245,21 +244,17 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private ImmutablePair<String, ResourceTypeV2<T, ?>> getClaimIdType(
       Matcher claimIdMatcher, IdType claimId) {
-    // BFD-3420 note: new regex have 4 possible groups to check:
-    // group(1) - fiss type 'f'
-    // group(2) - fiss claim id - alpha numeric expected
-    // group(3) - mcs type 'm'
-    // group(4) - mcs claim id - digits expected
-    String claimIdTypeStr =
-        claimIdMatcher.group(1) != null ? claimIdMatcher.group(1) : claimIdMatcher.group(3);
+    // group(1) - fiss type 'f' or mcs type 'm'
+    // group(2) - fiss claim id or mcs field - alpha numeric expected with possible leading '-' for
+    // mcs id field
+    String claimIdTypeStr = claimIdMatcher.group(1);
     // robust by check or assert
     if (claimIdTypeStr == null || claimIdTypeStr.isEmpty())
       throw new IllegalStateException(
           "Missing fiss or mcs claim id type info." + claimId.getIdPart());
     Optional<ResourceTypeV2<T, ?>> optional = parseClaimType(claimIdTypeStr);
-    String claimIdValStr =
-        claimIdMatcher.group(1) != null ? claimIdMatcher.group(2) : claimIdMatcher.group(4);
     if (optional.isEmpty()) throw new ResourceNotFoundException(claimId);
+    String claimIdValStr = claimIdMatcher.group(2);
     if (claimIdValStr == null || claimIdValStr.isEmpty())
       throw new IllegalStateException("Missing fiss or mcs claim id value." + claimId.getIdPart());
     return new ImmutablePair<String, ResourceTypeV2<T, ?>>(claimIdValStr, optional.get());
