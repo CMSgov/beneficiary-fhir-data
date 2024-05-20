@@ -4,7 +4,7 @@ psycogreen==1.0.2
 boto3==1.28.52
 setuptools>=68.2.2
 flask==2.3.3
-requests==2.31.0
+requests==2.32.0
 gevent==23.9.1
 urllib3==1.26.18
 werkzeug==3.0.1
