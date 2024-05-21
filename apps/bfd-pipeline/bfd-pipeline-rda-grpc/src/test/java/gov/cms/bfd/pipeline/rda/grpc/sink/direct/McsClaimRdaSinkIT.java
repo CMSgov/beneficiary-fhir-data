@@ -66,7 +66,7 @@ public class McsClaimRdaSinkIT {
           detail.setIdrDtlNumber((short) 0);
           detail.setIdrDtlStatus("P");
           detail.setIdrDtlNdc("00002060440");
-          detail.setIdrDtlNdcUnitCount("UN");
+          detail.setIdrDtlNdcUnitCount("1");
           claim.getDetails().add(detail);
 
           final RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
@@ -184,7 +184,7 @@ public class McsClaimRdaSinkIT {
           detail.setIdrDtlNumber((short) 0);
           detail.setIdrDtlStatus("P");
           detail.setIdrDtlNdc("00002060440");
-          detail.setIdrDtlNdcUnitCount("UN");
+          detail.setIdrDtlNdcUnitCount("1");
           claim.getDetails().add(detail);
 
           final RdaMcsDiagnosisCode diagCode = new RdaMcsDiagnosisCode();
