@@ -164,7 +164,7 @@ locals {
       threshold = "99.8"
     }
     slo_availability_uptime_percent_24hr_alert = {
-      type      = "alert"
+      type      = "warning"
       period    = 24 * 60 * 60
       threshold = "99"
     }
