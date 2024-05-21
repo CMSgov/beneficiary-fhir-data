@@ -11,11 +11,13 @@ import gov.cms.bfd.pipeline.bridge.util.WrappedMessage;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.RecordSource;
+import gov.cms.mpsm.rda.v1.fiss.FissAdmTypeCode;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimTypeIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
+import gov.cms.mpsm.rda.v1.fiss.FissNdcQtyQual;
 import gov.cms.mpsm.rda.v1.fiss.FissNonBillRevCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
@@ -42,6 +44,16 @@ public class FissTransformer extends AbstractTransformer {
 
   /** Constant value used within the code. */
   private static final String MEDICARE = "MEDICARE";
+
+  /** Hardcoded NDC quantity qualifier unit that can't be extracted from RIF. */
+  public static final FissNdcQtyQual DEFAULT_HARDCODED_NDC_QTY_QUAL =
+      FissNdcQtyQual.NDC_QTY_QUAL_ME;
+
+  /** Hardcoded NDC quantity that can't be extracted from RIF. */
+  public static final String DEFAULT_HARDCODED_NDC_QTY = "20";
+
+  /** Hardcoded NDC that can't be extracted from RIF. */
+  public static final String DEFAULT_HARDCODED_NDC = "00777310502";
 
   /** {@inheritDoc} */
   @Override
@@ -140,6 +152,8 @@ public class FissTransformer extends AbstractTransformer {
     final String dcn =
         ifNull(data.get(Fiss.FI_DOC_CLM_CNTL_NUM).orElse(null), () -> convertDcn(claimId));
 
+    String admTypCd = data.get(Fiss.ADM_TYP_CD).orElse("");
+
     FissClaim.Builder claimBuilder =
         FissClaim.newBuilder()
             .setRdaClaimKey(claimId)
@@ -206,6 +220,8 @@ public class FissTransformer extends AbstractTransformer {
     data.get(Fiss.PRNCPAL_DGNS_CD).ifPresent(claimBuilder::setPrincipleDiag);
     data.get(Fiss.PRVDR_NUM)
         .ifPresent(value -> claimBuilder.setMedaProv6(String.format("%.6s", value)));
+    data.get(Fiss.ADM_TYP_CD)
+        .ifPresent(value -> claimBuilder.setAdmTypCdEnum(getAdmTypeCodeEnum(value)));
 
     addDiagCodes(claimBuilder, data);
     addProcCodes(claimBuilder, data);
@@ -250,6 +266,26 @@ public class FissTransformer extends AbstractTransformer {
       case "hospice" -> FissClaimTypeIndicator.CLAIM_TYPE_HOSPICE;
       case "snf" -> FissClaimTypeIndicator.CLAIM_TYPE_SNF;
       default -> FissClaimTypeIndicator.UNRECOGNIZED;
+    };
+  }
+
+  /**
+   * Determines the {@link gov.cms.mpsm.rda.v1.fiss.FissAdmTypeCode} from the claim inpatient
+   * admission type code.
+   *
+   * @param clmIpAdmsnTypeCd The Claim Inpatient Admission Type Code
+   * @return The corresponding {@link FissAdmTypeCode}
+   */
+  private FissAdmTypeCode getAdmTypeCodeEnum(String clmIpAdmsnTypeCd) {
+    return switch (clmIpAdmsnTypeCd) {
+      case "0" -> FissAdmTypeCode.ADM_TYPE_0;
+      case "1" -> FissAdmTypeCode.ADM_TYPE_EMERGENCY;
+      case "2" -> FissAdmTypeCode.ADM_TYPE_URGENT;
+      case "3" -> FissAdmTypeCode.ADM_TYPE_ELECTIVE;
+      case "4" -> FissAdmTypeCode.ADM_TYPE_NEWBORN;
+      case "5" -> FissAdmTypeCode.ADM_TYPE_TRAUMA_CENTER;
+      case "9" -> FissAdmTypeCode.ADM_TYPE_9;
+      default -> FissAdmTypeCode.UNRECOGNIZED;
     };
   }
 
@@ -350,7 +386,10 @@ public class FissTransformer extends AbstractTransformer {
             .setApcHcpcsApc("00000")
             .setNonBillRevCodeEnum(FissNonBillRevCode.NON_BILL_ESRD)
             .setServDtCymd(DEFAULT_HARDCODED_DATE)
-            .setServDtCymdText(DEFAULT_HARDCODED_DATE);
+            .setServDtCymdText(DEFAULT_HARDCODED_DATE)
+            .setNdcQtyQualEnum(DEFAULT_HARDCODED_NDC_QTY_QUAL)
+            .setNdcQty(DEFAULT_HARDCODED_NDC_QTY)
+            .setNdc(DEFAULT_HARDCODED_NDC);
 
     data.get(Fiss.REV_CNTR).ifPresent(builder::setRevCd);
     consumeIf(

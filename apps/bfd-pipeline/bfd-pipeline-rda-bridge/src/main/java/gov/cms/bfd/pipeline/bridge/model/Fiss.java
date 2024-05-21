@@ -116,6 +116,9 @@ public class Fiss {
    */
   public static final int MAX_PROC_CODES = Math.min(ICD_PRCDR_CD.size(), PRCDR_DT.size());
 
+  /** ADM-TYP-CD code is set to Inpatient CLM_IP_ADMSN_TYPE_CD code name. */
+  public static final String ADM_TYP_CD = InpatientClaimColumn.CLM_IP_ADMSN_TYPE_CD.name();
+
   /** Private constructor method. */
   private Fiss() {}
 }

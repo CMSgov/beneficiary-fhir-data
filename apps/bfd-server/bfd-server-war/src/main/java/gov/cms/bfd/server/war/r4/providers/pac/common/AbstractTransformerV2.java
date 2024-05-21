@@ -1,6 +1,9 @@
 package gov.cms.bfd.server.war.r4.providers.pac.common;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
+import gov.cms.bfd.model.codebook.model.Variable;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -341,6 +344,32 @@ public class AbstractTransformerV2 {
   protected static CodeableConcept createCodeableConcept(C4BBIdentifierType idType) {
     return new CodeableConcept(
         new Coding(idType.getSystem(), idType.toCode(), idType.getDisplay()));
+  }
+
+  /**
+   * This method creates a {@link CodeableConcept} that's intended for use as a category: the {@link
+   * Variable#getId()} will be used for the {@link Coding#getCode()}.
+   *
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
+   * @return the output {@link CodeableConcept} for the specified input values
+   */
+  protected static CodeableConcept createCodeableConceptForCategory(
+      String codingSystem, CcwCodebookInterface ccwVariable) {
+    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+
+    Coding carinCoding =
+        new Coding()
+            .setCode("info")
+            .setSystem(TransformerConstants.CARIN_SUPPORTING_INFO_TYPE)
+            .setDisplay("Information");
+    Coding cmsBBcoding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
+
+    CodeableConcept categoryCodeableConcept = new CodeableConcept();
+    categoryCodeableConcept.addCoding(carinCoding);
+    categoryCodeableConcept.addCoding(cmsBBcoding);
+
+    return categoryCodeableConcept;
   }
 
   /**

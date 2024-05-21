@@ -232,6 +232,7 @@ public class RDATestUtils {
             .clmTypInd("4")
             .drgCd("drgc")
             .groupCode("gr")
+            .admTypCd("3")
             .build();
 
     Set<RdaFissProcCode> procCodes =
@@ -314,6 +315,13 @@ public class RDATestUtils {
                 .hcpcModifier4("m4")
                 .hcpcModifier5("m5")
                 .apcHcpcsApc("00001")
+                .build(),
+            RdaFissRevenueLine.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 2)
+                .ndc("00777310502")
+                .ndcQty("1.5")
+                .ndcQtyQual("ML")
                 .build());
 
     claim.setPayers(payers);
@@ -498,6 +506,8 @@ public class RDATestUtils {
                 .idrProcCode("FDSAE")
                 .idrDtlPrimaryDiagCode("HF3IJIF")
                 .idrModOne("A")
+                .idrDtlNdc("00777310502")
+                .idrDtlNdcUnitCount("1.5")
                 .build(),
             RdaMcsDetail.builder()
                 .idrDtlNumber((short) 2)

@@ -13,12 +13,14 @@ import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.r4.model.Claim;
@@ -28,6 +30,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.PositiveIntType;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
@@ -35,6 +38,7 @@ import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
+@Slf4j
 @Component
 public class McsClaimTransformerV2 extends AbstractTransformerV2
     implements ResourceTransformer<Claim> {
@@ -220,16 +224,22 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
               Claim.ItemComponent item;
 
               if (Strings.isNotBlank(detail.getIdrProcCode())) {
+                List<Coding> codings = new ArrayList<>();
+                CodeableConcept productOrService = new CodeableConcept();
+
+                codings.add(
+                    new Coding(
+                        TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
+                        detail.getIdrProcCode(),
+                        null));
+                productOrService.setCoding(codings);
                 item =
                     new Claim.ItemComponent()
                         .setSequence(detail.getIdrDtlNumber())
                         // The FHIR spec requires productOrService to exist even if there is
                         // no product code, so printing out the system regardless because
                         // HAPI won't serialize it unless there is some sort of value inside.
-                        .setProductOrService(
-                            createCodeableConcept(
-                                TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
-                                detail.getIdrProcCode()))
+                        .setProductOrService(productOrService)
                         .setServiced(
                             createPeriod(detail.getIdrDtlFromDate(), detail.getIdrDtlToDate()))
                         .setModifier(getModifiers(detail));
@@ -248,6 +258,30 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
                       dxCode ->
                           item.setDiagnosisSequence(
                               List.of(new PositiveIntType(dxCode.getRdaPosition()))));
+                }
+
+                if (Strings.isNotBlank(detail.getIdrDtlNdc())
+                    && Strings.isNotBlank(detail.getIdrDtlNdcUnitCount())) {
+                  System.out.println("HERE");
+                  Claim.DetailComponent detailComponent = new Claim.DetailComponent();
+                  int sequenceNumber = 1;
+                  detailComponent.setSequence(sequenceNumber);
+                  detailComponent.setProductOrService(
+                      createCodeableConcept(
+                          TransformerConstants.CODING_NDC, detail.getIdrDtlNdc()));
+
+                  try {
+                    detailComponent.setQuantity(
+                        new Quantity(Double.parseDouble(detail.getIdrDtlNdcUnitCount())));
+                  } catch (NumberFormatException ex) {
+                    // If the NDC_UNIT_COUNT isn't a valid number, do not set quantity value.
+                    // Awaiting upstream RDA test data changes
+                    log.error(
+                        "Failed to parse IdrDtlNdcUnitCount as a number: message={}",
+                        ex.getMessage(),
+                        ex);
+                  }
+                  item.addDetail(detailComponent);
                 }
               } else {
                 item = null;
