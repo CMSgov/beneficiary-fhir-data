@@ -300,6 +300,21 @@ public final class TransformerConstants {
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "pint". */
   public static final String CODING_SYSTEM_UCUM_PINT_DISPLAY = "pint";
 
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "International Unit". */
+  public static final String CODING_SYSTEM_UCUM_F2_CODE = "[IU]";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Gram". */
+  public static final String CODING_SYSTEM_UCUM_GR_CODE = "g";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Milliliter". */
+  public static final String CODING_SYSTEM_UCUM_ML_CODE = "mL";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Milligram". */
+  public static final String CODING_SYSTEM_UCUM_ME_CODE = "mg";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Unit". */
+  public static final String CODING_SYSTEM_UCUM_UN_CODE = "[arb'U]";
+
   /** Used to set the coverage issuer for CMS. */
   public static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
 

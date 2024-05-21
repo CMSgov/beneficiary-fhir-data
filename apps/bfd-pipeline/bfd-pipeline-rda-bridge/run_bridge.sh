@@ -1,5 +1,6 @@
 #!/bin/sh
 
 PROJ_DIR=$(dirname "$0")
+PROJ_VERSION=$(yq .project.parent.version "${PROJ_DIR}/pom.xml")
 
-exec java -cp "$PROJ_DIR/target/bfd-pipeline-rda-bridge-1.0.0-SNAPSHOT.jar:$PROJ_DIR/target/dependency/*" gov.cms.bfd.pipeline.bridge.RDABridge "$@"
+exec java -cp "${PROJ_DIR}/target/bfd-pipeline-rda-bridge-${PROJ_VERSION}.jar:${PROJ_DIR}/target/dependency/*" gov.cms.bfd.pipeline.bridge.RDABridge "$@"

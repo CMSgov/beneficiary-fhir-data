@@ -32,6 +32,12 @@ public class McsTransformer extends AbstractTransformer {
   /** Maps the mbi number to its beneficiary data. */
   private final Map<String, BeneficiaryData> mbiMap;
 
+  /** Hardcoded DETAIL NDC that can't be extracted from RIF. */
+  public static final String DEFAULT_HARDCODED_DTL_NDC = "00777310502";
+
+  /** Hardcoded DETAIL NDC UNIT COUNT that can't be extracted from RIF. */
+  public static final String DEFAULT_HARDCODED_NDC_UNIT_COUNT = "20";
+
   /** {@inheritDoc} */
   @Override
   public Optional<MessageOrBuilder> transform(
@@ -260,6 +266,8 @@ public class McsTransformer extends AbstractTransformer {
         .ifPresent(detailBuilder::setIdrDtlFromDate);
     data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)
         .ifPresent(detailBuilder::setIdrDtlToDate);
+    detailBuilder.setIdrDtlNdc(DEFAULT_HARDCODED_DTL_NDC);
+    detailBuilder.setIdrDtlNdcUnitCount(DEFAULT_HARDCODED_NDC_UNIT_COUNT);
     detailBuilder.setIdrDtlNumber(lineNumber);
 
     return detailBuilder.build();
