@@ -116,7 +116,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_BY_ID_OMIT_IDENTIFIERS(
         "bene_by_id_omit_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries ")
+            s.contains(" from ccw.beneficiaries ")
                 && s.contains("bene_id=")
                 && !s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
@@ -124,54 +124,58 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_BY_ID_INCLUDE_IDENTIFIERS(
         "bene_by_id_include_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries ")
+            s.contains(" from ccw.beneficiaries ")
                 && s.contains("bene_id=")
                 && s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
     /** Represents the query for beneficiary by mbi (via bene history). */
     BENE_BY_MBI_HISTORY(
         "bene_by_mbi_mbis_from_beneficiarieshistory",
-        (s -> s.contains(" from beneficiaries_history ") && s.contains("mbi_hash="))),
+        (s -> s.contains(" from ccw.beneficiaries_history ") && s.contains("mbi_hash="))),
     /** Represents the query for beneficiary by hicn (via bene history). */
     BENE_BY_HICN_HISTORY(
         "bene_by_hicn_hicns_from_beneficiarieshistory",
-        (s -> s.contains(" from beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
+        (s -> s.contains(" from ccw.beneficiaries_history ") && s.contains("bene_crnt_hic_num="))),
     /** Represents the query for beneficiary by hicn or id (no hicn/mbi returned). */
     BENE_BY_HICN_OR_ID_OMIT_IDENTIFIERS(
         "bene_by_hicn_bene_by_hicn_or_id_omit_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries ")
+            s.contains(" from ccw.beneficiaries ")
                 && !s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
     /** Represents the query for beneficiary by hicn or id. */
     BENE_BY_HICN_OR_ID_INCLUDE_IDENTIFIERS(
         "bene_by_hicn_bene_by_hicn_or_id_include_hicns_and_mbis",
         (s ->
-            s.contains(" from beneficiaries ")
+            s.contains(" from ccw.beneficiaries ")
                 && s.contains(" join ")
                 && s.contains("bene_crnt_hic_num="))),
     /** Represents the query for beneficiary by coverage contract. */
     BENE_BY_COVERAGE(
         "bene_by_coverage",
-        (s -> s.contains(" from beneficiaries ") && s.contains("where beneficiar0_.ptd_cntrct_"))),
+        (s ->
+            s.contains(" from ccw.beneficiaries ")
+                && s.contains("where beneficiar0_.ptd_cntrct_"))),
     /** Represents the query for EOB by bene id (carrier). */
-    EOBS_BY_BENE_ID_CARRIER("eobs_by_bene_id_carrier", (s -> s.contains(" from carrier_claims "))),
+    EOBS_BY_BENE_ID_CARRIER(
+        "eobs_by_bene_id_carrier", (s -> s.contains(" from ccw.carrier_claims "))),
     /** Represents the query for EOB by bene id (DME). */
-    EOBS_BY_BENE_ID_DME("eobs_by_bene_id_dme", (s -> s.contains(" from dme_claims "))),
+    EOBS_BY_BENE_ID_DME("eobs_by_bene_id_dme", (s -> s.contains(" from ccw.dme_claims "))),
     /** Represents the query for EOB by bene id (HHA). */
-    EOBS_BY_BENE_ID_HHA("eobs_by_bene_id_hha", (s -> s.contains(" from hha_claims "))),
+    EOBS_BY_BENE_ID_HHA("eobs_by_bene_id_hha", (s -> s.contains(" from ccw.hha_claims "))),
     /** Represents the query for EOB by bene id (hospice). */
-    EOBS_BY_BENE_ID_HOSPICE("eobs_by_bene_id_hospice", (s -> s.contains(" from hospice_claims "))),
+    EOBS_BY_BENE_ID_HOSPICE(
+        "eobs_by_bene_id_hospice", (s -> s.contains(" from ccw.hospice_claims "))),
     /** Represents the query for EOB by bene id (inpatient). */
     EOBS_BY_BENE_ID_INPATIENT(
-        "eobs_by_bene_id_inpatient", (s -> s.contains(" from inpatient_claims "))),
+        "eobs_by_bene_id_inpatient", (s -> s.contains(" from ccw.inpatient_claims "))),
     /** Represents the query for EOB by bene id (outpatient). */
     EOBS_BY_BENE_ID_OUTPATIENT(
-        "eobs_by_bene_id_outpatient", (s -> s.contains(" from outpatient_claims "))),
+        "eobs_by_bene_id_outpatient", (s -> s.contains(" from ccw.outpatient_claims "))),
     /** Represents the query for EOB by bene id (partD). */
-    EOBS_BY_BENE_ID_PDE("eobs_by_bene_id_pde", (s -> s.contains(" from partd_events "))),
+    EOBS_BY_BENE_ID_PDE("eobs_by_bene_id_pde", (s -> s.contains(" from ccw.partd_events "))),
     /** Represents the query for EOB by bene id (SNF). */
-    EOBS_BY_BENE_ID_SNF("eobs_by_bene_id_snf", (s -> s.contains(" from snf_claims "))),
+    EOBS_BY_BENE_ID_SNF("eobs_by_bene_id_snf", (s -> s.contains(" from ccw.snf_claims "))),
     /** Represents the query for partially adjudicated claims (fiss). */
     FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from rda.fiss")),
     /** Represents the query for partially adjudicated claims (mcs). */
@@ -179,9 +183,9 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     /** Represents the query for mbi cache lookup. */
     MBI_CACHE("mbi_cache_lookup", s -> s.contains("from rda.mbi_cache")),
     /** Represents the query for loaded batches. */
-    LOADED_BATCH("loaded_batch", (s -> s.contains(" from loaded_batches "))),
+    LOADED_BATCH("loaded_batch", (s -> s.contains(" from ccw.loaded_batches "))),
     /** Represents the query for loaded files. */
-    LOADED_FILE("loaded_file", (s -> s.contains(" from loaded_files "))),
+    LOADED_FILE("loaded_file", (s -> s.contains(" from ccw.loaded_files "))),
     /**
      * Represents the query for checking if a beneficiary exists given the partD contract id and
      * year month.
@@ -189,7 +193,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_EXISTS_BY_YEAR_MONTH_PARTD_CONTRACT_ID(
         "bene_exists_by_year_month_part_d_contract_id",
         (s ->
-            s.contains(" from beneficiary_monthly ")
+            s.contains(" from ccw.beneficiary_monthly ")
                 && s.contains("year_month=")
                 && s.contains("partd_contract_number_id="))),
 

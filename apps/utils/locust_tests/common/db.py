@@ -63,7 +63,7 @@ def get_regression_bene_ids(uri: str) -> List[str]:
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
-    bene_query = _get_regression_query('SELECT "bene_id" FROM "beneficiaries"')
+    bene_query = _get_regression_query('SELECT "bene_id" FROM ccw.beneficiaries')
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
@@ -77,7 +77,7 @@ def get_regression_hashed_mbis(uri: str) -> List[str]:
     Returns:
         List[str]: A list of synthetic hashed MBIs used for the regression suites
     """
-    mbi_query = _get_regression_query('SELECT "mbi_hash" FROM "beneficiaries"')
+    mbi_query = _get_regression_query('SELECT "mbi_hash" FROM ccw.beneficiaries')
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
@@ -94,7 +94,7 @@ def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
         to the contract ID, the contract month, and contract year, respectively
     """
     contract_id_query = _get_regression_query(
-        'SELECT "partd_contract_number_id", "year_month" FROM "beneficiary_monthly"'
+        'SELECT "partd_contract_number_id", "year_month" FROM ccw.beneficiary_monthly'
     )
 
     return [
@@ -135,7 +135,7 @@ def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
     else:
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
-    bene_query = f'SELECT "bene_id" FROM "beneficiaries" {table_sample_text} LIMIT {LIMIT}'
+    bene_query = f'SELECT "bene_id" FROM ccw.beneficiaries {table_sample_text} LIMIT {LIMIT}'
 
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
@@ -154,8 +154,8 @@ def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
     # by only taking MBI hashes that are distinct in both beneficiaries _and_
     # benficiaries_history
     mbi_query = (
-        f"SELECT beneficiaries.mbi_hash FROM beneficiaries {table_sample_text} "
-        "    INNER JOIN beneficiaries_history "
+        f"SELECT beneficiaries.mbi_hash FROM ccw.beneficiaries {table_sample_text} "
+        "    INNER JOIN ccw.beneficiaries_history "
         "        ON beneficiaries.mbi_hash = beneficiaries_history.mbi_hash "
         "    GROUP BY beneficiaries.mbi_hash "
         "    HAVING count(beneficiaries_history.mbi_hash) = 1 "
@@ -178,7 +178,7 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
 
     contract_id_query = (
         'SELECT "partd_contract_number_id", "year_month" '
-        'FROM "beneficiary_monthly" '
+        'FROM ccw.beneficiary_monthly '
         f"{table_sample_text}"
         f"LIMIT {LIMIT}"
     )

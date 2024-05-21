@@ -8,9 +8,12 @@ import gov.cms.bfd.server.war.ServerRequiredTest;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,6 +55,55 @@ public class ClaimE2E extends ServerRequiredTest {
   public static void tearDown() {
     rdaTestUtils.truncateTables();
     rdaTestUtils.destroy();
+  }
+
+  /**
+   * Tests invalid claim IDs, for FISS / MCS claim {@link Claim} is looked up with and got 400
+   * response with FHIR OperationOutcome-> diagnostics match ID validation error message.
+   */
+  @Test
+  public void testGetClaimResourceById400Error() {
+    List<String> invalid_claim_ids =
+        Arrays.asList(
+            "F-LTA0M2E0NWY5ZGU3ZjI5MzJmYWFiYmI", // upper case resource type
+            "f-MWkrjfrkejfk-98000", // dash in id value
+            "f123456", // no separator '-' between resource type and id value
+            "fLTA0M2E0NWY5ZGU3ZjI5MzJmYWFiYmI", // no separator
+            "-m-XYZ001", // malformed mcs id
+            "m----123456", // extra dash mcs id value part
+            "M-123456", // upper case resource type
+            "K-H123456", // invalid resource type 'K'
+            "f-1*23456", // star char in id value
+            "m-1*23456"); // invalid chars in mcs id value
+    for (String idStr : invalid_claim_ids) {
+      String requestString = claimEndpoint + idStr;
+      String resp = getResponseByIDWith400Error(requestString);
+      Assertions.assertTrue(resp.contains("OperationOutcome"));
+      Assertions.assertTrue(resp.contains("error"));
+      Assertions.assertTrue(resp.contains("diagnostics"));
+      Assertions.assertTrue(
+          resp.contains(
+              "ID pattern: '"
+                  + idStr
+                  + "' does not match expected pattern: {singleCharacter}-{claimIdNumber}"));
+    }
+  }
+
+  /**
+   * Tests wel-formed but non-exist claim IDs, for FISS / MCS claim {@link Claim} is looked up using
+   * a well-formed claim ID, expect 404 with FHIR OperationOutcome.
+   */
+  @Test
+  public void testGetClaimResourceById404Error() {
+    List<String> invalid_claim_ids = Arrays.asList("f-123456nonexist", "m-654321nonexist");
+    for (String idStr : invalid_claim_ids) {
+      String requestString = claimEndpoint + idStr;
+      String resp = getResponseByIDWith404Error(requestString);
+      Assertions.assertTrue(resp.contains("OperationOutcome"));
+      Assertions.assertTrue(resp.contains("error"));
+      Assertions.assertTrue(resp.contains("diagnostics"));
+      Assertions.assertTrue(resp.contains(idStr + " is not known"));
+    }
   }
 
   /**
@@ -276,5 +328,47 @@ public class ClaimE2E extends ServerRequiredTest {
     String expected = rdaTestUtils.expectedResponseFor(expectedResponseFileName);
 
     AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
+  }
+
+  /**
+   * Verifies the Claim response for the given requestString returns a 400 and the json response of
+   * FHIR OperationOutcome.
+   *
+   * @param requestString the request string to search with.
+   * @return the string of the response.
+   */
+  private String getResponseByIDWith400Error(String requestString) {
+    return getResponseByIDWith4XX(requestString, 400);
+  }
+
+  /**
+   * Verifies the Claim response for the given requestString returns a 404 and the json response of
+   * FHIR OperationOutcome.
+   *
+   * @param requestString the request string to search with.
+   * @return the string of the response.
+   */
+  private String getResponseByIDWith404Error(String requestString) {
+    return getResponseByIDWith4XX(requestString, 404);
+  }
+
+  /**
+   * Helper common func for 4XX get response.
+   *
+   * @param requestString - request url
+   * @param expected4XXCode - the expected error code
+   * @return string of the response json.
+   */
+  private String getResponseByIDWith4XX(String requestString, int expected4XXCode) {
+    return given()
+        .spec(requestAuth)
+        .expect()
+        .statusCode(expected4XXCode)
+        .when()
+        .get(requestString)
+        .then()
+        .extract()
+        .response()
+        .asString();
   }
 }

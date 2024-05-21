@@ -8,6 +8,7 @@ mappings:
   nullableFieldAccessorType: Optional
   sourceType: RifCsv
   table:
+    schema: ccw
     columns:
     - comment: 723 Beneficiary ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt)
       dbName: bene_id

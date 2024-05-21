@@ -153,6 +153,18 @@
   "item": [
     {
       "sequence": 1,
+      "detail" : [ {
+        "productOrService" : {
+          "coding" : [ {
+            "code" : "00777310502",
+            "system" : "http://hl7.org/fhir/sid/ndc"
+          } ]
+        },
+        "quantity" : {
+          "value" : 1.5
+        },
+        "sequence" : 1
+      } ],
       "diagnosisSequence": [
         1
       ],

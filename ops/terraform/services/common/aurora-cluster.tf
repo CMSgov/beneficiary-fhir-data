@@ -37,7 +37,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   allow_major_version_upgrade = false
   engine                      = "aurora-postgresql"
   engine_mode                 = "provisioned"
-  engine_version              = "14.9"
+  engine_version              = "14.11"
   apply_immediately           = local.rds_apply_immediately
 
   backtrack_window                    = 0
@@ -123,6 +123,7 @@ resource "aws_rds_cluster_instance" "nodes" {
   cluster_identifier              = aws_rds_cluster.aurora_cluster.id
   copy_tags_to_snapshot           = true
   db_subnet_group_name            = aws_rds_cluster.aurora_cluster.db_subnet_group_name
+  db_parameter_group_name         = aws_rds_cluster.aurora_cluster.db_instance_parameter_group_name
   engine                          = aws_rds_cluster.aurora_cluster.engine
   engine_version                  = aws_rds_cluster.aurora_cluster.engine_version
   identifier                      = "${aws_rds_cluster.aurora_cluster.id}-node-${count.index}"
