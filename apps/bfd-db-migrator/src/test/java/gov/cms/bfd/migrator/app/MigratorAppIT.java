@@ -36,6 +36,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import javax.sql.DataSource;
 import lombok.Getter;
@@ -146,10 +148,6 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     doReturn(configLoader).when(app).createConfigLoader();
 
     int numMigrations = getNumMigrationScripts();
-    /* Normally the version would be the same as the number of files, but
-    migration #12 is missing for some reason in the real scripts, so the version will be files +1 */
-    int expectedVersion = numMigrations + 1;
-
     try {
       // Run the app and collect its output.
       final int exitCode = app.performMigrationsAndHandleExceptions();
@@ -160,10 +158,13 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
           EXIT_CODE_SUCCESS, exitCode, "Did not get expected exit code, \nOUTPUT:\n" + logOutput);
 
       // Test the migrations occurred by checking the log output
-      boolean hasExpectedMigrationLine =
-          logOutput.contains(
-              String.format("Successfully applied %s migrations to schema", numMigrations));
 
+      Pattern logPattern =
+          Pattern.compile(
+              String.format(".*Successfully applied %s migration(s?) to schema.*", numMigrations),
+              Pattern.DOTALL);
+      Matcher logMatcher = logPattern.matcher(logOutput);
+      boolean hasExpectedMigrationLine = logMatcher.matches();
       assertTrue(
           hasExpectedMigrationLine,
           "Did not find log entry for completing expected number of migrations ("
@@ -171,8 +172,8 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
               + ") \nOUTPUT:\n"
               + logOutput);
       assertTrue(
-          logOutput.contains(String.format("now at version v%s", expectedVersion)),
-          "Did not find log entry for expected final version (v" + expectedVersion + ")");
+          logOutput.contains(String.format("now at version v%s", numMigrations)),
+          "Did not find log entry for expected final version (v" + numMigrations + ")");
 
       // verify that progress messages were passed to SQS
       final var progressMessages = readProgressMessagesFromSQSQueue();

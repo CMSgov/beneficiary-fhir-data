@@ -119,8 +119,8 @@ public final class DatabaseSchemaManager {
 
     // The default name for the schema table changed in Flyway 5.
     // We need to specify the original table name for backwards compatibility.
-    flywayBuilder.table("schema_version");
-
+    // flywayBuilder.table("schema_version");
+    flywayBuilder.defaultSchema("ccw");
     // If we want to point at a specific location for the migration scripts
     // Useful for testing
     if (flywayScriptLocationOverride != null && flywayScriptLocationOverride.length() > 0) {
