@@ -13,7 +13,6 @@ import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
-import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
@@ -597,8 +596,7 @@ public final class ServerTestUtils {
             BeneficiaryMonthly.class,
             Beneficiary.class,
             LoadedBatch.class,
-            LoadedFile.class,
-            SkippedRifRecord.class);
+            LoadedFile.class);
 
     try (Connection connection = dataSource.getConnection(); ) {
       // Disable auto-commit and remember the default schema name.

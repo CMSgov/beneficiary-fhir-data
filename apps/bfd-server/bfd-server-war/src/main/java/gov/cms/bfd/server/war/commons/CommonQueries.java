@@ -179,8 +179,6 @@ public class CommonQueries {
     if (includeIdentifiers) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     }
-    // TODO : the following left join of skippedRifRecords needs to be removed as part of BFD-3241
-    root.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
 
     criteriaQuery.select(root);
     criteriaQuery.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneId));
