@@ -127,7 +127,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
         (s ->
             s.contains(" from ccw.beneficiaries ")
                 && s.contains("bene_id=")
-                && s.contains(" join ") // this one since left join gone
+                && s.contains(" join ")
                 && !s.contains("bene_crnt_hic_num="))),
     /** Represents the query for beneficiary by mbi (via bene history). */
     BENE_BY_MBI_HISTORY(

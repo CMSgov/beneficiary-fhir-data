@@ -831,7 +831,6 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
             + TransformerConstants.CODING_BBAPI_BENE_MBI_HASH
             + "|"
             + mbiHash;
-    // i think it needs an include identifier header
 
     List<String> additionalExpectedMdcKeys = new ArrayList<>();
     additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
