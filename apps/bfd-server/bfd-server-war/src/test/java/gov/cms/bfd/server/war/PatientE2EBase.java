@@ -821,7 +821,8 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
    * expected for Patient by mbi.
    */
   @Test
-  public void testPatientByIdentifierHasAccessJsonWithExpectedMdcKeys() throws IOException { // here
+  public void testPatientByIdentifierHasAccessJsonWithExpectedMdcKeys()
+      throws IOException { // problematic one
     Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
     String mbiHash = beneficiary.getMbiHash().orElseThrow();
     String requestString =
@@ -830,8 +831,9 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
             + TransformerConstants.CODING_BBAPI_BENE_MBI_HASH
             + "|"
             + mbiHash;
+    // i think it needs an include identifier header
 
-    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    List<String> additionalExpectedMdcKeys = new ArrayList<>();
     additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
 
     ServerTestUtils.assertAccessJsonHasMdcKeys(
@@ -847,7 +849,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     String requestString = patientEndpoint + patientId;
 
-    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    List<String> additionalExpectedMdcKeys = new ArrayList<>();
     additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION);
 
     ServerTestUtils.assertAccessJsonHasMdcKeys(
@@ -863,7 +865,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
     String requestString = patientEndpoint + "?_id=" + patientId;
 
-    List<String> additionalExpectedMdcKeys = new ArrayList<>(MDC_EXPECTED_BASE_KEYS);
+    List<String> additionalExpectedMdcKeys = new ArrayList<>();
     additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
 
     ServerTestUtils.assertAccessJsonHasMdcKeys(

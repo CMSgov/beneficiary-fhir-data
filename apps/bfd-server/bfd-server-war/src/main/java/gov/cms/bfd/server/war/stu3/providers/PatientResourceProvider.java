@@ -155,7 +155,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    */
   @Read(version = false)
   @Trace
-  public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
+  public Patient read(
+      @IdParam IdType patientId, RequestDetails requestDetails) { // include identifier !
     if (patientId == null || patientId.getIdPart() == null) {
       throw new InvalidRequestException("Missing required patient ID");
     }
