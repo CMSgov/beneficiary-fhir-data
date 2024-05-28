@@ -23,8 +23,10 @@ public class DatabaseTestSchemaManager {
 
   /** Logger for writing information out. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseTestSchemaManager.class);
+
   /** Baseline version of migration scripts. */
   public static final String BASELINE_VERSION = "20240522164906244";
+
   /**
    * Creates or updates, as appropriate, the backend database schema for the specified database.
    *
@@ -101,7 +103,8 @@ public class DatabaseTestSchemaManager {
     flywayBuilder.baselineOnMigrate(true);
     flywayBuilder.baselineVersion(BASELINE_VERSION);
 
-    // We want to allow the scripts to be executed out of order, in the case of concurrent development.
+    // We want to allow the scripts to be executed out of order, in the case of concurrent
+    // development.
     flywayBuilder.outOfOrder(true);
     // Let flyway know which schemas it will be working with.
     flywayBuilder.schemas(DatabaseTestUtils.FLYWAY_CLEAN_SCHEMAS.toArray(new String[0]));

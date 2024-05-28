@@ -28,8 +28,10 @@ import org.slf4j.LoggerFactory;
 public final class DatabaseSchemaManager {
   /** Logger for writing messages. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
+
   /** Baseline version of migration scripts. */
   public static final String BASELINE_VERSION = "20240522164906244";
+
   /** List of schemas. */
   public static final List<String> SCHEMAS = List.of("ccw", "rda");
 
@@ -122,7 +124,8 @@ public final class DatabaseSchemaManager {
     flywayBuilder.baselineOnMigrate(true);
     flywayBuilder.baselineVersion(BASELINE_VERSION);
 
-    // We want to allow the scripts to be executed out of order, in the case of concurrent development.
+    // We want to allow the scripts to be executed out of order, in the case of concurrent
+    // development.
     flywayBuilder.outOfOrder(true);
     // Let flyway know which schemas it will be working with.
     flywayBuilder.schemas(SCHEMAS.toArray(new String[0]));
