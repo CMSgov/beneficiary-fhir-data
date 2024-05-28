@@ -306,7 +306,7 @@ END $$;
 -- Name: set_fhirdb_owner(text); Type: FUNCTION; Schema: public;
 --
 
-CREATE FUNCTION public.set_fhirdb_owner(role_name text) RETURNS void
+CREATE OR REPLACE FUNCTION public.set_fhirdb_owner(role_name text) RETURNS void
     LANGUAGE plpgsql
      AS $$
 DECLARE
@@ -3110,17 +3110,6 @@ ALTER TABLE ccw.snf_claims
 ALTER TABLE ONLY ccw.snf_claims
     ADD CONSTRAINT snf_claims_pkey PRIMARY KEY (clm_id);
 
-
---
--- Name: BeneficiariesHistory_old BeneficiariesHistory_pkey_old; Type: CONSTRAINT; Schema: public;
---
-
-ALTER TABLE public."BeneficiariesHistory_old"
-    DROP CONSTRAINT IF EXISTS "BeneficiariesHistory_pkey_old" CASCADE;
-ALTER TABLE ONLY public."BeneficiariesHistory_old"
-    ADD CONSTRAINT "BeneficiariesHistory_pkey_old" PRIMARY KEY ("beneficiaryHistoryId");
-
-
 --
 -- Name: claim_message_meta_data claim_message_meta_data_pkey; Type: CONSTRAINT; Schema: rda;
 --
@@ -3453,14 +3442,6 @@ CREATE INDEX IF NOT EXISTS skipped_rif_records_bene_id_idx ON ccw.skipped_rif_re
 
 
 CREATE INDEX IF NOT EXISTS snf_claims_bene_id_idx ON ccw.snf_claims USING btree (bene_id);
-
-
---
--- Name: BeneficiariesHistory_hicn_idx_old; Type: INDEX; Schema: public;
---
-
-
-CREATE INDEX IF NOT EXISTS "BeneficiariesHistory_hicn_idx_old" ON public."BeneficiariesHistory_old" USING btree (hicn);
 
 
 --
@@ -4294,16 +4275,6 @@ GRANT SELECT ON TABLE ccw.snf_claims TO bfd_reader_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE ccw.snf_claims TO bfd_writer_role;
 GRANT ALL ON TABLE ccw.snf_claims TO bfd_migrator_role;
 GRANT ALL ON TABLE ccw.snf_claims TO rds_superuser;
-
-
---
--- Name: TABLE "BeneficiariesHistory_old"; Type: ACL; Schema: public;
---
-
-GRANT SELECT ON TABLE public."BeneficiariesHistory_old" TO bfd_reader_role;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public."BeneficiariesHistory_old" TO bfd_writer_role;
-GRANT ALL ON TABLE public."BeneficiariesHistory_old" TO bfd_migrator_role;
-GRANT ALL ON TABLE public."BeneficiariesHistory_old" TO rds_superuser;
 
 
 --
