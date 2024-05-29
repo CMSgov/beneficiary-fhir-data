@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -346,7 +347,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     Enumeration<? extends JarEntry> enumeration = migrationJar.entries();
 
     int fileCount = 0;
-    String latestVersion = "";
+    List<String> versions = new ArrayList<>();
     while (enumeration.hasMoreElements()) {
       ZipEntry entry = enumeration.nextElement();
       // Check for sql migration scripts
@@ -355,10 +356,11 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
               .matcher(entry.getName());
       if (versionMatcher.matches()) {
         fileCount++;
-        latestVersion = versionMatcher.group(1);
+        versions.add(versionMatcher.group(1));
       }
     }
-    return List.of(fileCount, latestVersion);
+    Collections.sort(versions);
+    return List.of(fileCount, versions.getLast());
   }
 
   /**
