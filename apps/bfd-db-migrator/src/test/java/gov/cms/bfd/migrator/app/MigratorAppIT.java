@@ -147,7 +147,9 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     ConfigLoader configLoader = createConfigLoader(TestDirectory.REAL);
     doReturn(configLoader).when(app).createConfigLoader();
 
-    int numMigrations = getNumMigrationScripts();
+    List<Object> migrationList = getNumMigrationScripts();
+    int numMigrations = (int) migrationList.get(0);
+    String latestVersion = (String) migrationList.get(1);
     try {
       // Run the app and collect its output.
       final int exitCode = app.performMigrationsAndHandleExceptions();
@@ -159,21 +161,21 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
 
       // Test the migrations occurred by checking the log output
 
-      Pattern logPattern =
+      Matcher logMatcher =
           Pattern.compile(
-              String.format(".*Successfully applied %s migration(s?) to schema.*", numMigrations),
-              Pattern.DOTALL);
-      Matcher logMatcher = logPattern.matcher(logOutput);
-      boolean hasExpectedMigrationLine = logMatcher.matches();
+                  String.format(
+                      ".*Successfully applied %s migration(s?) to schema.*", numMigrations),
+                  Pattern.DOTALL)
+              .matcher(logOutput);
       assertTrue(
-          hasExpectedMigrationLine,
+          logMatcher.matches(),
           "Did not find log entry for completing expected number of migrations ("
               + numMigrations
               + ") \nOUTPUT:\n"
               + logOutput);
-      //      assertTrue(
-      //          logOutput.contains(String.format("now at version v%s", finalVersion)),
-      //          "Did not find log entry for expected final version (v" + finalVersion + ")");
+      assertTrue(
+          logOutput.contains(String.format("now at version v%s", latestVersion)),
+          "Did not find log entry for expected final version (v" + ")");
 
       // verify that progress messages were passed to SQS
       final var progressMessages = readProgressMessagesFromSQSQueue();
@@ -320,13 +322,13 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   }
 
   /**
-   * Gets the number of migration scripts by checking the directory they are located in and counting
-   * the files.
+   * Gets the number of migration scripts and latest version by checking the directory they are
+   * located in and counting the files.
    *
-   * @return the number migration scripts
+   * @return A list containing the number of migration scripts and the latest version.
    * @throws IOException pass through
    */
-  private int getNumMigrationScripts() throws IOException {
+  private List<Object> getNumMigrationScripts() throws IOException {
     int MAX_SEARCH_DEPTH = 5;
     Path jarFilePath =
         Files.find(
@@ -344,15 +346,19 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     Enumeration<? extends JarEntry> enumeration = migrationJar.entries();
 
     int fileCount = 0;
+    String latestVersion = "";
     while (enumeration.hasMoreElements()) {
       ZipEntry entry = enumeration.nextElement();
-
       // Check for sql migration scripts
-      if (entry.getName().startsWith("db/migration/V") && entry.getName().endsWith(".sql")) {
+      Matcher versionMatcher =
+          Pattern.compile("db\\/migration\\/V(\\d*)__.*\\.sql", Pattern.DOTALL)
+              .matcher(entry.getName());
+      if (versionMatcher.matches()) {
         fileCount++;
+        latestVersion = versionMatcher.group(1);
       }
     }
-    return fileCount;
+    return List.of(fileCount, latestVersion);
   }
 
   /**
