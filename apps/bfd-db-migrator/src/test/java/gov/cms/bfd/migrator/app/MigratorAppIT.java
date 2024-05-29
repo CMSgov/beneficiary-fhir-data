@@ -148,7 +148,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     ConfigLoader configLoader = createConfigLoader(TestDirectory.REAL);
     doReturn(configLoader).when(app).createConfigLoader();
 
-    List<Object> migrationList = getNumMigrationScripts();
+    List<Object> migrationList = getMigrationScriptsInfo();
     int numMigrations = (int) migrationList.get(0);
     String latestVersion = (String) migrationList.get(1);
     try {
@@ -329,7 +329,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
    * @return A list containing the number of migration scripts and the latest version.
    * @throws IOException pass through
    */
-  private List<Object> getNumMigrationScripts() throws IOException {
+  private List<Object> getMigrationScriptsInfo() throws IOException {
     int MAX_SEARCH_DEPTH = 5;
     Path jarFilePath =
         Files.find(
