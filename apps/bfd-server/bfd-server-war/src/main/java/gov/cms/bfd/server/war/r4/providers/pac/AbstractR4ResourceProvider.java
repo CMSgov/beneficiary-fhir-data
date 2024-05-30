@@ -47,6 +47,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -65,9 +66,17 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   /**
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
-   * e.g. <code>f-1234</code> or <code>m--1234</code> (for negative IDs).
+   * e.g. <code>f-1234</code> or <code>m--1234</code> (for negative IDs). e.g. <code>
+   * f-LTA0M2EyNWU2YjM0MmRmOTczY2YyYjU</code> or <code>m--00009127422efa</code> (for negative IDs).
+   *
+   * <p>Observation of data on ENVs, prod, prod-sbx, test: mcs_claim table, column idr_clm_hd_idn
+   * char(15): -00009127422efa, -100000103 fiss_claim table, column claim_id char(43):
+   * LTA0M2EyNWU2YjM0MmRmOTczY2YyYjU, MjIzMzYzMDQzOTIyMDdDQUFZICAgICAwMTAxMQ
    */
-  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Digit}+)");
+  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("^([fm])-(-?\\p{Alnum}+)$");
+
+  // note, per observation: the mcs claim id (column idr_clm_hd_idn) is not digit only as shown
+  // above sample values
 
   /** The metric registry. */
   private final MetricRegistry metricRegistry;
@@ -197,7 +206,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     }
     final boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
-    if (claimId == null) throw new IllegalArgumentException("Resource ID can not be null");
     if (claimId.getVersionIdPartAsLong() != null)
       throw new IllegalArgumentException("Resource ID must not define a version.");
 
@@ -211,22 +219,45 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
           "ID pattern: '"
               + claimIdText
               + "' does not match expected pattern: {singleCharacter}-{claimIdNumber}");
-
-    String claimIdTypeText = claimIdMatcher.group(1);
-    Optional<ResourceTypeV2<T, ?>> optional = parseClaimType(claimIdTypeText);
-    if (optional.isEmpty()) throw new ResourceNotFoundException(claimId);
-    ResourceTypeV2<T, ?> claimIdType = optional.get();
-    String claimIdString = claimIdMatcher.group(2);
+    ImmutablePair<String, ResourceTypeV2<T, ?>> claimIdObj =
+        getClaimIdType(claimIdMatcher, claimId);
 
     Object claimEntity;
 
     try {
-      claimEntity = claimDao.getEntityById(claimIdType, claimIdString);
+      claimEntity = claimDao.getEntityById(claimIdObj.getRight(), claimIdObj.getLeft());
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(claimId);
     }
 
-    return transformEntity(claimIdType, claimEntity, includeTaxNumbers);
+    return transformEntity(claimIdObj.getRight(), claimEntity, includeTaxNumbers);
+  }
+
+  /**
+   * Helper to extract id type and id string.
+   *
+   * @param claimIdMatcher - regex with matching groups
+   * @param claimId - the full claim id object with type string 'f' or 'm' as prefix
+   * @return the pair of id string and id resource type
+   * @throws IllegalStateException if the type string missing
+   * @throws ResourceNotFoundException if the type string is not tied to a resource (RDA)
+   */
+  private ImmutablePair<String, ResourceTypeV2<T, ?>> getClaimIdType(
+      Matcher claimIdMatcher, IdType claimId) {
+    // group(1) - fiss type 'f' or mcs type 'm'
+    // group(2) - fiss claim id or mcs field - alpha numeric expected with possible leading '-' for
+    // mcs id field
+    String claimIdTypeStr = claimIdMatcher.group(1);
+    // robust by check or assert
+    if (claimIdTypeStr == null || claimIdTypeStr.isEmpty())
+      throw new IllegalStateException(
+          "Missing fiss or mcs claim id type info." + claimId.getIdPart());
+    Optional<ResourceTypeV2<T, ?>> optional = parseClaimType(claimIdTypeStr);
+    if (optional.isEmpty()) throw new ResourceNotFoundException(claimId);
+    String claimIdValStr = claimIdMatcher.group(2);
+    if (claimIdValStr == null || claimIdValStr.isEmpty())
+      throw new IllegalStateException("Missing fiss or mcs claim id value." + claimId.getIdPart());
+    return new ImmutablePair<String, ResourceTypeV2<T, ?>>(claimIdValStr, optional.get());
   }
 
   /**
