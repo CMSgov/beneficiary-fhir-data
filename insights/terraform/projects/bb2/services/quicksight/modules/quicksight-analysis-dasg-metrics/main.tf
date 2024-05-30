@@ -810,7 +810,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 visibility   = "VISIBLE"
               }
               selected_field_options {
-                custom_label = "Enrollees served-Progress to FY2024 Target 400K"
+                custom_label = "Enrollees served-Progress to FY2024 Target 450K"
                 field_id     = "0581b3bf-d5ad-47a1-ad31-c6cc9c1408ec.4.1641486129331"
                 visibility   = "VISIBLE"
               }
