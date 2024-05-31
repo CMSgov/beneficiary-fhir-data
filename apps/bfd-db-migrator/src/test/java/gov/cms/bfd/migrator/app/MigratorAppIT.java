@@ -176,7 +176,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
               + logOutput);
       assertTrue(
           logOutput.contains(String.format("now at version v%s", latestVersion)),
-          "Did not find log entry for expected final version (v" + ")");
+          "Did not find log entry for expected final version (v" + latestVersion + ")");
 
       // verify that progress messages were passed to SQS
       final var progressMessages = readProgressMessagesFromSQSQueue();
