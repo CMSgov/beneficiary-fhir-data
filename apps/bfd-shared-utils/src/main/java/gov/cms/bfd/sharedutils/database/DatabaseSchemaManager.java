@@ -90,7 +90,8 @@ public final class DatabaseSchemaManager {
     MigrationInfoService flywayInfo = flyway.info();
     return flywayInfo != null
         && flywayInfo.current() != null
-        && flywayInfo.current().getState() == MigrationState.SUCCESS;
+        && (flywayInfo.current().getState() == MigrationState.SUCCESS
+            || flywayInfo.current().getState() == MigrationState.BASELINE);
   }
 
   /**
