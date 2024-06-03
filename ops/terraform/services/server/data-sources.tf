@@ -57,7 +57,7 @@ data "aws_security_groups" "aurora_cluster" {
   filter {
     name = "tag:Name"
     values = toset([
-      "bfd-${local.db_environment}-aurora-cluster",
+      local.db_cluster_identifier,
       "bfd-${local.seed_env}-aurora-cluster"
     ])
   }
