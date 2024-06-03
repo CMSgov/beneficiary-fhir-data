@@ -226,9 +226,10 @@ public class OpenApiDocs {
       // iterate over paths and add post specification to _search endpoints
       var paths = (Map<String, Object>) spec.get("paths");
       for (String path : paths.keySet()) {
-        if (apiVersion.equals(API_VERSION_2)
-            && (path.endsWith("ExplanationOfBenefit/_search")
-                || path.endsWith("Patient/_search"))) {
+        if ((apiVersion.equals(API_VERSION_2)
+                && (path.endsWith("ExplanationOfBenefit/_search")
+                    || path.endsWith("Patient/_search")))
+            || (apiVersion.equals(API_VERSION_1) && path.endsWith("Patient/_search"))) {
           var pathMap = (Map<String, Object>) paths.get(path);
           var postSpec = findPostSpecification(path, postSpecs);
 
