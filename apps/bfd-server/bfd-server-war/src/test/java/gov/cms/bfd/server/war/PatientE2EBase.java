@@ -821,8 +821,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
    * expected for Patient by mbi.
    */
   @Test
-  public void testPatientByIdentifierHasAccessJsonWithExpectedMdcKeys()
-      throws IOException {
+  public void testPatientByIdentifierHasAccessJsonWithExpectedMdcKeys() throws IOException {
     Beneficiary beneficiary = testUtils.getFirstBeneficiary(testUtils.loadSampleAData());
     String mbiHash = beneficiary.getMbiHash().orElseThrow();
     String requestString =
