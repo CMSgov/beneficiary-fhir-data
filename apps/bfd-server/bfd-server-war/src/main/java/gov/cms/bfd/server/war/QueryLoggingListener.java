@@ -110,7 +110,6 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     // Nothing to do here.
   }
 
-  // TODO: GET RID OF JOINS, got rid of left join, check if need join with bene hist table
   /** Enumerates the various query types. */
   static enum QueryType {
     /** Represents the query for beneficiary by id (no hicn/mbi returned). */
