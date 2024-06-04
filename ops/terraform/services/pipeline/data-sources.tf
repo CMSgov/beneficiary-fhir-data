@@ -1,7 +1,7 @@
 data "external" "rds" {
   program = [
     "${path.module}/scripts/rds-cluster-config.sh", # helper script
-    local.db_cluster_identifier                     # verified, positional argument to script
+    data.aws_rds_cluster.rds.cluster_identifier     # verified, positional argument to script
   ]
 }
 
@@ -79,7 +79,7 @@ data "aws_security_groups" "rds" {
   filter {
     name = "tag:Name"
     values = toset([
-      "bfd-${local.db_environment}-aurora-cluster",
+      local.db_cluster_identifier,
       "bfd-${local.seed_env}-aurora-cluster"
     ])
   }
@@ -90,7 +90,7 @@ data "aws_security_groups" "rds" {
 }
 
 data "aws_rds_cluster" "rds" {
-  cluster_identifier = local.nonsensitive_common_config["rds_cluster_identifier"]
+  cluster_identifier = local.db_cluster_identifier
 }
 
 data "aws_ssm_parameters_by_path" "nonsensitive_common" {
