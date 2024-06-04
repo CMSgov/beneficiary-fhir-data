@@ -37,7 +37,7 @@ resource "aws_iam_role" "cwl2firehose_role" {
         {
           Action   = ["firehose:*"]
           Effect   = "Allow"
-          Resource = ["arn:aws:firehose:${var.region}:${local.account_id}:deliverystream/${local.full_name}"]
+          Resource = ["arn:aws:firehose:${var.region}:${local.account_id}:*"]
         },
       ]
     })
@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "cwl_destination_policy_doc" {
     principals {
       type = "AWS"
       identifiers = [
-         data.aws_ssm_parameter.bb2_acct.value
+        data.aws_ssm_parameter.bb2_acct.value
       ]
     }
     actions = [
