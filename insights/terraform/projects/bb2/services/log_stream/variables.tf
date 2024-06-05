@@ -10,10 +10,6 @@ variable "firehose_s3_buffer_interval" {
   default     = 300
 }
 
-variable "bb2_acct" {
-  type = string
-}
-
 variable "glue_crawler_schedules" {
   description = "Map of crawler schedules for envs"
   type        = map(any)
