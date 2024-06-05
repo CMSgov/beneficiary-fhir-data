@@ -9,7 +9,3 @@ variable "project" {
 variable "region" {
   type = string
 }
-
-variable "bb2_acct" {
-  type = string
-}

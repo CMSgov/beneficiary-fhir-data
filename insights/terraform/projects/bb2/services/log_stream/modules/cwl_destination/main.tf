@@ -3,6 +3,7 @@ data "aws_caller_identity" "current" {}
 locals {
   account_id = data.aws_caller_identity.current.account_id
   full_name  = "bfd-insights-${var.project}-${var.firehose_name}"
+  env        = terraform.workspace
 }
 
 # CWL destination
@@ -36,7 +37,7 @@ resource "aws_iam_role" "cwl2firehose_role" {
         {
           Action   = ["firehose:*"]
           Effect   = "Allow"
-          Resource = ["arn:aws:firehose:${var.region}:${local.account_id}:deliverystream/${local.full_name}"]
+          Resource = ["arn:aws:firehose:${var.region}:${local.account_id}:*"]
         },
       ]
     })
@@ -50,7 +51,7 @@ data "aws_iam_policy_document" "cwl_destination_policy_doc" {
     principals {
       type = "AWS"
       identifiers = [
-        var.bb2_acct
+        data.aws_ssm_parameter.bb2_acct.value
       ]
     }
     actions = [
@@ -64,4 +65,8 @@ data "aws_iam_policy_document" "cwl_destination_policy_doc" {
 resource "aws_cloudwatch_log_destination_policy" "cwl_destination_policy" {
   destination_name = aws_cloudwatch_log_destination.cwl_destination.name
   access_policy    = data.aws_iam_policy_document.cwl_destination_policy_doc.json
+}
+
+data "aws_ssm_parameter" "bb2_acct" {
+  name = "/bfd/${local.env}/sensitive/insights/bb2_acct"
 }

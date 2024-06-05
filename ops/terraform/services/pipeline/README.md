@@ -25,6 +25,7 @@
 | <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Pipeline override ami-id. Defaults to latest pipeline/etl AMI from `master`. | `string` | `null` | no |
 | <a name="input_create_ccw_pipeline"></a> [create\_ccw\_pipeline](#input\_create\_ccw\_pipeline) | Creates a BFD Pipeline to run CCW Rif jobs; RDA jobs on the pipeline are disabled by default. | `bool` | `true` | no |
 | <a name="input_create_rda_pipeline"></a> [create\_rda\_pipeline](#input\_create\_rda\_pipeline) | Creates a BFD Pipeline to run RDA jobs; CCW Rif jobs on the pipeline are disabled by default. | `bool` | `true` | no |
+| <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts only. | `string` | `null` | no |
 | <a name="input_force_dashboard_creation"></a> [force\_dashboard\_creation](#input\_force\_dashboard\_creation) | Forces the creation of BFD Pipeline CloudWatch Dashboards; note dashboards are created by-default for established environments | `bool` | `false` | no |
 | <a name="input_force_sli_creation"></a> [force\_sli\_creation](#input\_force\_sli\_creation) | Forces the creation of BFD Pipeline SLI CloudWatch Metrics; required for SLO Alarms | `bool` | `false` | no |
 | <a name="input_force_slo_alarms_creation"></a> [force\_slo\_alarms\_creation](#input\_force\_slo\_alarms\_creation) | Forces the creation of BFD Pipeline SLO CloudWatch Alarms; note alarms are created by-default for established environments; requires SLIs | `bool` | `false` | no |
@@ -81,8 +82,8 @@
 | [aws_kms_key.mgmt_config_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_rds_cluster.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [aws_security_group.enterprise_tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
-| [aws_security_group.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_security_groups.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_groups) | data source |
 | [aws_sns_topic.alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |
 | [aws_sns_topic.bfd_notices_slack_alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |
 | [aws_sns_topic.bfd_test_slack_alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |

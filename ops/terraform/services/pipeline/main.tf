@@ -100,8 +100,8 @@ locals {
   ami_id                 = data.aws_ami.main.image_id
   availability_zone      = data.external.rds.result["WriterAZ"]
   kms_key_id             = data.aws_kms_key.cmk.arn
-  db_cluster_identifier  = var.db_environment_override != null ? "bfd-${var.db_environment_override}-aurora-cluster" : "bfd-${local.seed_env}-aurora-cluster"
-  db_environment         = var.db_environment_override != null ? var.db_environment_override : local.seed_env
+  db_cluster_identifier  = "bfd-${local.db_environment}-aurora-cluster"
+  db_environment         = var.db_environment_override != null ? var.db_environment_override : local.env
   rds_security_group_ids = data.aws_security_groups.rds.ids
   rds_writer_endpoint    = data.external.rds.result["Endpoint"]
   vpc_id                 = data.aws_vpc.main.id
