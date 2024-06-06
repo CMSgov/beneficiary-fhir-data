@@ -5,6 +5,7 @@ import gov.cms.bfd.sharedutils.exceptions.UncheckedSqlException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
@@ -27,6 +28,12 @@ import org.slf4j.LoggerFactory;
 public final class DatabaseSchemaManager {
   /** Logger for writing messages. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
+
+  /** Baseline version of migration scripts. */
+  public static final String BASELINE_VERSION = "20240522164906244";
+
+  /** List of schemas. */
+  public static final List<String> SCHEMAS = List.of("ccw", "rda");
 
   /**
    * Creates or updates, as appropriate, the backend database schema for the specified database.
@@ -83,7 +90,8 @@ public final class DatabaseSchemaManager {
     MigrationInfoService flywayInfo = flyway.info();
     return flywayInfo != null
         && flywayInfo.current() != null
-        && flywayInfo.current().getState() == MigrationState.SUCCESS;
+        && (flywayInfo.current().getState() == MigrationState.SUCCESS
+            || flywayInfo.current().getState() == MigrationState.BASELINE);
   }
 
   /**
@@ -108,19 +116,20 @@ public final class DatabaseSchemaManager {
     // Trying to prevent career-limiting mistakes.
     flywayBuilder.cleanDisabled(true);
 
-    // Apply a baseline for non-empty databases, start at version 0
+    // Apply a baseline for non-empty databases.
     // FIXME: Official documentation warns against these settings for
     // production environments. As of flyway 9, this option needs to
     // be set explicitly in order to remain consistent with the way
     // BFD used flyway 8 and the existing IT strategy. Until BFD adopts
     // a better IT strategy, this must be set to true.
     flywayBuilder.baselineOnMigrate(true);
-    flywayBuilder.baselineVersion("0");
+    flywayBuilder.baselineVersion(BASELINE_VERSION);
 
-    // The default name for the schema table changed in Flyway 5.
-    // We need to specify the original table name for backwards compatibility.
-    flywayBuilder.table("schema_version");
-
+    // We want to allow the scripts to be executed out of order, in the case of concurrent
+    // development.
+    flywayBuilder.outOfOrder(true);
+    // Let flyway know which schemas it will be working with.
+    flywayBuilder.schemas(SCHEMAS.toArray(new String[0]));
     // If we want to point at a specific location for the migration scripts
     // Useful for testing
     if (flywayScriptLocationOverride != null && flywayScriptLocationOverride.length() > 0) {
