@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.SkippedRifRecord;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -101,25 +100,6 @@ public final class BeneficiaryTransformerTest {
         patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
-  }
-
-  /**
-   * Verifies that {@link BeneficiaryTransformer#transform(Beneficiary, RequestHeaders)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
-   * when there is a matching {@link SkippedRifRecord} for the {@link Beneficiary}.
-   */
-  @Test
-  public void transformSampleARecordWithSkippedRecord() {
-    Beneficiary beneficiary = loadSampleABeneficiary();
-    beneficiary.getSkippedRifRecords().add(new SkippedRifRecord());
-
-    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("false");
-    Patient patient = beneficiaryTransformer.transform(beneficiary, requestHeader);
-    assertEquals(1, patient.getMeta().getTag().size());
-    TransformerTestUtils.assertCodingEquals(
-        TransformerConstants.CODING_SYSTEM_BFD_TAGS,
-        TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
-        patient.getMeta().getTag().get(0));
   }
 
   /**

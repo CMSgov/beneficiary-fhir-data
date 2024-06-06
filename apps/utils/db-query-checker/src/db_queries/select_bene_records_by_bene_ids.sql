@@ -1,5 +1,4 @@
 SELECT beneficiar0_.bene_id::text AS bene_id1_13_0_,
-       skippedrif2_.record_id AS record_i1_32_2_,
        beneficiar0_.age AS age2_13_0_,
        beneficiar0_.rfrnc_yr AS rfrnc_yr3_13_0_,
        beneficiar0_.bene_link_key AS bene_lin4_13_0_,
@@ -204,16 +203,6 @@ SELECT beneficiar0_.bene_id::text AS bene_id1_13_0_,
        beneficiar0_.enrl_src AS enrl_s203_13_0_,
        beneficiar0_.buyin_mo_cnt AS buyin_204_13_0_,
        beneficiar0_.state_code AS state_205_13_0_,
-       beneficiar0_.v_dod_sw AS v_dod_206_13_0_,
-       skippedrif2_.bene_id AS bene_id2_32_2_,
-       skippedrif2_.dml_ind AS dml_ind3_32_2_,
-       skippedrif2_.rif_data AS rif_data4_32_2_,
-       skippedrif2_.rif_file_timestamp AS rif_file5_32_2_,
-       skippedrif2_.rif_file_type AS rif_file6_32_2_,
-       skippedrif2_.skip_reason AS skip_rea7_32_2_,
-       skippedrif2_.bene_id AS bene_id2_32_1__,
-       skippedrif2_.record_id AS record_i1_32_1__
+       beneficiar0_.v_dod_sw AS v_dod_206_13_0_
 FROM ccw.beneficiaries beneficiar0_
-       LEFT OUTER JOIN ccw.skipped_rif_records skippedrif2_
-                    ON beneficiar0_.bene_id::text=skippedrif2_.bene_id::text
 WHERE beneficiar0_.bene_id::text IN ($1)
