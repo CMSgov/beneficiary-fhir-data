@@ -44,7 +44,7 @@ public final class DatabaseTestUtils {
    * We need to inform Flyway of all of our schemas in order for {@link Flyway#clean()} to work
    * properly.
    */
-  public static final List<String> FLYWAY_CLEAN_SCHEMAS = List.of("public", "rda");
+  public static final List<String> FLYWAY_CLEAN_SCHEMAS = List.of("ccw", "rda");
 
   /** The default database type to use for the integration tests when nothing is provided. */
   public static final String DEFAULT_IT_DATABASE = "jdbc:bfd-test:tc";

@@ -32,10 +32,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import javax.sql.DataSource;
 import lombok.Getter;
@@ -145,11 +148,9 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     ConfigLoader configLoader = createConfigLoader(TestDirectory.REAL);
     doReturn(configLoader).when(app).createConfigLoader();
 
-    int numMigrations = getNumMigrationScripts();
-    /* Normally the version would be the same as the number of files, but
-    migration #12 is missing for some reason in the real scripts, so the version will be files +1 */
-    int expectedVersion = numMigrations + 1;
-
+    List<Object> migrationList = getMigrationScriptsInfo();
+    int numMigrations = (int) migrationList.get(0);
+    String latestVersion = (String) migrationList.get(1);
     try {
       // Run the app and collect its output.
       final int exitCode = app.performMigrationsAndHandleExceptions();
@@ -160,19 +161,22 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
           EXIT_CODE_SUCCESS, exitCode, "Did not get expected exit code, \nOUTPUT:\n" + logOutput);
 
       // Test the migrations occurred by checking the log output
-      boolean hasExpectedMigrationLine =
-          logOutput.contains(
-              String.format("Successfully applied %s migrations to schema", numMigrations));
 
+      Matcher logMatcher =
+          Pattern.compile(
+                  String.format(
+                      ".*Successfully applied %s migration(s?) to schema.*", numMigrations),
+                  Pattern.DOTALL)
+              .matcher(logOutput);
       assertTrue(
-          hasExpectedMigrationLine,
+          logMatcher.matches(),
           "Did not find log entry for completing expected number of migrations ("
               + numMigrations
               + ") \nOUTPUT:\n"
               + logOutput);
       assertTrue(
-          logOutput.contains(String.format("now at version v%s", expectedVersion)),
-          "Did not find log entry for expected final version (v" + expectedVersion + ")");
+          logOutput.contains(String.format("now at version v%s", latestVersion)),
+          "Did not find log entry for expected final version (v" + latestVersion + ")");
 
       // verify that progress messages were passed to SQS
       final var progressMessages = readProgressMessagesFromSQSQueue();
@@ -319,13 +323,13 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   }
 
   /**
-   * Gets the number of migration scripts by checking the directory they are located in and counting
-   * the files.
+   * Gets the number of migration scripts and latest version by checking the directory they are
+   * located in and counting the files.
    *
-   * @return the number migration scripts
+   * @return A list containing the number of migration scripts and the latest version.
    * @throws IOException pass through
    */
-  private int getNumMigrationScripts() throws IOException {
+  private List<Object> getMigrationScriptsInfo() throws IOException {
     int MAX_SEARCH_DEPTH = 5;
     Path jarFilePath =
         Files.find(
@@ -343,15 +347,20 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     Enumeration<? extends JarEntry> enumeration = migrationJar.entries();
 
     int fileCount = 0;
+    List<String> versions = new ArrayList<>();
     while (enumeration.hasMoreElements()) {
       ZipEntry entry = enumeration.nextElement();
-
       // Check for sql migration scripts
-      if (entry.getName().startsWith("db/migration/V") && entry.getName().endsWith(".sql")) {
+      Matcher versionMatcher =
+          Pattern.compile("db\\/migration\\/V(\\d*)__.*\\.sql", Pattern.DOTALL)
+              .matcher(entry.getName());
+      if (versionMatcher.matches()) {
         fileCount++;
+        versions.add(versionMatcher.group(1));
       }
     }
-    return fileCount;
+    Collections.sort(versions);
+    return List.of(fileCount, versions.getLast());
   }
 
   /**

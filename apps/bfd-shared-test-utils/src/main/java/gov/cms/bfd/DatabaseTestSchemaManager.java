@@ -24,6 +24,9 @@ public class DatabaseTestSchemaManager {
   /** Logger for writing information out. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseTestSchemaManager.class);
 
+  /** Baseline version of migration scripts. */
+  public static final String BASELINE_VERSION = "20240522164906244";
+
   /**
    * Creates or updates, as appropriate, the backend database schema for the specified database.
    *
@@ -96,14 +99,15 @@ public class DatabaseTestSchemaManager {
     // Trying to prevent career-limiting mistakes.
     flywayBuilder.cleanDisabled(true);
 
-    // Apply a baseline for non-empty databases, start at version 0
+    // Apply a baseline for non-empty databases.
     flywayBuilder.baselineOnMigrate(true);
-    flywayBuilder.baselineVersion("0");
+    flywayBuilder.baselineVersion(BASELINE_VERSION);
 
-    // The default name for the schema table changed in Flyway 5.
-    // We need to specify the original table name for backwards compatibility.
-    flywayBuilder.table("schema_version");
-
+    // We want to allow the scripts to be executed out of order, in the case of concurrent
+    // development.
+    flywayBuilder.outOfOrder(true);
+    // Let flyway know which schemas it will be working with.
+    flywayBuilder.schemas(DatabaseTestUtils.FLYWAY_CLEAN_SCHEMAS.toArray(new String[0]));
     // If we want to point at a specific location for the migration scripts
     // Useful for testing
     if (flywayScriptLocationOverride != null && flywayScriptLocationOverride.length() > 0) {
