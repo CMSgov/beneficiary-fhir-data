@@ -102,7 +102,7 @@ def monitorMigrator(Map args = [:]) {
     heartbeatInterval = args.heartbeatInterval
     maxMessages = args.maxMessages
     sqsQueueUrl = awsSqs.getQueueUrl(sqsQueueName)
-    latestSchemaVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as Integer
+    latestSchemaVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as BigInteger
     while(true) {
         awsAuth.assumeRole()
         hasMessages = true;
@@ -189,7 +189,7 @@ boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
         storedSchemaVersion = awsSsm.getParameter(
                 parameterName: "/bfd/${bfdEnv}/common/nonsensitive/database_schema_version",
                 awsRegion: awsRegion
-        ) as Integer
+        ) as BigInteger
     } catch(Exception ex) {
         echo "Exception has been encountered getting the parameter /bfd/${bfdEnv}/common/nonsensitive/database_schema_version from the aws ssm, missing ssm parameter for stored schema version."
         return true
@@ -197,7 +197,7 @@ boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
     echo "Stored Schema Version : ${storedSchemaVersion}"
 
     // check latest available versioned migration
-    latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as Integer
+    latestAvailableMigrationVersion = sh(returnStdout: true, script: "./ops/jenkins/scripts/getLatestSchemaMigrationScriptVersion.sh") as BigInteger
     echo "Latest Available Migration Version: ${latestAvailableMigrationVersion}"
 
     // compare and determine
