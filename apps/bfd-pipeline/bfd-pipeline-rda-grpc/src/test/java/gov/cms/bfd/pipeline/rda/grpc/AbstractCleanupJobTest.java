@@ -30,6 +30,21 @@ class AbstractCleanupJobTest {
   }
 
   /**
+   * Test scenario with expired claims; some normal, and some synthetic (which should not be
+   * deleted).
+   *
+   * @throws ProcessingException if errors occur during processing.
+   */
+  @Test
+  void runS3Sources() throws ProcessingException {
+    var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
+    utils.seedData(cutoff, 8, 0, 4);
+    var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
+    var deleted = cleanUpJob.run();
+    assertEquals(4, deleted);
+  }
+
+  /**
    * Basic test scenario, normal case where it executes multiple transactions to remove old claims.
    *
    * @throws ProcessingException if errors occurs during processing.
@@ -37,7 +52,7 @@ class AbstractCleanupJobTest {
   @Test
   void runComplete() throws ProcessingException {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
-    utils.seedData(cutoff, 8, 4);
+    utils.seedData(cutoff, 8, 4, 0);
 
     var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
@@ -68,7 +83,7 @@ class AbstractCleanupJobTest {
   @Test
   void runNoneFound() throws ProcessingException {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
-    utils.seedData(cutoff, 0, 8);
+    utils.seedData(cutoff, 0, 8, 0);
 
     var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
@@ -87,7 +102,7 @@ class AbstractCleanupJobTest {
   @Test
   void runAllDeleted() throws ProcessingException {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
-    utils.seedData(cutoff, 5, 0);
+    utils.seedData(cutoff, 5, 0, 0);
 
     var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
@@ -105,7 +120,7 @@ class AbstractCleanupJobTest {
   @Test
   void runEmpty() throws ProcessingException {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
-    utils.seedData(cutoff, 0, 0);
+    utils.seedData(cutoff, 0, 0, 0);
 
     var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
@@ -123,7 +138,7 @@ class AbstractCleanupJobTest {
   @Test
   void notEnabled() throws ProcessingException {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
-    utils.seedData(cutoff, 4, 4);
+    utils.seedData(cutoff, 4, 4, 0);
 
     var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, false);
     var deleted = cleanUpJob.run();

@@ -86,8 +86,9 @@ public class CleanupTestUtils {
    *     lastUpdated.
    * @param newClaims the number of Fiss claims to generate that are less than 60 days since
    *     lastUpdated.
+   * @param s3Sources the number of claims to generate with an S3 apiSource.
    */
-  public void seedData(Instant cutoff, int oldClaims, int newClaims) {
+  public void seedData(Instant cutoff, int oldClaims, int newClaims, int s3Sources) {
     List<Instant> dateSeq = new ArrayList<>();
 
     // add 60-day dates
@@ -102,9 +103,15 @@ public class CleanupTestUtils {
     transactionManager.executeProcedure(
         entityManager -> {
           int baseClaimId = 1;
+          int s3Count = 0;
           for (Instant i : dateSeq) {
+            String apiSource = "test";
+            if (s3Count < s3Sources) {
+              apiSource = "S3:test";
+              s3Count++;
+            }
             String claimId = "" + (baseClaimId++);
-            entityManager.merge(createFissClaimForDate(claimId, mbi, i));
+            entityManager.merge(createFissClaimForDate(claimId, mbi, i, apiSource));
           }
         });
   }
@@ -154,9 +161,11 @@ public class CleanupTestUtils {
    * @param claimId the claimId to set.
    * @param mbi the mbi to set.
    * @param lastUpdated the lastUpdated to set.
+   * @param apiSource the apiSource to set.
    * @return a new RdaFissClaim object.
    */
-  public RdaFissClaim createFissClaimForDate(String claimId, Mbi mbi, Instant lastUpdated) {
+  public RdaFissClaim createFissClaimForDate(
+      String claimId, Mbi mbi, Instant lastUpdated, String apiSource) {
     RdaFissClaim claim =
         RdaFissClaim.builder()
             .sequenceNumber(1L)
@@ -169,6 +178,7 @@ public class CleanupTestUtils {
             .currLoc2("Somda")
             .medaProvId("meda12345")
             .medaProv_6("meda12")
+            .apiSource(apiSource)
             .fedTaxNumber("tax12345")
             .totalChargeAmount(new BigDecimal("1234.32"))
             .receivedDate(LocalDate.of(1970, 1, 1))
