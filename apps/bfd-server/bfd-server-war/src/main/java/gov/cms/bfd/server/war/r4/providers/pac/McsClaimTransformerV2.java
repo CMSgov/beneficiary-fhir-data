@@ -262,7 +262,6 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
 
                 if (Strings.isNotBlank(detail.getIdrDtlNdc())
                     && Strings.isNotBlank(detail.getIdrDtlNdcUnitCount())) {
-                  System.out.println("HERE");
                   Claim.DetailComponent detailComponent = new Claim.DetailComponent();
                   int sequenceNumber = 1;
                   detailComponent.setSequence(sequenceNumber);

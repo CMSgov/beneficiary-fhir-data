@@ -99,22 +99,6 @@ public final class TransformerConstants {
   /** For custom [Resource].meta.tags entries. */
   public static final String CODING_SYSTEM_BFD_TAGS = BASE_URL_BBAPI_RESOURCES + "/codesystem/tags";
 
-  /**
-   * Used to notify end users when they receive {@link Patient} records impacted by <a
-   * href="https://jira.cms.gov/browse/BFD-1566">BFD-1566</a> and <a
-   * href="https://jira.cms.gov/browse/BFD-2265">BFD-2265</a>. See the documentation on <code>
-   * LoadAppOptions.isFilteringNonNullAndNon2023Benes()</code> for details
-   */
-  public static final String CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT =
-      "delayed-backdated-enrollment";
-
-  /**
-   * The {@link Coding#getDisplay()} value for {@link
-   * #CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT}.
-   */
-  public static final String CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY =
-      "Impacted by delayed backdated enrollment data.";
-
   /** The type value for benefit balance code set. */
   public static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/benefit-balance";

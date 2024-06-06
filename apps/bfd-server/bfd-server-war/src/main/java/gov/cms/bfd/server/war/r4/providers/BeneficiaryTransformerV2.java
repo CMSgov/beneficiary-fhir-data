@@ -87,20 +87,6 @@ public class BeneficiaryTransformerV2 {
 
       Patient patient = new Patient();
 
-      /*
-       * Notify end users when they receive Patient records impacted by
-       * https://jira.cms.gov/browse/BFD-1566. See the documentation on
-       * LoadAppOptions.isFilteringNonNullAndNon2023Benes() for details.
-       */
-      if (!beneficiary.getSkippedRifRecords().isEmpty()) {
-        patient
-            .getMeta()
-            .addTag(
-                TransformerConstants.CODING_SYSTEM_BFD_TAGS,
-                TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT,
-                TransformerConstants.CODING_BFD_TAGS_DELAYED_BACKDATED_ENROLLMENT_DISPLAY);
-      }
-
       // Required values not directly mapped
       patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
       patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
