@@ -38,10 +38,10 @@ class AbstractCleanupJobTest {
   @Test
   void runS3Sources() throws ProcessingException {
     var cutoff = Instant.now().minus(60, ChronoUnit.DAYS);
-    utils.seedData(cutoff, 8, 0, 4);
+    utils.seedData(cutoff, 8, 0, 5);
     var cleanUpJob = new RdaFissClaimCleanupJob(utils.getTransactionManager(), 6, 2, true);
     var deleted = cleanUpJob.run();
-    assertEquals(4, deleted);
+    assertEquals(3, deleted);
   }
 
   /**
