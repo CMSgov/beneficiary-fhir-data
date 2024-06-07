@@ -1,97 +1,65 @@
 ---
-bfd: 
-  ${env}:
-    common:
-      env_name_std: ${env}
-      new_relic_metric_host: &newRelicMetricHost https://gov-metric-api.newrelic.com
-      new_relic_metric_path: &newRelicMetricPath /metric/v1
-      rds_backup_retention_period: 1
-      rds_cluster_identifier: bfd-${env}-aurora-cluster
-      rds_iam_database_authentication_enabled: true
-      rds_instance_count: 1
-    migrator:
-      instance_type: m6a.large
-      volume_iops: 3000
-      volume_size: 100
-      volume_throughput: 125
-      volume_type: gp3
-      sqs_queue_name: bfd-${env}-migrator
-      new_relic_metric_host: *newRelicMetricHost
-      new_relic_metric_path: *newRelicMetricPath
-    pipeline:
-      shared:
-        # NOTE: At the time of this writing, there is less emphasis on pipeline instances in ephemeral environments
-        bfd_pipeline_dir: &bfdPipelineDir /bluebutton-data-pipeline
-        data_pipeline_dir: *bfdPipelineDir
-        data_pipeline_new_relic_metric_host: *newRelicMetricHost
-        data_pipeline_new_relic_metric_path: *newRelicMetricPath
-        data_pipeline_user: bb-etl
-        data_pipeline_micrometer_cw_enabled: false
-        data_pipeline_micrometer_cw_namespace: bfd-${env}/bfd-pipeline
-        data_pipeline_micrometer_cw_interval: PT1M
-      ccw:
-        data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
-        data_pipeline_ccw_rif_job_enabled: false
-        data_pipeline_idempotency_required: true
-        instance_type: c6a.4xlarge
-        rif_job_batch_size: 7
-        rif_job_queue_size_multiple: 5
-        rif_thread_multiple: 3
-        rif_job_batch_size_claims: 100
-        rif_job_queue_size_multiple_claims: 10
-        rif_thread_multiple_claims: 25
-        slis_repeater_lambda_invoke_rate: 15 minutes
-      rda:
-        ## PIPELINE RDA
-        grpc:
-          inprocess_server:
-            mode: UNDEFINED
-            s3:
-              region: us-east-1
-              bucket:
-              dir:
-        job:
-          enabled: &rda_job_enabled true
-          process_dlq: &rda_job_process_dlq true
-          starting_fiss_seq_num: &rda_job_starting_fiss 0
-          starting_mcs_seq_num: &rda_job_starting_mcs 0
-        cleanup:
-          enabled: false
-          run_size: UNDEFINED
-          transaction_size: UNDEFINED
-        data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
-        data_pipeline_rda_job_enabled: *rda_job_enabled
-        data_pipeline_rda_job_starting_fiss_seq_num: *rda_job_starting_fiss
-        data_pipeline_rda_job_starting_mcs_seq_num: *rda_job_starting_mcs
-        data_pipeline_rda_process_dlq: *rda_job_process_dlq
-        instance_type: m6a.large
-        # Excluded, if temporarily, from this configuration. Yielding to ansible role defaults at this time if possible.
-        # data_pipeline_rda_grpc_max_idle_seconds: 600
-        # data_pipeline_rda_grpc_server_type: 'Remote'
-        # data_pipeline_rda_job_batch_size: 20
-        # data_pipeline_rda_job_interval_seconds: 3600
-        # data_pipeline_rda_job_starting_fiss_seq_num: 0
-        # data_pipeline_rda_job_starting_mcs_seq_num: 0
-        # data_pipeline_rda_job_write_threads: 5
-        # ALWAYS excluded from parameter store. Only valid when data_pipeline_rda_grpc_server_type is InProcess
-        # data_pipeline_rda_grpc_inproc_server_mode: ''
-        # data_pipeline_rda_grpc_inproc_server_s3_bucket: ''
-        # data_pipeline_rda_grpc_inproc_server_s3_directory: ''
-        # data_pipeline_rda_grpc_inproc_server_s3_region: ''
-    server:
-      data_server_dir: /usr/local/bfd-server
-      data_server_new_relic_metric_host: *newRelicMetricHost
-      data_server_new_relic_metric_path: *newRelicMetricPath
-      pac_resources_enabled: true
-      pac_claim_source_types: fiss,mcs
-      lb_is_public: false
-      lb_ingress_port: 443
-      lb_egress_port: 7443
-      launch_template_volume_iops: 3000
-      launch_template_volume_throughput: 125
-      launch_template_volume_type: gp3
-      # NOTE: lb_vpc_peerings_json stores a json string that will be decoded within the server
-      # Terraservice into a list. The ephemeral variant is purposefully empty to ensure there are no
-      # peerings to ephemeral environments
-      lb_vpc_peerings_json: >-
-        []
+/bfd/${env}/common/nonsensitive/env_name_std: ${env}
+/bfd/${env}/common/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
+/bfd/${env}/common/nonsensitive/new_relic_metric_path: /metric/v1
+/bfd/${env}/common/nonsensitive/rds_backup_retention_period: 1
+/bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
+/bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: true
+/bfd/${env}/common/nonsensitive/rds_instance_count: 1
+/bfd/${env}/migrator/nonsensitive/instance_type: m6a.large
+/bfd/${env}/migrator/nonsensitive/volume_iops: 3000
+/bfd/${env}/migrator/nonsensitive/volume_size: 100
+/bfd/${env}/migrator/nonsensitive/volume_throughput: 125
+/bfd/${env}/migrator/nonsensitive/volume_type: gp3
+/bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-${env}-migrator
+/bfd/${env}/migrator/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
+/bfd/${env}/migrator/nonsensitive/new_relic_metric_path: /metric/v1
+/bfd/${env}/pipeline/nonsensitive/shared/bfd_pipeline_dir: /bluebutton-data-pipeline
+/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_dir: /bluebutton-data-pipeline
+/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_new_relic_metric_host: https://gov-metric-api.newrelic.com
+/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_new_relic_metric_path: /metric/v1
+/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_user: bb-etl
+/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_micrometer_cw_enabled: false
+/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_micrometer_cw_namespace: bfd-${env}/bfd-pipeline
+/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_micrometer_cw_interval: PT1M
+/bfd/${env}/pipeline/nonsensitive/ccw/data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
+/bfd/${env}/pipeline/nonsensitive/ccw/data_pipeline_ccw_rif_job_enabled: false
+/bfd/${env}/pipeline/nonsensitive/ccw/data_pipeline_idempotency_required: true
+/bfd/${env}/pipeline/nonsensitive/ccw/instance_type: c6a.4xlarge
+/bfd/${env}/pipeline/nonsensitive/ccw/rif_job_batch_size: 7
+/bfd/${env}/pipeline/nonsensitive/ccw/rif_job_queue_size_multiple: 5
+/bfd/${env}/pipeline/nonsensitive/ccw/rif_thread_multiple: 3
+/bfd/${env}/pipeline/nonsensitive/ccw/rif_job_batch_size_claims: 100
+/bfd/${env}/pipeline/nonsensitive/ccw/rif_job_queue_size_multiple_claims: 10
+/bfd/${env}/pipeline/nonsensitive/ccw/rif_thread_multiple_claims: 25
+/bfd/${env}/pipeline/nonsensitive/ccw/slis_repeater_lambda_invoke_rate: 15 minutes
+/bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/mode: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/region: us-east-1
+/bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/bucket: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/dir: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/rda/job/enabled: true
+/bfd/${env}/pipeline/nonsensitive/rda/job/process_dlq: true
+/bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: 0
+/bfd/${env}/pipeline/nonsensitive/rda/job/starting_mcs_seq_num: 0
+/bfd/${env}/pipeline/nonsensitive/rda/cleanup/enabled: false
+/bfd/${env}/pipeline/nonsensitive/rda/cleanup/run_size: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/rda/cleanup/transaction_size: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/rda/data_pipeline_ccw_rif_job_enabled: false # CCW Jobs are disabled by default on RDA Pipelines
+/bfd/${env}/pipeline/nonsensitive/rda/data_pipeline_rda_job_enabled: true
+/bfd/${env}/pipeline/nonsensitive/rda/data_pipeline_rda_job_starting_fiss_seq_num: 0
+/bfd/${env}/pipeline/nonsensitive/rda/data_pipeline_rda_job_starting_mcs_seq_num: 0
+/bfd/${env}/pipeline/nonsensitive/rda/data_pipeline_rda_process_dlq: true
+/bfd/${env}/pipeline/nonsensitive/rda/instance_type: m6a.large
+/bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: https://gov-metric-api.newrelic.com
+/bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: /metric/v1
+/bfd/${env}/server/nonsensitive/pac_resources_enabled: true
+/bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
+/bfd/${env}/server/nonsensitive/lb_is_public: false
+/bfd/${env}/server/nonsensitive/lb_ingress_port: 443
+/bfd/${env}/server/nonsensitive/lb_egress_port: 7443
+/bfd/${env}/server/nonsensitive/launch_template_volume_iops: 3000
+/bfd/${env}/server/nonsensitive/launch_template_volume_throughput: 125
+/bfd/${env}/server/nonsensitive/launch_template_volume_type: gp3
+/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
+  []
