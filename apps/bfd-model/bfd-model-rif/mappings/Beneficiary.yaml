@@ -935,16 +935,6 @@ mappings:
     - cascadeTypes:
       - ALL
       collectionType: Set
-      entityClass: gov.cms.bfd.model.rif.SkippedRifRecord
-      fetchType: LAZY
-      fieldName: skippedRifRecords
-      joinType: OneToMany
-      mappedBy: beneId
-      orphanRemoval: false
-      readOnly: true
-    - cascadeTypes:
-      - ALL
-      collectionType: Set
       entityClass: gov.cms.bfd.model.rif.entities.BeneficiaryHistory
       fetchType: LAZY
       fieldName: beneficiaryHistories

@@ -556,7 +556,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
       String field, String value, PatientLinkBuilder paging) {
-    String joinsClause = "left join fetch b.skippedRifRecords ";
     boolean passDistinctThrough = false;
 
     /*
@@ -576,7 +575,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
           "select distinct b from Beneficiary b "
-              + joinsClause
               + "where b."
               + field
               + " = :value and b.beneficiaryId > :cursor "
@@ -590,7 +588,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     } else {
       String query =
           "select distinct b from Beneficiary b "
-              + joinsClause
               + "where b."
               + field
               + " = :value "
@@ -919,7 +916,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
-    beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 

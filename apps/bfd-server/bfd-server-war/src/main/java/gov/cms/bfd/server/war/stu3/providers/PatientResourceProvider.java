@@ -683,7 +683,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
     beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    beneRoot.fetch(Beneficiary_.skippedRifRecords, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
     // Run the query and return the results.

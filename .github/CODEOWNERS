@@ -2,21 +2,7 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@mjburling @dondevun @meliGuzman
-
-# BFD Pipeline and Server Codeowners
-/docs/rfcs @mjburling @dondevun @meliGuzman
-/ops @mjburling @dondevun @meliGuzman
-/apps @mjburling @dondevun @meliGuzman
-
-# BFD Performance Testing Utilities
-/apps/utils/locust_tests @mjburling @dondevun @meliGuzman
-
-# BFD Insights Codeowners
-/insights @mjburling @dondevun @meliGuzman
-
-# GitHub Actions Workflows
-/.github/workflows @mjburling @dondevun @meliGuzman
+@mjburling @dondevun @meliGuzman @aschey-forpeople
 
 # Administration
 /.github/CODEOWNERS @mjburling @dondevun @meliGuzman
