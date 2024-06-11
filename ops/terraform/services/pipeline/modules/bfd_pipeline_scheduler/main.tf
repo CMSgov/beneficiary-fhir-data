@@ -42,7 +42,7 @@ resource "aws_lambda_function" "this" {
   handler          = "pipeline_scheduler.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = 300
 
   environment {
