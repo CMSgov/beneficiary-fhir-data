@@ -43,7 +43,6 @@ boolean deployMigrator(Map args = [:]) {
 	    tfVars: [
                 ami_id_override: amiId,
                 create_migrator_instance: true,
-                migrator_monitor_heartbeat_interval_seconds_override: heartbeatInterval
 	    ]
     )
 
@@ -51,7 +50,6 @@ boolean deployMigrator(Map args = [:]) {
     finalMigratorStatus = monitorMigrator(
         sqsQueueName: sqsQueueName,
         awsRegion: awsRegion,
-        heartbeatInterval: heartbeatInterval,
         maxMessages: 10
     )
 

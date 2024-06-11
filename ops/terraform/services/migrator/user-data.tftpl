@@ -16,27 +16,17 @@ aws ssm get-parameters-by-path \
     --path "/bfd/${env}/migrator/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > migrator_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > migrator_vars.json
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
-
-cat <<EOF > extra_vars.json
-{
-  "db_migrator_db_url": "${db_migrator_db_url}",
-  "env": "${env}",
-  "migrator_monitor_enabled": ${migrator_monitor_enabled},
-  "migrator_monitor_heartbeat_interval_seconds": ${migrator_monitor_heartbeat_interval_seconds},
-  "db_migrator_tmp_dir": "{{ db_migrator_dir }}/tmp"
-}
-EOF
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > common_vars.json
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@migrator_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-db-migrator.yml
+ansible-playbook --extra-vars '@migrator_vars.json' --extra-vars '@common_vars.json' --tags "post-ami" launch_bfd-db-migrator.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins

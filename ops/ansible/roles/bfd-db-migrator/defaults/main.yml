@@ -1,7 +1,6 @@
 ---
-env: test
-db_migrator_dir: /opt/bfd-db-migrator
-db_migrator_user: bb-migrator
-db_migrator_tmp_dir: /tmp
-migrator_monitor_enabled: true
-migrator_monitor_heartbeat_interval_seconds: 300
+env_name_std: 'unknown-environment'
+ref_dir: /opt/bfd-db-migrator
+user: bb-migrator
+tmp: '{{ ref_dir }}/tmp'
+logs: '{{ ref_dir }}'

@@ -55,14 +55,11 @@ locals {
   kms_key_id            = data.aws_kms_key.cmk.key_id
   vpn_security_group_id = data.aws_security_group.vpn.id
   ent_tools_sg_id       = data.aws_security_group.enterprise_tools.id
-  rds_writer_endpoint   = data.external.rds.result["Endpoint"]
   account_id            = data.aws_caller_identity.current.account_id
 
   # Deploy Time Configuration
-  ami_id                                      = data.aws_ami.main.image_id
-  migrator_instance_count                     = var.create_migrator_instance ? 1 : 0
-  migrator_monitor_enabled                    = var.migrator_monitor_enabled_override != null ? var.migrator_monitor_enabled_override : true
-  migrator_monitor_heartbeat_interval_seconds = var.migrator_monitor_heartbeat_interval_seconds_override != null ? var.migrator_monitor_heartbeat_interval_seconds_override : 300
+  ami_id                  = data.aws_ami.main.image_id
+  migrator_instance_count = var.create_migrator_instance ? 1 : 0
 }
 
 resource "aws_sqs_queue" "this" {
@@ -101,11 +98,7 @@ resource "aws_instance" "this" {
   }
 
   user_data = templatefile("${path.module}/user-data.tftpl", {
-    account_id                                  = local.account_id
-    db_migrator_db_url                          = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
-    env                                         = local.env
-    seed_env                                    = local.seed_env
-    migrator_monitor_enabled                    = local.migrator_monitor_enabled
-    migrator_monitor_heartbeat_interval_seconds = local.migrator_monitor_heartbeat_interval_seconds
+    env      = local.env
+    seed_env = local.seed_env
   })
 }
