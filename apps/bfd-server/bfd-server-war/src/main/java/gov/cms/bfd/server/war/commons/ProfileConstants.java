@@ -57,4 +57,7 @@ public class ProfileConstants {
    */
   public static final String C4BB_PATIENT_URL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient";
+
+  public static final String C4DIC_PATIENT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition-C4DIC-Patient";
 }

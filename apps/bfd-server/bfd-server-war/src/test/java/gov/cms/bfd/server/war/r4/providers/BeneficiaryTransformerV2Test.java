@@ -89,7 +89,7 @@ public final class BeneficiaryTransformerV2Test {
   public void setup() {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry);
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, false);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 

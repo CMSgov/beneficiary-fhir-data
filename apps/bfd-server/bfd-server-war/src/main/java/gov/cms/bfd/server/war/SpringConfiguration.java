@@ -116,6 +116,8 @@ public class SpringConfiguration {
    */
   public static final String SSM_PATH_PAC_CLAIM_SOURCE_TYPES = "pac/claim_source_types";
 
+  public static final String SSM_PATH_C4DIC_ENABLED = "c4dic/enabled";
+
   /** Maximum number of threads to use for executing EOB claim transformers in parallel. */
   public static final String PROP_EXECUTOR_SERVICE_THREADS = "bfdServer.executorService.threads";
 
