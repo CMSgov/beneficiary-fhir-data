@@ -5,8 +5,8 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose-ingester" {
 
   extended_s3_configuration {
     bucket_arn          = data.aws_s3_bucket.bfd-insights-bucket.arn
-    buffer_interval     = 300
-    buffer_size         = 128
+    buffering_interval  = 300
+    buffering_size      = 128
     error_output_prefix = "databases/${module.database.name}/${module.glue-table-api-requests.name}_errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/"
     kms_key_arn         = data.aws_kms_key.kms_key.arn
     prefix              = "databases/${module.database.name}/${module.glue-table-api-requests.name}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/"
