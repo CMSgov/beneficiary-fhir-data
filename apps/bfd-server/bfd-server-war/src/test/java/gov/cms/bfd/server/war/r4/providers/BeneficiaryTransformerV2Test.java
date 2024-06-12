@@ -35,18 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -160,12 +150,30 @@ public final class BeneficiaryTransformerV2Test {
   /** Tests that the transformer sets the expected profile metadata. */
   @Test
   public void shouldSetCorrectProfile() {
+    List<CanonicalType> profile = patient.getMeta().getProfile();
+    assertEquals(1, profile.size());
     // The base CanonicalType doesn't seem to compare correctly so lets convert it
     // to a string
     assertTrue(
-        patient.getMeta().getProfile().stream()
+        profile.stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
+  }
+
+  @Test
+  public void shouldSetCorrectProfilesWithC4DicEnabled() {
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, true);
+    createPatient(RequestHeaders.getHeaderWrapper());
+    List<CanonicalType> profile = patient.getMeta().getProfile();
+    assertEquals(2, profile.size());
+    assertTrue(
+        profile.stream()
+            .map(ct -> ct.getValueAsString())
+            .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
+    assertTrue(
+        profile.stream()
+            .map(ct -> ct.getValueAsString())
+            .anyMatch(v -> v.equals(ProfileConstants.C4DIC_PATIENT_URL)));
   }
 
   /** Tests that the transformer sets the expected member identifier values. */
