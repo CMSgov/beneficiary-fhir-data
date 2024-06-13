@@ -116,6 +116,7 @@ public class SpringConfiguration {
    */
   public static final String SSM_PATH_PAC_CLAIM_SOURCE_TYPES = "pac/claim_source_types";
 
+  /** The {@link String } Boolean property that is used to enable the C4DIC profile. */
   public static final String SSM_PATH_C4DIC_ENABLED = "c4dic/enabled";
 
   /** Maximum number of threads to use for executing EOB claim transformers in parallel. */
