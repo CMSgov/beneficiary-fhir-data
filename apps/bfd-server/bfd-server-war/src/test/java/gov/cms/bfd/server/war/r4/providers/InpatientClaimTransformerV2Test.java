@@ -1220,12 +1220,7 @@ public final class InpatientClaimTransformerV2Test {
 
     CodeableConcept compare =
         new CodeableConcept()
-            .setCoding(
-                Arrays.asList(
-                    new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
-                        "GG",
-                        null)));
+            .setCoding(Arrays.asList(new Coding("http://unitsofmeasure.org", "GG", null)));
 
     assertTrue(compare.equalsDeep(modifier));
   }

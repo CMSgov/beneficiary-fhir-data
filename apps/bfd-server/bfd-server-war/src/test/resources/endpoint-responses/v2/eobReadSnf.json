@@ -630,9 +630,8 @@
     },
     "modifier" : [ {
       "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
-        "code" : "ML",
-        "display" : "Milliliter"
+        "system" : "http://unitsofmeasure.org",
+        "code" : "ML"
       } ]
     } ],
     "locationAddress" : {
