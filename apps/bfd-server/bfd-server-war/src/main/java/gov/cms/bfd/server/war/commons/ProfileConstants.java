@@ -58,6 +58,11 @@ public class ProfileConstants {
   public static final String C4BB_PATIENT_URL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient";
 
+  /**
+   * C4DIC Resource Profile: C4DIC Patient <a
+   * href="https://hl7.org/fhir/us/insurance-card/STU1.1/StructureDefinition-C4DIC-Patient.html">
+   * C4BBOrganization</a>.
+   */
   public static final String C4DIC_PATIENT_URL =
-      "http://hl7.org/fhir/us/insurance-card/StructureDefinition-C4DIC-Patient";
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition-C4DIC-Patient|1.1";
 }

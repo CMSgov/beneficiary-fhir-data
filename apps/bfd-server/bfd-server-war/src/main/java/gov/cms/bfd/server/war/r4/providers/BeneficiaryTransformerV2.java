@@ -40,7 +40,7 @@ public class BeneficiaryTransformerV2 {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** Whether to enable the C4DIC profile */
+  /** Whether to enable the C4DIC profile. */
   private final Boolean c4DicEnabled;
 
   /**
@@ -51,6 +51,7 @@ public class BeneficiaryTransformerV2 {
    * called by tests.
    *
    * @param metricRegistry the metric registry
+   * @param c4dicEnabled whether to enable the C4DIC profile
    */
   public BeneficiaryTransformerV2(
       MetricRegistry metricRegistry,

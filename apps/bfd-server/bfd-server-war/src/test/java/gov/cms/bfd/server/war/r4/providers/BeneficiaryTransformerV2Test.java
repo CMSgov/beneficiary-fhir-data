@@ -171,6 +171,7 @@ public final class BeneficiaryTransformerV2Test {
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
   }
 
+  /** Tests that the transformer sets the expected profile when C4DIC is enabled. */
   @Test
   public void shouldSetCorrectProfilesWithC4DicEnabled() {
     beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, true);
