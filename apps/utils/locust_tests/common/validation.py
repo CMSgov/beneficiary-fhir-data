@@ -1,7 +1,7 @@
 """Validate tests against target SLIs"""
 import logging
 import time
-from enum import StrEnum
+from enum import StrEnum, Enum
 from typing import Optional
 
 import gevent

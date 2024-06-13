@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import StrEnum, Enum
 
 METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
 
