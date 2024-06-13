@@ -27,7 +27,7 @@ locals {
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_db_username"          = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_db_username"
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations" = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_iterations"
     "/bfd/${local.env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"     = "/bfd/${local.seed_env}/pipeline/sensitive/shared/data_pipeline_hicn_hash_pepper"
-# The prod-sbx environment includes an in-process server instead of a communicating with an external, gRPC host
+    # The prod-sbx environment includes an in-process server instead of a communicating with an external, gRPC host
     "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_host"
     "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token" = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_auth_token"
     "/bfd/${local.env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/data_pipeline_rda_grpc_port"
