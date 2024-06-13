@@ -3,7 +3,7 @@ import os
 import subprocess
 import urllib.parse
 from dataclasses import asdict, dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import List
 
 import boto3
@@ -40,7 +40,7 @@ class PipelineSignalMessage:
     log_group_name: str
 
 
-class TestResult(str, Enum):
+class TestResult(StrEnum):
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
 

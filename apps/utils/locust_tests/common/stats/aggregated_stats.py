@@ -4,7 +4,7 @@ objects"""
 import hashlib
 import time
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Dict, List, Optional, Union
 
 from locust.env import Environment
@@ -168,7 +168,7 @@ class TaskStats:
         }
 
 
-class FinalCompareResult(str, Enum):
+class FinalCompareResult(StrEnum):
     """Enum that indicates the _overall_ result of a given AggregatedStats' comparison with a
     baseline AggregatedStats. Used to filter out runs that did not pass comparison against a
     baseline, but may want to be stored for future analysis"""
