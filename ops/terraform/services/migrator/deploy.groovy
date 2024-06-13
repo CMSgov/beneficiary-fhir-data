@@ -181,7 +181,7 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
 boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
     println "Comparing schema migration versions..."
     // Initialize stored schema version
-    int storedSchemaVersion = 0
+    BigInteger storedSchemaVersion = 0
     // check SSM Parameter Store
     try {
         storedSchemaVersion = awsSsm.getParameter(
