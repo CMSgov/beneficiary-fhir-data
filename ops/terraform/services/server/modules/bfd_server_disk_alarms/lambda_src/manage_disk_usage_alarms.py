@@ -1,6 +1,6 @@
 import json
 import os
-from enum import Enum
+from enum import StrEnum
 
 import boto3
 from botocore.config import Config
@@ -33,7 +33,7 @@ cw_client = boto3.client("cloudwatch", config=boto_config)
 autoscaling_client = boto3.client("autoscaling", config=boto_config)
 
 
-class AutoScalingEvent(str, Enum):
+class AutoScalingEvent(StrEnum):
     """Represents the possible AWS AutoScaling Notifcations events that this Lambda will react to"""
 
     INSTANCE_LAUNCH = "autoscaling:EC2_INSTANCE_LAUNCH"

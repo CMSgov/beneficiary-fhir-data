@@ -147,7 +147,7 @@ resource "aws_lambda_function" "glue_trigger" {
   handler          = "glue-trigger.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = local.glue_trigger_lambda_timeout_seconds
   environment {
     variables = {
@@ -166,7 +166,7 @@ resource "aws_lambda_function" "spice_refresh_trigger" {
   memory_size      = 128
   package_type     = "Zip"
   role             = aws_iam_role.spice_refresh_role.arn
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   filename         = data.archive_file.spice_trigger.output_path
   source_code_hash = data.archive_file.spice_trigger.output_base64sha256
   timeout          = 60

@@ -1,7 +1,7 @@
 import json
 import os
 from dataclasses import asdict, dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from urllib.request import Request, urlopen
 
@@ -15,7 +15,7 @@ SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 logger = Logger()
 
 
-class NotificationType(str, Enum):
+class NotificationType(StrEnum):
     FILE_DISCOVERED = "FILE_DISCOVERED"
     TRANSFER_SUCCESS = "TRANSFER_SUCCESS"
     TRANSFER_FAILED = "TRANSFER_FAILED"

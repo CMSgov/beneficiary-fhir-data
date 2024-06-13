@@ -1,11 +1,11 @@
 import os
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum, Enum
 
 METRICS_NAMESPACE = os.environ.get("METRICS_NAMESPACE", "")
 
 
-class RifFileType(str, Enum):
+class RifFileType(StrEnum):
     """Represents all of the possible RIF file types that can be loaded by the BFD ETL Pipeline. The
     value of each enum is a specific substring that is used to match on each type of file"""
 

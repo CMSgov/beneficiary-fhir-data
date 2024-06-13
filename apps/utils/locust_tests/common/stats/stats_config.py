@@ -2,13 +2,13 @@ import dataclasses
 import re
 from argparse import Namespace
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Dict, List, Optional
 
 from locust.argument_parser import LocustArgumentParser
 
 
-class StatsStorageType(str, Enum):
+class StatsStorageType(StrEnum):
     """Enumeration for each available type of storage for JSON stats"""
 
     FILE = "file"
@@ -16,7 +16,7 @@ class StatsStorageType(str, Enum):
     S3 = "s3"
     """Indicates that aggregated statistics will be stored to an S3 bucket"""
 
-class StatsComparisonType(str, Enum):
+class StatsComparisonType(StrEnum):
     """Enumeration for each possible type of stats comparison"""
 
     PREVIOUS = "previous"

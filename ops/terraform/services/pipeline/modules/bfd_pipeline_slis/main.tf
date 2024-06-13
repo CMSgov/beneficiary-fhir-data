@@ -78,7 +78,7 @@ resource "aws_lambda_function" "this" {
   handler          = "${local.lambdas[local.lambda_update_slis].src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:60"]
   timeout          = 300
   environment {
@@ -206,7 +206,7 @@ resource "aws_lambda_function" "repeater" {
   handler          = "${local.lambdas[local.lambda_repeater].src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = 300
   environment {
     variables = {

@@ -38,7 +38,7 @@ resource "aws_lambda_function" "this" {
   handler          = "trigger_glue_crawler.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = 520 # 520 seconds gives enough time for backoff retries to be attempted
   environment {
     variables = {
