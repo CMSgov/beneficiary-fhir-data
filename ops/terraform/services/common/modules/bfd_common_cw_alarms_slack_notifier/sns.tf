@@ -104,7 +104,7 @@ resource "aws_sns_topic_policy" "cloudwatch_alarms_slack_bfd_notices" {
 
 resource "aws_sns_topic" "cloudwatch_alarms_slack_bfd_test" {
   name              = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
-  display_name      = "BFD Cloudwatch Alarms alerts to #bfd-test. Created by Terraform."
+  display_name      = "BFD Cloudwatch Alarms alerts to #bfd-test-alerts. Created by Terraform."
   kms_master_key_id = local.kms_master_key_id
 }
 
