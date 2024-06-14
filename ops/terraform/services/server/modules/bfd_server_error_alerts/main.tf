@@ -122,7 +122,7 @@ resource "aws_lambda_function" "alert_lambda_scheduler" {
   handler          = "${local.alert_lambda_scheduler_src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = 300
 
   environment {
@@ -159,7 +159,7 @@ resource "aws_lambda_function" "alerting_lambda" {
   handler          = "${local.alerting_lambda_src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = 300
 
   environment {

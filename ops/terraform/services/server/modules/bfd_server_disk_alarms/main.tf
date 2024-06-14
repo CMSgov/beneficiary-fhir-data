@@ -186,7 +186,7 @@ resource "aws_lambda_function" "this" {
   handler          = "manage_disk_usage_alarms.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = local.lambda_timeout_seconds
   environment {
     variables = {

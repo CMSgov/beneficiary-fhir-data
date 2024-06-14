@@ -16,7 +16,7 @@ docker build "$BUILD_ROOT_DIR" \
   --build-arg PACKER_VERSION="${CBC_PACKER_VERSION:-1.6.6}" \
   --build-arg TFENV_REPO_HASH="${CBC_TFENV_REPO_HASH:-c05c364}" \
   --build-arg TFENV_VERSIONS="${CBC_TFENV_VERSIONS:-1.5.0}" \
-  --build-arg PYTHON3_TAR_SOURCE="${CBC_PYTHON3_TAR_SOURCE:-https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz}" \
+  --build-arg PYTHON3_TAR_SOURCE="${CBC_PYTHON3_TAR_SOURCE:-https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz}" \
   --build-arg KOTLINC_ZIP_SOURCE="${CBC_KOTLINC_ZIP_SOURCE:-https://github.com/JetBrains/kotlin/releases/download/v1.9.10/kotlin-compiler-1.9.10.zip}" \
   --build-arg CIPHER_SCRIPT="${CIPHER_SCRIPT}" \
   --build-arg YQ_VERSION="${CBC_YQ_VERSION:-4}" \

@@ -1,7 +1,7 @@
 """Validate tests against target SLIs"""
 import logging
 import time
-from enum import Enum
+from enum import StrEnum, Enum
 from typing import Optional
 
 import gevent
@@ -14,7 +14,7 @@ _validation_goal: Optional["ValidationGoal"] = None
 """The SLA goals against which to measure the test run's results"""
 
 
-class ValidationResult(str, Enum):
+class ValidationResult(StrEnum):
     """Enum representing the result of failure ratio and SLA validation"""
 
     NOT_APPLICABLE = "NOT_APPLICABLE"

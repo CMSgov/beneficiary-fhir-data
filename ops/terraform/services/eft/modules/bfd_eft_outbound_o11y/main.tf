@@ -142,7 +142,7 @@ resource "aws_lambda_function" "slack_notifier" {
   handler          = "${local.slack_notifier_lambda_src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.10"
+  runtime          = "python3.11"
   timeout          = 300
 
   tags = {
