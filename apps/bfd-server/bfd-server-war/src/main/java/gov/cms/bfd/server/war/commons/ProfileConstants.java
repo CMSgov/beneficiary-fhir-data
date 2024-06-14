@@ -64,5 +64,5 @@ public class ProfileConstants {
    * C4DICPatient</a>.
    */
   public static final String C4DIC_PATIENT_URL =
-      "http://hl7.org/fhir/us/insurance-card/StructureDefinition-C4DIC-Patient|1.1";
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient|1.1";
 }
