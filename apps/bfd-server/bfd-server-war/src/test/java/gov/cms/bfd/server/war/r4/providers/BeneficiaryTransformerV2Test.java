@@ -185,7 +185,7 @@ public final class BeneficiaryTransformerV2Test {
     assertTrue(
         profile.stream()
             .map(ct -> ct.getValueAsString())
-            .anyMatch(v -> v.equals(ProfileConstants.C4DIC_PATIENT_URL)));
+            .anyMatch(v -> v.equals(ProfileConstants.C4DIC_PATIENT_URL_VERSIONED)));
   }
 
   /** Tests that the transformer sets the expected member identifier values. */

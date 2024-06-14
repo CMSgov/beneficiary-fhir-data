@@ -99,7 +99,7 @@ public class BeneficiaryTransformerV2 {
       // Required values not directly mapped
       patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
       if (this.c4DicEnabled) {
-        patient.getMeta().addProfile(ProfileConstants.C4DIC_PATIENT_URL);
+        patient.getMeta().addProfile(ProfileConstants.C4DIC_PATIENT_URL_VERSIONED);
       }
       patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
 

@@ -8,12 +8,14 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.CoverageClass;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +27,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
@@ -56,15 +60,16 @@ final class CoverageTransformerV2 {
    * @return the {@link Coverage} resource that was generated
    */
   @Trace
-  public Coverage transform(MedicareSegment medicareSegment, Beneficiary beneficiary) {
+  public Coverage transform(
+      MedicareSegment medicareSegment, Beneficiary beneficiary, EnumSet<Profile> enabledProfiles) {
     Objects.requireNonNull(medicareSegment);
     Objects.requireNonNull(beneficiary);
 
     return switch (medicareSegment) {
-      case PART_A -> transformPartA(beneficiary);
-      case PART_B -> transformPartB(beneficiary);
-      case PART_C -> transformPartC(beneficiary);
-      case PART_D -> transformPartD(beneficiary);
+      case PART_A -> transformPartA(beneficiary, enabledProfiles);
+      case PART_B -> transformPartB(beneficiary, enabledProfiles);
+      case PART_C -> transformPartC(beneficiary, enabledProfiles);
+      case PART_D -> transformPartD(beneficiary, enabledProfiles);
       default -> throw new BadCodeMonkeyException();
     };
   }
@@ -77,9 +82,9 @@ final class CoverageTransformerV2 {
    *     Beneficiary}
    */
   @Trace
-  public List<IBaseResource> transform(Beneficiary beneficiary) {
+  public List<IBaseResource> transform(Beneficiary beneficiary, EnumSet<Profile> enabledProfiles) {
     return Arrays.stream(MedicareSegment.values())
-        .map(s -> transform(s, beneficiary))
+        .map(s -> transform(s, beneficiary, enabledProfiles))
         .collect(Collectors.toList());
   }
 
@@ -91,11 +96,12 @@ final class CoverageTransformerV2 {
    * @return {@link MedicareSegment#PART_A} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartA(Beneficiary beneficiary) {
+  private Coverage transformPartA(Beneficiary beneficiary, EnumSet<Profile> enabledProfiles) {
     Timer.Context timer = createTimerContext("part_a");
     Coverage coverage = new Coverage();
 
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    addProfiles(coverage, enabledProfiles);
+    addIdentifier(coverage, beneficiary, enabledProfiles);
 
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
 
@@ -106,7 +112,7 @@ final class CoverageTransformerV2 {
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
-    setTypeAndIssuer(coverage);
+    setTypeAndIssuer(coverage, enabledProfiles);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -154,11 +160,12 @@ final class CoverageTransformerV2 {
    * @return {@link MedicareSegment#PART_B} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartB(Beneficiary beneficiary) {
+  private Coverage transformPartB(Beneficiary beneficiary, EnumSet<Profile> enabledProfiles) {
     Timer.Context timer = createTimerContext("part_b");
     Coverage coverage = new Coverage();
 
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    addProfiles(coverage, enabledProfiles);
+    addIdentifier(coverage, beneficiary, enabledProfiles);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
     setCoverageStatus(coverage, beneficiary.getPartBTerminationCode());
 
@@ -168,7 +175,7 @@ final class CoverageTransformerV2 {
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
-    setTypeAndIssuer(coverage);
+    setTypeAndIssuer(coverage, enabledProfiles);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -211,17 +218,18 @@ final class CoverageTransformerV2 {
    * @return {@link MedicareSegment#PART_C} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartC(Beneficiary beneficiary) {
+  private Coverage transformPartC(Beneficiary beneficiary, EnumSet<Profile> enabledProfiles) {
     Timer.Context timer = createTimerContext("part_c");
     Coverage coverage = new Coverage();
 
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    addProfiles(coverage, enabledProfiles);
+    addIdentifier(coverage, beneficiary, enabledProfiles);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
     coverage.setStatus(CoverageStatus.ACTIVE);
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
-    setTypeAndIssuer(coverage);
+    setTypeAndIssuer(coverage, enabledProfiles);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -265,11 +273,12 @@ final class CoverageTransformerV2 {
    * @return {@link MedicareSegment#PART_D} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartD(Beneficiary beneficiary) {
+  private Coverage transformPartD(Beneficiary beneficiary, EnumSet<Profile> enabledProfiles) {
     Timer.Context timer = createTimerContext("part_d");
     Coverage coverage = new Coverage();
 
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    addProfiles(coverage, enabledProfiles);
+    addIdentifier(coverage, beneficiary, enabledProfiles);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
 
     TransformerUtilsV2.setPeriodStart(
@@ -278,7 +287,7 @@ final class CoverageTransformerV2 {
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
-    setTypeAndIssuer(coverage);
+    setTypeAndIssuer(coverage, enabledProfiles);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -752,6 +761,15 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.PTDCNTRCT12, beneficiary.getPartDContractNumberDecId());
   }
 
+  private void addProfiles(Coverage coverage, EnumSet<Profile> enabledProfiles) {
+    if (enabledProfiles.contains(Profile.C4BB)) {
+      coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    }
+    if (enabledProfiles.contains(Profile.C4DIC)) {
+      coverage.getMeta().addProfile(ProfileConstants.C4DIC_COVERAGE_URL_VERSIONED);
+    }
+  }
+
   /**
    * Sets the Coverage.status Looks up or adds a contained {@link Identifier} object to the current
    * {@link Patient}. This is used to store Identifier slices related to the Provider organization.
@@ -773,16 +791,59 @@ final class CoverageTransformerV2 {
    *
    * @param coverage The {@link Coverage} to Coverage details
    */
-  void setTypeAndIssuer(Coverage coverage) {
+  private void setTypeAndIssuer(Coverage coverage, EnumSet<Profile> enabledProfiles) {
+    setType(coverage);
+    if (enabledProfiles.contains(Profile.C4BB)) {
+      addC4bbPayor(coverage);
+    }
+    if (enabledProfiles.contains(Profile.C4DIC)) {
+      addC4DicPayor(coverage);
+    }
+  }
+
+  private void setType(Coverage coverage) {
     coverage.setType(
         new CodeableConcept()
             .addCoding(
                 new Coding()
                     .setCode("SUBSIDIZ")
                     .setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode")));
+  }
+
+  private void addC4bbPayor(Coverage coverage) {
     coverage
         .addPayor()
         .setIdentifier(new Identifier().setValue(TransformerConstants.COVERAGE_ISSUER));
+  }
+
+  private void addC4DicPayor(Coverage coverage) {
+    Organization organization =
+        TransformerUtilsV2.findOrCreateContainedOrganization(
+            coverage, TransformerUtilsV2.PROVIDER_ORG_ID, EnumSet.of(Profile.C4DIC));
+
+    coverage.addPayor(new Reference(organization));
+  }
+
+  private void addIdentifier(
+      Coverage coverage, Beneficiary beneficiary, EnumSet<Profile> enabledProfiles) {
+    if (enabledProfiles.contains(Profile.C4DIC)) {
+      Organization organization =
+          TransformerUtilsV2.findOrCreateContainedOrganization(
+              coverage, TransformerUtilsV2.PROVIDER_ORG_ID, EnumSet.of(Profile.C4DIC));
+
+      Identifier identifier =
+          new Identifier()
+              .setType(
+                  TransformerUtilsV2.createCodeableConcept(
+                      TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+                      null,
+                      TransformerConstants.PATIENT_MB_ID_DISPLAY,
+                      "MB"))
+              .setValue((String.valueOf(beneficiary.getBeneficiaryId())))
+              .setSystem(TransformerConstants.CODING_BBAPI_BENE_ID)
+              .setAssigner(new Reference(organization));
+      coverage.addIdentifier(identifier);
+    }
   }
 
   /**

@@ -29,6 +29,7 @@ import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -1107,7 +1108,8 @@ public class TransformerUtilsV2Test {
     String expectedId = "#provider-org";
 
     Organization actualOrganization =
-        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+        TransformerUtilsV2.findOrCreateContainedOrganization(
+            eob, expectedId, EnumSet.of(Profile.C4BB));
 
     assertEquals(expectedId, actualOrganization.getId());
     assertTrue(
@@ -1138,7 +1140,8 @@ public class TransformerUtilsV2Test {
     String expectedId = "#provider-org";
 
     Organization actualOrganization =
-        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+        TransformerUtilsV2.findOrCreateContainedOrganization(
+            eob, expectedId, EnumSet.of(Profile.C4BB));
 
     assertEquals(expectedId, actualOrganization.getId());
     assertTrue(
@@ -1155,7 +1158,9 @@ public class TransformerUtilsV2Test {
 
     // Call findOrCreateContainedOrganization and make sure it finds the organization that
     // was created above and doesn't have duplicate entries for eob.
-    actualOrganization = TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+    actualOrganization =
+        TransformerUtilsV2.findOrCreateContainedOrganization(
+            eob, expectedId, EnumSet.of(Profile.C4BB));
 
     resource =
         eob.getContained().stream()

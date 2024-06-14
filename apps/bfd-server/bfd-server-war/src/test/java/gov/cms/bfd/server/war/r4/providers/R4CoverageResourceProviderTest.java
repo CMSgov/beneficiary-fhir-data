@@ -109,7 +109,8 @@ public class R4CoverageResourceProviderTest {
   @BeforeEach
   public void setup() {
     coverageProvider =
-        new R4CoverageResourceProvider(metricRegistry, loadedFilterManager, coverageTransformer);
+        new R4CoverageResourceProvider(
+            metricRegistry, loadedFilterManager, coverageTransformer, false);
     coverageProvider.setEntityManager(entityManager);
     lenient().when(coverageId.getVersionIdPartAsLong()).thenReturn(null);
     when(beneficiary.getIdPart()).thenReturn("111199991111");
@@ -134,8 +135,8 @@ public class R4CoverageResourceProviderTest {
     when(loadedFilterManager.isResultSetEmpty(any(), any())).thenReturn(false);
 
     // transformer mocking
-    when(coverageTransformer.transform(any())).thenReturn(List.of(testCoverage));
-    when(coverageTransformer.transform(any(), any())).thenReturn(testCoverage);
+    when(coverageTransformer.transform(any(), any())).thenReturn(List.of(testCoverage));
+    when(coverageTransformer.transform(any(), any(), any())).thenReturn(testCoverage);
 
     // Mock coverage id
     when(coverageId.getIdPart()).thenReturn(VALID_PART_A_COVERAGE_ID);
@@ -301,7 +302,8 @@ public class R4CoverageResourceProviderTest {
   public void testCoverageByBeneficiaryWhereMissingBeneExpectEmptyBundle() {
     when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
 
-    Bundle bundle = coverageProvider.searchByBeneficiary(beneficiary, null, null, requestDetails);
+    Bundle bundle =
+        coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
     assertEquals(0, bundle.getTotal());
   }
@@ -315,7 +317,8 @@ public class R4CoverageResourceProviderTest {
     when(requestDetails.getParameters()).thenReturn(params);
 
     // Note: startIndex in the param is not used, must be passed from requestDetails
-    Bundle bundle = coverageProvider.searchByBeneficiary(beneficiary, null, null, requestDetails);
+    Bundle bundle =
+        coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
     /*
      * Check paging; Verify that only the first and last paging links exist, since there should
@@ -334,7 +337,8 @@ public class R4CoverageResourceProviderTest {
   public void testCoverageByBeneficiaryWhereNoPagingRequestedExpectNoPageData() {
     when(requestDetails.getHeader(any())).thenReturn("");
 
-    Bundle bundle = coverageProvider.searchByBeneficiary(beneficiary, null, null, requestDetails);
+    Bundle bundle =
+        coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
     /*
      * Check that no paging was added when not requested

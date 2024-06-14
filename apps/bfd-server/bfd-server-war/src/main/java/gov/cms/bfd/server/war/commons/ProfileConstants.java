@@ -43,12 +43,42 @@ public class ProfileConstants {
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage";
 
   /**
+   * C4DIC Resource Profile: C4DIC Coverage <a
+   * href="https://hl7.org/fhir/us/insurance-card/STU1.1/StructureDefinition-C4DIC-Coverage.html">
+   * C4DICCoverage</a>.
+   */
+  public static final String C4DIC_COVERAGE_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage";
+
+  /**
+   * C4DIC Resource Profile: C4DIC Coverage <a
+   * href="https://hl7.org/fhir/us/insurance-card/STU1.1/StructureDefinition-C4DIC-Coverage.html">
+   * C4DICCoverage</a>.
+   */
+  public static final String C4DIC_COVERAGE_URL_VERSIONED = C4DIC_COVERAGE_URL + "|1.1";
+
+  /**
    * C4BB Resource Profile: C4BB Organization <a
    * href="http://hl7.org/fhir/us/carin-bb/STU1/StructureDefinition-C4BB-Organization.html">
    * C4BBOrganization</a>.
    */
   public static final String C4BB_ORGANIZATION_URL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization";
+
+  /**
+   * C4BB Resource Profile: C4DIC Organization <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition-C4DIC-Organization.html">
+   * C4BBOrganization</a>.
+   */
+  public static final String C4DIC_ORGANIZATION_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization";
+
+  /**
+   * C4BB Resource Profile: C4DIC Organization <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition-C4DIC-Organization.html">
+   * C4BBOrganization</a>.
+   */
+  public static final String C4DIC_ORGANIZATION_URL_VERSIONED = C4DIC_ORGANIZATION_URL + "|1.1";
 
   /**
    * C4BB Resource Profile: C4BB Patient <a
@@ -64,5 +94,12 @@ public class ProfileConstants {
    * C4DICPatient</a>.
    */
   public static final String C4DIC_PATIENT_URL =
-      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient|1.1";
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient";
+
+  /**
+   * C4DIC Resource Profile: C4DIC Patient <a
+   * href="https://hl7.org/fhir/us/insurance-card/STU1.1/StructureDefinition-C4DIC-Patient.html">
+   * C4DICPatient</a>.
+   */
+  public static final String C4DIC_PATIENT_URL_VERSIONED = C4DIC_PATIENT_URL + "1.1";
 }

@@ -45,6 +45,7 @@ import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RaceCategory;
@@ -90,6 +91,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitBalanceComponent;
@@ -132,10 +134,10 @@ public final class TransformerUtilsV2 {
   private static final String NPI_ORG_DISPLAY_DEFAULT = "UNKNOWN";
 
   /** Constant used to look up and identify an internal `contained` Organization resource. */
-  private static final String PROVIDER_ORG_ID = "provider-org";
+  static final String PROVIDER_ORG_ID = "provider-org";
 
   /** Constant for finding a provider org reference. */
-  private static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
+  static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
 
   /**
    * Creates a {@link CodeableConcept} from the specified system and code.
@@ -3550,19 +3552,25 @@ public final class TransformerUtilsV2 {
    * Looks for an {@link Organization} with the given resource ID in {@link
    * ExplanationOfBenefit#getContained()} or adds one if it doesn't exist.
    *
-   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param resource the {@link DomainResource} to modify
    * @param id The resource ID
    * @return The found or new {@link Organization} resource
    */
-  static Organization findOrCreateContainedOrganization(ExplanationOfBenefit eob, String id) {
+  static Organization findOrCreateContainedOrganization(
+      DomainResource resource, String id, EnumSet<Profile> supportedProfiles) {
     Optional<Resource> organization =
-        eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
+        resource.getContained().stream().filter(r -> r.getId() == id).findFirst();
 
     // If it isn't there, add one
     if (!organization.isPresent()) {
       organization = Optional.of(new Organization().setId(id));
-      organization.get().getMeta().addProfile(ProfileConstants.C4BB_ORGANIZATION_URL);
-      eob.getContained().add(organization.get());
+      if (supportedProfiles.contains(Profile.C4BB)) {
+        organization.get().getMeta().addProfile(ProfileConstants.C4BB_ORGANIZATION_URL);
+      }
+      if (supportedProfiles.contains(Profile.C4DIC)) {
+        organization.get().getMeta().addProfile(ProfileConstants.C4DIC_ORGANIZATION_URL_VERSIONED);
+      }
+      resource.getContained().add(organization.get());
     }
 
     // At this point `organization.get()` will always return
@@ -3609,7 +3617,8 @@ public final class TransformerUtilsV2 {
       Optional<String> npiOrgName,
       Optional<Instant> lastUpdated) {
     if (value.isPresent()) {
-      Organization organization = findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID);
+      Organization organization =
+          findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID, EnumSet.of(Profile.C4BB));
 
       // Add the new Identifier to the Organization
       Identifier id =

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_C4DIC_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -27,6 +28,8 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
+import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -36,6 +39,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +49,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,7 +63,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
    */
   private static final Pattern COVERAGE_ID_PATTERN =
-      Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Digit}+)");
+      Pattern.compile(
+          "(?:(c4dic|c4bb)-)?(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
 
   /** The entity manager. */
   private EntityManager entityManager;
@@ -71,6 +77,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
 
   /** The coverage transformer. */
   private final CoverageTransformerV2 coverageTransformer;
+
+  private final boolean c4DicEnabled;
 
   /**
    * Instantiates a new {@link R4CoverageResourceProvider}.
@@ -85,10 +93,12 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   public R4CoverageResourceProvider(
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
-      CoverageTransformerV2 coverageTransformer) {
+      CoverageTransformerV2 coverageTransformer,
+      @Value("${" + SSM_PATH_C4DIC_ENABLED + ":false}") Boolean c4dicEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.coverageTransformer = requireNonNull(coverageTransformer);
+    this.c4DicEnabled = c4dicEnabled;
   }
 
   /**
@@ -139,20 +149,37 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
+    String regexPrefixText = this.c4DicEnabled ? "({c4bb|c4dic}-)?" : "";
+    String invalidCoverageIdMessage =
+        "Coverage ID pattern: '"
+            + coverageIdText
+            + "' does not match expected pattern: "
+            + regexPrefixText
+            + "{alphaNumericString}-{singleCharacter}-{idNumber}";
     if (!coverageIdMatcher.matches()) {
-      throw new InvalidRequestException(
-          "Coverage ID pattern: '"
-              + coverageIdText
-              + "' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}");
+      throw new InvalidRequestException(invalidCoverageIdMessage);
     }
 
-    String coverageIdSegmentText = coverageIdMatcher.group(1);
+    String profileString = coverageIdMatcher.group(1);
+
+    if (!c4DicEnabled && profileString != null) {
+      throw new InvalidRequestException(invalidCoverageIdMessage);
+    }
+
+    EnumSet<Profile> enabledProfiles = this.getDefaultProfiles();
+
+    if (profileString != null) {
+      Profile profile = Profile.valueOf(profileString.toUpperCase());
+      enabledProfiles = EnumSet.of(profile);
+    }
+
+    String coverageIdSegmentText = coverageIdMatcher.group(2);
     Optional<MedicareSegment> coverageIdSegment =
         MedicareSegment.selectByUrlPrefix(coverageIdSegmentText);
     if (!coverageIdSegment.isPresent()) {
       throw new ResourceNotFoundException(coverageId);
     }
-    Long beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
+    Long beneficiaryId = Long.parseLong(coverageIdMatcher.group(3));
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
@@ -169,7 +196,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
-    Coverage coverage = coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity);
+    Coverage coverage =
+        coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity, enabledProfiles);
     return coverage;
   }
 
@@ -210,12 +238,23 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
               value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
+      @OptionalParam(name = "_profile") String profile,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
+
+    EnumSet<Profile> enabledProfiles = this.getDefaultProfiles();
+    if (this.c4DicEnabled && profile != null) {
+      enabledProfiles =
+          switch (profile) {
+            case ProfileConstants.C4DIC_COVERAGE_URL -> EnumSet.of(Profile.C4DIC);
+            case ProfileConstants.C4BB_COVERAGE_URL -> EnumSet.of(Profile.C4BB);
+            default -> throw new InvalidRequestException("Invalid profile: " + profile);
+          };
+    }
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
-      coverages = coverageTransformer.transform(beneficiaryEntity);
+      coverages = coverageTransformer.transform(beneficiaryEntity, enabledProfiles);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
@@ -284,5 +323,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
       }
     }
     return beneficiary;
+  }
+
+  private EnumSet<Profile> getDefaultProfiles() {
+    return this.c4DicEnabled ? EnumSet.of(Profile.C4BB, Profile.C4DIC) : EnumSet.of(Profile.C4BB);
   }
 }
