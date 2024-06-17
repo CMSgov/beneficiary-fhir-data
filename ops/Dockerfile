@@ -26,7 +26,7 @@ RUN echo flyway.placeholders.type.int4=int4 > /flyway/conf/flyway.conf \
     && echo flyway.postgresql.transactional.lock=false >> /flyway/conf/flyway.conf
 
 FROM amazonlinux:2 as al2
-ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz"
+ARG PYTHON3_TAR_SOURCE="https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz"
 LABEL org.opencontainers.image.source=https://github.com/CMSgov/beneficiary-fhir-data
 
 # Getting systemd to run correctly inside Docker is very tricky. Need to
@@ -76,8 +76,8 @@ RUN curl -o python3.tgz $PYTHON3_TAR_SOURCE && \
     cd $(basename $PYTHON3_TAR_SOURCE .tgz) && \
     ./configure && make && make altinstall
 
-RUN ln -fs /usr/local/bin/python3.9 /usr/bin/python3 && \
-    ln -fs /usr/local/bin/pip3.9 /usr/bin/pip3
+RUN ln -fs /usr/local/bin/python3.11 /usr/bin/python3 && \
+    ln -fs /usr/local/bin/pip3.11 /usr/bin/pip3
 
 RUN /usr/bin/python3 -m pip install --upgrade pip
 

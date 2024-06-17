@@ -184,6 +184,15 @@ service_startup_check() {
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 SERVICE_SCRIPT="$(find {{ data_server_dir }} -type f -name bfd-server-launcher.sh)"
 
+CONFIG_SETTINGS_JSON=$(cat <<EOF
+{"ssmHierarchies": [
+    "/bfd/{{ env_name_std }}/server/sensitive/",
+    "/bfd/{{ env_name_std }}/server/nonsensitive/"
+]}
+EOF
+)
+export CONFIG_SETTINGS_JSON
+
 # 3... 2... 1... launch!
 "$SERVICE_SCRIPT" \
   -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \

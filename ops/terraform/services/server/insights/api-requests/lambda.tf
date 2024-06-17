@@ -19,7 +19,7 @@ resource "aws_lambda_function" "lambda-function-format-firehose-logs" {
   package_type                   = "Zip"
   reserved_concurrent_executions = -1
   role                           = aws_iam_role.iam-role-firehose-lambda.arn
-  runtime                        = "python3.8"
+  runtime                        = "python3.11"
   source_code_hash               = data.archive_file.zip-archive-format-firehose-logs.output_base64sha256
 
   tags = { "lambda-console:blueprint" = "kinesis-firehose-cloudwatch-logs-processor-python" }
@@ -175,7 +175,7 @@ resource "aws_lambda_function" "bfd_insights_error_slack" {
   handler          = "bfd-insights-error-slack.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = local.lambda_timeout_seconds
   environment {
     variables = {

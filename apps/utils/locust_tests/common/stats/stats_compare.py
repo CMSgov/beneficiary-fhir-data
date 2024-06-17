@@ -6,7 +6,7 @@ import itertools
 import json
 import logging
 from dataclasses import asdict, dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from locust.env import Environment
@@ -16,14 +16,14 @@ from common.stats.stats_config import StatsComparisonType, StatsConfiguration
 from common.stats.stats_loaders import StatsLoader
 
 
-class StatBetterIf(str, Enum):
+class StatBetterIf(StrEnum):
     """Enum representing whether a given stat is better if its value is smaller or larger"""
 
     SMALLER = "SMALLER"
     LARGER = "LARGER"
 
 
-class StatCompareResult(str, Enum):
+class StatCompareResult(StrEnum):
     """Enum representing the result of a particular stat comparison"""
 
     PASS = "PASS"

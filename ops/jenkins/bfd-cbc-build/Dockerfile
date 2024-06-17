@@ -28,8 +28,8 @@ RUN curl -o python3.tgz $PYTHON3_TAR_SOURCE && \
     cd $(basename $PYTHON3_TAR_SOURCE .tgz) && \
     ./configure && make && make altinstall
 
-RUN ln -fs /usr/local/bin/python3.9 /usr/bin/python3 && \
-    ln -fs /usr/local/bin/pip3.9 /usr/bin/pip3
+RUN ln -fs /usr/local/bin/python3.11 /usr/bin/python3 && \
+    ln -fs /usr/local/bin/pip3.11 /usr/bin/pip3
 
 RUN /usr/bin/python3 -m pip install --upgrade pip
 

@@ -5,7 +5,7 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Optional
 
 import boto3
@@ -30,7 +30,7 @@ ONETIME_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-at-"
 RATE_SCHEDULE_NAME_PREFIX = f"bfd-{BFD_ENVIRONMENT}-run-error-alerter-every-"
 
 
-class AlarmState(str, Enum):
+class AlarmState(StrEnum):
     ALARMING = "ALARM"
     OK = "OK"
 

@@ -21,7 +21,7 @@
     "bfdColumnName": "fi_doc_clm_cntl_num",
     "bfdDbType": "CHAR",
     "bfdDbSize": 23,
-    "bfdJavaFieldName": "fiOriginalClaimControlNumber",
+    "bfdJavaFieldName": "fiDocumentClaimControlNumber",
     "ccwMapping": [
         "FI_DOC_CLM_CNTL_NUM"
     ],
