@@ -3,9 +3,9 @@ Description=BFD DB Migrator Service
 Wants=network-online.target
 
 [Service]
-WorkingDirectory={{ db_migrator_dir }}
-ExecStart={{ db_migrator_dir }}/bfd-db-migrator-service.sh
-User={{ db_migrator_user }}
+WorkingDirectory={{ ref_dir }}
+ExecStart={{ ref_dir }}/bfd-db-migrator-service.sh
+User={{ user }}
 
 [Install]
 WantedBy=multi-user.target
