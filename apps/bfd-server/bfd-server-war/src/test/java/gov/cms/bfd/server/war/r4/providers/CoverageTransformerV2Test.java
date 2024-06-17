@@ -16,7 +16,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +23,6 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -285,9 +283,7 @@ public final class CoverageTransformerV2Test {
     newBeneficiary.setLastUpdated(calen.getTime().toInstant());
     newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
 
-    Coverage newCoverage =
-        coverageTransformer.transform(
-            MedicareSegment.PART_A, newBeneficiary, EnumSet.of(Profile.C4BB));
+    Coverage newCoverage = coverageTransformer.transform(MedicareSegment.PART_A, newBeneficiary);
     checkForNoYearlyDate(newCoverage);
   }
 
@@ -825,7 +821,7 @@ public final class CoverageTransformerV2Test {
    */
   public void transformCoverage(MedicareSegment medSeg, boolean showJson) throws FHIRException {
     if (currSegment == null || currSegment != medSeg) {
-      coverage = coverageTransformer.transform(medSeg, beneficiary, EnumSet.of(Profile.C4BB));
+      coverage = coverageTransformer.transform(medSeg, beneficiary);
       currSegment = medSeg;
     }
     if (showJson && coverage != null) {

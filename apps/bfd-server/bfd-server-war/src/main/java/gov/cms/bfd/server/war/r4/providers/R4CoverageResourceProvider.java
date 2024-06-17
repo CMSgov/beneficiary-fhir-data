@@ -63,8 +63,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
    */
   private static final Pattern COVERAGE_ID_PATTERN =
-      Pattern.compile(
-          "(?:(c4dic|c4bb)-)?(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
+      Pattern.compile("(\\p{Alnum}+-?\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
 
   /** The entity manager. */
   private EntityManager entityManager;
@@ -149,37 +148,22 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
-    String regexPrefixText = this.c4DicEnabled ? "({c4bb|c4dic}-)?" : "";
     String invalidCoverageIdMessage =
         "Coverage ID pattern: '"
             + coverageIdText
             + "' does not match expected pattern: "
-            + regexPrefixText
             + "{alphaNumericString}-{singleCharacter}-{idNumber}";
     if (!coverageIdMatcher.matches()) {
       throw new InvalidRequestException(invalidCoverageIdMessage);
     }
 
-    String profileString = coverageIdMatcher.group(1);
-
-    if (!c4DicEnabled && profileString != null) {
-      throw new InvalidRequestException(invalidCoverageIdMessage);
-    }
-
-    EnumSet<Profile> enabledProfiles = this.getDefaultProfiles();
-
-    if (profileString != null) {
-      Profile profile = Profile.valueOf(profileString.toUpperCase());
-      enabledProfiles = EnumSet.of(profile);
-    }
-
-    String coverageIdSegmentText = coverageIdMatcher.group(2);
+    String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =
-        MedicareSegment.selectByUrlPrefix(coverageIdSegmentText);
+        MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, getEnabledProfiles());
     if (!coverageIdSegment.isPresent()) {
       throw new ResourceNotFoundException(coverageId);
     }
-    Long beneficiaryId = Long.parseLong(coverageIdMatcher.group(3));
+    Long beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
@@ -196,8 +180,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
-    Coverage coverage =
-        coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity, enabledProfiles);
+    Coverage coverage = coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity);
     return coverage;
   }
 
@@ -243,7 +226,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     List<IBaseResource> coverages;
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
 
-    EnumSet<Profile> enabledProfiles = this.getDefaultProfiles();
+    EnumSet<Profile> enabledProfiles = this.getEnabledProfiles();
+
     if (this.c4DicEnabled && profile != null) {
       enabledProfiles =
           switch (profile) {
@@ -325,7 +309,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     return beneficiary;
   }
 
-  private EnumSet<Profile> getDefaultProfiles() {
+  private EnumSet<Profile> getEnabledProfiles() {
     return this.c4DicEnabled ? EnumSet.of(Profile.C4BB, Profile.C4DIC) : EnumSet.of(Profile.C4BB);
   }
 }

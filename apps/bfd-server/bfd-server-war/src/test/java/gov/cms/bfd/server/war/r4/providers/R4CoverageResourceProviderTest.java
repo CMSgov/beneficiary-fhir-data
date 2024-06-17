@@ -26,6 +26,7 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.Profile;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -39,6 +40,7 @@ import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,8 +137,9 @@ public class R4CoverageResourceProviderTest {
     when(loadedFilterManager.isResultSetEmpty(any(), any())).thenReturn(false);
 
     // transformer mocking
-    when(coverageTransformer.transform(any(), any())).thenReturn(List.of(testCoverage));
-    when(coverageTransformer.transform(any(), any(), any())).thenReturn(testCoverage);
+    when(coverageTransformer.transform(any(), (EnumSet<Profile>) any()))
+        .thenReturn(List.of(testCoverage));
+    when(coverageTransformer.transform(any(), (Beneficiary) any())).thenReturn(testCoverage);
 
     // Mock coverage id
     when(coverageId.getIdPart()).thenReturn(VALID_PART_A_COVERAGE_ID);

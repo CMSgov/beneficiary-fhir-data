@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
+import java.util.EnumSet;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,8 @@ public enum MedicareSegment {
   /** Represents the part C medicare segment. */
   PART_C("part-c"),
   /** Represents the part D medicare segment. */
-  PART_D("part-d");
+  PART_D("part-d"),
+  C4DIC("c4dic");
 
   /** The url prefix for this segment. */
   private final String urlPrefix;
@@ -28,9 +30,15 @@ public enum MedicareSegment {
    * @return the {@link MedicareSegment} (if any) whose {@link #urlPrefix} value matches the one
    *     specified
    */
-  public static Optional<MedicareSegment> selectByUrlPrefix(String urlPrefix) {
+  public static Optional<MedicareSegment> selectByUrlPrefix(
+      String urlPrefix, EnumSet<Profile> enabledProfiles) {
     for (MedicareSegment medicareSegment : values()) {
-      if (medicareSegment.getUrlPrefix().equals(urlPrefix)) return Optional.of(medicareSegment);
+      if (medicareSegment.getUrlPrefix().equals(urlPrefix)) {
+        if (medicareSegment == MedicareSegment.C4DIC && !enabledProfiles.contains(Profile.C4DIC)) {
+          return Optional.empty();
+        }
+        return Optional.of(medicareSegment);
+      }
     }
 
     return Optional.empty();
