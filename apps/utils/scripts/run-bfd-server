@@ -174,7 +174,7 @@ function setvar() {
   else
     full_ssm_name="${SSM_PARAMETER_PATH}/${ssm_name}"
     echo put-parameter $full_ssm_name
-    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${full_ssm_name}" --value "${value}" # > /dev/null
+    aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${full_ssm_name}" --value "${value}" --no-cli-pager # > /dev/null
   fi
 }
 
@@ -254,6 +254,7 @@ setvar db/password "InsecureLocalDev"
 
 setvar pac/enabled true
 setvar pac/claim_source_types "fiss,mcs"
+setvar c4dic/enabled false
 
 classpath="${launcher_jar}:${bin_dir}/lib/*:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.server.launcher.DataServerLauncherApp"
