@@ -1968,7 +1968,7 @@ public final class TransformerUtils {
     qty.setValue(unitCount);
     item.setQuantity(qty);
 
-    if (nationalDrugCodeQualifierCode.isPresent()) { // here
+    if (nationalDrugCodeQualifierCode.isPresent()) {
       /*
        * TODO: Is NDC count only ever present when line quantity isn't set? Depending
        * on that, it
