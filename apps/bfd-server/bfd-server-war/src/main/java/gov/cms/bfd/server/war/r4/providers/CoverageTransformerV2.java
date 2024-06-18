@@ -78,6 +78,7 @@ final class CoverageTransformerV2 {
    * Transforms a beneficiary into a {@link Coverage} resource.
    *
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
+   * @param enabledProfiles the CARIN {@link Profile} to use
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
    *     Beneficiary}
    */
@@ -92,6 +93,14 @@ final class CoverageTransformerV2 {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Transforms a beneficiary into a {@link Coverage} resource per the CARIN Digital Insurance Card
+   * {@link Profile}.
+   *
+   * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
+   * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
+   *     Beneficiary}
+   */
   private Coverage transformC4Dic(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("c4dic");
 
@@ -793,10 +802,21 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.PTDCNTRCT12, beneficiary.getPartDContractNumberDecId());
   }
 
+  /**
+   * Adds the CARIN Blue Button {@link Profile} to the Meta FHIR element under the Coverage details.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   */
   private void addC4BbProfile(Coverage coverage) {
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
+  /**
+   * Adds the CARIN Digital Insurance Card {@link Profile} to the Meta FHIR element under the
+   * Coverage details.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   */
   private void addC4DicProfile(Coverage coverage) {
     coverage.getMeta().addProfile(ProfileConstants.C4DIC_COVERAGE_URL_VERSIONED);
   }
@@ -816,6 +836,11 @@ final class CoverageTransformerV2 {
     }
   }
 
+  /**
+   * Sets the Type code on the {@link Coverage} details.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   */
   private void setType(Coverage coverage) {
     coverage.setType(
         new CodeableConcept()
@@ -825,12 +850,23 @@ final class CoverageTransformerV2 {
                     .setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode")));
   }
 
+  /**
+   * Sets the Payor's identifier on the {@link Coverage} details.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   */
   private void addC4bbPayor(Coverage coverage) {
     coverage
         .addPayor()
         .setIdentifier(new Identifier().setValue(TransformerConstants.COVERAGE_ISSUER));
   }
 
+  /**
+   * Sets a contained organization as the payor on the {@link Coverage} details per the CARIN
+   * Digital Insurance Card {@link Profile}.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   */
   private void addC4DicPayor(Coverage coverage) {
     Organization organization =
         TransformerUtilsV2.findOrCreateContainedOrganization(
@@ -839,6 +875,13 @@ final class CoverageTransformerV2 {
     coverage.addPayor(new Reference(organization));
   }
 
+  /**
+   * Sets a contained organization as the assigner and the MB ID as the identifier on the {@link
+   * Coverage} details per the CARIN Digital Insurance Card {@link Profile}.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   * @param beneficiary The {@link Beneficiary}
+   */
   private void addC4DicIdentifier(Coverage coverage, Beneficiary beneficiary) {
 
     Organization organization =

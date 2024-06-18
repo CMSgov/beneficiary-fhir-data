@@ -77,6 +77,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   /** The coverage transformer. */
   private final CoverageTransformerV2 coverageTransformer;
 
+  /** The CARIN digital insurance card feature flag. */
   private final boolean c4DicEnabled;
 
   /**
@@ -88,6 +89,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    * @param metricRegistry the metric registry
    * @param loadedFilterManager the loaded filter manager
    * @param coverageTransformer the coverage transformer
+   * @param c4dicEnabled the CARIN digital insurance card feature flag
    */
   public R4CoverageResourceProvider(
       MetricRegistry metricRegistry,
@@ -200,6 +202,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
+   * @param profile a supported CARIN {@link Profile}
    * @return Returns a {@link List} of {@link Coverage}s, which may contain multiple matching
    *     resources, or may also be empty.
    */
@@ -309,6 +312,11 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     return beneficiary;
   }
 
+  /**
+   * Returns enabled CARIN profiles.
+   *
+   * @return CARIN {@link Profile}
+   */
   private EnumSet<Profile> getEnabledProfiles() {
     return this.c4DicEnabled ? EnumSet.of(Profile.C4BB, Profile.C4DIC) : EnumSet.of(Profile.C4BB);
   }
