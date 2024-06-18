@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_C4DIC_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -29,6 +30,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
@@ -38,6 +40,9 @@ public class BeneficiaryTransformerV2 {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
+  /** Whether to enable the C4DIC profile. */
+  private final Boolean c4DicEnabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -46,9 +51,13 @@ public class BeneficiaryTransformerV2 {
    * called by tests.
    *
    * @param metricRegistry the metric registry
+   * @param c4dicEnabled whether to enable the C4DIC profile
    */
-  public BeneficiaryTransformerV2(MetricRegistry metricRegistry) {
+  public BeneficiaryTransformerV2(
+      MetricRegistry metricRegistry,
+      @Value("${" + SSM_PATH_C4DIC_ENABLED + ":false}") Boolean c4dicEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
+    this.c4DicEnabled = c4dicEnabled;
   }
 
   /**
@@ -89,6 +98,9 @@ public class BeneficiaryTransformerV2 {
 
       // Required values not directly mapped
       patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
+      if (this.c4DicEnabled) {
+        patient.getMeta().addProfile(ProfileConstants.C4DIC_PATIENT_URL);
+      }
       patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
 
       // BENE_ID => patient.identifier
