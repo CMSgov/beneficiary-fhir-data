@@ -1,73 +1,27 @@
 #!/bin/bash
 
-export BFD_CCW_JOB_ENABLED='{{ data_pipeline_ccw_rif_job_enabled }}'
-export BFD_CCW_S3_BUCKET_NAME='{{ data_pipeline_s3_bucket }}'
-export BFD_HICN_HASH_ITERATIONS='{{ data_pipeline_hicn_hash_iterations }}'  # The minimum number of iterations recommended by NIST is 1000.
-export BFD_HICN_HASH_PEPPER='{{ data_pipeline_hicn_hash_pepper }}'
-export BFD_DB_URL='{{ data_pipeline_db_url }}'
-export BFD_DB_USERNAME='{{ data_pipeline_db_username }}'
-export BFD_DB_PASSWORD='{{ data_pipeline_db_password }}'
-# NOTE: RIF Loader Threads are generally some multiple of available cpus/core, e.g. `$((3 * $(nproc)))`
-export BFD_LOADER_THREAD_COUNT='{{ ansible_processor_vcpus * (rif_thread_multiple | int) }}'
-export BFD_CCW_JOB_BATCH_SIZE='{{ rif_job_batch_size }}'
-export BFD_CCW_JOB_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple }}'
-export BFD_CCW_JOB_CLAIMS_LOADER_THREAD_COUNT='{{ ansible_processor_vcpus * (rif_thread_multiple_claims | int) }}'
-export BFD_CCW_JOB_CLAIMS_BATCH_SIZE='{{ rif_job_batch_size_claims }}'
-export BFD_CCW_JOB_CLAIMS_QUEUE_SIZE_MULTIPLE='{{ rif_job_queue_size_multiple_claims }}'
+export BFD_CCW_JOB_ENABLED={{ enabled if pipeline_instance_type == 'ccw' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
+export BFD_RDA_JOB_ENABLED={{ enabled if pipeline_instance_type == 'rda' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
 
-export BFD_CCW_IDEMPOTENCY_ENABLED='{{ data_pipeline_idempotency_required }}'
+export BFD_DB_URL='{{ db_url }}' {# derived from terraform control plane #}{{ '\n' }}
+{{ '#' if db_password_override|default('', true)|length<1 else '' }}export BFD_DB_PASSWORD='{{ db_password_override|default('', true) }}'                      {# application defaults to ssm db/password #}{{ '\n' }}
+{{ '#' if db_username_override|default('', true)|length<1 else '' }}export BFD_DB_USERNAME='{{ db_username_override|default('', true) }}'                      {# application defaults to ssm db/username #}{{ '\n' }}
+{{ '#' if db_auth_type_override|default('', true)|length<1 else '' }}export BFD_DB_AUTH_TYPE='{{ db_auth_type_override|default('', true) }}'                   {# application defaults to ssm db/auth_type #}{{ '\n' }}
+{{ '#' if db_max_connections_override|default('', true)|length<1 else '' }}export BFD_DB_MAX_CONNECTIONS='{{ db_max_connections_override|default('', true) }}' {# application defaults to ssm db/max_connections #}{{ '\n' }}
 
-# Observability
-{% if data_pipeline_micrometer_cw_enabled is defined and data_pipeline_micrometer_cw_namespace is defined %}
-export BFD_MICROMETER_CW_ENABLED={{ data_pipeline_micrometer_cw_enabled }}
-export BFD_MICROMETER_CW_NAMESPACE={{ data_pipeline_micrometer_cw_namespace }}
-export BFD_MICROMETER_CW_INTERVAL={{ data_pipeline_micrometer_cw_interval | default('PT1M') }}
-{% else %}
-# export BFD_MICROMETER_CW_ENABLED=
-# export BFD_MICROMETER_CW_NAMESPACE=
-# export BFD_MICROMETER_CW_INTERVAL=
-{% endif %}
+{{ '#' if new_relic_app_name_override|default('', true)|length<1 else ''}}export BFD_NEW_RELIC_APP_NAME='{{ new_relic_app_name_override|default('', true) }}'                                   {# application defaults to ssm new_relic/app_name #}{{ '\n' }}
+{{ '#' if new_relic_metrics_license_key_override|default('', true)|length<1 else '' }}export BFD_NEW_RELIC_METRICS_LICENSE_KEY='{{ new_relic_metrics_license_key_override|default('', true) }}' {# application defaults to ssm new_relic/metrics/license_key #}{{ '\n' }}
+{{ '#' if new_relic_metrics_host_override|default('', true)|length<1 else '' }}export BFD_NEW_RELIC_METRICS_HOST='{{ new_relic_metrics_host_override|default('', true) }}'                      {# application defaults to ssm new_relic/metrics/host #}{{ '\n' }}
+{{ '#' if new_relic_metrics_path_override|default('', true)|length<1 else ''}}export BFD_NEW_RELIC_METRICS_PATH='{{ new_relic_metrics_path_override|default('', true) }}'                       {# application defaults to ssm new_relic/metrics/path #}{{ '\n' }}
+{{ '#' if new_relic_metrics_period_override|default('', true)|length<1 else '' }}export BFD_NEW_RELIC_METRICS_PERIOD='{{ new_relic_metrics_period_override|default('', true) }}'                {# application defaults to ssm new_relic/metrics/period #}{{ '\n' }}
 
-export BFD_NEW_RELIC_METRICS_HOST='{{ data_pipeline_new_relic_metric_host }}'
-export BFD_NEW_RELIC_METRICS_PATH='{{ data_pipeline_new_relic_metric_path }}'
-{% if data_pipeline_new_relic_app_name is defined %}
-export BFD_NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
-{% else %}
-#export BFD_NEW_RELIC_APP_NAME=
-{% endif %}
-{% if data_pipeline_new_relic_metric_key is defined %}
-export BFD_NEW_RELIC_METRICS_LICENSE_KEY='{{ data_pipeline_new_relic_metric_key }}'
-{% else %}
-#export BFD_NEW_RELIC_METRICS_LICENSE_KEY=
-{% endif %}
+# NOTE: Calculated values from ansible facts. Multiple available cpus/cores e.g. `$((3 * $(nproc)))`
+export BFD_LOADER_THREAD_COUNT='{{ ansible_processor_vcpus * (thread_multiple|default(3, true)|int) }}'
+{{ '' if pipeline_instance_type == 'ccw' else '#' }}export BFD_CCW_JOB_CLAIMS_LOADER_THREAD_COUNT='{{ ansible_processor_vcpus * (rif_thread_multiple_claims|default(25, true)|int) }}'
+{{ '' if pipeline_instance_type == 'ccw' else '#' }}export BFD_CCW_S3_BUCKET_NAME='{{ s3_bucket }}'                {# derived from terraform control plane #}{{ '\n' }}
+{{ '' if pipeline_instance_type == 'rda' else '#' }}export BFD_RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ s3_bucket }}'  {# derived from terraform control plane #}{{ '\n' }}
 
-export BFD_RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
-export BFD_RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
-export BFD_RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
-export BFD_RDA_JOB_WRITE_THREAD_COUNT='{{ data_pipeline_rda_job_write_threads }}'
-{% if data_pipeline_rda_process_dlq is defined %}
-export BFD_RDA_JOB_PROCESS_DLQ='{{ data_pipeline_rda_process_dlq }}'
-{% endif %}
-{% if data_pipeline_rda_version is defined %}
-export BFD_RDA_JOB_RDA_VERSION='{{ data_pipeline_rda_version }}'
-{% endif %}
-{% if data_pipeline_rda_job_starting_fiss_seq_num is defined %}
-export BFD_RDA_JOB_STARTING_FISS_SEQ_NUM='{{ data_pipeline_rda_job_starting_fiss_seq_num }}'
-{% endif %}
-{% if data_pipeline_rda_job_starting_mcs_seq_num is defined %}
-export BFD_RDA_JOB_STARTING_MCS_SEQ_NUM='{{ data_pipeline_rda_job_starting_mcs_seq_num }}'
-{% endif %}
-export BFD_RDA_GRPC_HOST='{{ data_pipeline_rda_grpc_host }}'
-export BFD_RDA_GRPC_PORT='{{ data_pipeline_rda_grpc_port }}'
-export BFD_RDA_GRPC_MAX_IDLE_SECONDS='{{ data_pipeline_rda_grpc_max_idle_seconds }}'
-export BFD_RDA_GRPC_AUTH_TOKEN='{{ data_pipeline_rda_grpc_auth_token }}'
-export BFD_RDA_GRPC_SERVER_TYPE='{{ data_pipeline_rda_grpc_server_type }}'
-export BFD_RDA_GRPC_INPROCESS_SERVER_MODE='{{ data_pipeline_rda_grpc_inproc_server_mode }}'
-export BFD_RDA_GRPC_INPROCESS_SERVER_S3_REGION='{{ data_pipeline_rda_grpc_inproc_server_s3_region }}'
-export BFD_RDA_GRPC_INPROCESS_SERVER_S3_BUCKET='{{ data_pipeline_rda_grpc_inproc_server_s3_bucket }}'
-export BFD_RDA_GRPC_INPROCESS_SERVER_S3_DIR='{{ data_pipeline_rda_grpc_inproc_server_s3_directory }}'
-
-# Referenced by the pipeline's logback.xml file to add environment name for use in splunk.
+{# Referenced by the pipeline's logback.xml file to add environment name for use in splunk. #}{{ '\n' }}
 export BFD_ENV_NAME='{{ env_name_std }}'
 
 #Layered configuration support
@@ -80,14 +34,14 @@ EOF
 )
 export CONFIG_SETTINGS_JSON
 
-# Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
-# export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
-
-# Set some additional variables.
-JVM_ARGS='{{ data_pipeline_jvm_args }}'
-SERVICE_SCRIPT="$(find {{ data_pipeline_dir }} -type f -name bfd-pipeline-app.sh)"
+# Additional variables
+# NOTE: ansible fact derived jvm heap
+#       JVM heap size is 80% of total memory minus 2GB for other system processes and overhead (security tools et al.)
+#       Ie. For an 8GB instance, the heap size will be ~4.4GB (6.4 - 2)
+JVM_ARGS="-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:+PreserveFramePointer -XX:+UseStringDeduplication"
+SERVICE_SCRIPT="$(find {{ ref_dir }} -type f -name bfd-pipeline-app.sh)"
 
 exec "$SERVICE_SCRIPT" \
 	${JVM_ARGS} \
-	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} -Dorg.jboss.logging.provider=slf4j \
-	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"
+	-Djava.io.tmpdir={{ tmp }} -Dorg.jboss.logging.provider=slf4j \
+	&>> "{{ ref_dir }}/bluebutton-data-pipeline.log"
