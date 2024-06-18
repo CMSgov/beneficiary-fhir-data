@@ -14,17 +14,6 @@
 /bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-${env}-migrator
 /bfd/${env}/migrator/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
 /bfd/${env}/migrator/nonsensitive/new_relic_metric_path: /metric/v1
-/bfd/${env}/pipeline/nonsensitive/shared/bfd_pipeline_dir: /bluebutton-data-pipeline
-/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_dir: /bluebutton-data-pipeline
-/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_new_relic_metric_host: https://gov-metric-api.newrelic.com
-/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_new_relic_metric_path: /metric/v1
-/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_user: bb-etl
-/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_micrometer_cw_enabled: false
-/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_micrometer_cw_namespace: bfd-${env}/bfd-pipeline
-/bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_micrometer_cw_interval: PT1M
-/bfd/${env}/pipeline/nonsensitive/ccw/data_pipeline_rda_job_enabled: false # RDA Jobs are disabled by default on CCW Pipelines
-/bfd/${env}/pipeline/nonsensitive/ccw/data_pipeline_ccw_rif_job_enabled: false
-/bfd/${env}/pipeline/nonsensitive/ccw/data_pipeline_idempotency_required: true
 /bfd/${env}/pipeline/nonsensitive/ccw/instance_type: c6a.4xlarge
 /bfd/${env}/pipeline/nonsensitive/ccw/rif_job_batch_size: 7
 /bfd/${env}/pipeline/nonsensitive/ccw/rif_job_queue_size_multiple: 5
@@ -37,7 +26,7 @@
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/region: us-east-1
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/bucket: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/dir: UNDEFINED
-/bfd/${env}/pipeline/nonsensitive/rda/job/enabled: true
+/bfd/${env}/pipeline/nonsensitive/rda/job/enabled: false
 /bfd/${env}/pipeline/nonsensitive/rda/job/process_dlq: true
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: 0
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_mcs_seq_num: 0
