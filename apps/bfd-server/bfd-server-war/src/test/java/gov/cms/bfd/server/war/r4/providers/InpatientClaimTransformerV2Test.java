@@ -372,8 +372,7 @@ public final class InpatientClaimTransformerV2Test {
   public void shouldHaveClmIpAdmsnTypeCdSupInfo() {
     SupportingInformationComponent sic =
         TransformerTestUtilsV2.findSupportingInfoByCode(
-            "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
-            eob.getSupportingInfo());
+            "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit", eob.getSupportingInfo());
 
     SupportingInformationComponent compare =
         TransformerTestUtilsV2.createSupportingInfo(
@@ -387,11 +386,11 @@ public final class InpatientClaimTransformerV2Test {
                     "Information"),
                 new Coding(
                     "https://bluebutton.cms.gov/resources/codesystem/information",
-                    "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+                    "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
                     "Claim Inpatient Admission Type Code")),
             // Code
             new Coding(
-                "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+                "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
                 "1",
                 "Emergency - The patient required immediate medical intervention as a result of"
                     + " severe, life threatening, or potentially disabling conditions. Generally,"

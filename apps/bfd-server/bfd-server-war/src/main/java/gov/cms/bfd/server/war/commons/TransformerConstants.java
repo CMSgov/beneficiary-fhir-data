@@ -6,6 +6,8 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaimColumn;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
@@ -92,6 +94,17 @@ public final class TransformerConstants {
    * {@link CcwCodebookVariable#getVariable()}'s {@link Variable#getId()}.
    */
   public static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
+
+  /**
+   * Maps a ccw variable to a specific URL. If the variable exists as a key in this map, then the
+   * value will be used as the system; otherwise, it will be constructed using the above constants.
+   */
+  public static final Map<String, String> CCW_SYSTEM_MAP =
+      new HashMap<>() {
+        {
+          put("clm_ip_admsn_type_cd", "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit");
+        }
+      };
 
   /** The constant for the USD code. */
   public static final String CODED_MONEY_USD = "USD";

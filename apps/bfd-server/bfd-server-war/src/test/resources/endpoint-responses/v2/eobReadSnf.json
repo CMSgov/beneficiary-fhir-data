@@ -262,13 +262,13 @@
         "display" : "Information"
       }, {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-        "code" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+        "code" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
         "display" : "Claim Inpatient Admission Type Code"
       } ]
     },
     "code" : {
       "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
         "code" : "3",
         "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations."
       } ]

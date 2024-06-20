@@ -12,9 +12,12 @@ public class CCWUtils {
    *     published
    */
   public static String calculateVariableReferenceUrl(CcwCodebookInterface ccwVariable) {
-    return String.format(
-        "%s/%s",
-        TransformerConstants.BASE_URL_CCW_VARIABLES,
-        ccwVariable.getVariable().getId().toLowerCase());
+    String ccwVarId = ccwVariable.getVariable().getId().toLowerCase();
+    // If the ccw variable exists in the CCW_SYSTEM_REMAP map, then we can return the value of this
+    // mapping as the system. Otherwise, it will be constructed.
+    if (TransformerConstants.CCW_SYSTEM_MAP.containsKey(ccwVarId)) {
+      return TransformerConstants.CCW_SYSTEM_MAP.get(ccwVarId);
+    }
+    return String.format("%s/%s", TransformerConstants.BASE_URL_CCW_VARIABLES, ccwVarId);
   }
 }
