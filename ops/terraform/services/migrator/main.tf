@@ -98,7 +98,8 @@ resource "aws_instance" "this" {
   }
 
   user_data = templatefile("${path.module}/user-data.tftpl", {
-    env      = local.env
-    seed_env = local.seed_env
+    env             = local.env
+    seed_env        = local.seed_env
+    writer_endpoint = "jdbc:postgresql://${local.rds_writer_endpoint}:5432/fhirdb"
   })
 }
