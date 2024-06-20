@@ -31,6 +31,7 @@ locals {
   kms_config_key_alias            = local.nonsensitive_common_config["kms_config_key_alias"]
   queue_name                      = local.nonsensitive_config["sqs_queue_name"]
   rds_cluster_identifier          = local.nonsensitive_common_config["rds_cluster_identifier"]
+  rds_writer_endpoint             = data.external.rds.result["Endpoint"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
   volume_iops       = local.nonsensitive_config["volume_iops"]
