@@ -142,13 +142,22 @@ def processRecords(records: list[dict[str, Any]]) -> Generator[dict[str, Any]]:
         if data["messageType"] == "CONTROL_MESSAGE":
             yield {"result": "Dropped", "recordId": recId}
         elif data["messageType"] == "DATA_MESSAGE":
-            joinedData = "".join(
+            valid_log_events = [
                 x
                 for x in (transformLogEvent(e) for e in data["logEvents"])
                 if x is not None
-            )
+            ]
+            if not valid_log_events:
+                print(
+                    f"Record ID {r['recordId']} was empty after attempting to transform its log"
+                    " events. Marking as ProcessingFailed"
+                )
+                yield {"result": "ProcessingFailed", "recordId": recId}
+
+            joinedData = "".join(valid_log_events)
             dataBytes = joinedData.encode("utf-8")
             encodedData = base64.b64encode(dataBytes).decode("utf-8")
+
             yield {"data": encodedData, "result": "Ok", "recordId": recId}
         else:
             yield {"result": "ProcessingFailed", "recordId": recId}
