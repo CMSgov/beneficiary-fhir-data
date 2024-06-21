@@ -110,9 +110,7 @@ def transformLogEvent(log_event: dict[str, Any]) -> str | None:
     str: The transformed log event.
     """
 
-    """
-    BFD modification to the blueprint to format the message json uniformly.
-    """
+    # BFD modification to the blueprint to format the message json uniformly.
     try:
         log_event_json = json.loads(log_event["message"])
     except json.JSONDecodeError as exc:
