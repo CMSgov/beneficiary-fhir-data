@@ -360,14 +360,25 @@ def lambda_handler(event: dict[str, Any], context: dict[str, Any]):
             recordsReingestedSoFar += len(recordBatch)
             print("Reingested %d/%d" % (recordsReingestedSoFar, len(flattenedList)))
 
+    num_processed_ok = len([r for r in records if r["result"] == "Ok"])
+    num_processed_failed = len(
+        [r for r in records if r["result"] == "ProcessingFailed"]
+    )
+    num_split = len([rl for rl in recordListsToReingest if len(rl) > 1])
+    num_reingested_asis = len([rl for rl in recordListsToReingest if len(rl) == 1])
+    num_actual_dropped = len([r for r in records if r["result"] == "Dropped"]) - (
+        num_reingested_asis + num_split
+    )
     print(
-        "%d input records, %d returned as Ok or ProcessingFailed, %d split and"
-        " re-ingested, %d re-ingested as-is"
+        "%d input records, %d returned as Ok, %d returned as ProcessingFailed, %d split and"
+        " re-ingested, %d re-ingested as-is, %d record(s) dropped"
         % (
             len(event["records"]),
-            len([r for r in records if r["result"] != "Dropped"]),
-            len([l for l in recordListsToReingest if len(l) > 1]),
-            len([l for l in recordListsToReingest if len(l) == 1]),
+            num_processed_ok,
+            num_processed_failed,
+            num_split,
+            num_reingested_asis,
+            num_actual_dropped,
         )
     )
 
