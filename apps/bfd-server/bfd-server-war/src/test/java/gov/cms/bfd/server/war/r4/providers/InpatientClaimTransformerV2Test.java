@@ -372,7 +372,8 @@ public final class InpatientClaimTransformerV2Test {
   public void shouldHaveClmIpAdmsnTypeCdSupInfo() {
     SupportingInformationComponent sic =
         TransformerTestUtilsV2.findSupportingInfoByCode(
-            "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit", eob.getSupportingInfo());
+            "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+            eob.getSupportingInfo());
 
     SupportingInformationComponent compare =
         TransformerTestUtilsV2.createSupportingInfo(
@@ -381,12 +382,12 @@ public final class InpatientClaimTransformerV2Test {
             // Category
             Arrays.asList(
                 new Coding(
-                    "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-                    "info",
+                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+                    "admtype",
                     "Information"),
                 new Coding(
                     "https://bluebutton.cms.gov/resources/codesystem/information",
-                    "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
+                    "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
                     "Claim Inpatient Admission Type Code")),
             // Code
             new Coding(

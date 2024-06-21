@@ -201,7 +201,7 @@
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-        "code" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
         "display" : "Claim Inpatient Admission Type Code"
       } ]
     },

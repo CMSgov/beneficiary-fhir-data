@@ -36,7 +36,7 @@
             "additional": [
                 "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
                 "eob.information[N].category.coding[N].system = 'https://bluebutton.cms.gov/resources/codesystem/information'",
-                "eob.information[N].category.coding[N].code = 'https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit'",
+                "eob.information[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd'",
                 "eob.information[N].category.coding[N].display = 'Claim Inpatient Admission Type Code'"
             ],
             "derived": "",
