@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+
+{{ '#' if db_url|default('', true)|length<1 else '' }}export BFD_DB_URL='{{ db_url|default('', true) }}'
+
 # OPERATIONAL OVERRIDES
 ## The expression {{ '#' if foo|default('', true)|length<1 else '' }} prepends exports with '#' to prevent
 ## undefined or empty 'foo' variable from entering the environment. Maintains the existing templating
 ## strategy and remains flexible for manual manipulation of resultant script in development and
 ## troubleshooting scenarios.
 {{ '#' if db_password_override|default('', true)|length<1 else '' }}export BFD_DB_PASSWORD='{{ db_password_override|default('', true) }}'
-{{ '#' if db_url_override|default('', true)|length<1 else '' }}export BFD_DB_URL='{{ db_url_override|default('', true) }}'
 {{ '#' if db_username_override|default('', true)|length<1 else '' }}export BFD_DB_USERNAME='{{ db_username_override|default('', true) }}'
 {{ '#' if db_auth_type_override|default('', true)|length<1 else '' }}export BFD_DB_AUTH_TYPE='{{ db_auth_type_override|default('', true) }}'
 {{ '#' if db_max_connections_override|default('', true)|length<1 else '' }}export BFD_DB_MAX_CONNECTIONS='{{ db_max_connections_override|default('', true) }}'
