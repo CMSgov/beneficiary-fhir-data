@@ -97,7 +97,7 @@ def format_json(y: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def transformLogEvent(log_event: dict[str, Any]) -> str:
+def transformLogEvent(log_event: dict[str, Any]) -> str | None:
     """Transform each log event.
 
     The default implementation below just extracts the message and appends a newline to it.
@@ -113,7 +113,15 @@ def transformLogEvent(log_event: dict[str, Any]) -> str:
     """
     BFD modification to the blueprint to format the message json uniformly.
     """
-    log_event_json = json.loads(log_event["message"])
+    try:
+        log_event_json = json.loads(log_event["message"])
+    except json.JSONDecodeError as exc:
+        print(
+            f'Unable to transform log ID {log_event["id"]} due to JSON error "{str(exc)}" decoding'
+            f" message: {log_event['message']}"
+        )
+        return None
+
     flattened_log_event_json = format_json(log_event_json)
     flattened_log_event_json["cw_id"] = log_event["id"]
     # Ignoring that utcfromtimestamp is deprecated. Should probably be replaced with fromtimestamp,
@@ -134,7 +142,11 @@ def processRecords(records: list[dict[str, Any]]) -> Generator[dict[str, Any]]:
         if data["messageType"] == "CONTROL_MESSAGE":
             yield {"result": "Dropped", "recordId": recId}
         elif data["messageType"] == "DATA_MESSAGE":
-            joinedData = "".join([transformLogEvent(e) for e in data["logEvents"]])
+            joinedData = "".join(
+                x
+                for x in (transformLogEvent(e) for e in data["logEvents"])
+                if x is not None
+            )
             dataBytes = joinedData.encode("utf-8")
             encodedData = base64.b64encode(dataBytes).decode("utf-8")
             yield {"data": encodedData, "result": "Ok", "recordId": recId}
