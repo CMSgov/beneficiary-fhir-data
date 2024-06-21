@@ -131,7 +131,9 @@ def transformLogEvent(log_event: dict[str, Any]) -> str | None:
     return stringized_flattened_log_event_json + "\n"
 
 
-def processRecords(records: list[dict[str, Any]]) -> Generator[dict[str, Any]]:
+def processRecords(
+    records: list[dict[str, Any]],
+) -> Generator[dict[str, Any], None, None]:
     for r in records:
         data = loadJsonGzipBase64(r["data"])
         recId = r["recordId"]
@@ -145,18 +147,18 @@ def processRecords(records: list[dict[str, Any]]) -> Generator[dict[str, Any]]:
                 for x in (transformLogEvent(e) for e in data["logEvents"])
                 if x is not None
             ]
-            if not valid_log_events:
+            if valid_log_events:
+                joinedData = "".join(valid_log_events)
+                dataBytes = joinedData.encode("utf-8")
+                encodedData = base64.b64encode(dataBytes).decode("utf-8")
+
+                yield {"data": encodedData, "result": "Ok", "recordId": recId}
+            else:
                 print(
                     f"Record ID {r['recordId']} was empty after attempting to transform its log"
-                    " events. Marking as ProcessingFailed"
+                    " events. Marking as Dropped"
                 )
-                yield {"result": "ProcessingFailed", "recordId": recId}
-
-            joinedData = "".join(valid_log_events)
-            dataBytes = joinedData.encode("utf-8")
-            encodedData = base64.b64encode(dataBytes).decode("utf-8")
-
-            yield {"data": encodedData, "result": "Ok", "recordId": recId}
+                yield {"result": "Dropped", "recordId": recId}
         else:
             yield {"result": "ProcessingFailed", "recordId": recId}
 
