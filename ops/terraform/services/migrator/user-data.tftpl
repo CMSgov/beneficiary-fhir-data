@@ -16,21 +16,17 @@ aws ssm get-parameters-by-path \
     --path "/bfd/${env}/migrator/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > migrator_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > migrator_vars.json
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > common_vars.json
 
 cat <<EOF > extra_vars.json
 {
-  "db_migrator_db_url": "${db_migrator_db_url}",
-  "env": "${env}",
-  "migrator_monitor_enabled": ${migrator_monitor_enabled},
-  "migrator_monitor_heartbeat_interval_seconds": ${migrator_monitor_heartbeat_interval_seconds},
-  "db_migrator_tmp_dir": "{{ db_migrator_dir }}/tmp"
+  "db_url": "${writer_endpoint}"
 }
 EOF
 

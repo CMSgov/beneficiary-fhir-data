@@ -338,7 +338,7 @@ public abstract class ConfigLoaderSource {
 
     /**
      * Maps a name to match environment variable naming conventions by adding our prefix, replacing
-     * any '.' with '_', and converting all characters to upper case.
+     * any '/' with '_', and converting all characters to upper case.
      *
      * @param name name to map
      * @return mapped name

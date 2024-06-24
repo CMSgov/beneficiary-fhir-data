@@ -43,7 +43,6 @@ boolean deployMigrator(Map args = [:]) {
 	    tfVars: [
                 ami_id_override: amiId,
                 create_migrator_instance: true,
-                migrator_monitor_heartbeat_interval_seconds_override: heartbeatInterval
 	    ]
     )
 
@@ -51,7 +50,6 @@ boolean deployMigrator(Map args = [:]) {
     finalMigratorStatus = monitorMigrator(
         sqsQueueName: sqsQueueName,
         awsRegion: awsRegion,
-        heartbeatInterval: heartbeatInterval,
         maxMessages: 10
     )
 
@@ -183,7 +181,7 @@ boolean canMigratorDeploymentProceed(String sqsQueueName, String awsRegion) {
 boolean isMigratorDeploymentRequired(String bfdEnv, String awsRegion) {
     println "Comparing schema migration versions..."
     // Initialize stored schema version
-    int storedSchemaVersion = 0
+    BigInteger storedSchemaVersion = 0
     // check SSM Parameter Store
     try {
         storedSchemaVersion = awsSsm.getParameter(
