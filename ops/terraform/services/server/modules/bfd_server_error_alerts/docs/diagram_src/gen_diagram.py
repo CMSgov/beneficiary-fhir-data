@@ -66,5 +66,5 @@ with Diagram("bfd-2728", graph_attr=graph_attrs, outformat="png", show=False):
                 " query"
             )
         )
-        >> Slack("#bfd-test-alerts")
+        >> Slack("#bfd-internal-alerts")
     )
