@@ -3,7 +3,8 @@ locals {
   seed_env = var.seed_env
 
   # When the CustomEndpoint is empty, fall back to the ReaderEndpoint
-  rds_reader_endpoint = data.external.rds.result["ReaderEndpoint"]
+  # rds_reader_endpoint = data.external.rds.result["ReaderEndpoint"]
+  rds_reader_endpoint = data.aws_rds_proxy.proxy.endpoint
 
   additional_tags = { Layer = var.layer, role = var.role }
 
@@ -38,6 +39,11 @@ locals {
   ]
 
   on_launch_lifecycle_hook_name = "bfd-${local.env}-${var.role}-on-launch"
+
+  // Sets the application name as part of the startup message and also tells JDBC to assume Postgres
+  // is at least v9. These parameters serve to avoid connection pinning wrt RDS Proxy.
+  // See: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/rds-proxy-setup.html#rds-proxy-connecting-postgresql
+  full_suffix = coalesce(var.jdbc_suffix, "invalid") != "invalid" ? "${var.jdbc_suffix}&ApplicationName=bfd-server&assumeMinServerVersion=9.0" : "?ApplicationName=bfd-server&assumeMinServerVersion=9.0"
 }
 
 ## Security groups
@@ -139,7 +145,7 @@ resource "aws_launch_template" "main" {
     seed_env              = local.seed_env
     port                  = var.lb_config.port
     accountId             = var.launch_config.account_id
-    data_server_db_url    = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${var.jdbc_suffix}"
+    data_server_db_url    = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${local.full_suffix}"
     launch_lifecycle_hook = local.on_launch_lifecycle_hook_name
   }))
 

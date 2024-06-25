@@ -18,6 +18,10 @@ data "aws_rds_cluster" "rds" {
   cluster_identifier = var.db_config.db_cluster_identifier
 }
 
+data "aws_rds_proxy" "proxy" {
+  name = "bfd-2826-prod"
+}
+
 data "external" "rds" {
   program = [
     "${path.module}/scripts/rds-cluster-config.sh", # helper script
