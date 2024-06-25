@@ -3,8 +3,7 @@ locals {
   seed_env = var.seed_env
 
   # When the CustomEndpoint is empty, fall back to the ReaderEndpoint
-  # rds_reader_endpoint = data.external.rds.result["ReaderEndpoint"]
-  rds_reader_endpoint = data.aws_db_proxy.proxy.endpoint
+  rds_reader_endpoint = data.external.rds.result["ProxyReaderEndpoint"]
 
   additional_tags = { Layer = var.layer, role = var.role }
 

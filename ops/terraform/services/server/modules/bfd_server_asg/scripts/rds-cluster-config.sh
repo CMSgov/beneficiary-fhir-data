@@ -34,4 +34,9 @@ WRITER_AZ="$(aws rds describe-db-instances --db-instance-identifier "$WRITER_NOD
 
 WRITER_CONFIG="$(jq --null-input --arg writer_node "$WRITER_NODE" --arg writer_az "$WRITER_AZ" '{ WriterNode: $writer_node, WriterAZ: $writer_az }')"
 
-jq --argjson obj "$WRITER_CONFIG" '. += $obj | del(.Members)' <<<$CLUSTER
+MERGED_READER_WRITER_CONFIG="$(jq --argjson obj "$WRITER_CONFIG" '. += $obj | del(.Members)' <<<"$CLUSTER")"
+
+# TODO: Don't hardcode the proxy name; rewrite script to remove unnecessary fields for BFD Server
+PROXY_READER_ENDPOINT="$(aws rds describe-db-proxy-endpoints --db-proxy-name bfd-2826-prod | jq -r '.DBProxyEndpoints[] | select(.TargetRole | contains("READ_ONLY")) | .Endpoint')"
+
+jq --arg proxy_reader "$PROXY_READER_ENDPOINT" '. += { ProxyReaderEndpoint: $proxy_reader }' <<<"$MERGED_READER_WRITER_CONFIG"
