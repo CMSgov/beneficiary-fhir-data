@@ -18,7 +18,7 @@ data "aws_rds_cluster" "rds" {
   cluster_identifier = var.db_config.db_cluster_identifier
 }
 
-data "aws_rds_proxy" "proxy" {
+data "aws_db_proxy" "proxy" {
   name = "bfd-2826-prod"
 }
 
