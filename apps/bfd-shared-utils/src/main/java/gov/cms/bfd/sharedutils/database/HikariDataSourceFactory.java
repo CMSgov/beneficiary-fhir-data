@@ -28,7 +28,9 @@ public class HikariDataSourceFactory implements DataSourceFactory {
     dataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
     dataSource.setUsername(dbOptions.getDatabaseUsername());
     dataSource.setPassword(dbOptions.getDatabasePassword());
-    dataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
+    // Setting the pool size to 1 is the dumbest possible change to "disable" Hikari connection pooling so that we
+    // rely entirely on RDS Proxy
+    dataSource.setMaximumPoolSize(1);
     dataSource.setRegisterMbeans(true);
   }
 }
