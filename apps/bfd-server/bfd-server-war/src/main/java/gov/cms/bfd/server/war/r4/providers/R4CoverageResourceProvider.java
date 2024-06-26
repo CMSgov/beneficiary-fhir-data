@@ -230,15 +230,15 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     List<IBaseResource> coverages;
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
 
-    EnumSet<Profile> chosenProfiles = this.enabledProfiles;
-    if (this.enabledProfiles.contains(Profile.C4DIC) && profile != null) {
-      chosenProfiles =
-          switch (profile) {
-            case ProfileConstants.C4DIC_COVERAGE_URL -> EnumSet.of(Profile.C4DIC);
-            case ProfileConstants.C4BB_COVERAGE_URL -> EnumSet.of(Profile.C4BB);
-            default -> throw new InvalidRequestException("Invalid profile: " + profile);
-          };
-    }
+    EnumSet<Profile> chosenProfiles =
+        (this.enabledProfiles.contains(Profile.C4DIC) && profile != null)
+            ? switch (profile) {
+              case ProfileConstants.C4DIC_COVERAGE_URL -> EnumSet.of(Profile.C4DIC);
+              case ProfileConstants.C4BB_COVERAGE_URL -> EnumSet.of(Profile.C4BB);
+              default -> throw new InvalidRequestException("Invalid profile: " + profile);
+            }
+            : this.enabledProfiles;
+
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
       coverages = coverageTransformer.transform(beneficiaryEntity, chosenProfiles);
