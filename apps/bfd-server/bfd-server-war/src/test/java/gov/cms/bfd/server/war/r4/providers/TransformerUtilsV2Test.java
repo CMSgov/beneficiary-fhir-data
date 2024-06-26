@@ -1108,15 +1108,12 @@ public class TransformerUtilsV2Test {
     String expectedId = "#provider-org";
 
     Organization actualOrganization =
-        TransformerUtilsV2.findOrCreateContainedOrganization(
-            eob, expectedId, EnumSet.of(Profile.C4BB));
+        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId, Profile.C4BB);
 
     assertEquals(expectedId, actualOrganization.getId());
     assertTrue(
         actualOrganization.getMeta().getProfile().stream()
-            .filter(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
-            .findFirst()
-            .isPresent());
+            .anyMatch(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL)));
 
     Optional<Resource> resource =
         eob.getContained().stream().filter(r -> r.getId().equals(expectedId)).findFirst();
@@ -1125,9 +1122,7 @@ public class TransformerUtilsV2Test {
     Organization actualEobContainedOrganizationResource = (Organization) resource.get();
     assertTrue(
         actualEobContainedOrganizationResource.getMeta().getProfile().stream()
-            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
-            .findAny()
-            .isPresent());
+            .anyMatch(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL)));
   }
 
   /**
@@ -1140,15 +1135,12 @@ public class TransformerUtilsV2Test {
     String expectedId = "#provider-org";
 
     Organization actualOrganization =
-        TransformerUtilsV2.findOrCreateContainedOrganization(
-            eob, expectedId, EnumSet.of(Profile.C4BB));
+        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId, Profile.C4BB);
 
     assertEquals(expectedId, actualOrganization.getId());
     assertTrue(
         actualOrganization.getMeta().getProfile().stream()
-            .filter(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
-            .findFirst()
-            .isPresent());
+            .anyMatch(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL)));
 
     List<Resource> resource =
         eob.getContained().stream()
@@ -1159,8 +1151,7 @@ public class TransformerUtilsV2Test {
     // Call findOrCreateContainedOrganization and make sure it finds the organization that
     // was created above and doesn't have duplicate entries for eob.
     actualOrganization =
-        TransformerUtilsV2.findOrCreateContainedOrganization(
-            eob, expectedId, EnumSet.of(Profile.C4BB));
+        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId, Profile.C4BB);
 
     resource =
         eob.getContained().stream()
@@ -1172,9 +1163,7 @@ public class TransformerUtilsV2Test {
     Organization actualEobContainedOrganizationResource = (Organization) resource.get(0);
     assertTrue(
         actualEobContainedOrganizationResource.getMeta().getProfile().stream()
-            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
-            .findAny()
-            .isPresent());
+            .anyMatch(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL)));
   }
 
   /**

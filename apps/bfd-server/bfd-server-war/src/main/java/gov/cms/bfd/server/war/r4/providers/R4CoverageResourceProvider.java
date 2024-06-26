@@ -77,8 +77,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   /** The coverage transformer. */
   private final CoverageTransformerV2 coverageTransformer;
 
-  /** The CARIN digital insurance card feature flag. */
-  private final boolean c4DicEnabled;
+  /** The enabled CARIN profiles. */
+  private final EnumSet<Profile> enabledProfiles;
 
   /**
    * Instantiates a new {@link R4CoverageResourceProvider}.
@@ -99,7 +99,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.coverageTransformer = requireNonNull(coverageTransformer);
-    this.c4DicEnabled = c4dicEnabled;
+    this.enabledProfiles = Profile.getEnabledProfiles(c4dicEnabled);
   }
 
   /**
@@ -161,7 +161,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
 
     String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =
-        MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, getEnabledProfiles());
+        MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, this.enabledProfiles);
     if (!coverageIdSegment.isPresent()) {
       throw new ResourceNotFoundException(coverageId);
     }
@@ -229,10 +229,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     List<IBaseResource> coverages;
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
 
-    EnumSet<Profile> enabledProfiles = this.getEnabledProfiles();
-
-    if (this.c4DicEnabled && profile != null) {
-      enabledProfiles =
+    EnumSet<Profile> chosenProfiles = this.enabledProfiles;
+    if (this.enabledProfiles.contains(Profile.C4DIC) && profile != null) {
+      chosenProfiles =
           switch (profile) {
             case ProfileConstants.C4DIC_COVERAGE_URL -> EnumSet.of(Profile.C4DIC);
             case ProfileConstants.C4BB_COVERAGE_URL -> EnumSet.of(Profile.C4BB);
@@ -241,7 +240,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     }
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
-      coverages = coverageTransformer.transform(beneficiaryEntity, enabledProfiles);
+      coverages = coverageTransformer.transform(beneficiaryEntity, chosenProfiles);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
@@ -310,14 +309,5 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
       }
     }
     return beneficiary;
-  }
-
-  /**
-   * Returns enabled CARIN profiles.
-   *
-   * @return CARIN {@link Profile}
-   */
-  private EnumSet<Profile> getEnabledProfiles() {
-    return this.c4DicEnabled ? EnumSet.of(Profile.C4BB, Profile.C4DIC) : EnumSet.of(Profile.C4BB);
   }
 }

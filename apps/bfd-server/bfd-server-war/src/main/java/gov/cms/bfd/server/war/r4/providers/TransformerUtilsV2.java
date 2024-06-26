@@ -46,7 +46,6 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.Profile;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -3554,23 +3553,18 @@ public final class TransformerUtilsV2 {
    *
    * @param resource the {@link DomainResource} to modify
    * @param id The resource ID
-   * @param supportedProfiles the supported CARIN {@link Profile}
+   * @param profile the supported CARIN {@link Profile}
    * @return The found or new {@link Organization} resource
    */
   static Organization findOrCreateContainedOrganization(
-      DomainResource resource, String id, EnumSet<Profile> supportedProfiles) {
+      DomainResource resource, String id, Profile profile) {
     Optional<Resource> organization =
         resource.getContained().stream().filter(r -> r.getId() == id).findFirst();
 
     // If it isn't there, add one
     if (!organization.isPresent()) {
       organization = Optional.of(new Organization().setId(id));
-      if (supportedProfiles.contains(Profile.C4BB)) {
-        organization.get().getMeta().addProfile(ProfileConstants.C4BB_ORGANIZATION_URL);
-      }
-      if (supportedProfiles.contains(Profile.C4DIC)) {
-        organization.get().getMeta().addProfile(ProfileConstants.C4DIC_ORGANIZATION_URL_VERSIONED);
-      }
+      organization.get().getMeta().addProfile(profile.getVersionedOrganizationUrl());
       resource.getContained().add(organization.get());
     }
 
@@ -3619,7 +3613,7 @@ public final class TransformerUtilsV2 {
       Optional<Instant> lastUpdated) {
     if (value.isPresent()) {
       Organization organization =
-          findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID, EnumSet.of(Profile.C4BB));
+          findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID, Profile.C4BB);
 
       // Add the new Identifier to the Organization
       Identifier id =

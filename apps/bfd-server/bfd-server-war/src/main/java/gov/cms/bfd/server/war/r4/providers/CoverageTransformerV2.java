@@ -9,7 +9,6 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.CoverageClass;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -105,8 +104,9 @@ final class CoverageTransformerV2 {
     Timer.Context timer = createTimerContext("c4dic");
 
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4DIC;
 
-    addC4DicProfile(coverage);
+    addProfile(coverage, profile);
     addC4DicIdentifier(coverage, beneficiary);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.C4DIC, beneficiary));
 
@@ -140,8 +140,9 @@ final class CoverageTransformerV2 {
   private Coverage transformPartA(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("part_a");
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4BB;
 
-    addC4BbProfile(coverage);
+    addProfile(coverage, profile);
 
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
 
@@ -204,8 +205,9 @@ final class CoverageTransformerV2 {
   private Coverage transformPartB(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("part_b");
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4BB;
 
-    addC4BbProfile(coverage);
+    addProfile(coverage, profile);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
     setCoverageStatus(coverage, beneficiary.getPartBTerminationCode());
 
@@ -262,8 +264,9 @@ final class CoverageTransformerV2 {
   private Coverage transformPartC(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("part_c");
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4BB;
 
-    addC4BbProfile(coverage);
+    addProfile(coverage, profile);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
     coverage.setStatus(CoverageStatus.ACTIVE);
 
@@ -317,8 +320,9 @@ final class CoverageTransformerV2 {
   private Coverage transformPartD(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("part_d");
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4BB;
 
-    addC4BbProfile(coverage);
+    addProfile(coverage, profile);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
 
     TransformerUtilsV2.setPeriodStart(
@@ -803,22 +807,13 @@ final class CoverageTransformerV2 {
   }
 
   /**
-   * Adds the CARIN Blue Button {@link Profile} to the Meta FHIR element under the Coverage details.
+   * Adds the {@link Profile} to the Meta FHIR element under the Coverage details.
    *
    * @param coverage The {@link Coverage} to Coverage details
+   * @param profile The {@link Profile} to add
    */
-  private void addC4BbProfile(Coverage coverage) {
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
-  }
-
-  /**
-   * Adds the CARIN Digital Insurance Card {@link Profile} to the Meta FHIR element under the
-   * Coverage details.
-   *
-   * @param coverage The {@link Coverage} to Coverage details
-   */
-  private void addC4DicProfile(Coverage coverage) {
-    coverage.getMeta().addProfile(ProfileConstants.C4DIC_COVERAGE_URL_VERSIONED);
+  private void addProfile(Coverage coverage, Profile profile) {
+    coverage.getMeta().addProfile(profile.getVersionedCoverageUrl());
   }
 
   /**
@@ -870,7 +865,7 @@ final class CoverageTransformerV2 {
   private void addC4DicPayor(Coverage coverage) {
     Organization organization =
         TransformerUtilsV2.findOrCreateContainedOrganization(
-            coverage, TransformerUtilsV2.PROVIDER_ORG_ID, EnumSet.of(Profile.C4DIC));
+            coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
 
     coverage.addPayor(new Reference(organization));
   }
@@ -883,10 +878,9 @@ final class CoverageTransformerV2 {
    * @param beneficiary The {@link Beneficiary}
    */
   private void addC4DicIdentifier(Coverage coverage, Beneficiary beneficiary) {
-
     Organization organization =
         TransformerUtilsV2.findOrCreateContainedOrganization(
-            coverage, TransformerUtilsV2.PROVIDER_ORG_ID, EnumSet.of(Profile.C4DIC));
+            coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
 
     Identifier identifier =
         new Identifier()
