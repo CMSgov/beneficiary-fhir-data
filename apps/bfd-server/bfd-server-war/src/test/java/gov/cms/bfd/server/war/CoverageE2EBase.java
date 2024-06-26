@@ -129,7 +129,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .body(
             "issue.diagnostics",
             hasItem(
-                "Coverage ID pattern: 'bad-format' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}"))
+                "Coverage ID pattern: 'bad-format' does not match expected pattern: {alphaNumericString}?-{alphaNumericString}-{idNumber}"))
         .statusCode(400)
         .when()
         .get(requestString);
