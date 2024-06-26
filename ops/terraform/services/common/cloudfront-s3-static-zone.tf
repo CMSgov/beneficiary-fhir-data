@@ -1,10 +1,14 @@
 # Creates a private static zone for the environment
-locals {
-  root_domain_name      = local.hosted_zones[0].zone.domain
-  static_cf_bucket_name = "bfd-${local.env}-cloudfront-${local.account_id}"
+data "aws_canonical_user_id" "current" {}
+
+data "aws_route53_zone" "root_zone" {
+  vpc_id = data.aws_vpc.main.id
 }
 
-data "aws_canonical_user_id" "current" {}
+locals {
+  root_domain_name      = data.aws_route53_zone.root_zone.name
+  static_cf_bucket_name = "bfd-${local.env}-cloudfront-${local.account_id}"
+}
 
 resource "aws_route53_zone" "static" {
   name          = "${local.env}.${local.root_domain_name}"
@@ -25,7 +29,7 @@ resource "aws_route53_record" "static" {
   name    = "static.${aws_route53_zone.static.name}"
   type    = "CNAME"
   ttl     = "300"
-  records = [aws_cloudfront_distribution.static_site_distribution.root_domain_name]
+  records = [aws_cloudfront_distribution.static_site_distribution.domain_name]
 }
 
 resource "aws_s3_bucket" "cloudfront_bucket" {
@@ -104,7 +108,7 @@ resource "aws_s3_bucket_policy" "cloudfront_bucket" {
             "Effect": "Deny",
             "Principal": "*",
             "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket}/*",
+            "Resource": "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*",
             "Condition": {
               "StringNotEquals": {
                 "s3:x-amz-server-side-encryption": "aws:kms"
@@ -116,7 +120,7 @@ resource "aws_s3_bucket_policy" "cloudfront_bucket" {
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket}/*",
+            "Resource": "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*",
             "Condition": {
                 "ArnEquals": {
                     "aws:userid": "arn:aws:iam::${local.account_id}:user/Jenkins"
@@ -129,8 +133,8 @@ resource "aws_s3_bucket_policy" "cloudfront_bucket" {
             "Principal": "*",
             "Action": "s3:*",
             "Resource": [
-                "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket}",
-                "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket}/*"
+                "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}",
+                "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*"
             ],
             "Condition": {
                 "Bool": {
@@ -142,7 +146,6 @@ resource "aws_s3_bucket_policy" "cloudfront_bucket" {
 }
 EOF
 }
-
 
 resource "aws_s3_bucket" "cloudfront_logging" {
   bucket = local.logging_bucket
