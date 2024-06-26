@@ -136,7 +136,7 @@ public final class TransformerUtilsV2 {
   static final String PROVIDER_ORG_ID = "provider-org";
 
   /** Constant for finding a provider org reference. */
-  static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
+  private static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
 
   /**
    * Creates a {@link CodeableConcept} from the specified system and code.
@@ -3088,8 +3088,9 @@ public final class TransformerUtilsV2 {
    * @param lastUpdated the last updated
    * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM
    * @param fiClmProcDt FI_CLM_PROC_DT
-   * @param c4bbInstutionalClaimSubtype the {@link C4BBbInstutionalClaimSubtype} that is passed in
+   * @param c4bbInstutionalClaimSubtype the {@link C4BBInstutionalClaimSubtypes} that is passed in
    * @param claimQueryCode the CLAIM_QUERY_CODE
+   * @param profile the CARIN {@link Profile}
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -3108,7 +3109,8 @@ public final class TransformerUtilsV2 {
       Optional<String> fiDocClmControlNum,
       Optional<LocalDate> fiClmProcDt,
       C4BBInstutionalClaimSubtypes c4bbInstutionalClaimSubtype,
-      Optional<Character> claimQueryCode) {
+      Optional<Character> claimQueryCode,
+      Profile profile) {
 
     // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
     claimQueryCode.ifPresent(
@@ -3133,7 +3135,7 @@ public final class TransformerUtilsV2 {
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(
-        eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, npiOrgName, lastUpdated);
+        eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, npiOrgName, lastUpdated, profile);
 
     // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()
@@ -3585,13 +3587,15 @@ public final class TransformerUtilsV2 {
    * @param type The {@link C4BBIdentifierType} of the identifier slice
    * @param value The value of the identifier. If empty, this call is a no-op
    * @param lastUpdated the last updated value to use for the slice
+   * @param profile the CARIN {@link Profile}
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
-      Optional<Instant> lastUpdated) {
-    addProviderSlice(eob, type, Optional.of(value), Optional.empty(), lastUpdated);
+      Optional<Instant> lastUpdated,
+      Profile profile) {
+    addProviderSlice(eob, type, Optional.of(value), Optional.empty(), lastUpdated, profile);
   }
 
   /**
@@ -3604,16 +3608,17 @@ public final class TransformerUtilsV2 {
    * @param value The value of the identifier. If empty, this call is a no-op
    * @param npiOrgName the npi org name
    * @param lastUpdated the last updated to use for the slice
+   * @param profile the CARIN {@link Profile}
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       Optional<String> value,
       Optional<String> npiOrgName,
-      Optional<Instant> lastUpdated) {
+      Optional<Instant> lastUpdated,
+      Profile profile) {
     if (value.isPresent()) {
-      Organization organization =
-          findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID, Profile.C4BB);
+      Organization organization = findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID, profile);
 
       // Add the new Identifier to the Organization
       Identifier id =
@@ -3654,14 +3659,16 @@ public final class TransformerUtilsV2 {
    * @param value The value of the identifier. If empty, this call is a no-op
    * @param npiOrgName the npi org name
    * @param lastupdated the last updated to use for the slice
+   * @param profile the CARIN {@link Profile}
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
       Optional<String> npiOrgName,
-      Optional<Instant> lastupdated) {
-    addProviderSlice(eob, type, Optional.of(value), npiOrgName, lastupdated);
+      Optional<Instant> lastupdated,
+      Profile profile) {
+    addProviderSlice(eob, type, Optional.of(value), npiOrgName, lastupdated, profile);
   }
 
   /**

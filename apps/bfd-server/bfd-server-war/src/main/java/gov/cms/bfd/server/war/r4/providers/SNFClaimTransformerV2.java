@@ -14,6 +14,7 @@ import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
@@ -137,7 +138,8 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
-        claimGroup.getLastUpdated());
+        claimGroup.getLastUpdated(),
+        Profile.C4BB);
 
     // add EOB information to fields that are common between the Inpatient and SNF claim types
     // CLM_IP_ADMSN_TYPE_CD => ExplanationOfBenefit.supportingInfo.code
@@ -310,7 +312,8 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.of(claimGroup.getClaimQueryCode()));
+        Optional.of(claimGroup.getClaimQueryCode()),
+        Profile.C4BB);
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD => diagnosis.diagnosisCodeableConcept

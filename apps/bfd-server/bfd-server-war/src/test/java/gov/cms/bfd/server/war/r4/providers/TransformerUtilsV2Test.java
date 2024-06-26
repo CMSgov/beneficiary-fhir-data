@@ -214,7 +214,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -253,7 +254,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     Optional<Resource> organization =
         eob.getContained().stream()
@@ -297,7 +299,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -333,7 +336,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertEquals(1, eob.getContained().size());
     Organization actualEobContainedOrganizationResource = (Organization) eob.getContained().get(0);
@@ -558,7 +562,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.of(fiClmProcDt),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -603,7 +608,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -644,7 +650,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.of('3'));
+        Optional.of('3'),
+        Profile.C4BB);
 
     assertNotNull(eob.getBillablePeriod());
     assertFalse(eob.getBillablePeriod().isEmpty());
@@ -1183,7 +1190,8 @@ public class TransformerUtilsV2Test {
         C4BBOrganizationIdentifierType.NPI,
         Optional.of(expectedValue),
         Optional.of(expectedNpiOrgName),
-        Optional.of(instant));
+        Optional.of(instant),
+        Profile.C4BB);
 
     Optional<Resource> resource =
         eob.getContained().stream().filter(r -> r.getId().equals(expectedId)).findFirst();
@@ -1223,7 +1231,8 @@ public class TransformerUtilsV2Test {
         C4BBOrganizationIdentifierType.NPI,
         Optional.of(expectedValue),
         Optional.empty(),
-        Optional.of(instant));
+        Optional.of(instant),
+        Profile.C4BB);
 
     List<Resource> c = eob.getContained();
     Optional<Resource> resource =

@@ -12,6 +12,7 @@ import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
@@ -135,7 +136,8 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
-        claimGroup.getLastUpdated());
+        claimGroup.getLastUpdated(),
+        Profile.C4BB);
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
     if (claimGroup.getPatientStatusCd().isPresent()) {
@@ -187,7 +189,8 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        claimGroup.getClaimQueryCode());
+        claimGroup.getClaimQueryCode(),
+        Profile.C4BB);
 
     // Handle Diagnosis
     // ADMTG_DGNS_CD => diagnosis.diagnosisCodeableConcept

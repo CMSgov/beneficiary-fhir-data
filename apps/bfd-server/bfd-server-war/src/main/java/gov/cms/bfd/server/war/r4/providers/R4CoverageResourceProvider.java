@@ -150,12 +150,13 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
-    String invalidCoverageIdMessage =
-        "Coverage ID pattern: '"
-            + coverageIdText
-            + "' does not match expected pattern: "
-            + "{alphaNumericString}-{singleCharacter}-{idNumber}";
+
     if (!coverageIdMatcher.matches()) {
+      String invalidCoverageIdMessage =
+          "Coverage ID pattern: '"
+              + coverageIdText
+              + "' does not match expected pattern: "
+              + "{alphaNumericString}?-{alphaNumericString}-{idNumber}";
       throw new InvalidRequestException(invalidCoverageIdMessage);
     }
 
