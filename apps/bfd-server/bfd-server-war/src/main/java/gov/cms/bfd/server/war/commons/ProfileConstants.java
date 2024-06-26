@@ -101,5 +101,5 @@ public class ProfileConstants {
    * href="https://hl7.org/fhir/us/insurance-card/STU1.1/StructureDefinition-C4DIC-Patient.html">
    * C4DICPatient</a>.
    */
-  public static final String C4DIC_PATIENT_URL_VERSIONED = C4DIC_PATIENT_URL + "1.1";
+  public static final String C4DIC_PATIENT_URL_VERSIONED = C4DIC_PATIENT_URL + "|1.1";
 }
