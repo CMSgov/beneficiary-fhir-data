@@ -117,9 +117,16 @@ resource "aws_ssm_parameter" "ephemeral_common" {
   for_each  = local.common_seed_paths
   key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
   value     = local.seed[each.value]
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
 
 # Copy targeted MIGRATOR hierarchy paths from seed environment into requested ephemeral environment
@@ -127,9 +134,16 @@ resource "aws_ssm_parameter" "ephemeral_migrator" {
   for_each  = local.migrator_seed_paths
   key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
   value     = local.seed[each.value]
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
 
 # Copy targeted PIPELINE hierarchy paths from seed environment into requested ephemeral environment
@@ -137,9 +151,16 @@ resource "aws_ssm_parameter" "ephemeral_pipeline" {
   for_each  = { for k, v in local.pipeline_seed_paths : k => v if v != "" }
   key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
   value     = local.seed[each.value]
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
 
 # Copy targeted SERVER hierarchy paths from seed environment into requested ephemeral environment
@@ -147,8 +168,15 @@ resource "aws_ssm_parameter" "ephemeral_server" {
   for_each  = local.server_seed_paths
   key_id    = contains(split("/", each.key), "sensitive") ? local.kms_key_id : null
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = contains(split("/", each.key), "sensitive") ? "SecureString" : "String"
   value     = local.seed[each.value]
   tier      = "Intelligent-Tiering"
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
