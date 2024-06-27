@@ -204,70 +204,34 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_loggin
   }
 }
 
-## using "arn:aws:iam::aws:policy/CloudFrontFullAccess" verbatim 2024-06-27
+data "aws_caller_identity" "current" {}
+
 resource "aws_s3_bucket_policy" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.id
 
-  policy = <<POLICY
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "cfflistbuckets",
-            "Action": [
-                "s3:ListAllMyBuckets"
-            ],
-            "Effect": "Allow",
-            "Resource": "arn:aws:s3:::*",
-            "Principal": {
-              "Service": "cloudfront.amazonaws.com"
-            }
-        },
-        {
-            "Sid": "cffullaccess",
-            "Action": [
-                "acm:ListCertificates",
-                "cloudfront:*",
-                "cloudfront-keyvaluestore:*",
-                "iam:ListServerCertificates",
-                "waf:ListWebACLs",
-                "waf:GetWebACL",
-                "wafv2:ListWebACLs",
-                "wafv2:GetWebACL",
-                "kinesis:ListStreams"
-            ],
-            "Effect": "Allow",
-            "Resource": "*",
-            "Principal": {
-              "Service": "cloudfront.amazonaws.com"
-            }
-        },
-        {
-            "Sid": "cffdescribestream",
-            "Action": [
-                "kinesis:DescribeStream"
-            ],
-            "Effect": "Allow",
-            "Resource": "arn:aws:kinesis:*:*:*",
-            "Principal": {
-              "Service": "cloudfront.amazonaws.com"
-            }
-        },
-        {
-            "Sid": "cfflistroles",
-            "Action": [
-                "iam:ListRoles"
-            ],
-            "Effect": "Allow",
-            "Resource": "arn:aws:iam::*:*",
-            "Principal": {
-              "Service": "cloudfront.amazonaws.com"
-            }
+  policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+          {
+              Sid = "AllowCloudFrontServicePrincipal"
+              Effect = "Allow"
+              Principal = {
+                  Service = "cloudfront.amazonaws.com"
+              }
+              Action = "s3:PutObject"
+              Resource = "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+              Condition = {
+                  StringEquals = {
+                      "AWS:SourceAccount" = data.aws_caller_identity.current.account_id
+                  }
+                  ArnLike = {
+                      "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"
+                  }
+              }
+          }
+        ]
+  })
 
-        }
-    ]
-}
-POLICY
 }
 
 resource "aws_cloudfront_distribution" "static_site_distribution" {
