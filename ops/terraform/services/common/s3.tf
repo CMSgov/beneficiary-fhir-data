@@ -75,7 +75,7 @@ resource "aws_s3_bucket_policy" "logging" {
         "AWS": "${local.aws_classic_loadbalancer_account_roots[local.region]}"
       },
       "Resource": [
-        "arn:aws:s3:::bfd-${local.env}-logs-${local.account_id}"
+        "arn:aws:s3:::bfd-${local.env}-logs-${local.account_id}",
         "arn:aws:s3:::bfd-${local.env}-logs-${local.account_id}/*"
       ]
     },
