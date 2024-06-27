@@ -38,9 +38,13 @@ data "aws_route53_zone" "vpc_root" {
 resource "aws_route53_record" "static_env" {
   zone_id = data.aws_route53_zone.vpc_root.zone_id
   name    = local.static_cf_alias
-  type    = "ALIAS"
-  ttl     = "300"
-  records = [aws_cloudfront_distribution.static_site_distribution.domain_name]
+  type    = "A"
+  
+  alias {
+    name    = aws_cloudfront_distribution.static_site_distribution.domain_name
+    zone_id = aws_cloudfront_distribution.static_site_distribution.zone_id
+  }
+
 }
 
 resource "aws_s3_bucket" "cloudfront_bucket" {
