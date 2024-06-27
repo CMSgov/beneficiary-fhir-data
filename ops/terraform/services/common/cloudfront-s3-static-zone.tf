@@ -218,7 +218,10 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
                 "s3:ListAllMyBuckets"
             ],
             "Effect": "Allow",
-            "Resource": "arn:aws:s3:::*"
+            "Resource": "arn:aws:s3:::*",
+            "Principal": {
+              "Service": "cloudfront.amazonaws.com"
+            }
         },
         {
             "Sid": "cffullaccess",
@@ -234,7 +237,10 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
                 "kinesis:ListStreams"
             ],
             "Effect": "Allow",
-            "Resource": "*"
+            "Resource": "*",
+            "Principal": {
+              "Service": "cloudfront.amazonaws.com"
+            }
         },
         {
             "Sid": "cffdescribestream",
@@ -242,7 +248,10 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
                 "kinesis:DescribeStream"
             ],
             "Effect": "Allow",
-            "Resource": "arn:aws:kinesis:*:*:*"
+            "Resource": "arn:aws:kinesis:*:*:*",
+            "Principal": {
+              "Service": "cloudfront.amazonaws.com"
+            }
         },
         {
             "Sid": "cfflistroles",
