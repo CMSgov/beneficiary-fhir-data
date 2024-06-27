@@ -52,7 +52,7 @@
 /bfd/${env}/common/nonsensitive/management_security_group: bfd-prod-sbx-remote-management
 /bfd/${env}/common/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
 /bfd/${env}/common/nonsensitive/new_relic_metric_path: /metric/v1
-/bfd/${env}/common/nonsensitive/rds_aurora_family: aurora-postgresql14
+/bfd/${env}/common/nonsensitive/rds_aurora_family: aurora-postgresql16
 /bfd/${env}/common/nonsensitive/rds_backup_retention_period: "3"
 /bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: "true"
 /bfd/${env}/common/nonsensitive/rds_master_username: bfduser
