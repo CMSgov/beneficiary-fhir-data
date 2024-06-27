@@ -214,7 +214,10 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
       "Action": "s3:PutObject",
       "Effect": "Allow",
       "Principal": "*",
-      "Resource": "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}/*"
+      "Resource": [
+        "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}",
+        "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}/*"
+      ]
     },
     {
       "Action": "s3:*",
@@ -241,6 +244,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   origin {
     domain_name = aws_s3_bucket.cloudfront_bucket.bucket_regional_domain_name
     origin_id   = "S3-${aws_s3_bucket.cloudfront_bucket.id}"
+    origin_access_control_id = aws_cloudfront_origin_access_control.static_site_control.id
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.static_site_identity.cloudfront_access_identity_path
@@ -301,3 +305,9 @@ resource "aws_cloudfront_origin_access_identity" "static_site_identity" {
   comment = "Origin access identity for static site ${terraform.workspace}"
 }
 
+resource "aws_cloudfront_origin_access_control" "static_site_control" {
+  name                              = "static_site_control-${terraform.workspace}"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
