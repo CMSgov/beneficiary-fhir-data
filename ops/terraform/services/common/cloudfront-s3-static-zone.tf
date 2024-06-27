@@ -118,7 +118,7 @@ resource "aws_s3_object" "index" {
 EOF
 
   lifecycle {
-    ignore_changes = [ value, tags ]
+    ignore_changes = [ all ]
   }
 }
 
@@ -138,7 +138,7 @@ resource "aws_s3_object" "error" {
 EOF
 
   lifecycle {
-    ignore_changes = [ value, tags ]
+    ignore_changes = [ all ]
   }
 }
 
