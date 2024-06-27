@@ -12,8 +12,8 @@ data "aws_ssm_parameter" "root_domain" {
 locals {
 #  root_domain_name      = data.aws_route53_zone.root_zone.name
   root_domain_name      = data.aws_ssm_parameter.root_domain.value
-  static_cf_bucket_name = "bfd-${local.env}-cloudfront-${local.account_id}"
-  static_cf_alias       = "${local.env}.static.${local.root_domain_name}"
+  static_cf_bucket_name = "bfd-${terraform.workspace}-cloudfront-${local.account_id}"
+  static_cf_alias       = "${terraform.workspace}.static.${local.root_domain_name}"
 }
 
 # resource "aws_route53_zone" "static" {
@@ -112,9 +112,9 @@ resource "aws_s3_object" "index" {
   content      = <<EOF
 <!DOCTYPE html>
 <html>
-<head>${local.env} Index page</head>
+<head>${terraform.workspace} Index page</head>
 <body>
-<p>Placeholder page for ${local.env} Static Site</p>
+<p>Placeholder page for ${terraform.workspace} Static Site</p>
 </body>
 </html>
 EOF
@@ -132,9 +132,9 @@ resource "aws_s3_object" "error" {
   content      = <<EOF
 <!DOCTYPE html>
 <html>
-<head>${local.env} Error page</head>
+<head>${terraform.workspace} Error page</head>
 <body>
-<p>Placeholder Error page for ${local.env} Static Site</p>
+<p>Placeholder Error page for ${terraform.workspace} Static Site</p>
 </body>
 </html>
 EOF
@@ -244,7 +244,7 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
       "Principal": {
         "AWS": "${local.aws_classic_loadbalancer_account_roots[local.region]}"
       },
-      "Resource": "arn:aws:s3:::bfd-${local.env}-logs-${local.account_id}/*"
+      "Resource": "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}/*"
     },
     {
       "Action": "s3:*",
@@ -256,8 +256,8 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
       "Effect": "Deny",
       "Principal": "*",
       "Resource": [
-        "arn:aws:s3:::bfd-${local.env}-logs-${local.account_id}",
-        "arn:aws:s3:::bfd-${local.env}-logs-${local.account_id}/*"
+        "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}",
+        "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}/*"
       ],
       "Sid": "AllowSSLRequestsOnly"
     }
@@ -279,7 +279,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "CloudFront distribution for static site ${local.env}"
+  comment             = "CloudFront distribution for static site ${terraform.workspace}"
   default_root_object = "index"
 
   aliases = [local.root_domain_name]
@@ -321,13 +321,13 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   }
 
   tags = {
-    Name = "StaticSite-CloudFront-${local.env}"
+    Name = "StaticSite-CloudFront-${terraform.workspace}"
     Layer = local.layer
     role  = "static-site"
   }
 }
 
 resource "aws_cloudfront_origin_access_identity" "static_site_identity" {
-  comment = "Origin access identity for static site ${local.env}"
+  comment = "Origin access identity for static site ${terraform.workspace}"
 }
 
