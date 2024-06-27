@@ -87,6 +87,46 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_bucket
   }
 }
 
+resource "aws_s3_bucket_object" "index" {
+  bucket  = aws_s3_bucket.cloudfront_bucket.id
+  key     = "index"
+  
+  content_type = "text/plain"
+  content      = <<EOF
+<!DOCTYPE html>
+<html>
+<head>${local.env} Index page</head>
+<body>
+<p>Placeholder page for ${local.env} Static Site</p>
+</body>
+</html>
+EOF
+
+  lifecycle {
+    ignore_changes = [ values, tags ]
+  }
+}
+
+resource "aws_s3_bucket_object" "error" {
+  bucket  = aws_s3_bucket.cloudfront_bucket.id
+  key     = "error"
+  
+  content_type = "text/plain"
+  content      = <<EOF
+<!DOCTYPE html>
+<html>
+<head>${local.env} Error page</head>
+<body>
+<p>Placeholder Error page for ${local.env} Static Site</p>
+</body>
+</html>
+EOF
+
+  lifecycle {
+    ignore_changes = [ values, tags ]
+  }
+}
+
 resource "aws_s3_bucket_logging" "cloudfront_bucket" {
   count = local.is_ephemeral_env ? 0 : 1
 
