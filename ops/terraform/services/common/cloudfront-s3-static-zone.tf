@@ -1,34 +1,16 @@
 # Creates a private static zone for the environment
 data "aws_canonical_user_id" "current" {}
 
-# data "aws_route53_zone" "root_zone" {
-#   vpc_id = data.aws_vpc.main.id
-# }
-
 data "aws_ssm_parameter" "root_domain" {
   name = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
 }
 
 locals {
-#  root_domain_name      = data.aws_route53_zone.root_zone.name
   root_domain_name      = data.aws_ssm_parameter.root_domain.value
   static_cf_bucket_name = "bfd-${terraform.workspace}-cf-${local.account_id}"
+  static_cflog_bkt_name = "bfd-${terraform.workspace}-cflog-${local.account_id}"
   static_cf_alias       = "${terraform.workspace}.static.${local.root_domain_name}"
 }
-
-# resource "aws_route53_zone" "static" {
-#   name          = "${local.env}.${local.root_domain_name}"
-#   comment       = "BFD static-site zone for ${local.env}"
-#   force_destroy = true
-
-#   # VPC is only valid for private zones
-#   dynamic "vpc" {
-#     for_each = ["dummy"]
-#     content {
-#       vpc_id = data.aws_vpc.main.id
-#     }
-#   }
-# }
 
 data "aws_route53_zone" "vpc_root" {
   name         = local.root_domain_name
@@ -60,20 +42,20 @@ resource "aws_s3_bucket" "cloudfront_bucket" {
 }
 
 resource "aws_s3_bucket_ownership_controls" "cloudfront_bucket" {
-  bucket = aws_s3_bucket.cloudfront_bucket.id
+  bucket = aws_s3_bucket.cloudfront_bucket.bucket
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
 }
 
 resource "aws_s3_bucket_acl" "cloudfront_bucket" {
-  bucket     = aws_s3_bucket.cloudfront_bucket.id
+  bucket     = aws_s3_bucket.cloudfront_bucket.bucket
   depends_on = [ aws_s3_bucket_ownership_controls.cloudfront_bucket ]
   acl        = "private"
 }
 
 resource "aws_s3_bucket_website_configuration" "static" {
-  bucket = aws_s3_bucket.cloudfront_bucket.id
+  bucket = aws_s3_bucket.cloudfront_bucket.bucket
 
   index_document {
     suffix = "index"
@@ -87,7 +69,7 @@ resource "aws_s3_bucket_website_configuration" "static" {
 
 # block public access to the bucket
 resource "aws_s3_bucket_public_access_block" "cloudfront_bucket" {
-  bucket                  = aws_s3_bucket.cloudfront_bucket.id
+  bucket                  = aws_s3_bucket.cloudfront_bucket.bucket
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -95,7 +77,7 @@ resource "aws_s3_bucket_public_access_block" "cloudfront_bucket" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_bucket" {
-  bucket = aws_s3_bucket.cloudfront_bucket.id
+  bucket = aws_s3_bucket.cloudfront_bucket.bucket
   rule {
     apply_server_side_encryption_by_default {
       kms_master_key_id = local.kms_key_id
@@ -105,7 +87,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_bucket
 }
 
 resource "aws_s3_object" "index" {
-  bucket  = aws_s3_bucket.cloudfront_bucket.id
+  bucket  = aws_s3_bucket.cloudfront_bucket.bucket
   key     = "index"
   
   content_type = "text/plain"
@@ -125,7 +107,7 @@ EOF
 }
 
 resource "aws_s3_object" "error" {
-  bucket  = aws_s3_bucket.cloudfront_bucket.id
+  bucket  = aws_s3_bucket.cloudfront_bucket.bucket
   key     = "error"
   
   content_type = "text/plain"
@@ -145,16 +127,14 @@ EOF
 }
 
 resource "aws_s3_bucket_logging" "cloudfront_bucket" {
-  count = local.is_ephemeral_env ? 0 : 1
+  bucket = aws_s3_bucket.cloudfront_bucket.bucket
 
-  bucket = aws_s3_bucket.cloudfront_bucket.id
-
-  target_bucket = local.logging_bucket
+  target_bucket = aws_s3_bucket.cloudfront_logging.bucket  # local.logging_bucket
   target_prefix = "static-${local.legacy_service}_s3_access_logs/"
 }
-# leveraging env/mgmt/s3-base.tf as starting point
+
 resource "aws_s3_bucket_policy" "cloudfront_bucket" {
-  bucket = aws_s3_bucket.cloudfront_bucket.id
+  bucket = aws_s3_bucket.cloudfront_bucket.bucket
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -180,7 +160,7 @@ EOF
 }
 
 resource "aws_s3_bucket" "cloudfront_logging" {
-  bucket = local.logging_bucket
+  bucket = local.static_cflog_bkt_name # local.logging_bucket
   tags = {
     Layer = "static-${local.layer}"
     role  = "logs"
@@ -188,7 +168,7 @@ resource "aws_s3_bucket" "cloudfront_logging" {
 }
 
 resource "aws_s3_bucket_public_access_block" "cloudfront_logging" {
-  bucket                  = aws_s3_bucket.cloudfront_logging.id
+  bucket                  = aws_s3_bucket.cloudfront_logging.bucket
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -196,7 +176,7 @@ resource "aws_s3_bucket_public_access_block" "cloudfront_logging" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_logging" {
-  bucket = aws_s3_bucket.cloudfront_logging.id
+  bucket = aws_s3_bucket.cloudfront_logging.bucket
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -205,7 +185,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_loggin
 }
 
 resource "aws_s3_bucket_policy" "cloudfront_logging" {
-  bucket = aws_s3_bucket.cloudfront_logging.id
+  bucket = aws_s3_bucket.cloudfront_logging.bucket
 
   policy = jsonencode({
         Version = "2012-10-17"
@@ -252,7 +232,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
 
   logging_config {
     include_cookies = false
-    bucket = aws_s3_bucket.cloudfront_logging.id
+    bucket = aws_s3_bucket.cloudfront_logging.bucket
     prefix = local.is_ephemeral_env ? null : "static"
   }
 
