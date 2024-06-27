@@ -3561,7 +3561,7 @@ public final class TransformerUtilsV2 {
   static Organization findOrCreateContainedOrganization(
       DomainResource resource, String id, Profile profile) {
     Optional<Resource> organization =
-        resource.getContained().stream().filter(r -> r.getId() == id).findFirst();
+        resource.getContained().stream().filter(r -> r.getId().equals(id)).findFirst();
 
     // If it isn't there, add one
     if (!organization.isPresent()) {

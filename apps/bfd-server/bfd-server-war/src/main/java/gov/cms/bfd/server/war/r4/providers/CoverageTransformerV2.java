@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -82,7 +83,7 @@ final class CoverageTransformerV2 {
    *     Beneficiary}
    */
   @Trace
-  public List<IBaseResource> transform(Beneficiary beneficiary, EnumSet<Profile> enabledProfiles) {
+  public List<IBaseResource> transform(Beneficiary beneficiary, Set<Profile> enabledProfiles) {
     return Arrays.stream(MedicareSegment.values())
         .filter(
             s ->
@@ -110,7 +111,7 @@ final class CoverageTransformerV2 {
     addC4DicIdentifier(coverage, beneficiary);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.C4DIC, beneficiary));
 
-    beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
+    beneficiary.getMedicareBeneficiaryId().ifPresent(coverage::setSubscriberId);
 
     setType(coverage);
     addC4DicPayor(coverage);

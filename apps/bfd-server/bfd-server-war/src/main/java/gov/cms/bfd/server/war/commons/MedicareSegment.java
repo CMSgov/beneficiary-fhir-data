@@ -2,6 +2,8 @@ package gov.cms.bfd.server.war.commons;
 
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -33,7 +35,7 @@ public enum MedicareSegment {
    *     specified
    */
   public static Optional<MedicareSegment> selectByUrlPrefix(
-      String urlPrefix, EnumSet<Profile> enabledProfiles) {
+      String urlPrefix, Set<Profile> enabledProfiles) {
     for (MedicareSegment medicareSegment : values()) {
       if (medicareSegment.getUrlPrefix().equals(urlPrefix)) {
         if (medicareSegment == MedicareSegment.C4DIC && !enabledProfiles.contains(Profile.C4DIC)) {
