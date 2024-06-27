@@ -28,9 +28,9 @@ locals {
     "/bfd/${local.env}/pipeline/sensitive/hicn_hash/iterations" = "/bfd/${local.seed_env}/pipeline/sensitive/hicn_hash/iterations"
     "/bfd/${local.env}/pipeline/sensitive/hicn_hash/pepper"     = "/bfd/${local.seed_env}/pipeline/sensitive/hicn_hash/pepper"
     # The prod-sbx environment includes an in-process server instead of a communicating with an external, gRPC host
-    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/auth_token"                   = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/auth_token"
-    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/port"                         = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/port"
-    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/host"                         = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/host"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/auth_token" = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/auth_token"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/port"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/port"
+    "/bfd/${local.env}/pipeline/sensitive/rda/grpc/host"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/host"
   } : {}
 
   # FUTURE: Fix this when hierarchies are supported with Terraform module.
