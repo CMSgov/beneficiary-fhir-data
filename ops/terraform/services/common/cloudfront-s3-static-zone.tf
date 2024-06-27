@@ -259,7 +259,11 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
                 "iam:ListRoles"
             ],
             "Effect": "Allow",
-            "Resource": "arn:aws:iam::*:*"
+            "Resource": "arn:aws:iam::*:*",
+            "Principal": {
+              "Service": "cloudfront.amazonaws.com"
+            }
+
         }
     ]
 }
