@@ -204,8 +204,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_loggin
   }
 }
 
-data "aws_caller_identity" "current" {}
-
 resource "aws_s3_bucket_policy" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.id
 
