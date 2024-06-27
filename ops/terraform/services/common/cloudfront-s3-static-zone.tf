@@ -1,33 +1,44 @@
 # Creates a private static zone for the environment
 data "aws_canonical_user_id" "current" {}
 
-data "aws_route53_zone" "root_zone" {
-  vpc_id = data.aws_vpc.main.id
+# data "aws_route53_zone" "root_zone" {
+#   vpc_id = data.aws_vpc.main.id
+# }
+
+data "aws_ssm_parameter" "root_domain" {
+  path = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
 }
 
 locals {
-  root_domain_name      = data.aws_route53_zone.root_zone.name
+#  root_domain_name      = data.aws_route53_zone.root_zone.name
+  root_domain_name      = data.aws_ssm_parameter.root_domain.value
   static_cf_bucket_name = "bfd-${local.env}-cloudfront-${local.account_id}"
+  static_cf_alias       = "${local.env}.static.${local.root_domain_name}"
 }
 
-resource "aws_route53_zone" "static" {
-  name          = "${local.env}.${local.root_domain_name}"
-  comment       = "BFD static-site zone for ${local.env}"
-  force_destroy = true
+# resource "aws_route53_zone" "static" {
+#   name          = "${local.env}.${local.root_domain_name}"
+#   comment       = "BFD static-site zone for ${local.env}"
+#   force_destroy = true
 
-  # VPC is only valid for private zones
-  dynamic "vpc" {
-    for_each = ["dummy"]
-    content {
-      vpc_id = data.aws_vpc.main.id
-    }
-  }
+#   # VPC is only valid for private zones
+#   dynamic "vpc" {
+#     for_each = ["dummy"]
+#     content {
+#       vpc_id = data.aws_vpc.main.id
+#     }
+#   }
+# }
+
+data "aws_route53_zone" "vpc_root" {
+  name         = local.root_domain_name
+  private_zone = true
 }
 
-resource "aws_route53_record" "static" {
-  zone_id = aws_route53_zone.static.zone_id
-  name    = "static.${aws_route53_zone.static.name}"
-  type    = "CNAME"
+resource "aws_route53_record" "static_env" {
+  zone_id = data.aws_route53_zone.vpc_root.zone_id
+  name    = local.static_cf_alias
+  type    = "ALIAS"
   ttl     = "300"
   records = [aws_cloudfront_distribution.static_site_distribution.domain_name]
 }
