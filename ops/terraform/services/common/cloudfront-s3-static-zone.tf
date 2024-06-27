@@ -206,7 +206,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_loggin
 
 resource "aws_s3_bucket_policy" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.id
-  policy = "arn:aws:iam::aws:policy/CloudFrontFullAccess"
+  policy_id = "arn:aws:iam::aws:policy/CloudFrontFullAccess"
 #   policy = <<POLICY
 # {
 #   "Id": "CF_Logging_Policy",
