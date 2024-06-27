@@ -177,10 +177,13 @@ resource "aws_s3_bucket_policy" "cloudfront_bucket" {
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*",
+            "Resource": [ 
+              "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}",
+              "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*" 
+            ], 
             "Condition": {
                 "ArnEquals": {
-                    "aws:userid": "arn:aws:iam::${local.account_id}:user/Jenkins"
+                    "aws:userid": "arn:aws:iam::${local.account_id}:role/cloudbees-jenkins"
                 }
             }
         },
