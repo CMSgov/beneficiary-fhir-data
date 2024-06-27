@@ -20,10 +20,10 @@ This role is configurable, though it tries to provide reasonable defaults where 
 
 | Name                                   | Description                                               | Default              | Required |
 |----------------------------------------|-----------------------------------------------------------|----------------------|----------|
+| db_url                                 | fully qualified jdbc url for the database                 |                      | yes      |
 | db_auth_type_override                  | override for the database username                        |                      | no       |
 | db_max_connections_override            | override for the database max connections figure          |                      | no       |
 | db_password_override                   | override for the database password                        |                      | no       |
-| db_url_override                        | override for the database url                             |                      | no       |
 | db_username_override                   | override for the database username                        |                      | no       |
 | new_relic_metrics_license_key_override | override new relice license key                           |                      | no       |
 | new_relic_metrics_host_override        | override new relic metrics host                           |                      | no       |
@@ -66,7 +66,7 @@ Here's an example of how to apply this role to the `bfd-db-migrator` host in an 
       vars:
         env_name_std: dev
         db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/{{ bfd_version }}/bfd-db-migrator-{{ bfd_version }}.zip"
-        db_url_override: jdbc:postgresql://db:5432/fhirdb
+        db_url: jdbc:postgresql://db:5432/fhirdb
         db_username_override: bfd
         db_password_override: bfd
 ```

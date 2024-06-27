@@ -108,7 +108,7 @@
 /bfd/${env}/common/nonsensitive/rds_master_username: bfduser
 /bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-prod-aurora-cluster
 /bfd/${env}/common/nonsensitive/rds_instance_class: db.r6i.12xlarge
-/bfd/${env}/common/nonsensitive/rds_instance_count: "4"
+/bfd/${env}/common/nonsensitive/rds_instance_count: "3"
 /bfd/${env}/common/nonsensitive/rds_security_group: bfd-prod-aurora-cluster
 /bfd/${env}/common/nonsensitive/vpc_name: bfd-prod-vpc
 /bfd/${env}/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private
