@@ -12,7 +12,7 @@ data "aws_ssm_parameter" "root_domain" {
 locals {
 #  root_domain_name      = data.aws_route53_zone.root_zone.name
   root_domain_name      = data.aws_ssm_parameter.root_domain.value
-  static_cf_bucket_name = "bfd-${terraform.workspace}-cloudfront-${local.account_id}"
+  static_cf_bucket_name = "bfd-${terraform.workspace}-cf-${local.account_id}"
   static_cf_alias       = "${terraform.workspace}.static.${local.root_domain_name}"
 }
 
@@ -161,46 +161,18 @@ resource "aws_s3_bucket_policy" "cloudfront_bucket" {
     "Id": "PutObjPolicy",
     "Statement": [
         {
-            "Sid": "DenyUnEncryptedObjectUploads",
-            "Effect": "Deny",
-            "Principal": "*",
-            "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*",
-            "Condition": {
-              "StringNotEquals": {
-                "s3:x-amz-server-side-encryption": "aws:kms"
+          "Sid": "AllowCloudFrontServicePrincipal",
+          "Effect": "Allow",
+          "Principal": {
+              "Service": "cloudfront.amazonaws.com"
+          },
+          "Action": "s3:GetObject",
+          "Resource": "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*",
+          "Condition": {
+              "StringEquals": {
+                "AWS:SourceArn": "${aws_cloudfront_distribution.static_site_distribution.arn}"
               }
-            }
-        },
-        {
-            "Sid": "JenkinsGetObject",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": [ 
-              "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}",
-              "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*" 
-            ], 
-            "Condition": {
-                "ArnEquals": {
-                    "aws:userid": "arn:aws:iam::${local.account_id}:role/cloudbees-jenkins"
-                }
-            }
-        },
-        {
-            "Sid": "AllowSSLRequestsOnly",
-            "Effect": "Deny",
-            "Principal": "*",
-            "Action": "s3:*",
-            "Resource": [
-                "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}",
-                "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*"
-            ],
-            "Condition": {
-                "Bool": {
-                    "aws:SecureTransport": "false"
-                }
-            }
+          }
         }
     ]
 }
@@ -241,9 +213,7 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
     {
       "Action": "s3:PutObject",
       "Effect": "Allow",
-      "Principal": {
-        "AWS": "${local.aws_classic_loadbalancer_account_roots[local.region]}"
-      },
+      "Principal": "*",
       "Resource": "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}/*"
     },
     {
