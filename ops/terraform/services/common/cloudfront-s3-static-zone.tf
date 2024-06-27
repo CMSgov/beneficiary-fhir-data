@@ -42,7 +42,7 @@ resource "aws_route53_record" "static_env" {
   
   alias {
     name    = aws_cloudfront_distribution.static_site_distribution.domain_name
-    zone_id = aws_cloudfront_distribution.static_site_distribution.zone_id
+    zone_id = aws_cloudfront_distribution.static_site_distribution.hosted_zone_id
   }
 
 }
@@ -118,7 +118,7 @@ resource "aws_s3_object" "index" {
 EOF
 
   lifecycle {
-    ignore_changes = [ all ]
+    ignore_changes = [ content, tags ]
   }
 }
 
@@ -138,7 +138,7 @@ resource "aws_s3_object" "error" {
 EOF
 
   lifecycle {
-    ignore_changes = [ all ]
+    ignore_changes = [ content, tags ]
   }
 }
 
