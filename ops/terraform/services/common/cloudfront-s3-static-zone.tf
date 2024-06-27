@@ -43,6 +43,8 @@ resource "aws_route53_record" "static_env" {
   alias {
     name    = aws_cloudfront_distribution.static_site_distribution.domain_name
     zone_id = aws_cloudfront_distribution.static_site_distribution.hosted_zone_id
+    
+    evaluate_target_health = true
   }
 
 }
