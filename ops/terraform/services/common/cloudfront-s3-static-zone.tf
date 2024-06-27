@@ -6,7 +6,7 @@ data "aws_canonical_user_id" "current" {}
 # }
 
 data "aws_ssm_parameter" "root_domain" {
-  path = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
+  name = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
 }
 
 locals {
@@ -98,7 +98,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_bucket
   }
 }
 
-resource "aws_s3_bucket_object" "index" {
+resource "aws_s3_object" "index" {
   bucket  = aws_s3_bucket.cloudfront_bucket.id
   key     = "index"
   
@@ -114,11 +114,11 @@ resource "aws_s3_bucket_object" "index" {
 EOF
 
   lifecycle {
-    ignore_changes = [ values, tags ]
+    ignore_changes = [ value, tags ]
   }
 }
 
-resource "aws_s3_bucket_object" "error" {
+resource "aws_s3_object" "error" {
   bucket  = aws_s3_bucket.cloudfront_bucket.id
   key     = "error"
   
@@ -134,7 +134,7 @@ resource "aws_s3_bucket_object" "error" {
 EOF
 
   lifecycle {
-    ignore_changes = [ values, tags ]
+    ignore_changes = [ value, tags ]
   }
 }
 
@@ -273,7 +273,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   comment             = "CloudFront distribution for static site ${local.env}"
   default_root_object = "index"
 
-  aliases = [aws_route53_zone.static.name]
+  aliases = [local.root_domain_name]
 
   logging_config {
     include_cookies = false
