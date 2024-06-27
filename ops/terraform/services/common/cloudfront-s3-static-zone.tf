@@ -208,7 +208,7 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.id
   policy = <<POLICY
 {
-  "Id": "LBAccessLogs",
+  "Id": "CF_Logging_Policy",
   "Statement": [
     {
       "Action": "s3:PutObject",
