@@ -204,41 +204,57 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_loggin
   }
 }
 
+## using "arn:aws:iam::aws:policy/CloudFrontFullAccess" verbatim 2024-06-27
 resource "aws_s3_bucket_policy" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.id
-  policy_id = "arn:aws:iam::aws:policy/CloudFrontFullAccess"
-#   policy = <<POLICY
-# {
-#   "Id": "CF_Logging_Policy",
-#   "Statement": [
-#     {
-#       "Action": "s3:PutObject",
-#       "Effect": "Allow",
-#       "Principal": "*",
-#       "Resource": [
-#         "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}",
-#         "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}/*"
-#       ]
-#     },
-#     {
-#       "Action": "s3:*",
-#       "Condition": {
-#         "Bool": {
-#           "aws:SecureTransport": "false"
-#         }
-#       },
-#       "Effect": "Deny",
-#       "Principal": "*",
-#       "Resource": [
-#         "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}",
-#         "arn:aws:s3:::bfd-${terraform.workspace}-logs-${local.account_id}/*"
-#       ],
-#       "Sid": "AllowSSLRequestsOnly"
-#     }
-#   ],
-#   "Version": "2012-10-17"
-# }
-# POLICY
+
+  policy = <<POLICY
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "cfflistbuckets",
+            "Action": [
+                "s3:ListAllMyBuckets"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::*"
+        },
+        {
+            "Sid": "cffullaccess",
+            "Action": [
+                "acm:ListCertificates",
+                "cloudfront:*",
+                "cloudfront-keyvaluestore:*",
+                "iam:ListServerCertificates",
+                "waf:ListWebACLs",
+                "waf:GetWebACL",
+                "wafv2:ListWebACLs",
+                "wafv2:GetWebACL",
+                "kinesis:ListStreams"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Sid": "cffdescribestream",
+            "Action": [
+                "kinesis:DescribeStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:kinesis:*:*:*"
+        },
+        {
+            "Sid": "cfflistroles",
+            "Action": [
+                "iam:ListRoles"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:iam::*:*"
+        }
+    ]
+}
+POLICY
 }
 
 resource "aws_cloudfront_distribution" "static_site_distribution" {
