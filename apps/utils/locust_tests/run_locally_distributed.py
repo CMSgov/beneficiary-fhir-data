@@ -1,8 +1,9 @@
-"""Small python helper for running Locust tests distributedly and headlessly on the local machine.
-"""
+"""Small python helper for running Locust tests distributedly and headlessly on the local machine."""
 
 import argparse
+import signal
 import subprocess
+import sys
 from typing import List
 
 arg_parser = argparse.ArgumentParser(
@@ -32,14 +33,14 @@ arg_parser.add_argument(
     dest="locust-tags",
     type=str,
     help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided (Optional, Default: "")',
-    default=""
+    default="",
 )
 arg_parser.add_argument(
     "--locust-exclude-tags",
     dest="locust-exclude-tags",
     type=str,
     help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) (Optional, Default: "")',
-    default=""
+    default="",
 )
 raw_args, unknown_args = arg_parser.parse_known_args()
 config = vars(raw_args)
@@ -63,7 +64,29 @@ master_process = subprocess.Popen(
     stderr=subprocess.STDOUT,
 )
 
-worker_processes: List[subprocess.Popen] = []
+
+def sigint_handler(
+    signum: int,
+    master: subprocess.Popen[bytes],
+    workers: list[subprocess.Popen[bytes]],
+) -> None:
+    signal.signal(signalnum=signum, handler=signal.SIG_IGN)
+    print("CTRL+C pressed, stopping...")
+    for worker in workers:
+        worker.terminate()
+
+    master.terminate()
+    sys.exit(0)
+
+
+worker_processes: List[subprocess.Popen[bytes]] = []
+
+signal.signal(
+    signalnum=signal.SIGINT,
+    handler=lambda _, __: sigint_handler(
+        signum=signal.SIGINT, master=master_process, workers=worker_processes
+    ),
+)
 for i in range(int(num_workers)):
     print(f"Creating worker #{i}")
     worker_processes.append(
@@ -73,7 +96,7 @@ for i in range(int(num_workers)):
             stderr=subprocess.DEVNULL,
         )
     )
-
 master_process.wait()
+
 for process in worker_processes:
     process.terminate()
