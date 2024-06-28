@@ -27,9 +27,14 @@ public class HikariDataSourceFactory implements DataSourceFactory {
    * @param dataSource data source to configure
    */
   protected void configureDataSource(HikariDataSource dataSource) {
-    dataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
+    dataSource.setJdbcUrl(
+        dbOptions.getDatabaseUrl().replace("jdbc:postgresql", "jdbc:aws-wrapper:postgresql"));
+    dataSource.addDataSourceProperty(
+        "jdbcUrl",
+        dbOptions.getDatabaseUrl().replace("jdbc:postgresql", "jdbc:aws-wrapper:postgresql"));
     dataSource.setUsername(dbOptions.getDatabaseUsername());
     dataSource.setPassword(dbOptions.getDatabasePassword());
+
     dataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
     dataSource.setRegisterMbeans(true);
     dataSource.setDataSourceClassName(AwsWrapperDataSource.class.getName());

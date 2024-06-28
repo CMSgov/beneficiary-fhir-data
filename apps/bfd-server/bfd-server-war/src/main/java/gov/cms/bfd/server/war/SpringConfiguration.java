@@ -284,6 +284,7 @@ public class SpringConfiguration {
    */
   private Properties jpaProperties() {
     Properties extraProperties = new Properties();
+    extraProperties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
     /*
      * Hibernate validation is being disabled in the applications so that
      * validation failures do not prevent the server from starting.
