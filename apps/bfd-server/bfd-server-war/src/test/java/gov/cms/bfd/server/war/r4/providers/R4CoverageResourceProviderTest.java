@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -26,7 +27,9 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -309,6 +312,70 @@ public class R4CoverageResourceProviderTest {
         coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
     assertEquals(0, bundle.getTotal());
+  }
+
+  /** Tests that the transformer is called with only the C4BB profile when C4DIC is not enabled */
+  @Test
+  public void testCoverageByBeneficiaryCount() {
+    coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB)));
+  }
+
+  /**
+   * Tests that the transformer is called with only the C4BB profile when the C4BB profile is
+   * requested
+   */
+  @Test
+  public void testCoverageByBeneficiaryCountC4BBProfile() {
+    coverageProvider.searchByBeneficiary(
+        beneficiary, null, null, ProfileConstants.C4BB_COVERAGE_URL, requestDetails);
+
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB)));
+  }
+
+  /**
+   * Tests that the transformer is called with only the C4DIC profile when the C4DIC profile is
+   * requested
+   */
+  @Test
+  public void testCoverageByBeneficiaryCountC4DICProfile() {
+    coverageProvider =
+        new R4CoverageResourceProvider(
+            metricRegistry, loadedFilterManager, coverageTransformer, true);
+    coverageProvider.setEntityManager(entityManager);
+
+    coverageProvider.searchByBeneficiary(
+        beneficiary, null, null, ProfileConstants.C4DIC_COVERAGE_URL, requestDetails);
+
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4DIC)));
+  }
+
+  /** Tests that the transformer is called with both profiles when both are enabled */
+  @Test
+  public void testCoverageByBeneficiaryCountBothProfiles() {
+    coverageProvider =
+        new R4CoverageResourceProvider(
+            metricRegistry, loadedFilterManager, coverageTransformer, true);
+    coverageProvider.setEntityManager(entityManager);
+
+    coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
+
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB, Profile.C4DIC)));
+  }
+
+  /** Tests that the transformer is called with the C4DIC profile when a C4DIC ID is used */
+  @Test
+  public void testCoverageByIdC4Dic() {
+    coverageProvider =
+        new R4CoverageResourceProvider(
+            metricRegistry, loadedFilterManager, coverageTransformer, true);
+    coverageProvider.setEntityManager(entityManager);
+
+    when(coverageId.getIdPart()).thenReturn("c4dic-9145");
+
+    coverageProvider.read(coverageId);
+
+    verify(coverageTransformer).transform(eq(MedicareSegment.C4DIC), any());
   }
 
   /** Test coverage by beneficiary when paging is requested, expect paging links are returned. */

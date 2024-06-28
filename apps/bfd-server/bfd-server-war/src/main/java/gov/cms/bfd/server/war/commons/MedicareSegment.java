@@ -1,9 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

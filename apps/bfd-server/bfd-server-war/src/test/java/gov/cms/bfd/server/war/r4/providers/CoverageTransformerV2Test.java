@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -23,9 +24,12 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -151,6 +155,17 @@ public final class CoverageTransformerV2Test {
     verifyMetrics("part_d");
   }
 
+  /** Standalone wrapper to output C4DIC. */
+  @Test
+  public void outputTransformCoverageC4Dic() throws FHIRException {
+    String partD = "c4dic-567834";
+    transformCoverage(MedicareSegment.C4DIC, true);
+    assertNotNull(coverage);
+    assertEquals("Coverage", coverage.getIdElement().getResourceType());
+    assertEquals(partD, coverage.getIdPart());
+    verifyMetrics("c4dic");
+  }
+
   // ==================
   // Begin PART A Tests
   // ==================
@@ -166,7 +181,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetCorrectProfileAndDatePartA() {
     transformCoverage(MedicareSegment.PART_A, false);
-    verifyMeta();
+    verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
   /** Tests that the transformer sets the expected extension entries. */
@@ -302,7 +317,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetCorrectProfileAndDatePartB() {
     transformCoverage(MedicareSegment.PART_B, false);
-    verifyMeta();
+    verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
   /** Tests that the transformer sets the expected extension entries. */
@@ -396,7 +411,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetCorrectProfileAndDatePartC() {
     transformCoverage(MedicareSegment.PART_C, false);
-    verifyMeta();
+    verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
   /** Tests that the transformer sets the expected extension entries. */
@@ -508,7 +523,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetCorrectProfileAndDatePartD() {
     transformCoverage(MedicareSegment.PART_D, false);
-    verifyMeta();
+    verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
   /** Tests that the transformer sets the expected period date. */
@@ -642,8 +657,48 @@ public final class CoverageTransformerV2Test {
   }
 
   // ==================
+  // Begin C4DIC tests
+  // ==================
+
+  /** Tests that the transformer sets the expected coverage id. */
+  @Test
+  public void shouldSetIDC4DIC() {
+    transformCoverage(MedicareSegment.C4DIC, false);
+    verifyID("c4dic-567834");
+  }
+
+  /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
+  @Test
+  public void shouldSetCorrectProfileAndDateC4DIC() {
+    transformCoverage(MedicareSegment.C4DIC, false);
+    verifyMeta(ProfileConstants.C4DIC_COVERAGE_URL + ProfileConstants.C4DIC_VERSION_SUFFIX);
+  }
+
+  // ==================
   // Begin Common tests
   // ==================
+
+  /** Tests that the transformer filters out the C4DIC profile */
+  @Test
+  public void shouldFilterOutC4DicProfile() {
+    List<IBaseResource> coverages = transformCoverageAll(EnumSet.of(Profile.C4BB), true);
+    assertEquals(4, coverages.size());
+  }
+
+  /** Tests that the transformer filters out the C4BB profile */
+  @Test
+  public void shouldFilterOutC4BBProfile() {
+    List<IBaseResource> coverages = transformCoverageAll(EnumSet.of(Profile.C4DIC), true);
+    assertEquals(1, coverages.size());
+  }
+
+  /** Tests that the transformer returns all profiles */
+  @Test
+  public void shouldReturnAllProfiles() {
+    List<IBaseResource> coverages =
+        transformCoverageAll(EnumSet.of(Profile.C4BB, Profile.C4DIC), true);
+    assertEquals(5, coverages.size());
+  }
 
   /**
    * Verifies the coverage id.
@@ -659,14 +714,14 @@ public final class CoverageTransformerV2Test {
    * Verifies the metadata has some last updated value and the profile contains {@link
    * ProfileConstants#C4BB_COVERAGE_URL}.
    */
-  private static void verifyMeta() {
+  private static void verifyMeta(String coverageUrl) {
     assertNotNull(coverage.getMeta().getLastUpdated());
 
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
     assertTrue(
         coverage.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
-            .anyMatch(v -> v.equals(ProfileConstants.C4BB_COVERAGE_URL)));
+            .anyMatch(v -> v.equals(coverageUrl)));
   }
 
   /** Verify that various expected extensions exist. */
@@ -830,6 +885,26 @@ public final class CoverageTransformerV2Test {
   }
 
   /**
+   * Wrapper to transform all coverages for the included profiles
+   *
+   * @param profiles profiles to include
+   * @param showJson {@code true} if the json should be printed to stdout
+   * @return list of coverages
+   * @throws FHIRException if there is an issue transforming the coverage
+   */
+  private List<IBaseResource> transformCoverageAll(Set<Profile> profiles, boolean showJson)
+      throws FHIRException {
+    List<IBaseResource> coverages = coverageTransformer.transform(beneficiary, profiles);
+    if (showJson) {
+      for (IBaseResource coverage : coverages) {
+        System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
+      }
+    }
+
+    return coverages;
+  }
+
+  /**
    * Verifies that the specified {@link MedicareSegment#PART_A} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
    */
@@ -894,7 +969,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(beneficiary);
 
     verifyCoverageClass("Part A");
-    verifyMeta();
+    verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
     verifyExtensionsPartA();
     verifyCoverageStatus("cancelled");
     verifyType();
@@ -918,7 +993,7 @@ public final class CoverageTransformerV2Test {
     assertNotNull(beneficiary);
     verifyCoverageClass("Part B");
 
-    verifyMeta();
+    verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
     verifyExtensionsPartB();
     verifyCoverageStatus("active");
     verifyType();
