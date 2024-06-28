@@ -40,7 +40,7 @@ if [ ! "$(docker ps -f "name=${CONTAINER_NAME}-db" --format '{{.Names}}' | grep 
     -e 'POSTGRES_USER=bfd' \
     -e 'POSTGRES_PASSWORD=bfd' \
     --rm \
-    postgres:16-alpine -c max_connections=200
+    postgres:16 -c max_connections=200
 fi
 
 # Prep the Docker container that will be used (if it's not already running).
