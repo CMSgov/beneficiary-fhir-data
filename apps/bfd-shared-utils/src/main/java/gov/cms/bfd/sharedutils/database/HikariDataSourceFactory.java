@@ -1,7 +1,9 @@
 package gov.cms.bfd.sharedutils.database;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.Properties;
 import lombok.AllArgsConstructor;
+import software.amazon.jdbc.ds.AwsWrapperDataSource;
 
 /**
  * Simple implementation of {@link DataSourceFactory} that creates a {@link HikariDataSource}
@@ -29,6 +31,12 @@ public class HikariDataSourceFactory implements DataSourceFactory {
     dataSource.setUsername(dbOptions.getDatabaseUsername());
     dataSource.setPassword(dbOptions.getDatabasePassword());
     dataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
+    //    dataSource.setMinimumIdle();
     dataSource.setRegisterMbeans(true);
+    dataSource.setDataSourceClassName(AwsWrapperDataSource.class.getName());
+    dataSource.setExceptionOverrideClassName("software.amazon.jdbc.util.HikariCPSQLException");
+    Properties targetDataSourceProps = new Properties();
+    targetDataSourceProps.setProperty("wrapperPlugins", "failover,efm2");
+    dataSource.addDataSourceProperty("targetDataSourceProperties", targetDataSourceProps);
   }
 }
