@@ -16,7 +16,7 @@ All three of these programs are intended to be deployed using their correspondin
 
 The other two are required only for local deployment:
 
-* postgres: A simple postgresql 14 service using a small persistent volume.
+* postgres: A simple postgresql 16 service using a small persistent volume.
 * localstack: A simulator for S3, SSM, and SQS.
 
 These are installed using normal `helm install` commands as described later in this document.
