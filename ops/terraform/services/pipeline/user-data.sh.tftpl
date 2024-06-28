@@ -12,68 +12,38 @@ cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
 # ${pipeline_instance} specific variables
 aws ssm get-parameters-by-path \
-    --with-decryption \
     --path "/bfd/${env}/pipeline/nonsensitive/${pipeline_instance}" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > nonsensitive_pipeline_vars.json
-
-%{ if pipeline_instance == "rda" ~}
-aws ssm get-parameters-by-path \
-    --with-decryption \
-    --path "/bfd/${env}/pipeline/sensitive/${pipeline_instance}" \
-    --recursive \
-    --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > sensitive_pipeline_vars.json
-%{ endif ~}
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > pipeline_vars.json
 
 # shared pipeline variables
 aws ssm get-parameters-by-path \
-    --with-decryption \
-    --path "/bfd/${env}/pipeline/nonsensitive/shared" \
-    --recursive \
+    --path "/bfd/${env}/pipeline/nonsensitive/" \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > nonsensitive_shared_pipeline_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > shared_pipeline_vars.json
 
+# common service variables
 aws ssm get-parameters-by-path \
-    --with-decryption \
-    --path "/bfd/${env}/pipeline/sensitive/shared" \
-    --recursive \
-    --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > sensitive_shared_pipeline_vars.json
-
-# common variables
-aws ssm get-parameters-by-path \
-    --with-decryption \
     --path "/bfd/${env}/common/nonsensitive/" \
     --recursive \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > common_vars.json
 
-# JVM heap size is 80% of total memory minus 2GB for other system processes and overhead (security tools et al.)
-# Ie. For an 8GB instance, the heap size will be ~4.4GB (6.4 - 2)
 cat <<EOF > extra_vars.json
 {
-  "data_pipeline_db_url": "${writer_endpoint}",
-  "data_pipeline_jvm_args": "-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:+PreserveFramePointer -XX:+UseStringDeduplication",
-  "data_pipeline_new_relic_app_name": "BFD Pipeline %{ if pipeline_instance == "rda" ~} %{ else ~} ${pipeline_instance} %{ endif ~} ({{ env_name_std }})",
-  "data_pipeline_s3_bucket": "${pipeline_bucket}",
-  "data_pipeline_tmp_dir": "{{ data_pipeline_dir }}/tmp",
-  "env": "${env}"
+  "db_url": "${writer_endpoint}",
+  "pipeline_instance_type": "${pipeline_instance}",
+  "s3_bucket": "${pipeline_bucket}"
 }
 EOF
 
 mkdir -p logs
 
-# TODO: Shift application-specific configuration to the application and simplify as part of BFD-3210.
 ansible-playbook \
   --extra-vars '@common_vars.json' \
-  --extra-vars '@nonsensitive_pipeline_vars.json' \
-  --extra-vars '@nonsensitive_shared_pipeline_vars.json' \
-%{ if pipeline_instance == "rda" ~}
-  --extra-vars '@sensitive_pipeline_vars.json' \
-%{ endif ~}
-  --extra-vars '@sensitive_shared_pipeline_vars.json' \
+  --extra-vars '@shared_pipeline_vars.json' \
+  --extra-vars '@pipeline_vars.json' \
   --extra-vars '@extra_vars.json' \
   --tags "post-ami" launch_bfd-pipeline.yml
 
