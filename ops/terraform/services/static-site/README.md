@@ -1,8 +1,6 @@
 # `static-site` Terraservice
 
-> _NOTE: `static-site` is a `prod` and `test` Terraservice and so cannot be applied to environments other than `test` and `prod` due to those environments missing necessary configuration. This is intentional. At this time, `static-site` does **not** support ephemeral environments, even those seeded from the aforementioned, supported environments._
-
-This Terraservice contains the Terraform IaC for BFD's static-site infrastructure. 
+This Terraservice contains the Terraform IaC for BFD's static-site documentation infrastructure. 
 
 ## Requirements
 
@@ -59,7 +57,7 @@ No outputs.
 | [aws_s3_bucket.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_public_access_block.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
-| [aws_iam_policy_document.cf_loggingt_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
+| [aws_iam_policy_document.cf_logging_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
 | [aws_s3_bucket_policy.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_cloudfront_distribution.static_site_distribution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution) | resource |
 | [aws_cloudfront_origin_access_identity.static_site_identity](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_identity) | resource |
