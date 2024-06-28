@@ -36,6 +36,7 @@ public class HikariDataSourceFactory implements DataSourceFactory {
     dataSource.setPassword(dbOptions.getDatabasePassword());
 
     dataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
+    dataSource.setMaxLifetime(30000);
     dataSource.setRegisterMbeans(true);
     dataSource.setDataSourceClassName(AwsWrapperDataSource.class.getName());
     dataSource.setExceptionOverrideClassName("software.amazon.jdbc.util.HikariCPSQLException");
