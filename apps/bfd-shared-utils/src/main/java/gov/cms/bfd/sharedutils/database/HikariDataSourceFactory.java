@@ -1,10 +1,9 @@
 package gov.cms.bfd.sharedutils.database;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.Properties;
 import lombok.AllArgsConstructor;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
-
-import java.util.Properties;
 
 /**
  * Simple implementation of {@link DataSourceFactory} that creates a {@link HikariDataSource}
