@@ -87,46 +87,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_bucket
   }
 }
 
-resource "aws_s3_object" "index" {
-  bucket  = aws_s3_bucket.cloudfront_bucket.bucket
-  key     = "index"
-  
-  content_type = "text/plain"
-  content      = <<EOF
-<!DOCTYPE html>
-<html>
-<head>${terraform.workspace} Index page</head>
-<body>
-<p>Placeholder page for ${terraform.workspace} Static Site</p>
-</body>
-</html>
-EOF
-
-  lifecycle {
-    ignore_changes = [ content, tags ]
-  }
-}
-
-resource "aws_s3_object" "error" {
-  bucket  = aws_s3_bucket.cloudfront_bucket.bucket
-  key     = "error"
-  
-  content_type = "text/plain"
-  content      = <<EOF
-<!DOCTYPE html>
-<html>
-<head>${terraform.workspace} Error page</head>
-<body>
-<p>Placeholder Error page for ${terraform.workspace} Static Site</p>
-</body>
-</html>
-EOF
-
-  lifecycle {
-    ignore_changes = [ content, tags ]
-  }
-}
-
 resource "aws_s3_bucket_logging" "cloudfront_bucket" {
   bucket = aws_s3_bucket.cloudfront_bucket.bucket
 
@@ -182,6 +142,47 @@ resource "aws_s3_bucket_policy" "cloudfront_bucket" {
 
   policy = data.aws_iam_policy_document.cf_bucket_policy.json
 }
+
+resource "aws_s3_object" "index" {
+  bucket  = aws_s3_bucket.cloudfront_bucket.bucket
+  key     = "index"
+  
+  content_type = "text/plain"
+  content      = <<EOF
+<!DOCTYPE html>
+<html>
+<head>${terraform.workspace} Index page</head>
+<body>
+<p>Placeholder page for ${terraform.workspace} Static Site</p>
+</body>
+</html>
+EOF
+
+  lifecycle {
+    ignore_changes = [ content, tags ]
+  }
+}
+
+resource "aws_s3_object" "error" {
+  bucket  = aws_s3_bucket.cloudfront_bucket.bucket
+  key     = "error"
+  
+  content_type = "text/plain"
+  content      = <<EOF
+<!DOCTYPE html>
+<html>
+<head>${terraform.workspace} Error page</head>
+<body>
+<p>Placeholder Error page for ${terraform.workspace} Static Site</p>
+</body>
+</html>
+EOF
+
+  lifecycle {
+    ignore_changes = [ content, tags ]
+  }
+}
+
 
 resource "aws_s3_bucket" "cloudfront_logging" {
   bucket = local.static_cflog_bkt_name # local.logging_bucket
