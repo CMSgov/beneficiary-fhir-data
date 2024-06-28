@@ -1,12 +1,13 @@
 # Creates a private static zone for the environment
 data "aws_canonical_user_id" "current" {}
 
-data "aws_ssm_parameter" "root_domain" {
-  name = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
-}
+# data "aws_ssm_parameter" "root_domain" {
+#   name = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
+# }
 
 locals {
-  root_domain_name      = data.aws_ssm_parameter.root_domain.value
+  # root_domain_name      = data.aws_ssm_parameter.root_domain.value
+  root_domain_name      = data.aws_ssm_parameter.zone_name.value
   static_cf_bucket_name = "bfd-${terraform.workspace}-cf-${local.account_id}"
   static_cflog_bkt_name = "bfd-${terraform.workspace}-cflog-${local.account_id}"
   static_cf_alias       = "${terraform.workspace}.static.${local.root_domain_name}"
@@ -33,7 +34,7 @@ resource "aws_route53_record" "static_env" {
 
 resource "aws_s3_bucket" "cloudfront_bucket" {
   bucket        = local.is_ephemeral_env ? null : local.static_cf_bucket_name
-  bucket_prefix = local.is_ephemeral_env ? null : "static"
+  #bucket_prefix = local.is_ephemeral_env ? null : "static"
 
   tags = {
     Layer = "static-${local.layer}",
@@ -133,30 +134,53 @@ resource "aws_s3_bucket_logging" "cloudfront_bucket" {
   target_prefix = "static-${local.legacy_service}_s3_access_logs/"
 }
 
+data "aws_iam_policy_document" "cf_bucket_policy" { 
+  statement {
+
+    sid = "AllowCloudFrontServicePrincipal"
+    effect = "Allow"
+
+    principals {
+      type = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+    actions =  ["s3:GetObject"]
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*"
+    ]
+    condition {
+      test = "ForAnyValue:StringEquals"
+      variable = "AWS:SourceArn"
+      values = [ "${aws_cloudfront_distribution.static_site_distribution.arn}" ]
+    }
+  }
+  
+  statement {
+    sid = "JenkinsRWObjects"
+    effect = "Allow"
+    principals { 
+      type = "AWS"
+      identifiers = ["*"]
+    }
+    actions = ["s3:*"]
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*"
+    ]
+    condition {
+      test = "ArnEquals"
+      variable = "AWS:Role"
+      values = [ "arn:aws:iam::${local.account_id}:role/cloudbees-jenkins" ]
+    }
+  }
+
+}
+
 resource "aws_s3_bucket_policy" "cloudfront_bucket" {
   bucket = aws_s3_bucket.cloudfront_bucket.bucket
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Id": "PutObjPolicy",
-    "Statement": [
-        {
-          "Sid": "AllowCloudFrontServicePrincipal",
-          "Effect": "Allow",
-          "Principal": {
-              "Service": "cloudfront.amazonaws.com"
-          },
-          "Action": "s3:GetObject",
-          "Resource": "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*",
-          "Condition": {
-              "StringEquals": {
-                "AWS:SourceArn": "${aws_cloudfront_distribution.static_site_distribution.arn}"
-              }
-          }
-        }
-    ]
-}
-EOF
+
+  policy = data.aws_iam_policy_document.cf_bucket_policy.json
 }
 
 resource "aws_s3_bucket" "cloudfront_logging" {
@@ -184,38 +208,43 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_loggin
   }
 }
 
+data "aws_iam_policy_document" "cf_logging_policy" {
+  statement {
+    sid = "AllowCloudFrontServicePrincipal"
+
+    effect = "Allow"
+    principals {
+        type = "Service"
+        identifiers = ["cloudfront.amazonaws.com"]
+    }
+    actions = ["s3:PutObject"]
+    resources = [ 
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+    ]
+    condition {
+      test = "ForAnyValue:StringEquals"
+      variable = "AWS:SourceAccount" 
+      values = [data.aws_caller_identity.current.account_id]
+    }
+    condition {
+      test = "ForAnyValue:StringEquals"
+      variable = "AWS:SourceArn" 
+      values = ["arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"]
+    }
+  }
+}
 resource "aws_s3_bucket_policy" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.bucket
 
-  policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-          {
-              Sid = "AllowCloudFrontServicePrincipal"
-              Effect = "Allow"
-              Principal = {
-                  Service = "cloudfront.amazonaws.com"
-              }
-              Action = "s3:PutObject"
-              Resource = "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
-              Condition = {
-                  StringEquals = {
-                      "AWS:SourceAccount" = data.aws_caller_identity.current.account_id
-                  }
-                  ArnLike = {
-                      "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"
-                  }
-              }
-          }
-        ]
-  })
+  policy = data.aws_iam_policy_document.cf_logging_policy.json
 
 }
 
 resource "aws_cloudfront_distribution" "static_site_distribution" {
   origin {
     domain_name = aws_s3_bucket.cloudfront_bucket.bucket_regional_domain_name
-    origin_id   = "S3-${aws_s3_bucket.cloudfront_bucket.name}"
+    origin_id   = "S3-${aws_s3_bucket.cloudfront_bucket.id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.static_site_control.id
 
     s3_origin_config {
@@ -239,7 +268,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "S3-${aws_s3_bucket.cloudfront_bucket.name}"
+    target_origin_id       = "S3-${aws_s3_bucket.cloudfront_bucket.id}"
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
