@@ -89,7 +89,7 @@ locals {
   ok_actions    = local.is_prod ? [data.aws_sns_topic.ok[0].arn] : []
 
   # The log availability alarm will post an incident in prod; in other envs it will get posted
-  # to #bfd-test
+  # to #bfd-internal-alerts
   # TODO: Replace testing SNS topic in BFD-2244
   log_availability_alarm_actions = local.is_ephemeral_env ? [] : local.is_prod ? [data.aws_sns_topic.bfd_notices_slack_alarm[0].arn] : [data.aws_sns_topic.bfd_test_slack_alarm[0].arn]
 

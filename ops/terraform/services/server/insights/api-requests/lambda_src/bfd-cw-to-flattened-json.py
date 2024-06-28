@@ -45,53 +45,51 @@ The code below will:
 
 1) Gunzip the data
 2) Parse the json
-3) Set the result to ProcessingFailed for any record whose messageType is not DATA_MESSAGE, thus 
-   redirecting them to the processing error output. Such records do not contain any log events. You 
+3) Set the result to ProcessingFailed for any record whose messageType is not DATA_MESSAGE, thus
+   redirecting them to the processing error output. Such records do not contain any log events. You
    can modify the code to set the result to Dropped instead to get rid of these records completely.
-4) For records whose messageType is DATA_MESSAGE, extract the individual log events from the 
-   logEvents field, and pass each one to the transformLogEvent method. You can modify the 
+4) For records whose messageType is DATA_MESSAGE, extract the individual log events from the
+   logEvents field, and pass each one to the transformLogEvent method. You can modify the
    transformLogEvent method to perform custom transformations on the log events.
-5) Concatenate the result from (4) together and set the result as the data of the record returned to 
-   Firehose. Note that this step will not add any delimiters. Delimiters should be appended by the 
+5) Concatenate the result from (4) together and set the result as the data of the record returned to
+   Firehose. Note that this step will not add any delimiters. Delimiters should be appended by the
    logic within the transformLogEvent method.
-6) Any individual record exceeding 6,000,000 bytes in size after decompression, processing and 
-   base64-encoding is marked as Dropped, and the original record is split into two and re-ingested 
-   back into Firehose or Kinesis. The re-ingested records should be about half the size compared to 
+6) Any individual record exceeding 6,000,000 bytes in size after decompression, processing and
+   base64-encoding is marked as Dropped, and the original record is split into two and re-ingested
+   back into Firehose or Kinesis. The re-ingested records should be about half the size compared to
    the original, and should fit within the size limit the second time round.
-7) When the total data size (i.e. the sum over multiple records) after decompression, processing and 
-   base64-encoding exceeds 6,000,000 bytes, any additional records are re-ingested back into 
+7) When the total data size (i.e. the sum over multiple records) after decompression, processing and
+   base64-encoding exceeds 6,000,000 bytes, any additional records are re-ingested back into
    Firehose or Kinesis.
-8) The retry count for intermittent failures during re-ingestion is set 20 attempts. If you wish to 
+8) The retry count for intermittent failures during re-ingestion is set 20 attempts. If you wish to
    retry fewer number of times for intermittent failures you can lower this value.
-"""
 
-"""
-Except where noted as a 'BFD modification' all code here is original to the AWS
-Blueprint and should not be changed without accepting the maintenance burden.
+Except for type hints/annotations and code noted as a 'BFD modification' all code here is original
+to the AWS Blueprint and should not be changed without accepting the maintenance burden.
 """
 
 import base64
-import json
 import gzip
+import json
+from datetime import datetime  # BFD modification
+from typing import Any, Generator
+
 import boto3
 
-from datetime import datetime  # BFD modification
 
-
-def format_json(y):
+def format_json(y: dict[str, Any]) -> dict[str, Any]:
     """
     BFD modification to add a function to flatten a JSON object (but not pivot out arrays),
     convert field names to lower case, and replace "." with "_" in field names.
     Code credits: https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
     """
 
-    out = {}
+    out: dict[str, Any] = {}
 
-    def flatten(x, name=""):
-        if type(x) is dict:
-            if isinstance(x, dict):
-                for a in x:
-                    flatten(x[a], name + a.replace(".", "_") + "_")
+    def flatten(x: dict[str, Any] | str, name: str = ""):
+        if isinstance(x, dict):
+            for a in x:
+                flatten(x[a], name + a.replace(".", "_") + "_")
         else:
             out[name.lower()[:-1]] = x
 
@@ -99,7 +97,7 @@ def format_json(y):
     return out
 
 
-def transformLogEvent(log_event):
+def transformLogEvent(log_event: dict[str, Any]) -> str | None:
     """Transform each log event.
 
     The default implementation below just extracts the message and appends a newline to it.
@@ -112,20 +110,30 @@ def transformLogEvent(log_event):
     str: The transformed log event.
     """
 
-    """
-    BFD modification to the blueprint to format the message json uniformly.
-    """
-    log_event_json = json.loads(log_event["message"])
+    # BFD modification to the blueprint to format the message json uniformly.
+    try:
+        log_event_json = json.loads(log_event["message"])
+    except json.JSONDecodeError as exc:
+        print(
+            f'Unable to transform log ID {log_event["id"]} due to JSON error "{str(exc)}" decoding'
+            f" message: {log_event['message']}"
+        )
+        return None
+
     flattened_log_event_json = format_json(log_event_json)
     flattened_log_event_json["cw_id"] = log_event["id"]
-    flattened_log_event_json["cw_timestamp"] = datetime.utcfromtimestamp(
+    # Ignoring that utcfromtimestamp is deprecated. Should probably be replaced with fromtimestamp,
+    # but without comprehensive tests I don't want to accept the possibility of unexpected changes
+    flattened_log_event_json["cw_timestamp"] = datetime.utcfromtimestamp(  # type: ignore
         log_event["timestamp"] / 1000
     ).isoformat()
     stringized_flattened_log_event_json = json.dumps(flattened_log_event_json)
     return stringized_flattened_log_event_json + "\n"
 
 
-def processRecords(records):
+def processRecords(
+    records: list[dict[str, Any]],
+) -> Generator[dict[str, Any], None, None]:
     for r in records:
         data = loadJsonGzipBase64(r["data"])
         recId = r["recordId"]
@@ -134,15 +142,28 @@ def processRecords(records):
         if data["messageType"] == "CONTROL_MESSAGE":
             yield {"result": "Dropped", "recordId": recId}
         elif data["messageType"] == "DATA_MESSAGE":
-            joinedData = "".join([transformLogEvent(e) for e in data["logEvents"]])
-            dataBytes = joinedData.encode("utf-8")
-            encodedData = base64.b64encode(dataBytes).decode("utf-8")
-            yield {"data": encodedData, "result": "Ok", "recordId": recId}
+            valid_log_events = [
+                x
+                for x in (transformLogEvent(e) for e in data["logEvents"])
+                if x is not None
+            ]
+            if valid_log_events:
+                joinedData = "".join(valid_log_events)
+                dataBytes = joinedData.encode("utf-8")
+                encodedData = base64.b64encode(dataBytes).decode("utf-8")
+
+                yield {"data": encodedData, "result": "Ok", "recordId": recId}
+            else:
+                print(
+                    f"Record ID {r['recordId']} was empty after attempting to transform its log"
+                    " events. Marking as Dropped"
+                )
+                yield {"result": "Dropped", "recordId": recId}
         else:
             yield {"result": "ProcessingFailed", "recordId": recId}
 
 
-def splitCWLRecord(cwlRecord):
+def splitCWLRecord(cwlRecord: dict[str, Any]) -> list[bytes]:
     """
     Splits one CWL record into two, each containing half the log events.
     Serializes and compreses the data before returning. That data can then be
@@ -158,9 +179,15 @@ def splitCWLRecord(cwlRecord):
     return [gzip.compress(json.dumps(r).encode("utf-8")) for r in [rec1, rec2]]
 
 
-def putRecordsToFirehoseStream(streamName, records, client, attemptsMade, maxAttempts):
-    failedRecords = []
-    codes = []
+def putRecordsToFirehoseStream(
+    streamName: str,
+    records: list[dict[str, Any]],
+    client: Any,
+    attemptsMade: int,
+    maxAttempts: int,
+):
+    failedRecords: list[dict[str, Any]] = []
+    codes: list[str] = []
     errMsg = ""
     # if put_record_batch throws for whatever reason, response['xx'] will error out, adding a check
     # for a valid response will prevent this
@@ -203,9 +230,15 @@ def putRecordsToFirehoseStream(streamName, records, client, attemptsMade, maxAtt
             )
 
 
-def putRecordsToKinesisStream(streamName, records, client, attemptsMade, maxAttempts):
-    failedRecords = []
-    codes = []
+def putRecordsToKinesisStream(
+    streamName: str,
+    records: list[dict[str, Any]],
+    client: Any,
+    attemptsMade: int,
+    maxAttempts: int,
+) -> None:
+    failedRecords: list[dict[str, Any]] = []
+    codes: list[str] = []
     errMsg = ""
     # if put_records throws for whatever reason, response['xx'] will error out, adding a check for a
     # valid response will prevent this
@@ -246,7 +279,9 @@ def putRecordsToKinesisStream(streamName, records, client, attemptsMade, maxAtte
             )
 
 
-def createReingestionRecord(isSas, originalRecord, data=None):
+def createReingestionRecord(
+    isSas: bool, originalRecord: dict[str, Any], data: bytes | None = None
+) -> dict[str, Any]:
     if data is None:
         data = base64.b64decode(originalRecord["data"])
     r = {"Data": data}
@@ -255,18 +290,18 @@ def createReingestionRecord(isSas, originalRecord, data=None):
     return r
 
 
-def loadJsonGzipBase64(base64Data):
+def loadJsonGzipBase64(base64Data: bytes) -> dict[str, Any]:
     return json.loads(gzip.decompress(base64.b64decode(base64Data)))
 
 
-def lambda_handler(event, context):
+def lambda_handler(event: dict[str, Any], context: dict[str, Any]):
     isSas = "sourceKinesisStreamArn" in event
     streamARN = event["sourceKinesisStreamArn"] if isSas else event["deliveryStreamArn"]
     region = streamARN.split(":")[3]
     streamName = streamARN.split("/")[1]
     records = list(processRecords(event["records"]))
     projectedSize = 0
-    recordListsToReingest = []
+    recordListsToReingest: list[list[dict[str, Any]]] = []
 
     for idx, rec in enumerate(records):
         originalRecord = event["records"][idx]
@@ -312,28 +347,38 @@ def lambda_handler(event, context):
     # call putRecordBatch/putRecords for each group of up to 500 records to be re-ingested
     if recordListsToReingest:
         recordsReingestedSoFar = 0
-        client = boto3.client("kinesis" if isSas else "firehose", region_name=region)
+        client = boto3.client("kinesis" if isSas else "firehose", region_name=region)  # type: ignore
         maxBatchSize = 500
         flattenedList = [r for sublist in recordListsToReingest for r in sublist]
         for i in range(0, len(flattenedList), maxBatchSize):
             recordBatch = flattenedList[i : i + maxBatchSize]
             # last argument is maxAttempts
-            args = [streamName, recordBatch, client, 0, 20]
             if isSas:
-                putRecordsToKinesisStream(*args)
+                putRecordsToKinesisStream(streamName, recordBatch, client, 0, 20)
             else:
-                putRecordsToFirehoseStream(*args)
+                putRecordsToFirehoseStream(streamName, recordBatch, client, 0, 20)
             recordsReingestedSoFar += len(recordBatch)
             print("Reingested %d/%d" % (recordsReingestedSoFar, len(flattenedList)))
 
+    num_processed_ok = len([r for r in records if r["result"] == "Ok"])
+    num_processed_failed = len(
+        [r for r in records if r["result"] == "ProcessingFailed"]
+    )
+    num_split = len([rl for rl in recordListsToReingest if len(rl) > 1])
+    num_reingested_asis = len([rl for rl in recordListsToReingest if len(rl) == 1])
+    num_actual_dropped = len([r for r in records if r["result"] == "Dropped"]) - (
+        num_reingested_asis + num_split
+    )
     print(
-        "%d input records, %d returned as Ok or ProcessingFailed, %d split and"
-        " re-ingested, %d re-ingested as-is"
+        "%d input records, %d returned as Ok, %d returned as ProcessingFailed, %d split and"
+        " re-ingested, %d re-ingested as-is, %d record(s) dropped"
         % (
             len(event["records"]),
-            len([r for r in records if r["result"] != "Dropped"]),
-            len([l for l in recordListsToReingest if len(l) > 1]),
-            len([l for l in recordListsToReingest if len(l) == 1]),
+            num_processed_ok,
+            num_processed_failed,
+            num_split,
+            num_reingested_asis,
+            num_actual_dropped,
         )
     )
 
