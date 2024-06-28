@@ -53,7 +53,7 @@ public final class DatabaseTestUtils {
   public static final String TEST_CONTAINER_DATABASE_IMAGE_PROPERTY = "its.testcontainer.db.image";
 
   /** The default test container image to use when nothing is provided. */
-  public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "postgres:16.3";
+  public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "postgres:16.2";
 
   /** The username used for test container database username. */
   public static final String TEST_CONTAINER_DATABASE_USERNAME = "bfd";
