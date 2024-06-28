@@ -315,7 +315,7 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHaveExtensions() {
     List<Extension> expected = eob.getExtension();
-    assertEquals(7, expected.size());
+    assertEquals(8, expected.size());
 
     assertNotNull(
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -384,6 +384,11 @@ public final class HospiceClaimTransformerV2Test {
             new Extension(
                 "https://bluebutton.cms.gov/resources/variables/fi_num",
                 new Coding("https://bluebutton.cms.gov/resources/variables/fi_num", "6666", null)),
+            new Extension(
+                "https://bluebutton.cms.gov/resources/variables/fi_num",
+                new Identifier()
+                    .setSystem("https://bluebutton.cms.gov/resources/variables/fi_num")
+                    .setValue("6666")),
             hospiceCountExtension);
 
     for (int i = 0; i < expected.size(); i++) {

@@ -680,7 +680,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Tests that the transformer sets the expected number of extensions for this claim type. */
   @Test
   public void shouldHaveKnownExtensions() {
-    assertEquals(10, eob.getExtension().size());
+    assertEquals(11, eob.getExtension().size());
   }
 
   /** Tests that the transformer sets the expected "near line" extensions. */
