@@ -1409,5 +1409,117 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
         }
       }
     }
+    sheets {
+      content_type = "INTERACTIVE"
+      name         = "Total Unique Enrollee Authorization by Language"
+      sheet_id     = "97c4c9f6-6ac8-4499-9e85-42b00bcdcfdf"
+
+      layouts {
+        configuration {
+          grid_layout {
+            elements {
+              column_index = "0"
+              column_span  = 31
+              element_id   = "a9a16dc5-470a-4473-9141-f261a6e8b0b2"
+              element_type = "VISUAL"
+              row_index    = "0"
+              row_span     = 12
+            }
+          }
+        }
+      }
+
+      visuals {
+        table_visual {
+          visual_id = "9a9a16dc5-470a-4473-9141-f261a6e8b0b2"
+
+          chart_configuration {
+            field_options {
+              #order = []
+
+              selected_field_options {
+                custom_label = "Date"
+                field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.time_of_event.0.1667239330557"
+                width        = "300px"
+              }
+              selected_field_options {
+                custom_label = "Language"
+                field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.req_qparam_lang.2.1667239330557"
+                width        = "300px"
+              }
+              selected_field_options {
+                custom_label = "Total Unique Enrollees"
+                field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.req_user_id.2.1667239330557"
+                width        = "300px"
+              }
+            }
+            field_wells {
+              table_aggregated_field_wells {
+                group_by {
+                  date_dimension_field {
+                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.time_of_event.0.1667239330557"
+
+                    column {
+                      column_name         = "time_of_event"
+                      data_set_identifier = "events_prod_perf_mon"
+                    }
+                  }
+                }
+                group_by {
+                  categorical_dimension_field {
+                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.req_qparam_lang.2.1706289461891"
+
+                    column {
+                      column_name         = "req_qparam_lang"
+                      data_set_identifier = "events_prod_perf_mon"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.req_user_id.2.1667239330557"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "COUNT"
+                    }
+
+                    column {
+                      column_name         = "req_user_id"
+                      data_set_identifier = "events_prod_perf_mon"
+                    }
+                  }
+                }
+              }
+            }
+            sort_configuration {
+              row_sort {
+                field_sort {
+                  direction = "DESC"
+                  field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.time_of_event.2.1667239330557"
+                }
+              }
+            }
+            table_options {
+
+              cell_style {
+                height = 25
+              }
+            }
+          }
+
+          subtitle {
+            visibility = "VISIBLE"
+          }
+
+          title {
+            visibility = "VISIBLE"
+
+            format_text {
+              rich_text = "<visual-title>\n  <block align=\"center\">\n   Total Unique Enrollee Authorization by Language  </block></visual-title>"
+            }
+          }
+        }
+      }
+    }
   }
 }
