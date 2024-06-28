@@ -28,6 +28,7 @@ public class HikariDataSourceFactory implements DataSourceFactory {
    */
   protected void configureDataSource(HikariDataSource dataSource) {
     dataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
+    dataSource.addDataSourceProperty("jdbcUrl", dbOptions.getDatabaseUrl());
     dataSource.setUsername(dbOptions.getDatabaseUsername());
     dataSource.setPassword(dbOptions.getDatabasePassword());
     dataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
