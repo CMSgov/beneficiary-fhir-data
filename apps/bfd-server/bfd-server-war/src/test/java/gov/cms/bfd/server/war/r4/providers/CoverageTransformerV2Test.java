@@ -678,21 +678,21 @@ public final class CoverageTransformerV2Test {
   // Begin Common tests
   // ==================
 
-  /** Tests that the transformer filters out the C4DIC profile */
+  /** Tests that the transformer filters out the C4DIC profile. */
   @Test
   public void shouldFilterOutC4DicProfile() {
     List<IBaseResource> coverages = transformCoverageAll(EnumSet.of(Profile.C4BB), true);
     assertEquals(4, coverages.size());
   }
 
-  /** Tests that the transformer filters out the C4BB profile */
+  /** Tests that the transformer filters out the C4BB profile. */
   @Test
   public void shouldFilterOutC4BBProfile() {
     List<IBaseResource> coverages = transformCoverageAll(EnumSet.of(Profile.C4DIC), true);
     assertEquals(1, coverages.size());
   }
 
-  /** Tests that the transformer returns all profiles */
+  /** Tests that the transformer returns all profiles. */
   @Test
   public void shouldReturnAllProfiles() {
     List<IBaseResource> coverages =
@@ -713,6 +713,8 @@ public final class CoverageTransformerV2Test {
   /**
    * Verifies the metadata has some last updated value and the profile contains {@link
    * ProfileConstants#C4BB_COVERAGE_URL}.
+   *
+   * @param coverageUrl coverage URL
    */
   private static void verifyMeta(String coverageUrl) {
     assertNotNull(coverage.getMeta().getLastUpdated());
@@ -885,7 +887,7 @@ public final class CoverageTransformerV2Test {
   }
 
   /**
-   * Wrapper to transform all coverages for the included profiles
+   * Wrapper to transform all coverages for the included profiles.
    *
    * @param profiles profiles to include
    * @param showJson {@code true} if the json should be printed to stdout

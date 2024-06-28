@@ -314,7 +314,7 @@ public class R4CoverageResourceProviderTest {
     assertEquals(0, bundle.getTotal());
   }
 
-  /** Tests that the transformer is called with only the C4BB profile when C4DIC is not enabled */
+  /** Tests that the transformer is called with only the C4BB profile when C4DIC is not enabled. */
   @Test
   public void testCoverageByBeneficiaryCount() {
     coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
@@ -323,7 +323,7 @@ public class R4CoverageResourceProviderTest {
 
   /**
    * Tests that the transformer is called with only the C4BB profile when the C4BB profile is
-   * requested
+   * requested.
    */
   @Test
   public void testCoverageByBeneficiaryCountC4BBProfile() {
@@ -335,7 +335,7 @@ public class R4CoverageResourceProviderTest {
 
   /**
    * Tests that the transformer is called with only the C4DIC profile when the C4DIC profile is
-   * requested
+   * requested.
    */
   @Test
   public void testCoverageByBeneficiaryCountC4DICProfile() {
@@ -350,7 +350,7 @@ public class R4CoverageResourceProviderTest {
     verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4DIC)));
   }
 
-  /** Tests that the transformer is called with both profiles when both are enabled */
+  /** Tests that the transformer is called with both profiles when both are enabled. */
   @Test
   public void testCoverageByBeneficiaryCountBothProfiles() {
     coverageProvider =
@@ -363,7 +363,7 @@ public class R4CoverageResourceProviderTest {
     verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB, Profile.C4DIC)));
   }
 
-  /** Tests that the transformer is called with the C4DIC profile when a C4DIC ID is used */
+  /** Tests that the transformer is called with the C4DIC profile when a C4DIC ID is used. */
   @Test
   public void testCoverageByIdC4Dic() {
     coverageProvider =
