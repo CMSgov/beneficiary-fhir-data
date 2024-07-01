@@ -237,18 +237,15 @@ public class SpringConfiguration {
   @Bean
   public DataSource dataSource(
       SimpleDataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
-    if (dataSourceFactory instanceof DataSourceFactory) {
-      HikariDataSource pooledDataSource = (HikariDataSource) dataSourceFactory.createDataSource();
-      DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);
-      // Wrap the pooled DataSource in a proxy that records performance data.
-      return ProxyDataSourceBuilder.create(pooledDataSource)
-          .name("BFD-Data")
-          .listener(new QueryLoggingListener())
-          .proxyResultSet()
-          .build();
-    } else {
-      return dataSourceFactory.createDataSource();
-    }
+//      HikariDataSource pooledDataSource = (HikariDataSource) dataSourceFactory.createDataSource();
+//      DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);
+//      // Wrap the pooled DataSource in a proxy that records performance data.
+//      return ProxyDataSourceBuilder.create(pooledDataSource)
+//          .name("BFD-Data")
+//          .listener(new QueryLoggingListener())
+//          .proxyResultSet()
+//          .build();
+    return dataSourceFactory.createDataSource();
   }
 
   /**
