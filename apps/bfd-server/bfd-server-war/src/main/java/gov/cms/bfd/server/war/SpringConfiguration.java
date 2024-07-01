@@ -39,11 +39,12 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
+import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsAwsWrapperDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.SimpleDataSourceFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -215,14 +216,15 @@ public class SpringConfiguration {
             .databasePassword(password)
             .maxPoolSize(maxPoolSize)
             .build();
-    if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
-      return RdsAwsWrapperDataSourceFactory.builder()
-          .awsClientConfig(awsClientConfig)
-          .databaseOptions(databaseOptions)
-          .build();
-    } else {
-      return new HikariDataSourceFactory(databaseOptions);
-    }
+//    if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
+//      return RdsDataSourceFactory.builder()
+//              .awsClientConfig(awsClientConfig)
+//              .databaseOptions(databaseOptions)
+//              .build();
+//    } else {
+////      return new HikariDataSourceFactory(databaseOptions);
+//    }
+    return new AwsWrapperDataSourceFactory(databaseOptions);
   }
 
   /**
@@ -232,7 +234,7 @@ public class SpringConfiguration {
    * @param metricRegistry the {@link MetricRegistry} for the application
    * @return the {@link DataSource} that provides the application's database connection
    */
-  @Bean(destroyMethod = "close")
+  @Bean
   public DataSource dataSource(
       SimpleDataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
     if (dataSourceFactory instanceof DataSourceFactory) {
