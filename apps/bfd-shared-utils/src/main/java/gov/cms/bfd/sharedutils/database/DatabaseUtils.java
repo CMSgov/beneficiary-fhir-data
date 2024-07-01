@@ -68,13 +68,16 @@ public final class DatabaseUtils {
      * strongly worded letter instructing it to avoid sequential scans whenever
      * possible.
      */
-    // This code is almost 6 years old (as of 06/24). If we do this, RDS Proxy will pin the connection according to its
-    // pinning rules and we get no benefit. I'm not sure of the consequences of re-enabling sequential scans, but my
-    // guess is that whatever was causing this has probably been fixed or has changed in the last six years
-//    if (poolingDataSource.getJdbcUrl() != null
-//        && poolingDataSource.getJdbcUrl().contains("postgre"))
-//      poolingDataSource.setConnectionInitSql(
-//          "set application_name = 'bfd-server'; set enable_seqscan = false;");
+    // This code is almost 6 years old (as of 06/24). If we do this, RDS Proxy will pin the
+    // connection according to its
+    // pinning rules and we get no benefit. I'm not sure of the consequences of re-enabling
+    // sequential scans, but my
+    // guess is that whatever was causing this has probably been fixed or has changed in the last
+    // six years
+    //    if (poolingDataSource.getJdbcUrl() != null
+    //        && poolingDataSource.getJdbcUrl().contains("postgre"))
+    //      poolingDataSource.setConnectionInitSql(
+    //          "set application_name = 'bfd-server'; set enable_seqscan = false;");
 
     poolingDataSource.setRegisterMbeans(true);
     poolingDataSource.setMetricRegistry(metricRegistry);

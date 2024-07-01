@@ -74,26 +74,26 @@ public class RdsHikariDataSource extends HikariDataSource {
   @Builder
   public static class Config {
     /** Used to get the current time. */
-    private final Clock clock;
+    public final Clock clock;
 
     /** Minimum time between token requests. */
-    private final long tokenTtlMillis;
+    public final long tokenTtlMillis;
 
     /** IAM user id used in the token requests and to authenticate to the database. */
-    private final String databaseUser;
+    public final String databaseUser;
 
     /** Database instance/host id. */
-    private final String databaseHost;
+    public final String databaseHost;
 
     /** Database port. */
-    private final int databasePort;
+    public final int databasePort;
 
     /**
      * Gets the current time in milliseconds.
      *
      * @return current time millis
      */
-    private long currentTimeMillis() {
+    public long currentTimeMillis() {
       return clock.millis();
     }
 
@@ -102,7 +102,7 @@ public class RdsHikariDataSource extends HikariDataSource {
      *
      * @return the token request object
      */
-    private GenerateAuthenticationTokenRequest createTokenRequest() {
+    public GenerateAuthenticationTokenRequest createTokenRequest() {
       return GenerateAuthenticationTokenRequest.builder()
           .username(databaseUser)
           .hostname(databaseHost)

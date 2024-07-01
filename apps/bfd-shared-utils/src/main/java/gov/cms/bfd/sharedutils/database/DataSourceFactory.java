@@ -3,7 +3,7 @@ package gov.cms.bfd.sharedutils.database;
 import com.zaxxer.hikari.HikariDataSource;
 
 /** Implementations of this interface create {@link HikariDataSource} instances on demand. */
-public interface DataSourceFactory {
+public interface DataSourceFactory extends SimpleDataSourceFactory {
   /**
    * Create a properly configured {@link HikariDataSource} instance.
    *

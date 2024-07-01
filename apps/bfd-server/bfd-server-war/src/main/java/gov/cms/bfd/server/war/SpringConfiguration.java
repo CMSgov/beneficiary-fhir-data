@@ -43,7 +43,8 @@ import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsAwsWrapperDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.SimpleDataSourceFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
@@ -197,7 +198,7 @@ public class SpringConfiguration {
    * @return the factory
    */
   @Bean
-  public DataSourceFactory dataSourceFactory(
+  public SimpleDataSourceFactory dataSourceFactory(
       @Value("${" + SSM_PATH_DATABASE_AUTH_TYPE + ":JDBC}") String authTypeName,
       @Value("${" + SSM_PATH_DATABASE_URL + "}") String url,
       @Value("${" + SSM_PATH_DATABASE_USERNAME + "}") String username,
@@ -215,7 +216,7 @@ public class SpringConfiguration {
             .maxPoolSize(maxPoolSize)
             .build();
     if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
-      return RdsDataSourceFactory.builder()
+      return RdsAwsWrapperDataSourceFactory.builder()
           .awsClientConfig(awsClientConfig)
           .databaseOptions(databaseOptions)
           .build();
@@ -232,17 +233,20 @@ public class SpringConfiguration {
    * @return the {@link DataSource} that provides the application's database connection
    */
   @Bean(destroyMethod = "close")
-  public DataSource dataSource(DataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
-
-    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
-    DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);
-
-    // Wrap the pooled DataSource in a proxy that records performance data.
-    return ProxyDataSourceBuilder.create(pooledDataSource)
-        .name("BFD-Data")
-        .listener(new QueryLoggingListener())
-        .proxyResultSet()
-        .build();
+  public DataSource dataSource(
+      SimpleDataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
+    if (dataSourceFactory instanceof DataSourceFactory) {
+      HikariDataSource pooledDataSource = (HikariDataSource) dataSourceFactory.createDataSource();
+      DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);
+      // Wrap the pooled DataSource in a proxy that records performance data.
+      return ProxyDataSourceBuilder.create(pooledDataSource)
+          .name("BFD-Data")
+          .listener(new QueryLoggingListener())
+          .proxyResultSet()
+          .build();
+    } else {
+      return dataSourceFactory.createDataSource();
+    }
   }
 
   /**
