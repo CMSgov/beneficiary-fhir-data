@@ -29,14 +29,14 @@
             "version": "R4",
             "resource": "ExplanationOfBenefit",
             "element": "item[N].modifier[N].coding[N].code",
-            "fhirPath": "item[%n].modifier.coding.where(system='https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd').code",
+            "fhirPath": "item[%n].modifier.coding.where(system='http://unitsofmeasure.org').code",
             "discriminator": [
-                "item[N].modifier[N].coding[N].system = 'https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd'"
+                "item[N].modifier[N].coding[N].system = 'http://unitsofmeasure.org'"
             ],
             "additional": [],
             "derived": "",
             "note": "",
-            "example": "[\\n  {\\n    \"system\": \"https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd\",\\n    \"code\": \"GG\"\\n  }\\n]"
+            "example": "[\\n  {\\n    \"system\": \"http://unitsofmeasure.org\",\\n    \"code\": \"GG\"\\n  }\\n]"
         }
     ]
 }

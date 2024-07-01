@@ -290,7 +290,7 @@
       "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
       "valueQuantity" : {
         "value" : 666,
-        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+        "system" : "http://unitsofmeasure.org",
         "code" : "DD"
       }
     } ],

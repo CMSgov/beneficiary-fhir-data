@@ -8,13 +8,13 @@
   "total" : 8,
   "link" : [ {
     "relation" : "first",
-    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?_format=json&startIndex=0&_count=8&patient=Patient%2F567834"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?patient=567834&startIndex=0&_count=8"
   }, {
     "relation" : "last",
-    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?_format=json&startIndex=0&_count=8&patient=Patient%2F567834"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?patient=567834&startIndex=0&_count=8"
   }, {
     "relation" : "self",
-    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?_count=8&_format=json&patient=Patient%2F567834"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit/?_count=8&patient=567834"
   } ],
   "entry" : [ {
     "resource" : {
@@ -400,7 +400,7 @@
           "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
           "valueQuantity" : {
             "value" : 77,
-            "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+            "system" : "http://unitsofmeasure.org",
             "code" : "GG"
           }
         } ],
@@ -1461,7 +1461,7 @@
           "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
           "valueQuantity" : {
             "value" : 666,
-            "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+            "system" : "http://unitsofmeasure.org",
             "code" : "DD"
           }
         } ],
@@ -2319,7 +2319,7 @@
           "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
           "valueQuantity" : {
             "value" : 77,
-            "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+            "system" : "http://unitsofmeasure.org",
             "code" : "GG"
           }
         } ],
@@ -2970,8 +2970,7 @@
           "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
           "valueQuantity" : {
             "value" : 234.567,
-            "unit" : "Milliliter",
-            "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+            "system" : "http://unitsofmeasure.org",
             "code" : "ML"
           }
         } ],
@@ -4376,7 +4375,7 @@
           "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
           "valueQuantity" : {
             "value" : 5454,
-            "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+            "system" : "http://unitsofmeasure.org",
             "code" : "B"
           }
         } ],
