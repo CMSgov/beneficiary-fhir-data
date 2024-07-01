@@ -141,7 +141,6 @@ public class DatabaseTestSchemaManager {
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "");
         placeholders.put("logic.alter-column-type", "type");
-        placeholders.put("logic.hsql-only-alter", "-- alter");
         placeholders.put("logic.psql-only-alter", "alter");
         placeholders.put("logic.alter-rename-column", "rename column");
         placeholders.put("logic.alter-rename-constraint", "rename constraint");
@@ -151,7 +150,6 @@ public class DatabaseTestSchemaManager {
         placeholders.put("logic.sequence-increment", "increment");
         placeholders.put("logic.perms", "");
         placeholders.put("logic.psql-only", "");
-        placeholders.put("logic.hsql-only", "-- ");
       } else {
         throw new RuntimeException("Unsupported database vendor");
       }

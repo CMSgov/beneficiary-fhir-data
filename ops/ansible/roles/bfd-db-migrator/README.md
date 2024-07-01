@@ -16,20 +16,24 @@ This role utilizes [Ansible Tags](https://docs.ansible.com/ansible/latest/user_g
 Role Variables
 --------------
 
-This role is highly configurable, though it tries to provide reasonable defaults where possible: Here are the variables that must be defined by users:
+This role is configurable, though it tries to provide reasonable defaults where possible:
 
-| Name                                | Description                                                                                               | Default              | Required        |
-|-------------------------------------|-----------------------------------------------------------------------------------------------------------|----------------------|-----------------|
-| db_migrator_db_password             | password for targeted database                                                                            | n/a                  | yes             |
-| db_migrator_db_url                  | url for targeted database, e.g. `jdbc:postgresql://mydbserver.example.com:5432/mydb`                      | n/a                  | yes             |
-| db_migrator_db_username             | username for targeted database                                                                            | n/a                  | yes             |
-| env                                 | deployment env, e.g. `prod`, `prod-sbx`, `test` **required by the migrator monitor**<sup>\*</sup>         | test                 | no<sup>\*</sup> |
-| db_migrator_dir                     | primary, on-host directory for migrator-related resources                                                 | /opt/bfd-db-migrator | no              |
-| db_migrator_tmp_dir                 | defines the `-Djava.io.tmpdir` for the migrator's jvm                                                     | /tmp                 | no              |
-| db_migrator_user                    | user to be created to run migrator service                                                                | bb-migrator          | no              |
-| migrator_monitor_enabled            | migrator-monitor enabled for sqs message passing, **requires `env`**                                      | false                | no              |
-| migrator_monitor_heartbeat_interval | sleep interval between monitor heartbeats                                                                 | 300                  | no              |
-| sqs_queue_name                      | the sqs queue to read from when monitoring the migrator **required by the migrator monitor**<sup>\*</sup> | bfd-test-migrator    | no<sup>\*</sup> |
+| Name                                   | Description                                               | Default              | Required |
+|----------------------------------------|-----------------------------------------------------------|----------------------|----------|
+| db_url                                 | fully qualified jdbc url for the database                 |                      | yes      |
+| db_auth_type_override                  | override for the database username                        |                      | no       |
+| db_max_connections_override            | override for the database max connections figure          |                      | no       |
+| db_password_override                   | override for the database password                        |                      | no       |
+| db_username_override                   | override for the database username                        |                      | no       |
+| new_relic_metrics_license_key_override | override new relice license key                           |                      | no       |
+| new_relic_metrics_host_override        | override new relic metrics host                           |                      | no       |
+| new_relic_metrics_path_override        | override newrelic path                                    |                      | no       |
+| new_relic_metrics_period_override      | overide newrelic metrics period                           |                      | no       |
+| env_name_std                           | deployment env, e.g. `prod`, `prod-sbx`, `test`           | unknown-environment  | no       |
+| logs                                   | logs directory                                            | `{{ ref_dir }}`      | no       |
+| ref_dir                                | primary, on-host directory for migrator-related resources | /opt/bfd-db-migrator | no       |
+| tmp                                    | defines the `-Djava.io.tmpdir` for the migrator's jvm     | `{{ ref_dir }}/tmp`  | no       |
+| user                                   | user to be created to run migrator service                | bb-migrator          | no       |
 
 See [defaults/main.yml](./defaults/main.yml) for the list of defaulted variables and their default values.
 
@@ -43,18 +47,29 @@ Example Playbook
 
 Here's an example of how to apply this role to the `bfd-db-migrator` host in an Ansible play:
 
-    - hosts: bfd-db-migrator
-    tasks:
-        - name: Apply Role
-        import_role:
-            name: bfd-db-migrator
-        vars:
-            bfd_version: 2.0.0-SNAPSHOT
-            db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/{{ bfd_version }}/bfd-db-migrator-{{ bfd_version }}.zip"
-            db_migrator_db_url: 'jdbc:hsqldb:mem:test'
-            db_migrator_db_username: "{{ ssm_db_migrator_db_username }}"
-            db_migrator_db_password: "{{ ssm_db_migrator_db_password }}"
-
+``` yaml
+- hosts: bfd-db-migrator
+  tasks:
+    - name: Install Prerequisites
+      vars:
+        ansible_python_interpreter: /usr/bin/python
+      yum:
+        pkg:
+          - procps
+          - awscli
+          - jq
+        state: present
+      become: true
+    - name: Apply Role
+      import_role:
+        name: bfd-db-migrator
+      vars:
+        env_name_std: dev
+        db_migrator_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-db-migrator/{{ bfd_version }}/bfd-db-migrator-{{ bfd_version }}.zip"
+        db_url: jdbc:postgresql://db:5432/fhirdb
+        db_username_override: bfd
+        db_password_override: bfd
+```
 
 Running the Tests
 -----------------
@@ -80,5 +95,5 @@ From this, the tests can be run by issuing the following:
 # optional `-e` extra variables flag for migrator monitor enablement
 # optional `-k` to keep the container running after test completion
 # and specifying `some-image-tag` to target the image generated above
-ops/ansible/roles/bfd-db-migrator/test/run-tests.sh -e migrator_monitor_enabled=True -k some-image-tag
+ops/ansible/roles/bfd-db-migrator/test/run-tests.sh -e db_url_override=jdbc:postgresql://db:5432/alt -k some-image-tag
 ```
