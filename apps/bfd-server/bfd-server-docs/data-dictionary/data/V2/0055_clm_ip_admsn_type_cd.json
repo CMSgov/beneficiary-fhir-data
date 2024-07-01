@@ -29,14 +29,14 @@
             "version": "R4",
             "resource": "ExplanationOfBenefit",
             "element": "supportingInfo[N].code.coding[N].code",
-            "fhirPath": "supportingInfo.where(code.coding.where(system='https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd')).code.coding.code",
+            "fhirPath": "supportingInfo.where(code.coding.where(system='https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit')).code.coding.code",
             "discriminator": [
-                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd'"
+                "supportingInfo[N].code.coding[N].system = 'https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit'"
             ],
             "additional": [
                 "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
-                "eob.supportingInfo[N].category.coding[N].system = 'http://terminology.hl7.org/CodeSystem/claiminformationcategory'",
-                "eob.supportingInfo[N].category.coding[N].code = 'info'",
+                "eob.supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
+                "eob.supportingInfo[N].category.coding[N].code = 'admtype'",
                 "eob.supportingInfo[N].category.coding[N].display = 'Information')",
                 "eob.supportingInfo[N].category.coding[N].system = https://bluebutton.cms.gov/resources/codesystem/information'",
                 "eob.supportingInfo[N].category.coding[N].code = 'https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd'",
@@ -44,7 +44,7 @@
             ],
             "derived": "",
             "note": "",
-            "example": "[\\n  {\\n    \"sequence\": 3,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://terminology.hl7.org/CodeSystem/claiminformationcategory\",\\n          \"code\": \"info\",\\n          \"display\": \"Information\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/information\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd\",\\n          \"display\": \"Claim Inpatient Admission Type Code\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd\",\\n          \"code\": \"1\",\\n          \"display\": \"Emergency - The patient required immediate medical intervention as a result of severe, life threatening, or potentially disabling conditions. Generally, the patient was admitted through the emergency room.\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+            "example": "[\\n  {\\n    \"sequence\": 3,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"admtype\",\\n          \"display\": \"Information\"\\n        },\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/codesystem/information\",\\n          \"code\": \"https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd\",\\n          \"display\": \"Claim Inpatient Admission Type Code\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit\",\\n          \"code\": \"1\",\\n          \"display\": \"Emergency - The patient required immediate medical intervention as a result of severe, life threatening, or potentially disabling conditions. Generally, the patient was admitted through the emergency room.\"\\n        }\\n      ]\\n    }\\n  }\\n]"
         }
     ]
 }
