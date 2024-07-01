@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -26,6 +27,9 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -39,6 +43,7 @@ import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +114,8 @@ public class R4CoverageResourceProviderTest {
   @BeforeEach
   public void setup() {
     coverageProvider =
-        new R4CoverageResourceProvider(metricRegistry, loadedFilterManager, coverageTransformer);
+        new R4CoverageResourceProvider(
+            metricRegistry, loadedFilterManager, coverageTransformer, false);
     coverageProvider.setEntityManager(entityManager);
     lenient().when(coverageId.getVersionIdPartAsLong()).thenReturn(null);
     when(beneficiary.getIdPart()).thenReturn("111199991111");
@@ -134,8 +140,9 @@ public class R4CoverageResourceProviderTest {
     when(loadedFilterManager.isResultSetEmpty(any(), any())).thenReturn(false);
 
     // transformer mocking
-    when(coverageTransformer.transform(any())).thenReturn(List.of(testCoverage));
-    when(coverageTransformer.transform(any(), any())).thenReturn(testCoverage);
+    when(coverageTransformer.transform(any(), (EnumSet<Profile>) any()))
+        .thenReturn(List.of(testCoverage));
+    when(coverageTransformer.transform(any(), (Beneficiary) any())).thenReturn(testCoverage);
 
     // Mock coverage id
     when(coverageId.getIdPart()).thenReturn(VALID_PART_A_COVERAGE_ID);
@@ -238,7 +245,7 @@ public class R4CoverageResourceProviderTest {
               coverageProvider.read(coverageId);
             });
     assertEquals(
-        "Coverage ID pattern: '1?234' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}",
+        "Coverage ID pattern: '1?234' does not match expected pattern: {alphaNumericString}?-{alphaNumericString}-{idNumber}",
         exception.getLocalizedMessage());
   }
 
@@ -301,9 +308,74 @@ public class R4CoverageResourceProviderTest {
   public void testCoverageByBeneficiaryWhereMissingBeneExpectEmptyBundle() {
     when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
 
-    Bundle bundle = coverageProvider.searchByBeneficiary(beneficiary, null, null, requestDetails);
+    Bundle bundle =
+        coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
     assertEquals(0, bundle.getTotal());
+  }
+
+  /** Tests that the transformer is called with only the C4BB profile when C4DIC is not enabled. */
+  @Test
+  public void testCoverageByBeneficiaryCount() {
+    coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB)));
+  }
+
+  /**
+   * Tests that the transformer is called with only the C4BB profile when the C4BB profile is
+   * requested.
+   */
+  @Test
+  public void testCoverageByBeneficiaryCountC4BBProfile() {
+    coverageProvider.searchByBeneficiary(
+        beneficiary, null, null, ProfileConstants.C4BB_COVERAGE_URL, requestDetails);
+
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB)));
+  }
+
+  /**
+   * Tests that the transformer is called with only the C4DIC profile when the C4DIC profile is
+   * requested.
+   */
+  @Test
+  public void testCoverageByBeneficiaryCountC4DICProfile() {
+    coverageProvider =
+        new R4CoverageResourceProvider(
+            metricRegistry, loadedFilterManager, coverageTransformer, true);
+    coverageProvider.setEntityManager(entityManager);
+
+    coverageProvider.searchByBeneficiary(
+        beneficiary, null, null, ProfileConstants.C4DIC_COVERAGE_URL, requestDetails);
+
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4DIC)));
+  }
+
+  /** Tests that the transformer is called with both profiles when both are enabled. */
+  @Test
+  public void testCoverageByBeneficiaryCountBothProfiles() {
+    coverageProvider =
+        new R4CoverageResourceProvider(
+            metricRegistry, loadedFilterManager, coverageTransformer, true);
+    coverageProvider.setEntityManager(entityManager);
+
+    coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
+
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB, Profile.C4DIC)));
+  }
+
+  /** Tests that the transformer is called with the C4DIC profile when a C4DIC ID is used. */
+  @Test
+  public void testCoverageByIdC4Dic() {
+    coverageProvider =
+        new R4CoverageResourceProvider(
+            metricRegistry, loadedFilterManager, coverageTransformer, true);
+    coverageProvider.setEntityManager(entityManager);
+
+    when(coverageId.getIdPart()).thenReturn("c4dic-9145");
+
+    coverageProvider.read(coverageId);
+
+    verify(coverageTransformer).transform(eq(MedicareSegment.C4DIC), any());
   }
 
   /** Test coverage by beneficiary when paging is requested, expect paging links are returned. */
@@ -315,7 +387,8 @@ public class R4CoverageResourceProviderTest {
     when(requestDetails.getParameters()).thenReturn(params);
 
     // Note: startIndex in the param is not used, must be passed from requestDetails
-    Bundle bundle = coverageProvider.searchByBeneficiary(beneficiary, null, null, requestDetails);
+    Bundle bundle =
+        coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
     /*
      * Check paging; Verify that only the first and last paging links exist, since there should
@@ -334,7 +407,8 @@ public class R4CoverageResourceProviderTest {
   public void testCoverageByBeneficiaryWhereNoPagingRequestedExpectNoPageData() {
     when(requestDetails.getHeader(any())).thenReturn("");
 
-    Bundle bundle = coverageProvider.searchByBeneficiary(beneficiary, null, null, requestDetails);
+    Bundle bundle =
+        coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
     /*
      * Check that no paging was added when not requested

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_C4DIC_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -27,6 +28,8 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
+import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -36,6 +39,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +49,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,7 +63,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
    */
   private static final Pattern COVERAGE_ID_PATTERN =
-      Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Digit}+)");
+      Pattern.compile("(\\p{Alnum}+-?\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
 
   /** The entity manager. */
   private EntityManager entityManager;
@@ -72,6 +77,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   /** The coverage transformer. */
   private final CoverageTransformerV2 coverageTransformer;
 
+  /** The enabled CARIN profiles. */
+  private final EnumSet<Profile> enabledProfiles;
+
   /**
    * Instantiates a new {@link R4CoverageResourceProvider}.
    *
@@ -81,14 +89,17 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    * @param metricRegistry the metric registry
    * @param loadedFilterManager the loaded filter manager
    * @param coverageTransformer the coverage transformer
+   * @param c4dicEnabled the CARIN digital insurance card feature flag
    */
   public R4CoverageResourceProvider(
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
-      CoverageTransformerV2 coverageTransformer) {
+      CoverageTransformerV2 coverageTransformer,
+      @Value("${" + SSM_PATH_C4DIC_ENABLED + ":false}") Boolean c4dicEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.coverageTransformer = requireNonNull(coverageTransformer);
+    this.enabledProfiles = Profile.getEnabledProfiles(c4dicEnabled);
   }
 
   /**
@@ -139,16 +150,19 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
+
     if (!coverageIdMatcher.matches()) {
-      throw new InvalidRequestException(
+      String invalidCoverageIdMessage =
           "Coverage ID pattern: '"
               + coverageIdText
-              + "' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}");
+              + "' does not match expected pattern: "
+              + "{alphaNumericString}?-{alphaNumericString}-{idNumber}";
+      throw new InvalidRequestException(invalidCoverageIdMessage);
     }
 
     String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =
-        MedicareSegment.selectByUrlPrefix(coverageIdSegmentText);
+        MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, this.enabledProfiles);
     if (!coverageIdSegment.isPresent()) {
       throw new ResourceNotFoundException(coverageId);
     }
@@ -189,6 +203,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
+   * @param profile a supported CARIN {@link Profile}
    * @return Returns a {@link List} of {@link Coverage}s, which may contain multiple matching
    *     resources, or may also be empty.
    */
@@ -210,12 +225,23 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
               value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
+      @OptionalParam(name = "_profile") String profile,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
+
+    EnumSet<Profile> chosenProfiles =
+        (this.enabledProfiles.contains(Profile.C4DIC) && profile != null)
+            ? switch (profile) {
+              case ProfileConstants.C4DIC_COVERAGE_URL -> EnumSet.of(Profile.C4DIC);
+              case ProfileConstants.C4BB_COVERAGE_URL -> EnumSet.of(Profile.C4BB);
+              default -> throw new InvalidRequestException("Invalid profile: " + profile);
+            }
+            : this.enabledProfiles;
+
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
-      coverages = coverageTransformer.transform(beneficiaryEntity);
+      coverages = coverageTransformer.transform(beneficiaryEntity, chosenProfiles);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }

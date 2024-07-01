@@ -57,7 +57,7 @@ final class CoverageTransformer {
       case PART_B -> transformPartB(beneficiary);
       case PART_C -> transformPartC(beneficiary);
       case PART_D -> transformPartD(beneficiary);
-      default -> throw new BadCodeMonkeyException();
+      default -> throw new BadCodeMonkeyException(); // C4DIC in stu3
     };
   }
 
@@ -71,6 +71,7 @@ final class CoverageTransformer {
   @Trace
   public List<IBaseResource> transform(Beneficiary beneficiary) {
     return Arrays.stream(MedicareSegment.values())
+        .filter(medicareSegment -> !medicareSegment.equals(MedicareSegment.C4DIC))
         .map(s -> transform(s, beneficiary))
         .collect(Collectors.toList());
   }

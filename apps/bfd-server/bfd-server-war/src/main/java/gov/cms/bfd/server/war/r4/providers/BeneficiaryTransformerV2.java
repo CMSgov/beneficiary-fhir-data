@@ -11,12 +11,13 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants.CurrencyIdentifier;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -40,8 +41,8 @@ public class BeneficiaryTransformerV2 {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** Whether to enable the C4DIC profile. */
-  private final Boolean c4DicEnabled;
+  /** Enabled CARIN profiles. */
+  private final EnumSet<Profile> enabledProfiles;
 
   /**
    * Instantiates a new transformer.
@@ -57,7 +58,7 @@ public class BeneficiaryTransformerV2 {
       MetricRegistry metricRegistry,
       @Value("${" + SSM_PATH_C4DIC_ENABLED + ":false}") Boolean c4dicEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.c4DicEnabled = c4dicEnabled;
+    this.enabledProfiles = Profile.getEnabledProfiles(c4dicEnabled);
   }
 
   /**
@@ -96,11 +97,10 @@ public class BeneficiaryTransformerV2 {
 
       Patient patient = new Patient();
 
-      // Required values not directly mapped
-      patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
-      if (this.c4DicEnabled) {
-        patient.getMeta().addProfile(ProfileConstants.C4DIC_PATIENT_URL);
+      for (Profile profile : enabledProfiles) {
+        patient.getMeta().addProfile(profile.getVersionedPatientUrl());
       }
+
       patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
 
       // BENE_ID => patient.identifier

@@ -13,7 +13,7 @@ import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
@@ -90,7 +90,7 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
+    eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id
@@ -131,7 +131,8 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
-        claimGroup.getLastUpdated());
+        claimGroup.getLastUpdated(),
+        Profile.C4BB);
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
     claimGroup
@@ -302,7 +303,8 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.of(claimGroup.getClaimQueryCode()));
+        Optional.of(claimGroup.getClaimQueryCode()),
+        Profile.C4BB);
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
