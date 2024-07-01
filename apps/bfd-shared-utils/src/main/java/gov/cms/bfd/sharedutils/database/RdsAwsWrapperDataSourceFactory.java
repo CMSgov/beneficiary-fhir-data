@@ -142,6 +142,7 @@ public class RdsAwsWrapperDataSourceFactory implements SimpleDataSourceFactory {
         Properties targetDataSourceProps = new Properties();
         targetDataSourceProps.setProperty(
                 "wrapperProfileName", "datasource-with-internal-connection-pool");
+        targetDataSourceProps.setProperty("readerHostSelectorStrategy", "leastConnections");
         dataSource.setTargetDataSourceProperties(targetDataSourceProps);
         return dataSource;
     }
