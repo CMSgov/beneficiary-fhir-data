@@ -155,7 +155,7 @@ public enum Profile {
   /**
    * Returns the EOB nonclinician resource URL with the version appended.
    *
-   * @return versioned Coverage URL
+   * @return versioned EOB nonclinician URL
    */
   public String getVersionedEobNonclinicianUrl() {
     return this.eobNonclinicianUrl + this.versionSuffix;
