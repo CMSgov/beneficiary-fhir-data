@@ -104,35 +104,35 @@ public class RdsAwsWrapperDataSourceFactory implements SimpleDataSourceFactory {
         rdsClientBuilder.credentialsProvider(DefaultCredentialsProvider.create());
         var rdsClient = rdsClientBuilder.build();
 
-        ConfigurationProfileBuilder.get()
-                .from(ConfigurationProfilePresetCodes.E)
-                .withName("datasource-with-internal-connection-pool")
-                .withConnectionProvider(
-                        new HikariPooledConnectionProvider(
-                                (HostSpec hostSpec, Properties originalProps) -> {
-                                    final HikariConfig config = new HikariConfig();
-                                    config.setMaximumPoolSize(databaseOptions.getMaxPoolSize());
-                                    // holds few extra connections in case of sudden traffic peak
-                                    config.setMinimumIdle(Math.max(2, Runtime.getRuntime().availableProcessors()));
-                                    //                        // close idle connection in 15min; helps to get back to
-                                    // normal pool size after load peak
-                                    //                        config.setIdleTimeout(TimeUnit.MINUTES.toMillis(15));
-                                    //                        // verify pool configuration and creates no connections
-                                    // during initialization phase
-                                    //                        config.setInitializationFailTimeout(-1);
-                                    //
-                                    // config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(10));
-                                    //                        // validate idle connections at least every 3 min
-                                    //                        config.setKeepaliveTime(TimeUnit.MINUTES.toMillis(3));
-                                    //                        // allows to quickly validate connection in the pool and
-                                    // move on to another connection if needed
-                                    //
-                                    // config.setValidationTimeout(TimeUnit.SECONDS.toMillis(1));
-                                    //                        config.setMaxLifetime(TimeUnit.DAYS.toMillis(1));
-                                    return config;
-                                },
-                                null))
-                .buildAndSet();
+//        ConfigurationProfileBuilder.get()
+//                .from(ConfigurationProfilePresetCodes.E)
+//                .withName("datasource-with-internal-connection-pool")
+//                .withConnectionProvider(
+//                        new HikariPooledConnectionProvider(
+//                                (HostSpec hostSpec, Properties originalProps) -> {
+//                                    final HikariConfig config = new HikariConfig();
+//                                    config.setMaximumPoolSize(databaseOptions.getMaxPoolSize());
+//                                    // holds few extra connections in case of sudden traffic peak
+//                                    config.setMinimumIdle(Math.max(2, Runtime.getRuntime().availableProcessors()));
+//                                    //                        // close idle connection in 15min; helps to get back to
+//                                    // normal pool size after load peak
+//                                    //                        config.setIdleTimeout(TimeUnit.MINUTES.toMillis(15));
+//                                    //                        // verify pool configuration and creates no connections
+//                                    // during initialization phase
+//                                    //                        config.setInitializationFailTimeout(-1);
+//                                    //
+//                                    // config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(10));
+//                                    //                        // validate idle connections at least every 3 min
+//                                    //                        config.setKeepaliveTime(TimeUnit.MINUTES.toMillis(3));
+//                                    //                        // allows to quickly validate connection in the pool and
+//                                    // move on to another connection if needed
+//                                    //
+//                                    // config.setValidationTimeout(TimeUnit.SECONDS.toMillis(1));
+//                                    //                        config.setMaxLifetime(TimeUnit.DAYS.toMillis(1));
+//                                    return config;
+//                                },
+//                                null))
+//                .buildAndSet();
 
         // the dataSource will take care of closing this when its close method is called
         AwsWrapperDataSource dataSource = createRdsAwsWrapperDataSource(rdsClient);
@@ -140,9 +140,8 @@ public class RdsAwsWrapperDataSourceFactory implements SimpleDataSourceFactory {
         dataSource.setUser(databaseOptions.getDatabaseUsername());
         dataSource.setPassword(databaseOptions.getDatabasePassword());
         Properties targetDataSourceProps = new Properties();
-        targetDataSourceProps.setProperty(
-                "wrapperProfileName", "datasource-with-internal-connection-pool");
-        targetDataSourceProps.setProperty("readerHostSelectorStrategy", "leastConnections");
+        targetDataSourceProps.setProperty("wrapperProfileName", "E");
+//        targetDataSourceProps.setProperty("readerHostSelectorStrategy", "leastConnections");
         dataSource.setTargetDataSourceProperties(targetDataSourceProps);
         return dataSource;
     }
