@@ -952,20 +952,20 @@ public final class TransformerUtils {
     quantity.setSystem(codingSystem);
     quantity.setCode(unitCode.get());
 
-    String display = null;
-
-    switch (unitCode.get()) {
-      case TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_F2_DISPLAY;
-      case TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_GR_DISPLAY;
-      case TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_ML_DISPLAY;
-      case TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_ME_DISPLAY;
-      case TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_UN_DISPLAY;
-    }
+    String display =
+        switch (unitCode.get()) {
+          case TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_F2_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_GR_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_ML_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_ME_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_UN_DISPLAY;
+          default -> null;
+        };
 
     Optional<String> unit = Optional.ofNullable(display);
 

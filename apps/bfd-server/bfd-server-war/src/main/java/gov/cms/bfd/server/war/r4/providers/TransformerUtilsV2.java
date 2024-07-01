@@ -915,20 +915,20 @@ public final class TransformerUtilsV2 {
    * @return the output {@link Coding} for the specified input values
    */
   public static Coding createUnitOfMeasureCoding(String codingSystem, String codingCode) {
-    String display = null;
-
-    switch (codingCode) {
-      case TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_F2_DISPLAY;
-      case TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_GR_DISPLAY;
-      case TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_ML_DISPLAY;
-      case TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_ME_DISPLAY;
-      case TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE -> display =
-          TransformerConstants.CODING_SYSTEM_UCUM_UN_DISPLAY;
-    }
+    String display =
+        switch (codingCode) {
+          case TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_F2_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_GR_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_ML_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_ME_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE -> TransformerConstants
+              .CODING_SYSTEM_UCUM_UN_DISPLAY;
+          default -> null;
+        };
 
     return new Coding(codingSystem, codingCode, display);
   }
