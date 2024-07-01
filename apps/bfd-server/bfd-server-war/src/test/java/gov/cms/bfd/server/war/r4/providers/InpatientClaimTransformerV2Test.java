@@ -109,6 +109,8 @@ public final class InpatientClaimTransformerV2Test {
             .findFirst()
             .get();
     claim.setLastUpdated(Instant.now());
+    // Mock HCPCS Code missing
+    claim.getLines().getFirst().setHcpcsCode(Optional.empty());
     return claim;
   }
 
@@ -1193,7 +1195,7 @@ public final class InpatientClaimTransformerV2Test {
 
   /** Tests that the transformer sets the expected line item product/service. */
   @Test
-  public void shouldHaveLineItemProductOrService() {
+  public void shouldHaveDataAbsentLineItemProductOrService() {
     CodeableConcept pos = eob.getItemFirstRep().getProductOrService();
 
     CodeableConcept compare =
@@ -1201,9 +1203,9 @@ public final class InpatientClaimTransformerV2Test {
             .setCoding(
                 Arrays.asList(
                     new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/hcpcs_cd", "M55", null),
-                    new Coding(
-                        "https://bluebutton.cms.gov/resources/codesystem/hcpcs", "M55", null)));
+                        TransformerConstants.CODING_DATA_ABSENT,
+                        TransformerConstants.DATA_ABSENT_REASON_NULL_CODE,
+                        TransformerConstants.DATA_ABSENT_REASON_DISPLAY)));
 
     assertTrue(compare.equalsDeep(pos));
   }

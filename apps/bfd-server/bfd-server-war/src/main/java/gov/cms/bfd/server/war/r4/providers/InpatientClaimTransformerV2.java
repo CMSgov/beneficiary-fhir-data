@@ -391,21 +391,29 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           line.getDeductibleCoinsuranceCd());
 
       // HCPCS_CD => item.productOrService
-      line.getHcpcsCode()
-          .ifPresent(
-              c ->
-                  item.setProductOrService(
-                      new CodeableConcept()
-                          .setCoding(
-                              Arrays.asList(
-                                  new Coding()
-                                      .setSystem(
-                                          CCWUtils.calculateVariableReferenceUrl(
-                                              CcwCodebookVariable.HCPCS_CD))
-                                      .setCode(c),
-                                  new Coding()
-                                      .setSystem(TransformerConstants.CODING_SYSTEM_HCPCS)
-                                      .setCode(c)))));
+      Optional<String> hcpcsCode = line.getHcpcsCode();
+      if (hcpcsCode.isPresent()) {
+        item.setProductOrService(
+            new CodeableConcept()
+                .setCoding(
+                    Arrays.asList(
+                        new Coding()
+                            .setSystem(
+                                CCWUtils.calculateVariableReferenceUrl(
+                                    CcwCodebookVariable.HCPCS_CD))
+                            .setCode(hcpcsCode.get()),
+                        new Coding()
+                            .setSystem(TransformerConstants.CODING_SYSTEM_HCPCS)
+                            .setCode(hcpcsCode.get()))));
+      } else {
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept
+            .addCoding()
+            .setSystem(TransformerConstants.CODING_DATA_ABSENT)
+            .setCode(TransformerConstants.DATA_ABSENT_REASON_NULL_CODE)
+            .setDisplay(TransformerConstants.DATA_ABSENT_REASON_DISPLAY);
+        item.setProductOrService(codeableConcept);
+      }
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

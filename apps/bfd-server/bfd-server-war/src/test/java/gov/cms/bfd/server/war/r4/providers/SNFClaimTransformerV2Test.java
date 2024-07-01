@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -108,6 +109,8 @@ public class SNFClaimTransformerV2Test {
             .findFirst()
             .get();
     claim.setLastUpdated(Instant.now());
+    // Mock HCPCS Code missing
+    claim.getLines().getFirst().setHcpcsCode(Optional.empty());
     return claim;
   }
 
@@ -983,7 +986,7 @@ public class SNFClaimTransformerV2Test {
 
   /** Tests that the transformer sets the expected Coding for line item produce/service. */
   @Test
-  public void shouldHaveLineItemProductOrServiceCoding() {
+  public void shouldHaveDataAbsentLineItemProductOrServiceCoding() {
     CodeableConcept pos = eob.getItemFirstRep().getProductOrService();
 
     CodeableConcept compare =
@@ -991,7 +994,9 @@ public class SNFClaimTransformerV2Test {
             .setCoding(
                 Arrays.asList(
                     new Coding(
-                        "https://bluebutton.cms.gov/resources/codesystem/hcpcs", "MMM", null)));
+                        TransformerConstants.CODING_DATA_ABSENT,
+                        TransformerConstants.DATA_ABSENT_REASON_NULL_CODE,
+                        null)));
 
     assertTrue(compare.equalsDeep(pos));
   }
