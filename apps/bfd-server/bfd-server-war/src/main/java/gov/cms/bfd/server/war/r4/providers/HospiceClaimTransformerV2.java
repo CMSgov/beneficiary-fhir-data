@@ -88,7 +88,7 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
+    eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id
