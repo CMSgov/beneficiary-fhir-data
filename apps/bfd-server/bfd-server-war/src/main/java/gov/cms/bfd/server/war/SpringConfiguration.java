@@ -23,7 +23,6 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
@@ -40,11 +39,8 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
-import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.SimpleDataSourceFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -62,7 +58,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -216,14 +211,14 @@ public class SpringConfiguration {
             .databasePassword(password)
             .maxPoolSize(maxPoolSize)
             .build();
-//    if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
-//      return RdsDataSourceFactory.builder()
-//              .awsClientConfig(awsClientConfig)
-//              .databaseOptions(databaseOptions)
-//              .build();
-//    } else {
-////      return new HikariDataSourceFactory(databaseOptions);
-//    }
+    //    if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
+    //      return RdsDataSourceFactory.builder()
+    //              .awsClientConfig(awsClientConfig)
+    //              .databaseOptions(databaseOptions)
+    //              .build();
+    //    } else {
+    ////      return new HikariDataSourceFactory(databaseOptions);
+    //    }
     return new AwsWrapperDataSourceFactory(databaseOptions);
   }
 
@@ -237,14 +232,15 @@ public class SpringConfiguration {
   @Bean
   public DataSource dataSource(
       SimpleDataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
-//      HikariDataSource pooledDataSource = (HikariDataSource) dataSourceFactory.createDataSource();
-//      DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);
-//      // Wrap the pooled DataSource in a proxy that records performance data.
-//      return ProxyDataSourceBuilder.create(pooledDataSource)
-//          .name("BFD-Data")
-//          .listener(new QueryLoggingListener())
-//          .proxyResultSet()
-//          .build();
+    //      HikariDataSource pooledDataSource = (HikariDataSource)
+    // dataSourceFactory.createDataSource();
+    //      DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);
+    //      // Wrap the pooled DataSource in a proxy that records performance data.
+    //      return ProxyDataSourceBuilder.create(pooledDataSource)
+    //          .name("BFD-Data")
+    //          .listener(new QueryLoggingListener())
+    //          .proxyResultSet()
+    //          .build();
     return dataSourceFactory.createDataSource();
   }
 
