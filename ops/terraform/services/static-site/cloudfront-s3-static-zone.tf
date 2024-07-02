@@ -29,7 +29,7 @@ resource "aws_route53_record" "static_env" {
     name    = aws_cloudfront_distribution.static_site_distribution.domain_name
     zone_id = aws_cloudfront_distribution.static_site_distribution.hosted_zone_id
     
-    evaluate_target_health = true
+    evaluate_target_health = false # true
   }
 
 }
@@ -51,22 +51,24 @@ resource "aws_s3_bucket_ownership_controls" "cloudfront_bucket" {
   }
 }
 
-resource "aws_s3_bucket_acl" "cloudfront_bucket" {
-  bucket     = aws_s3_bucket.cloudfront_bucket.bucket
-  depends_on = [ aws_s3_bucket_ownership_controls.cloudfront_bucket ]
-  acl        = "private"
-}
+### retry24:
+## Error: creating S3 Bucket (bfd-test-cf-577373831711) ACL: operation error S3: PutBucketAcl, https response error StatusCode: 400, RequestID: 2JDVNXAW1CS9HW73, HostID: L2WlKtupZmFHeIqwlFl0fsrKke/iA8fxBJ/diqzxRMPyuSZsedQ3REBT2QhSOenboU/nwXM3pgPHfNRxoLmKkVZOo7zAnfnimIvE2RbICDk=, api error AccessControlListNotSupported: The bucket does not allow ACLs
+# resource "aws_s3_bucket_acl" "cloudfront_bucket" {
+#   bucket     = aws_s3_bucket.cloudfront_bucket.bucket
+#   depends_on = [ aws_s3_bucket_ownership_controls.cloudfront_bucket ]
+#   acl        = "private"
+# }
 
 resource "aws_s3_bucket_website_configuration" "static" {
   bucket = aws_s3_bucket.cloudfront_bucket.bucket
 
   index_document {
-    suffix = "index"
+    suffix = "index.html"
   }
 
-  error_document {
-    key = "error"
-  }
+  # error_document {
+  #   key = "/error.html"
+  # }
 
 }
 
@@ -103,19 +105,28 @@ data "aws_iam_policy_document" "cf_bucket_policy" {
     effect = "Allow"
 
     principals {
-      type = "AWS" ## "Service"
-      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn] ## ["cloudfront.amazonaws.com"]
+      type = "Service" 
+      identifiers = ["cloudfront.amazonaws.com"] 
     }
-    actions =  ["s3:GetObject", "s3:ListBucket"]
+    
+    principals {
+      type = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn] 
+    }
+    
+    actions =  ["s3:GetObject"]  ##, "s3:ListBucket"]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
+##      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
       "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
     ]
-    # condition {
-    #   test = "StringEquals"
-    #   variable = "AWS:SourceArn"
-    #   values = ["arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.static_site_distribution.id}"] ## [ "${aws_cloudfront_distribution.static_site_distribution.arn}" ]
-    # }
+    condition {
+      test = "StringEquals"
+      variable = "AWS:SourceArn"
+      values = [ 
+        aws_cloudfront_distribution.static_site_distribution.arn,
+        aws_cloudfront_origin_access_identity.static_site_identity.iam_arn 
+      ] 
+    }
   }
   
   statement {
@@ -137,6 +148,24 @@ data "aws_iam_policy_document" "cf_bucket_policy" {
     }
   }
 
+  statement {
+    sid = "OnlySecureTransport"
+    actions = ["s3:*"]
+    condition {
+        test = "Bool"
+        variable = "aws:SecureTransport"
+        values = [ "false" ]
+    }
+    effect = "Deny"
+    principals {
+       type = "*"
+       identifiers = ["*"]
+    }
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
+    ]
+  }
 }
 
 resource "aws_s3_bucket_policy" "cloudfront_bucket" {
@@ -147,9 +176,9 @@ resource "aws_s3_bucket_policy" "cloudfront_bucket" {
 
 resource "aws_s3_object" "index" {
   bucket  = aws_s3_bucket.cloudfront_bucket.bucket
-  key     = "index"
+  key     = "/index.html"
   
-  content_type = "text/plain"
+  content_type = "text/html"
   content      = <<EOF
 <!DOCTYPE html>
 <html>
@@ -163,13 +192,14 @@ EOF
   lifecycle {
     ignore_changes = [ content, tags ]
   }
+  ##acl = "public-read" ## "private"
 }
 
 resource "aws_s3_object" "error" {
   bucket  = aws_s3_bucket.cloudfront_bucket.bucket
-  key     = "error"
+  key     = "/error.html"
   
-  content_type = "text/plain"
+  content_type = "text/html"
   content      = <<EOF
 <!DOCTYPE html>
 <html>
@@ -183,6 +213,7 @@ EOF
   lifecycle {
     ignore_changes = [ content, tags ]
   }
+  ##acl = "public-read" # "private"
 }
 
 
@@ -212,7 +243,7 @@ resource "aws_s3_bucket_ownership_controls" "cloudfront_logging" {
 resource "aws_s3_bucket_acl" "cloudfront_logging" {
   bucket     = aws_s3_bucket.cloudfront_logging.bucket
   depends_on = [ aws_s3_bucket_ownership_controls.cloudfront_logging ]
-  acl        = "private"
+  acl        = "log-delivery-write"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_logging" {
@@ -238,18 +269,37 @@ data "aws_iam_policy_document" "cf_logging_policy" {
       "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}",
       "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/*"
     ]
+    # condition {
+    #   test = "ForAnyValue:StringEquals"
+    #   variable = "AWS:SourceAccount" 
+    #   values = [data.aws_caller_identity.current.account_id]
+    # }
     condition {
-      test = "ForAnyValue:StringEquals"
-      variable = "AWS:SourceAccount" 
-      values = [data.aws_caller_identity.current.account_id]
-    }
-    condition {
-      test = "ForAnyValue:StringEquals"
+      test = "StringEquals"
       variable = "AWS:SourceArn" 
-      values = ["arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"]
+      values = [aws_cloudfront_distribution.static_site_distribution.arn]
     }
   }
+  statement {
+    sid = "OnlySecureTransport"
+    actions = ["s3:*"]
+    condition {
+        test = "Bool"
+        variable = "aws:SecureTransport"
+        values = [ "false" ]
+    }
+    effect = "Deny"
+    principals {
+       type = "*"
+       identifiers = ["*"]
+    }
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/*"
+    ]
+  }
 }
+
 resource "aws_s3_bucket_policy" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.bucket
 
@@ -260,7 +310,7 @@ resource "aws_s3_bucket_policy" "cloudfront_logging" {
 resource "aws_cloudfront_distribution" "static_site_distribution" {
   origin {
     domain_name = aws_s3_bucket.cloudfront_bucket.bucket_regional_domain_name
-    origin_id   = "S3-${aws_s3_bucket.cloudfront_bucket.id}"
+    origin_id   = "S3-${aws_s3_bucket.cloudfront_bucket.bucket}"
     # origin_access_control_id = aws_cloudfront_origin_access_control.static_site_control.id
 
     s3_origin_config {
@@ -271,20 +321,26 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   enabled             = true
   is_ipv6_enabled     = true
   comment             = "CloudFront distribution for static site ${terraform.workspace}"
-  default_root_object = "index"
+  default_root_object = "/index.html"
+
+  custom_error_response {
+    error_code = 404
+    response_code = 200
+    response_page_path = "/error.html"
+  }
 
   ##aliases = [local.root_domain_name]
 
   logging_config {
     include_cookies = false
     bucket = local.static_cflog_bucket_ref # aws_s3_bucket.cloudfront_logging.bucket
-    prefix = local.is_ephemeral_env ? null : "static"
+    prefix = local.is_ephemeral_env ? null : "cf-logging/"
   }
 
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "S3-${aws_s3_bucket.cloudfront_bucket.id}"
+    target_origin_id       = "S3-${aws_s3_bucket.cloudfront_bucket.bucket}"
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
@@ -296,8 +352,8 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
     }
 
     min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    default_ttl            = 0
+    max_ttl                = 0
   }
 
   restrictions {
