@@ -5,18 +5,10 @@ provider "aws" {
   }
 }
 
-provider "aws" {
-  alias  = "secondary"
-  region = "us-west-2"
-  default_tags {
-    tags = local.default_tags
-  }
-}
-
 terraform {
   backend "s3" {
     bucket         = "bfd-tf-state"
-    key            = "services/base/terraform.tfstate"
+    key            = "services/static-site/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bfd-tf-table"
     encrypt        = "1"

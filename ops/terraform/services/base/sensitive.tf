@@ -11,11 +11,18 @@ resource "aws_ssm_parameter" "common_sensitive" {
 
   key_id    = local.kms_key_id
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = "SecureString"
   value     = each.value
 
   tags = {}
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "migrator_sensitive" {
@@ -23,11 +30,18 @@ resource "aws_ssm_parameter" "migrator_sensitive" {
 
   key_id    = local.kms_key_id
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = "SecureString"
   value     = each.value
 
   tags = {}
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "pipeline_sensitive" {
@@ -35,11 +49,18 @@ resource "aws_ssm_parameter" "pipeline_sensitive" {
 
   key_id    = local.kms_key_id
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = "SecureString"
   value     = each.value
 
   tags = {}
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "server_sensitive" {
@@ -47,12 +68,19 @@ resource "aws_ssm_parameter" "server_sensitive" {
 
   key_id    = local.kms_key_id
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = "SecureString"
   tier      = "Intelligent-Tiering"
   value     = each.value
 
   tags = {}
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "eft_sensitive" {
@@ -60,9 +88,16 @@ resource "aws_ssm_parameter" "eft_sensitive" {
 
   key_id    = local.kms_key_id
   name      = each.key
-  overwrite = true
+  # overwrite = true
   type      = "SecureString"
   value     = each.value
 
   tags = {}
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      tags,
+    ]
+  }
 }
