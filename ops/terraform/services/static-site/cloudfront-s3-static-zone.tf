@@ -11,6 +11,8 @@ locals {
   static_cf_bucket_name = "bfd-${terraform.workspace}-cf-${local.account_id}"
   static_cflog_bkt_name = "bfd-${terraform.workspace}-cflog-${local.account_id}"
   static_cf_alias       = "${terraform.workspace}.static.${local.root_domain_name}"
+  
+  static_cflog_bucket_ref = "${local.static_cflog_bkt_name}.s3.amazonaws.com"
 }
 
 data "aws_route53_zone" "vpc_root" {
@@ -101,19 +103,19 @@ data "aws_iam_policy_document" "cf_bucket_policy" {
     effect = "Allow"
 
     principals {
-      type = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
+      type = "AWS" ## "Service"
+      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn] ## ["cloudfront.amazonaws.com"]
     }
-    actions =  ["s3:GetObject"]
+    actions =  ["s3:GetObject", "s3:ListBucket"]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}",
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*"
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
     ]
-    condition {
-      test = "ForAnyValue:StringEquals"
-      variable = "AWS:SourceArn"
-      values = [ "${aws_cloudfront_distribution.static_site_distribution.arn}" ]
-    }
+    # condition {
+    #   test = "StringEquals"
+    #   variable = "AWS:SourceArn"
+    #   values = ["arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.static_site_distribution.id}"] ## [ "${aws_cloudfront_distribution.static_site_distribution.arn}" ]
+    # }
   }
   
   statement {
@@ -125,12 +127,12 @@ data "aws_iam_policy_document" "cf_bucket_policy" {
     }
     actions = ["s3:*"]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}",
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.arn}/*"
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
     ]
     condition {
       test = "ArnEquals"
-      variable = "AWS:Role"
+      variable = "AWS:UserId"
       values = [ "arn:aws:iam::${local.account_id}:role/cloudbees-jenkins" ]
     }
   }
@@ -200,6 +202,19 @@ resource "aws_s3_bucket_public_access_block" "cloudfront_logging" {
   restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_ownership_controls" "cloudfront_logging" {
+  bucket = aws_s3_bucket.cloudfront_logging.bucket
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "cloudfront_logging" {
+  bucket     = aws_s3_bucket.cloudfront_logging.bucket
+  depends_on = [ aws_s3_bucket_ownership_controls.cloudfront_logging ]
+  acl        = "private"
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.bucket
   rule {
@@ -218,10 +233,10 @@ data "aws_iam_policy_document" "cf_logging_policy" {
         type = "Service"
         identifiers = ["cloudfront.amazonaws.com"]
     }
-    actions = ["s3:PutObject"]
+    actions =  ["s3:*"] # ["s3:PutObject"]
     resources = [ 
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}",
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/*"
     ]
     condition {
       test = "ForAnyValue:StringEquals"
@@ -246,7 +261,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   origin {
     domain_name = aws_s3_bucket.cloudfront_bucket.bucket_regional_domain_name
     origin_id   = "S3-${aws_s3_bucket.cloudfront_bucket.id}"
-    origin_access_control_id = aws_cloudfront_origin_access_control.static_site_control.id
+    # origin_access_control_id = aws_cloudfront_origin_access_control.static_site_control.id
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.static_site_identity.cloudfront_access_identity_path
@@ -258,11 +273,11 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   comment             = "CloudFront distribution for static site ${terraform.workspace}"
   default_root_object = "index"
 
-  aliases = [local.root_domain_name]
+  ##aliases = [local.root_domain_name]
 
   logging_config {
     include_cookies = false
-    bucket = aws_s3_bucket.cloudfront_logging.bucket
+    bucket = local.static_cflog_bucket_ref # aws_s3_bucket.cloudfront_logging.bucket
     prefix = local.is_ephemeral_env ? null : "static"
   }
 
@@ -307,9 +322,9 @@ resource "aws_cloudfront_origin_access_identity" "static_site_identity" {
   comment = "Origin access identity for static site ${terraform.workspace}"
 }
 
-resource "aws_cloudfront_origin_access_control" "static_site_control" {
-  name                              = "static_site_control-${terraform.workspace}"
-  origin_access_control_origin_type = "s3"
-  signing_behavior                  = "always"
-  signing_protocol                  = "sigv4"
-}
+# resource "aws_cloudfront_origin_access_control" "static_site_control" {
+#   name                              = "static_site_control-${terraform.workspace}"
+#   origin_access_control_origin_type = "s3"
+#   signing_behavior                  = "always"
+#   signing_protocol                  = "sigv4"
+# }
