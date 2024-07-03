@@ -2,9 +2,9 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
-data "aws_kms_key" "cmk" {
-  key_id = local.kms_key_alias
-}
+# data "aws_kms_key" "cmk" {
+#   key_id = local.kms_key_alias
+# }
 
 data "aws_kms_key" "config_cmk" {
   key_id = local.kms_config_key_alias

@@ -1,10 +1,6 @@
 # Creates a private static zone for the environment
 data "aws_canonical_user_id" "current" {}
 
-# data "aws_ssm_parameter" "root_domain" {
-#   name = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
-# }
-
 locals {
   # root_domain_name      = data.aws_ssm_parameter.root_domain.value
   root_domain_name      = data.aws_ssm_parameter.zone_name.value
@@ -13,6 +9,52 @@ locals {
   static_cf_alias       = "${terraform.workspace}.static.${local.root_domain_name}"
   
   static_cflog_bucket_ref = "${local.static_cflog_bkt_name}.s3.amazonaws.com"
+  
+  env_kms_alias   = "alias/cf-${terraform.workspace}-s3-key"
+  kms_key_id      = aws_kms_key.cfbucket_kms_key.arn
+}
+
+resource "aws_kms_key" "cfbucket_kms_key" {
+  description             = "KMS key for S3 bucket encryption"
+  deletion_window_in_days = 30
+  
+  policy = data.aws_iam_policy_document.cfbucket_kms_key_policy.json
+}
+
+resource "aws_kms_alias" "cfbucket_kms_alias" {
+  name          = local.env_kms_alias
+  target_key_id = aws_kms_key.cfbucket_kms_key.id
+}
+
+data "aws_iam_policy_document" "cfbucket_kms_key_policy" {
+  statement {
+    actions   = ["kms:*"]
+    effect    = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey",
+      "kms:ReEncrypt*"
+    ]
+    effect    = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
+    }
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.static_site_distribution.arn]
+    }
+  }
 }
 
 data "aws_route53_zone" "vpc_root" {
@@ -85,7 +127,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_bucket
   bucket = aws_s3_bucket.cloudfront_bucket.bucket
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = local.kms_key_id
+      kms_master_key_id = local.kms_key_id  ## redefined here, disabled in main
       sse_algorithm     = "aws:kms"
     }
   }
@@ -95,7 +137,7 @@ resource "aws_s3_bucket_logging" "cloudfront_bucket" {
   bucket = aws_s3_bucket.cloudfront_bucket.bucket
 
   target_bucket = aws_s3_bucket.cloudfront_logging.bucket  # local.logging_bucket
-  target_prefix = "static-${local.legacy_service}_s3_access_logs/"
+  target_prefix = "${terraform.workspace}-${local.legacy_service}_s3_access_logs/"
 }
 
 data "aws_iam_policy_document" "cf_bucket_policy" { 
@@ -114,19 +156,24 @@ data "aws_iam_policy_document" "cf_bucket_policy" {
       identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn] 
     }
     
+    principals {
+      type = "AWS"
+      identifiers = ["arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${aws_cloudfront_origin_access_identity.static_site_identity.id}"]
+    }
+    
     actions =  ["s3:GetObject"]  ##, "s3:ListBucket"]
     resources = [
 ##      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
       "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
     ]
-    condition {
-      test = "StringEquals"
-      variable = "AWS:SourceArn"
-      values = [ 
-        aws_cloudfront_distribution.static_site_distribution.arn,
-        aws_cloudfront_origin_access_identity.static_site_identity.iam_arn 
-      ] 
-    }
+    # condition {
+    #   test = "StringEquals"
+    #   variable = "AWS:SourceArn"
+    #   values = [ 
+    #     aws_cloudfront_distribution.static_site_distribution.arn,
+    #     aws_cloudfront_origin_access_identity.static_site_identity.iam_arn 
+    #   ] 
+    # }
   }
   
   statement {
@@ -145,6 +192,29 @@ data "aws_iam_policy_document" "cf_bucket_policy" {
       test = "ArnEquals"
       variable = "AWS:UserId"
       values = [ "arn:aws:iam::${local.account_id}:role/cloudbees-jenkins" ]
+    }
+  }
+
+  statement {
+    sid     = "AllowKMSAccess"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SecureTransport"
+      values   = ["true"]
     }
   }
 
@@ -334,7 +404,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   logging_config {
     include_cookies = false
     bucket = local.static_cflog_bucket_ref # aws_s3_bucket.cloudfront_logging.bucket
-    prefix = local.is_ephemeral_env ? null : "cf-logging/"
+    prefix = "${terraform.workspace}-cf-logging/"
   }
 
   default_cache_behavior {
