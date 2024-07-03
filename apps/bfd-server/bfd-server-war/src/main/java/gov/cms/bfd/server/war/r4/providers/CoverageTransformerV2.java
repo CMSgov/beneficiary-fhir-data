@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.commons.TransformerConstants.COVERAGE_ISSUER;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -37,9 +39,6 @@ final class CoverageTransformerV2 {
 
   /** Helper to record metric information. */
   private final MetricRegistry metricRegistry;
-
-  /** Constant value used within the code. */
-  private static final String MEDICARE = "MEDICARE";
 
   /**
    * Instantiates a new {@link CoverageTransformerV2}.
@@ -854,9 +853,7 @@ final class CoverageTransformerV2 {
    * @param coverage The {@link Coverage} to Coverage details
    */
   private void addC4bbPayor(Coverage coverage) {
-    coverage
-        .addPayor()
-        .setIdentifier(new Identifier().setValue(TransformerConstants.COVERAGE_ISSUER));
+    coverage.addPayor().setIdentifier(new Identifier().setValue(COVERAGE_ISSUER));
   }
 
   /**
@@ -870,7 +867,7 @@ final class CoverageTransformerV2 {
         TransformerUtilsV2.findOrCreateContainedOrganization(
             coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
     organization.setActive(true);
-    organization.setName(MEDICARE);
+    organization.setName(COVERAGE_ISSUER);
 
     coverage.addPayor(new Reference(organization));
   }
