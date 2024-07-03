@@ -38,6 +38,9 @@ final class CoverageTransformerV2 {
   /** Helper to record metric information. */
   private final MetricRegistry metricRegistry;
 
+  /** Constant value used within the code. */
+  private static final String MEDICARE = "MEDICARE";
+
   /**
    * Instantiates a new {@link CoverageTransformerV2}.
    *
@@ -866,6 +869,8 @@ final class CoverageTransformerV2 {
     Organization organization =
         TransformerUtilsV2.findOrCreateContainedOrganization(
             coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
+    organization.setActive(true);
+    organization.setName(MEDICARE);
 
     coverage.addPayor(new Reference(organization));
   }
