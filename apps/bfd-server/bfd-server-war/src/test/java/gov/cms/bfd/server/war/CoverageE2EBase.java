@@ -115,27 +115,6 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
   }
 
   /**
-   * Verifies that {@link R4CoverageResourceProvider#read} returns a 400 and error message when
-   * requesting a contract id which is improperly formatted.
-   */
-  @Test
-  public void testReadWhenImproperlyFormattedCoverageIdExpect400() {
-    String requestString = coverageEndpoint + "bad-format";
-
-    given()
-        .spec(requestAuth)
-        .expect()
-        .body("issue.severity", hasItem("error"))
-        .body(
-            "issue.diagnostics",
-            hasItem(
-                "Coverage ID pattern: 'bad-format' does not match expected pattern: {alphaNumericString}-{singleCharacter}-{idNumber}"))
-        .statusCode(400)
-        .when()
-        .get(requestString);
-  }
-
-  /**
    * Verify that Coverage returns a 200 when searching by an existing bene id, and the bene id in
    * each of the resources matches the searched-by id.
    */

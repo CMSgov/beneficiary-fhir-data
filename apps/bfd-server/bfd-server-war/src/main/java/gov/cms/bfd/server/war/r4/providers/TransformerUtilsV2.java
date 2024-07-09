@@ -45,7 +45,7 @@ import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -90,6 +90,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitBalanceComponent;
@@ -132,7 +133,7 @@ public final class TransformerUtilsV2 {
   private static final String NPI_ORG_DISPLAY_DEFAULT = "UNKNOWN";
 
   /** Constant used to look up and identify an internal `contained` Organization resource. */
-  private static final String PROVIDER_ORG_ID = "provider-org";
+  static final String PROVIDER_ORG_ID = "provider-org";
 
   /** Constant for finding a provider org reference. */
   private static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
@@ -3101,8 +3102,9 @@ public final class TransformerUtilsV2 {
    * @param lastUpdated the last updated
    * @param fiDocClmControlNum FI_DOC_CLM_CNTL_NUM
    * @param fiClmProcDt FI_CLM_PROC_DT
-   * @param c4bbInstutionalClaimSubtype the {@link C4BBbInstutionalClaimSubtype} that is passed in
+   * @param c4bbInstutionalClaimSubtype the {@link C4BBInstutionalClaimSubtypes} that is passed in
    * @param claimQueryCode the CLAIM_QUERY_CODE
+   * @param profile the CARIN {@link Profile}
    */
   static void mapEobCommonGroupInpOutHHAHospiceSNF(
       ExplanationOfBenefit eob,
@@ -3121,7 +3123,8 @@ public final class TransformerUtilsV2 {
       Optional<String> fiDocClmControlNum,
       Optional<LocalDate> fiClmProcDt,
       C4BBInstutionalClaimSubtypes c4bbInstutionalClaimSubtype,
-      Optional<Character> claimQueryCode) {
+      Optional<Character> claimQueryCode,
+      Profile profile) {
 
     // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
     claimQueryCode.ifPresent(
@@ -3146,7 +3149,7 @@ public final class TransformerUtilsV2 {
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(
-        eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, npiOrgName, lastUpdated);
+        eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, npiOrgName, lastUpdated, profile);
 
     // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()
@@ -3564,19 +3567,21 @@ public final class TransformerUtilsV2 {
    * Looks for an {@link Organization} with the given resource ID in {@link
    * ExplanationOfBenefit#getContained()} or adds one if it doesn't exist.
    *
-   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param resource the {@link DomainResource} to modify
    * @param id The resource ID
+   * @param profile the supported CARIN {@link Profile}
    * @return The found or new {@link Organization} resource
    */
-  static Organization findOrCreateContainedOrganization(ExplanationOfBenefit eob, String id) {
+  static Organization findOrCreateContainedOrganization(
+      DomainResource resource, String id, Profile profile) {
     Optional<Resource> organization =
-        eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
+        resource.getContained().stream().filter(r -> r.getId().equals(id)).findFirst();
 
     // If it isn't there, add one
     if (!organization.isPresent()) {
       organization = Optional.of(new Organization().setId(id));
-      organization.get().getMeta().addProfile(ProfileConstants.C4BB_ORGANIZATION_URL);
-      eob.getContained().add(organization.get());
+      organization.get().getMeta().addProfile(profile.getVersionedOrganizationUrl());
+      resource.getContained().add(organization.get());
     }
 
     // At this point `organization.get()` will always return
@@ -3596,13 +3601,15 @@ public final class TransformerUtilsV2 {
    * @param type The {@link C4BBIdentifierType} of the identifier slice
    * @param value The value of the identifier. If empty, this call is a no-op
    * @param lastUpdated the last updated value to use for the slice
+   * @param profile the CARIN {@link Profile}
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
-      Optional<Instant> lastUpdated) {
-    addProviderSlice(eob, type, Optional.of(value), Optional.empty(), lastUpdated);
+      Optional<Instant> lastUpdated,
+      Profile profile) {
+    addProviderSlice(eob, type, Optional.of(value), Optional.empty(), lastUpdated, profile);
   }
 
   /**
@@ -3615,15 +3622,17 @@ public final class TransformerUtilsV2 {
    * @param value The value of the identifier. If empty, this call is a no-op
    * @param npiOrgName the npi org name
    * @param lastUpdated the last updated to use for the slice
+   * @param profile the CARIN {@link Profile}
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       Optional<String> value,
       Optional<String> npiOrgName,
-      Optional<Instant> lastUpdated) {
+      Optional<Instant> lastUpdated,
+      Profile profile) {
     if (value.isPresent()) {
-      Organization organization = findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID);
+      Organization organization = findOrCreateContainedOrganization(eob, PROVIDER_ORG_ID, profile);
 
       // Add the new Identifier to the Organization
       Identifier id =
@@ -3664,14 +3673,16 @@ public final class TransformerUtilsV2 {
    * @param value The value of the identifier. If empty, this call is a no-op
    * @param npiOrgName the npi org name
    * @param lastupdated the last updated to use for the slice
+   * @param profile the CARIN {@link Profile}
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
       Optional<String> npiOrgName,
-      Optional<Instant> lastupdated) {
-    addProviderSlice(eob, type, Optional.of(value), npiOrgName, lastupdated);
+      Optional<Instant> lastupdated,
+      Profile profile) {
+    addProviderSlice(eob, type, Optional.of(value), npiOrgName, lastupdated, profile);
   }
 
   /**
