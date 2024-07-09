@@ -299,6 +299,20 @@ public final class TransformerConstants {
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Unit". */
   public static final String CODING_SYSTEM_UCUM_UN_CODE = "[arb'U]";
 
+  /**
+   * Code System URL for Data Absent <a
+   * href="http://hl7.org/fhir/StructureDefinition/data-absent-reason">Extension: Data Absent
+   * Reason</a>.
+   */
+  public static final String CODING_DATA_ABSENT =
+      "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
+
+  /** The {@link #CODING_DATA_ABSENT} {@link Coding#getCode()} for "Data Absent Reason". */
+  public static final String DATA_ABSENT_REASON_NULL_CODE = "NULL";
+
+  /** The {@link #CODING_DATA_ABSENT} {@link Coding#getDisplay()} for "Data Absent Reason". */
+  public static final String DATA_ABSENT_REASON_DISPLAY = "Data Absent Reason";
+
   /** Used to set the coverage issuer for CMS. */
   public static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
 
