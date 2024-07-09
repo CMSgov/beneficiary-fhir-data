@@ -16,11 +16,12 @@ import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.RdsClientBuilder;
 
 /**
- * Implementation of {@link DataSourceFactory} that creates instances of {@link HikariDataSource}
- * objects that use temporary auth tokens requested from RDS instead of a fixed password. {@see
+ * Implementation of {@link HikariDataSourceFactory} that creates instances of {@link
+ * HikariDataSource} objects that use temporary auth tokens requested from RDS instead of a fixed
+ * password. {@see
  * https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html}.
  */
-public class RdsDataSourceFactory extends HikariDataSourceFactory {
+public class RdsDataSourceFactory extends DefaultHikariDataSourceFactory {
   /**
    * A short delay between token requests so that constructing a new thread pool doesn't need to
    * trigger hundreds of token requests at the same time. According to the AWS documentation a token

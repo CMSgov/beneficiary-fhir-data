@@ -52,7 +52,7 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import io.micrometer.core.instrument.config.validate.ValidationException;
@@ -141,7 +141,7 @@ public class AppConfigurationTest {
         envVars.get(AppConfiguration.SSM_PATH_DATABASE_PASSWORD),
         testAppConfig.getDatabaseOptions().getDatabasePassword());
     assertThat(testAppConfig.createDataSourceFactory())
-        .isExactlyInstanceOf(HikariDataSourceFactory.class);
+        .isExactlyInstanceOf(DefaultHikariDataSourceFactory.class);
 
     assertEquals(
         Integer.parseInt(envVars.get(AppConfiguration.SSM_PATH_LOADER_THREADS)),

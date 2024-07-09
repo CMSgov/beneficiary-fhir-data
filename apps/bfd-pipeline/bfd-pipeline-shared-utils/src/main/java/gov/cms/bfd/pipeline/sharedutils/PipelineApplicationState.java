@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.sharedutils;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -95,13 +95,13 @@ public final class PipelineApplicationState implements AutoCloseable {
   /**
    * Create pooled data source used to communicate with the database.
    *
-   * @param dataSourceFactory the {@link DataSourceFactory} to use for the application's DB (which
-   *     this will use to create {@link #pooledDataSource})
+   * @param dataSourceFactory the {@link HikariDataSourceFactory} to use for the application's DB
+   *     (which this will use to create {@link #pooledDataSource})
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
   public static HikariDataSource createPooledDataSource(
-      DataSourceFactory dataSourceFactory, MetricRegistry metrics) {
+      HikariDataSourceFactory dataSourceFactory, MetricRegistry metrics) {
     HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
     pooledDataSource.setMetricRegistry(metrics);
 

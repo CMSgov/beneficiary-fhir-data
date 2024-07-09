@@ -1,8 +1,8 @@
 package gov.cms.bfd.sharedutils.config;
 
 import com.google.common.base.Preconditions;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import java.net.InetAddress;
@@ -118,18 +118,18 @@ public abstract class BaseAppConfiguration {
   }
 
   /**
-   * Creates appropriate {@link DataSourceFactory} based on on our {@link DatabaseOptions}.
+   * Creates appropriate {@link HikariDataSourceFactory} based on on our {@link DatabaseOptions}.
    *
    * @return factory for creating data sources
    */
-  public DataSourceFactory createDataSourceFactory() {
+  public HikariDataSourceFactory createDataSourceFactory() {
     if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
       return RdsDataSourceFactory.builder()
           .awsClientConfig(awsClientConfig)
           .databaseOptions(databaseOptions)
           .build();
     } else {
-      return new HikariDataSourceFactory(databaseOptions);
+      return new DefaultHikariDataSourceFactory(databaseOptions);
     }
   }
 

@@ -15,8 +15,8 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -71,13 +71,13 @@ public class DirectRdaLoadApp {
     final DatabaseOptions databaseConfig =
         readDatabaseOptions(options, jobConfig.getJobConfig().getWriteThreads());
     final AwsClientConfig awsClientConfig = readAwsClientConfig(options);
-    final DataSourceFactory dataSourceFactory =
+    final HikariDataSourceFactory dataSourceFactory =
         awsClientConfig != null
             ? RdsDataSourceFactory.builder()
                 .awsClientConfig(awsClientConfig)
                 .databaseOptions(databaseConfig)
                 .build()
-            : new HikariDataSourceFactory(databaseConfig);
+            : new DefaultHikariDataSourceFactory(databaseConfig);
     HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);
     System.out.printf("thread count is %d%n", jobConfig.getJobConfig().getWriteThreads());

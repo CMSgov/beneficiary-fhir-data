@@ -39,9 +39,9 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseUtils;
+import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import jakarta.persistence.EntityManager;
@@ -197,7 +197,7 @@ public class SpringConfiguration {
    * @return the factory
    */
   @Bean
-  public DataSourceFactory dataSourceFactory(
+  public HikariDataSourceFactory dataSourceFactory(
       @Value("${" + SSM_PATH_DATABASE_AUTH_TYPE + ":JDBC}") String authTypeName,
       @Value("${" + SSM_PATH_DATABASE_URL + "}") String url,
       @Value("${" + SSM_PATH_DATABASE_USERNAME + "}") String username,
@@ -220,7 +220,7 @@ public class SpringConfiguration {
           .databaseOptions(databaseOptions)
           .build();
     } else {
-      return new HikariDataSourceFactory(databaseOptions);
+      return new DefaultHikariDataSourceFactory(databaseOptions);
     }
   }
 
@@ -232,7 +232,8 @@ public class SpringConfiguration {
    * @return the {@link DataSource} that provides the application's database connection
    */
   @Bean(destroyMethod = "close")
-  public DataSource dataSource(DataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
+  public DataSource dataSource(
+      HikariDataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
 
     HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
     DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);

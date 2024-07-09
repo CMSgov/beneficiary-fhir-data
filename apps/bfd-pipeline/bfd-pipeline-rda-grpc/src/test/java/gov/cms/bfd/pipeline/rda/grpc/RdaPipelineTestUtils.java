@@ -22,7 +22,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Timer;
@@ -125,7 +125,8 @@ public class RdaPipelineTestUtils {
             .databasePassword(dataSourceComponents.getPassword())
             .maxPoolSize(10)
             .build();
-    try (HikariDataSource dataSource = new HikariDataSourceFactory(dbOptions).createDataSource();
+    try (HikariDataSource dataSource =
+            new DefaultHikariDataSourceFactory(dbOptions).createDataSource();
         PipelineApplicationState appState =
             new PipelineApplicationState(
                 new SimpleMeterRegistry(),
