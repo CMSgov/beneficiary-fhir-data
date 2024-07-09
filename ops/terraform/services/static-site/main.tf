@@ -59,8 +59,7 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   region     = data.aws_region.current.name
   vpc_id     = data.aws_vpc.this.id
-  # comment out this local from baseline, leverage local in cloudfront-s3-static-zone.tf
-  # kms_key_id = data.aws_kms_key.cmk.arn 
+
   kms_config_key_arns = flatten(
     [
       for v in data.aws_kms_key.config_cmk.multi_region_configuration :
@@ -68,4 +67,15 @@ locals {
     ]
   )
   logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
+
+  root_domain_name      = data.aws_ssm_parameter.zone_name.value
+  static_cf_bucket_name = "bfd-${terraform.workspace}-cf-${local.account_id}"
+  static_cflog_bkt_name = "bfd-${terraform.workspace}-cflog-${local.account_id}"
+  static_cf_alias       = "${terraform.workspace}.static.${local.root_domain_name}"
+  
+  static_cflog_bucket_ref = "${local.static_cflog_bkt_name}.s3.amazonaws.com"
+  
+  env_kms_alias   = "alias/cf-${terraform.workspace}-s3-key"
+  kms_key_id      = aws_kms_key.cfbucket_kms_key.arn
+
 }
