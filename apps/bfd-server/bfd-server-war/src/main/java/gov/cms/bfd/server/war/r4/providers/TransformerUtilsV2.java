@@ -917,16 +917,11 @@ public final class TransformerUtilsV2 {
   public static Coding createUnitOfMeasureCoding(String codingSystem, String codingCode) {
     String display =
         switch (codingCode) {
-          case TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE -> TransformerConstants
-              .CODING_SYSTEM_UCUM_F2_DISPLAY;
-          case TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE -> TransformerConstants
-              .CODING_SYSTEM_UCUM_GR_DISPLAY;
-          case TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE -> TransformerConstants
-              .CODING_SYSTEM_UCUM_ML_DISPLAY;
-          case TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE -> TransformerConstants
-              .CODING_SYSTEM_UCUM_ME_DISPLAY;
-          case TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE -> TransformerConstants
-              .CODING_SYSTEM_UCUM_UN_DISPLAY;
+          case "F2" -> TransformerConstants.CODING_SYSTEM_UCUM_F2_DISPLAY;
+          case "GR" -> TransformerConstants.CODING_SYSTEM_UCUM_GR_DISPLAY;
+          case "ML" -> TransformerConstants.CODING_SYSTEM_UCUM_ML_DISPLAY;
+          case "ME" -> TransformerConstants.CODING_SYSTEM_UCUM_ME_DISPLAY;
+          case "UN" -> TransformerConstants.CODING_SYSTEM_UCUM_UN_DISPLAY;
           default -> null;
         };
 
