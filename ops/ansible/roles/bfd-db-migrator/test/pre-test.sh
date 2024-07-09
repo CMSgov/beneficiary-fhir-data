@@ -40,7 +40,7 @@ docker run \
     -e 'POSTGRES_PASSWORD=bfd' \
     --name "${CONTAINER_NAME}-db" \
     --rm \
-    postgres:14 -c max_connections=200
+    postgres:16 -c max_connections=200
 fi
 
 # Prep the Docker container that will be used (if it's not already running).
