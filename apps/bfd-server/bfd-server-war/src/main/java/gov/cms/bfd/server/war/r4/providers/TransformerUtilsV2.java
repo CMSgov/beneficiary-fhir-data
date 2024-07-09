@@ -1101,12 +1101,21 @@ public final class TransformerUtilsV2 {
    */
   static void addNationalDrugCode(
       ItemComponent item, Optional<String> nationalDrugCode, String drugCode) {
-    nationalDrugCode.ifPresent(
-        code ->
-            item.getProductOrService()
-                .addExtension()
-                .setUrl(TransformerConstants.CODING_NDC)
-                .setValue(new Coding(TransformerConstants.CODING_NDC, code, drugCode)));
+    if (nationalDrugCode.isPresent()) {
+      item.getProductOrService()
+          .addExtension()
+          .setUrl(TransformerConstants.CODING_NDC)
+          .setValue(new Coding(TransformerConstants.CODING_NDC, nationalDrugCode.get(), drugCode));
+    } else {
+      item.getProductOrService()
+          .addExtension()
+          .setUrl(TransformerConstants.CODING_DATA_ABSENT)
+          .setValue(
+              new Coding(
+                  TransformerConstants.CODING_DATA_ABSENT,
+                  TransformerConstants.DATA_ABSENT_REASON_NULL_CODE,
+                  TransformerConstants.DATA_ABSENT_REASON_DISPLAY));
+    }
   }
 
   /**
@@ -3725,6 +3734,16 @@ public final class TransformerUtilsV2 {
         code ->
             item.setProductOrService(
                 createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS, code)));
+
+    if (hcpcsCode.isPresent()) {
+      item.setProductOrService(
+          createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsCode.get()));
+    } else {
+      item.setProductOrService(
+          createCodeableConcept(
+              TransformerConstants.CODING_DATA_ABSENT,
+              TransformerConstants.DATA_ABSENT_REASON_NULL_CODE));
+    }
 
     for (Optional<String> hcpcsModifier : modifiers) {
       if (hcpcsModifier.isPresent()) {
