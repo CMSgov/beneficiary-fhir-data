@@ -6,6 +6,8 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaimColumn;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
@@ -92,6 +94,50 @@ public final class TransformerConstants {
    * {@link CcwCodebookVariable#getVariable()}'s {@link Variable#getId()}.
    */
   public static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
+
+  /** Base URL for nubc. */
+  public static final String BASE_URL_NUBC = "https://www.nubc.org";
+
+  /** System for NUBC admsn. */
+  public static final String NUBC_ADMIT_CODE_SYSTEM =
+      BASE_URL_NUBC + "/CodeSystem/PriorityTypeOfAdmitOrVisit";
+
+  /**
+   * Maps a ccw variable to a specific URL. If the variable exists as a key in this map, then the
+   * value will be used as the system; otherwise, it will be constructed using the above constants.
+   */
+  public static final Map<String, String> CCW_SYSTEM_MAP =
+      new HashMap<>() {
+        {
+          put("clm_ip_admsn_type_cd", NUBC_ADMIT_CODE_SYSTEM);
+        }
+      };
+
+  /** Constant for Carin BB base url. */
+  public static final String BASE_URL_CARIN_BB = "http://hl7.org/fhir/us/carin-bb";
+
+  /** Constant for Carin BB Information Category. */
+  public static final String CODING_CARIN_BB_INFORMATION_CATEGORY =
+      BASE_URL_CARIN_BB + "/CodeSystem/C4BBSupportingInfoType";
+
+  /** Constant for Carin BB admntype code. */
+  public static final String CARIN_BB_ADMN_TYPE = "admtype";
+
+  /** Maps a CCW variable for a category to a new system. */
+  public static final Map<String, String> CARIN_CATEGORY_SYSTEM_MAP =
+      new HashMap<>() {
+        {
+          put("clm_ip_admsn_type_cd", CODING_CARIN_BB_INFORMATION_CATEGORY);
+        }
+      };
+
+  /** Maps a CCW variable for a category to a new code. */
+  public static final Map<String, String> CARIN_CATEGORY_CODE_MAP =
+      new HashMap<>() {
+        {
+          put("clm_ip_admsn_type_cd", CARIN_BB_ADMN_TYPE);
+        }
+      };
 
   /** The constant for the USD code. */
   public static final String CODED_MONEY_USD = "USD";

@@ -384,8 +384,8 @@ public final class InpatientClaimTransformerV2Test {
             // Category
             Arrays.asList(
                 new Coding(
-                    "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-                    "info",
+                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+                    "admtype",
                     "Information"),
                 new Coding(
                     "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -393,7 +393,7 @@ public final class InpatientClaimTransformerV2Test {
                     "Claim Inpatient Admission Type Code")),
             // Code
             new Coding(
-                "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+                "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
                 "1",
                 "Emergency - The patient required immediate medical intervention as a result of"
                     + " severe, life threatening, or potentially disabling conditions. Generally,"
