@@ -1092,7 +1092,7 @@ public final class TransformerUtils {
    */
   private static CodeableConcept createCodeableConceptForFieldId(
       IAnyResource rootResource, String codingSystem, CcwCodebookInterface ccwVariable) {
-    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable, true);
     Coding coding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
 
     return new CodeableConcept().addCoding(coding);

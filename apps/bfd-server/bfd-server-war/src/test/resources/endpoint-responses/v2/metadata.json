@@ -119,6 +119,9 @@
         "type" : "date",
         "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
+        "name" : "_profile",
+        "type" : "string"
+      }, {
         "name" : "beneficiary",
         "type" : "reference",
         "documentation" : "Fetch _Beneficiary_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n- `beneficiary=567834`\n- `beneficiary=1234`"

@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.commons.TransformerConstants.COVERAGE_ISSUER;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -8,7 +10,7 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.CoverageClass;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -25,7 +28,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
@@ -65,6 +70,7 @@ final class CoverageTransformerV2 {
       case PART_B -> transformPartB(beneficiary);
       case PART_C -> transformPartC(beneficiary);
       case PART_D -> transformPartD(beneficiary);
+      case C4DIC -> transformC4Dic(beneficiary);
       default -> throw new BadCodeMonkeyException();
     };
   }
@@ -73,14 +79,56 @@ final class CoverageTransformerV2 {
    * Transforms a beneficiary into a {@link Coverage} resource.
    *
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
+   * @param enabledProfiles the CARIN {@link Profile} to use
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
    *     Beneficiary}
    */
   @Trace
-  public List<IBaseResource> transform(Beneficiary beneficiary) {
+  public List<IBaseResource> transform(Beneficiary beneficiary, Set<Profile> enabledProfiles) {
     return Arrays.stream(MedicareSegment.values())
+        .filter(
+            s ->
+                (enabledProfiles.contains(Profile.C4DIC) && s == MedicareSegment.C4DIC)
+                    || (enabledProfiles.contains(Profile.C4BB) && s != MedicareSegment.C4DIC))
         .map(s -> transform(s, beneficiary))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Transforms a beneficiary into a {@link Coverage} resource per the CARIN Digital Insurance Card
+   * {@link Profile}.
+   *
+   * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
+   * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
+   *     Beneficiary}
+   */
+  private Coverage transformC4Dic(Beneficiary beneficiary) {
+    Timer.Context timer = createTimerContext("c4dic");
+
+    Coverage coverage = new Coverage();
+    Profile profile = Profile.C4DIC;
+
+    addProfile(coverage, profile);
+    addC4DicIdentifier(coverage, beneficiary);
+    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.C4DIC, beneficiary));
+
+    beneficiary.getMedicareBeneficiaryId().ifPresent(coverage::setSubscriberId);
+
+    setType(coverage);
+    addC4DicPayor(coverage);
+
+    setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
+
+    createCoverageClass(
+        coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
+
+    coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
+
+    // update Coverage.meta.lastUpdated
+    TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
+
+    timer.stop();
+    return coverage;
   }
 
   /**
@@ -94,8 +142,9 @@ final class CoverageTransformerV2 {
   private Coverage transformPartA(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("part_a");
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4BB;
 
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    addProfile(coverage, profile);
 
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
 
@@ -106,7 +155,8 @@ final class CoverageTransformerV2 {
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
-    setTypeAndIssuer(coverage);
+    setType(coverage);
+    addC4bbPayor(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -157,8 +207,9 @@ final class CoverageTransformerV2 {
   private Coverage transformPartB(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("part_b");
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4BB;
 
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    addProfile(coverage, profile);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
     setCoverageStatus(coverage, beneficiary.getPartBTerminationCode());
 
@@ -168,7 +219,8 @@ final class CoverageTransformerV2 {
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
-    setTypeAndIssuer(coverage);
+    setType(coverage);
+    addC4bbPayor(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -214,14 +266,16 @@ final class CoverageTransformerV2 {
   private Coverage transformPartC(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("part_c");
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4BB;
 
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    addProfile(coverage, profile);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
     coverage.setStatus(CoverageStatus.ACTIVE);
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
-    setTypeAndIssuer(coverage);
+    setType(coverage);
+    addC4bbPayor(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -268,8 +322,9 @@ final class CoverageTransformerV2 {
   private Coverage transformPartD(Beneficiary beneficiary) {
     Timer.Context timer = createTimerContext("part_d");
     Coverage coverage = new Coverage();
+    Profile profile = Profile.C4BB;
 
-    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
+    addProfile(coverage, profile);
     coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
 
     TransformerUtilsV2.setPeriodStart(
@@ -278,7 +333,8 @@ final class CoverageTransformerV2 {
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
 
-    setTypeAndIssuer(coverage);
+    setType(coverage);
+    addC4bbPayor(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -753,6 +809,16 @@ final class CoverageTransformerV2 {
   }
 
   /**
+   * Adds the {@link Profile} to the Meta FHIR element under the Coverage details.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   * @param profile The {@link Profile} to add
+   */
+  private void addProfile(Coverage coverage, Profile profile) {
+    coverage.getMeta().addProfile(profile.getVersionedCoverageUrl());
+  }
+
+  /**
    * Sets the Coverage.status Looks up or adds a contained {@link Identifier} object to the current
    * {@link Patient}. This is used to store Identifier slices related to the Provider organization.
    *
@@ -768,21 +834,68 @@ final class CoverageTransformerV2 {
   }
 
   /**
-   * Sets the Coverage.type creates {@link CodeableConcept} object and sets the Coverage {@link
-   * Coverage} type.
+   * Sets the Type code on the {@link Coverage} details.
    *
    * @param coverage The {@link Coverage} to Coverage details
    */
-  void setTypeAndIssuer(Coverage coverage) {
+  private void setType(Coverage coverage) {
     coverage.setType(
         new CodeableConcept()
             .addCoding(
                 new Coding()
                     .setCode("SUBSIDIZ")
                     .setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode")));
-    coverage
-        .addPayor()
-        .setIdentifier(new Identifier().setValue(TransformerConstants.COVERAGE_ISSUER));
+  }
+
+  /**
+   * Sets the Payor's identifier on the {@link Coverage} details.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   */
+  private void addC4bbPayor(Coverage coverage) {
+    coverage.addPayor().setIdentifier(new Identifier().setValue(COVERAGE_ISSUER));
+  }
+
+  /**
+   * Sets a contained organization as the payor on the {@link Coverage} details per the CARIN
+   * Digital Insurance Card {@link Profile}.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   */
+  private void addC4DicPayor(Coverage coverage) {
+    Organization organization =
+        TransformerUtilsV2.findOrCreateContainedOrganization(
+            coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
+    organization.setActive(true);
+    organization.setName(COVERAGE_ISSUER);
+
+    coverage.addPayor(new Reference(organization));
+  }
+
+  /**
+   * Sets a contained organization as the assigner and the MB ID as the identifier on the {@link
+   * Coverage} details per the CARIN Digital Insurance Card {@link Profile}.
+   *
+   * @param coverage The {@link Coverage} to Coverage details
+   * @param beneficiary The {@link Beneficiary}
+   */
+  private void addC4DicIdentifier(Coverage coverage, Beneficiary beneficiary) {
+    Organization organization =
+        TransformerUtilsV2.findOrCreateContainedOrganization(
+            coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
+
+    Identifier identifier =
+        new Identifier()
+            .setType(
+                TransformerUtilsV2.createCodeableConcept(
+                    TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+                    null,
+                    TransformerConstants.PATIENT_MB_ID_DISPLAY,
+                    "MB"))
+            .setValue((String.valueOf(beneficiary.getBeneficiaryId())))
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_ID)
+            .setAssigner(new Reference(organization));
+    coverage.addIdentifier(identifier);
   }
 
   /**
