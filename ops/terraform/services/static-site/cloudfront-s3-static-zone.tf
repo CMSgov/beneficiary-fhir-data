@@ -57,6 +57,13 @@ data "aws_iam_policy_document" "cfbucket_kms_key_policy" {
   }
 }
 
+# data "aws_acm_certificate" "env_issued" {
+#   domain      = "${local.static_cf_alias}"
+#   statuses    = ["ISSUED"]
+#   types       = ["IMPORTED"]
+#   most_recent = true
+# }
+
 data "aws_route53_zone" "vpc_root" {
   name         = local.root_domain_name
   private_zone = true
@@ -435,6 +442,9 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
 
   viewer_certificate {
     cloudfront_default_certificate = true
+    # acm_certificate_arn      = data.aws_acm_certificate.env_issued.arn
+    # minimum_protocol_version = "TLSv1.2_2021"
+    # ssl_support_method       = "sni-only"
   }
 
   tags = {
