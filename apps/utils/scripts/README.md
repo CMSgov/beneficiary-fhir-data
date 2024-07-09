@@ -8,7 +8,7 @@ The scripts are:
 * `run-db-migrator`: Runs the latest version of the BFD database migrator.
 * `run-rda-server`: Runs a mock RDA API server in one of several modes.
 * `build-bfd`: Simplifies running maven to build BFD with a variety of options.
-* `create-bfd-db`: Create a new postgresql 14 database running in a docker container.
+* `create-bfd-db`: Create a new postgresql 16 database running in a docker container.
 
 # Dependencies
 
@@ -387,7 +387,7 @@ You must run the migrator to set up the schema before you can use the database w
 If you just want to reuse the same database you can simply restart the container rather than running this script.
 
 When the script runs it first deletes any existing volume or container with the name `bfd-db`.
-Then it starts a new container using the `postgres:14` image.
+Then it starts a new container using the `postgres:16` image.
 The image is always pulled so each run will use the latest available image from docker hub.
 
 After starting the container it waits for port 5432 to have a listener.
