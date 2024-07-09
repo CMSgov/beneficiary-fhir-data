@@ -287,6 +287,9 @@ public final class TransformerConstants {
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "International Unit". */
   public static final String CODING_SYSTEM_UCUM_F2_CODE = "[IU]";
 
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode() constant} for "International Unit". */
+  public static final String CODING_SYSTEM_UCUM_F2 = "F2";
+
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "International Unit". */
   public static final String CODING_SYSTEM_UCUM_F2_DISPLAY = "International Unit";
 
@@ -296,11 +299,17 @@ public final class TransformerConstants {
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "Gram". */
   public static final String CODING_SYSTEM_UCUM_GR_DISPLAY = "Gram";
 
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} constant for "Gram". */
+  public static final String CODING_SYSTEM_UCUM_GR = "GR";
+
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Milliliter". */
   public static final String CODING_SYSTEM_UCUM_ML_CODE = "mL";
 
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "Milliliter". */
   public static final String CODING_SYSTEM_UCUM_ML_DISPLAY = "Milliliter";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} constant for "Milliliter". */
+  public static final String CODING_SYSTEM_UCUM_ML = "ML";
 
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Milligram". */
   public static final String CODING_SYSTEM_UCUM_ME_CODE = "mg";
@@ -308,11 +317,17 @@ public final class TransformerConstants {
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "Milligram". */
   public static final String CODING_SYSTEM_UCUM_ME_DISPLAY = "Milligram";
 
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} constant for "Milligram". */
+  public static final String CODING_SYSTEM_UCUM_ME = "ME";
+
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Unit". */
   public static final String CODING_SYSTEM_UCUM_UN_CODE = "[arb'U]";
 
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "Unit". */
   public static final String CODING_SYSTEM_UCUM_UN_DISPLAY = "Unit";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} constant for "Unit". */
+  public static final String CODING_SYSTEM_UCUM_UN = "UN";
 
   /**
    * Code System URL for Data Absent <a
