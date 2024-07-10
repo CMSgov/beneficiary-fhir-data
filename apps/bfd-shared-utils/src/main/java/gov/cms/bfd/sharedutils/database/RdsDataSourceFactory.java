@@ -1,5 +1,6 @@
 package gov.cms.bfd.sharedutils.database;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
@@ -80,15 +81,35 @@ public class RdsDataSourceFactory extends DefaultHikariDataSourceFactory {
    */
   @Override
   public HikariDataSource createDataSource() {
-    RdsClientBuilder rdsClientBuilder = createRdsClientBuilder();
+    return createDataSource(null);
+  }
+
+  /**
+   * Constructs a {@link RdsHikariDataSource} instance that will submit metrics to the provided
+   * {@link MetricRegistry}.
+   *
+   * @param metricRegistry the {@link MetricRegistry} for the application
+   * @return the data source
+   */
+  @Override
+  public HikariDataSource createDataSource(MetricRegistry metricRegistry) {
+    final var rdsClient = getRdsClient();
+    // the dataSource will take care of closing this when its close method is called
+    final var dataSource = createRdsHikariDataSource(rdsClient);
+    configureDataSource(dataSource, metricRegistry);
+    return dataSource;
+  }
+
+  /**
+   * Creates a {@link RdsClient}.
+   *
+   * @return the RDS client
+   */
+  private RdsClient getRdsClient() {
+    final var rdsClientBuilder = createRdsClientBuilder();
     awsClientConfig.configureAwsService(rdsClientBuilder);
     rdsClientBuilder.credentialsProvider(DefaultCredentialsProvider.create());
-    var rdsClient = rdsClientBuilder.build();
-
-    // the dataSource will take care of closing this when its close method is called
-    RdsHikariDataSource dataSource = createRdsHikariDataSource(rdsClient);
-    configureDataSource(dataSource);
-    return dataSource;
+    return rdsClientBuilder.build();
   }
 
   /**

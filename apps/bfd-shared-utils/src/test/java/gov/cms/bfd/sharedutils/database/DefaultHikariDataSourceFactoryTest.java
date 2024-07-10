@@ -21,7 +21,7 @@ public class DefaultHikariDataSourceFactoryTest {
             .build();
     var dataSource = mock(HikariDataSource.class);
     var factory = new DefaultHikariDataSourceFactory(databaseOptions);
-    factory.configureDataSource(dataSource);
+    factory.configureDataSource(dataSource, null);
     verify(dataSource).setJdbcUrl(databaseOptions.getDatabaseUrl());
     verify(dataSource).setUsername(databaseOptions.getDatabaseUsername());
     verify(dataSource).setPassword(databaseOptions.getDatabasePassword());

@@ -83,12 +83,12 @@ public class RdsDataSourceFactoryTest {
 
     // We're just verifying these are called.  We don't want them to do anything.
     doNothing().when(awsClientConfig).configureAwsService(rdsClientBuilder);
-    doNothing().when(dataSourceFactory).configureDataSource(dataSource);
+    doNothing().when(dataSourceFactory).configureDataSource(dataSource, null);
 
     // now create the data source and verify the calls were made as expected
     assertSame(dataSource, dataSourceFactory.createDataSource());
     verify(awsClientConfig).configureAwsService(rdsClientBuilder);
     verify(rdsClientBuilder).credentialsProvider(any(DefaultCredentialsProvider.class));
-    verify(dataSourceFactory).configureDataSource(dataSource);
+    verify(dataSourceFactory).configureDataSource(dataSource, null);
   }
 }
