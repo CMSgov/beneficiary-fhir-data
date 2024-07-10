@@ -40,78 +40,43 @@ resource "aws_ssm_parameter" "common_nonsensitive" {
   for_each = local.common_nonsensitive
 
   name      = each.key
-  # overwrite = true
+  overwrite = true
   type      = "String"
   value     = each.value
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes to tags, e.g. because a management agent
-      # updates these based on some ruleset managed elsewhere.
-      tags,
-    ]
-  }
 }
 
 resource "aws_ssm_parameter" "migrator_nonsensitive" {
   for_each = local.migrator_nonsensitive
 
   name      = each.key
-  # overwrite = true
+  overwrite = true
   type      = "String"
   value     = each.value
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes to tags, e.g. because a management agent
-      # updates these based on some ruleset managed elsewhere.
-      tags,
-    ]
-  }
 }
 
 resource "aws_ssm_parameter" "pipeline_nonsensitive" {
   for_each = local.pipeline_nonsensitive
 
   name      = each.key
-  # overwrite = true
+  overwrite = true
   type      = "String"
   value     = each.value
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes to tags, e.g. because a management agent
-      # updates these based on some ruleset managed elsewhere.
-      tags,
-    ]
-  }
 }
 
 resource "aws_ssm_parameter" "server_nonsensitive" {
   for_each = local.server_nonsensitive
 
   name      = each.key
-  # overwrite = true
+  overwrite = true
   type      = "String"
   value     = each.value
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes to tags, e.g. because a management agent
-      # updates these based on some ruleset managed elsewhere.
-      tags,
-    ]
-  }
 }
 
 resource "aws_ssm_parameter" "eft_nonsensitive" {
   for_each = local.eft_nonsensitive
 
   name      = each.key
-  # overwrite = true
+  overwrite = true
   type      = "String"
   value     = each.value
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes to tags, e.g. because a management agent
-      # updates these based on some ruleset managed elsewhere.
-      tags,
-    ]
-  }
 }
