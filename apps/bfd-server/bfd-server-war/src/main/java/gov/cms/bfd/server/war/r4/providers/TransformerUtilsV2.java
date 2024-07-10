@@ -778,6 +778,27 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Creates a {@link CodeableConcept} from the specified system and code.
+   *
+   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
+   *     CodeableConcept} will be contained in
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   * @return a {@link CodeableConcept} with the specified {@link Coding}
+   */
+  static CodeableConcept createCodeableConceptForUnitOfMeasure(
+      IAnyResource rootResource, String codingSystem, Optional<String> codingCode) {
+    if (rootResource == null || codingCode.isEmpty()) {
+      throw new IllegalArgumentException();
+    }
+    Coding coding = createUnitOfMeasureCoding(codingSystem, codingCode.get());
+    CodeableConcept concept = new CodeableConcept();
+    concept.addCoding(coding);
+
+    return concept;
+  }
+
+  /**
    * Adds a qualification {@link CodeableConcept} to the given careTeam component, if the input code
    * optional is not empty. If the code is empty, returns with no effect. Can safely be called to
    * add qualification only if the value is present.
@@ -837,12 +858,17 @@ public final class TransformerUtilsV2 {
    */
   private static CodeableConcept createCodeableConceptForFieldId(
       IAnyResource rootResource, String codingSystem, CcwCodebookInterface ccwVariable) {
-    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable, true);
 
     Coding carinCoding =
         new Coding()
-            .setCode("info")
-            .setSystem(TransformerConstants.CARIN_SUPPORTING_INFO_TYPE)
+            .setCode(
+                TransformerConstants.CARIN_CATEGORY_CODE_MAP.getOrDefault(
+                    ccwVariable.getVariable().getId().toLowerCase(), "info"))
+            .setSystem(
+                TransformerConstants.CARIN_CATEGORY_SYSTEM_MAP.getOrDefault(
+                    ccwVariable.getVariable().getId().toLowerCase(),
+                    TransformerConstants.CARIN_SUPPORTING_INFO_TYPE))
             .setDisplay("Information");
     Coding cmsBBcoding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
 
@@ -885,6 +911,32 @@ public final class TransformerUtilsV2 {
             : null;
 
     return new Coding(system, codeString, display);
+  }
+
+  /**
+   * Creates a unit of measure coding.
+   *
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   * @return the output {@link Coding} for the specified input values
+   */
+  public static Coding createUnitOfMeasureCoding(String codingSystem, String codingCode) {
+    String display =
+        switch (codingCode) {
+          case TransformerConstants.CODING_SYSTEM_UCUM_F2 -> TransformerConstants
+              .CODING_SYSTEM_UCUM_F2_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_GR -> TransformerConstants
+              .CODING_SYSTEM_UCUM_GR_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ML -> TransformerConstants
+              .CODING_SYSTEM_UCUM_ML_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ME -> TransformerConstants
+              .CODING_SYSTEM_UCUM_ME_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_UN -> TransformerConstants
+              .CODING_SYSTEM_UCUM_UN_DISPLAY;
+          default -> null;
+        };
+
+    return new Coding(codingSystem, codingCode, display);
   }
 
   /**
@@ -3792,10 +3844,8 @@ public final class TransformerUtilsV2 {
     if (nationalDrugCodeQualifierCode.isPresent()) {
       item.getModifier()
           .add(
-              TransformerUtilsV2.createCodeableConcept(
-                  eob,
-                  CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
-                  nationalDrugCodeQualifierCode));
+              TransformerUtilsV2.createCodeableConceptForUnitOfMeasure(
+                  eob, TransformerConstants.CODING_SYSTEM_UCUM, nationalDrugCodeQualifierCode));
     }
 
     // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity

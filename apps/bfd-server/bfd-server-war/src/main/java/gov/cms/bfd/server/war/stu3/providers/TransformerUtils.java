@@ -937,6 +937,44 @@ public final class TransformerUtils {
   }
 
   /**
+   * Sets the {@link Quantity} fields related to the unit for the amount: {@link
+   * Quantity#getSystem()}, {@link Quantity#getCode()}, and {@link Quantity#getUnit()}.
+   *
+   * @param codingSystem the {@link org.hl7.fhir.r4.model.Coding#getSystem()} to use
+   * @param unitCode the value to use for {@link Quantity#getCode()}
+   * @param quantity the {@link Quantity} to modify
+   */
+  static void setNdcQuantityUnitInfo(
+      String codingSystem, Optional<String> unitCode, Quantity quantity) {
+    if (!unitCode.isPresent()) {
+      return;
+    }
+    quantity.setSystem(codingSystem);
+    quantity.setCode(unitCode.get());
+
+    String display =
+        switch (unitCode.get()) {
+          case TransformerConstants.CODING_SYSTEM_UCUM_F2 -> TransformerConstants
+              .CODING_SYSTEM_UCUM_F2_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_GR -> TransformerConstants
+              .CODING_SYSTEM_UCUM_GR_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ML -> TransformerConstants
+              .CODING_SYSTEM_UCUM_ML_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ME -> TransformerConstants
+              .CODING_SYSTEM_UCUM_ME_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_UN -> TransformerConstants
+              .CODING_SYSTEM_UCUM_UN_DISPLAY;
+          default -> null;
+        };
+
+    Optional<String> unit = Optional.ofNullable(display);
+
+    if (unit.isPresent()) {
+      quantity.setUnit(unit.get());
+    }
+  }
+
+  /**
    * Creates an extension coding for the specified ccw variable and code.
    *
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
@@ -1054,7 +1092,7 @@ public final class TransformerUtils {
    */
   private static CodeableConcept createCodeableConceptForFieldId(
       IAnyResource rootResource, String codingSystem, CcwCodebookInterface ccwVariable) {
-    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable, true);
     Coding coding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
 
     return new CodeableConcept().addCoding(coding);
@@ -1942,11 +1980,8 @@ public final class TransformerUtils {
       Extension drugQuantityExtension =
           createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
       Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
-      TransformerUtils.setQuantityUnitInfo(
-          CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
-          nationalDrugCodeQualifierCode,
-          eob,
-          drugQuantity);
+      TransformerUtils.setNdcQuantityUnitInfo(
+          TransformerConstants.CODING_SYSTEM_UCUM, nationalDrugCodeQualifierCode, drugQuantity);
 
       item.addExtension(drugQuantityExtension);
     }

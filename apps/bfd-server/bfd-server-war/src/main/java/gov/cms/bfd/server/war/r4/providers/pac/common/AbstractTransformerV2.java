@@ -356,12 +356,17 @@ public class AbstractTransformerV2 {
    */
   protected static CodeableConcept createCodeableConceptForCategory(
       String codingSystem, CcwCodebookInterface ccwVariable) {
-    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable, true);
 
     Coding carinCoding =
         new Coding()
-            .setCode("info")
-            .setSystem(TransformerConstants.CARIN_SUPPORTING_INFO_TYPE)
+            .setCode(
+                TransformerConstants.CARIN_CATEGORY_CODE_MAP.getOrDefault(
+                    ccwVariable.getVariable().getId().toLowerCase(), "info"))
+            .setSystem(
+                TransformerConstants.CARIN_CATEGORY_SYSTEM_MAP.getOrDefault(
+                    ccwVariable.getVariable().getId().toLowerCase(),
+                    TransformerConstants.CARIN_SUPPORTING_INFO_TYPE))
             .setDisplay("Information");
     Coding cmsBBcoding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
 
