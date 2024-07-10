@@ -61,7 +61,7 @@ No outputs.
 | [aws_s3_bucket_ownership_controls.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws//latest/docs/resources/s3_bucket_ownership_controls) | resource |
 | [aws_s3_bucket_acl.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws//latest/docs/resources/s3_bucket_acl) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
-| [aws_iam_policy_document.cf_logging_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
+| [aws_iam_policy_document.cloudfront_log_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
 | [aws_s3_bucket_policy.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_cloudfront_distribution.static_site_distribution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution) | resource |
 | [aws_cloudfront_origin_access_identity.static_site_identity](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_identity) | resource |
