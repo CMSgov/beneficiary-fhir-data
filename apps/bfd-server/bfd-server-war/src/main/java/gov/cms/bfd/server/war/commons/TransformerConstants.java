@@ -6,6 +6,8 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaimColumn;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
@@ -92,6 +94,50 @@ public final class TransformerConstants {
    * {@link CcwCodebookVariable#getVariable()}'s {@link Variable#getId()}.
    */
   public static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
+
+  /** Base URL for nubc. */
+  public static final String BASE_URL_NUBC = "https://www.nubc.org";
+
+  /** System for NUBC admsn. */
+  public static final String NUBC_ADMIT_CODE_SYSTEM =
+      BASE_URL_NUBC + "/CodeSystem/PriorityTypeOfAdmitOrVisit";
+
+  /**
+   * Maps a ccw variable to a specific URL. If the variable exists as a key in this map, then the
+   * value will be used as the system; otherwise, it will be constructed using the above constants.
+   */
+  public static final Map<String, String> CCW_SYSTEM_MAP =
+      new HashMap<>() {
+        {
+          put("clm_ip_admsn_type_cd", NUBC_ADMIT_CODE_SYSTEM);
+        }
+      };
+
+  /** Constant for Carin BB base url. */
+  public static final String BASE_URL_CARIN_BB = "http://hl7.org/fhir/us/carin-bb";
+
+  /** Constant for Carin BB Information Category. */
+  public static final String CODING_CARIN_BB_INFORMATION_CATEGORY =
+      BASE_URL_CARIN_BB + "/CodeSystem/C4BBSupportingInfoType";
+
+  /** Constant for Carin BB admntype code. */
+  public static final String CARIN_BB_ADMN_TYPE = "admtype";
+
+  /** Maps a CCW variable for a category to a new system. */
+  public static final Map<String, String> CARIN_CATEGORY_SYSTEM_MAP =
+      new HashMap<>() {
+        {
+          put("clm_ip_admsn_type_cd", CODING_CARIN_BB_INFORMATION_CATEGORY);
+        }
+      };
+
+  /** Maps a CCW variable for a category to a new code. */
+  public static final Map<String, String> CARIN_CATEGORY_CODE_MAP =
+      new HashMap<>() {
+        {
+          put("clm_ip_admsn_type_cd", CARIN_BB_ADMN_TYPE);
+        }
+      };
 
   /** The constant for the USD code. */
   public static final String CODED_MONEY_USD = "USD";
@@ -287,17 +333,47 @@ public final class TransformerConstants {
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "International Unit". */
   public static final String CODING_SYSTEM_UCUM_F2_CODE = "[IU]";
 
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode() constant} for "International Unit". */
+  public static final String CODING_SYSTEM_UCUM_F2 = "F2";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "International Unit". */
+  public static final String CODING_SYSTEM_UCUM_F2_DISPLAY = "International Unit";
+
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Gram". */
   public static final String CODING_SYSTEM_UCUM_GR_CODE = "g";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "Gram". */
+  public static final String CODING_SYSTEM_UCUM_GR_DISPLAY = "Gram";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} constant for "Gram". */
+  public static final String CODING_SYSTEM_UCUM_GR = "GR";
 
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Milliliter". */
   public static final String CODING_SYSTEM_UCUM_ML_CODE = "mL";
 
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "Milliliter". */
+  public static final String CODING_SYSTEM_UCUM_ML_DISPLAY = "Milliliter";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} constant for "Milliliter". */
+  public static final String CODING_SYSTEM_UCUM_ML = "ML";
+
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Milligram". */
   public static final String CODING_SYSTEM_UCUM_ME_CODE = "mg";
 
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "Milligram". */
+  public static final String CODING_SYSTEM_UCUM_ME_DISPLAY = "Milligram";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} constant for "Milligram". */
+  public static final String CODING_SYSTEM_UCUM_ME = "ME";
+
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "Unit". */
   public static final String CODING_SYSTEM_UCUM_UN_CODE = "[arb'U]";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "Unit". */
+  public static final String CODING_SYSTEM_UCUM_UN_DISPLAY = "Unit";
+
+  /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} constant for "Unit". */
+  public static final String CODING_SYSTEM_UCUM_UN = "UN";
 
   /**
    * Code System URL for Data Absent <a

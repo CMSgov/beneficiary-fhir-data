@@ -200,9 +200,9 @@
           {
             "category" : {
               "coding" : [ {
-                "code" : "info",
+                "code" : "admtype",
                 "display" : "Information",
-                "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+                "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
               }, {
                 "code" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
                 "display" : "Claim Inpatient Admission Type Code",
@@ -212,7 +212,7 @@
             "code" : {
               "coding" : [ {
                 "code" : "3",
-                "system" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd"
+                "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
               } ]
             },
             "sequence" : 3

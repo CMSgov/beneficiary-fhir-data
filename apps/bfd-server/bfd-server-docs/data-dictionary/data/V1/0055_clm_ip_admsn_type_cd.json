@@ -31,7 +31,7 @@
             "element": "information[N].code.coding[N].code",
             "fhirPath": "",
             "discriminator": [
-                "information[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd'"
+                "information[N].code.coding[N].system = 'https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit'"
             ],
             "additional": [
                 "eob.information[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
