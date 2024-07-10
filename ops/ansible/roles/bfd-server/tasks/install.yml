@@ -115,6 +115,10 @@
   become: true
 
 ### Logrotate Stuff
+- name: Run logrotate hourly
+  command: mv /etc/cron.daily/logrotate /etc/cron.hourly
+  become: true
+
 - name: Configure bfd-server Log Rotation
   template:
     src: 'bfd-server.j2'

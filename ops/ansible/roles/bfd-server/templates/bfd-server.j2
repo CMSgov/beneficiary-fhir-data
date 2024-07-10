@@ -1,6 +1,6 @@
 "{{ data_server_dir }}/access.json" "{{ data_server_dir }}/bluebutton-server-app-log.json" {
     rotate 1
-    daily
+    hourly
     #size of largest live logfile at time of creation was 272M w/out log rotation
     size 300M
     copytruncate
@@ -9,9 +9,9 @@
 
 "{{ data_server_dir }}/access.log" {
     rotate 1
-    daily
+    hourly
     #size of live logfile at time of creation was 30M w/out log rotation
-    size 50M
+    size 100M
     copytruncate
     compress
 }

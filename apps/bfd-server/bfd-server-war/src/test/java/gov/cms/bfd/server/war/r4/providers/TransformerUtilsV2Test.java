@@ -29,6 +29,7 @@ import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -213,7 +214,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -252,7 +254,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     Optional<Resource> organization =
         eob.getContained().stream()
@@ -296,7 +299,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -332,7 +336,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertEquals(1, eob.getContained().size());
     Organization actualEobContainedOrganizationResource = (Organization) eob.getContained().get(0);
@@ -557,7 +562,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.of(fiClmProcDt),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -602,7 +608,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.empty());
+        Optional.empty(),
+        Profile.C4BB);
 
     assertNotNull(eob.getExtension());
     assertFalse(eob.getExtension().isEmpty());
@@ -643,7 +650,8 @@ public class TransformerUtilsV2Test {
         Optional.empty(),
         Optional.empty(),
         C4BBInstutionalClaimSubtypes.Inpatient,
-        Optional.of('3'));
+        Optional.of('3'),
+        Profile.C4BB);
 
     assertNotNull(eob.getBillablePeriod());
     assertFalse(eob.getBillablePeriod().isEmpty());
@@ -1107,14 +1115,12 @@ public class TransformerUtilsV2Test {
     String expectedId = "#provider-org";
 
     Organization actualOrganization =
-        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId, Profile.C4BB);
 
     assertEquals(expectedId, actualOrganization.getId());
     assertTrue(
         actualOrganization.getMeta().getProfile().stream()
-            .filter(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
-            .findFirst()
-            .isPresent());
+            .anyMatch(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL)));
 
     Optional<Resource> resource =
         eob.getContained().stream().filter(r -> r.getId().equals(expectedId)).findFirst();
@@ -1123,9 +1129,7 @@ public class TransformerUtilsV2Test {
     Organization actualEobContainedOrganizationResource = (Organization) resource.get();
     assertTrue(
         actualEobContainedOrganizationResource.getMeta().getProfile().stream()
-            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
-            .findAny()
-            .isPresent());
+            .anyMatch(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL)));
   }
 
   /**
@@ -1138,14 +1142,12 @@ public class TransformerUtilsV2Test {
     String expectedId = "#provider-org";
 
     Organization actualOrganization =
-        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId, Profile.C4BB);
 
     assertEquals(expectedId, actualOrganization.getId());
     assertTrue(
         actualOrganization.getMeta().getProfile().stream()
-            .filter(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
-            .findFirst()
-            .isPresent());
+            .anyMatch(v -> v.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL)));
 
     List<Resource> resource =
         eob.getContained().stream()
@@ -1155,7 +1157,8 @@ public class TransformerUtilsV2Test {
 
     // Call findOrCreateContainedOrganization and make sure it finds the organization that
     // was created above and doesn't have duplicate entries for eob.
-    actualOrganization = TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId);
+    actualOrganization =
+        TransformerUtilsV2.findOrCreateContainedOrganization(eob, expectedId, Profile.C4BB);
 
     resource =
         eob.getContained().stream()
@@ -1167,9 +1170,7 @@ public class TransformerUtilsV2Test {
     Organization actualEobContainedOrganizationResource = (Organization) resource.get(0);
     assertTrue(
         actualEobContainedOrganizationResource.getMeta().getProfile().stream()
-            .filter(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL))
-            .findAny()
-            .isPresent());
+            .anyMatch(p -> p.getValue().equals(ProfileConstants.C4BB_ORGANIZATION_URL)));
   }
 
   /**
@@ -1189,7 +1190,8 @@ public class TransformerUtilsV2Test {
         C4BBOrganizationIdentifierType.NPI,
         Optional.of(expectedValue),
         Optional.of(expectedNpiOrgName),
-        Optional.of(instant));
+        Optional.of(instant),
+        Profile.C4BB);
 
     Optional<Resource> resource =
         eob.getContained().stream().filter(r -> r.getId().equals(expectedId)).findFirst();
@@ -1229,7 +1231,8 @@ public class TransformerUtilsV2Test {
         C4BBOrganizationIdentifierType.NPI,
         Optional.of(expectedValue),
         Optional.empty(),
-        Optional.of(instant));
+        Optional.of(instant),
+        Profile.C4BB);
 
     List<Resource> c = eob.getContained();
     Optional<Resource> resource =

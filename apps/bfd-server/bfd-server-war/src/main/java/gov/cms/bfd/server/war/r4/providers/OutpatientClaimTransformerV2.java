@@ -14,7 +14,7 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
@@ -99,7 +99,7 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_OUTPATIENT_PROFILE_URL);
+    eob.getMeta().addProfile(Profile.C4BB.getVersionedEobOutpatientUrl());
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id
@@ -162,7 +162,8 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
-        claimGroup.getLastUpdated());
+        claimGroup.getLastUpdated(),
+        Profile.C4BB);
 
     // NCH_PROFNL_CMPNT_CHRG_AMT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
@@ -233,7 +234,8 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
         claimGroup.getFiDocumentClaimControlNumber(),
         claimGroup.getFiscalIntermediaryClaimProcessDate(),
         C4BBInstutionalClaimSubtypes.Outpatient,
-        Optional.of(claimGroup.getClaimQueryCode()));
+        Optional.of(claimGroup.getClaimQueryCode()),
+        Profile.C4BB);
 
     // Handle Diagnosis
     // PRNCPAL_DGNS_CD => diagnosis.diagnosisCodeableConcept
