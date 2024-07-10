@@ -133,8 +133,7 @@
             minmax(150px, 5fr)
             /* Example */
             minmax(150px, 6fr)
-            {% endif %}
-            ;
+            {% endif %};
     }
 
     thead,
@@ -159,6 +158,12 @@
         font-weight: normal;
         font-size: 1.1rem;
         height: 1.5em;
+    }
+
+    .ellipsis {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .wrap {

@@ -15,12 +15,12 @@
     <td>{{ item.fhirMapping[0].element }}</td>
     <td>
         {% for discriminator in item.fhirMapping[0].discriminator %}
-            <div>{{ discriminator }}</div>
+            <div class="ellipsis">{{ discriminator }}</div>
         {% endfor %}
     </td>
     <td>
         {% for additional in item.fhirMapping[0].additional %}
-            <div>{{ additional }}</div>
+            <div class="ellipsis">{{ additional }}</div>
         {% endfor %}
     </td>
     <td class="wrap">{{ item.fhirMapping[0].derived }}</td>
