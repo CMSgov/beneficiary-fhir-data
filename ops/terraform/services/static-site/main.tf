@@ -3,27 +3,29 @@ module "terraservice" {
 
   environment_name     = terraform.workspace
   relative_module_root = "ops/terraform/services/static-site"
-  additional_tags = {
-    Layer = local.layer
-    Name  = local.full_name
-    role  = local.service
-  }
+  additional_tags = local.static_tags
 }
 
 locals {
-  default_tags       = module.terraservice.default_tags
+  default_tags       = merge(module.terraservice.default_tags,local.static_tags)
+  static_tags        = {
+    Layer = local.layer
+    Name  = local.full_name
+    role  = local.service
+    SaaS  = "Cloudfront"
+  }
   env                = module.terraservice.env
   seed_env           = module.terraservice.seed_env
   is_ephemeral_env   = module.terraservice.is_ephemeral_env
   latest_bfd_release = module.terraservice.latest_bfd_release
   bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
 
-  service   = "static-site"
+  service        = "static-site"
   legacy_service = local.service
-  layer     = "data"
-  full_name = "bfd-${local.env}-${local.service}"
+  layer          = "data"
+  full_name      = "bfd-${local.env}-${local.service}"
 
-  ssm_hierarchy_roots   = ["bfd"]
+  ssm_hierarchy_roots = ["bfd"]
   ssm_hierarchies = flatten([
     for root in local.ssm_hierarchy_roots :
     ["/${root}/${local.env}/common", "/${root}/${local.env}/${local.service}"]
@@ -66,16 +68,16 @@ locals {
       concat(v.primary_key[*].arn, v.replica_keys[*].arn)
     ]
   )
-  logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
+  logging_bucket = "bfd-${local.seed_env}-logs"
 
-  root_domain_name      = data.aws_ssm_parameter.zone_name.value
-  static_cf_bucket_name = "bfd-${terraform.workspace}-cf-${local.account_id}"
-  static_cflog_bkt_name = "bfd-${terraform.workspace}-cflog-${local.account_id}"
-  static_cf_alias       = "${terraform.workspace}.static.${local.root_domain_name}"
-  
-  static_cflog_bucket_ref = "${local.static_cflog_bkt_name}.s3.amazonaws.com"
-  
-  env_kms_alias   = "alias/cf-${terraform.workspace}-s3-key"
-  kms_key_id      = aws_kms_key.cfbucket_kms_key.arn
+  root_domain_name       = data.aws_ssm_parameter.zone_name.value
+  static_cloudfront_name = "bfd-${local.env}-static"
+  static_logging_name    = "bfd-${local.env}-staticlogging"
+  static_site_fqdn        = "${local.env}.static.${local.root_domain_name}"
+
+  # static_logging_bucket_ref = "${local.static_logging_name}.s3.amazonaws.com"
+
+  env_kms_alias = "alias/static-${local.env}-s3-key"
+  kms_key_id    = aws_kms_key.static_kms_key.arn
 
 }

@@ -45,10 +45,11 @@ data "aws_ssm_parameter" "zone_is_private" {
 #   private_zone = nonsensitive(data.aws_ssm_parameter.zone_is_private.value)
 # }
 
-data "aws_iam_policy_document" "cfbucket_kms_key_policy" {
+data "aws_iam_policy_document" "static_kms_key_policy" {
+  depends_on = [ aws_cloudfront_distribution.static_site_distribution, aws_cloudfront_origin_access_identity.static_site_identity ]
   statement {
-    actions   = ["kms:*"]
-    effect    = "Allow"
+    actions = ["kms:*"]
+    effect  = "Allow"
     principals {
       type        = "AWS"
       identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
@@ -62,7 +63,7 @@ data "aws_iam_policy_document" "cfbucket_kms_key_policy" {
       "kms:GenerateDataKey",
       "kms:ReEncrypt*"
     ]
-    effect    = "Allow"
+    effect = "Allow"
     principals {
       type        = "AWS"
       identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
@@ -76,61 +77,62 @@ data "aws_iam_policy_document" "cfbucket_kms_key_policy" {
   }
 }
 
-data "aws_iam_policy_document" "cf_bucket_policy" { 
+data "aws_iam_policy_document" "cloudfront_policy" {
+  depends_on = [ aws_cloudfront_origin_access_identity.static_site_identity, aws_s3_bucket.static_site ]
   statement {
 
-    sid = "AllowCloudFrontServicePrincipal"
+    sid    = "AllowCloudFrontServicePrincipal"
     effect = "Allow"
 
     principals {
-      type = "Service" 
-      identifiers = ["cloudfront.amazonaws.com"] 
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
     }
-    
+
     principals {
-      type = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn] 
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
     }
-    
+
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = ["arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${aws_cloudfront_origin_access_identity.static_site_identity.id}"]
     }
-    
-    actions =  ["s3:GetObject"]  ##, "s3:ListBucket"]
+
+    actions = ["s3:GetObject"] ##, "s3:ListBucket"]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
+      "${aws_s3_bucket.static_site.arn}/*"
     ]
   }
-  
+
   statement {
-    sid = "JenkinsRWObjects"
+    sid    = "JenkinsRWObjects"
     effect = "Allow"
-    principals { 
-      type = "AWS"
+    principals {
+      type        = "AWS"
       identifiers = ["*"]
     }
     actions = ["s3:*"]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
+      "${aws_s3_bucket.static_site.arn}",
+      "${aws_s3_bucket.static_site.arn}/*"
     ]
     condition {
-      test = "ArnEquals"
+      test     = "ArnEquals"
       variable = "AWS:UserId"
-      values = [ "arn:aws:iam::${local.account_id}:role/cloudbees-jenkins" ]
+      values   = ["arn:aws:iam::${local.account_id}:role/cloudbees-jenkins"]
     }
   }
 
   statement {
-    sid     = "AllowKMSAccess"
+    sid = "AllowKMSAccess"
     actions = [
       "s3:GetObject",
       "s3:ListBucket"
     ]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
+      "${aws_s3_bucket.static_site.arn}",
+      "${aws_s3_bucket.static_site.arn}/*"
     ]
 
     principals {
@@ -146,39 +148,40 @@ data "aws_iam_policy_document" "cf_bucket_policy" {
   }
 
   statement {
-    sid = "OnlySecureTransport"
+    sid     = "OnlySecureTransport"
     actions = ["s3:*"]
     condition {
-        test = "Bool"
-        variable = "aws:SecureTransport"
-        values = [ "false" ]
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
     }
     effect = "Deny"
     principals {
-       type = "*"
-       identifiers = ["*"]
+      type        = "*"
+      identifiers = ["*"]
     }
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_bucket.bucket}/*"
+      "${aws_s3_bucket.static_site.arn}",
+      "${aws_s3_bucket.static_site.arn}/*"
     ]
   }
 }
 
 
-data "aws_iam_policy_document" "cf_logging_policy" {
+data "aws_iam_policy_document" "cloudfront_log_policy" {
+  depends_on = [ aws_s3_bucket.cloudfront_logging, aws_cloudfront_distribution.static_site_distribution ]
   statement {
     sid = "AllowCloudFrontServicePrincipal"
 
     effect = "Allow"
     principals {
-        type = "Service"
-        identifiers = ["cloudfront.amazonaws.com"]
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
     }
-    actions =  ["s3:*"] # ["s3:PutObject"]
-    resources = [ 
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/*"
+    actions = ["s3:*"] # ["s3:PutObject"]
+    resources = [
+      "${aws_s3_bucket.cloudfront_logging.arn}",
+      "${aws_s3_bucket.cloudfront_logging.arn}/*"
     ]
     # condition {
     #   test = "ForAnyValue:StringEquals"
@@ -186,33 +189,33 @@ data "aws_iam_policy_document" "cf_logging_policy" {
     #   values = [data.aws_caller_identity.current.account_id]
     # }
     condition {
-      test = "StringEquals"
-      variable = "AWS:SourceArn" 
-      values = [aws_cloudfront_distribution.static_site_distribution.arn]
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.static_site_distribution.arn]
     }
   }
   statement {
-    sid = "OnlySecureTransport"
+    sid     = "OnlySecureTransport"
     actions = ["s3:*"]
     condition {
-        test = "Bool"
-        variable = "aws:SecureTransport"
-        values = [ "false" ]
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
     }
     effect = "Deny"
     principals {
-       type = "*"
-       identifiers = ["*"]
+      type        = "*"
+      identifiers = ["*"]
     }
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.cloudfront_logging.bucket}/*"
+      "${aws_s3_bucket.cloudfront_logging.arn}",
+      "${aws_s3_bucket.cloudfront_logging.arn}/*"
     ]
   }
 }
 
 # data "aws_acm_certificate" "env_issued" {
-#   domain      = "${local.static_cf_alias}"
+#   domain      = "${local.static_site_fqdn}"
 #   statuses    = ["ISSUED"]
 #   types       = ["IMPORTED"]
 #   most_recent = true
