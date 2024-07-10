@@ -26,6 +26,7 @@ import gov.cms.bfd.sharedutils.config.BaseConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
+import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -368,45 +369,30 @@ public class SpringConfiguration extends BaseConfiguration {
     metricRegistry.registerAll(new MemoryUsageGaugeSet());
     metricRegistry.registerAll(new GarbageCollectorMetricSet());
 
-    String newRelicMetricKey = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_KEY, null);
-
-    if (newRelicMetricKey != null) {
-      String newRelicAppName = config.stringValue(SSM_PATH_NEW_RELIC_APP_NAME, null);
-      String newRelicMetricHost = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_HOST, null);
-      String newRelicMetricPath = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_PATH, null);
-      String rawNewRelicPeriod = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_PERIOD, null);
-
-      int newRelicPeriod;
-      try {
-        newRelicPeriod = Integer.parseInt(rawNewRelicPeriod);
-      } catch (NumberFormatException ex) {
-        newRelicPeriod = 15;
-      }
-
-      String hostname;
-      try {
-        hostname = InetAddress.getLocalHost().getHostName();
-      } catch (UnknownHostException e) {
-        hostname = "unknown";
-      }
-
+    // TODO: Taken from MigratorApp; should be refactored to a shared location in BFD-1558
+    MetricOptions metricOptions = loadMetricOptions(config);
+    if (metricOptions.getNewRelicMetricKey().isPresent()) {
       SenderConfiguration configuration =
-          SenderConfiguration.builder(newRelicMetricHost, newRelicMetricPath)
-              .httpPoster(new OkHttpPoster())
-              .apiKey(newRelicMetricKey)
-              .build();
+              SenderConfiguration.builder(
+                              metricOptions.getNewRelicMetricHost().orElse(null),
+                              metricOptions.getNewRelicMetricPath().orElse(null))
+                      .httpPoster(new OkHttpPoster())
+                      .apiKey(metricOptions.getNewRelicMetricKey().orElse(null))
+                      .build();
 
       MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
 
       Attributes commonAttributes =
-          new Attributes().put("host", hostname).put("appName", newRelicAppName);
+              new Attributes()
+                      .put("host", metricOptions.getHostname().orElse("unknown"))
+                      .put("appName", metricOptions.getNewRelicAppName().orElse(null));
 
       NewRelicReporter newRelicReporter =
-          NewRelicReporter.build(metricRegistry, metricBatchSender)
-              .commonAttributes(commonAttributes)
-              .build();
+              NewRelicReporter.build(metricRegistry, metricBatchSender)
+                      .commonAttributes(commonAttributes)
+                      .build();
 
-      newRelicReporter.start(newRelicPeriod, TimeUnit.SECONDS);
+      newRelicReporter.start(metricOptions.getNewRelicMetricPeriod().orElse(15), TimeUnit.SECONDS);
     }
 
     return metricRegistry;
