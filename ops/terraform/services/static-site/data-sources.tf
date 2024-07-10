@@ -46,7 +46,7 @@ data "aws_ssm_parameter" "zone_is_private" {
 # }
 
 data "aws_iam_policy_document" "static_kms_key_policy" {
-  depends_on = [ aws_cloudfront_distribution.static_site_distribution, aws_cloudfront_origin_access_identity.static_site_identity ]
+  depends_on = [aws_cloudfront_distribution.static_site_distribution, aws_cloudfront_origin_access_identity.static_site_identity]
   statement {
     actions = ["kms:*"]
     effect  = "Allow"
@@ -78,7 +78,7 @@ data "aws_iam_policy_document" "static_kms_key_policy" {
 }
 
 data "aws_iam_policy_document" "cloudfront_policy" {
-  depends_on = [ aws_cloudfront_origin_access_identity.static_site_identity, aws_s3_bucket.static_site ]
+  depends_on = [aws_cloudfront_origin_access_identity.static_site_identity, aws_s3_bucket.static_site]
   statement {
 
     sid    = "AllowCloudFrontServicePrincipal"
@@ -169,7 +169,7 @@ data "aws_iam_policy_document" "cloudfront_policy" {
 
 
 data "aws_iam_policy_document" "cloudfront_log_policy" {
-  depends_on = [ aws_s3_bucket.cloudfront_logging, aws_cloudfront_distribution.static_site_distribution ]
+  depends_on = [aws_s3_bucket.cloudfront_logging, aws_cloudfront_distribution.static_site_distribution]
   statement {
     sid = "AllowCloudFrontServicePrincipal"
 

@@ -3,12 +3,12 @@ module "terraservice" {
 
   environment_name     = terraform.workspace
   relative_module_root = "ops/terraform/services/static-site"
-  additional_tags = local.static_tags
+  additional_tags      = local.static_tags
 }
 
 locals {
-  default_tags       = merge(module.terraservice.default_tags,local.static_tags)
-  static_tags        = {
+  default_tags = merge(module.terraservice.default_tags, local.static_tags)
+  static_tags = {
     Layer = local.layer
     Name  = local.full_name
     role  = local.service
@@ -73,7 +73,7 @@ locals {
   root_domain_name       = data.aws_ssm_parameter.zone_name.value
   static_cloudfront_name = "bfd-${local.env}-static"
   static_logging_name    = "bfd-${local.env}-staticlogging"
-  static_site_fqdn        = "${local.env}.static.${local.root_domain_name}"
+  static_site_fqdn       = "${local.env}.static.${local.root_domain_name}"
 
   # static_logging_bucket_ref = "${local.static_logging_name}.s3.amazonaws.com"
 
