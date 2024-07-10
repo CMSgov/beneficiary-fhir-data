@@ -1,5 +1,23 @@
 <script type="text/javascript">
     addEventListener("DOMContentLoaded", function () {
+        const tableContainer = document.getElementById('table-container');
+        function disableScroll() {
+           
+            // Get the current page scroll position
+            scrollTop = tableContainer.scrollTop;
+            scrollLeft = tableContainer.scrollLeft,
+ 
+                // if any scroll is attempted,
+                // set this to the previous value
+                tableContainer.onscroll = function () {
+                    tableContainer.scrollTo(scrollLeft, scrollTop);
+                };
+        }
+ 
+        function enableScroll() {
+            tableContainer.onscroll = function () { };
+        }
+        
         var coll = document.getElementsByClassName("collapsible");
         var i;
 
@@ -19,7 +37,7 @@
         const table = document.querySelector('table');
         // initialize computed pixel values
         table.style.gridTemplateColumns = getComputedStyle(table).gridTemplateColumns;
-        const tableContainer = document.getElementById('table-container');
+       
 
         /*
           The following will soon be filled with column objects containing
@@ -32,7 +50,6 @@
 
         // Where the magic happens. I.e. when they're actually resizing
         const onMouseMove = (e) => requestAnimationFrame(() => {
-
             // Calculate the desired width
             horizontalScrollOffset = tableContainer.scrollLeft;
             const width = (horizontalScrollOffset + e.clientX) - headerBeingResized.offsetLeft;
@@ -53,19 +70,23 @@
 
         // Clean up event listeners, classes, etc.
         const onMouseUp = () => {
-            window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mouseup', onMouseUp);
-            headerBeingResized.classList.remove('header--being-resized');
+            enableScroll();
+            tableContainer.removeEventListener('mousemove', onMouseMove);
+            tableContainer.removeEventListener('mouseup', onMouseUp);
+            tableContainer.removeEventListener('mouseleave', onMouseUp);
+            if (headerBeingResized) {
+                headerBeingResized.classList.remove('header--being-resized');
+            }
             headerBeingResized = null;
         };
 
         // Get ready, they're about to resize
         const initResize = ({ target }) => {
-
-
+            disableScroll();
             headerBeingResized = target.parentNode;
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseup', onMouseUp);
+            tableContainer.addEventListener('mousemove', onMouseMove);
+            tableContainer.addEventListener('mouseup', onMouseUp);
+            tableContainer.addEventListener('mouseleave', onMouseUp);
             headerBeingResized.classList.add('header--being-resized');
         };
 
@@ -79,8 +100,6 @@
             header.querySelector('.resize-handle').addEventListener('mousedown', initResize);
         });
     })
-    // Our real web app uses Vue.js but I'll stick to plain JavaScript here
-
 
 </script>
 
