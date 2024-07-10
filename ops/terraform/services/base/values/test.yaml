@@ -215,7 +215,7 @@
 /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/server/nonsensitive/pac/enabled: "true"
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
-/bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
+/bfd/${env}/server/nonsensitive/c4dic/enabled: "true"
 /bfd/${env}/server/nonsensitive/new_relic/host: gov-collector.newrelic.com
 /bfd/${env}/server/nonsensitive/new_relic/log_path: /usr/local/bfd-server/
 /bfd/${env}/server/nonsensitive/new_relic/high_security_enabled: "false"
