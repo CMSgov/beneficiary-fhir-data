@@ -527,7 +527,7 @@
       "valueQuantity" : {
         "value" : 234.567,
         "unit" : "Milliliter",
-        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+        "system" : "http://unitsofmeasure.org",
         "code" : "ML"
       }
     } ],
