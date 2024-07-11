@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
@@ -25,6 +26,12 @@ public abstract class BaseConfiguration {
    * DatabaseOptions#authenticationType} value.
    */
   public static final String SSM_PATH_DATABASE_AUTH_TYPE = "db/auth_type";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link DatabaseOptions} {@link
+   * DatabaseOptions#dataSourceType} value.
+   */
+  public static final String SSM_PATH_DATABASE_DATA_SOURCE_TYPE = "db/data_source_type";
 
   /**
    * The path of the SSM parameter that should be used to provide the {@link DatabaseOptions} {@link
@@ -45,10 +52,98 @@ public abstract class BaseConfiguration {
   public static final String SSM_PATH_DATABASE_PASSWORD = "db/password";
 
   /**
-   * The path of the SSM parameter that should be used to provide the {@link DatabaseOptions} {@link
-   * DatabaseOptions#maxPoolSize} value.
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.HikariOptions} {@link DatabaseOptions.HikariOptions#maximumPoolSize} value.
    */
-  public static final String SSM_PATH_DATABASE_MAX_POOL_SIZE = "db/max_connections";
+  public static final String SSM_PATH_DB_HIKARI_MAX_POOL_SIZE = "db/hikari/max_pool_size";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.HikariOptions} {@link DatabaseOptions.HikariOptions#minimumIdleConnections}
+   * value.
+   */
+  public static final String SSM_PATH_DB_HIKARI_MIN_IDLE_CONNECTIONS =
+      "db/hikari/min_idle_connections";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.HikariOptions} {@link DatabaseOptions.HikariOptions#idleTimeoutMs} value.
+   */
+  public static final String SSM_PATH_DB_HIKARI_IDLE_TIMEOUT_MS = "db/hikari/idle_timeout_ms";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.HikariOptions} {@link
+   * DatabaseOptions.HikariOptions#initializationFailTimeoutMs} value.
+   */
+  public static final String SSM_PATH_DB_HIKARI_INIT_FAIL_TIMEOUT_MS =
+      "db/hikari/init_fail_timeout_ms";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.HikariOptions} {@link DatabaseOptions.HikariOptions#connectionTimeoutMs} value.
+   */
+  public static final String SSM_PATH_DB_HIKARI_CONNECTION_TIMEOUT_MS =
+      "db/hikari/connection_timeout_ms";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.HikariOptions} {@link DatabaseOptions.HikariOptions#keepaliveTimeMs} value.
+   */
+  public static final String SSM_PATH_DB_HIKARI_KEEPALIVE_TIMEOUT_MS =
+      "db/hikari/keepalive_timeout_ms";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.HikariOptions} {@link DatabaseOptions.HikariOptions#validationTimeoutMs} value.
+   */
+  public static final String SSM_PATH_DB_HIKARI_VALIDATION_TIMEOUT_MS =
+      "db/hikari/validation_timeout_ms";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.HikariOptions} {@link DatabaseOptions.HikariOptions#maxConnectionLifetimeMs}
+   * value.
+   */
+  public static final String SSM_PATH_DB_HIKARI_MAX_CONNECTION_LIFETIME_MS =
+      "db/hikari/max_connection_lifetime_ms";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions} {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions#useCustomPreset} value.
+   */
+  public static final String SSM_PATH_DB_WRAPPER_USE_CUSTOM_PRESET = "db/wrapper/use_custom_preset";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions} {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions#basePresetCode} value.
+   */
+  public static final String SSM_PATH_DB_WRAPPER_BASE_PRESET = "db/wrapper/base_preset";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions} {@link DatabaseOptions.AwsJdbcWrapperOptions#plugins}
+   * value.
+   */
+  public static final String SSM_PATH_DB_WRAPPER_PLUGINS_CSV = "db/wrapper/plugins_csv";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions} {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions#hostSelectionStrategy} value.
+   */
+  public static final String SSM_PATH_DB_WRAPPER_HOST_SELECTION_STRATEGY =
+      "db/wrapper/host_selection_strategy";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions} {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions#initialConnectionStrategy} value.
+   */
+  public static final String SSM_PATH_DB_WRAPPER_INIT_CONNECTION_STRATEGY =
+      "db/wrapper/init_connection_strategy";
 
   /**
    * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
@@ -151,23 +246,88 @@ public abstract class BaseConfiguration {
    * @return the database options
    */
   protected static DatabaseOptions loadDatabaseOptions(ConfigLoader config) {
-    DatabaseOptions.AuthenticationType databaseAuthType =
+    final var databaseAuthType =
         config
             .enumOption(SSM_PATH_DATABASE_AUTH_TYPE, DatabaseOptions.AuthenticationType.class)
             .orElse(DatabaseOptions.AuthenticationType.JDBC);
-    String databaseUrl = config.stringValue(SSM_PATH_DATABASE_URL);
-    String databaseUsername = config.stringValue(SSM_PATH_DATABASE_USERNAME);
-    String databasePassword = config.stringValue(SSM_PATH_DATABASE_PASSWORD);
-    Optional<Integer> databaseMaxPoolSize =
-        config.positiveIntOption(SSM_PATH_DATABASE_MAX_POOL_SIZE);
+    final var databaseDataSourceType =
+        config
+            .enumOption(SSM_PATH_DATABASE_DATA_SOURCE_TYPE, DatabaseOptions.DataSourceType.class)
+            .orElse(DatabaseOptions.DataSourceType.HIKARI);
+    final var databaseUrl = config.stringValue(SSM_PATH_DATABASE_URL);
+    final var databaseUsername = config.stringValue(SSM_PATH_DATABASE_USERNAME);
+    final var databasePassword = config.stringValue(SSM_PATH_DATABASE_PASSWORD);
 
-    return DatabaseOptions.builder()
-        .authenticationType(databaseAuthType)
-        .databaseUrl(databaseUrl)
-        .databaseUsername(databaseUsername)
-        .databasePassword(databasePassword)
-        .maxPoolSize(databaseMaxPoolSize.orElse(Runtime.getRuntime().availableProcessors()))
-        .build();
+    // Get Hikari configuration; all default values (except for max pool size and min idle
+    // connections) are taken directly from Hikari defaults
+    final var hikariMaxPoolSize =
+        config.positiveIntValue(
+            SSM_PATH_DB_HIKARI_MAX_POOL_SIZE, Runtime.getRuntime().availableProcessors());
+    final var hikariMinIdleConnections =
+        config.positiveIntValue(
+            SSM_PATH_DB_HIKARI_MIN_IDLE_CONNECTIONS, Runtime.getRuntime().availableProcessors());
+    final var hikariIdleTimeoutMs =
+        config.positiveLongValue(SSM_PATH_DB_HIKARI_IDLE_TIMEOUT_MS, TimeUnit.MINUTES.toMillis(10));
+    final var hikariInitFailTimeoutMs =
+        config.positiveLongValue(SSM_PATH_DB_HIKARI_INIT_FAIL_TIMEOUT_MS, 1);
+    final var hikariConnectionTimeoutMs =
+        config.positiveLongValue(
+            SSM_PATH_DB_HIKARI_CONNECTION_TIMEOUT_MS, TimeUnit.SECONDS.toMillis(30));
+    final var hikariKeepaliveTimeoutMs =
+        config.positiveLongValue(SSM_PATH_DB_HIKARI_KEEPALIVE_TIMEOUT_MS, 0);
+    final var hikariValidationTimeoutMs =
+        config.positiveLongValue(
+            SSM_PATH_DB_HIKARI_VALIDATION_TIMEOUT_MS, TimeUnit.SECONDS.toMillis(5));
+    final var hikariMaxConnectionLifetimeMs =
+        config.positiveLongValue(
+            SSM_PATH_DB_HIKARI_MAX_CONNECTION_LIFETIME_MS, TimeUnit.MINUTES.toMillis(30));
+    final var hikariOptions =
+        DatabaseOptions.HikariOptions.builder()
+            .maximumPoolSize(hikariMaxPoolSize)
+            .minimumIdleConnections(hikariMinIdleConnections)
+            .idleTimeoutMs(hikariIdleTimeoutMs)
+            .initializationFailTimeoutMs(hikariInitFailTimeoutMs)
+            .connectionTimeoutMs(hikariConnectionTimeoutMs)
+            .keepaliveTimeMs(hikariKeepaliveTimeoutMs)
+            .validationTimeoutMs(hikariValidationTimeoutMs)
+            .maxConnectionLifetimeMs(hikariMaxConnectionLifetimeMs)
+            .build();
+
+    final var dbOptionsBuilder =
+        DatabaseOptions.builder()
+            .authenticationType(databaseAuthType)
+            .dataSourceType(databaseDataSourceType)
+            .databaseUrl(databaseUrl)
+            .databaseUsername(databaseUsername)
+            .databasePassword(databasePassword)
+            .hikariOptions(hikariOptions);
+
+    // Get AWS Wrapper configuration
+    if (databaseDataSourceType == DatabaseOptions.DataSourceType.AWS_WRAPPER) {
+      final var wrapperUseCustomPreset =
+          config.booleanValue(SSM_PATH_DB_WRAPPER_USE_CUSTOM_PRESET, false);
+      final var wrapperBasePresetCode = config.stringValue(SSM_PATH_DB_WRAPPER_BASE_PRESET, "E");
+      // Default plugin list is the same as the default list of plugins when left unspecified
+      final var wrapperPluginsCsv =
+          config.stringValue(
+              SSM_PATH_DB_WRAPPER_PLUGINS_CSV, "auroraConnectionTracker,failover,efm2");
+      final var wrapperHostSelectionStrategy =
+          config.stringValue(SSM_PATH_DB_WRAPPER_HOST_SELECTION_STRATEGY, "roundRobin");
+      final var wrapperInitConnectionStrategy =
+          config.stringValue(SSM_PATH_DB_WRAPPER_INIT_CONNECTION_STRATEGY, "roundRobin");
+      final var wrapperOptions =
+          DatabaseOptions.AwsJdbcWrapperOptions.builder()
+              .useCustomPreset(wrapperUseCustomPreset)
+              .basePresetCode(wrapperBasePresetCode)
+              .pluginsCsv(wrapperPluginsCsv)
+              .hostSelectionStrategy(wrapperHostSelectionStrategy)
+              .initialConnectionStrategy(wrapperInitConnectionStrategy)
+              .build();
+
+      dbOptionsBuilder.awsJdbcWrapperOptions(wrapperOptions);
+    }
+
+    return dbOptionsBuilder.build();
   }
 
   /**

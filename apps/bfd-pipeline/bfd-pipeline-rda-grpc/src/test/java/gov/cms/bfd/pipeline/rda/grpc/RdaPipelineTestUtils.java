@@ -123,7 +123,7 @@ public class RdaPipelineTestUtils {
             .databaseUrl(dataSourceComponents.getUrl())
             .databaseUsername(dataSourceComponents.getUsername())
             .databasePassword(dataSourceComponents.getPassword())
-            .maxPoolSize(10)
+            .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(10).build())
             .build();
     try (HikariDataSource dataSource =
             new DefaultHikariDataSourceFactory(dbOptions).createDataSource();

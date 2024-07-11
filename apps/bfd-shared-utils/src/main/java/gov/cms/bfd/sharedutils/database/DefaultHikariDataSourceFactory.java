@@ -39,7 +39,7 @@ public class DefaultHikariDataSourceFactory implements HikariDataSourceFactory {
     dataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
     dataSource.setUsername(dbOptions.getDatabaseUsername());
     dataSource.setPassword(dbOptions.getDatabasePassword());
-    dataSource.setMaximumPoolSize(Math.max(2, dbOptions.getMaxPoolSize()));
+    dataSource.setMaximumPoolSize(Math.max(2, dbOptions.getHikariOptions().getMaximumPoolSize()));
     dataSource.setRegisterMbeans(true);
 
     /*

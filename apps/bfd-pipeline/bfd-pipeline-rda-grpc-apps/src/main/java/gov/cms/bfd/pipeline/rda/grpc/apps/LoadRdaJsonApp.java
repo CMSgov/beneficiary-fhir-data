@@ -270,7 +270,7 @@ public class LoadRdaJsonApp {
           .databaseUrl(dbUrl)
           .databaseUsername(dbUser)
           .databasePassword(dbPassword)
-          .maxPoolSize(10)
+          .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(10).build())
           .build();
     }
 

@@ -47,6 +47,9 @@ public class ConfigLoader {
   /** Error message for non-positive integer. */
   public static final String NOT_POSITIVE_INTEGER = "not a positive integer";
 
+  /** Error message for non-positive long. */
+  public static final String NOT_POSITIVE_LONG = "not a positive long";
+
   /** Error message for invalid hex strings. */
   @VisibleForTesting static final String NOT_VALID_HEX = "invalid hex string";
 
@@ -298,6 +301,40 @@ public class ConfigLoader {
    */
   public Optional<Integer> intOption(String name) {
     return parsedOption(name, Integer.class, Integer::parseInt);
+  }
+
+  /**
+   * Gets a required positive long configuration value.
+   *
+   * @param name name of configuration value
+   * @return long value
+   * @throws ConfigException if there is no valid long value or value is not positive
+   */
+  public long positiveLongValue(String name) {
+    return positiveLongOption(name).orElseThrow(() -> new ConfigException(name, NOT_PROVIDED));
+  }
+
+  /**
+   * Gets an optional positive long configuration value or a defaultValue if there is no value.
+   *
+   * @param name name of configuration value
+   * @param defaultValue the default value
+   * @return either the long value or defaultValue
+   * @throws ConfigException if a value existed but was not a valid positive long
+   */
+  public long positiveLongValue(String name, long defaultValue) {
+    return positiveLongOption(name).orElse(defaultValue);
+  }
+
+  /**
+   * Gets an optional positive long configuration value.
+   *
+   * @param name name of configuration value
+   * @return optional long value
+   * @throws ConfigException if there is a long value and it is not positive
+   */
+  public Optional<Long> positiveLongOption(String name) {
+    return longOption(name).map(x -> validate(name, x, NOT_POSITIVE_LONG, x > 0));
   }
 
   /**

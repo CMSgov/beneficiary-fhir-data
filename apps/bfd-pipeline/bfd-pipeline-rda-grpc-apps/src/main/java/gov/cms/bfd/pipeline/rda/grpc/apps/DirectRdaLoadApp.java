@@ -139,7 +139,11 @@ public class DirectRdaLoadApp {
         .databaseUrl(options.stringValue("database.url"))
         .databaseUsername(options.stringValue("database.user"))
         .databasePassword(options.stringValue("database.password", ""))
-        .maxPoolSize(options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)))
+        .hikariOptions(
+            DatabaseOptions.HikariOptions.builder()
+                .maximumPoolSize(
+                    options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)))
+                .build())
         .build();
   }
 

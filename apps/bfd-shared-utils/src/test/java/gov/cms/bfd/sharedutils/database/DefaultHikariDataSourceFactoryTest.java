@@ -17,7 +17,7 @@ public class DefaultHikariDataSourceFactoryTest {
             .databaseUrl("jdbc:postgres://host-name:111/")
             .databaseUsername("user")
             .databasePassword("pass")
-            .maxPoolSize(10)
+            .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(10).build())
             .build();
     var dataSource = mock(HikariDataSource.class);
     var factory = new DefaultHikariDataSourceFactory(databaseOptions);
@@ -25,7 +25,7 @@ public class DefaultHikariDataSourceFactoryTest {
     verify(dataSource).setJdbcUrl(databaseOptions.getDatabaseUrl());
     verify(dataSource).setUsername(databaseOptions.getDatabaseUsername());
     verify(dataSource).setPassword(databaseOptions.getDatabasePassword());
-    verify(dataSource).setMaximumPoolSize(databaseOptions.getMaxPoolSize());
+    verify(dataSource).setMaximumPoolSize(databaseOptions.getHikariOptions().getMaximumPoolSize());
     verify(dataSource).setRegisterMbeans(true);
   }
 }

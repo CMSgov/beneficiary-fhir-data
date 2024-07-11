@@ -171,7 +171,7 @@ public class AppConfigurationTest {
     envVars.put(AppConfiguration.SSM_PATH_DATABASE_URL, "jdbc:postgres://host:1234/fhirdb");
     envVars.put(AppConfiguration.SSM_PATH_DATABASE_USERNAME, "some_user");
     envVars.put(AppConfiguration.SSM_PATH_DATABASE_PASSWORD, "not-used");
-    envVars.put(AppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE, "14");
+    envVars.put(AppConfiguration.SSM_PATH_DB_HIKARI_MAX_POOL_SIZE, "14");
     addRequiredSettingsForTest(envVars);
 
     final var configLoader = AppConfiguration.createConfigLoaderForTesting(envVars);
@@ -183,7 +183,7 @@ public class AppConfigurationTest {
             .databaseUrl(envVars.get(AppConfiguration.SSM_PATH_DATABASE_URL))
             .databaseUsername(envVars.get(AppConfiguration.SSM_PATH_DATABASE_USERNAME))
             .databasePassword(envVars.get(AppConfiguration.SSM_PATH_DATABASE_PASSWORD))
-            .maxPoolSize(14)
+            .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(14).build())
             .build(),
         testAppConfig.getDatabaseOptions());
     assertThat(testAppConfig.createDataSourceFactory())

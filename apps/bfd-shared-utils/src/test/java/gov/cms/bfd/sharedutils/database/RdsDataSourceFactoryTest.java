@@ -29,7 +29,7 @@ public class RdsDataSourceFactoryTest {
           .databaseUrl("jdbc:postgres://host-name:111/")
           .databaseUsername("user")
           .databasePassword("pass")
-          .maxPoolSize(10)
+          .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(10).build())
           .build();
 
   /** Mock {@link AwsClientConfig}. */
