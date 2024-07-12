@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.jdbc.ds.AwsWrapperDataSource;
 
 /**
  * Base configuration class modeling the configuration options for BFD applications. Should be
@@ -228,10 +227,6 @@ public abstract class BaseConfiguration {
    * Creates a {@link HikariDataSource} based on provided {@link DatabaseOptions} and {@link
    * AwsClientConfig} if the data source should use RDS authentication.
    *
-   * @implNote FIXME: This method provided as an escape hatch for Migrator and Pipeline as of
-   *     introducing the AWS JDBC Wrapper and commonizing configuration classes across all
-   *     applications in BFD-3508. This method should be removed in favor of refactoring the
-   *     Migrator and Pipeline to support the {@link AwsWrapperDataSource} properly.
    * @param databaseOptions used to configure the resulting {@link HikariDataSourceFactory}
    * @param awsClientConfig used to configure authentication if the {@link
    *     DatabaseOptions#authenticationType} is {@link AuthenticationType#RDS}
@@ -239,6 +234,10 @@ public abstract class BaseConfiguration {
    */
   protected HikariDataSourceFactory createHikariDataSourceFactory(
       DatabaseOptions databaseOptions, AwsClientConfig awsClientConfig) {
+    // FIXME: This method provided as an escape hatch for Migrator and Pipeline as of
+    // introducing the AWS JDBC Wrapper and commonizing configuration classes across all
+    // applications in BFD-3508. This method should be removed in favor of refactoring the
+    // Migrator and Pipeline to support the AwsWrapperDataSource properly.
     if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
       return RdsHikariDataSourceFactory.builder()
           .awsClientConfig(awsClientConfig)

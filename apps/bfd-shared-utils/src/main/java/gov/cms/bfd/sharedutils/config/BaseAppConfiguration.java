@@ -1,11 +1,9 @@
 package gov.cms.bfd.sharedutils.config;
 
 import com.google.common.base.Preconditions;
-import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import javax.sql.DataSource;
 import lombok.Getter;
 
 /**
@@ -52,12 +50,12 @@ public abstract class BaseAppConfiguration extends BaseConfiguration {
   /**
    * Creates appropriate {@link HikariDataSourceFactory} based on our {@link DatabaseOptions}.
    *
-   * @implNote FIXME: Introduced as an escape hatch for BFD applications relying on being provided a
-   *     {@link HikariDataSource} or subclass thereof. This method should be removed when those
-   *     applications more properly support generic {@link DataSource}s
    * @return factory for creating data sources
    */
   public HikariDataSourceFactory createHikariDataSourceFactory() {
+    // FIXME: Introduced as an escape hatch for BFD applications relying on being provided a
+    // HikariDataSource or subclass thereof. This method should be removed when those
+    // applications more properly support generic DataSources
     return createHikariDataSourceFactory(databaseOptions, awsClientConfig);
   }
 
