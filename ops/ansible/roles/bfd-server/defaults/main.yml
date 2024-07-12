@@ -12,7 +12,7 @@ data_server_appserver_service: bfd-server
 data_server_user: bfd
 
 # The extra Java VM args to start the app server (Jetty) with.
-data_server_appserver_jvmargs: '-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=1024m' 
+data_server_appserver_jvmargs: '-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=1024m'
 
 # The port that the app server (Jetty) should host HTTPS on.
 data_server_appserver_https_port: 8443
@@ -21,7 +21,7 @@ data_server_appserver_https_port: 8443
 data_server_ssl_client_certificates: []
 
 # The max size of the DB connection pool for the Blue Button Data Server.
-data_server_db_connections_max: 40
+db_hikari_max_pool_size: 40
 
 # Whether or not partially adjudicated claims data resources are enabled.
 pac_resources_enabled: false

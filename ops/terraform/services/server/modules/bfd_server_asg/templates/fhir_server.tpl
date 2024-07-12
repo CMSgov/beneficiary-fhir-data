@@ -11,12 +11,14 @@ exec > >(
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
 # TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
+# SSM parameters with hierarchical leaf nodes will have those nodes transformed from "one/two/three"
+# to "one_two_three" by the jq expression below
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/server/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > server_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5:]|join("_")): .Value})|add' > server_vars.json
 
 # the previous ssm get-parameter will also pick the certs up due to the 'recursive' arg;.
 # we'll process the ".../client_certs/" path separately.
@@ -35,7 +37,6 @@ aws ssm get-parameters-by-path \
 cat <<EOF > extra_vars.json
 {
   "data_server_appserver_jvmargs": "-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0",
-  "data_server_db_connections_max": "{{ ansible_processor_vcpus * 10 }}",
   "data_server_new_relic_app_name": "BFD Server ({{ env_name_std }})",
   "data_server_new_relic_environment": "{{ env_name_std }}",
   "data_server_tmp_dir": "{{ data_server_dir }}/tmp",
