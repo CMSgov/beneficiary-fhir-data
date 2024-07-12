@@ -43,7 +43,7 @@ If you're reviewing this PR, please check for these things in particular:
 Please indicate if this PR does any of the following:  
 
 * Adds any new software dependencies
-* Modifies an security controls
+* Modifies any security controls
 * Adds new transmission or storage of data
 * Any other changes that could possible affect secuirity? 
 
