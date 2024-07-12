@@ -34,7 +34,7 @@ aws ssm get-parameters-by-path \
 
 cat <<EOF > extra_vars.json
 {
-  "data_server_appserver_jvmargs": "-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer",
+  "data_server_appserver_jvmargs": "-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0",
   "data_server_db_connections_max": "{{ ansible_processor_vcpus * 10 }}",
   "data_server_new_relic_app_name": "BFD Server ({{ env_name_std }})",
   "data_server_new_relic_environment": "{{ env_name_std }}",
@@ -67,3 +67,7 @@ EOF
 chmod 0644 /etc/profile.d/set-bfd-login-env.sh
 
 bash /usr/local/bin/permit-user-access "${seed_env}"
+
+# Disable the JVM's indefinite DNS caching to aid in proper RDS node selection per-connection
+mkdir -p "$JAVA_HOME/conf/security"
+echo "networkaddress.cache.ttl=5" > "$JAVA_HOME/conf/security/java.security"
