@@ -39,8 +39,18 @@ public class DefaultHikariDataSourceFactory implements HikariDataSourceFactory {
     dataSource.setJdbcUrl(dbOptions.getDatabaseUrl());
     dataSource.setUsername(dbOptions.getDatabaseUsername());
     dataSource.setPassword(dbOptions.getDatabasePassword());
-    dataSource.setMaximumPoolSize(Math.max(2, dbOptions.getHikariOptions().getMaximumPoolSize()));
     dataSource.setRegisterMbeans(true);
+
+    final var hikariOptions = dbOptions.getHikariOptions();
+    dataSource.setMaximumPoolSize(Math.max(2, hikariOptions.getMaximumPoolSize()));
+    dataSource.setMinimumIdle(hikariOptions.getMinimumIdleConnections());
+    dataSource.setIdleTimeout(hikariOptions.getIdleTimeoutMs());
+    dataSource.setInitializationFailTimeout(
+            hikariOptions.getInitializationFailTimeoutMs());
+    dataSource.setConnectionTimeout(hikariOptions.getConnectionTimeoutMs());
+    dataSource.setKeepaliveTime(hikariOptions.getKeepaliveTimeMs());
+    dataSource.setValidationTimeout(hikariOptions.getValidationTimeoutMs());
+    dataSource.setMaxLifetime(hikariOptions.getMaxConnectionLifetimeMs());
 
     /*
      * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
