@@ -40,17 +40,19 @@ If you're reviewing this PR, please check for these things in particular:
 
 ### What Security Implications Does This PR Have?
 
-* Please indicate if this PR does any of the following:  
+Please indicate if this PR does any of the following:  
+
     * Adds any new software dependencies
     * Modifies an security controls
     * Adds new transmission or storage of data
     * Any other changes that could possible affect secuirity? 
+
 * [ ] Yes
       
-    * If any of the above security implications apply, this PR must not be merged without the ISSO or team security engineer's (@sb-benohe) approval. 
+If any of the above security implications apply, this PR must not be merged without the ISSO or team security engineer's (@sb-benohe) approval. 
 
 
 ### Validation
 
-* Have you fully verified and tested these changes? Is the acceptance criteria met? Please provide reproducible testing instructions, code snippets, or screenshots as applicable.
+Have you fully verified and tested these changes? Is the acceptance criteria met? Please provide reproducible testing instructions, code snippets, or screenshots as applicable.
     
