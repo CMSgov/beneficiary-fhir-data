@@ -64,3 +64,18 @@
 /bfd/${env}/server/nonsensitive/launch_template_volume_type: gp3
 /bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
   []
+/bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
+/bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
+/bfd/${env}/server/nonsensitive/db/hikari/max_pool_size: 60
+/bfd/${env}/server/nonsensitive/db/hikari/min_idle_connections: 10
+/bfd/${env}/server/nonsensitive/db/hikari/idle_timeout_ms: 900000 # 15 minutes
+/bfd/${env}/server/nonsensitive/db/hikari/init_fail_timeout_ms: -1
+/bfd/${env}/server/nonsensitive/db/hikari/connection_timeout_ms: 10000 # 10 seconds
+/bfd/${env}/server/nonsensitive/db/hikari/keepalive_timeout_ms: 180000 # 3 minutes
+/bfd/${env}/server/nonsensitive/db/hikari/validation_timeout_ms: 1000 # 1 second
+/bfd/${env}/server/nonsensitive/db/hikari/max_connection_lifetime_ms: 1800000 # 30 minutes
+/bfd/${env}/server/nonsensitive/db/wrapper/use_custom_preset: "true"
+/bfd/${env}/server/nonsensitive/db/wrapper/base_preset: E
+/bfd/${env}/server/nonsensitive/db/wrapper/plugins_csv: "initialConnection,auroraConnectionTracker,readWriteSplitting,efm2,failover"
+/bfd/${env}/server/nonsensitive/db/wrapper/host_selection_strategy: roundRobin
+/bfd/${env}/server/nonsensitive/db/wrapper/init_connection_strategy: roundRobin

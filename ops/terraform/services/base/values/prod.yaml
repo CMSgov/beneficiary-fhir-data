@@ -113,8 +113,9 @@
 /bfd/${env}/common/nonsensitive/vpc_name: bfd-prod-vpc
 /bfd/${env}/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private
 /bfd/${env}/migrator/nonsensitive/ref_dir: /opt/bfd-db-migrator
-/bfd/${env}/migrator/nonsensitive/db/max_connections: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/db/auth_type: UNDEFINED
+/bfd/${env}/migrator/nonsensitive/db/data_source_type: HIKARI
+/bfd/${env}/migrator/nonsensitive/db/hikari/max_pool_size: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/sqs/queue_name: bfd-prod-migrator
 /bfd/${env}/migrator/nonsensitive/new_relic/app_name: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/new_relic/metrics/host: https://gov-metric-api.newrelic.com
@@ -145,8 +146,9 @@
 /bfd/${env}/pipeline/nonsensitive/systemd/exec_start: /bluebutton-data-pipeline/bfd-pipeline-service.sh
 /bfd/${env}/pipeline/nonsensitive/systemd/user: bb-etl
 /bfd/${env}/pipeline/nonsensitive/db/url: "null"
-/bfd/${env}/pipeline/nonsensitive/db/max_connections: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/db/auth_type: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/db/data_source_type: HIKARI
+/bfd/${env}/pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/loader_thread_count: ansible_processor_vcpus() * 25
 /bfd/${env}/pipeline/nonsensitive/micrometer_cw/enabled: "true"
 /bfd/${env}/pipeline/nonsensitive/micrometer_cw/namespace: bfd-prod/bfd-pipeline
@@ -208,8 +210,21 @@
 /bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_micrometer_cw_namespace: bfd-prod/bfd-pipeline
 /bfd/${env}/pipeline/nonsensitive/shared/data_pipeline_micrometer_cw_interval: PT1M
 /bfd/${env}/server/nonsensitive/ref_dir: /usr/local/bfd-server
-/bfd/${env}/server/nonsensitive/db/max_connections: ansible_processor_vcpus() * 10
 /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
+/bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
+/bfd/${env}/server/nonsensitive/db/hikari/max_pool_size: 60
+/bfd/${env}/server/nonsensitive/db/hikari/min_idle_connections: 10
+/bfd/${env}/server/nonsensitive/db/hikari/idle_timeout_ms: 900000 # 15 minutes
+/bfd/${env}/server/nonsensitive/db/hikari/init_fail_timeout_ms: -1
+/bfd/${env}/server/nonsensitive/db/hikari/connection_timeout_ms: 10000 # 10 seconds
+/bfd/${env}/server/nonsensitive/db/hikari/keepalive_timeout_ms: 180000 # 3 minutes
+/bfd/${env}/server/nonsensitive/db/hikari/validation_timeout_ms: 1000 # 1 second
+/bfd/${env}/server/nonsensitive/db/hikari/max_connection_lifetime_ms: 1800000 # 30 minutes
+/bfd/${env}/server/nonsensitive/db/wrapper/use_custom_preset: "true"
+/bfd/${env}/server/nonsensitive/db/wrapper/base_preset: E
+/bfd/${env}/server/nonsensitive/db/wrapper/plugins_csv: "initialConnection,auroraConnectionTracker,readWriteSplitting,efm2,failover"
+/bfd/${env}/server/nonsensitive/db/wrapper/host_selection_strategy: roundRobin
+/bfd/${env}/server/nonsensitive/db/wrapper/init_connection_strategy: roundRobin
 /bfd/${env}/server/nonsensitive/pac/enabled: "true"
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
