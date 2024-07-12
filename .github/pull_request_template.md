@@ -39,6 +39,7 @@ If you're reviewing this PR, please check for these things in particular:
 <!-- Add some items here -->
 
 ### What Security Implications Does This PR Have?
+
     * Please indicate if this PR does any of the following:  
         * Adds any new software dependencies
         * Modifies an security controls
@@ -50,5 +51,6 @@ If you're reviewing this PR, please check for these things in particular:
 
 
 ### Validation
+
     * Have you fully verified and tested these changes? Is the acceptance criteria met? Please provide reproducible testing instructions, code snippets, or screenshots as applicable.
     
