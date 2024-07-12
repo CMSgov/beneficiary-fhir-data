@@ -327,6 +327,18 @@ public class ConfigLoader {
   }
 
   /**
+   * Gets an optional long configuration value or a defaultValue if there is no value.
+   *
+   * @param name name of configuration value
+   * @param defaultValue the default value
+   * @return either the long value or defaultValue
+   * @throws ConfigException if a value existed but was not a valid long
+   */
+  public long longValue(String name, long defaultValue) {
+    return longOption(name).orElse(defaultValue);
+  }
+
+  /**
    * Gets an optional positive long configuration value.
    *
    * @param name name of configuration value

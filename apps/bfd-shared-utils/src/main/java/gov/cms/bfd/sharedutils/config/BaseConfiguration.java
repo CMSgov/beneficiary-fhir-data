@@ -308,8 +308,10 @@ public abstract class BaseConfiguration {
             SSM_PATH_DB_HIKARI_MIN_IDLE_CONNECTIONS, Runtime.getRuntime().availableProcessors());
     final var hikariIdleTimeoutMs =
         config.positiveLongValue(SSM_PATH_DB_HIKARI_IDLE_TIMEOUT_MS, TimeUnit.MINUTES.toMillis(10));
+    // Can be negative to specify that initial connection attempts are bypassed and the pool should
+    // be immediately started
     final var hikariInitFailTimeoutMs =
-        config.positiveLongValue(SSM_PATH_DB_HIKARI_INIT_FAIL_TIMEOUT_MS, 1);
+        config.longValue(SSM_PATH_DB_HIKARI_INIT_FAIL_TIMEOUT_MS, 1);
     final var hikariConnectionTimeoutMs =
         config.positiveLongValue(
             SSM_PATH_DB_HIKARI_CONNECTION_TIMEOUT_MS, TimeUnit.SECONDS.toMillis(30));
