@@ -5,8 +5,10 @@ import com.google.common.base.Preconditions;
 import com.zaxxer.hikari.HikariConfig;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.AwsJdbcWrapperOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.HikariOptions;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
-import javax.sql.DataSource;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
 import software.amazon.jdbc.HostSpec;
@@ -34,12 +36,23 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
   private final DatabaseOptions databaseOptions;
 
   @Override
-  public DataSource createDataSource() {
-    return createDataSource(null);
+  public AwsWrapperDataSource createDataSource() {
+    return createDataSource(null, null);
   }
 
   @Override
-  public DataSource createDataSource(MetricRegistry metricRegistry) {
+  public AwsWrapperDataSource createDataSource(Properties properties) {
+    return createDataSource(properties, null);
+  }
+
+  @Override
+  public AwsWrapperDataSource createDataSource(MetricRegistry metricRegistry) {
+    return createDataSource(null, metricRegistry);
+  }
+
+  @Override
+  public AwsWrapperDataSource createDataSource(
+      Properties properties, MetricRegistry metricRegistry) {
     Preconditions.checkNotNull(
         databaseOptions.getAwsJdbcWrapperOptions(),
         "AWS JDCB Wrapper options must not be null when creating an AwsWrapperDataSource");
@@ -59,7 +72,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
     }
 
     final var targetDataSourceProps = getProperties(wrapperOptions);
-    dataSource.setTargetDataSourceProperties(targetDataSourceProps);
+    dataSource.setTargetDataSourceProperties(mergeProperties(properties, targetDataSourceProps));
 
     return dataSource;
   }
@@ -102,7 +115,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
                    * strongly worded letter instructing it to avoid sequential scans whenever
                    * possible.
                    *
-                   * Taken directly from DefaultHikariDataSourceFactory.
+                   * Taken directly from HikariDataSourceFactory.
                    */
                   if (databaseOptions.getDatabaseUrl() != null
                       && databaseOptions.getDatabaseUrl().contains("postgre")) {
@@ -118,7 +131,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
                    * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
                    * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
                    *
-                   * Taken directly from DefaultHikariDataSourceFactory.
+                   * Taken directly from HikariDataSourceFactory.
                    */
                   config.setLeakDetectionThreshold(60 * 1000);
                   return config;
@@ -147,5 +160,18 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
         ReadWriteSplittingPlugin.READER_HOST_SELECTOR_STRATEGY.name,
         wrapperOptions.getHostSelectionStrategy());
     return targetDataSourceProps;
+  }
+
+  /**
+   * Merges 2 or more {@link Properties} collections together into a single {@link Properties}
+   * object. {@literal null} is ignored
+   *
+   * @param properties the {@link Properties} objects to merge
+   * @return a merged {@link Properties}
+   */
+  private static Properties mergeProperties(Properties... properties) {
+    return Stream.of(properties)
+        .filter(Objects::nonNull)
+        .collect(Properties::new, Map::putAll, Map::putAll);
   }
 }

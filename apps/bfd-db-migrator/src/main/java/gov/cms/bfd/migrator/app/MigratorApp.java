@@ -120,7 +120,7 @@ public final class MigratorApp {
     final MigratorProgressTracker progressTracker = createProgressTracker(appConfig);
     progressTracker.appStarted();
 
-    final HikariDataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
+    final HikariDataSourceFactory dataSourceFactory = appConfig.createHikariDataSourceFactory();
     final MetricRegistry appMetrics = setupMetrics(appConfig);
     createOrUpdateSchema(
         dataSourceFactory,
@@ -301,10 +301,9 @@ public final class MigratorApp {
    */
   private HikariDataSource createPooledDataSource(
       HikariDataSourceFactory dataSourceFactory, MetricRegistry metrics) {
-    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
+    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource(metrics);
     // we know that flyway requires at least two connections so override the value if it's 1
     pooledDataSource.setMaximumPoolSize(Math.max(2, pooledDataSource.getMaximumPoolSize()));
-    pooledDataSource.setMetricRegistry(metrics);
     return pooledDataSource;
   }
 }

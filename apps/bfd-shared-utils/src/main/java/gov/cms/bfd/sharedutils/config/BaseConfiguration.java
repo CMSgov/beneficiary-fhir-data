@@ -1,11 +1,11 @@
 package gov.cms.bfd.sharedutils.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.AuthenticationType;
-import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsHikariDataSourceFactory;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.jdbc.ds.AwsWrapperDataSource;
 
 /**
  * Base configuration class modeling the configuration options for BFD applications. Should be
@@ -188,23 +189,48 @@ public abstract class BaseConfiguration {
   public static final String ENV_VAR_AWS_SECRET_KEY = "AWS_SECRET_KEY";
 
   /**
-   * Creates appropriate {@link HikariDataSourceFactory} based on provided {@link DatabaseOptions}
-   * and {@link AwsClientConfig} if the data source should use RDS authentication.
+   * Creates appropriate {@link DataSourceFactory} based on provided {@link DatabaseOptions} and
+   * {@link AwsClientConfig} if the data source should use RDS authentication.
    *
    * @param databaseOptions used to configure the resulting {@link DataSourceFactory}
    * @param awsClientConfig used to configure authentication if the {@link
    *     DatabaseOptions#authenticationType} is {@link AuthenticationType#RDS}
    * @return factory for creating data sources
    */
-  public HikariDataSourceFactory createDataSourceFactory(
+  protected DataSourceFactory createDataSourceFactory(
       DatabaseOptions databaseOptions, AwsClientConfig awsClientConfig) {
     if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
-      return RdsDataSourceFactory.builder()
+      return RdsHikariDataSourceFactory.builder()
           .awsClientConfig(awsClientConfig)
           .databaseOptions(databaseOptions)
           .build();
     } else {
-      return new DefaultHikariDataSourceFactory(databaseOptions);
+      return new HikariDataSourceFactory(databaseOptions);
+    }
+  }
+
+  /**
+   * Creates a {@link HikariDataSource} based on provided {@link DatabaseOptions} and {@link
+   * AwsClientConfig} if the data source should use RDS authentication.
+   *
+   * @implNote FIXME: This method provided as an escape hatch for Migrator and Pipeline as of
+   *     introducing the AWS JDBC Wrapper and commonizing configuration classes across all
+   *     applications in BFD-3508. This method should be removed in favor of refactoring the
+   *     Migrator and Pipeline to support the {@link AwsWrapperDataSource} properly.
+   * @param databaseOptions used to configure the resulting {@link HikariDataSourceFactory}
+   * @param awsClientConfig used to configure authentication if the {@link
+   *     DatabaseOptions#authenticationType} is {@link AuthenticationType#RDS}
+   * @return a {@link HikariDataSourceFactory} that creates {@link HikariDataSource}s
+   */
+  protected HikariDataSourceFactory createHikariDataSourceFactory(
+      DatabaseOptions databaseOptions, AwsClientConfig awsClientConfig) {
+    if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
+      return RdsHikariDataSourceFactory.builder()
+          .awsClientConfig(awsClientConfig)
+          .databaseOptions(databaseOptions)
+          .build();
+    } else {
+      return new HikariDataSourceFactory(databaseOptions);
     }
   }
 

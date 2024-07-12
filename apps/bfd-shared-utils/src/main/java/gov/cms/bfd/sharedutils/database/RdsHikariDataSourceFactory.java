@@ -9,6 +9,7 @@ import jakarta.annotation.Nullable;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.Properties;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +23,7 @@ import software.amazon.awssdk.services.rds.RdsClientBuilder;
  * password. {@see
  * https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html}.
  */
-public class RdsDataSourceFactory extends DefaultHikariDataSourceFactory {
+public class RdsHikariDataSourceFactory extends HikariDataSourceFactory {
   /**
    * A short delay between token requests so that constructing a new thread pool doesn't need to
    * trigger hundreds of token requests at the same time. According to the AWS documentation a token
@@ -48,7 +49,7 @@ public class RdsDataSourceFactory extends DefaultHikariDataSourceFactory {
    * @param databaseOptions used to configure {@link RdsHikariDataSource} instances
    */
   @Builder
-  private RdsDataSourceFactory(
+  private RdsHikariDataSourceFactory(
       @Nullable Clock clock,
       @Nullable Long tokenTtlMillis,
       @Nonnull AwsClientConfig awsClientConfig,
@@ -65,38 +66,22 @@ public class RdsDataSourceFactory extends DefaultHikariDataSourceFactory {
     configBuilder.databaseHost(
         databaseOptions
             .getDatabaseHost()
-            .orElseThrow(RdsDataSourceFactory::reportInvalidDatabaseOptions));
+            .orElseThrow(RdsHikariDataSourceFactory::reportInvalidDatabaseOptions));
     configBuilder.databasePort(
         databaseOptions
             .getDatabasePort()
-            .orElseThrow(RdsDataSourceFactory::reportInvalidDatabaseOptions));
+            .orElseThrow(RdsHikariDataSourceFactory::reportInvalidDatabaseOptions));
     this.awsClientConfig = awsClientConfig;
     dataSourceConfig = configBuilder.build();
   }
 
-  /**
-   * Constructs a {@link RdsHikariDataSource} instance.
-   *
-   * @return the data source
-   */
   @Override
-  public HikariDataSource createDataSource() {
-    return createDataSource(null);
-  }
-
-  /**
-   * Constructs a {@link RdsHikariDataSource} instance that will submit metrics to the provided
-   * {@link MetricRegistry}.
-   *
-   * @param metricRegistry the {@link MetricRegistry} for the application
-   * @return the data source
-   */
-  @Override
-  public HikariDataSource createDataSource(MetricRegistry metricRegistry) {
+  public RdsHikariDataSource createDataSource(
+      @Nullable Properties properties, MetricRegistry metricRegistry) {
     final var rdsClient = getRdsClient();
     // the dataSource will take care of closing this when its close method is called
     final var dataSource = createRdsHikariDataSource(rdsClient);
-    configureDataSource(dataSource, metricRegistry);
+    configureDataSource(dataSource, properties, metricRegistry);
     return dataSource;
   }
 

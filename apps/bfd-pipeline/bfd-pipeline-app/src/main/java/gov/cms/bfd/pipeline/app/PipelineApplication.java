@@ -188,7 +188,7 @@ public final class PipelineApplication {
     configureMetrics(metricOptions, configLoader, appMeters, appMetrics);
 
     // Create a pooled data source for use by any registered jobs.
-    final HikariDataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
+    final HikariDataSourceFactory dataSourceFactory = appConfig.createHikariDataSourceFactory();
     try (HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics)) {
       logDatabaseDetails(pooledDataSource);

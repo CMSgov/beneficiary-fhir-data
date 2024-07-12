@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link DefaultHikariDataSourceFactory}. */
-public class DefaultHikariDataSourceFactoryTest {
+/** Unit tests for {@link HikariDataSourceFactory}. */
+public class HikariDataSourceFactoryTest {
   /** Verify that options are applied when data source is configured. */
   @Test
   void shouldConfigureDataSource() {
@@ -20,8 +20,8 @@ public class DefaultHikariDataSourceFactoryTest {
             .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(10).build())
             .build();
     var dataSource = mock(HikariDataSource.class);
-    var factory = new DefaultHikariDataSourceFactory(databaseOptions);
-    factory.configureDataSource(dataSource, null);
+    var factory = new HikariDataSourceFactory(databaseOptions);
+    factory.configureDataSource(dataSource, null, null);
     verify(dataSource).setJdbcUrl(databaseOptions.getDatabaseUrl());
     verify(dataSource).setUsername(databaseOptions.getDatabaseUsername());
     verify(dataSource).setPassword(databaseOptions.getDatabasePassword());

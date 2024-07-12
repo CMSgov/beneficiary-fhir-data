@@ -22,7 +22,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Timer;
@@ -108,7 +108,7 @@ public class RdaPipelineTestUtils {
   /**
    * Creates a {@link HikariDataSource}, {@link PipelineApplicationState} and {@link
    * TransactionManager} using the shared containerized postgres DB, passes them to the provided
-   * lambda function, then truncates all of the RDA tables and closes the {@link HikariDataSource}.
+   * lambda function, then truncates all the RDA tables and closes the {@link HikariDataSource}.
    *
    * @param clock used for the app state
    * @param test lambda to receive the appState and perform some testing
@@ -125,8 +125,7 @@ public class RdaPipelineTestUtils {
             .databasePassword(dataSourceComponents.getPassword())
             .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(10).build())
             .build();
-    try (HikariDataSource dataSource =
-            new DefaultHikariDataSourceFactory(dbOptions).createDataSource();
+    try (HikariDataSource dataSource = new HikariDataSourceFactory(dbOptions).createDataSource();
         PipelineApplicationState appState =
             new PipelineApplicationState(
                 new SimpleMeterRegistry(),

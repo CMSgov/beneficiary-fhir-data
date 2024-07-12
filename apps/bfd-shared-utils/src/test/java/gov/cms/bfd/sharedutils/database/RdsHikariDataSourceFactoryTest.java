@@ -19,9 +19,9 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.RdsClientBuilder;
 
-/** Unit tests for {@link RdsDataSourceFactory}. */
+/** Unit tests for {@link RdsHikariDataSourceFactory}. */
 @ExtendWith(MockitoExtension.class)
-public class RdsDataSourceFactoryTest {
+public class RdsHikariDataSourceFactoryTest {
   /** Fixed options for use in tests. */
   private final DatabaseOptions databaseOptions =
       DatabaseOptions.builder()
@@ -45,7 +45,7 @@ public class RdsDataSourceFactoryTest {
   @Test
   void constructorShouldUseDefaultConfigSettings() {
     var dataSourceFactory =
-        RdsDataSourceFactory.builder()
+        RdsHikariDataSourceFactory.builder()
             .awsClientConfig(awsClientConfig)
             .databaseOptions(databaseOptions)
             .build();
@@ -56,7 +56,7 @@ public class RdsDataSourceFactoryTest {
             .databaseHost("host-name")
             .databasePort(111)
             .clock(Clock.systemUTC())
-            .tokenTtlMillis(RdsDataSourceFactory.DEFAULT_TOKEN_TTL_MILLIS)
+            .tokenTtlMillis(RdsHikariDataSourceFactory.DEFAULT_TOKEN_TTL_MILLIS)
             .build();
 
     assertEquals(expectedDataSourceConfig, dataSourceFactory.getDataSourceConfig());
@@ -70,7 +70,7 @@ public class RdsDataSourceFactoryTest {
     // Using a spy lets us override and verify method calls.
     var dataSourceFactory =
         spy(
-            RdsDataSourceFactory.builder()
+            RdsHikariDataSourceFactory.builder()
                 .awsClientConfig(awsClientConfig)
                 .databaseOptions(databaseOptions)
                 .build());
@@ -83,12 +83,12 @@ public class RdsDataSourceFactoryTest {
 
     // We're just verifying these are called.  We don't want them to do anything.
     doNothing().when(awsClientConfig).configureAwsService(rdsClientBuilder);
-    doNothing().when(dataSourceFactory).configureDataSource(dataSource, null);
+    doNothing().when(dataSourceFactory).configureDataSource(dataSource, null, null);
 
     // now create the data source and verify the calls were made as expected
     assertSame(dataSource, dataSourceFactory.createDataSource());
     verify(awsClientConfig).configureAwsService(rdsClientBuilder);
     verify(rdsClientBuilder).credentialsProvider(any(DefaultCredentialsProvider.class));
-    verify(dataSourceFactory).configureDataSource(dataSource, null);
+    verify(dataSourceFactory).configureDataSource(dataSource, null, null);
   }
 }

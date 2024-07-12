@@ -19,9 +19,8 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
-import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsHikariDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
@@ -99,11 +98,11 @@ public class LoadRdaJsonApp {
                 final AwsClientConfig awsClientConfig = config.createAwsClientConfig();
                 final HikariDataSourceFactory dataSourceFactory =
                     databaseConfig.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS
-                        ? RdsDataSourceFactory.builder()
+                        ? RdsHikariDataSourceFactory.builder()
                             .awsClientConfig(awsClientConfig)
                             .databaseOptions(databaseConfig)
                             .build()
-                        : new DefaultHikariDataSourceFactory(databaseConfig);
+                        : new HikariDataSourceFactory(databaseConfig);
                 final HikariDataSource pooledDataSource =
                     PipelineApplicationState.createPooledDataSource(dataSourceFactory, metrics);
                 if (config.runSchemaMigration) {

@@ -52,8 +52,8 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import gov.cms.bfd.sharedutils.database.DefaultHikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsHikariDataSourceFactory;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import io.micrometer.core.instrument.config.validate.ValidationException;
 import java.net.URI;
@@ -141,7 +141,7 @@ public class AppConfigurationTest {
         envVars.get(AppConfiguration.SSM_PATH_DATABASE_PASSWORD),
         testAppConfig.getDatabaseOptions().getDatabasePassword());
     assertThat(testAppConfig.createDataSourceFactory())
-        .isExactlyInstanceOf(DefaultHikariDataSourceFactory.class);
+        .isExactlyInstanceOf(HikariDataSourceFactory.class);
 
     assertEquals(
         Integer.parseInt(envVars.get(AppConfiguration.SSM_PATH_LOADER_THREADS)),
@@ -187,7 +187,7 @@ public class AppConfigurationTest {
             .build(),
         testAppConfig.getDatabaseOptions());
     assertThat(testAppConfig.createDataSourceFactory())
-        .isExactlyInstanceOf(RdsDataSourceFactory.class);
+        .isExactlyInstanceOf(RdsHikariDataSourceFactory.class);
   }
 
   /** Verify that AWS settings are loaded as expected. */
