@@ -484,11 +484,16 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                   quantity.setSystem(TransformerConstants.CODING_SYSTEM_UCUM);
 
                   switch (revenueLine.getNdcQtyQual()) {
-                    case "F2" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE);
-                    case "GR" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE);
-                    case "ML" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE);
-                    case "ME" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE);
-                    case "UN" -> quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_F2 -> quantity.setCode(
+                        TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_GR -> quantity.setCode(
+                        TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_ML -> quantity.setCode(
+                        TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_ME -> quantity.setCode(
+                        TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_UN -> quantity.setCode(
+                        TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE);
                   }
                 }
 

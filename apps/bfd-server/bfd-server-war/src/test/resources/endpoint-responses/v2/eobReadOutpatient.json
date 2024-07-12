@@ -484,7 +484,7 @@
       } ]
     }, {
       "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+        "system" : "http://unitsofmeasure.org",
         "code" : "GG"
       } ]
     } ],
