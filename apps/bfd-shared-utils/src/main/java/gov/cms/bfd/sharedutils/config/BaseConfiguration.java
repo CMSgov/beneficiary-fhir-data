@@ -1,9 +1,12 @@
 package gov.cms.bfd.sharedutils.config;
 
+import com.google.common.base.Preconditions;
 import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.AuthenticationType;
+import gov.cms.bfd.sharedutils.database.DatabaseOptions.DataSourceType;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.RdsHikariDataSourceFactory;
 import java.net.InetAddress;
@@ -199,12 +202,24 @@ public abstract class BaseConfiguration {
    */
   protected DataSourceFactory createDataSourceFactory(
       DatabaseOptions databaseOptions, AwsClientConfig awsClientConfig) {
+    // FIXME: The AWS JDBC Wrapper has the capability to use RDS authentication
+    Preconditions.checkArgument(
+        databaseOptions.getDataSourceType() != DataSourceType.AWS_WRAPPER
+            || databaseOptions.getAuthenticationType() != AuthenticationType.RDS,
+        "RDS authentication is unsupported when using the AWS JDBC Wrapper");
     if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
       return RdsHikariDataSourceFactory.builder()
           .awsClientConfig(awsClientConfig)
           .databaseOptions(databaseOptions)
           .build();
     } else {
+      if (databaseOptions.getDataSourceType() == DataSourceType.AWS_WRAPPER) {
+        return new AwsWrapperDataSourceFactory(databaseOptions);
+      }
+
+      // dataSourceType should never be null (if it is, it defaults to HIKARI), but this covers all
+      // cases exhaustively. If additional cases are introduced, HIKARI should be handled
+      // explicitly.
       return new HikariDataSourceFactory(databaseOptions);
     }
   }
@@ -278,8 +293,8 @@ public abstract class BaseConfiguration {
             .orElse(DatabaseOptions.AuthenticationType.JDBC);
     final var databaseDataSourceType =
         config
-            .enumOption(SSM_PATH_DATABASE_DATA_SOURCE_TYPE, DatabaseOptions.DataSourceType.class)
-            .orElse(DatabaseOptions.DataSourceType.HIKARI);
+            .enumOption(SSM_PATH_DATABASE_DATA_SOURCE_TYPE, DataSourceType.class)
+            .orElse(DataSourceType.HIKARI);
     final var databaseUrl = config.stringValue(SSM_PATH_DATABASE_URL);
     final var databaseUsername = config.stringValue(SSM_PATH_DATABASE_USERNAME);
     final var databasePassword = config.stringValue(SSM_PATH_DATABASE_PASSWORD);
@@ -329,7 +344,7 @@ public abstract class BaseConfiguration {
             .hikariOptions(hikariOptions);
 
     // Get AWS Wrapper configuration
-    if (databaseDataSourceType == DatabaseOptions.DataSourceType.AWS_WRAPPER) {
+    if (databaseDataSourceType == DataSourceType.AWS_WRAPPER) {
       final var wrapperUseCustomPreset =
           config.booleanValue(SSM_PATH_DB_WRAPPER_USE_CUSTOM_PRESET, false);
       final var wrapperBasePresetCode = config.stringValue(SSM_PATH_DB_WRAPPER_BASE_PRESET, "E");
