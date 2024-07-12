@@ -64,7 +64,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
 
     final var hikariOptions = databaseOptions.getHikariOptions();
     final var wrapperOptions = databaseOptions.getAwsJdbcWrapperOptions();
-    if (wrapperOptions.isUseCustomPreset()) {
+    if (wrapperOptions.useCustomPreset()) {
       final var customPresetProfile =
           getCustomPresetProfile(metricRegistry, wrapperOptions, hikariOptions);
       DriverConfigurationProfiles.addOrReplaceProfile(
@@ -150,9 +150,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
     final var targetDataSourceProps = new Properties();
     targetDataSourceProps.setProperty(
         "wrapperProfileName",
-        wrapperOptions.isUseCustomPreset()
-            ? CUSTOM_PRESET_NAME
-            : wrapperOptions.getBasePresetCode());
+        wrapperOptions.useCustomPreset() ? CUSTOM_PRESET_NAME : wrapperOptions.getBasePresetCode());
     targetDataSourceProps.setProperty(
         AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name,
         wrapperOptions.getInitialConnectionStrategy());

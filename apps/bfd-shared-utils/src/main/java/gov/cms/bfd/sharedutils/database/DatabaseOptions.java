@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import javax.sql.DataSource;
 import lombok.Builder;
 import lombok.Value;
+import lombok.experimental.Accessors;
 import software.amazon.jdbc.ConnectionPluginFactory;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
 import software.amazon.jdbc.plugin.AuroraConnectionTrackerPluginFactory;
@@ -298,6 +299,7 @@ public class DatabaseOptions {
      * #initialConnectionStrategy} will be ignored in favor of the defaults provided by the
      * specified preset.
      */
+    @Accessors(fluent = true)
     boolean useCustomPreset;
 
     /**
