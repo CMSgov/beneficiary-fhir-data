@@ -16,18 +16,27 @@ data "aws_ssm_parameters_by_path" "params" {
   with_decryption = true
 }
 
-data "aws_ec2_managed_prefix_list" "vpn" {
-  filter {
-    name   = "prefix-list-name"
-    values = ["cmscloud-vpn"]
-  }
-}
-
 data "aws_vpc" "this" {
   filter {
     name   = "tag:Name"
     values = [local.vpc_name]
   }
+}
+
+data "aws_subnets" "env_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+  filter {
+    name   = "tag:Name"
+    values = ["*${local.layer}"]
+  }
+}
+
+data "aws_lb_hosted_zone_id" "static_lb" {
+  region = local.region
+  load_balancer_type = aws_lb.static_lb.load_balancer_type
 }
 
 data "aws_ssm_parameter" "zone_name" {
@@ -40,69 +49,25 @@ data "aws_ssm_parameter" "zone_is_private" {
   with_decryption = true
 }
 
-# data "aws_route53_zone" "this" {
-#   name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
-#   private_zone = nonsensitive(data.aws_ssm_parameter.zone_is_private.value)
-# }
-
-data "aws_iam_policy_document" "static_kms_key_policy" {
-  depends_on = [aws_cloudfront_distribution.static_site_distribution, aws_cloudfront_origin_access_identity.static_site_identity]
+data "aws_iam_policy_document" "s3_static_policy" {
+  depends_on = [aws_s3_bucket.static_site]
   statement {
-    actions = ["kms:*"]
-    effect  = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-    }
-    resources = ["*"]
-  }
-
-  statement {
-    actions = [
-      "kms:Decrypt",
-      "kms:GenerateDataKey",
-      "kms:ReEncrypt*"
-    ]
+    sid = "access-to-specific-VPCE-only"
     effect = "Allow"
     principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
+      type = "AWS"
+      identifiers = ["*"]
     }
-    resources = ["*"]
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.static_site_distribution.arn]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "cloudfront_policy" {
-  depends_on = [aws_cloudfront_origin_access_identity.static_site_identity, aws_s3_bucket.static_site]
-  statement {
-
-    sid    = "AllowCloudFrontServicePrincipal"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
-    }
-
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
-    }
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${aws_cloudfront_origin_access_identity.static_site_identity.id}"]
-    }
-
-    actions = ["s3:GetObject"] ##, "s3:ListBucket"]
+    actions = ["s3:GetObject"]
     resources = [
+      "${aws_s3_bucket.static_site.arn}",
       "${aws_s3_bucket.static_site.arn}/*"
     ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceVpce"
+      values   = [aws_vpc_endpoint.s3.id]
+    }
   }
 
   statement {
@@ -125,29 +90,6 @@ data "aws_iam_policy_document" "cloudfront_policy" {
   }
 
   statement {
-    sid = "AllowKMSAccess"
-    actions = [
-      "s3:GetObject",
-      "s3:ListBucket"
-    ]
-    resources = [
-      "${aws_s3_bucket.static_site.arn}",
-      "${aws_s3_bucket.static_site.arn}/*"
-    ]
-
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SecureTransport"
-      values   = ["true"]
-    }
-  }
-
-  statement {
     sid     = "OnlySecureTransport"
     actions = ["s3:*"]
     condition {
@@ -168,31 +110,25 @@ data "aws_iam_policy_document" "cloudfront_policy" {
 }
 
 
-data "aws_iam_policy_document" "cloudfront_log_policy" {
-  depends_on = [aws_s3_bucket.cloudfront_logging, aws_cloudfront_distribution.static_site_distribution]
+data "aws_iam_policy_document" "vpce_alb_log_policy" {
+  depends_on = [aws_s3_bucket.vpce_alb_logging]
   statement {
-    sid = "AllowCloudFrontServicePrincipal"
-
+    sid = "allowELBLogging"
     effect = "Allow"
     principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
+      type = "Service"
+      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
     }
-    actions = ["s3:*"] # ["s3:PutObject"]
-    resources = [
-      "${aws_s3_bucket.cloudfront_logging.arn}",
-      "${aws_s3_bucket.cloudfront_logging.arn}/*"
+    actions = [
+      "s3:PutBucketLogging",
+      "s3:PutObject",
+      "s3:GetObjectAcl",
+      "s3:GetBucketAcl"
     ]
-    # condition {
-    #   test = "ForAnyValue:StringEquals"
-    #   variable = "AWS:SourceAccount" 
-    #   values = [data.aws_caller_identity.current.account_id]
-    # }
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.static_site_distribution.arn]
-    }
+    resources = [
+      "${aws_s3_bucket.vpce_alb_logging.arn}",
+      "${aws_s3_bucket.vpce_alb_logging.arn}/*"
+    ]
   }
   statement {
     sid     = "OnlySecureTransport"
@@ -208,18 +144,19 @@ data "aws_iam_policy_document" "cloudfront_log_policy" {
       identifiers = ["*"]
     }
     resources = [
-      "${aws_s3_bucket.cloudfront_logging.arn}",
-      "${aws_s3_bucket.cloudfront_logging.arn}/*"
+      "${aws_s3_bucket.vpce_alb_logging.arn}",
+      "${aws_s3_bucket.vpce_alb_logging.arn}/*"
     ]
   }
 }
 
-# data "aws_acm_certificate" "env_issued" {
-#   domain      = "${local.static_site_fqdn}"
-#   statuses    = ["ISSUED"]
-#   types       = ["IMPORTED"]
-#   most_recent = true
-# }
+# TODO BFD-3489
+data "aws_acm_certificate" "env_issued" {
+  domain      = "${local.static_site_fqdn}"
+  statuses    = ["ISSUED"]
+  types       = ["IMPORTED"]
+  most_recent = true
+}
 
 data "aws_route53_zone" "vpc_root" {
   name         = local.root_domain_name
