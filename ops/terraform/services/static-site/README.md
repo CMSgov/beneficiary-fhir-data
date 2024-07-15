@@ -40,6 +40,9 @@ No outputs.
 
 | Name | Type |
 |------|------|
+| [aws_kms_key.static_kms_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_kms_alias.static_kms_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_iam_policy_document.static_kms_key_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
 | [aws_canonical_user_id.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/canonical_user_id) | data source |
 | [aws_route53_zone.vpc_root](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_route53_record.static_env](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
@@ -49,17 +52,17 @@ No outputs.
 | [aws_s3_bucket_public_access_block.static_site](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.static_site](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_logging.static_site](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_logging) | resource |
-| [aws_iam_policy_document.s3_static_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
+| [aws_iam_policy_document.cloudfront_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
 | [aws_s3_bucket_policy.static_site](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_object.index](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
 | [aws_s3_object.error](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
-| [aws_s3_bucket.vpce_alb_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
-| [aws_s3_bucket_public_access_block.vpce_alb_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
-| [aws_s3_bucket_ownership_controls.vpce_alb_logging](https://registry.terraform.io/providers/hashicorp/aws//latest/docs/resources/s3_bucket_ownership_controls) | resource |
-| [aws_s3_bucket_acl.vpce_alb_logging](https://registry.terraform.io/providers/hashicorp/aws//latest/docs/resources/s3_bucket_acl) | resource |
-| [aws_s3_bucket_server_side_encryption_configuration.vpce_alb_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
-| [aws_iam_policy_document.vpce_alb_log_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
-| [aws_s3_bucket_policy.vpce_alb_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
+| [aws_s3_bucket.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_public_access_block.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
+| [aws_s3_bucket_ownership_controls.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws//latest/docs/resources/s3_bucket_ownership_controls) | resource |
+| [aws_s3_bucket_acl.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws//latest/docs/resources/s3_bucket_acl) | resource |
+| [aws_s3_bucket_server_side_encryption_configuration.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
+| [aws_iam_policy_document.cloudfront_log_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data/iam_policy_document) | data source |
+| [aws_s3_bucket_policy.cloudfront_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_cloudfront_distribution.static_site_distribution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution) | resource |
 | [aws_cloudfront_origin_access_identity.static_site_identity](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_identity) | resource |
 

@@ -12,16 +12,17 @@ locals {
     Layer = local.layer
     Name  = local.full_name
     role  = local.service
+    SaaS  = "Cloudfront"
   }
-  env              = module.terraservice.env
-  seed_env         = module.terraservice.seed_env
-  is_ephemeral_env = module.terraservice.is_ephemeral_env
-  # latest_bfd_release = module.terraservice.latest_bfd_release
-  # bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
+  env                = module.terraservice.env
+  seed_env           = module.terraservice.seed_env
+  is_ephemeral_env   = module.terraservice.is_ephemeral_env
+  latest_bfd_release = module.terraservice.latest_bfd_release
+  bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
 
   service        = "static-site"
   legacy_service = local.service
-  layer          = "web"
+  layer          = "data"
   full_name      = "bfd-${local.env}-${local.service}"
 
   ssm_hierarchy_roots = ["bfd"]
@@ -70,7 +71,13 @@ locals {
   logging_bucket = "bfd-${local.seed_env}-logs"
 
   root_domain_name       = data.aws_ssm_parameter.zone_name.value
-  static_cloudfront_name = local.static_site_fqdn
-  static_logging_name    = "logging-${local.static_cloudfront_name}" # "bfd-${local.env}-staticlogging"
+  static_cloudfront_name = "bfd-${local.env}-static"
+  static_logging_name    = "bfd-${local.env}-staticlogging"
   static_site_fqdn       = "${local.env}.static.${local.root_domain_name}"
+
+  # static_logging_bucket_ref = "${local.static_logging_name}.s3.amazonaws.com"
+
+  env_kms_alias = "alias/static-${local.env}-s3-key"
+  kms_key_id    = aws_kms_key.static_kms_key.arn
+
 }
