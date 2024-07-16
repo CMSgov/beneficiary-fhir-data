@@ -1,6 +1,7 @@
 package gov.cms.bfd.sharedutils.config;
 
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_POSITIVE_INTEGER;
+import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_POSITIVE_LONG;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_PROVIDED;
 import static gov.cms.bfd.sharedutils.config.ConfigLoader.NOT_VALID_HEX;
 import static java.lang.Boolean.FALSE;
@@ -236,6 +237,36 @@ public class ConfigLoaderTest {
     assertException("z", null, NOT_PROVIDED, () -> loader.positiveIntValueZeroOK("z"));
   }
 
+  @Test
+  public void testPositiveLongs() {
+    values.put("a", "10");
+    values.put("b", "1000000000000000000");
+    values.put("c", "0");
+    values.put("d", "-1");
+    values.put("e", "not-a-number");
+
+    assertEquals(Optional.of(10L), loader.positiveLongOption("a"));
+    assertEquals(Optional.of(1000000000000000000L), loader.positiveLongOption("b"));
+    assertException("c", values, NOT_POSITIVE_LONG, () -> loader.positiveLongOption("c"));
+    assertException("d", values, NOT_POSITIVE_LONG, () -> loader.positiveLongOption("d"));
+    assertException("e", values, NOT_VALID_LONG, () -> loader.positiveLongOption("e"));
+    assertEquals(Optional.empty(), loader.positiveLongOption("z"));
+
+    assertEquals(10L, loader.positiveLongValue("a"));
+    assertEquals(1000000000000000000L, loader.positiveLongValue("b"));
+    assertException("c", values, NOT_POSITIVE_LONG, () -> loader.positiveLongValue("c"));
+    assertException("d", values, NOT_POSITIVE_LONG, () -> loader.positiveLongValue("d"));
+    assertException("e", values, NOT_VALID_LONG, () -> loader.positiveLongValue("e"));
+    assertException("z", null, NOT_PROVIDED, () -> loader.positiveLongValue("z"));
+
+    assertEquals(10L, loader.positiveLongValue("a"));
+    assertEquals(1000000000000000000L, loader.positiveLongValue("b", 42L));
+    assertException("c", values, NOT_POSITIVE_LONG, () -> loader.positiveLongValue("c", 42L));
+    assertException("d", values, NOT_POSITIVE_LONG, () -> loader.positiveLongValue("d", 42L));
+    assertException("e", values, NOT_VALID_LONG, () -> loader.positiveLongValue("e", 42L));
+    assertEquals(42L, loader.positiveLongValue("z", 42L));
+  }
+
   /** Validates all cases for long values. */
   @Test
   public void testLongs() {
@@ -247,6 +278,16 @@ public class ConfigLoaderTest {
     assertEquals(Optional.of(-20L), loader.longOption("b"));
     assertException("c", values, NOT_VALID_LONG, () -> loader.longOption("c"));
     assertEquals(Optional.empty(), loader.longOption("z"));
+
+    assertEquals(33L, loader.longValue("a"));
+    assertEquals(-20L, loader.longValue("b"));
+    assertException("c", values, NOT_VALID_LONG, () -> loader.longValue("c"));
+    assertException("z", null, NOT_PROVIDED, () -> loader.longValue("z"));
+
+    assertEquals(33L, loader.longValue("a", 42L));
+    assertEquals(-20L, loader.longValue("b", 42L));
+    assertException("c", values, NOT_VALID_LONG, () -> loader.longValue("c", 42L));
+    assertEquals(42L, loader.longValue("z", 42L));
   }
 
   /** Validates all cases for enum values. */
