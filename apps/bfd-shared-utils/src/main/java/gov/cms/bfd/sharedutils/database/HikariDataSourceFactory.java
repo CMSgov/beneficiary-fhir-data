@@ -32,8 +32,7 @@ public class HikariDataSourceFactory implements DataSourceFactory {
   }
 
   @Override
-  public HikariDataSource createDataSource(
-      @Nullable Properties properties, MetricRegistry metricRegistry) {
+  public HikariDataSource createDataSource(Properties properties, MetricRegistry metricRegistry) {
     HikariDataSource pooledDataSource = new HikariDataSource();
     configureDataSource(pooledDataSource, properties, metricRegistry);
     return pooledDataSource;

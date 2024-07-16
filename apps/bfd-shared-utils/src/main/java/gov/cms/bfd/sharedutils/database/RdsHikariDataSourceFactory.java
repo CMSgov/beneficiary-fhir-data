@@ -77,7 +77,7 @@ public class RdsHikariDataSourceFactory extends HikariDataSourceFactory {
 
   @Override
   public RdsHikariDataSource createDataSource(
-      @Nullable Properties properties, MetricRegistry metricRegistry) {
+      Properties properties, MetricRegistry metricRegistry) {
     final var rdsClient = getRdsClient();
     // the dataSource will take care of closing this when its close method is called
     final var dataSource = createRdsHikariDataSource(rdsClient);
