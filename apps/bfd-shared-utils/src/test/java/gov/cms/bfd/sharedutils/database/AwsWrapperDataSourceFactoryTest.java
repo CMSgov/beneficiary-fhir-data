@@ -1,7 +1,6 @@
 package gov.cms.bfd.sharedutils.database;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.HikariPooledConnectionProvider;

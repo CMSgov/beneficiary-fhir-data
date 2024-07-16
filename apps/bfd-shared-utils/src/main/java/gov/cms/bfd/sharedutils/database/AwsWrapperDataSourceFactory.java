@@ -31,8 +31,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
    * Name of custom preset created when calling {@link #getCustomPresetProfile(MetricRegistry,
    * AwsJdbcWrapperOptions, HikariOptions)}.
    */
-  @VisibleForTesting
-  static final String CUSTOM_PRESET_NAME = "custom-preset";
+  @VisibleForTesting static final String CUSTOM_PRESET_NAME = "custom-preset";
 
   /** Used to configure constructed instances. */
   private final DatabaseOptions databaseOptions;

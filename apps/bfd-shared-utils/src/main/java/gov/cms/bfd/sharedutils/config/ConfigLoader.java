@@ -327,7 +327,7 @@ public class ConfigLoader {
   }
 
   /**
-   * Gets a required  long configuration value.
+   * Gets a required long configuration value.
    *
    * @param name name of configuration value
    * @return long value
