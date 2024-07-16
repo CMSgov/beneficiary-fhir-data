@@ -1,6 +1,7 @@
 package gov.cms.bfd.sharedutils.database;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.zaxxer.hikari.HikariConfig;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.AwsJdbcWrapperOptions;
@@ -30,7 +31,8 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
    * Name of custom preset created when calling {@link #getCustomPresetProfile(MetricRegistry,
    * AwsJdbcWrapperOptions, HikariOptions)}.
    */
-  private static final String CUSTOM_PRESET_NAME = "custom-preset";
+  @VisibleForTesting
+  static final String CUSTOM_PRESET_NAME = "custom-preset";
 
   /** Used to configure constructed instances. */
   private final DatabaseOptions databaseOptions;
