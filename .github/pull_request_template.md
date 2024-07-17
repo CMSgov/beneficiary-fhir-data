@@ -45,7 +45,7 @@ Please indicate if this PR does any of the following:
 * Adds any new software dependencies
 * Modifies any security controls
 * Adds new transmission or storage of data
-* Any other changes that could possibly affect secuirity? 
+* Any other changes that could possibly affect security? 
 
 * [ ] I have considered the above security implications as it relates to this PR. (If one or more of the above apply, it cannot be merged without the ISSO or team security engineer's (@sb-benohe) approval.) 
 
