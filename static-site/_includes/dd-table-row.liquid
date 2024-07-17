@@ -1,0 +1,38 @@
+<tr>
+    <td id={{ item.bfdColumnName }}><a href=#{{item.bfdColumnName}}>{{ item.name }}</a></td>
+    <td class="wrap">{{ item.description }}</td>
+    <td>{{ item.appliesTo }}</td>
+    <td class="wrap">{{ item.suppliedIn | join: ", " }}</td>
+    <td>{{ item.bfdTableType }}</td>
+    <td>{{ item.bfdColumnName }}</td>
+    <td>{{ item.bfdDbType }}</td>
+    <td>{{ item.bfdDbSize }}</td>
+    <td>{{ item.bfdJavaFieldName }}</td>
+    <td>{{ item.ccwMapping | join ", " }}</td>
+    <td>{{ item.cclfMapping | join ", " }}</td>
+    <td>{{ item.fhirMapping[0].version }}</td>
+    <td>{{ item.fhirMapping[0].resource }}</td>
+    <td>{{ item.fhirMapping[0].element }}</td>
+    <td>
+        {% for discriminator in item.fhirMapping[0].discriminator %}
+            <div class="ellipsis">{{ discriminator }}</div>
+        {% endfor %}
+    </td>
+    <td>
+        {% for additional in item.fhirMapping[0].additional %}
+            <div class="ellipsis">{{ additional }}</div>
+        {% endfor %}
+    </td>
+    <td class="wrap">{{ item.fhirMapping[0].derived }}</td>
+    <td class="wrap">{{ item.fhirMapping[0].note }}</td>
+    {% if include.version == 'v2' %}
+    <td>
+        {{ item.fhirMapping[0].fhirPath }}
+    </td>
+    <td>
+        <button class="collapsible">+</button>
+        <div class="collapsible-content">
+            {% highlight javascript %}{{ item.fhirMapping[0].example }}{% endhighlight %}
+        </div>
+    </td>
+    {% endif %}
