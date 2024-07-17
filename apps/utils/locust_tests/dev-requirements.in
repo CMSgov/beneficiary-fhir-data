@@ -1,7 +1,7 @@
 black
 isort
 pylint
-setuptools>=68.2.2
+setuptools>=70.0.0
 
 # Below packages are explicitly pinned to versions that are resolved by pip-compile for
 # requirements.txt so that it is possible to install both requirements.txt and dev-requirements.txt
