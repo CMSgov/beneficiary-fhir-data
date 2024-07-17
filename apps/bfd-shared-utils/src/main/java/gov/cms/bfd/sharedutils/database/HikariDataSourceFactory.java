@@ -66,15 +66,6 @@ public class HikariDataSourceFactory implements DataSourceFactory {
     dataSource.setValidationTimeout(hikariOptions.getValidationTimeoutMs());
     dataSource.setMaxLifetime(hikariOptions.getMaxConnectionLifetimeMs());
 
-    /*
-     * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
-     * strongly worded letter instructing it to avoid sequential scans whenever
-     * possible.
-     */
-    if (dataSource.getJdbcUrl() != null && dataSource.getJdbcUrl().contains("postgre"))
-      dataSource.setConnectionInitSql(
-          "set application_name = 'bfd-server'; set enable_seqscan = false;");
-
     if (metricRegistry != null) {
       dataSource.setMetricRegistry(metricRegistry);
     }

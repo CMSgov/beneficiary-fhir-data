@@ -111,19 +111,6 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
                   config.setValidationTimeout(hikariOptions.getValidationTimeoutMs());
                   config.setMaxLifetime(hikariOptions.getMaxConnectionLifetimeMs());
 
-                  /*
-                   * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
-                   * strongly worded letter instructing it to avoid sequential scans whenever
-                   * possible.
-                   *
-                   * Taken directly from HikariDataSourceFactory.
-                   */
-                  if (databaseOptions.getDatabaseUrl() != null
-                      && databaseOptions.getDatabaseUrl().contains("postgre")) {
-                    config.setConnectionInitSql(
-                        "set application_name = 'bfd-server'; set enable_seqscan = false;");
-                  }
-
                   if (metricRegistry != null) {
                     config.setMetricRegistry(metricRegistry);
                   }
