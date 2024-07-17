@@ -8,8 +8,13 @@ import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
 import software.amazon.jdbc.plugin.readwritesplitting.ReadWriteSplittingPlugin;
 import software.amazon.jdbc.profile.DriverConfigurationProfiles;
 
+/** Unit tests for {@link AwsWrapperDataSourceFactory}. */
 public class AwsWrapperDataSourceFactoryTest {
 
+  /**
+   * Verify that a valid {@link software.amazon.jdbc.ds.AwsWrapperDataSource} is created when valid
+   * {@link DatabaseOptions} are provided.
+   */
   @Test
   void verifyCreatesValidDataSourceGivenValidOptions() {
     // Arrange

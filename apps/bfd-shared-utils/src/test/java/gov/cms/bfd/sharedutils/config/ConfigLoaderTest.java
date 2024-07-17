@@ -237,6 +237,7 @@ public class ConfigLoaderTest {
     assertException("z", null, NOT_PROVIDED, () -> loader.positiveIntValueZeroOK("z"));
   }
 
+  /** Validates all cases for positive long values. */
   @Test
   public void testPositiveLongs() {
     values.put("a", "10");
