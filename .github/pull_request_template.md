@@ -47,7 +47,7 @@ Please indicate if this PR does any of the following:
 * Adds new transmission or storage of data
 * Any other changes that could possibly affect secuirity? 
 
-* [ ] Yes, one or more of the above security implications apply. This PR must not be merged without the ISSO or team security engineer's (@sb-benohe) approval. 
+* [ ] I have considered the above security implications as it relates to this PR. (If one or more of the above apply, it cannot be merged without the ISSO or team security engineer's (@sb-benohe) approval.) 
 
 
 ### Validation
