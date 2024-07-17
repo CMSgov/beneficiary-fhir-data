@@ -5,13 +5,8 @@ This PR template is here to help ensure you're setup for success:
 -->
 
 **JIRA Ticket:**
-[BFD-123456](https://jira.cms.gov/browse/BFD-123456)
+BFD-XXXX
 
-**User Story or Bug Summary:**
-<!-- Please copy-paste the brief user story or bug description that this PR is intended to address. -->
-
-
----
 
 ### What Does This PR Do?
 <!--
@@ -31,8 +26,6 @@ Replace me.
 
 ### What Should Reviewers Watch For?
 <!--
-Add some items to the following list, or remove the entire section if it doesn't apply for some reason.
-
 Common items include:
 * Is this likely to address the goals expressed in the user story?
 * Are any additional documentation updates needed?
@@ -43,70 +36,21 @@ Common items include:
 -->
 
 If you're reviewing this PR, please check for these things in particular:
-<!-- Add some items to the following list here -->
-* Verify all PR security questions and checklists have been completed and addressed.
-
+<!-- Add some items here -->
 
 ### What Security Implications Does This PR Have?
 
-Submitters should complete the following questionnaire:
+Please indicate if this PR does any of the following:  
 
-* If the answer to any of the questions below is **Yes**, then **you must** supply a link to the associated Security Impact Assessment (SIA), security checklist, or other similar document in Confluence here: **N/A**
+* Adds any new software dependencies
+* Modifies any security controls
+* Adds new transmission or storage of data
+* Any other changes that could possibly affect security? 
 
-    * Does this PR add any new software dependencies? 
-      * [ ] Yes
-      * [ ] No
-    * Does this PR modify or invalidate any of our security controls?
-      * [ ] Yes
-      * [ ] No
-    * Does this PR store or transmit data that was not stored or transmitted before?
-      * [ ] Yes
-      * [ ] No
-
-* If the answer to any of the questions below is **Yes**, then please add @<!-- -->StewGoin as a reviewer, and note that this PR **should not be merged** unless/until he also approves it.
-    * Do you think this PR requires additional review of its security implications for other reasons?
-      * [ ] Yes
-      * [ ] No
-
-### What Needs to Be Merged and Deployed Before this PR?
-
-<!--
-Add some items to the following list, or remove the entire section if it doesn't apply.
-
-Common items include:
-* Database migrations (which should always be deployed by themselves, to reduce risk).
-* New features in external dependencies (e.g. BFD).
--->
-
-This PR cannot be either merged or deployed until the following prerequisite changes have been fully deployed:
-
-* N/A
+* [ ] I have considered the above security implications as it relates to this PR. (If one or more of the above apply, it cannot be merged without the ISSO or team security engineer's (`@sb-benohe`) approval.) 
 
 
-### Submitter Checklist
-<!--
-Helpful hint: if needed, Git allows you to edit your PR's commits and history, prior to merge.
-See these resources for more information:
+### Validation
 
-* <https://dev.to/maxwell_dev/the-git-rebase-introduction-i-wish-id-had>
-* <https://raphaelfabeni.com/git-editing-commits-part-1/>
--->
-
-I have gone through and verified that...:
-
-* [ ] I have named this PR and branch so they are [automatically linked](https://confluence.atlassian.com/adminjiracloud/integrating-with-development-tools-776636216.html) to the (most) relevant Jira issue. Ie: `BFD-123: Adds foo`
-* [ ] This PR is reasonably limited in scope, to help ensure that:
-    1. It doesn't unnecessarily tie a bunch of disparate features, fixes, refactorings, etc. together.
-    2. There isn't too much of a burden on reviewers.
-    3. Any problems it causes have a small "blast radius".
-    4. It'll be easier to rollback if that becomes necessary.
-* [ ] This PR includes any required documentation changes, including `README` updates and changelog / release notes entries.
-* [ ] The data dictionary has been updated with any field mapping changes, if any were made.
-* [ ] All new and modified code is appropriately commented, such that the what and why of its design would be reasonably clear to engineers, preferably ones unfamiliar with the project.
-* [ ] All tech debt and/or shortcomings introduced by this PR are detailed in `TODO` and/or `FIXME` comments, which include a JIRA ticket ID for any items that require urgent attention.
-* [ ] Reviews are requested from both:
-    * At least two other engineers on this project, at least one of whom is a senior engineer or owns the relevant component(s) here.
-    * Any relevant engineers on other projects (e.g. DC GEO, BB2, etc.).
-* [ ] Any deviations from the other policies in the [DASG Engineering Standards](https://github.com/CMSgov/cms-oeda-dasg/blob/master/policies/engineering_standards.md) are specifically called out in this PR, above.
-    * Please review the standards every few months to ensure you're familiar with them.
+Have you fully verified and tested these changes? Is the acceptance criteria met? Please provide reproducible testing instructions, code snippets, or screenshots as applicable.
     
