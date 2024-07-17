@@ -40,11 +40,6 @@ data "aws_ssm_parameter" "zone_is_private" {
   with_decryption = true
 }
 
-# data "aws_route53_zone" "this" {
-#   name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
-#   private_zone = nonsensitive(data.aws_ssm_parameter.zone_is_private.value)
-# }
-
 data "aws_iam_policy_document" "static_kms_key_policy" {
   depends_on = [aws_cloudfront_distribution.static_site_distribution, aws_cloudfront_origin_access_identity.static_site_identity]
   statement {
@@ -114,7 +109,7 @@ data "aws_iam_policy_document" "cloudfront_policy" {
     }
     actions = ["s3:*"]
     resources = [
-      "${aws_s3_bucket.static_site.arn}",
+      aws_s3_bucket.static_site.arn,
       "${aws_s3_bucket.static_site.arn}/*"
     ]
     condition {
@@ -131,7 +126,7 @@ data "aws_iam_policy_document" "cloudfront_policy" {
       "s3:ListBucket"
     ]
     resources = [
-      "${aws_s3_bucket.static_site.arn}",
+      aws_s3_bucket.static_site.arn,
       "${aws_s3_bucket.static_site.arn}/*"
     ]
 
@@ -161,7 +156,7 @@ data "aws_iam_policy_document" "cloudfront_policy" {
       identifiers = ["*"]
     }
     resources = [
-      "${aws_s3_bucket.static_site.arn}",
+      aws_s3_bucket.static_site.arn,
       "${aws_s3_bucket.static_site.arn}/*"
     ]
   }
@@ -180,14 +175,9 @@ data "aws_iam_policy_document" "cloudfront_log_policy" {
     }
     actions = ["s3:*"] # ["s3:PutObject"]
     resources = [
-      "${aws_s3_bucket.cloudfront_logging.arn}",
+      aws_s3_bucket.cloudfront_logging.arn,
       "${aws_s3_bucket.cloudfront_logging.arn}/*"
     ]
-    # condition {
-    #   test = "ForAnyValue:StringEquals"
-    #   variable = "AWS:SourceAccount" 
-    #   values = [data.aws_caller_identity.current.account_id]
-    # }
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
@@ -208,12 +198,13 @@ data "aws_iam_policy_document" "cloudfront_log_policy" {
       identifiers = ["*"]
     }
     resources = [
-      "${aws_s3_bucket.cloudfront_logging.arn}",
+      aws_s3_bucket.cloudfront_logging.arn,
       "${aws_s3_bucket.cloudfront_logging.arn}/*"
     ]
   }
 }
 
+## TODO - see ./r53.tf
 # data "aws_acm_certificate" "env_issued" {
 #   domain      = "${local.static_site_fqdn}"
 #   statuses    = ["ISSUED"]

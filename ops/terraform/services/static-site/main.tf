@@ -21,7 +21,6 @@ locals {
   bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
 
   service        = "static-site"
-  legacy_service = local.service
   layer          = "data"
   full_name      = "bfd-${local.env}-${local.service}"
 

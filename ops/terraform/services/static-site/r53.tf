@@ -1,7 +1,7 @@
 ## This resource is currently commented out intentionally during what has been characterized as Proof of Concept investigation.
 ## If CA-signed certificates for the private domain are deemed necessary, inclusion of those certificates within the configuration 
 ## will trigger enabling this resource for private domain aliasing.
-##
+## TODO
 # resource "aws_route53_record" "static_env" {
 #   zone_id = data.aws_route53_zone.vpc_root.zone_id
 #   name    = local.static_site_fqdn

@@ -1,10 +1,9 @@
 resource "aws_s3_bucket" "static_site" {
   bucket = local.is_ephemeral_env ? null : local.static_cloudfront_name
-  #bucket_prefix = local.is_ephemeral_env ? null : "static"
 
   tags = {
     Layer = "static-${local.layer}",
-    role  = local.legacy_service
+    role  = local.service
   }
 }
 
@@ -47,7 +46,7 @@ resource "aws_s3_bucket_logging" "static_site" {
   bucket = aws_s3_bucket.static_site.bucket
 
   target_bucket = aws_s3_bucket.cloudfront_logging.bucket # local.logging_bucket
-  target_prefix = "${local.env}-${local.legacy_service}_s3_access_logs/"
+  target_prefix = "${local.env}-${local.service}_s3_access_logs/"
 }
 
 resource "aws_s3_bucket_policy" "static_site" {
