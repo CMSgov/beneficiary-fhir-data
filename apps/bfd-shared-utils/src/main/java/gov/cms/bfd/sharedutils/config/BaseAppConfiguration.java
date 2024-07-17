@@ -53,7 +53,7 @@ public abstract class BaseAppConfiguration extends BaseConfiguration {
    * @return factory for creating data sources
    */
   public HikariDataSourceFactory createHikariDataSourceFactory() {
-    // FIXME: Introduced as an escape hatch for BFD applications relying on being provided a
+    // TODO: Introduced as an escape hatch for BFD applications relying on being provided a
     // HikariDataSource or subclass thereof. This method should be removed when those
     // applications more properly support generic DataSources
     return createHikariDataSourceFactory(databaseOptions, awsClientConfig);

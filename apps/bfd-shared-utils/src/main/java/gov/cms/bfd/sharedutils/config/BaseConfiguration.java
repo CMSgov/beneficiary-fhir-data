@@ -201,7 +201,8 @@ public abstract class BaseConfiguration {
    */
   protected DataSourceFactory createDataSourceFactory(
       DatabaseOptions databaseOptions, AwsClientConfig awsClientConfig) {
-    // FIXME: The AWS JDBC Wrapper has the capability to use RDS authentication
+    // TODO: The AWS JDBC Wrapper has the capability to use RDS authentication. When RDS auth
+    // support is added, this should be updated such that the wrapper could also be used for it
     Preconditions.checkArgument(
         databaseOptions.getDataSourceType() != DataSourceType.AWS_WRAPPER
             || databaseOptions.getAuthenticationType() != AuthenticationType.RDS,
