@@ -70,12 +70,6 @@ public class HikariDataSourceFactory implements DataSourceFactory {
       dataSource.setMetricRegistry(metricRegistry);
     }
 
-    /*
-     * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
-     * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
-     */
-    dataSource.setLeakDetectionThreshold(60 * 1000);
-
     if (properties != null) {
       dataSource.setDataSourceProperties(properties);
     }

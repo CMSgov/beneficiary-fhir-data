@@ -115,13 +115,6 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
                     config.setMetricRegistry(metricRegistry);
                   }
 
-                  /*
-                   * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
-                   * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
-                   *
-                   * Taken directly from HikariDataSourceFactory.
-                   */
-                  config.setLeakDetectionThreshold(60 * 1000);
                   return config;
                 }))
         .build();
