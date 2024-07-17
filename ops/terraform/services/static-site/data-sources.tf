@@ -73,6 +73,7 @@ data "aws_iam_policy_document" "static_kms_key_policy" {
 }
 
 data "aws_iam_policy_document" "cloudfront_policy" {
+  ## TODO: this policy may need updated with BFD-3465
   depends_on = [aws_cloudfront_origin_access_identity.static_site_identity, aws_s3_bucket.static_site]
   statement {
 
@@ -98,25 +99,6 @@ data "aws_iam_policy_document" "cloudfront_policy" {
     resources = [
       "${aws_s3_bucket.static_site.arn}/*"
     ]
-  }
-
-  statement {
-    sid    = "JenkinsRWObjects"
-    effect = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-    actions = ["s3:*"]
-    resources = [
-      aws_s3_bucket.static_site.arn,
-      "${aws_s3_bucket.static_site.arn}/*"
-    ]
-    condition {
-      test     = "ArnEquals"
-      variable = "AWS:UserId"
-      values   = ["arn:aws:iam::${local.account_id}:role/cloudbees-jenkins"]
-    }
   }
 
   statement {
