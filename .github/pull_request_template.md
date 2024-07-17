@@ -5,7 +5,7 @@ This PR template is here to help ensure you're setup for success:
 -->
 
 **JIRA Ticket:**
-[BFD-123456](https://jira.cms.gov/browse/BFD-123456)
+BFD-XXXX
 
 
 ### What Does This PR Do?
