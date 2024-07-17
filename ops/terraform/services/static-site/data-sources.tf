@@ -155,7 +155,7 @@ data "aws_iam_policy_document" "cloudfront_log_policy" {
       type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
     }
-    actions = ["s3:*"] # ["s3:PutObject"]
+    actions = ["s3:*"]
     resources = [
       aws_s3_bucket.cloudfront_logging.arn,
       "${aws_s3_bucket.cloudfront_logging.arn}/*"

@@ -74,8 +74,6 @@ locals {
   static_logging_name    = "bfd-${local.env}-staticlogging"
   static_site_fqdn       = "${local.env}.static.${local.root_domain_name}"
 
-  # static_logging_bucket_ref = "${local.static_logging_name}.s3.amazonaws.com"
-
   env_kms_alias = "alias/static-${local.env}-s3-key"
   kms_key_id    = aws_kms_key.static_kms_key.arn
 

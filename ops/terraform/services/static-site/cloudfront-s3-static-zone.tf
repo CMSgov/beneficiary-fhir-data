@@ -22,7 +22,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
 
   logging_config {
     include_cookies = false
-    bucket          = aws_s3_bucket.cloudfront_logging.bucket_domain_name ## local.static_logging_bucket_ref 
+    bucket          = aws_s3_bucket.cloudfront_logging.bucket_domain_name
     prefix          = "${local.env}-static-logs/"
   }
 
