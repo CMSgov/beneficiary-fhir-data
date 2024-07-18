@@ -45,7 +45,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "static_site" {
 resource "aws_s3_bucket_logging" "static_site" {
   bucket = aws_s3_bucket.static_site.bucket
 
-  target_bucket = aws_s3_bucket.cloudfront_logging.bucket 
+  target_bucket = aws_s3_bucket.cloudfront_logging.bucket
   target_prefix = "${local.env}-${local.service}_s3_access_logs/"
 }
 
@@ -102,7 +102,7 @@ EOF
 }
 
 resource "aws_s3_bucket" "cloudfront_logging" {
-  bucket = local.static_logging_name 
+  bucket = local.static_logging_name
   tags = {
     Layer = "static-${local.layer}"
     role  = "logs"

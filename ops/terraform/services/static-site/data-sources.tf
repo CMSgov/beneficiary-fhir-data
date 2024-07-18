@@ -95,7 +95,7 @@ data "aws_iam_policy_document" "cloudfront_policy" {
       identifiers = ["arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${aws_cloudfront_origin_access_identity.static_site_identity.id}"]
     }
 
-    actions = ["s3:GetObject"] 
+    actions = ["s3:GetObject"]
     resources = [
       "${aws_s3_bucket.static_site.arn}/*"
     ]
