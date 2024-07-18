@@ -68,7 +68,8 @@ def handler(event: Any, context: Any):
                 cw_client=cw_client,
                 metric_data_queries=[
                     MetricDataQuery(
-                        metric_namespace=METRICS_NAMESPACE, metric_name=pipeline_metric.metric_name
+                        metric_namespace=METRICS_NAMESPACE,
+                        metric_name=pipeline_metric.value.metric_name,
                     )
                     for pipeline_metric in SOURCE_TO_REPEATING_METRICS
                 ],
@@ -132,9 +133,11 @@ def handler(event: Any, context: Any):
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=[
                     MetricData(
-                        metric_name=SOURCE_TO_REPEATING_METRICS[v.pipeline_metric].metric_name,
+                        metric_name=SOURCE_TO_REPEATING_METRICS[
+                            v.pipeline_metric
+                        ].value.metric_name,
                         value=v.latest_value,
-                        unit=SOURCE_TO_REPEATING_METRICS[v.pipeline_metric].unit,
+                        unit=SOURCE_TO_REPEATING_METRICS[v.pipeline_metric].value.unit,
                         date_time=datetime.utcnow(),
                     )
                     for v in latest_values

@@ -363,7 +363,7 @@ class TestUpdatePipelineSlisHandler:
 
     def test_it_raises_sftp_transfer_error_and_sends_notifications_if_transfer_fails(self):
         event = generate_event()
-        mock_sftp_client.open.side_effect = IOError()
+        mock_sftp_client.putfo.side_effect = IOError()
 
         with pytest.raises(SFTPTransferError):
             handler(event=event, context=mock_lambda_context)
@@ -432,17 +432,17 @@ class TestUpdatePipelineSlisHandler:
         expected_s3_download_obj_key = DEFAULT_MOCK_OBJECT_KEY
         assert actual_s3_download_obj_key == expected_s3_download_obj_key
 
-        actual_sftp_open_path = mock_sftp_client.open.call_args.kwargs["filename"]
-        expected_sftp_open_path = f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}"
-        assert actual_sftp_open_path == expected_sftp_open_path
+        actual_sftp_putfo_path = mock_sftp_client.putfo.call_args.kwargs["remotepath"]
+        expected_sftp_putfo_path = f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}"
+        assert actual_sftp_putfo_path == expected_sftp_putfo_path
 
         actual_sftp_chmod_data = mock_sftp_client.chmod.call_args.kwargs
-        expected_sftp_chmod_data = {"path": expected_sftp_open_path, "mode": 0o664}
+        expected_sftp_chmod_data = {"path": expected_sftp_putfo_path, "mode": 0o664}
         assert actual_sftp_chmod_data == expected_sftp_chmod_data
 
         actual_sftp_rename_data = mock_sftp_client.rename.call_args.kwargs
         expected_sftp_rename_data = {
-            "oldpath": expected_sftp_open_path,
+            "oldpath": expected_sftp_putfo_path,
             "newpath": f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}",
         }
         assert actual_sftp_rename_data == expected_sftp_rename_data
