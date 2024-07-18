@@ -20,9 +20,9 @@ locals {
   latest_bfd_release = module.terraservice.latest_bfd_release
   bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
 
-  service        = "static-site"
-  layer          = "data"
-  full_name      = "bfd-${local.env}-${local.service}"
+  service   = "static-site"
+  layer     = "data"
+  full_name = "bfd-${local.env}-${local.service}"
 
   ssm_hierarchy_roots = ["bfd"]
   ssm_hierarchies = flatten([
