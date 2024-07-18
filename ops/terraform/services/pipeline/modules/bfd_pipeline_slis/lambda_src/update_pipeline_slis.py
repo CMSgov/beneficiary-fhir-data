@@ -142,7 +142,7 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
     )
 
     rif_type_dimension = {"data_type": rif_file_type.name.lower()}
-    # Group timestamp, or just "group", is a legacy term used interchangibly with "data load" or
+    # Group timestamp, or just "group", is a legacy term used interchangeably with "data load" or
     # "data load ISO string" throughout this Lambda, supporting documentation, and metrics
     group_timestamp_dimension = {"group_timestamp": data_load_iso_str}
 
@@ -164,10 +164,10 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
             cw_client=cw_client,
             metric_namespace=METRICS_NAMESPACE,
             metrics=gen_all_dimensioned_metrics(
-                metric_name=timestamp_metric.metric_name,
+                metric_name=timestamp_metric.value.metric_name,
                 date_time=s3_event_time,
                 value=utc_timestamp,
-                unit=timestamp_metric.unit,
+                unit=timestamp_metric.value.unit,
                 dimensions=[rif_type_dimension, group_timestamp_dimension],
             ),
         ),
@@ -238,17 +238,17 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                 cw_client=cw_client,
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=gen_all_dimensioned_metrics(
-                    metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.metric_name,
+                    metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.value.metric_name,
                     dimensions=[group_timestamp_dimension],
                     date_time=s3_event_time,
                     value=utc_timestamp,
-                    unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.unit,
+                    unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE.value.unit,
                 )
                 + [
                     MetricData(
-                        metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.metric_name,
+                        metric_name=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.value.metric_name,
                         value=utc_timestamp,
-                        unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.unit,
+                        unit=PipelineMetric.TIME_DATA_FIRST_AVAILABLE_REPEATING.value.unit,
                         date_time=s3_event_time,
                     )
                 ],
@@ -323,11 +323,11 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                     cw_client=cw_client,
                     metric_namespace=METRICS_NAMESPACE,
                     metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.metric_name,
+                        metric_name=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.value.metric_name,
                         dimensions=[rif_type_dimension, group_timestamp_dimension],
                         value=round(load_time_delta.total_seconds()),
                         date_time=s3_event_time,
-                        unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.unit,
+                        unit=PipelineMetric.TIME_DELTA_DATA_LOAD_TIME.value.unit,
                     ),
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
@@ -370,17 +370,17 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                 cw_client=cw_client,
                 metric_namespace=METRICS_NAMESPACE,
                 metrics=gen_all_dimensioned_metrics(
-                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.metric_name,
+                    metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED.value.metric_name,
                     dimensions=[group_timestamp_dimension],
                     date_time=s3_event_time,
                     value=utc_timestamp,
-                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.unit,
+                    unit=PipelineMetric.TIME_DATA_FULLY_LOADED.value.unit,
                 )
                 + [
                     MetricData(
-                        metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.metric_name,
+                        metric_name=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.value.metric_name,
                         value=utc_timestamp,
-                        unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.unit,
+                        unit=PipelineMetric.TIME_DATA_FULLY_LOADED_REPEATING.value.unit,
                         date_time=s3_event_time,
                     )
                 ],
@@ -421,11 +421,11 @@ def _handle_s3_event(s3_event_time: datetime, s3_object_key: str):
                     cw_client=cw_client,
                     metric_namespace=METRICS_NAMESPACE,
                     metrics=gen_all_dimensioned_metrics(
-                        metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.metric_name,
+                        metric_name=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.value.metric_name,
                         dimensions=[group_timestamp_dimension],
                         date_time=s3_event_time,
                         value=round(full_load_time_delta.total_seconds()),
-                        unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.unit,
+                        unit=PipelineMetric.TIME_DELTA_FULL_DATA_LOAD_TIME.value.unit,
                     ),
                 ),
                 ignored_exceptions=common_unrecoverable_exceptions,
