@@ -34,4 +34,4 @@
   value: "pg_stat_statements,auto_explain"
 - apply_method: "immediate"
   name: "enable_seqscan"
-  value: "off"
+  value: "0"
