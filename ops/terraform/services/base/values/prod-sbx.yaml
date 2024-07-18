@@ -166,8 +166,8 @@
 /bfd/${env}/server/nonsensitive/ref_dir: /usr/local/bfd-server
 /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
-/bfd/${env}/server/nonsensitive/db/hikari/max_pool_size: 60
-/bfd/${env}/server/nonsensitive/db/hikari/min_idle_connections: 10
+/bfd/${env}/server/nonsensitive/db/hikari/max_pool_size: 80 # vcpus * 5
+/bfd/${env}/server/nonsensitive/db/hikari/min_idle_connections: 20
 /bfd/${env}/server/nonsensitive/db/hikari/idle_timeout_ms: 900000 # 15 minutes
 /bfd/${env}/server/nonsensitive/db/hikari/init_fail_timeout_ms: -1
 /bfd/${env}/server/nonsensitive/db/hikari/connection_timeout_ms: 10000 # 10 seconds
