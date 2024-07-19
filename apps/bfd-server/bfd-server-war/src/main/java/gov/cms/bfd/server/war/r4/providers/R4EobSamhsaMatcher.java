@@ -40,6 +40,10 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
           TransformerConstants.CODING_SYSTEM_HCPCS,
           CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD));
 
+  /** Additional valid system url for productOrService coding. */
+  private static final Set<String> DATA_ABSENT_SYSTEM =
+      Set.of(TransformerConstants.CODING_DATA_ABSENT);
+
   /** {@inheritDoc} */
   // S128 - Fallthrough is intentional.
   @SuppressWarnings("squid:S128")
@@ -93,6 +97,7 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
     return codingSystems.equals(HCPCS_SYSTEM)
-        || codingSystems.equals(BACKWARDS_COMPATIBLE_HCPCS_SYSTEM);
+        || codingSystems.equals(BACKWARDS_COMPATIBLE_HCPCS_SYSTEM)
+        || codingSystems.equals(DATA_ABSENT_SYSTEM);
   }
 }
