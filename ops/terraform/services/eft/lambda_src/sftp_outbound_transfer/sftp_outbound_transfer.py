@@ -247,7 +247,7 @@ def _handle_s3_event(s3_object_key: str):
                     s3_client.download_fileobj(Bucket=BUCKET, Key=s3_object_key, Fileobj=bo)
                     bo.seek(0)
                     logger.info("Starting upload to %s", staging_dir_path)
-                    transfer = sftp_client.putfo(bo, staging_file_path)
+                    transfer = sftp_client.putfo(fl=bo, remotepath=staging_file_path)
 
                 logger.info(
                     "Upload of %s to %s successful: %s",
