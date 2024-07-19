@@ -7,7 +7,6 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
-import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.CoverageClass;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -16,7 +15,6 @@ import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,19 +24,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
@@ -136,14 +131,23 @@ final class CoverageTransformerV2 {
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     TransformerUtilsV2.setPeriodStart(
-            coverage.getPeriod(), beneficiary.getMedicareCoverageStartDate());
+        coverage.getPeriod(), beneficiary.getMedicareCoverageStartDate());
     coverage.setStatus(CoverageStatus.ACTIVE);
     coverage.setSubscriber(TransformerUtilsV2.referencePatient(beneficiary));
 
     List<Extension> colorExtensions = new ArrayList<>();
-    TransformerUtilsV2.addExtension(colorExtensions, TransformerConstants.C4DIC_FOREGROUNDCOLOR_CODE_SYSTEM, TransformerConstants.C4DIC_FOREGROUNDCOLOR);
-    TransformerUtilsV2.addExtension(colorExtensions, TransformerConstants.C4DIC_BACKGROUNDCOLOR_CODE_SYSTEM, TransformerConstants.C4DIC_BACKGROUNDCOLOR);
-    TransformerUtilsV2.addExtension(colorExtensions, TransformerConstants.C4DIC_HIGHLIGHTCOLOR_CODE_SYSTEM, TransformerConstants.C4DIC_HIGHLIGHTCOLOR);
+    TransformerUtilsV2.addExtension(
+        colorExtensions,
+        TransformerConstants.C4DIC_FOREGROUNDCOLOR_CODE_SYSTEM,
+        TransformerConstants.C4DIC_FOREGROUNDCOLOR);
+    TransformerUtilsV2.addExtension(
+        colorExtensions,
+        TransformerConstants.C4DIC_BACKGROUNDCOLOR_CODE_SYSTEM,
+        TransformerConstants.C4DIC_BACKGROUNDCOLOR);
+    TransformerUtilsV2.addExtension(
+        colorExtensions,
+        TransformerConstants.C4DIC_HIGHLIGHTCOLOR_CODE_SYSTEM,
+        TransformerConstants.C4DIC_HIGHLIGHTCOLOR);
     coverage.setExtension(colorExtensions);
 
     timer.stop();
@@ -899,20 +903,23 @@ final class CoverageTransformerV2 {
    */
   private void addC4dicOrganizationContact(Organization organization) {
     Organization.OrganizationContactComponent organizationContactComponent =
-            new Organization.OrganizationContactComponent();
+        new Organization.OrganizationContactComponent();
     organizationContactComponent.setPurpose(
-            TransformerUtilsV2.createCodeableConcept(TransformerConstants.C4DIC_CONTACT_TYPE_CODE_SYSTEM,
-                    null,
-                    TransformerConstants.C4DIC_CONTACT_TYPE_PAYOR_DISPLAY,
-                    TransformerConstants.C4DIC_CONTACT_TYPE_PAYOR_CODE));
+        TransformerUtilsV2.createCodeableConcept(
+            TransformerConstants.C4DIC_CONTACT_TYPE_CODE_SYSTEM,
+            null,
+            TransformerConstants.C4DIC_CONTACT_TYPE_PAYOR_DISPLAY,
+            TransformerConstants.C4DIC_CONTACT_TYPE_PAYOR_CODE));
 
-    ContactPoint phoneContact = TransformerUtilsV2.createContactPoint(ContactPoint.ContactPointSystem.PHONE,
+    ContactPoint phoneContact =
+        TransformerUtilsV2.createContactPoint(
+            ContactPoint.ContactPointSystem.PHONE,
             TransformerConstants.C4DIC_MEDICARE_SERVICE_PHONE_NUMBER,
             null);
 
-    ContactPoint emailContact = TransformerUtilsV2.createContactPoint(ContactPoint.ContactPointSystem.EMAIL,
-            TransformerConstants.C4DIC_MEDICARE_EMAIL,
-            null);
+    ContactPoint emailContact =
+        TransformerUtilsV2.createContactPoint(
+            ContactPoint.ContactPointSystem.EMAIL, TransformerConstants.C4DIC_MEDICARE_EMAIL, null);
     List<ContactPoint> contactPoints = List.of(phoneContact, emailContact);
     organizationContactComponent.setTelecom(contactPoints);
     organization.addContact(organizationContactComponent);

@@ -4148,12 +4148,12 @@ public final class TransformerUtilsV2 {
    * @return a {@link org.hl7.fhir.r4.model.ContactPoint}}
    */
   static ContactPoint createContactPoint(
-          ContactPoint.ContactPointSystem system, String value, ContactPoint.ContactPointUse use) {
+      ContactPoint.ContactPointSystem system, String value, ContactPoint.ContactPointUse use) {
     ContactPoint contactPoint = new ContactPoint();
     contactPoint.setSystem(system);
     contactPoint.setValue(value);
 
-    if (use != null){
+    if (use != null) {
       contactPoint.setUse(use);
     }
 
