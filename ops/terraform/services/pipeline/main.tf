@@ -82,7 +82,8 @@ locals {
   }
 
   log_groups = {
-    messages = "/bfd/${local.env}/bfd-pipeline/messages.txt"
+    messages      = "/bfd/${local.env}/bfd-pipeline/messages.txt"
+    cloudinit_out = "/aws/ec2/var/log/cloud-init-output.log"
   }
 
   alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : []
