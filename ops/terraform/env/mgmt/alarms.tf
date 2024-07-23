@@ -135,7 +135,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_init_fail" {
 
   alarm_actions = [aws_sns_topic.victor_ops_alert.arn]
 
-  actions_enabled   = true
+  actions_enabled = true
   alarm_description = join("", [
     "At least 1 (see Alarm value for exact number) EC2 instance is failing startup steps.\n",
     "See ${local.ec2_failing_instances_runbook_url} for instructions on resolving this alert."

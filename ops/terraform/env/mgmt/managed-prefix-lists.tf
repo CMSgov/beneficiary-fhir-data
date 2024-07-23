@@ -10,7 +10,7 @@ resource "aws_ec2_managed_prefix_list" "prefix_list" {
   dynamic "entry" {
     for_each = var.cbc_jenkins_prefix_list
     content {
-      cidr = entry.key
+      cidr        = entry.key
       description = entry.value
     }
   }
