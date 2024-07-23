@@ -350,6 +350,22 @@ try {
 					}
 				}
 			}
+			// BFD-3488
+			stage('Deploy Static Site to TEST') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_test') {
+					milestone(label: 'stage_deploy_static_site_start')
+
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/static-site",
+						)
+					}
+				}
+			}
+			//
 
 			stage('Manual Approval') {
 				currentStage = env.STAGE_NAME
@@ -518,6 +534,22 @@ try {
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
 				}
+				// BFD-3488
+				stage('Deploy Static Site to PROD-SBX') {
+					currentStage = env.STAGE_NAME
+					lock(resource: 'env_prod_sbx') {
+						milestone(label: 'stage_deploy_static_site_start')
+
+						container('bfd-cbc-build') {
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/static-site",
+							)
+						}
+					}
+				}
+				//
 			}
 
 
@@ -683,6 +715,22 @@ try {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 				}
 			}
+			// BFD-3488
+			stage('Deploy Static Site to PROD') {
+				currentStage = env.STAGE_NAME
+				lock(resource: 'env_prod') {
+					milestone(label: 'stage_deploy_static_site_start')
+
+					container('bfd-cbc-build') {
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/static-site",
+						)
+					}
+				}
+			}
+			//
 		}
 	}
 } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
