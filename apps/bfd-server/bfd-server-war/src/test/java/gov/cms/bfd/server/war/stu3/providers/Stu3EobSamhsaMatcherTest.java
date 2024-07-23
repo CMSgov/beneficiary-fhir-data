@@ -102,6 +102,7 @@ public final class Stu3EobSamhsaMatcherTest {
   public static Stream<Arguments> data() {
     final String HCPCS = TransformerConstants.CODING_SYSTEM_HCPCS;
     final String OTHER = "other system";
+    final String DATA_ABSENT = TransformerConstants.CODING_DATA_ABSENT;
     return Stream.of(
         arguments(
             "Empty list",
@@ -122,7 +123,12 @@ public final class Stu3EobSamhsaMatcherTest {
             "HCPCS and other systems",
             List.of(HCPCS, HCPCS, OTHER),
             false,
-            "should NOT return true (all known systems), but DID."));
+            "should NOT return true (all known systems), but DID."),
+        arguments(
+            "Data Absent Reason",
+            List.of(DATA_ABSENT),
+            true,
+            "should return true (all known systems), but DID."));
   }
 
   /**
