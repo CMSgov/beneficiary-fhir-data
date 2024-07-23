@@ -36,7 +36,7 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-cou
 }
 ## BFD-3520
 locals {
-  init-fail-pattern   = "%failed=[1-9]%"
+  init-fail-pattern   = "failed=[1-9]"
   this-metric-ns      = "bfd-${local.env}/bfd-pipeline"
   init-fail-filter-nm = "bfd-${local.env}/bfd-pipeline/ec2/init-count/fail"
   init-fail-metric-nm = "cloudinit/count/fail"
