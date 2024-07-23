@@ -534,23 +534,23 @@ try {
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
 				}
-				// BFD-3488
-				stage('Deploy Static Site to PROD-SBX') {
-					currentStage = env.STAGE_NAME
-					lock(resource: 'env_prod_sbx') {
-						milestone(label: 'stage_deploy_static_site_start')
-
-						container('bfd-cbc-build') {
-							awsAuth.assumeRole()
-							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/static-site",
-							)
-						}
-					}
-				}
-				//
 			}
+			// BFD-3488
+			// stage('Deploy Static Site to PROD-SBX') {
+			// 	currentStage = env.STAGE_NAME
+			// 	lock(resource: 'env_prod_sbx') {
+			// 		milestone(label: 'stage_deploy_static_site_start')
+
+			// 		container('bfd-cbc-build') {
+			// 			awsAuth.assumeRole()
+			// 			terraform.deployTerraservice(
+			// 				env: bfdEnv,
+			// 				directory: "ops/terraform/services/static-site",
+			// 			)
+			// 		}
+			// 	}
+			// }
+			//
 
 
 			bfdEnv = 'prod'
@@ -716,20 +716,20 @@ try {
 				}
 			}
 			// BFD-3488
-			stage('Deploy Static Site to PROD') {
-				currentStage = env.STAGE_NAME
-				lock(resource: 'env_prod') {
-					milestone(label: 'stage_deploy_static_site_start')
+			// stage('Deploy Static Site to PROD') {
+			// 	currentStage = env.STAGE_NAME
+			// 	lock(resource: 'env_prod') {
+			// 		milestone(label: 'stage_deploy_static_site_start')
 
-					container('bfd-cbc-build') {
-						awsAuth.assumeRole()
-						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/static-site",
-						)
-					}
-				}
-			}
+			// 		container('bfd-cbc-build') {
+			// 			awsAuth.assumeRole()
+			// 			terraform.deployTerraservice(
+			// 				env: bfdEnv,
+			// 				directory: "ops/terraform/services/static-site",
+			// 			)
+			// 		}
+			// 	}
+			// }
 			//
 		}
 	}
