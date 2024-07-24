@@ -1,0 +1,66 @@
+name: Automated Python Test Gate for Lambda Updates
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/*.py
+      - ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/*.py
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/*.py
+      - ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/*.py
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' # Specify the required Python version
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+
+      - name: Determine changed files
+        id: changed-files
+        run: |
+            echo "Detecting changed files..."
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+                git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+                git diff --name-only FETCH_HEAD ${{ github.sha }} > changed_files.txt
+            else
+                git diff --name-only ${{ github.sha }}^ ${{ github.sha }} > changed_files.txt
+            fi
+            echo "::set-output name=files::$(cat changed_files.txt | paste -sd ',')"
+  
+      - name: Run Python Tests for affected folders
+        id: run-tests
+        run: |
+            CHANGED_FILES="${{ steps.changed-files.outputs.files }}"
+            echo "Changed files: $CHANGED_FILES"
+            IFS=',' read -r -a array <<< "$CHANGED_FILES"
+            for element in "${array[@]}"
+            do
+              DIR=$(dirname "$element")
+              echo "Affected source folder: $DIR"
+              # Perform actions based on the affected folders
+              if [ -e $DIR/requirements.txt ]
+              then
+                pip install -r $DIR/requirements.txt 
+              fi
+              ##source venv/bin/activate
+              pip install pytest
+              pytest $DIR/tests 
+            done
