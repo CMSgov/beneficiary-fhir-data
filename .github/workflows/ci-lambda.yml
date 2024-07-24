@@ -61,8 +61,8 @@ jobs:
         id: run-tests
         run: |
             CHANGED_FILES=""
-            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.push-changes.outputs.files }}")
-            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.pr-changes.outputs.files }}")
+            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.push-changes.outputs.files }})
+            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.pr-changes.outputs.files }})
             echo "Changed files: $CHANGED_FILES"
             IFS=',' read -r -a array <<< "$CHANGED_FILES"
             for element in "${array[@]}"
