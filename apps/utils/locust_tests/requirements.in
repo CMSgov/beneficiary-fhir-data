@@ -2,7 +2,7 @@ locust==2.16.1
 psycopg2-binary==2.9.7
 psycogreen==1.0.2
 boto3==1.28.52
-setuptools>=68.2.2
+setuptools>=70.0.0
 flask==2.3.3
 requests==2.32.0
 gevent==23.9.1
