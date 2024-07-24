@@ -1,12 +1,12 @@
 name: Automated Python Test Gate for Lambda Updates
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/*.py
-      - ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/*.py
+#   push:
+    # branches:
+    #   - master
+    # paths:
+    #   - ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/*.py
+    #   - ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/*.py
   pull_request:
     branches:
       - master
