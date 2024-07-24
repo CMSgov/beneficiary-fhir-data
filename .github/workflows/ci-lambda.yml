@@ -36,22 +36,31 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
 
-      - name: Determine changed files
-        id: changed-files
+      - name: Determine changed files for push event
+        if: github.event_name == 'push'
+        id: push-changes
         run: |
-            echo "Detecting changed files..."
-            if [ "${{ github.event_name }}" = "pull_request" ]; then
-                git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
-                git diff --name-only FETCH_HEAD ${{ github.sha }} > changed_files.txt
-            else
-                git diff --name-only ${{ github.sha }}^ ${{ github.sha }} > changed_files.txt
-            fi
-            echo "::set-output name=files::$(cat changed_files.txt | paste -sd ',')"
-  
+            echo "Fetching list of changed files for push event..."
+            CHANGED_FILES=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }})
+            echo "Changed files: $CHANGED_FILES"
+            echo "::set-output name=files::$(echo $CHANGED_FILES | tr '\n' ' ')"
+
+      - name: Determine changed files for pull request event
+        if: github.event_name == 'pull_request'
+        id: pr-changes
+        run: |
+              echo "Fetching list of changed files for pull request event..."
+              PR_NUMBER=${{ github.event.pull_request.number }}
+              CHANGED_FILES=$(gh pr diff $PR_NUMBER --name-only)
+              echo "Changed files: $CHANGED_FILES"
+              echo "::set-output name=files::$(echo $CHANGED_FILES | tr '\n' ' ')"
+
       - name: Run Python Tests for affected folders
         id: run-tests
         run: |
-            CHANGED_FILES="${{ steps.changed-files.outputs.files }}"
+            CHANGED_FILES=""
+            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.push-changes.outputs.files }}")
+            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.pr-changes.outputs.files }}")
             echo "Changed files: $CHANGED_FILES"
             IFS=',' read -r -a array <<< "$CHANGED_FILES"
             for element in "${array[@]}"
