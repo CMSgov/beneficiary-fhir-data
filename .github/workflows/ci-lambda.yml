@@ -67,14 +67,17 @@ jobs:
             IFS=',' read -r -a array <<< "$CHANGED_FILES"
             for element in "${array[@]}"
             do
-              DIR=$(dirname "$element")
-              echo "Affected source folder: $DIR"
-              # Perform actions based on the affected folders
-              if [ -e $DIR/requirements.txt ]
-              then
-                pip install -r $DIR/requirements.txt 
-              fi
-              ##source venv/bin/activate
-              pip install pytest
-              pytest $DIR/tests 
+                DIR=$(dirname "$element")
+                echo "Affected source folder: $DIR"
+                if [ "${DIR}" =~ ".*lambda_src.*" ]
+                then
+                    # Perform actions based on the affected folders
+                    if [ -e $DIR/requirements.txt ]
+                    then
+                        pip install -r $DIR/requirements.txt 
+                    fi
+                    ##source venv/bin/activate
+                    pip install pytest
+                    pytest $DIR/tests 
+                fi
             done
