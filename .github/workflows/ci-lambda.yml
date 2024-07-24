@@ -60,6 +60,7 @@ jobs:
       - name: Run Python Tests for affected folders
         id: run-tests
         run: |
+            LAMBDA_PATTERN="lambda_src"
             CHANGED_FILES=""
             CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.push-changes.outputs.CHANGEDPUSHFILES }})
             CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.pr-changes.outputs.CHANGEDPRFILES }})
@@ -69,7 +70,7 @@ jobs:
             do
                 DIR=$(dirname "$element")
                 echo "Affected source folder: $DIR"
-                if [ "${DIR}" =~ ".*lambda_src.*" ]
+                if [[ "${DIR}" =~ "${LAMBDA_PATTERN}" ]]
                 then
                     # Perform actions based on the affected folders
                     if [ -e $DIR/requirements.txt ]
