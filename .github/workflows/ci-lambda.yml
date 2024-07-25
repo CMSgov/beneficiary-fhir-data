@@ -1,4 +1,4 @@
-name: Automated Python Test Gate for Lambda Updates
+name: CI - Python
 
 on:
   push:
