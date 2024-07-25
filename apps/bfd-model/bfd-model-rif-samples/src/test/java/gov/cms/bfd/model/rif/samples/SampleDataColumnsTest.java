@@ -1,6 +1,7 @@
 package gov.cms.bfd.model.rif.samples;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.entities.BeneficiaryColumn;
@@ -9,6 +10,7 @@ import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 import org.apache.commons.csv.CSVFormat;
@@ -56,20 +58,17 @@ public final class SampleDataColumnsTest {
       Enum<?>[] columnsInEnum = getColumnsInEnum(sampleFile.getRifFileType());
 
       // Use a CSVParser to parse the header out of the sample file.
-      CSVFormat parserFormat = CSVFormat.DEFAULT.withDelimiter('|');
+      CSVFormat parserFormat = CSVFormat.DEFAULT.builder().setDelimiter('|').build();
       CSVParser parser = RifParsingUtils.createCsvParser(parserFormat, sampleFile.toRifFile());
       CSVRecord sampleHeaderRecord = parser.getRecords().get(0);
-      String[] columnsInSample = new String[sampleHeaderRecord.size()];
-      for (int col = 0; col < columnsInSample.length; col++)
-        columnsInSample[col] = sampleHeaderRecord.get(col);
 
       /*
        * Remove from consideration the processing metadata columns
        * that intentionally aren't in the enums.
        */
       List<String> metadataColumns = Arrays.asList("VERSION", "DML_IND");
-      columnsInSample =
-          Arrays.stream(columnsInSample)
+      String[] columnsInSample =
+          Arrays.stream(sampleHeaderRecord.values())
               .filter(c -> !metadataColumns.contains(c))
               .toArray(String[]::new);
 
@@ -86,18 +85,18 @@ public final class SampleDataColumnsTest {
        * Loop through the columns in the sample data and ensure that
        * our column enums match.
        */
-      for (int col = 0; col < columnsInSample.length; col++) {
-        String columnNameFromEnum = columnsInEnum[col].name();
-        String columnNameFromSample = columnsInSample[col];
-        assertEquals(
-            columnNameFromSample,
-            columnNameFromEnum,
-            String.format(
-                "Unable to match column '%d' from sample data for '%s'.\nSample Columns: %s\nEnum Columns:   %s\n",
-                col,
-                sampleFile.name(),
-                toHeaderFormat(columnsInSample, c -> c),
-                toHeaderFormat(columnsInEnum, c -> c.name())));
+
+      HashSet<String> sampleSet = new HashSet<>(Arrays.asList(columnsInSample));
+      String[] enumSet = Arrays.stream(columnsInEnum).map(Enum::name).toArray(String[]::new);
+
+      for (String enumColumn : enumSet) {
+        assertTrue(sampleSet.contains(enumColumn));
+        String.format(
+            "Unable to match column '%s' from sample data for '%s'.\nSample Columns: %s\nEnum Columns:   %s\n",
+            enumColumn,
+            sampleFile.name(),
+            toHeaderFormat(columnsInSample, c -> c),
+            toHeaderFormat(columnsInEnum, c -> c.name()));
       }
     }
   }

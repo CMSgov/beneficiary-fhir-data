@@ -289,8 +289,10 @@ public enum StaticRifResource {
     try {
       Iterable<CSVRecord> records =
           CSVFormat.RFC4180
-              .withDelimiter('|')
-              .withHeader()
+              .builder()
+              .setDelimiter('|')
+              .setHeader()
+              .build()
               .parse(new InputStreamReader(file.open(), file.getCharset()));
       Set<String> uniqueIds = new HashSet<>();
       int i = 0;

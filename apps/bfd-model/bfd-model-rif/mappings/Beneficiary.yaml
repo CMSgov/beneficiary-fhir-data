@@ -105,6 +105,16 @@ mappings:
       dbName: mbi_num
       name: medicareBeneficiaryId
       sqlType: varchar(11)
+    - comment: Cross-reference Group ID
+      dbName: xref_grp_id
+      name: crossReferenceGroupId
+      sqlType: bigint
+      javaType: Long
+    - comment: Cross-reference Switch
+      dbName: xref_sw
+      name: crossReferenceSwitch
+      sqlType: char
+      javaType: Character
     - comment: Date of Death
       dbName: death_dt
       name: beneficiaryDateOfDeath
@@ -968,6 +978,8 @@ mappings:
     - BENE_GVN_NAME
     - BENE_MDL_NAME
     - MBI_NUM
+    - XREF_GRP_ID
+    - XREF_SW
     - DEATH_DT
     - RFRNC_YR
     - A_MO_CNT
@@ -1206,6 +1218,11 @@ mappings:
     to: nameMiddleInitial
   - from: MBI_NUM
     to: medicareBeneficiaryId
+  - from: XREF_GRP_ID
+    to: crossReferenceGroupId
+    transformer: LongString
+  - from: XREF_SW
+    to: crossReferenceSwitch
   - from: DEATH_DT
     to: beneficiaryDateOfDeath
   - defaultValue: '0'

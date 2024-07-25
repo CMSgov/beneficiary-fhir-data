@@ -56,6 +56,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.apache.commons.csv.CSVFormat;
@@ -1018,9 +1019,15 @@ public final class RifLoaderIT {
     Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
         rifRecordEvent -> {
           CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          List<String> headers = beneCsvRow.getParser().getHeaderNames();
+          int referenceYearIndex =
+              IntStream.range(0, headers.size())
+                  .filter(i -> headers.get(i).equals(BeneficiaryColumn.RFRNC_YR.name()))
+                  .findFirst()
+                  .getAsInt();
           List<String> beneCsvValues =
               StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
-          beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal() + 1, refYear);
+          beneCsvValues.set(referenceYearIndex, refYear);
           if (isUpdate) {
             beneCsvValues.set(0, "UPDATE");
           }
@@ -1149,14 +1156,10 @@ public final class RifLoaderIT {
       List<List<List<String>>> editedRifRecords =
           records.getRecords().map(editor).collectList().block();
 
-      // Build a CSVFormat with the specific header needed for the RIF file type.
-      String[] csvHeader =
-          Stream.concat(
-                  Stream.of("DML_IND"),
-                  Arrays.stream(rifFileEvent.getFile().getFileType().getColumns())
-                      .map(e -> e.name()))
-              .toArray(String[]::new);
-      CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader(csvHeader);
+      // Get the header from the original file
+      List<String> csvHeader = RifParsingUtils.createCsvParser(inputFile).getHeaderNames();
+      CSVFormat csvFormat =
+          RifParsingUtils.CSV_FORMAT.builder().setHeader(csvHeader.toArray(new String[0])).build();
 
       /*
        * Write the RIF records back out to a new RIF temp file. Worth noting that,
