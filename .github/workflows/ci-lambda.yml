@@ -6,15 +6,15 @@ on:
       - master
       - BFD-3524
     paths:
-      - ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/*.py
-      - ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/*.py
+      - **/*.py
+      - **/*requirement*.txt
   pull_request:
     branches:
       - master
       - BFD-3524
     paths:
-      - ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/*.py
-      - ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/*.py
+        - **/*.py
+        - **/*requirement*.txt
   workflow_dispatch:
 
 jobs:
@@ -23,24 +23,27 @@ jobs:
 
     steps:
       - name: Checkout code
+        id: code-checkout
         uses: actions/checkout@v4
         with:
             fetch-depth: 2
 
       - name: Set up Python
+        id: python-setup
         uses: actions/setup-python@v5.1.1
         with:
           python-version: '3.11' # Specify the required Python version
 
       - name: Install dependencies
+        id: dependency-install
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
 
       - name: Determine changed files for push event
+        id: list-push-changes
         if: github.event_name == 'push'
-        id: push-changes
         run: |
             echo "Fetching list of changed files for push event..."
             CHANGEDPUSHFILES=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }})
@@ -48,8 +51,8 @@ jobs:
             echo "CHANGEDPUSHFILES=${CHANGEDPUSHFILES}" >> $GITHUB_OUTPUT
 
       - name: Determine changed files for pull request event
+        id: list-pr-changes
         if: github.event_name == 'pull_request'
-        id: pr-changes
         run: |
               echo "Fetching list of changed files for pull request event..."
               PR_NUMBER=${{ github.event.pull_request.number }}
@@ -58,12 +61,12 @@ jobs:
               echo "CHANGEDPRFILES=${CHANGEDPRFILES}" >> $GITHUB_OUTPUT
 
       - name: Run Python Tests for affected folders
-        id: run-tests
+        id: run-pytest-set
         run: |
             LAMBDA_PATTERN="lambda_src"
             CHANGED_FILES=""
-            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.push-changes.outputs.CHANGEDPUSHFILES }})
-            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.pr-changes.outputs.CHANGEDPRFILES }})
+            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.list-push-changes.outputs.CHANGEDPUSHFILES }})
+            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }})
             echo "Changed files: $CHANGED_FILES"
             IFS=',' read -r -a array <<< "$CHANGED_FILES"
             for element in "${array[@]}"
@@ -73,9 +76,9 @@ jobs:
                 if [[ "${DIR}" =~ "${LAMBDA_PATTERN}" ]]
                 then
                     # Perform actions based on the affected folders
-                    if [ -e $DIR/requirements.txt ]
+                    if [ -e $DIR/*requirement*.txt ]
                     then
-                        pip install -r $DIR/requirements.txt 
+                        pip install -r $DIR/*requirement*.txt 
                     fi
                     ##source venv/bin/activate
                     pip install pytest
