@@ -6,15 +6,15 @@ on:
       - master
       - BFD-3524
     paths:
-      - **/*.py
-      - **/*requirement*.txt
+      - '**/*.py'
+      - '**/*requirement*.txt'
   pull_request:
     branches:
       - master
       - BFD-3524
     paths:
-        - **/*.py
-        - **/*requirement*.txt
+      - '**/*.py'
+      - '**/*requirement*.txt'
   workflow_dispatch:
 
 jobs:
