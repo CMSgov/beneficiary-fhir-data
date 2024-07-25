@@ -1,20 +1,31 @@
 name: CI - Python
 
 on:
-  push:
-    branches:
-      - master
-      - BFD-3524
-    paths:
-      - '**/*.py'
-      - '**/*requirement*.txt'
+  # push:
+  #   branches:
+  #     - master
+  #     - BFD-3524
+  #   paths:
+  #     - '**/*.py'
+  #     - '**/*requirement*.txt'
+  # pull_request:
+  #   branches:
+  #     - master
+  #     - BFD-3524
+  #   paths:
+  #     - '**/*.py'
+  #     - '**/*requirement*.txt'
   pull_request:
-    branches:
-      - master
-      - BFD-3524
     paths:
       - '**/*.py'
       - '**/*requirement*.txt'
+
+  merge_group:
+    branches:
+      - master
+    # paths:
+    #   - '**/*.py'
+    #   - '**/*requirement*.txt'
   workflow_dispatch:
 
 jobs:
@@ -34,12 +45,12 @@ jobs:
         with:
           python-version: '3.11' # Specify the required Python version
 
-      - name: Install dependencies
-        id: dependency-install
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
+      # - name: Install dependencies
+      #   id: dependency-install
+      #   run: |
+      #     python -m venv venv
+      #     source venv/bin/activate
+      #     pip install --upgrade pip
 
       - name: Determine changed files for push event
         id: list-push-changes
@@ -48,7 +59,7 @@ jobs:
             echo "Fetching list of changed files for push event..."
             CHANGEDPUSHFILES=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }})
             echo "Changed files: $CHANGEDPUSHFILES"
-            echo "CHANGEDPUSHFILES=${CHANGEDPUSHFILES}" >> $GITHUB_OUTPUT
+            echo 'CHANGEDPUSHFILES='"${CHANGEDPUSHFILES}" >> $GITHUB_OUTPUT
 
       - name: Determine changed files for pull request event
         id: list-pr-changes
@@ -58,29 +69,31 @@ jobs:
               PR_NUMBER=${{ github.event.pull_request.number }}
               CHANGEDPRFILES=$(gh pr diff $PR_NUMBER --name-only)
               echo "Changed files: $CHANGEDPRFILES"
-              echo "CHANGEDPRFILES=${CHANGEDPRFILES}" >> $GITHUB_OUTPUT
+              echo 'CHANGEDPRFILES='"${CHANGEDPRFILES}" >> $GITHUB_OUTPUT
 
       - name: Run Python Tests for affected folders
         id: run-pytest-set
         run: |
             LAMBDA_PATTERN="lambda_src"
             CHANGED_FILES=""
-            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.list-push-changes.outputs.CHANGEDPUSHFILES }})
-            CHANGED_FILES=$(echo $CHANGED_FILES ${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }})
-            echo "Changed files: $CHANGED_FILES"
-            IFS=',' read -r -a array <<< "$CHANGED_FILES"
-            for element in "${array[@]}"
+            CHANGED_FILES=$(echo "${{ steps.list-push-changes.outputs.CHANGEDPUSHFILES }}"; echo "${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }}")
+            echo 'Changed files:'; echo "$CHANGED_FILES"
+            # the following sequence reduces CHANGED_FILES to CHANGEDIRS
+            # thereby avoiding multiple test cycles for a single folder of muliple file changes
+            CHANGEDIRS=$(echo "$CHANGED_FILES" | while read f; do dirname $f; done | sort | uniq)
+            echo "${CHANGEDIRS}" | while read DIR
             do
-                DIR=$(dirname "$element")
                 echo "Affected source folder: $DIR"
                 if [[ "${DIR}" =~ "${LAMBDA_PATTERN}" ]]
                 then
-                    # Perform actions based on the affected folders
+                    # create virtual environment for each DIR and execute tests
+                    python -m venv venv
+                    source venv/bin/activate
+                    pip install --upgrade pip
                     if [ -e $DIR/*requirement*.txt ]
                     then
                         pip install -r $DIR/*requirement*.txt 
                     fi
-                    ##source venv/bin/activate
                     pip install pytest
                     pytest $DIR/tests 
                 fi
