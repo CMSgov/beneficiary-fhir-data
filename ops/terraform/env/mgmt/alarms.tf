@@ -106,3 +106,29 @@ resource "aws_cloudwatch_metric_alarm" "ec2_failing_instances" {
   alarm_actions = [aws_sns_topic.victor_ops_alert.arn]
   ok_actions    = [aws_sns_topic.victor_ops_ok.arn]
 }
+
+data "aws_sns_topic" "internal_alert_slack" {
+  #FIXME: replace when slack alert is in mgmt
+  name = "bfd-test-cloudwatch-alarms-slack-bfd-test"
+}
+
+resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
+  alarm_name          = "bfd-mgmt-lambda-error"
+  comparison_operator = "GreaterThanThreshold"
+  datapoints_to_alarm = 1
+  evaluation_periods  = 1
+  threshold           = 0
+  actions_enabled = true
+  treat_missing_data  = "ignore"
+
+  alarm_description = "Alarm that is defined to send alerts to the BFD-Warnings/Alerts slack channel that notify us of any reported Lambda failures"
+
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = 60
+  statistic           = "Sum"
+
+  #FIXME: replace when slack alert is in mgmt
+  alarm_actions       = [data.aws_sns_topic.internal_alert_slack.arn]
+
+}
