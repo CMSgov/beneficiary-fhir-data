@@ -29,6 +29,10 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
   /** Valid system url for productOrService coding. * */
   private static final Set<String> HCPCS_SYSTEM = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
 
+  /** Additional valid system url for productOrService coding. */
+  private static final Set<String> DATA_ABSENT_SYSTEM =
+      Set.of(TransformerConstants.CODING_DATA_ABSENT);
+
   /** {@inheritDoc} */
   // S128 - Fallthrough is intentional.
   @SuppressWarnings("squid:S128")
@@ -69,6 +73,6 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
-    return codingSystems.equals(HCPCS_SYSTEM);
+    return codingSystems.equals(HCPCS_SYSTEM) || codingSystems.equals(DATA_ABSENT_SYSTEM);
   }
 }

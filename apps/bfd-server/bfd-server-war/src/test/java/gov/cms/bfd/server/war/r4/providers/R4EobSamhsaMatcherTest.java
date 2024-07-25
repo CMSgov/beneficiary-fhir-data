@@ -31,6 +31,7 @@ public class R4EobSamhsaMatcherTest {
     final String HCPCS = TransformerConstants.CODING_SYSTEM_HCPCS;
     final String OLDER_HCPCS = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
     final String OTHER = "other system";
+    final String DATA_ABSENT = TransformerConstants.CODING_DATA_ABSENT;
 
     return Stream.of(
         arguments(
@@ -62,7 +63,12 @@ public class R4EobSamhsaMatcherTest {
             "HCPCS, older HCPCS, and other system",
             List.of(HCPCS, HCPCS, OLDER_HCPCS, OLDER_HCPCS, OTHER),
             false,
-            "should NOT return true (all known systems), but DID."));
+            "should NOT return true (all known systems), but DID."),
+        arguments(
+            "Data Absent Reason",
+            List.of(DATA_ABSENT),
+            true,
+            "should return true (all known systems), but DID."));
   }
 
   /**
