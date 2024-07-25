@@ -1,6 +1,11 @@
 locals {
   victor_ops_url                    = local.sensitive_common_config["victor_ops_url"]
   ec2_failing_instances_runbook_url = local.sensitive_common_config["alarm_ec2_failing_instances_runbook_url"]
+
+  ## TODO replace SSM parameter with new Runbook URL parameter+value
+  ec2_instance_script_failing_start_runbook_url = local.sensitive_common_config["alarm_ec2_failing_instances_runbook_url"]
+  ##
+
   cloudwatch_sns_topic_policy_spec  = <<-EOF
 {
   "Version": "2008-10-17",
@@ -138,7 +143,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_init_fail" {
   actions_enabled = true
   alarm_description = join("", [
     "At least 1 (see Alarm value for exact number) EC2 instance is failing startup steps.\n",
-    "See ${local.ec2_failing_instances_runbook_url} for instructions on resolving this alert."
+    "See ${local.ec2_instance_script_failing_start_runbook_url} for instructions on resolving this alert."
   ])
 }
 
