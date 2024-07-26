@@ -98,13 +98,20 @@ jobs:
         id: run-pytest-set
         run: |
             LAMBDA_PATTERN="lambda_src"
-            CHANGED_FILES=""
-            # CHANGED_FILES=$(echo "${{ steps.list-push-changes.outputs.CHANGEDPUSHFILES }}"; echo "${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }}")
-            CHANGED_FILES=$(cat "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}")
-            echo 'Changed files:'; echo "$CHANGED_FILES"
+            CHANGED_FILES=/tmp/CFLIST.txt
+            touch ${CHANGED_FILES}
+            if [ -e "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" ]
+            then
+              cat "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" >> ${CHANGED_FILES}
+            fi
+            if [ -e "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" ]
+            then
+              cat "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" >> ${CHANGED_FILES}
+            fi
+            echo 'Changed files:'; cat ${CHANGED_FILES}
             # the following sequence reduces CHANGED_FILES to CHANGEDIRS
             # thereby avoiding multiple test cycles for a single folder of muliple file changes
-            CHANGEDIRS=$(echo "$CHANGED_FILES" | while read f; do dirname $f; done | sort | uniq)
+            CHANGEDIRS=$(cat ${CHANGED_FILES} | while read f; do dirname $f; done | sort | uniq)
             echo "${CHANGEDIRS}" | while read DIR
             do
                 echo "Affected source folder: $DIR"
