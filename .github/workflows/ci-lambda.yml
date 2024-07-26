@@ -108,7 +108,7 @@ jobs:
   matrix-pytest:
     runs-on: ubuntu-latest
     needs: python-check
-    if: ${{ (!contains(needs.python-check.outputs.jobstatus, 'failure')) && (needs.python-check.outputs.DELTAFLDRCT != 0) }} 
+    ##if: ${{ (!contains(needs.python-check.outputs.jobstatus, 'failure')) && (needs.python-check.outputs.DELTAFLDRCT != 0) }} 
     env:
       DELTAFOLDERS64: ${{ needs.python-check.outputs.DELTAFLDRSET64 }}
       DELTAFOLDERCT: ${{ needs.python-check.outputs.DELTAFLDRCT }}
