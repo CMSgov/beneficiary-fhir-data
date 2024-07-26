@@ -131,6 +131,6 @@ jobs:
                         pip install -r $DIR/*requirement*.txt 
                     fi
                     pip install pytest
-                    pytest $DIR/tests 
+                    pytest $DIR 
                 fi
             done
