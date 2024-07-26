@@ -74,8 +74,8 @@ jobs:
             PR_NUMBER=${{ github.event.pull_request.number }}
             CHANGEDPRFILES=$(gh pr diff $PR_NUMBER --name-only)
             echo "Changed files: $CHANGEDPRFILES"
-            echo "${CHANGEDPRLIST}" > /tmp/PRLIST.txt
-            echo 'CHANGEDPRLIST=/tmp/PRLIST.txt' >> $GITHUB_OUTPUT
+            echo "${CHANGEDPRLIST}" > ${{ runner.temp }}/PRLIST.txt
+            echo "CHANGEDPRLIST=${{ runner.temp }}/PRLIST.txt" >> $GITHUB_OUTPUT
 
       - name: Determine changed files for merge_group event
         id: list-merge-changes
@@ -90,35 +90,33 @@ jobs:
             echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
             MERGE_FILES=$(git diff --name-only ${{ env.BASE_COMMIT }} HEAD)
             echo "Merge files: $MERGE_FILES"
-            echo "${MERGE_FILES}" > /tmp/MRGLIST.txt
-            echo 'CHANGEDMERGELIST=/tmp/MRGLIST.txt' >> $GITHUB_OUTPUT
+            echo "${MERGE_FILES}" > ${{ runner.temp }}/MRGLIST.txt
+            echo "CHANGEDMERGELIST=${{ runner.temp }}/MRGLIST.txt" >> $GITHUB_OUTPUT
 
 
       - name: Run Python Tests for affected folders
         id: run-pytest-set
         run: |
             LAMBDA_PATTERN="lambda_src"
-            CHANGED_FILES=/tmp/CFLIST.txt
+            CHANGED_FILES=${{ runner.temp }}/CFLIST.txt
             touch ${CHANGED_FILES}
-            if [ -z "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" ]
+            if [ -f "${{ steps.list-merge-changes.outputs.CHANGEDMERGELIST }}" ]
             then
-              echo "merge step skipped"
-            else
-              cat ${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }} >> ${CHANGED_FILES}
+              cat ${{ steps.list-merge-changes.outputs.CHANGEDMERGELIST }} >> ${CHANGED_FILES}
             fi
-            if [ -z "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" ]
+            if [ -f "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" ]
             then
-              echo "pull request step skipped"
-            else
               cat ${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }} >> ${CHANGED_FILES}
             fi
             echo 'Changed files:'; cat ${CHANGED_FILES}
             # the following sequence reduces CHANGED_FILES to CHANGEDIRS
             # thereby avoiding multiple test cycles for a single folder of muliple file changes
-            CHANGEDIRS=$(cat ${CHANGED_FILES} | while read f; do dirname $f; done | sort | uniq)
-            echo "${CHANGEDIRS}" | while read DIR
+            cat ${CHANGED_FILES} | while read f
+            do 
+              dirname $f
+            done | sort | uniq | while read DIR
             do
-                echo "Affected source folder: $DIR"
+                echo "Affected source folder: ${DIR}"
                 if [[ "${DIR}" =~ "${LAMBDA_PATTERN}" ]]
                 then
                     # create virtual environment for each DIR and execute tests
