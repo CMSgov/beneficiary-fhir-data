@@ -130,5 +130,4 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
 
   #FIXME: replace when slack alert is in mgmt
   alarm_actions       = [data.aws_sns_topic.internal_alert_slack.arn]
-
 }
