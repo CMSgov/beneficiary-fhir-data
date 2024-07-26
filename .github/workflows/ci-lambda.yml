@@ -31,6 +31,7 @@ on:
 
 env:
   BASE_COMMIT: ""
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   lambda-test:
