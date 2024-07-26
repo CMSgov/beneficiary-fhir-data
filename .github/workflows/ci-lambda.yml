@@ -74,7 +74,7 @@ jobs:
             PR_NUMBER=${{ github.event.pull_request.number }}
             CHANGEDPRFILES=$(gh pr diff $PR_NUMBER --name-only)
             echo "Changed files: $CHANGEDPRFILES"
-            echo 'CHANGEDPRFILES='"${CHANGEDPRFILES}" >> $GITHUB_OUTPUT
+            echo 'CHANGEDPRFILES='"'${CHANGEDPRFILES}'" >> $GITHUB_OUTPUT
 
       - name: Determine changed files for merge_group event
         id: list-merge-changes
@@ -88,7 +88,7 @@ jobs:
             BASE_COMMIT=$(git merge-base HEAD origin/$BASE_BRANCH)
             echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
             MERGE_FILES=$(git diff --name-only ${{ env.BASE_COMMIT }} HEAD)
-            echo 'CHANGEDMERGEFILES='"${CHANGEDMERGEFILES}" >> $GITHUB_OUTPUT
+            echo 'CHANGEDMERGEFILES='"'${CHANGEDMERGEFILES}'" >> $GITHUB_OUTPUT
 
 
       - name: Run Python Tests for affected folders
