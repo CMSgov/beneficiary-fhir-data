@@ -142,7 +142,7 @@ jobs:
             FOLDERLIST=${{ runner.temp }}/SRCFOLDERS.txt
             echo ${{ env.DELTAFOLDERS64 }} | base64 -d > $FOLDERLIST
             echo "FOLDERLIST content:"
-            cath $FOLDERLIST
+            cat $FOLDERLIST
             echo "FOLDERCOUNT is ${{ env.DELTAFOLDERCT }}"
             cat $FOLDERLIST | while read srcfolder
             do
