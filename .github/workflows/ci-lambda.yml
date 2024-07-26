@@ -72,9 +72,8 @@ jobs:
         run: |
             echo "Fetching list of changed files for pull request event..."
             PR_NUMBER=${{ github.event.pull_request.number }}
-            CHANGEDPRFILES=$(gh pr diff $PR_NUMBER --name-only)
-            echo "Changed files: $CHANGEDPRFILES"
-            echo "${CHANGEDPRLIST}" > ${{ runner.temp }}/PRLIST.txt
+            PR_FILES=$(gh pr diff $PR_NUMBER --name-only)
+            echo "${PR_FILES}" > ${{ runner.temp }}/PRLIST.txt
             echo "CHANGEDPRLIST=${{ runner.temp }}/PRLIST.txt" >> $GITHUB_OUTPUT
 
       - name: Determine changed files for merge_group event
@@ -89,7 +88,6 @@ jobs:
             BASE_COMMIT=$(git merge-base HEAD origin/$BASE_BRANCH)
             echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
             MERGE_FILES=$(git diff --name-only ${{ env.BASE_COMMIT }} HEAD)
-            echo "Merge files: $MERGE_FILES"
             echo "${MERGE_FILES}" > ${{ runner.temp }}/MRGLIST.txt
             echo "CHANGEDMERGELIST=${{ runner.temp }}/MRGLIST.txt" >> $GITHUB_OUTPUT
 
@@ -102,18 +100,23 @@ jobs:
             touch ${CHANGED_FILES}
             if [ -f "${{ steps.list-merge-changes.outputs.CHANGEDMERGELIST }}" ]
             then
+              echo "MERGE Change List"; cat ${{ steps.list-merge-changes.outputs.CHANGEDMERGELIST }}
               cat ${{ steps.list-merge-changes.outputs.CHANGEDMERGELIST }} >> ${CHANGED_FILES}
             fi
             if [ -f "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" ]
             then
+              echo "PR Change List"; cat ${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}
               cat ${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }} >> ${CHANGED_FILES}
             fi
             echo 'Changed files:'; cat ${CHANGED_FILES}
             # the following sequence reduces CHANGED_FILES to CHANGEDIRS
             # thereby avoiding multiple test cycles for a single folder of muliple file changes
             cat ${CHANGED_FILES} | while read f
-            do 
-              dirname $f
+            do
+              if [ -f $f ]
+              then
+                dirname $f
+              fi
             done | sort | uniq | while read DIR
             do
                 echo "Affected source folder: ${DIR}"
