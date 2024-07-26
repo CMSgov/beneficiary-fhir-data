@@ -118,7 +118,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   datapoints_to_alarm = 1
   evaluation_periods  = 1
   threshold           = 0
-  actions_enabled = true
+  actions_enabled     = true
   treat_missing_data  = "ignore"
 
   alarm_description = "Alarm that is defined to send alerts to the BFD-Warnings/Alerts slack channel that notify us of any reported Lambda failures"
