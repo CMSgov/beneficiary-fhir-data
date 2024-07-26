@@ -141,11 +141,15 @@ jobs:
         run: |
             FOLDERLIST=${{ runner.temp }}/SRCFOLDERS.txt
             echo ${{ env.DELTAFOLDERS64 }} | base64 -d > $FOLDERLIST
+            echo "FOLDERLIST content:"
+            cath $FOLDERLIST
+            echo "FOLDERCOUNT is ${{ env.DELTAFOLDERCT }}"
             cat $FOLDERLIST | while read srcfolder
             do
+              echo "srcfolder is ${srcfolder}"
               if [[ "${srcfolder}" =~ "${{ matrix.projects.projectRoot }}" ]]
               then
-                  echo "Testing ${{ matrix.projects.projectRoot }} as N of ${{env.DELTAFOLDERCT}}"
+                  echo "Testing ${{ matrix.projects.projectRoot }} as N of ${{ env.DELTAFOLDERCT }}"
                   # create virtual environment for each DIR and execute tests
                   # python -m venv venv
                   # source venv/bin/activate
