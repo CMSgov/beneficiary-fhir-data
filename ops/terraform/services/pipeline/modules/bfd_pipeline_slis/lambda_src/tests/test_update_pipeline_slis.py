@@ -20,6 +20,7 @@ from dynamo_db import (
     put_rif_available_event,
 )
 from update_pipeline_slis import (
+    _handle_s3_event,
     _is_incoming_folder_empty,  # type: ignore
     _is_pipeline_load_complete,  # type: ignore
     handler,
@@ -41,6 +42,7 @@ DEFAULT_MOCK_LOAD_AVAIL_TBL = "mock-load-available-tbl"
 MODULE_UNDER_TEST = "update_pipeline_slis"
 IS_INCOMING_FOLDER_EMPTY_PATCH_PATH = f"{MODULE_UNDER_TEST}.{_is_incoming_folder_empty.__name__}"
 IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH = f"{MODULE_UNDER_TEST}.{_is_pipeline_load_complete.__name__}"
+HANDLE_S3_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{_handle_s3_event.__name__}"
 PUT_METRIC_DATA_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_metric_data.__name__}"
 PUT_RIF_AVAILABLE_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_rif_available_event.__name__}"
 PUT_LOAD_AVAILABLE_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_load_available_event.__name__}"
@@ -166,7 +168,10 @@ class TestUpdatePipelineSlisHandler:
         with pytest.raises(expected_error):
             handler(event=event, context=mock_lambda_context)
 
-    def test_it_fails_if_s3_event_name_is_unknown(self, caplog: pytest.LogCaptureFixture):
+    @mock.patch(HANDLE_S3_EVENT_PATCH_PATH, autospec=True)
+    def test_it_fails_if_s3_event_name_is_unknown(
+        self, mock_handle_s3_event: mock.Mock, caplog: pytest.LogCaptureFixture
+    ):
         # Arrange
         invalid_s3_event = "invalid"
 
@@ -177,8 +182,9 @@ class TestUpdatePipelineSlisHandler:
                 context=mock_lambda_context,
             )
 
-        #Assert
+        # Assert
         assert f"Unsupported S3 event type: {invalid_s3_event}" in caplog.text
+        assert mock_handle_s3_event.call_count == 0
 
     def test_it_fails_if_key_not_incoming_or_done(self, caplog: pytest.LogCaptureFixture):
         # Arrange
@@ -207,6 +213,17 @@ class TestUpdatePipelineSlisHandler:
 
         # Assert
         assert "ETL file or path does not match expected format" in caplog.text
+
+    @mock.patch(HANDLE_S3_EVENT_PATCH_PATH, autospec=True)
+    def test_it_handles_s3_event_if_valid_s3_event_type(self, mock_handle_s3_event: mock.Mock):
+        # Arrange
+        valid_s3_event = "ObjectCreated"
+
+        # Act
+        handler(event=generate_event(event_name=valid_s3_event), context=mock_lambda_context)
+
+        # Assert
+        assert mock_handle_s3_event.call_count == 1
 
     @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
     @mock.patch(PUT_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
