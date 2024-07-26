@@ -1,2 +1,2 @@
 aws-lambda-powertools[all]
-setuptools>=69.0.2
+setuptools>=70.0.0
