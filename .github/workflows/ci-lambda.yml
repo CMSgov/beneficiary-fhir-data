@@ -91,7 +91,7 @@ jobs:
             MERGE_FILES=$(git diff --name-only ${{ env.BASE_COMMIT }} HEAD)
             echo "Merge files: $MERGE_FILES"
             echo "${MERGE_FILES}" > /tmp/MRGLIST.txt
-            echo 'CHANGEDMERGEFILES=/tmp/MRGLIST.txt' >> $GITHUB_OUTPUT
+            echo 'CHANGEDMERGELIST=/tmp/MRGLIST.txt' >> $GITHUB_OUTPUT
 
 
       - name: Run Python Tests for affected folders
@@ -100,7 +100,7 @@ jobs:
             LAMBDA_PATTERN="lambda_src"
             CHANGED_FILES=""
             # CHANGED_FILES=$(echo "${{ steps.list-push-changes.outputs.CHANGEDPUSHFILES }}"; echo "${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }}")
-            CHANGED_FILES=$(cat "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" "${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }}")
+            CHANGED_FILES=$(cat "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}")
             echo 'Changed files:'; echo "$CHANGED_FILES"
             # the following sequence reduces CHANGED_FILES to CHANGEDIRS
             # thereby avoiding multiple test cycles for a single folder of muliple file changes
