@@ -16,6 +16,7 @@ on:
   #     - '**/*.py'
   #     - '**/*requirement*.txt'
   pull_request:
+    types: [opened, synchronize, reopened]
     paths:
       - '**/*.py'
       - '**/*requirement*.txt'
@@ -27,6 +28,9 @@ on:
     #   - '**/*.py'
     #   - '**/*requirement*.txt'
   workflow_dispatch:
+
+env:
+  BASE_COMMIT: ""
 
 jobs:
   lambda-test:
@@ -52,31 +56,47 @@ jobs:
       #     source venv/bin/activate
       #     pip install --upgrade pip
 
-      - name: Determine changed files for push event
-        id: list-push-changes
-        if: github.event_name == 'push'
-        run: |
-            echo "Fetching list of changed files for push event..."
-            CHANGEDPUSHFILES=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }})
-            echo "Changed files: $CHANGEDPUSHFILES"
-            echo 'CHANGEDPUSHFILES='"${CHANGEDPUSHFILES}" >> $GITHUB_OUTPUT
+      # - name: Determine changed files for push event
+      #   id: list-push-changes
+      #   if: github.event_name == 'push'
+      #   run: |
+      #       echo "Fetching list of changed files for push event..."
+      #       CHANGEDPUSHFILES=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }})
+      #       echo "Changed files: $CHANGEDPUSHFILES"
+      #       echo 'CHANGEDPUSHFILES='"${CHANGEDPUSHFILES}" >> $GITHUB_OUTPUT
 
       - name: Determine changed files for pull request event
         id: list-pr-changes
         if: github.event_name == 'pull_request'
         run: |
-              echo "Fetching list of changed files for pull request event..."
-              PR_NUMBER=${{ github.event.pull_request.number }}
-              CHANGEDPRFILES=$(gh pr diff $PR_NUMBER --name-only)
-              echo "Changed files: $CHANGEDPRFILES"
-              echo 'CHANGEDPRFILES='"${CHANGEDPRFILES}" >> $GITHUB_OUTPUT
+            echo "Fetching list of changed files for pull request event..."
+            PR_NUMBER=${{ github.event.pull_request.number }}
+            CHANGEDPRFILES=$(gh pr diff $PR_NUMBER --name-only)
+            echo "Changed files: $CHANGEDPRFILES"
+            echo 'CHANGEDPRFILES='"${CHANGEDPRFILES}" >> $GITHUB_OUTPUT
+
+      - name: Determine changed files for merge_group event
+        id: list-merge-changes
+        if: github.event_name == 'merge_group'
+        run: |
+            # Get target branch (base branch) name
+            BASE_BRANCH=$(jq -r '.pull_request.base.ref' < "$GITHUB_EVENT_PATH")
+            # Fetch base branch
+            git fetch origin $BASE_BRANCH
+            # Get merge base commit
+            BASE_COMMIT=$(git merge-base HEAD origin/$BASE_BRANCH)
+            echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
+            MERGE_FILES=$(git diff --name-only ${{ env.BASE_COMMIT }} HEAD)
+            echo 'CHANGEDMERGEFILES='"${CHANGEDMERGEFILES}" >> $GITHUB_OUTPUT
+
 
       - name: Run Python Tests for affected folders
         id: run-pytest-set
         run: |
             LAMBDA_PATTERN="lambda_src"
             CHANGED_FILES=""
-            CHANGED_FILES=$(echo "${{ steps.list-push-changes.outputs.CHANGEDPUSHFILES }}"; echo "${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }}")
+            # CHANGED_FILES=$(echo "${{ steps.list-push-changes.outputs.CHANGEDPUSHFILES }}"; echo "${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }}")
+            CHANGED_FILES=$(echo "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}"; echo "${{ steps.list-pr-changes.outputs.CHANGEDPRFILES }}")
             echo 'Changed files:'; echo "$CHANGED_FILES"
             # the following sequence reduces CHANGED_FILES to CHANGEDIRS
             # thereby avoiding multiple test cycles for a single folder of muliple file changes
