@@ -19,9 +19,11 @@ from dynamo_db import (
     put_load_available_event,
     put_rif_available_event,
 )
-from update_pipeline_slis import _is_incoming_folder_empty  # type: ignore
-from update_pipeline_slis import _is_pipeline_load_complete  # type: ignore
-from update_pipeline_slis import handler
+from update_pipeline_slis import (
+    _is_incoming_folder_empty,  # type: ignore
+    _is_pipeline_load_complete,  # type: ignore
+    handler,
+)
 
 DEFAULT_MOCK_GROUP_ISO_STR = "2024-01-12T00:00:00Z"
 DEFAULT_MOCK_EVENT_TIME_ISO = "2024-01-19T00:00:00Z"
@@ -51,7 +53,7 @@ mock_lambda_context = mock.Mock()
 
 
 def generate_event(
-    key: str,
+    key: str = f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt",
     event_time_iso: str = DEFAULT_MOCK_EVENT_TIME_ISO,
     event_name: str = DEFAULT_MOCK_EVENT_NAME,
 ) -> dict[str, Any]:
@@ -122,12 +124,6 @@ class TestUpdatePipelineSlisHandler:
             ({"Records": [{"Sns": {"Message": '{"Records":""}'}}]}, ValueError),
             ({"Records": [{"Sns": {"Message": '{"Records":[{}]}'}}]}, KeyError),
             (
-                generate_event(
-                    key=f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt", event_name="invalid"
-                ),
-                ValueError,
-            ),
-            (
                 {
                     "Records": [{
                         "Sns": {
@@ -169,6 +165,20 @@ class TestUpdatePipelineSlisHandler:
     ):
         with pytest.raises(expected_error):
             handler(event=event, context=mock_lambda_context)
+
+    def test_it_fails_if_s3_event_name_is_unknown(self, caplog: pytest.LogCaptureFixture):
+        # Arrange
+        invalid_s3_event = "invalid"
+
+        # Act
+        with caplog.at_level(logging.WARNING):
+            handler(
+                event=generate_event(event_name=invalid_s3_event),
+                context=mock_lambda_context,
+            )
+
+        #Assert
+        assert f"Unsupported S3 event type: {invalid_s3_event}" in caplog.text
 
     def test_it_fails_if_key_not_incoming_or_done(self, caplog: pytest.LogCaptureFixture):
         # Arrange
