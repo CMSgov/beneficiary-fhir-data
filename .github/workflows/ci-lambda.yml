@@ -100,13 +100,17 @@ jobs:
             LAMBDA_PATTERN="lambda_src"
             CHANGED_FILES=/tmp/CFLIST.txt
             touch ${CHANGED_FILES}
-            if [ -e "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" ]
+            if [ -z "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" ]
             then
-              cat "${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }}" >> ${CHANGED_FILES}
+              echo "merge step skipped"
+            else
+              cat ${{ steps.list-merge-changes.outputs.CHANGEDMERGEFILES }} >> ${CHANGED_FILES}
             fi
-            if [ -e "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" ]
+            if [ -z "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" ]
             then
-              cat "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" >> ${CHANGED_FILES}
+              echo "pull request step skipped"
+            else
+              cat ${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }} >> ${CHANGED_FILES}
             fi
             echo 'Changed files:'; cat ${CHANGED_FILES}
             # the following sequence reduces CHANGED_FILES to CHANGEDIRS
