@@ -44,8 +44,8 @@ public final class SampleDataColumnsTest {
    * gov.cms.bfd.model.rif.samples.StaticRifResourceGroup#SAMPLE_A} data file headers.
    */
   @Test
-  public void verifySampleAColumns() {
-    verifyColumns(StaticRifResourceGroup.SAMPLE_A);
+  public void verifySampleBColumns() {
+    verifyColumns(StaticRifResourceGroup.SAMPLE_B);
   }
 
   /**

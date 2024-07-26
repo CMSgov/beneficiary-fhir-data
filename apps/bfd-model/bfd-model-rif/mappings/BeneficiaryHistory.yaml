@@ -138,6 +138,16 @@ mappings:
       dbName: mbi_hash
       name: mbiHash
       sqlType: varchar(64)
+    - comment: Cross-reference Group ID
+      dbName: xref_grp_id
+      name: crossReferenceGroupId
+      sqlType: bigint
+      javaType: Long
+    - comment: Cross-reference Switch
+      dbName: xref_sw
+      name: crossReferenceSwitch
+      sqlType: char
+      javaType: Character
     - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
       dbName: last_updated
       name: lastUpdated
@@ -169,6 +179,8 @@ mappings:
     - BENE_GVN_NAME
     - BENE_MDL_NAME
     - MBI_NUM
+    - XREF_GRP_ID
+    - XREF_SW
     - EFCTV_BGN_DT
     - EFCTV_END_DT
   transformations:
@@ -217,4 +229,9 @@ mappings:
     to: mbiEffectiveDate
   - from: EFCTV_END_DT
     to: mbiObsoleteDate
+  - from: XREF_GRP_ID
+    to: crossReferenceGroupId
+    transformer: LongString
+  - from: XREF_SW
+    to: crossReferenceSwitch
   transformerClassName: gov.cms.bfd.model.rif.entities.BeneficiaryHistoryParser

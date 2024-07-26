@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.ccw.rif.extract;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,7 +58,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_BENES.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof Beneficiary);
+    assertInstanceOf(Beneficiary.class, rifRecordEvent.getRecord());
 
     Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
     assertEquals(beneRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
@@ -106,6 +107,35 @@ public final class RifFilesProcessorTest {
    * StaticRifResource#SAMPLE_A_BENES}.
    */
   @Test
+  public void process1BeneRecordWithXRef() {
+    RifFilesEvent filesEvent =
+        new RifFilesEvent(Instant.now(), false, StaticRifResource.SAMPLE_B_BENES.toRifFile());
+    RifFilesProcessor processor = new RifFilesProcessor();
+    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
+
+    assertEquals(StaticRifResource.SAMPLE_B_BENES.getRecordCount(), rifEventsList.size());
+
+    RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+    assertEquals(
+        StaticRifResource.SAMPLE_B_BENES.getRifFileType(),
+        rifRecordEvent.getFileEvent().getFile().getFileType());
+    assertNotNull(rifRecordEvent.getRecord());
+    assertInstanceOf(Beneficiary.class, rifRecordEvent.getRecord());
+
+    Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
+    assertEquals(beneRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
+    assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
+    assertEquals(123456L, beneRow.getBeneficiaryId());
+    assertEquals(1, beneRow.getCrossReferenceGroupId().get());
+    assertEquals('N', beneRow.getCrossReferenceSwitch().get());
+  }
+
+  /**
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
+   * StaticRifResource#SAMPLE_A_BENES}.
+   */
+  @Test
   public void process1BeneRecordWithBackslash() {
     RifFilesEvent filesEvent =
         new RifFilesEvent(
@@ -122,7 +152,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof Beneficiary);
+    assertInstanceOf(Beneficiary.class, rifRecordEvent.getRecord());
 
     Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
     assertEquals(beneRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
@@ -151,7 +181,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.getRifFileType(),
         rifRecordEvent0.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent0.getRecord());
-    assertTrue(rifRecordEvent0.getRecord() instanceof BeneficiaryHistory);
+    assertInstanceOf(BeneficiaryHistory.class, rifRecordEvent0.getRecord());
     BeneficiaryHistory beneficiaryHistory0 = (BeneficiaryHistory) rifRecordEvent0.getRecord();
     assertEquals(beneficiaryHistory0.getBeneficiaryId(), rifRecordEvent0.getBeneficiaryId());
     assertEquals(RecordAction.INSERT, rifRecordEvent0.getRecordAction());
@@ -174,7 +204,7 @@ public final class RifFilesProcessorTest {
           StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.getRifFileType(),
           rifRecordEvent.getFileEvent().getFile().getFileType());
       assertNotNull(rifRecordEvent.getRecord());
-      assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryHistory);
+      assertInstanceOf(BeneficiaryHistory.class, rifRecordEvent.getRecord());
       BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
       assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
       assertEquals(567834L, beneficiaryHistory.getBeneficiaryId());
@@ -208,7 +238,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_PDE.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof PartDEvent);
+    assertInstanceOf(PartDEvent.class, rifRecordEvent.getRecord());
 
     PartDEvent pdeRow = (PartDEvent) rifRecordEvent.getRecord();
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
@@ -273,7 +303,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_CARRIER.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof CarrierClaim);
+    assertInstanceOf(CarrierClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     CarrierClaim claimGroup = (CarrierClaim) rifRecordEvent.getRecord();
@@ -419,7 +449,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_INPATIENT.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof InpatientClaim);
+    assertInstanceOf(InpatientClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     InpatientClaim claimGroup = (InpatientClaim) rifRecordEvent.getRecord();
@@ -604,7 +634,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_INPATIENT_FOUR_CHARACTER_DRG_CODE.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof InpatientClaim);
+    assertInstanceOf(InpatientClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     InpatientClaim claimGroup = (InpatientClaim) rifRecordEvent.getRecord();
@@ -782,7 +812,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_OUTPATIENT.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof OutpatientClaim);
+    assertInstanceOf(OutpatientClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     OutpatientClaim claimGroup = (OutpatientClaim) rifRecordEvent.getRecord();
@@ -941,7 +971,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_SNF.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof SNFClaim);
+    assertInstanceOf(SNFClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     SNFClaim claimGroup = (SNFClaim) rifRecordEvent.getRecord();
@@ -1115,7 +1145,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_SNF_FOUR_CHARACTER_DRG_CODE.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof SNFClaim);
+    assertInstanceOf(SNFClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     SNFClaim claimGroup = (SNFClaim) rifRecordEvent.getRecord();
@@ -1288,7 +1318,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_HOSPICE.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof HospiceClaim);
+    assertInstanceOf(HospiceClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     HospiceClaim claimGroup = (HospiceClaim) rifRecordEvent.getRecord();
@@ -1403,7 +1433,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_HHA.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof HHAClaim);
+    assertInstanceOf(HHAClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     HHAClaim claimGroup = (HHAClaim) rifRecordEvent.getRecord();
@@ -1515,7 +1545,7 @@ public final class RifFilesProcessorTest {
         StaticRifResource.SAMPLE_A_DME.getRifFileType(),
         rifRecordEvent.getFileEvent().getFile().getFileType());
     assertNotNull(rifRecordEvent.getRecord());
-    assertTrue(rifRecordEvent.getRecord() instanceof DMEClaim);
+    assertInstanceOf(DMEClaim.class, rifRecordEvent.getRecord());
 
     // Verify the claim header.
     DMEClaim claimGroup = (DMEClaim) rifRecordEvent.getRecord();
