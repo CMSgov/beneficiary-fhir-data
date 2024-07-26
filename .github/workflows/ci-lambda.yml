@@ -126,9 +126,9 @@ jobs:
                     python -m venv venv
                     source venv/bin/activate
                     pip install --upgrade pip
-                    if [ -e $DIR/*requirement*.txt ]
+                    if [ -e $DIR/requirements.txt ]
                     then
-                        pip install -r $DIR/*requirement*.txt 
+                        pip install -r $DIR/requirements.txt 
                     fi
                     pip install pytest
                     pytest $DIR 
