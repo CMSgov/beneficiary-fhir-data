@@ -9,7 +9,7 @@ from typing import Any, Callable, Type
 from unittest import mock
 
 import paramiko
-import pytest
+import pytest-BUG_INDUCER
 
 from errors import (
     InvalidObjectKeyError,
