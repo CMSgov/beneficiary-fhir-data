@@ -108,6 +108,10 @@ public enum StaticRifResource {
   SAMPLE_B_BENES(
       resourceUrl("rif-static-samples/sample-b-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
+  /** Sample C Beneficiary static rif. */
+  SAMPLE_C_BENES(
+      resourceUrl("rif-static-samples/sample-c-beneficiaries.txt"), RifFileType.BENEFICIARY, 2),
+
   /** Sample U Carrier static rif. */
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 

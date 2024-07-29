@@ -517,6 +517,62 @@ public final class RifLoaderIT {
     }
   }
 
+  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
+  @Test
+  public void loadSamplesWithXref() {
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_C.getResources()));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
+    // Ensure no records were skipped
+    validateBeneficiaryCountsInDatabase(2);
+
+    /*
+     * Verify that the updates worked as expected by manually checking some fields.
+     */
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      CriteriaQuery<BeneficiaryHistory> beneficiaryHistoryCriteria =
+          entityManager.getCriteriaBuilder().createQuery(BeneficiaryHistory.class);
+      List<BeneficiaryHistory> beneficiaryHistoryEntries =
+          entityManager
+              .createQuery(
+                  beneficiaryHistoryCriteria.select(
+                      beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
+              .getResultList();
+      assertEquals(567834L, beneficiaryHistoryEntries.get(0).getBeneficiaryId());
+
+      assertEquals(7, beneficiaryHistoryEntries.size());
+      // last entry from first bene
+      BeneficiaryHistory beneHistory1 = beneficiaryHistoryEntries.get(5);
+      // only entry from second bene
+      BeneficiaryHistory beneHistory2 = beneficiaryHistoryEntries.get(6);
+
+      assertEquals(beneHistory1.getCrossReferenceSwitch(), Optional.empty());
+      assertEquals(beneHistory1.getCrossReferenceGroupId(), Optional.empty());
+      assertEquals(beneHistory2.getCrossReferenceSwitch().get(), 'N');
+      assertEquals(beneHistory2.getCrossReferenceGroupId().get(), 1);
+
+      Beneficiary beneficiaryFromDb1 = entityManager.find(Beneficiary.class, 567834L);
+      Beneficiary beneficiaryFromDb2 = entityManager.find(Beneficiary.class, 123456L);
+
+      assertEquals(beneficiaryFromDb1.getCrossReferenceSwitch().get(), 'Y');
+      assertEquals(beneficiaryFromDb1.getCrossReferenceGroupId().get(), 2);
+      assertEquals(beneficiaryFromDb2.getCrossReferenceSwitch().get(), 'Y');
+      assertEquals(beneficiaryFromDb2.getCrossReferenceGroupId().get(), 1);
+
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+  }
+
   /**
    * This test checks that all enrollment data for the year has been loaded into the beneficiary
    * monthly table and checks each month to make sure the correct values are there.

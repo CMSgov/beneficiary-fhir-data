@@ -75,14 +75,16 @@ public enum StaticRifResourceGroup {
   /** Sample U Beneficiaries Unchanged Resource Group. */
   SAMPLE_U_BENES_UNCHANGED(
       StaticRifResource.SAMPLE_U_BENES_UNCHANGED, StaticRifResource.SAMPLE_U_CARRIER),
-  /** Sample U Beneficiarys Chaned with 8 Months Resource Group. */
+  /** Sample U Beneficiaries Chaned with 8 Months Resource Group. */
   SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS(
       StaticRifResource.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS, StaticRifResource.SAMPLE_U_CARRIER),
-  /** Sample U Beneficiarys Chaned with 9 Months Resource Group. */
+  /** Sample U Beneficiaries Chaned with 9 Months Resource Group. */
   SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS(
       StaticRifResource.SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS, StaticRifResource.SAMPLE_U_CARRIER),
-  /** Sample B. */
+  /** Sample B Beneficiaries with Cross-reference Groups. */
   SAMPLE_B(StaticRifResource.SAMPLE_B_BENES),
+  /** Sample C Beneficiary Updates with Cross-reference Groups. */
+  SAMPLE_C(StaticRifResource.SAMPLE_C_BENES),
   /** Synthea Data Resource Group. */
   SYNTHEA_DATA(
       StaticRifResource.SAMPLE_SYNTHEA_BENES2011,
