@@ -44,6 +44,7 @@ jobs:
         id: create-config
         run: |
             FN=PRJLIST.json
+            touch "${{ runner.temp }}/${FN}"
             echo "PRJCONFIG=${FN}" >> $GITHUB_OUTPUT
 
       - name: Get changed directory list as CSV with count
