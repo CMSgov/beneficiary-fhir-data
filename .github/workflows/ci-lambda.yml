@@ -95,6 +95,6 @@ jobs:
             # python -m venv venv
             # source venv/bin/activate
             pip install --upgrade pip
-            pip install -r ${{ matrix.projects.projectRoot }}/requirements.txt 
+            pip install -r ${{ github.workspace }}/${{ matrix.projects.projectRoot }}/requirements.txt 
             pip install pytest
-            pytest ${{ matrix.projects.projectRoot }}
+            pytest ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
