@@ -1,13 +1,6 @@
 name: CI - Python
 
 on:
-  # push:
-  #   branches:
-  #     - master
-  #     - BFD-3524
-  #   paths:
-  #     - '**/*.py'
-  #     - '**/*requirement*.txt'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
@@ -26,13 +19,19 @@ env:
   BASE_COMMIT: ""
   GH_TOKEN: ${{ github.token }}
 
+##
+## PROJECT MATRIX REFERENCE:
+## [
+##  { projectName: "sftp-outbound-transfer-lambda", projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", pythonVersion: "3.12" },
+##  { projectName: "update-pipeline-slis-lambda", projectRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", testsRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", pythonVersion: "3.11" }
+## ]
+
 jobs:
   python-check:
     runs-on: ubuntu-latest
     outputs:
       jobstatus: ${{ join(steps.*.conclusion) }}
-      DELTAFLDRSET64: ${{ steps.validate-testworthy-changes.outputs.FOLDERLIST }}
-      DELTAFLDRCT: ${{ steps.validate-testworthy-changes.outputs.FOLDERLINES }}
+      MATRIX: ${{ steps.match-proj-deltas.outputs.MATRIX }}
 
     steps:
       - name: Checkout code
@@ -41,94 +40,52 @@ jobs:
         with:
             fetch-depth: 2
 
-      # - name: Determine changed files for push event
-      #   id: list-push-changes
-      #   if: github.event_name == 'push'
-      #   run: |
-      #       echo "Fetching list of changed files for push event..."
-      #       CHANGEDPUSHFILES=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }})
-      #       echo "Changed files: $CHANGEDPUSHFILES"
-      #       echo 'CHANGEDPUSHFILES='"${CHANGEDPUSHFILES}" >> $GITHUB_OUTPUT
-
-      - name: Determine changed files for pull request event
-        id: list-pr-changes
-        if: github.event_name == 'pull_request'
+      - name: Establish Project Config
+        id: create-config
         run: |
-            echo "Fetching list of changed files for pull request event..."
-            PR_NUMBER=${{ github.event.pull_request.number }}
-            PR_FILES=$(gh pr diff $PR_NUMBER --name-only)
-            echo "${PR_FILES}" > ${{ runner.temp }}/PRLIST.txt
-            echo "CHANGEDPRLIST=${{ runner.temp }}/PRLIST.txt" >> $GITHUB_OUTPUT
+            FN=${{ runner.temp }}/PRJLIST.json
+            echo "PRJCONFIG=${FN}" >> $GITHUB_OUTPUT
 
-      - name: Determine changed files for merge_group event
-        id: list-merge-changes
-        if: github.event_name == 'merge_group'
-        run: |
-            # Get target branch (base branch) name
-            BASE_BRANCH=$(jq -r '.pull_request.base.ref' < "$GITHUB_EVENT_PATH")
-            # Fetch base branch
-            git fetch origin $BASE_BRANCH
-            # Get merge base commit
-            BASE_COMMIT=$(git merge-base HEAD origin/$BASE_BRANCH)
-            echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
-            MERGE_FILES=$(git diff --name-only ${{ env.BASE_COMMIT }} HEAD)
-            echo "${MERGE_FILES}" > ${{ runner.temp }}/MRGLIST.txt
-            echo "CHANGEDMERGELIST=${{ runner.temp }}/MRGLIST.txt" >> $GITHUB_OUTPUT
-
-      - name: Delineate Modified Folders
+      - name: Get changed directory list as CSV with count
+        id: changed-dirs
+        uses: tj-actions/changed-files@v44
+        with:
+          dir_names: "true"
+          separator: ","
+              
+      - name: Capture Modified Folders with Count
         id: validate-testworthy-changes
         run: |
-            CHANGED_FILES=${{ runner.temp }}/CFLIST.txt
             UNIQ_FOLDERS=${{ runner.temp }}/UNIQFLDR.txt
-            touch ${CHANGED_FILES}
-            if [ -f "${{ steps.list-merge-changes.outputs.CHANGEDMERGELIST }}" ]
-            then
-              echo "MERGE Change List"; cat ${{ steps.list-merge-changes.outputs.CHANGEDMERGELIST }}
-              cat ${{ steps.list-merge-changes.outputs.CHANGEDMERGELIST }} >> ${CHANGED_FILES}
-            fi
-            if [ -f "${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}" ]
-            then
-              echo "PR Change List"; cat ${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }}
-              cat ${{ steps.list-pr-changes.outputs.CHANGEDPRLIST }} >> ${CHANGED_FILES}
-            fi
-            echo 'Changed files:'; cat ${CHANGED_FILES}
-            # the following sequence reduces CHANGED_FILES to CHANGEDIRS
-            # thereby avoiding multiple test cycles for a single folder of muliple file changes
-            cat ${CHANGED_FILES} | while read f
-            do
-              if [ -f $f ]
-              then
-                dirname $f
-              fi
-            done | sort | uniq >> ${UNIQ_FOLDERS}
+            echo ${{ steps.changed-dirs.outputs.all_changed_files }} >> ${UNIQ_FOLDERS}
             UNIQ64=$(cat ${UNIQ_FOLDERS}|base64)
-            echo "FOLDERLIST=${UNIQ64}" >> $GITHUB_OUTPUT
-            echo "FOLDERLINES=$(cat ${UNIQ_FOLDERS}|wc -l)"
+            echo "FOLDERLISTCSV=${UNIQ64}" >> $GITHUB_OUTPUT
+            echo "FOLDERCT=${{ steps.changed-dirs.outputs.all_changed_files_count }}"
 
+      - name: Define Managed Project Roots
+        id: define-proj-list
+        uses: jsdaniell/create-json@v1.2.3
+        with:
+          name: ${{ steps.create-config.outputs.PRJCONFIG }}
+          json: '[ { "projectName": "sftp-outbound-transfer-lambda", "projectRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", "testsRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", "pythonVersion": "3.12" }, { "projectName": "update-pipeline-slis-lambda", "projectRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", "testsRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", "pythonVersion": "3.11" } ]'
+
+      - name: Match Changed Folder List to Project Roots
+        id: match-proj-deltas
+        run: |
+            PROJ_JSON=${{ steps.create-config.outputs.PRJCONFIG }}
+            PROJ_ROOT_LIST=$(cat ${PROJ_JSON} | jq -c '[ .[]|.projectRoot ]')
+            FOLDERLISTCSV64=${{ steps.validate-testworthy-changes.outputs.FOLDERLISTCSV }}
+            FOLDERLISTJSON=$(echo ${FOLDERLISTCSV64}|base64 -d| awk '{ n=split($0,a,","); { for(i in a) printf "%s\n",a[i]; } }'|sort|uniq| jq --raw-input '.' | jq --slurp)
+            PROJECTMATCHJSON=$(echo ${FOLDERLISTJSON} | jq '.[]'|sed 's/"//g'|while read pathnm; do cat ${PROJ_JSON}| jq --arg match $pathnm '.[]|select(.projectRoot|startswith($match))'; done | jq '[.]')
+            echo "MATRIX="$PROJECTMATCHJSON >> $GITHUB_OUTPUT
+            
   matrix-pytest:
     runs-on: ubuntu-latest
     needs: python-check
-    ##if: ${{ (!contains(needs.python-check.outputs.jobstatus, 'failure')) && (needs.python-check.outputs.DELTAFLDRCT != 0) }} 
-    env:
-      DELTAFOLDERS64: ${{ needs.python-check.outputs.DELTAFLDRSET64 }}
-      DELTAFOLDERCT: ${{ needs.python-check.outputs.DELTAFLDRCT }}
+    if: ${{ !contains(needs.python-check.outputs.jobstatus, 'failure') }} 
     strategy:
       matrix:
-        projects:
-          [
-            {
-              projectName: "sftp-outbound-transfer-lambda",
-              projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
-              testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests",
-              pythonVersion: "3.12"
-            },
-            {
-              projectName: "update-pipeline-slis-lambda",
-              projectRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src",
-              testsRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests",
-              pythonVersion: "3.11"
-            },
-          ]
+        projects: ${{ fromJSON(needs.python-check.outputs.MATRIX) }}
 
     steps:
       - name: Setup Python Tests for affected folders
@@ -139,23 +96,11 @@ jobs:
       - name: Run Python Tests per project
         id: run-pytest-set
         run: |
-            FOLDERLIST=${{ runner.temp }}/SRCFOLDERS.txt
-            echo ${{ env.DELTAFOLDERS64 }} | base64 -d > $FOLDERLIST
-            echo "FOLDERLIST content:"
-            cat $FOLDERLIST
-            echo "FOLDERCOUNT is ${{ env.DELTAFOLDERCT }}"
-            cat $FOLDERLIST | while read srcfolder
-            do
-              echo "srcfolder is ${srcfolder}"
-              if [[ "${srcfolder}" =~ "${{ matrix.projects.projectRoot }}" ]]
-              then
-                  echo "Testing ${{ matrix.projects.projectRoot }} as N of ${{ env.DELTAFOLDERCT }}"
-                  # create virtual environment for each DIR and execute tests
-                  # python -m venv venv
-                  # source venv/bin/activate
-                  pip install --upgrade pip
-                  pip install -r ${{ matrix.projects.projectRoot }}/requirements.txt 
-                  pip install pytest
-                  pytest ${{ matrix.projects.projectRoot }}
-              fi
-            done
+            echo "Testing ${{ matrix.projects.projectRoot }}"
+            # create virtual environment for each DIR and execute tests
+            # python -m venv venv
+            # source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r ${{ matrix.projects.projectRoot }}/requirements.txt 
+            pip install pytest
+            pytest ${{ matrix.projects.projectRoot }}
