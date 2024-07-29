@@ -10,10 +10,6 @@ on:
   merge_group:
     branches:
       - master
-    # paths:
-    #   - '**/*.py'
-    #   - '**/*requirement*.txt'
-  workflow_dispatch:
 
 env:
   BASE_COMMIT: ""
