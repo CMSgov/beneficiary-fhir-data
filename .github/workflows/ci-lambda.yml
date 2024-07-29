@@ -43,7 +43,7 @@ jobs:
       - name: Establish Project Config
         id: create-config
         run: |
-            FN=${{ runner.temp }}/PRJLIST.json
+            FN=PRJLIST.json
             echo "PRJCONFIG=${FN}" >> $GITHUB_OUTPUT
 
       - name: Get changed directory list as CSV with count
@@ -67,12 +67,13 @@ jobs:
         uses: jsdaniell/create-json@v1.2.3
         with:
           name: ${{ steps.create-config.outputs.PRJCONFIG }}
+          dir: "${{ runner.temp }}/"
           json: '[ { "projectName": "sftp-outbound-transfer-lambda", "projectRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", "testsRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", "pythonVersion": "3.12" }, { "projectName": "update-pipeline-slis-lambda", "projectRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", "testsRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", "pythonVersion": "3.11" } ]'
 
       - name: Match Changed Folder List to Project Roots
         id: match-proj-deltas
         run: |
-            PROJ_JSON=${{ steps.create-config.outputs.PRJCONFIG }}
+            PROJ_JSON="${{ runner.temp }}/${{ steps.create-config.outputs.PRJCONFIG }}"
             PROJ_ROOT_LIST=$(cat ${PROJ_JSON} | jq -c '[ .[]|.projectRoot ]')
             FOLDERLISTCSV64=${{ steps.validate-testworthy-changes.outputs.FOLDERLISTCSV }}
             FOLDERLISTJSON=$(echo ${FOLDERLISTCSV64}|base64 -d| awk '{ n=split($0,a,","); { for(i in a) printf "%s\n",a[i]; } }'|sort|uniq| jq --raw-input '.' | jq --slurp)
