@@ -18,6 +18,7 @@ on:
 env:
   BASE_COMMIT: ""
   GH_TOKEN: ${{ github.token }}
+  PRJCONFIGFN: "PRJLIST.json"
 
 ##
 ## PROJECT MATRIX REFERENCE:
@@ -40,13 +41,6 @@ jobs:
         with:
             fetch-depth: 2
 
-      - name: Establish Project Config
-        id: create-config
-        run: |
-            FN=PRJLIST.json
-            touch "${{ runner.temp }}/${FN}"
-            echo "PRJCONFIG=${FN}" >> $GITHUB_OUTPUT
-
       - name: Get changed directory list as CSV with count
         id: changed-dirs
         uses: tj-actions/changed-files@v44
@@ -67,14 +61,14 @@ jobs:
         id: define-proj-list
         uses: jsdaniell/create-json@v1.2.3
         with:
-          name: ${{ steps.create-config.outputs.PRJCONFIG }}
+          name: ${{ env.PRJCONFIGFN }}
           dir: "${{ runner.temp }}/"
           json: '[ { "projectName": "sftp-outbound-transfer-lambda", "projectRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", "testsRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", "pythonVersion": "3.12" }, { "projectName": "update-pipeline-slis-lambda", "projectRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", "testsRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", "pythonVersion": "3.11" } ]'
 
       - name: Match Changed Folder List to Project Roots
         id: match-proj-deltas
         run: |
-            PROJ_JSON="${{ runner.temp }}/${{ steps.create-config.outputs.PRJCONFIG }}"
+            PROJ_JSON="${{ runner.temp }}/${{ env.PRJCONFIGFN }}"
             PROJ_ROOT_LIST=$(cat ${PROJ_JSON} | jq -c '[ .[]|.projectRoot ]')
             FOLDERLISTCSV64=${{ steps.validate-testworthy-changes.outputs.FOLDERLISTCSV }}
             FOLDERLISTJSON=$(echo ${FOLDERLISTCSV64}|base64 -d| awk '{ n=split($0,a,","); { for(i in a) printf "%s\n",a[i]; } }'|sort|uniq| jq --raw-input '.' | jq --slurp)
