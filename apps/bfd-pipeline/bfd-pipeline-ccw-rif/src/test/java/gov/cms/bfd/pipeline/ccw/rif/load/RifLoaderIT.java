@@ -556,18 +556,18 @@ public final class RifLoaderIT {
       // only entry from second bene
       BeneficiaryHistory beneHistory2 = beneficiaryHistoryEntries.get(6);
 
-      assertEquals(beneHistory1.getCrossReferenceSwitch(), Optional.empty());
-      assertEquals(beneHistory1.getCrossReferenceGroupId(), Optional.empty());
-      assertEquals(beneHistory2.getCrossReferenceSwitch().get(), 'N');
-      assertEquals(beneHistory2.getCrossReferenceGroupId().get(), 1);
+      assertEquals(beneHistory1.getXrefSwitch(), Optional.empty());
+      assertEquals(beneHistory1.getXrefGroupId(), Optional.empty());
+      assertEquals(beneHistory2.getXrefSwitch().get(), 'N');
+      assertEquals(beneHistory2.getXrefGroupId().get(), 1);
 
       Beneficiary beneficiaryFromDb1 = entityManager.find(Beneficiary.class, 567834L);
       Beneficiary beneficiaryFromDb2 = entityManager.find(Beneficiary.class, 123456L);
 
-      assertEquals(beneficiaryFromDb1.getCrossReferenceSwitch().get(), 'Y');
-      assertEquals(beneficiaryFromDb1.getCrossReferenceGroupId().get(), 2);
-      assertEquals(beneficiaryFromDb2.getCrossReferenceSwitch().get(), 'Y');
-      assertEquals(beneficiaryFromDb2.getCrossReferenceGroupId().get(), 1);
+      assertEquals(beneficiaryFromDb1.getXrefSwitch().get(), 'Y');
+      assertEquals(beneficiaryFromDb1.getXrefGroupId().get(), 2);
+      assertEquals(beneficiaryFromDb2.getXrefSwitch().get(), 'Y');
+      assertEquals(beneficiaryFromDb2.getXrefGroupId().get(), 1);
 
     } finally {
       if (entityManager != null) {

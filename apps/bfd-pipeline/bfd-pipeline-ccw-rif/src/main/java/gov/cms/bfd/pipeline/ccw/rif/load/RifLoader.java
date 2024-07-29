@@ -833,8 +833,8 @@ public final class RifLoader {
       oldBeneCopy.setMbiHash(oldBeneficiaryRecord.get().getMbiHash());
       oldBeneCopy.setMbiEffectiveDate(oldBeneficiaryRecord.get().getMbiEffectiveDate());
       oldBeneCopy.setMbiObsoleteDate(oldBeneficiaryRecord.get().getMbiObsoleteDate());
-      oldBeneCopy.setCrossReferenceGroupId(oldBeneficiaryRecord.get().getCrossReferenceGroupId());
-      oldBeneCopy.setCrossReferenceSwitch(oldBeneficiaryRecord.get().getCrossReferenceSwitch());
+      oldBeneCopy.setXrefGroupId(oldBeneficiaryRecord.get().getXrefGroupId());
+      oldBeneCopy.setXrefSwitch(oldBeneficiaryRecord.get().getXrefSwitch());
       oldBeneCopy.setLastUpdated(Optional.of(batchTimestamp));
 
       entityManager.persist(oldBeneCopy);
@@ -873,14 +873,12 @@ public final class RifLoader {
     }
 
     if (!Objects.equals(
-        newBeneficiaryRecord.getCrossReferenceGroupId(),
-        oldBeneficiaryRecord.getCrossReferenceGroupId())) {
+        newBeneficiaryRecord.getXrefGroupId(), oldBeneficiaryRecord.getXrefGroupId())) {
       return false;
     }
 
     if (!Objects.equals(
-        newBeneficiaryRecord.getCrossReferenceSwitch(),
-        oldBeneficiaryRecord.getCrossReferenceSwitch())) {
+        newBeneficiaryRecord.getXrefSwitch(), oldBeneficiaryRecord.getXrefSwitch())) {
       return false;
     }
 

@@ -140,12 +140,12 @@ mappings:
       sqlType: varchar(64)
     - comment: Cross-reference Group ID
       dbName: xref_grp_id
-      name: crossReferenceGroupId
+      name: xrefGroupId
       sqlType: bigint
       javaType: Long
     - comment: Cross-reference Switch
       dbName: xref_sw
-      name: crossReferenceSwitch
+      name: xrefSwitch
       sqlType: char
       javaType: Character
     - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
@@ -230,8 +230,8 @@ mappings:
   - from: EFCTV_END_DT
     to: mbiObsoleteDate
   - from: XREF_GRP_ID
-    to: crossReferenceGroupId
+    to: xrefGroupId
     transformer: LongString
   - from: XREF_SW
-    to: crossReferenceSwitch
+    to: xrefSwitch
   transformerClassName: gov.cms.bfd.model.rif.entities.BeneficiaryHistoryParser

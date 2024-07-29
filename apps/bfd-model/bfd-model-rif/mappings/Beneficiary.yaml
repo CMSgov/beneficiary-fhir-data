@@ -107,12 +107,12 @@ mappings:
       sqlType: varchar(11)
     - comment: Cross-reference Group ID
       dbName: xref_grp_id
-      name: crossReferenceGroupId
+      name: xrefGroupId
       sqlType: bigint
       javaType: Long
     - comment: Cross-reference Switch
       dbName: xref_sw
-      name: crossReferenceSwitch
+      name: xrefSwitch
       sqlType: char
       javaType: Character
     - comment: Date of Death
@@ -1219,10 +1219,10 @@ mappings:
   - from: MBI_NUM
     to: medicareBeneficiaryId
   - from: XREF_GRP_ID
-    to: crossReferenceGroupId
+    to: xrefGroupId
     transformer: LongString
   - from: XREF_SW
-    to: crossReferenceSwitch
+    to: xrefSwitch
   - from: DEATH_DT
     to: beneficiaryDateOfDeath
   - defaultValue: '0'

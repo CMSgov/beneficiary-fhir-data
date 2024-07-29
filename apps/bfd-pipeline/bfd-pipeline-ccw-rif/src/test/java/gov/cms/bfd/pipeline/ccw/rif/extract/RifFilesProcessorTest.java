@@ -127,8 +127,8 @@ public final class RifFilesProcessorTest {
     assertEquals(beneRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     assertEquals(123456L, beneRow.getBeneficiaryId());
-    assertEquals(1, beneRow.getCrossReferenceGroupId().get());
-    assertEquals('N', beneRow.getCrossReferenceSwitch().get());
+    assertEquals(1, beneRow.getXrefGroupId().get());
+    assertEquals('N', beneRow.getXrefSwitch().get());
   }
 
   /**
