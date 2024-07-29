@@ -92,9 +92,6 @@ jobs:
         id: run-pytest-set
         run: |
             echo "Testing ${{ matrix.projects.projectRoot }}"
-            # create virtual environment for each DIR and execute tests
-            # python -m venv venv
-            # source venv/bin/activate
             pip install --upgrade pip
             pip install -r ${{ github.workspace }}/${{ matrix.projects.projectRoot }}/requirements.txt 
             pip install pytest
