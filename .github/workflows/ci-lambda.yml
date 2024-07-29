@@ -59,11 +59,9 @@ jobs:
 
       - name: Define Managed Project Roots
         id: define-proj-list
-        uses: jsdaniell/create-json@v1.2.3
-        with:
-          name: ${{ env.PRJCONFIGFN }}
-          dir: "${{ runner.temp }}/"
-          json: '[ { "projectName": "sftp-outbound-transfer-lambda", "projectRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", "testsRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", "pythonVersion": "3.12" }, { "projectName": "update-pipeline-slis-lambda", "projectRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", "testsRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", "pythonVersion": "3.11" } ]'
+        run: |
+            PROJCFG_FN=${{ runner.temp }}/${{ env.PRJCONFIGFN }}
+            echo '[ { "projectName": "sftp-outbound-transfer-lambda", "projectRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", "testsRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", "pythonVersion": "3.12" }, { "projectName": "update-pipeline-slis-lambda", "projectRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", "testsRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", "pythonVersion": "3.11" } ]' > ${PROJCFG_FN}
 
       - name: Match Changed Folder List to Project Roots
         id: match-proj-deltas
