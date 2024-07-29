@@ -517,7 +517,10 @@ public final class RifLoaderIT {
     }
   }
 
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_B} and {@link
+   * StaticRifResourceGroup#SAMPLE_C} data.
+   */
   @Test
   public void loadSamplesWithXref() {
     loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
