@@ -82,6 +82,11 @@ jobs:
         projects: ${{ fromJSON(needs.python-check.outputs.MATRIX) }}
 
     steps:
+      - name: Checkout code
+        id: code-checkout
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 2
       - name: Setup Python Tests for affected folders
         id: install-pytest-set
         uses: actions/setup-python@v5.1.1
