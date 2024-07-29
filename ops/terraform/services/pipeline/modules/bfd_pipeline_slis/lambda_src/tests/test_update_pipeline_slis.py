@@ -19,9 +19,12 @@ from dynamo_db import (
     put_load_available_event,
     put_rif_available_event,
 )
-from update_pipeline_slis import _is_incoming_folder_empty  # type: ignore
-from update_pipeline_slis import _is_pipeline_load_complete  # type: ignore
-from update_pipeline_slis import handler
+from update_pipeline_slis import (
+    _handle_s3_event,
+    _is_incoming_folder_empty,  # type: ignore
+    _is_pipeline_load_complete,  # type: ignore
+    handler,
+)
 
 DEFAULT_MOCK_GROUP_ISO_STR = "2024-01-12T00:00:00Z"
 DEFAULT_MOCK_EVENT_TIME_ISO = "2024-01-19T00:00:00Z"
@@ -39,6 +42,7 @@ DEFAULT_MOCK_LOAD_AVAIL_TBL = "mock-load-available-tbl"
 MODULE_UNDER_TEST = "update_pipeline_slis"
 IS_INCOMING_FOLDER_EMPTY_PATCH_PATH = f"{MODULE_UNDER_TEST}.{_is_incoming_folder_empty.__name__}"
 IS_PIPEILNE_LOAD_COMPLETE_PATCH_PATH = f"{MODULE_UNDER_TEST}.{_is_pipeline_load_complete.__name__}"
+HANDLE_S3_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{_handle_s3_event.__name__}"
 PUT_METRIC_DATA_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_metric_data.__name__}"
 PUT_RIF_AVAILABLE_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_rif_available_event.__name__}"
 PUT_LOAD_AVAILABLE_EVENT_PATCH_PATH = f"{MODULE_UNDER_TEST}.{put_load_available_event.__name__}"
@@ -51,7 +55,7 @@ mock_lambda_context = mock.Mock()
 
 
 def generate_event(
-    key: str,
+    key: str = f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt",
     event_time_iso: str = DEFAULT_MOCK_EVENT_TIME_ISO,
     event_name: str = DEFAULT_MOCK_EVENT_NAME,
 ) -> dict[str, Any]:
@@ -122,12 +126,6 @@ class TestUpdatePipelineSlisHandler:
             ({"Records": [{"Sns": {"Message": '{"Records":""}'}}]}, ValueError),
             ({"Records": [{"Sns": {"Message": '{"Records":[{}]}'}}]}, KeyError),
             (
-                generate_event(
-                    key=f"Incoming/{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt", event_name="invalid"
-                ),
-                ValueError,
-            ),
-            (
                 {
                     "Records": [{
                         "Sns": {
@@ -170,6 +168,24 @@ class TestUpdatePipelineSlisHandler:
         with pytest.raises(expected_error):
             handler(event=event, context=mock_lambda_context)
 
+    @mock.patch(HANDLE_S3_EVENT_PATCH_PATH, autospec=True)
+    def test_it_fails_if_s3_event_name_is_unknown(
+        self, mock_handle_s3_event: mock.Mock, caplog: pytest.LogCaptureFixture
+    ):
+        # Arrange
+        invalid_s3_event = "invalid"
+
+        # Act
+        with caplog.at_level(logging.WARNING):
+            handler(
+                event=generate_event(event_name=invalid_s3_event),
+                context=mock_lambda_context,
+            )
+
+        # Assert
+        assert f"Unsupported S3 event type: {invalid_s3_event}" in caplog.text
+        assert mock_handle_s3_event.call_count == 0
+
     def test_it_fails_if_key_not_incoming_or_done(self, caplog: pytest.LogCaptureFixture):
         # Arrange
         invalid_key = f"{DEFAULT_MOCK_GROUP_ISO_STR}/bene_1234.txt"
@@ -197,6 +213,17 @@ class TestUpdatePipelineSlisHandler:
 
         # Assert
         assert "ETL file or path does not match expected format" in caplog.text
+
+    @mock.patch(HANDLE_S3_EVENT_PATCH_PATH, autospec=True)
+    def test_it_handles_s3_event_if_valid_s3_event_type(self, mock_handle_s3_event: mock.Mock):
+        # Arrange
+        valid_s3_event = "ObjectCreated"
+
+        # Act
+        handler(event=generate_event(event_name=valid_s3_event), context=mock_lambda_context)
+
+        # Assert
+        assert mock_handle_s3_event.call_count == 1
 
     @mock.patch(PUT_METRIC_DATA_PATCH_PATH, autospec=True)
     @mock.patch(PUT_RIF_AVAILABLE_EVENT_PATCH_PATH, autospec=True)
