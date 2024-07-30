@@ -8,8 +8,6 @@ on:
       - '**/*requirement*.txt'
 
   merge_group:
-    branches:
-      - master
 
 env:
   BASE_COMMIT: ""
