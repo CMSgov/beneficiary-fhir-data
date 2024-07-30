@@ -491,21 +491,12 @@ public class SpringConfiguration {
 
   /**
    * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
-   *
-   * @param includeFakeOrgName if true, the {@link NPIOrgLookup} will include a fake org name for
-   *     testing purposes.
    * @return the {@link NPIOrgLookup} for the application.
    * @throws IOException if there is an error accessing the resource
    */
   @Bean
-  public NPIOrgLookup npiOrgLookup(
-      @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":false}") Boolean includeFakeOrgName)
-      throws IOException {
-    if (includeFakeOrgName) {
-      return new NPIOrgLookup();
-    } else {
+  public NPIOrgLookup npiOrgLookup() throws IOException {
       return NPIOrgLookup.createNpiOrgLookup();
-    }
   }
 
   /**

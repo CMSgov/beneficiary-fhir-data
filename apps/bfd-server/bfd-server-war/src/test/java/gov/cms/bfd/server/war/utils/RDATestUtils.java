@@ -18,6 +18,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -717,10 +718,14 @@ public class RDATestUtils {
         .when(NPIOrgLookup::createNpiOrgLookup)
         .thenAnswer(
             i -> {
-              HashMap<String, String> npiOrgMap = new HashMap<>();
-              npiOrgMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
-              return new NPIOrgLookup(npiOrgMap);
+              StringBuilder initialString = new StringBuilder();
+              InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
+              NPIOrgLookup mockInstance = new NPIOrgLookup(npiDataStream);
+              mockInstance.npiOrgHashMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+              return mockInstance;
+
             });
+
     return npiOrgLookup;
   }
 }

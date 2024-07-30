@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +25,15 @@ public class NPIOrgLookupTest {
   /** Setup Before Each test method. */
   @BeforeEach
   void setup() throws IOException {
-    npiOrgDataLookup = new NPIOrgLookup();
+    StringBuilder initialString = new StringBuilder();
+    InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
+    npiOrgDataLookup = new NPIOrgLookup(npiDataStream);
     npiOrgDisplay = Optional.empty();
+
+    Map<String, String> npiOrgHashMap = new HashMap<>();
+    npiOrgHashMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+
+    npiOrgDataLookup.npiOrgHashMap = npiOrgHashMap;
   }
 
   /** Return Fake NPI Org. */
