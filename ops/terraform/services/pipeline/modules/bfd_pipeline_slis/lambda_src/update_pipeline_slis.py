@@ -476,7 +476,11 @@ def handler(event: dict[Any, Any], context: LambdaContext):
                 ).replace(tzinfo=timezone.utc)
                 s3_object_key = unquote(s3_record.s3.get_object.key)
                 s3_event_name = s3_record.event_name
-                s3_event_type = S3EventType.from_event_name(s3_event_name)
+                try:
+                    s3_event_type = S3EventType.from_event_name(s3_event_name)
+                except ValueError:
+                    logger.warning(f"Unsupported S3 event type: {s3_event_name}")
+                    continue
 
                 # Append to all future logs information about the S3 Event
                 logger.append_keys(
