@@ -491,12 +491,13 @@ public class SpringConfiguration {
 
   /**
    * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
+   *
    * @return the {@link NPIOrgLookup} for the application.
    * @throws IOException if there is an error accessing the resource
    */
   @Bean
   public NPIOrgLookup npiOrgLookup() throws IOException {
-      return NPIOrgLookup.createNpiOrgLookup();
+    return NPIOrgLookup.createNpiOrgLookup();
   }
 
   /**

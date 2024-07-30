@@ -715,16 +715,16 @@ public class RDATestUtils {
   public static @NotNull MockedStatic<NPIOrgLookup> mockNPIOrgLookup() {
     MockedStatic<NPIOrgLookup> npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
     npiOrgLookup
-        .when(NPIOrgLookup::createNpiOrgLookup)
-        .thenAnswer(
-            i -> {
-              StringBuilder initialString = new StringBuilder();
-              InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
-              NPIOrgLookup mockInstance = new NPIOrgLookup(npiDataStream);
-              mockInstance.npiOrgHashMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
-              return mockInstance;
+            .when(NPIOrgLookup::createNpiOrgLookup)
+            .thenAnswer(
+                    i -> {
+                      StringBuilder initialString = new StringBuilder();
+                      InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
+                      NPIOrgLookup mockInstance = new NPIOrgLookup(npiDataStream);
+                      mockInstance.npiOrgHashMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+                      return mockInstance;
 
-            });
+                    });
 
     return npiOrgLookup;
   }

@@ -22,7 +22,9 @@ public class NPIOrgLookupTest {
   /** Global variable for npiOrgDisplay. */
   Optional<String> npiOrgDisplay;
 
-  /** Setup Before Each test method. */
+  /**
+   * Setup Before Each test method.
+   */
   @BeforeEach
   void setup() throws IOException {
     StringBuilder initialString = new StringBuilder();
