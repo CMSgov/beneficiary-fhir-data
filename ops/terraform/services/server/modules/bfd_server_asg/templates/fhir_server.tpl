@@ -70,5 +70,6 @@ chmod 0644 /etc/profile.d/set-bfd-login-env.sh
 bash /usr/local/bin/permit-user-access "${seed_env}"
 
 # Disable the JVM's indefinite DNS caching to aid in proper RDS node selection per-connection
+# See https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/jvm-ttl-dns.html
 mkdir -p "$JAVA_HOME/conf/security"
 echo "networkaddress.cache.ttl=5" > "$JAVA_HOME/conf/security/java.security"
