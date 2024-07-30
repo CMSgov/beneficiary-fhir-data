@@ -2,7 +2,6 @@ name: CI - Python
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
     paths:
       - '**/*.py'
       - '**/*requirement*.txt'
