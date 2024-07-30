@@ -22,19 +22,13 @@ public class NPIOrgLookupTest {
   /** Global variable for npiOrgDisplay. */
   Optional<String> npiOrgDisplay;
 
-  /**
-   * A fake npi number.
-   */
+  /** A fake npi number. */
   public static final String FAKE_NPI_NUMBER = "0000000000";
 
-  /**
-   * A fake org name display that is associated with the FAKE_NPI_ORG_NAME.
-   */
+  /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
 
-  /**
-   * Setup Before Each test method.
-   */
+  /** Setup Before Each test method. */
   @BeforeEach
   void setup() throws IOException {
     InputStream npiDataStream = new ByteArrayInputStream("".getBytes());
@@ -50,16 +44,14 @@ public class NPIOrgLookupTest {
   /** Return Fake NPI Org. */
   @Test
   public void shouldReturnFakeOrgData() throws IOException {
-    npiOrgDisplay =
-            npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_NPI_NUMBER));
+    npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_NPI_NUMBER));
     assertNotEquals(null, npiOrgDisplay.get());
   }
 
   /** Return Fake NPI Org Name. */
   @Test
   public void shouldReturnFakeNPIOrgName() throws IOException {
-    npiOrgDisplay =
-            npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_NPI_NUMBER));
+    npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_NPI_NUMBER));
     assertEquals(FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
   }
 
@@ -83,15 +75,12 @@ public class NPIOrgLookupTest {
    */
   @Test
   public void shouldReturnMapWhenInputStreamIsFormattedCorrectly() throws IOException {
-    String initialString = FAKE_NPI_NUMBER +
-            "\t" +
-            FAKE_NPI_ORG_NAME;
+    String initialString = FAKE_NPI_NUMBER + "\t" + FAKE_NPI_ORG_NAME;
 
     InputStream targetStream = new ByteArrayInputStream(initialString.getBytes());
     Map<String, String> npiOrgMap = npiOrgDataLookup.readNPIOrgDataStream(targetStream);
     assertFalse(isNullOrEmptyMap(npiOrgMap));
-    assertEquals(
-            FAKE_NPI_ORG_NAME, npiOrgMap.get(FAKE_NPI_NUMBER));
+    assertEquals(FAKE_NPI_ORG_NAME, npiOrgMap.get(FAKE_NPI_NUMBER));
   }
 
   /**

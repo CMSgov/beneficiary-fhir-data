@@ -82,14 +82,10 @@ public class RDATestUtils {
   /** The entity manager. */
   private EntityManager entityManager;
 
-  /**
-   * A fake npi number.
-   */
+  /** A fake npi number. */
   public static final String FAKE_NPI_NUMBER = "0000000000";
 
-  /**
-   * A fake org name display that is associated with the FAKE_NPI_ORG_NAME.
-   */
+  /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
 
   /** Initializes the test utility. */
@@ -725,15 +721,14 @@ public class RDATestUtils {
   public static @NotNull MockedStatic<NPIOrgLookup> mockNPIOrgLookup() {
     MockedStatic<NPIOrgLookup> npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
     npiOrgLookup
-            .when(NPIOrgLookup::createNpiOrgLookup)
-            .thenAnswer(
-                    i -> {
-                      InputStream npiDataStream = new ByteArrayInputStream("".getBytes());
-                      NPIOrgLookup mockInstance = new NPIOrgLookup(npiDataStream);
-                      mockInstance.npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
-                      return mockInstance;
-
-                    });
+        .when(NPIOrgLookup::createNpiOrgLookup)
+        .thenAnswer(
+            i -> {
+              InputStream npiDataStream = new ByteArrayInputStream("".getBytes());
+              NPIOrgLookup mockInstance = new NPIOrgLookup(npiDataStream);
+              mockInstance.npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
+              return mockInstance;
+            });
 
     return npiOrgLookup;
   }
