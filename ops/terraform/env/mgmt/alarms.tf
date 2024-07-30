@@ -1,10 +1,7 @@
 locals {
   victor_ops_url                    = local.sensitive_common_config["victor_ops_url"]
   ec2_failing_instances_runbook_url = local.sensitive_common_config["alarm_ec2_failing_instances_runbook_url"]
-
-  ## TODO BFD-3553 replace SSM parameter with new Runbook URL parameter+value
   ec2_instance_script_failing_start_runbook_url = local.sensitive_common_config["alarm_ec2_instance_script_failing_start_runbook_url"]
-  ##
 
   cloudwatch_sns_topic_policy_spec  = <<-EOF
 {
