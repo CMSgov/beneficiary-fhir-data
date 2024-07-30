@@ -55,6 +55,11 @@ locals {
   rds_iam_database_authentication_enabled = local.nonsensitive_config["rds_iam_database_authentication_enabled"]
   rds_instance_class                      = local.nonsensitive_config["rds_instance_class"]
   rds_instance_count                      = local.nonsensitive_config["rds_instance_count"]
+  rds_scaling_min_instances               = local.nonsensitive_config["rds_scaling_min_instances"]
+  rds_scaling_max_instances               = local.nonsensitive_config["rds_scaling_max_instances"]
+  rds_scaling_cpu_target                  = local.nonsensitive_config["rds_scaling_cpu_target"]
+  rds_scale_in_cooldown                   = local.nonsensitive_config["rds_scale_in_cooldown"]
+  rds_scale_out_cooldown                  = local.nonsensitive_config["rds_scale_out_cooldown"]
   rds_master_password                     = lookup(local.sensitive_config, "rds_master_password", null)
   rds_master_username                     = lookup(local.nonsensitive_config, "rds_master_username", null)
   rds_snapshot_identifier                 = lookup(local.nonsensitive_config, "rds_snapshot_identifier", null)
