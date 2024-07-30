@@ -76,7 +76,7 @@ jobs:
     strategy:
       matrix:
         projects: ${{ fromJSON(needs.python-check.outputs.MATRIX) }}
-
+      fail-fast: false
     steps:
       - name: Checkout code
         id: code-checkout
