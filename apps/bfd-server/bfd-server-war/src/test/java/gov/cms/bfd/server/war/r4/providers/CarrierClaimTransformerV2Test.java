@@ -813,7 +813,7 @@ public class CarrierClaimTransformerV2Test {
             "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
             "primary",
             "Primary provider");
-    compare4.getProvider().setDisplay(NPIOrgLookup.FAKE_NPI_ORG_NAME);
+    compare4.getProvider().setDisplay(RDATestUtils.FAKE_NPI_ORG_NAME);
 
     assertTrue(compare4.equalsDeep(member4));
 
@@ -1513,7 +1513,7 @@ public class CarrierClaimTransformerV2Test {
             .findAny()
             .orElse(null);
     assertEquals("primary", careTeamEntry.getRole().getCoding().get(0).getCode());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
     assertEquals(
         "npi", careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getCode());
     assertEquals(

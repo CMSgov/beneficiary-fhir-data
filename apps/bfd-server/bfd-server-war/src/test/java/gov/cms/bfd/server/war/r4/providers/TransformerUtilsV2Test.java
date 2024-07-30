@@ -239,8 +239,8 @@ public class TransformerUtilsV2Test {
 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
-        Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER),
-        Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME),
+        Optional.of(RDATestUtils.FAKE_NPI_NUMBER),
+        Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME),
         ' ',
         ' ',
         Optional.empty(),
@@ -265,10 +265,10 @@ public class TransformerUtilsV2Test {
     Organization org = (Organization) organization.get();
     Optional<Identifier> identifier =
         org.getIdentifier().stream()
-            .filter(i -> i.getValue().equals(NPIOrgLookup.FAKE_NPI_NUMBER))
+            .filter(i -> i.getValue().equals(RDATestUtils.FAKE_NPI_NUMBER))
             .findFirst();
-    assertEquals(NPIOrgLookup.FAKE_NPI_NUMBER, identifier.get().getValue());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, org.getName());
+    assertEquals(RDATestUtils.FAKE_NPI_NUMBER, identifier.get().getValue());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, org.getName());
   }
 
   /**
@@ -321,8 +321,8 @@ public class TransformerUtilsV2Test {
 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
-        Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER),
-        Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME),
+        Optional.of(RDATestUtils.FAKE_NPI_NUMBER),
+        Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME),
         ' ',
         ' ',
         Optional.empty(),
@@ -343,7 +343,7 @@ public class TransformerUtilsV2Test {
     Organization actualEobContainedOrganizationResource = (Organization) eob.getContained().get(0);
     assertEquals("provider-org", actualEobContainedOrganizationResource.getId());
     assertEquals(true, actualEobContainedOrganizationResource.getActive());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, actualEobContainedOrganizationResource.getName());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, actualEobContainedOrganizationResource.getName());
     assertTrue(
         actualEobContainedOrganizationResource.getIdentifier().stream()
             .filter(s -> s.getSystem().equals(TransformerConstants.CODING_NPI_US))
@@ -781,12 +781,12 @@ public class TransformerUtilsV2Test {
     C4BBClaimProfessionalAndNonClinicianCareTeamRole role =
         C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY;
     String id = "123";
-    Optional<String> npiOrgDisplay = Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME);
+    Optional<String> npiOrgDisplay = Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME);
 
     CareTeamComponent careTeamEntry =
         TransformerUtilsV2.addCareTeamMemberWithNpiOrg(eob, item, type, role, id, npiOrgDisplay);
     assertEquals("primary", careTeamEntry.getRole().getCoding().get(0).getCode());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
     assertEquals(id, careTeamEntry.getProvider().getIdentifier().getValue());
     assertEquals(
         "npi", careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getCode());

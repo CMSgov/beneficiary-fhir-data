@@ -31,6 +31,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -72,7 +74,7 @@ public final class CarrierClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
-        .thenReturn(Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME));
+            .thenReturn(Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME));
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 

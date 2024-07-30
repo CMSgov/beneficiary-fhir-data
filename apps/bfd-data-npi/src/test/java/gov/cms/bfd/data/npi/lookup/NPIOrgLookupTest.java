@@ -23,17 +23,26 @@ public class NPIOrgLookupTest {
   Optional<String> npiOrgDisplay;
 
   /**
+   * A fake npi number.
+   */
+  public static final String FAKE_NPI_NUMBER = "0000000000";
+
+  /**
+   * A fake org name display that is associated with the FAKE_NPI_ORG_NAME.
+   */
+  public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
+
+  /**
    * Setup Before Each test method.
    */
   @BeforeEach
   void setup() throws IOException {
-    StringBuilder initialString = new StringBuilder();
-    InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
+    InputStream npiDataStream = new ByteArrayInputStream("".getBytes());
     npiOrgDataLookup = new NPIOrgLookup(npiDataStream);
     npiOrgDisplay = Optional.empty();
 
     Map<String, String> npiOrgHashMap = new HashMap<>();
-    npiOrgHashMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+    npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
 
     npiOrgDataLookup.npiOrgHashMap = npiOrgHashMap;
   }
@@ -42,7 +51,7 @@ public class NPIOrgLookupTest {
   @Test
   public void shouldReturnFakeOrgData() throws IOException {
     npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
+            npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_NPI_NUMBER));
     assertNotEquals(null, npiOrgDisplay.get());
   }
 
@@ -50,22 +59,22 @@ public class NPIOrgLookupTest {
   @Test
   public void shouldReturnFakeNPIOrgName() throws IOException {
     npiOrgDisplay =
-        npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER));
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
+            npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_NPI_NUMBER));
+    assertEquals(FAKE_NPI_ORG_NAME, npiOrgDisplay.get());
   }
 
   /** Should not return Org Name and NPI Number is empty. */
   @Test
   public void shouldNotReturnWhenNPINumberIsEmpty() throws IOException {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.empty());
-    assertEquals(false, npiOrgDisplay.isPresent());
+    assertFalse(npiOrgDisplay.isPresent());
   }
 
   /** Should not return Org Name and NPI Number is empty string. */
   @Test
   public void shouldNotReturnWhenNPINumberIEmptyString() throws IOException {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(""));
-    assertEquals(false, npiOrgDisplay.isPresent());
+    assertFalse(npiOrgDisplay.isPresent());
   }
 
   /**
@@ -74,16 +83,15 @@ public class NPIOrgLookupTest {
    */
   @Test
   public void shouldReturnMapWhenInputStreamIsFormattedCorrectly() throws IOException {
-    StringBuilder initialString = new StringBuilder();
-    initialString.append(npiOrgDataLookup.FAKE_NPI_NUMBER);
-    initialString.append("\t");
-    initialString.append(npiOrgDataLookup.FAKE_NPI_ORG_NAME);
+    String initialString = FAKE_NPI_NUMBER +
+            "\t" +
+            FAKE_NPI_ORG_NAME;
 
-    InputStream targetStream = new ByteArrayInputStream(initialString.toString().getBytes());
+    InputStream targetStream = new ByteArrayInputStream(initialString.getBytes());
     Map<String, String> npiOrgMap = npiOrgDataLookup.readNPIOrgDataStream(targetStream);
     assertFalse(isNullOrEmptyMap(npiOrgMap));
     assertEquals(
-        npiOrgDataLookup.FAKE_NPI_ORG_NAME, npiOrgMap.get(npiOrgDataLookup.FAKE_NPI_NUMBER));
+            FAKE_NPI_ORG_NAME, npiOrgMap.get(FAKE_NPI_NUMBER));
   }
 
   /**

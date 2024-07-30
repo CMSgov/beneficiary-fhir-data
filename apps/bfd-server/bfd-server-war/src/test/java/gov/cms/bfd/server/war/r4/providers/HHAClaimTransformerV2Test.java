@@ -1193,9 +1193,9 @@ public class HHAClaimTransformerV2Test {
     Organization org = (Organization) organization.get();
     Optional<Identifier> identifier =
         org.getIdentifier().stream()
-            .filter(i -> i.getValue().equals(NPIOrgLookup.FAKE_NPI_NUMBER))
+                .filter(i -> i.getValue().equals(RDATestUtils.FAKE_NPI_NUMBER))
             .findFirst();
-    assertEquals(NPIOrgLookup.FAKE_NPI_NUMBER, identifier.get().getValue());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, org.getName());
+    assertEquals(RDATestUtils.FAKE_NPI_NUMBER, identifier.get().getValue());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, org.getName());
   }
 }

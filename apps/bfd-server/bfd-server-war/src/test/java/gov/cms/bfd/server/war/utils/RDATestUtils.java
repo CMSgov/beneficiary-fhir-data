@@ -82,6 +82,16 @@ public class RDATestUtils {
   /** The entity manager. */
   private EntityManager entityManager;
 
+  /**
+   * A fake npi number.
+   */
+  public static final String FAKE_NPI_NUMBER = "0000000000";
+
+  /**
+   * A fake org name display that is associated with the FAKE_NPI_ORG_NAME.
+   */
+  public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
+
   /** Initializes the test utility. */
   public void init() {
     final DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
@@ -718,10 +728,9 @@ public class RDATestUtils {
             .when(NPIOrgLookup::createNpiOrgLookup)
             .thenAnswer(
                     i -> {
-                      StringBuilder initialString = new StringBuilder();
-                      InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
+                      InputStream npiDataStream = new ByteArrayInputStream("".getBytes());
                       NPIOrgLookup mockInstance = new NPIOrgLookup(npiDataStream);
-                      mockInstance.npiOrgHashMap.put(NPIOrgLookup.FAKE_NPI_NUMBER, NPIOrgLookup.FAKE_NPI_ORG_NAME);
+                      mockInstance.npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
                       return mockInstance;
 
                     });
