@@ -63,7 +63,7 @@ config_path="${base_path}/${EKS_SSM_CONFIG_ROOT}"
 
 set_const_param \
   "5" \
-  "$config_path/nonsensitive/db/max_connections"
+  "$config_path/nonsensitive/db/hikari/max_pool_size"
 
 copy_param \
   "$base_path" "$config_path" /nonsensitive/sqs/queue_name \

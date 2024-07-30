@@ -118,7 +118,7 @@ set_const_secure_params \
   "jdbc:postgresql://${EKS_RDS_WRITER_ENDPOINT}:5432/fhirdb?logServerErrorDetail=false" "${base_config_path}/sensitive/db/url" \
 
 set_const_params \
-  "10" "${base_config_path}/nonsensitive/db/max_connections" \
+  "10" "${base_config_path}/nonsensitive/db/hikari/max_pool_size" \
   "true" "${base_config_path}/nonsensitive/pac/enabled" \
   "fiss,mcs" "${base_config_path}/nonsensitive/pac/claim_source_types" \
 

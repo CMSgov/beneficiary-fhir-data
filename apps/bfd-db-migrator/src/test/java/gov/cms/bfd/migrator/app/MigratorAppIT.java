@@ -381,7 +381,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
         AppConfiguration.SSM_PATH_DATABASE_USERNAME, dataSourceComponents.getUsername());
     environment.put(
         AppConfiguration.SSM_PATH_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    environment.put(AppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE, "2");
+    environment.put(AppConfiguration.SSM_PATH_DB_HIKARI_MAX_POOL_SIZE, "2");
 
     // add SQS related configuration settings
     environment.put(SSM_PATH_SQS_QUEUE_NAME, SQS_QUEUE_NAME);
