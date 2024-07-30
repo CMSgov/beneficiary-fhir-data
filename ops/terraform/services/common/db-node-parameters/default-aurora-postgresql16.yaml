@@ -32,3 +32,6 @@
 - apply_method: "pending-reboot"
   name: "shared_preload_libraries"
   value: "pg_stat_statements,auto_explain"
+- apply_method: "immediate"
+  name: "enable_seqscan"
+  value: "0"

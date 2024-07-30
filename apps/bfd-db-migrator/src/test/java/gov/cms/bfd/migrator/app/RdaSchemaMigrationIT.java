@@ -139,7 +139,7 @@ public class RdaSchemaMigrationIT {
         AppConfiguration.SSM_PATH_DATABASE_USERNAME, dataSourceComponents.getUsername());
     environment.put(
         AppConfiguration.SSM_PATH_DATABASE_PASSWORD, dataSourceComponents.getPassword());
-    environment.put(AppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE, "2");
+    environment.put(AppConfiguration.SSM_PATH_DB_HIKARI_MAX_POOL_SIZE, "2");
 
     return ConfigLoader.builder().addMap(environment.build()).build();
   }

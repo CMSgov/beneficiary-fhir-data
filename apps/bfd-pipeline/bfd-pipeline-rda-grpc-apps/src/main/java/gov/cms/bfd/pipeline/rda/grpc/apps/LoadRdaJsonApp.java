@@ -17,11 +17,10 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsHikariDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.File;
 import java.time.Clock;
@@ -97,9 +96,9 @@ public class LoadRdaJsonApp {
                 final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
                 final DatabaseOptions databaseConfig = config.createDatabaseOptions();
                 final AwsClientConfig awsClientConfig = config.createAwsClientConfig();
-                final DataSourceFactory dataSourceFactory =
+                final HikariDataSourceFactory dataSourceFactory =
                     databaseConfig.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS
-                        ? RdsDataSourceFactory.builder()
+                        ? RdsHikariDataSourceFactory.builder()
                             .awsClientConfig(awsClientConfig)
                             .databaseOptions(databaseConfig)
                             .build()
@@ -270,7 +269,7 @@ public class LoadRdaJsonApp {
           .databaseUrl(dbUrl)
           .databaseUsername(dbUser)
           .databasePassword(dbPassword)
-          .maxPoolSize(10)
+          .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(10).build())
           .build();
     }
 
