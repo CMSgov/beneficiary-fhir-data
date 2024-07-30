@@ -50,7 +50,10 @@ jobs:
         run: |
             echo "Testing ${{ matrix.projects.projectName }}"
             pip install --upgrade pip
-            pip install -r ${{ github.workspace }}/${{ matrix.projects.projectRoot }}/requirements.txt 
+            if [ -f ${{ github.workspace }}/${{ matrix.projects.projectRoot }}/requirements.txt ]
+            then
+              pip install -r ${{ github.workspace }}/${{ matrix.projects.projectRoot }}/requirements.txt 
+            fi
             pip install pytest
             cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
             pytest ${{ github.workspace }}/${{ matrix.projects.testsRoot }}
