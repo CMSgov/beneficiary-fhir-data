@@ -10,7 +10,6 @@ else:
     Topic = object
     SSMClient = object
 
-#dataclass GlobalSsmConfig
 @dataclass(frozen=True, eq=True)
 class GlobalSsmConfig:
     sftp_connect_timeout: int
