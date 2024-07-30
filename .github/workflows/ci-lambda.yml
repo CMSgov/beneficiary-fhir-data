@@ -12,68 +12,33 @@ on:
 env:
   BASE_COMMIT: ""
   GH_TOKEN: ${{ github.token }}
-  PRJCONFIGFN: "PRJLIST.json"
-
-##
-## PROJECT MATRIX REFERENCE:
-## [
-##  { projectName: "sftp-outbound-transfer-lambda", projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", pythonVersion: "3.12" },
-##  { projectName: "update-pipeline-slis-lambda", projectRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", testsRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", pythonVersion: "3.11" }
-## ]
 
 jobs:
   python-check:
     runs-on: ubuntu-latest
     outputs:
       jobstatus: ${{ join(steps.*.conclusion) }}
-      MATRIX: ${{ steps.match-proj-deltas.outputs.MATRIX }}
 
-    steps:
-      - name: Checkout code
-        id: code-checkout
-        uses: actions/checkout@v4
-        with:
-            fetch-depth: 2
-
-      - name: Get changed directory list as CSV with count
-        id: changed-dirs
-        uses: tj-actions/changed-files@v44
-        with:
-          dir_names: "true"
-          separator: ","
-              
-      - name: Capture Modified Folders with Count
-        id: validate-testworthy-changes
-        run: |
-            UNIQ_FOLDERS=${{ runner.temp }}/UNIQFLDR.txt
-            echo ${{ steps.changed-dirs.outputs.all_changed_files }} >> ${UNIQ_FOLDERS}
-            UNIQ64=$(cat ${UNIQ_FOLDERS}|base64)
-            echo "FOLDERLISTCSV=${UNIQ64}" >> $GITHUB_OUTPUT
-            echo "FOLDERCT=${{ steps.changed-dirs.outputs.all_changed_files_count }}"
-
-      - name: Define Managed Project Roots
-        id: define-proj-list
-        run: |
-            PROJCFG_FN=${{ runner.temp }}/${{ env.PRJCONFIGFN }}
-            echo '[ { "projectName": "sftp-outbound-transfer-lambda", "projectRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", "testsRoot": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", "pythonVersion": "3.12" }, { "projectName": "update-pipeline-slis-lambda", "projectRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", "testsRoot": "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", "pythonVersion": "3.11" } ]' > ${PROJCFG_FN}
-
-      - name: Match Changed Folder List to Project Roots
-        id: match-proj-deltas
-        run: |
-            PROJ_JSON="${{ runner.temp }}/${{ env.PRJCONFIGFN }}"
-            PROJ_ROOT_LIST=$(cat ${PROJ_JSON} | jq -c '[ .[]|.projectRoot ]')
-            FOLDERLISTCSV64=${{ steps.validate-testworthy-changes.outputs.FOLDERLISTCSV }}
-            FOLDERLISTJSON=$(echo ${FOLDERLISTCSV64}|base64 -d| awk '{ n=split($0,a,","); { for(i in a) printf "%s\n",a[i]; } }'|sort|uniq| jq --raw-input '.' | jq --slurp)
-            PROJECTMATCHJSON=$(echo ${FOLDERLISTJSON} | jq '.[]'|sed 's/"//g'|while read pathnm; do cat ${PROJ_JSON}| jq --arg match $pathnm '.[]|select(.projectRoot|startswith($match))'; done | jq '[.]')
-            echo "MATRIX="$PROJECTMATCHJSON >> $GITHUB_OUTPUT
-            
   matrix-pytest:
     runs-on: ubuntu-latest
     needs: python-check
-    if: ${{ !contains(needs.python-check.outputs.jobstatus, 'failure') }} 
     strategy:
       matrix:
-        projects: ${{ fromJSON(needs.python-check.outputs.MATRIX) }}
+        projects: 
+          [
+            { 
+              projectName: "sftp-outbound-transfer-lambda", 
+              projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", 
+              testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", 
+              pythonVersion: "3.12" 
+            },
+            { 
+              projectName: "update-pipeline-slis-lambda", 
+              projectRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", 
+              testsRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", 
+              pythonVersion: "3.11" 
+            }
+          ]
       fail-fast: false
     steps:
       - name: Checkout code
@@ -89,8 +54,9 @@ jobs:
       - name: Run Python Tests per project
         id: run-pytest-set
         run: |
-            echo "Testing ${{ matrix.projects.projectRoot }}"
+            echo "Testing ${{ matrix.projects.projectName }}"
             pip install --upgrade pip
             pip install -r ${{ github.workspace }}/${{ matrix.projects.projectRoot }}/requirements.txt 
             pip install pytest
-            pytest ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
+            cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
+            pytest ${{ github.workspace }}/${{ matrix.projects.testsRoot }}
