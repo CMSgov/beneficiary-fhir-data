@@ -3,7 +3,7 @@ locals {
   ec2_failing_instances_runbook_url = local.sensitive_common_config["alarm_ec2_failing_instances_runbook_url"]
 
   ## TODO BFD-3553 replace SSM parameter with new Runbook URL parameter+value
-  ec2_instance_script_failing_start_runbook_url = local.sensitive_common_config["alarm_ec2_failing_instances_runbook_url"]
+  ec2_instance_script_failing_start_runbook_url = local.sensitive_common_config["alarm_ec2_instance_script_failing_start_runbook_url"]
   ##
 
   cloudwatch_sns_topic_policy_spec  = <<-EOF
@@ -142,9 +142,8 @@ resource "aws_cloudwatch_metric_alarm" "ec2_init_fail" {
 
   actions_enabled = true
   alarm_description = join("", [
-    "At least 1 (see Alarm value for exact number) EC2 instance is failing startup steps.\n"
+    "At least 1 (see Alarm value for exact number) EC2 instance is failing startup steps.\n",
+    "See ${local.ec2_instance_script_failing_start_runbook_url} for instructions on resolving this alert."
   ])
-  ## TODO: BFD-3553 Introduce Runbook (page on WIKI, SSM Parameter value for URL)
-  ## "See ${local.ec2_instance_script_failing_start_runbook_url} for instructions on resolving this alert."
 }
 
