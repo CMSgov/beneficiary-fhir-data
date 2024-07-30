@@ -1,0 +1,5 @@
+boto3
+# This is a package maintained by Amazon that has some significant quality-of-life improvements with
+# respect to developing Lambda functions. It is not included in the default runtime, but Amazon
+# provides a Lambda Layer in all Regions that the update-pipeline-slis Lambda uses that includes it
+aws-lambda-powertools[all]
