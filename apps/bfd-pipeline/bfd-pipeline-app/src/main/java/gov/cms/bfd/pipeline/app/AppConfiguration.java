@@ -580,13 +580,13 @@ public final class AppConfiguration extends BaseAppConfiguration {
   static DatabaseOptions loadDatabaseOptions(ConfigLoader config, int loaderThreads) {
     DatabaseOptions databaseOptions = loadDatabaseOptions(config);
 
-    Optional<Integer> databaseMaxPoolSize = config.intOption(SSM_PATH_DATABASE_MAX_POOL_SIZE);
+    Optional<Integer> databaseMaxPoolSize = config.intOption(SSM_PATH_DB_HIKARI_MAX_POOL_SIZE);
 
     if (databaseMaxPoolSize.isPresent() && databaseMaxPoolSize.get() < 1) {
       throw new AppConfigurationException(
           String.format(
               "Invalid value for configuration environment variable '%s': '%s'",
-              SSM_PATH_DATABASE_MAX_POOL_SIZE, databaseMaxPoolSize));
+              SSM_PATH_DB_HIKARI_MAX_POOL_SIZE, databaseMaxPoolSize));
     }
 
     /*
@@ -597,7 +597,12 @@ public final class AppConfiguration extends BaseAppConfiguration {
       databaseMaxPoolSize = Optional.of(loaderThreads * 2);
     }
 
-    return databaseOptions.toBuilder().maxPoolSize(databaseMaxPoolSize.orElse(1)).build();
+    return databaseOptions.toBuilder()
+        .hikariOptions(
+            DatabaseOptions.HikariOptions.builder()
+                .maximumPoolSize(databaseMaxPoolSize.orElse(1))
+                .build())
+        .build();
   }
 
   /**

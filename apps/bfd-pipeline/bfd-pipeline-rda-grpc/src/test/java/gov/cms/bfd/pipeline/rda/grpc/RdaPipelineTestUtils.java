@@ -108,7 +108,7 @@ public class RdaPipelineTestUtils {
   /**
    * Creates a {@link HikariDataSource}, {@link PipelineApplicationState} and {@link
    * TransactionManager} using the shared containerized postgres DB, passes them to the provided
-   * lambda function, then truncates all of the RDA tables and closes the {@link HikariDataSource}.
+   * lambda function, then truncates all the RDA tables and closes the {@link HikariDataSource}.
    *
    * @param clock used for the app state
    * @param test lambda to receive the appState and perform some testing
@@ -123,7 +123,7 @@ public class RdaPipelineTestUtils {
             .databaseUrl(dataSourceComponents.getUrl())
             .databaseUsername(dataSourceComponents.getUsername())
             .databasePassword(dataSourceComponents.getPassword())
-            .maxPoolSize(10)
+            .hikariOptions(DatabaseOptions.HikariOptions.builder().maximumPoolSize(10).build())
             .build();
     try (HikariDataSource dataSource = new HikariDataSourceFactory(dbOptions).createDataSource();
         PipelineApplicationState appState =
