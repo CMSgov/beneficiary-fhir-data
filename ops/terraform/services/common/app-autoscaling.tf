@@ -1,6 +1,11 @@
+locals {
+  enable_rds_scheduled_scaling = !var.disable_rds_scheduling_override && (local.env == "test" || local.is_ephemeral_env)
+  replicas_scaling_target      = local.enable_rds_scheduled_scaling ? one(aws_appautoscaling_target.dynamic_replicas) : one(aws_appautoscaling_target.static_replicas)
+}
+
 resource "aws_appautoscaling_target" "dynamic_replicas" {
-  # only applicable for test environment or ephemeral environments
-  count = local.env == "test" || local.is_ephemeral_env ? 1 : 0
+  # only applicable for test environment or ephemeral environments unless override is specified
+  count = local.enable_rds_scheduled_scaling ? 1 : 0
 
   service_namespace  = "rds"
   scalable_dimension = "rds:cluster:ReadReplicaCount"
@@ -22,7 +27,7 @@ resource "aws_appautoscaling_target" "dynamic_replicas" {
 
 resource "aws_appautoscaling_target" "static_replicas" {
   # only applicable for prod/prod-sbx (not test or ephemeral)
-  count = local.env != "test" && !local.is_ephemeral_env ? 1 : 0
+  count = !local.enable_rds_scheduled_scaling ? 1 : 0
 
   service_namespace  = "rds"
   scalable_dimension = "rds:cluster:ReadReplicaCount"
@@ -30,10 +35,6 @@ resource "aws_appautoscaling_target" "static_replicas" {
 
   min_capacity = local.rds_min_reader_nodes
   max_capacity = local.rds_max_reader_nodes
-}
-
-locals {
-  replicas_scaling_target = local.env == "test" || local.is_ephemeral_env ? one(aws_appautoscaling_target.dynamic_replicas) : one(aws_appautoscaling_target.static_replicas)
 }
 
 resource "aws_appautoscaling_policy" "replicas_cpu_scaling" {
@@ -55,7 +56,7 @@ resource "aws_appautoscaling_policy" "replicas_cpu_scaling" {
 }
 
 resource "aws_appautoscaling_scheduled_action" "work_hours_scale_out" {
-  count = local.env == "test" || local.is_ephemeral_env ? 1 : 0
+  count = local.enable_rds_scheduled_scaling ? 1 : 0
 
   name               = "bfd-${local.env}-work-hours-scale-out"
   service_namespace  = local.replicas_scaling_target.namespace
@@ -73,7 +74,7 @@ resource "aws_appautoscaling_scheduled_action" "work_hours_scale_out" {
 }
 
 resource "aws_appautoscaling_scheduled_action" "off_hours_scale_in" {
-  count = local.env == "test" || local.is_ephemeral_env ? 1 : 0
+  count = local.enable_rds_scheduled_scaling ? 1 : 0
 
   name               = "bfd-${local.env}-off-hours-scale-in"
   service_namespace  = local.replicas_scaling_target.namespace
