@@ -1,29 +1,15 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_REGION;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_AUTH_TYPE;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_URL;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_USERNAME;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_APP_NAME;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_HOST;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_KEY;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_PATH;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_PERIOD;
-
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
-import com.google.common.base.Strings;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
@@ -36,22 +22,18 @@ import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
+import gov.cms.bfd.sharedutils.config.BaseConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
+import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
-import gov.cms.bfd.sharedutils.database.DatabaseOptions;
-import gov.cms.bfd.sharedutils.database.DatabaseUtils;
-import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.servlet.ServletContext;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,13 +56,12 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import software.amazon.awssdk.regions.Region;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
-public class SpringConfiguration {
+public class SpringConfiguration extends BaseConfiguration {
   /**
    * The {@link String } Boolean property that is used to enable the fake drug code (00000-0000)
    * that is used for integration testing. When this property is set to the string 'true', this fake
@@ -175,57 +156,30 @@ public class SpringConfiguration {
   /**
    * Creates an {@link AwsClientConfig} used for all AWS services.
    *
-   * @param awsRegionName optional region name
+   * @param configLoader used to look up configuration values
    * @return the config
    */
   @Bean
-  public AwsClientConfig awsClientConfig(
-      @Value("${" + ENV_VAR_AWS_REGION + ":}") String awsRegionName) {
-    Region region = Strings.isNullOrEmpty(awsRegionName) ? null : Region.of(awsRegionName);
-    return AwsClientConfig.awsBuilder().region(region).build();
+  public AwsClientConfig awsClientConfig(ConfigLoader configLoader) {
+    return loadAwsClientConfig(configLoader);
   }
 
   /**
    * Creates a factory to create {@link DataSource}s.
    *
-   * @param authTypeName whether to use RDS or JDBC authentication
-   * @param url the JDBC URL of the database for the application
-   * @param username the database username to use
-   * @param password the database password to use
-   * @param connectionsMaxText the maximum number of database connections to use
+   * @param configLoader used to look up configuration values
    * @param awsClientConfig common AWS settings
    * @return the factory
    */
   @Bean
   public DataSourceFactory dataSourceFactory(
-      @Value("${" + SSM_PATH_DATABASE_AUTH_TYPE + ":JDBC}") String authTypeName,
-      @Value("${" + SSM_PATH_DATABASE_URL + "}") String url,
-      @Value("${" + SSM_PATH_DATABASE_USERNAME + "}") String username,
-      @Value("${" + SSM_PATH_DATABASE_PASSWORD + ":}") String password,
-      @Value("${" + SSM_PATH_DATABASE_MAX_POOL_SIZE + ":-1}") String connectionsMaxText,
-      AwsClientConfig awsClientConfig) {
-    final var authType = DatabaseOptions.AuthenticationType.valueOf(authTypeName);
-    final int maxPoolSize = DatabaseUtils.computeMaximumPoolSize(connectionsMaxText);
-    final var databaseOptions =
-        DatabaseOptions.builder()
-            .authenticationType(authType)
-            .databaseUrl(url)
-            .databaseUsername(username)
-            .databasePassword(password)
-            .maxPoolSize(maxPoolSize)
-            .build();
-    if (databaseOptions.getAuthenticationType() == DatabaseOptions.AuthenticationType.RDS) {
-      return RdsDataSourceFactory.builder()
-          .awsClientConfig(awsClientConfig)
-          .databaseOptions(databaseOptions)
-          .build();
-    } else {
-      return new HikariDataSourceFactory(databaseOptions);
-    }
+      ConfigLoader configLoader, AwsClientConfig awsClientConfig) {
+    final var dbOptions = loadDatabaseOptions(configLoader);
+    return createDataSourceFactory(dbOptions, awsClientConfig);
   }
 
   /**
-   * Creates the application's database connection pool using a factory.
+   * Creates the application's database data source using a factory.
    *
    * @param dataSourceFactory factory used to create {@link DataSource}s
    * @param metricRegistry the {@link MetricRegistry} for the application
@@ -233,12 +187,10 @@ public class SpringConfiguration {
    */
   @Bean(destroyMethod = "close")
   public DataSource dataSource(DataSourceFactory dataSourceFactory, MetricRegistry metricRegistry) {
-
-    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
-    DatabaseUtils.configureDataSource(pooledDataSource, metricRegistry);
+    DataSource dataSource = dataSourceFactory.createDataSource(metricRegistry);
 
     // Wrap the pooled DataSource in a proxy that records performance data.
-    return ProxyDataSourceBuilder.create(pooledDataSource)
+    return ProxyDataSourceBuilder.create(dataSource)
         .name("BFD-Data")
         .listener(new QueryLoggingListener())
         .proxyResultSet()
@@ -415,45 +367,30 @@ public class SpringConfiguration {
     metricRegistry.registerAll(new MemoryUsageGaugeSet());
     metricRegistry.registerAll(new GarbageCollectorMetricSet());
 
-    String newRelicMetricKey = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_KEY, null);
-
-    if (newRelicMetricKey != null) {
-      String newRelicAppName = config.stringValue(SSM_PATH_NEW_RELIC_APP_NAME, null);
-      String newRelicMetricHost = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_HOST, null);
-      String newRelicMetricPath = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_PATH, null);
-      String rawNewRelicPeriod = config.stringValue(SSM_PATH_NEW_RELIC_METRIC_PERIOD, null);
-
-      int newRelicPeriod;
-      try {
-        newRelicPeriod = Integer.parseInt(rawNewRelicPeriod);
-      } catch (NumberFormatException ex) {
-        newRelicPeriod = 15;
-      }
-
-      String hostname;
-      try {
-        hostname = InetAddress.getLocalHost().getHostName();
-      } catch (UnknownHostException e) {
-        hostname = "unknown";
-      }
-
+    // TODO: Taken from MigratorApp; should be refactored to a shared location in BFD-1558
+    MetricOptions metricOptions = loadMetricOptions(config);
+    if (metricOptions.getNewRelicMetricKey().isPresent()) {
       SenderConfiguration configuration =
-          SenderConfiguration.builder(newRelicMetricHost, newRelicMetricPath)
+          SenderConfiguration.builder(
+                  metricOptions.getNewRelicMetricHost().orElse(null),
+                  metricOptions.getNewRelicMetricPath().orElse(null))
               .httpPoster(new OkHttpPoster())
-              .apiKey(newRelicMetricKey)
+              .apiKey(metricOptions.getNewRelicMetricKey().orElse(null))
               .build();
 
       MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
 
       Attributes commonAttributes =
-          new Attributes().put("host", hostname).put("appName", newRelicAppName);
+          new Attributes()
+              .put("host", metricOptions.getHostname().orElse("unknown"))
+              .put("appName", metricOptions.getNewRelicAppName().orElse(null));
 
       NewRelicReporter newRelicReporter =
           NewRelicReporter.build(metricRegistry, metricBatchSender)
               .commonAttributes(commonAttributes)
               .build();
 
-      newRelicReporter.start(newRelicPeriod, TimeUnit.SECONDS);
+      newRelicReporter.start(metricOptions.getNewRelicMetricPeriod().orElse(15), TimeUnit.SECONDS);
     }
 
     return metricRegistry;

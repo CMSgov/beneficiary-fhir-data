@@ -12,7 +12,48 @@ LOGS_DIR='{{ data_server_dir }}/'
 export BFD_DB_URL='{{ data_server_db_url }}'
 export BFD_DB_USERNAME='{{ data_server_db_username }}'
 export BFD_DB_PASSWORD='{{ data_server_db_password }}'
-export BFD_DB_MAX_CONNECTIONS='{{ data_server_db_connections_max }}'
+{% if db_data_source_type is defined %}
+export BFD_DB_DATA_SOURCE_TYPE='{{ db_data_source_type }}'
+{% endif %}
+{% if db_hikari_max_pool_size is defined %}
+export BFD_DB_HIKARI_MAX_POOL_SIZE='{{ db_hikari_max_pool_size }}'
+{% endif %}
+{% if db_hikari_min_idle_connections is defined %}
+export BFD_DB_HIKARI_MIN_IDLE_CONNECTIONS='{{ db_hikari_min_idle_connections }}'
+{% endif %}
+{% if db_hikari_idle_timeout_ms is defined %}
+export BFD_DB_HIKARI_IDLE_TIMEOUT_MS='{{ db_hikari_idle_timeout_ms }}'
+{% endif %}
+{% if db_hikari_init_fail_timeout_ms is defined %}
+export BFD_DB_HIKARI_INIT_FAIL_TIMEOUT_MS='{{ db_hikari_init_fail_timeout_ms }}'
+{% endif %}
+{% if db_hikari_connection_timeout_ms is defined %}
+export BFD_DB_HIKARI_CONNECTION_TIMEOUT_MS='{{ db_hikari_connection_timeout_ms }}'
+{% endif %}
+{% if db_hikari_keepalive_timeout_ms is defined %}
+export BFD_DB_HIKARI_KEEPALIVE_TIMEOUT_MS='{{ db_hikari_keepalive_timeout_ms }}'
+{% endif %}
+{% if db_hikari_validation_timeout_ms is defined %}
+export BFD_DB_HIKARI_VALIDATION_TIMEOUT_MS='{{ db_hikari_validation_timeout_ms }}'
+{% endif %}
+{% if db_hikari_max_connection_lifetime_ms is defined %}
+export BFD_DB_HIKARI_MAX_CONNECTION_LIFETIME_MS='{{ db_hikari_max_connection_lifetime_ms }}'
+{% endif %}
+{% if db_wrapper_use_custom_preset is defined %}
+export BFD_DB_WRAPPER_USE_CUSTOM_PRESET='{{ db_wrapper_use_custom_preset }}'
+{% endif %}
+{% if db_wrapper_base_preset is defined %}
+export BFD_DB_WRAPPER_BASE_PRESET='{{ db_wrapper_base_preset }}'
+{% endif %}
+{% if db_wrapper_plugins_csv is defined %}
+export BFD_DB_WRAPPER_PLUGINS_CSV='{{ db_wrapper_plugins_csv }}'
+{% endif %}
+{% if db_wrapper_host_selection_strategy is defined %}
+export BFD_DB_WRAPPER_HOST_SELECTION_STRATEGY='{{ db_wrapper_host_selection_strategy }}'
+{% endif %}
+{% if db_wrapper_init_connection_strategy is defined %}
+export BFD_DB_WRAPPER_INIT_CONNECTION_STRATEGY='{{ db_wrapper_init_connection_strategy }}'
+{% endif %}
 export BFD_PAC_ENABLED='{{ pac_resources_enabled }}'
 export BFD_PAC_CLAIM_SOURCE_TYPES='{{ pac_claim_source_types }}'
 
