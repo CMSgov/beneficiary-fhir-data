@@ -116,8 +116,7 @@ resource "aws_db_parameter_group" "aurora_cluster" {
   }
 }
 
-resource "aws_rds_cluster_instance" "nodes" {
-  count                           = local.rds_instance_count
+resource "aws_rds_cluster_instance" "writer" {
   auto_minor_version_upgrade      = true
   ca_cert_identifier              = "rds-ca-rsa4096-g1"
   cluster_identifier              = aws_rds_cluster.aurora_cluster.id
@@ -126,7 +125,7 @@ resource "aws_rds_cluster_instance" "nodes" {
   db_parameter_group_name         = aws_rds_cluster.aurora_cluster.db_instance_parameter_group_name
   engine                          = aws_rds_cluster.aurora_cluster.engine
   engine_version                  = aws_rds_cluster.aurora_cluster.engine_version
-  identifier                      = "${aws_rds_cluster.aurora_cluster.id}-node-${count.index}"
+  identifier                      = "${aws_rds_cluster.aurora_cluster.id}-writer-node"
   instance_class                  = local.rds_instance_class
   monitoring_interval             = 15
   monitoring_role_arn             = data.aws_iam_role.monitoring.arn
@@ -135,41 +134,4 @@ resource "aws_rds_cluster_instance" "nodes" {
   preferred_maintenance_window    = aws_rds_cluster.aurora_cluster.preferred_maintenance_window
   publicly_accessible             = false
   tags                            = { Layer = "data" }
-}
-
-### The following configuration is almost exlcusively for separated, custom reader endpoints
-### supporting development of synthea data
-locals {
-  # declare a reader_nodes collection for nodes that aren't currently identified as a writer
-  reader_nodes = [for node in aws_rds_cluster_instance.nodes : node if !node.writer]
-}
-
-# This is the general reader endpoint in production
-resource "aws_rds_cluster_endpoint" "readers" {
-  # Create the separate endpoint for prod clusters
-  count = local.env == "prod" ? 1 : 0
-
-  cluster_identifier          = aws_rds_cluster.aurora_cluster.id
-  cluster_endpoint_identifier = "bfd-${local.env}-ro"
-  custom_endpoint_type        = "READER"
-
-  # EXCLUDED_MEMBERS assigns ALL but the last reader to the custom endpoint
-  excluded_members = [
-    element(local.reader_nodes, length(local.reader_nodes) - 1).id
-  ]
-}
-
-# This is the reserved synthea reader endpoint in production
-resource "aws_rds_cluster_endpoint" "beta_reader" {
-  # Create the separate endpoint for prod clusters
-  count = local.env == "prod" ? 1 : 0
-
-  cluster_identifier          = aws_rds_cluster.aurora_cluster.id
-  cluster_endpoint_identifier = "bfd-${local.env}-beta-reader"
-  custom_endpoint_type        = "READER"
-
-  # STATIC_MEMBERS assigns just the last reader node to the custom endpoint
-  static_members = [
-    element(local.reader_nodes, length(local.reader_nodes) - 1).id
-  ]
 }
