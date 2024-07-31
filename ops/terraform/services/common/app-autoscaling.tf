@@ -4,6 +4,10 @@ locals {
 }
 
 resource "aws_appautoscaling_target" "dynamic_replicas" {
+  # All app autoscaling resources need to be applied after the writer exists or read replicas will
+  # not automatically be created if the min_capacity is not satisfied
+  depends_on = [aws_rds_cluster_instance.writer]
+
   # only applicable for test environment or ephemeral environments unless override is specified
   count = local.enable_rds_scheduled_scaling ? 1 : 0
 
@@ -26,6 +30,8 @@ resource "aws_appautoscaling_target" "dynamic_replicas" {
 }
 
 resource "aws_appautoscaling_target" "static_replicas" {
+  depends_on = [aws_rds_cluster_instance.writer]
+
   # only applicable for prod/prod-sbx (not test or ephemeral)
   count = !local.enable_rds_scheduled_scaling ? 1 : 0
 
@@ -38,8 +44,10 @@ resource "aws_appautoscaling_target" "static_replicas" {
 }
 
 resource "aws_appautoscaling_policy" "replicas_cpu_scaling" {
+  depends_on = [aws_rds_cluster_instance.writer]
+
   name               = "bfd-${local.env}-cpu-scaling"
-  service_namespace  = local.replicas_scaling_target.namespace
+  service_namespace  = local.replicas_scaling_target.service_namespace
   resource_id        = local.replicas_scaling_target.resource_id
   scalable_dimension = local.replicas_scaling_target.scalable_dimension
   policy_type        = "TargetTrackingScaling"
@@ -56,10 +64,12 @@ resource "aws_appautoscaling_policy" "replicas_cpu_scaling" {
 }
 
 resource "aws_appautoscaling_scheduled_action" "work_hours_scale_out" {
+  depends_on = [aws_rds_cluster_instance.writer]
+
   count = local.enable_rds_scheduled_scaling ? 1 : 0
 
   name               = "bfd-${local.env}-work-hours-scale-out"
-  service_namespace  = local.replicas_scaling_target.namespace
+  service_namespace  = local.replicas_scaling_target.service_namespace
   resource_id        = local.replicas_scaling_target.resource_id
   scalable_dimension = local.replicas_scaling_target.scalable_dimension
   schedule           = "cron(00 07 ? * MON-FRI *)"
@@ -74,10 +84,12 @@ resource "aws_appautoscaling_scheduled_action" "work_hours_scale_out" {
 }
 
 resource "aws_appautoscaling_scheduled_action" "off_hours_scale_in" {
+  depends_on = [aws_rds_cluster_instance.writer]
+
   count = local.enable_rds_scheduled_scaling ? 1 : 0
 
   name               = "bfd-${local.env}-off-hours-scale-in"
-  service_namespace  = local.replicas_scaling_target.namespace
+  service_namespace  = local.replicas_scaling_target.service_namespace
   resource_id        = local.replicas_scaling_target.resource_id
   scalable_dimension = local.replicas_scaling_target.scalable_dimension
   schedule           = "cron(00 19 ? * MON-FRI *)"
