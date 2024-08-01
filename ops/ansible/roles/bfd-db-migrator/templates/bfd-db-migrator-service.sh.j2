@@ -11,7 +11,7 @@
 {{ '#' if db_password_override|default('', true)|length<1 else '' }}export BFD_DB_PASSWORD='{{ db_password_override|default('', true) }}'
 {{ '#' if db_username_override|default('', true)|length<1 else '' }}export BFD_DB_USERNAME='{{ db_username_override|default('', true) }}'
 {{ '#' if db_auth_type_override|default('', true)|length<1 else '' }}export BFD_DB_AUTH_TYPE='{{ db_auth_type_override|default('', true) }}'
-{{ '#' if db_max_connections_override|default('', true)|length<1 else '' }}export BFD_DB_MAX_CONNECTIONS='{{ db_max_connections_override|default('', true) }}'
+{{ '#' if db_max_connections_override|default('', true)|length<1 else '' }}export BFD_DB_HIKARI_MAX_POOL_SIZE='{{ db_max_connections_override|default('', true) }}'
 
 {{ '#' if new_relic_metrics_license_key_override|default('', true)|length<1 else '' }}export BFD_NEW_RELIC_METRICS_LICENSE_KEY='{{ new_relic_metrics_license_key_override|default('', true) }}'
 {{ '#' if new_relic_metrics_host_override|default('', true)|length<1 else '' }}export BFD_NEW_RELIC_METRICS_HOST='{{ new_relic_metrics_host_override|default('', true) }}'

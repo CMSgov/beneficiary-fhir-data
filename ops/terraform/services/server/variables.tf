@@ -6,7 +6,7 @@ variable "ami_id_override" {
 
 variable "jdbc_suffix" {
   default     = "?logServerErrorDetail=false"
-  description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
+  description = "Suffix added to the Database JDBC URL to set various JDBC parameters"
   type        = string
 }
 

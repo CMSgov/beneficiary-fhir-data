@@ -36,7 +36,7 @@ import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.events.DoNothingEventPublisher;
 import gov.cms.bfd.sharedutils.events.EventPublisher;
 import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
@@ -188,7 +188,7 @@ public final class PipelineApplication {
     configureMetrics(metricOptions, configLoader, appMeters, appMetrics);
 
     // Create a pooled data source for use by any registered jobs.
-    final DataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
+    final HikariDataSourceFactory dataSourceFactory = appConfig.createHikariDataSourceFactory();
     try (HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics)) {
       logDatabaseDetails(pooledDataSource);

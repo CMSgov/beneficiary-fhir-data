@@ -15,10 +15,9 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
-import gov.cms.bfd.sharedutils.database.RdsDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.RdsHikariDataSourceFactory;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.annotation.Nullable;
 import java.io.File;
@@ -71,9 +70,9 @@ public class DirectRdaLoadApp {
     final DatabaseOptions databaseConfig =
         readDatabaseOptions(options, jobConfig.getJobConfig().getWriteThreads());
     final AwsClientConfig awsClientConfig = readAwsClientConfig(options);
-    final DataSourceFactory dataSourceFactory =
+    final HikariDataSourceFactory dataSourceFactory =
         awsClientConfig != null
-            ? RdsDataSourceFactory.builder()
+            ? RdsHikariDataSourceFactory.builder()
                 .awsClientConfig(awsClientConfig)
                 .databaseOptions(databaseConfig)
                 .build()
@@ -139,7 +138,11 @@ public class DirectRdaLoadApp {
         .databaseUrl(options.stringValue("database.url"))
         .databaseUsername(options.stringValue("database.user"))
         .databasePassword(options.stringValue("database.password", ""))
-        .maxPoolSize(options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)))
+        .hikariOptions(
+            DatabaseOptions.HikariOptions.builder()
+                .maximumPoolSize(
+                    options.intValue("database.maxConnections", Math.max(10, 5 * threadCount)))
+                .build())
         .build();
   }
 
