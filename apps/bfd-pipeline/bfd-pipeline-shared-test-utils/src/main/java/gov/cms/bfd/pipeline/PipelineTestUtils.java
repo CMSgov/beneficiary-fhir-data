@@ -64,8 +64,8 @@ import org.slf4j.LoggerFactory;
 public final class PipelineTestUtils {
   /**
    * A reasonable (though not terribly performant) suggested default value for {@link
-   * DatabaseOptions#getMaxPoolSize()}. Effectively, it's double the default value that will be used
-   * in tests for <code>LoadAppOptions#getLoaderThreads()</code>.
+   * DatabaseOptions.HikariOptions#maximumPoolSize}. Effectively, it's double the default value that
+   * will be used in tests for <code>LoadAppOptions#getLoaderThreads()</code>.
    */
   private static final int DEFAULT_MAX_POOL_SIZE =
       Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2 * 2;

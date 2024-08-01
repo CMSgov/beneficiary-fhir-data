@@ -17,8 +17,8 @@ import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
 import gov.cms.bfd.sharedutils.config.MetricOptions;
-import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
 import gov.cms.bfd.sharedutils.sqs.SqsDao;
 import gov.cms.bfd.sharedutils.sqs.SqsEventPublisher;
@@ -120,7 +120,7 @@ public final class MigratorApp {
     final MigratorProgressTracker progressTracker = createProgressTracker(appConfig);
     progressTracker.appStarted();
 
-    final DataSourceFactory dataSourceFactory = appConfig.createDataSourceFactory();
+    final HikariDataSourceFactory dataSourceFactory = appConfig.createHikariDataSourceFactory();
     final MetricRegistry appMetrics = setupMetrics(appConfig);
     createOrUpdateSchema(
         dataSourceFactory,
@@ -142,7 +142,7 @@ public final class MigratorApp {
    * @throws FatalAppException to report an error that should terminate the application
    */
   private void validateSchema(
-      DataSourceFactory dataSourceFactory,
+      HikariDataSourceFactory dataSourceFactory,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
       throws FatalAppException {
@@ -173,7 +173,7 @@ public final class MigratorApp {
    * @throws FatalAppException to report an error that should terminate the application
    */
   private void createOrUpdateSchema(
-      DataSourceFactory dataSourceFactory,
+      HikariDataSourceFactory dataSourceFactory,
       String flywayScriptLocationOverride,
       MigratorProgressTracker progressTracker,
       MetricRegistry appMetrics)
@@ -294,17 +294,16 @@ public final class MigratorApp {
    *
    * <p>TODO: BFD-1558 Move to shared location for pipeline + this app
    *
-   * @param dataSourceFactory the {@link DataSourceFactory} to use to create a {@link
+   * @param dataSourceFactory the {@link HikariDataSourceFactory} to use to create a {@link
    *     HikariDataSource}
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
   private HikariDataSource createPooledDataSource(
-      DataSourceFactory dataSourceFactory, MetricRegistry metrics) {
-    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource();
+      HikariDataSourceFactory dataSourceFactory, MetricRegistry metrics) {
+    HikariDataSource pooledDataSource = dataSourceFactory.createDataSource(metrics);
     // we know that flyway requires at least two connections so override the value if it's 1
     pooledDataSource.setMaximumPoolSize(Math.max(2, pooledDataSource.getMaximumPoolSize()));
-    pooledDataSource.setMetricRegistry(metrics);
     return pooledDataSource;
   }
 }

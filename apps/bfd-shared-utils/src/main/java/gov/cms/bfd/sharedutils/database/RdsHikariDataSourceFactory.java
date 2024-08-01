@@ -1,5 +1,6 @@
 package gov.cms.bfd.sharedutils.database;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
@@ -8,6 +9,7 @@ import jakarta.annotation.Nullable;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.Properties;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,11 +18,12 @@ import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.RdsClientBuilder;
 
 /**
- * Implementation of {@link DataSourceFactory} that creates instances of {@link HikariDataSource}
- * objects that use temporary auth tokens requested from RDS instead of a fixed password. {@see
+ * Implementation of {@link HikariDataSourceFactory} that creates instances of {@link
+ * HikariDataSource} objects that use temporary auth tokens requested from RDS instead of a fixed
+ * password. {@see
  * https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html}.
  */
-public class RdsDataSourceFactory extends HikariDataSourceFactory {
+public class RdsHikariDataSourceFactory extends HikariDataSourceFactory {
   /**
    * A short delay between token requests so that constructing a new thread pool doesn't need to
    * trigger hundreds of token requests at the same time. According to the AWS documentation a token
@@ -46,7 +49,7 @@ public class RdsDataSourceFactory extends HikariDataSourceFactory {
    * @param databaseOptions used to configure {@link RdsHikariDataSource} instances
    */
   @Builder
-  private RdsDataSourceFactory(
+  private RdsHikariDataSourceFactory(
       @Nullable Clock clock,
       @Nullable Long tokenTtlMillis,
       @Nonnull AwsClientConfig awsClientConfig,
@@ -63,31 +66,35 @@ public class RdsDataSourceFactory extends HikariDataSourceFactory {
     configBuilder.databaseHost(
         databaseOptions
             .getDatabaseHost()
-            .orElseThrow(RdsDataSourceFactory::reportInvalidDatabaseOptions));
+            .orElseThrow(RdsHikariDataSourceFactory::reportInvalidDatabaseOptions));
     configBuilder.databasePort(
         databaseOptions
             .getDatabasePort()
-            .orElseThrow(RdsDataSourceFactory::reportInvalidDatabaseOptions));
+            .orElseThrow(RdsHikariDataSourceFactory::reportInvalidDatabaseOptions));
     this.awsClientConfig = awsClientConfig;
     dataSourceConfig = configBuilder.build();
   }
 
-  /**
-   * Constructs a {@link RdsHikariDataSource} instance.
-   *
-   * @return the data source
-   */
   @Override
-  public HikariDataSource createDataSource() {
-    RdsClientBuilder rdsClientBuilder = createRdsClientBuilder();
+  public RdsHikariDataSource createDataSource(
+      Properties properties, MetricRegistry metricRegistry) {
+    final var rdsClient = getRdsClient();
+    // the dataSource will take care of closing this when its close method is called
+    final var dataSource = createRdsHikariDataSource(rdsClient);
+    configureDataSource(dataSource, properties, metricRegistry);
+    return dataSource;
+  }
+
+  /**
+   * Creates a {@link RdsClient}.
+   *
+   * @return the RDS client
+   */
+  private RdsClient getRdsClient() {
+    final var rdsClientBuilder = createRdsClientBuilder();
     awsClientConfig.configureAwsService(rdsClientBuilder);
     rdsClientBuilder.credentialsProvider(DefaultCredentialsProvider.create());
-    var rdsClient = rdsClientBuilder.build();
-
-    // the dataSource will take care of closing this when its close method is called
-    RdsHikariDataSource dataSource = createRdsHikariDataSource(rdsClient);
-    configureDataSource(dataSource);
-    return dataSource;
+    return rdsClientBuilder.build();
   }
 
   /**
