@@ -221,6 +221,35 @@ public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link RifFilesProcessor} can correctly handle {@link
+   * StaticRifResource#SAMPLE_B_BENEFICIARY_HISTORY}.
+   */
+  @Test
+  public void processBeneficiaryHistoryRecord_SAMPLE_B() {
+    RifFilesEvent filesEvent =
+        new RifFilesEvent(
+            Instant.now(), false, StaticRifResource.SAMPLE_B_BENEFICIARY_HISTORY.toRifFile());
+    RifFilesProcessor processor = new RifFilesProcessor();
+    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
+    List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collectList().block();
+
+    assertEquals(
+        StaticRifResource.SAMPLE_B_BENEFICIARY_HISTORY.getRecordCount(), rifEventsList.size());
+
+    RifRecordEvent<?> rifRecordEvent0 = rifEventsList.get(0);
+    assertEquals(
+        StaticRifResource.SAMPLE_B_BENEFICIARY_HISTORY.getRifFileType(),
+        rifRecordEvent0.getFileEvent().getFile().getFileType());
+    assertNotNull(rifRecordEvent0.getRecord());
+    assertInstanceOf(BeneficiaryHistory.class, rifRecordEvent0.getRecord());
+    BeneficiaryHistory beneficiaryHistory0 = (BeneficiaryHistory) rifRecordEvent0.getRecord();
+    assertEquals(beneficiaryHistory0.getBeneficiaryId(), rifRecordEvent0.getBeneficiaryId());
+    assertEquals(RecordAction.INSERT, rifRecordEvent0.getRecordAction());
+    assertEquals(1, beneficiaryHistory0.getXrefGroupId().get());
+    assertEquals('N', beneficiaryHistory0.getXrefSwitch().get());
+  }
+
+  /**
+   * Ensures that {@link RifFilesProcessor} can correctly handle {@link
    * StaticRifResource#SAMPLE_A_PDE}.
    */
   @Test
