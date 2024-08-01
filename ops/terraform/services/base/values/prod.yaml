@@ -111,7 +111,7 @@
 /bfd/${env}/common/nonsensitive/rds_security_group: bfd-prod-aurora-cluster
 /bfd/${env}/common/nonsensitive/rds_min_reader_nodes: 1
 /bfd/${env}/common/nonsensitive/rds_max_reader_nodes: 3
-/bfd/${env}/common/nonsensitive/rds_scaling_cpu_target: 75
+/bfd/${env}/common/nonsensitive/rds_scaling_cpu_target: 50
 /bfd/${env}/common/nonsensitive/rds_scale_in_cooldown: 300
 /bfd/${env}/common/nonsensitive/rds_scale_out_cooldown: 300
 /bfd/${env}/common/nonsensitive/vpc_name: bfd-prod-vpc
