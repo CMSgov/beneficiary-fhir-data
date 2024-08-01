@@ -1,17 +1,5 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_REGION;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_AUTH_TYPE;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_URL;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_USERNAME;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_APP_NAME;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_HOST;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_KEY;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_PATH;
-import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_PERIOD;
-
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
@@ -49,17 +37,6 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.servlet.ServletContext;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -75,6 +52,31 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import software.amazon.awssdk.regions.Region;
+
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.ENV_VAR_AWS_REGION;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_AUTH_TYPE;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_MAX_POOL_SIZE;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_URL;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_DATABASE_USERNAME;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_APP_NAME;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_HOST;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_KEY;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_PATH;
+import static gov.cms.bfd.sharedutils.config.BaseAppConfiguration.SSM_PATH_NEW_RELIC_METRIC_PERIOD;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
@@ -496,8 +498,15 @@ public class SpringConfiguration {
    * @throws IOException if there is an error accessing the resource
    */
   @Bean
-  public NPIOrgLookup npiOrgLookup() throws IOException {
-    return NPIOrgLookup.createNpiOrgLookup();
+  public NPIOrgLookup npiOrgLookup(
+          @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":false}") String fakeOrgFile)
+          throws IOException {
+    if (fakeOrgFile!= null) {
+      InputStream npiDataStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fakeOrgFile);
+      return new NPIOrgLookup(npiDataStream);
+      } else {
+      return NPIOrgLookup.createNpiOrgLookup();
+    }                                                                                                     
   }
 
   /**
