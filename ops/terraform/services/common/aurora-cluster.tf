@@ -82,6 +82,20 @@ resource "aws_rds_cluster" "aurora_cluster" {
     data.aws_security_group.tools.id,
     data.aws_security_group.vpn.id,
   ]
+
+  # Autoscaled reader nodes are not managed by Terraform and Terraform is unable to destroy a
+  # cluster with nodes still within it. To support simply running "terraform destroy" in
+  # environments with autoscaling enabled, a helper script is used that will automatically mark all
+  # autoscaled nodes for deletion and wait for them to be deleted before exiting. This runs only on
+  # destroy
+  provisioner "local-exec" {
+    when        = destroy
+    command     = "${path.module}/scripts/destroy-autoscaled-nodes.sh"
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      DB_CLUSTER_ID = self.cluster_identifier
+    }
+  }
 }
 
 resource "aws_rds_cluster_parameter_group" "aurora_cluster" {
