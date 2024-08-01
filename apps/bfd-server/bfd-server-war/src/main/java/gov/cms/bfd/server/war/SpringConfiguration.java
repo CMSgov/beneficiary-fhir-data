@@ -35,8 +35,6 @@ import jakarta.persistence.PersistenceUnit;
 import jakarta.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -432,13 +430,14 @@ public class SpringConfiguration extends BaseConfiguration {
   /**
    * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
    *
+   * @param fakeOrgFile file name for fake org data. If not null, it will load the test data
    * @return the {@link NPIOrgLookup} for the application.
    * @throws IOException if there is an error accessing the resource
    */
   @Bean
   public NPIOrgLookup npiOrgLookup(
-      @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":false}") String fakeOrgFile) throws IOException {
-    if (fakeOrgFile != null) {
+      @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":}") String fakeOrgFile) throws IOException {
+    if (fakeOrgFile != null && !fakeOrgFile.isEmpty()) {
       InputStream npiDataStream =
           Thread.currentThread().getContextClassLoader().getResourceAsStream(fakeOrgFile);
       return new NPIOrgLookup(npiDataStream);
