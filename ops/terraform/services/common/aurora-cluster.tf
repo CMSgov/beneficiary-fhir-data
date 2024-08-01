@@ -93,8 +93,11 @@ resource "aws_rds_cluster" "aurora_cluster" {
     command     = "${path.module}/scripts/destroy-autoscaled-nodes.sh"
     interpreter = ["/bin/bash", "-c"]
     environment = {
-      DB_CLUSTER_ID   = self.cluster_identifier
-      BFD_ENVIRONMENT = local.env
+      DB_CLUSTER_ID = self.cluster_identifier
+      # This may seem strange, but provisioners can only refer to properties of the resource which
+      # local.env is not. Fortunately, the "stack" tag _is_ the name of the current environment, so
+      # we can use that to pass the environment to the script
+      BFD_ENVIRONMENT = self.tags.stack
     }
   }
 }
