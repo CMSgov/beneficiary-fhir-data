@@ -125,6 +125,8 @@ final class CoverageTransformerV2 {
     createCoverageClass(
         coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
 
+    addSubscribedParts(beneficiary, coverage);
+
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
     // update Coverage.meta.lastUpdated
@@ -949,6 +951,44 @@ final class CoverageTransformerV2 {
             .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
             .setAssigner(new Reference(organization));
     coverage.addIdentifier(identifier);
+  }
+
+  /**
+   * Denotes which parts the beneficiary is subscribed to on the provided {@link Coverage} resource.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @param coverage The {@link Coverage} to Coverage details
+   */
+  private void addSubscribedParts(Beneficiary beneficiary, Coverage coverage) {
+    if (beneficiary.getPartACoverageStartDate().isPresent()) {
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_A,
+          Optional.empty());
+    }
+    if (beneficiary.getPartBCoverageStartDate().isPresent()) {
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_B,
+          Optional.empty());
+    }
+    if (beneficiary.getHmoCoverageCount().isPresent()
+        && beneficiary.getHmoCoverageCount().get().compareTo(BigDecimal.ZERO) > 0) {
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_C,
+          Optional.empty());
+    }
+    if (beneficiary.getPartDCoverageStartDate().isPresent()) {
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_D,
+          Optional.empty());
+    }
   }
 
   /**

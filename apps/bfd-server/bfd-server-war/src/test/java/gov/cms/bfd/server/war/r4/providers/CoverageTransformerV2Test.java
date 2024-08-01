@@ -28,6 +28,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -158,12 +159,41 @@ public final class CoverageTransformerV2Test {
   /** Standalone wrapper to output C4DIC. */
   @Test
   public void outputTransformCoverageC4Dic() throws FHIRException {
-    String partD = "c4dic-567834";
+    String c4dicId = "c4dic-567834";
     transformCoverage(MedicareSegment.C4DIC, true);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
-    assertEquals(partD, coverage.getIdPart());
+    assertEquals(c4dicId, coverage.getIdPart());
     verifyMetrics("c4dic");
+    List<String> plans = Arrays.asList("Part A", "Part B", "Part C", "Part D");
+
+    List<String> actualPlans =
+        coverage.getClass_().stream()
+            .filter(
+                classComponent ->
+                    classComponent.getType().getCodingFirstRep().getCode().equals("plan"))
+            .map(
+                classComponent -> {
+                  String plan = classComponent.getValue();
+                  assertTrue(plans.contains(plan));
+                  return plan;
+                })
+            .toList();
+    assertEquals(plans.size(), actualPlans.size());
+    assertEquals(Coverage.CoverageStatus.ACTIVE, coverage.getStatus());
+    assertEquals("Patient/567834", coverage.getSubscriber().getReference());
+    assertNotNull(coverage.getPeriod().getStart());
+    String mbiIdentifier =
+        coverage.getIdentifier().getFirst().getType().getCodingFirstRep().getCode();
+    assertEquals("MB", mbiIdentifier);
+
+    List<Extension> extensions = coverage.getExtension();
+    Set<String> actualColors =
+        extensions.stream()
+            .map(extension -> extension.getValue().toString())
+            .collect(Collectors.toSet());
+    Set<String> expectedColors = Set.of("#F4FEFF", "#092E86", "#3B9BFB");
+    assertEquals(expectedColors, actualColors);
   }
 
   // ==================
