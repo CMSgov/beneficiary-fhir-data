@@ -93,7 +93,8 @@ resource "aws_rds_cluster" "aurora_cluster" {
     command     = "${path.module}/scripts/destroy-autoscaled-nodes.sh"
     interpreter = ["/bin/bash", "-c"]
     environment = {
-      DB_CLUSTER_ID = self.cluster_identifier
+      DB_CLUSTER_ID   = self.cluster_identifier
+      BFD_ENVIRONMENT = local.env
     }
   }
 }

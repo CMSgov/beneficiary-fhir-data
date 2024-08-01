@@ -2,9 +2,27 @@
 # Terraform helper script called as a local-exec provisioner at destroy-time of the Aurora cluster
 # resource. This script will enumerate the autoscaled reader nodes within the given Aurora cluster
 # (provided by environment variable $DB_CLUSTER_ID), mark them all for deletion, and then wait
-# indefinitely for all nodes to be successfully deleted.
+# indefinitely for all nodes to be successfully deleted. This script is intended to run ONLY in
+# ephemeral environments and will immediately fail if it is run in an established environment.
+# Environment variables:
+#   DB_CLUSTER_ID: The cluster identifier of the ephemeral database cluster that is being destroyed
+# . BFD_ENVIRONMENT: The name of the environment that this script is being run against
 
 set -euo pipefail
+
+# Ensure that the BFD_ENVIRONMENT environment var is specified and not empty
+trimmed_bfd_env="$(echo "$BFD_ENVIRONMENT" | tr -d '[:space:]')"
+if [[ -z $trimmed_bfd_env ]]; then
+  echo "BFD_ENVIRONMENT must not be an empty string or whitespace"
+  exit 1
+fi
+
+# Ensure that whatever environment this script is running in is NOT an established environment. We
+# never want to destroy nodes in our established environments
+if [[ $trimmed_bfd_env == "prod" || $trimmed_bfd_env == "prod-sbx" || $trimmed_bfd_env == "test" ]]; then
+  echo "Cannot destroy nodes in established environment $BFD_ENVIRONMENT"
+  exit 1
+fi
 
 # Be _extra_ careful about the cluster ID given by the $DB_CLUSTER_ID environment variable.
 # Specifically, remove all whitespace (which is invalid for a cluster ID) and ensure that the
