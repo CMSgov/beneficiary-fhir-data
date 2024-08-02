@@ -40,7 +40,7 @@ fi
 # marked for deletion. Additionally, we select for only the nodes with names containing
 # "autoscaling" to avoid possibly deleting the writer node which is managed by Terraform directly
 nodes_in_cluster="$(
-  aws rds describe-db-clusters --db-cluster-identifier "$trimmed_cluster_id" |
+  aws rds describe-db-clusters --db-cluster-identifier "$trimmed_cluster_id" --output json |
     jq -r '.DBClusters[0].DBClusterMembers[].DBInstanceIdentifier | select(. | contains("autoscaling"))'
 )"
 
@@ -54,7 +54,7 @@ for node in $nodes_in_cluster; do
   # stderr is redirected to /dev/null to ensure that if there are any errors this variable is empty
   # and no operation is done
   instance_details_json="$(
-    aws rds describe-db-instances --db-instance-identifier "$node" 2>/dev/null || echo ""
+    aws rds describe-db-instances --db-instance-identifier "$node" --output json 2>/dev/null || echo ""
   )"
 
   # If the instance is empty, then don't do anything
@@ -70,7 +70,7 @@ for node in $nodes_in_cluster; do
   if [[ $instance_status != "deleting" ]]; then
     echo "Marking $node for deletion"
     # Redirect stdout to /dev/null as the JSON response is unnecessary
-    aws rds delete-db-instance --db-instance-identifier "$node" > /dev/null
+    aws rds delete-db-instance --db-instance-identifier "$node" >/dev/null
   fi
 done
 
@@ -82,7 +82,7 @@ while true; do
   deleting_nodes=0
   for node in $nodes_in_cluster; do
     instance_details_json="$(
-      aws rds describe-db-instances --db-instance-identifier "$node" 2>/dev/null || echo ""
+      aws rds describe-db-instances --db-instance-identifier "$node" --output json 2>/dev/null || echo ""
     )"
 
     # If the instance is empty, then don't do anything
