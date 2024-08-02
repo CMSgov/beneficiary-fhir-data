@@ -17,6 +17,17 @@ locals {
   prod_sbx_kms_key_id     = aws_kms_key.data_keys["prod-sbx"].arn
   prod_kms_key_id         = aws_kms_key.data_keys["prod"].arn
 
+  # BFD-3520
+  log_groups = {
+    cloudinit_out = "/aws/ec2/var/log/cloud-init-output.log"
+  }
+  init_fail_pattern     = "%failed=[1-9]%"
+  this_metric_namespace = "bfd-${local.env}/ec2"
+  init_fail_filter_name = "bfd-${local.env}/ec2/init-count/fail"
+  init_fail_metric_name = "cloudinit/count/fail"
+  init_fail_alarm_name  = "bfd-${local.env}-cloud-init-failure"
+  #
+
   all_kms_config_key_arns = flatten(
     [
       for v in concat(
