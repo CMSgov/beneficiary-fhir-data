@@ -1,11 +1,12 @@
 /*
- * This script will remove all beneficiaries
+ * This script will remove all beneficiaries and their associated data that were created during a specific pipeline load.
+ * This is useful for testing a pipeline load in an ephemeral environment.
  */
 
 begin transaction;
 
--- s3 prefix should look something like Synthetic/Incoming/2024-07-30T20:07:46Z% (note the wildcard a the end)
-create temp table s3_prefix(prefix) as values('Synthetic/Incoming/2024-07-30T20:07:46Z%');
+-- set the s3 prefix to clean up, it should look something like Synthetic/Incoming/2024-07-30T20:07:46Z% (note the wildcard a the end)
+create temp table s3_prefix(prefix) as values(s3_prefix);
 create temp table benes_to_remove (bene_id bigint primary key);
 
 insert into benes_to_remove(bene_id)
