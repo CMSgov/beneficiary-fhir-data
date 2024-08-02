@@ -71,6 +71,12 @@ public final class DataSetMoveTask implements Callable<Void> {
           String.format("%s/%s", manifest.getManifestKeyIncomingLocation(), s3KeySuffixToMove);
       targetKey = String.format("%s/%s", manifest.getManifestKeyDoneLocation(), s3KeySuffixToMove);
 
+      LOGGER.info(
+          "Copying {}/{} to {}/{}",
+          options.getS3BucketName(),
+          sourceKey,
+          options.getS3BucketName(),
+          targetKey);
       s3TaskManager
           .getS3Dao()
           .copyObject(options.getS3BucketName(), sourceKey, options.getS3BucketName(), targetKey);
