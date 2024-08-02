@@ -41,6 +41,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -2177,8 +2178,7 @@ final class TransformerTestUtils {
    */
   static void assertFDADrugCodeDisplayEquals(
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaDrugCodeDisplayLookup();
     String nationalDrugCodeDisplayValueActual =
         drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(nationalDrugCode));
     assertEquals(

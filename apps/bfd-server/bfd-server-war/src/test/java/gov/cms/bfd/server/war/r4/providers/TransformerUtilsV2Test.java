@@ -81,21 +81,16 @@ public class TransformerUtilsV2Test {
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
-
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
   @AfterEach
   public void after() {
     npiOrgLookup.close();
-    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -951,8 +946,7 @@ public class TransformerUtilsV2Test {
     dmeClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new DMEClaimTransformerV2(
-            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+        new DMEClaimTransformerV2(new MetricRegistry(), new FdaDrugCodeDisplayLookup());
     genEob = claimTransformerInterface.transform(dmeClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);

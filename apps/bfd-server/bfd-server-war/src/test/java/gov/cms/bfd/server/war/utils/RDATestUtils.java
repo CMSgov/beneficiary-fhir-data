@@ -27,7 +27,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,6 +86,12 @@ public class RDATestUtils {
 
   /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
+
+  /** A fake drug code used for testing. */
+  public static final String FAKE_DRUG_CODE = "00000-0000";
+
+  /** A fake drug code display that is associated with the FAKE_DRUG_CODE. */
+  public static final String FAKE_DRUG_CODE_DISPLAY = "Fake Diluent - WATER";
 
   /** Initializes the test utility. */
   public void init() {
@@ -693,23 +698,15 @@ public class RDATestUtils {
   }
 
   /**
-   * Mocks an FdaDrugCodeDisplayLookup object.
+   * // * Mocks an FdaDrugCodeDisplayLookup object. // * // * @return mocked
+   * FdaDrugCodeDisplayLookup //
    *
    * @return mocked FdaDrugCodeDisplayLookup
    */
-  public static @NotNull MockedStatic<FdaDrugCodeDisplayLookup> mockFdaDrugCodeDisplayLookup() {
-    MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup =
-        Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
-    fdaDrugCodeDisplayLookup
-        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
-        .thenAnswer(
-            i -> {
-              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
-              fdaDrugCodeMap.put(
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
-              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
-            });
+  public static @NotNull FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup() {
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup();
+
+    fdaDrugCodeDisplayLookup.ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
     return fdaDrugCodeDisplayLookup;
   }
 

@@ -100,22 +100,17 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   /** The NPI org lookup to use for the test. */
   private static MockedStatic<NPIOrgLookup> npiOrgLookup;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
-
   /** Sets up the test. */
   @BeforeEach
   public void setup() {
     samhsaMatcherV2 = new R4EobSamhsaMatcher();
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
   @AfterEach
   public void after() {
     npiOrgLookup.close();
-    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -126,8 +121,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public static Stream<Arguments> data() throws IOException {
     // Load and transform the various claim types for testing
 
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup();
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
     DMEClaimTransformerV2 dmeClaimTransformerV2 =

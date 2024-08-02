@@ -11,8 +11,7 @@ public class FDADrugCodeDisplayLookupIT {
   /** Verifies a real drug code display. */
   @Test
   public void verifiedRealDrugCode() {
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup();
     String fdaCodeDisplay =
         fdaDrugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of("804250039"));
     assertEquals("Celecoxib - CELECOXIB", fdaCodeDisplay);

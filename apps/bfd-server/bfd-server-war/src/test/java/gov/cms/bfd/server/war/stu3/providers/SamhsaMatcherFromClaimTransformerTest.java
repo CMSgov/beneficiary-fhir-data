@@ -94,22 +94,17 @@ public class SamhsaMatcherFromClaimTransformerTest {
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
-
   /** Sets up the test. */
   @BeforeEach
   public void setup() {
     samhsaMatcher = new Stu3EobSamhsaMatcher();
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
   @AfterEach
   public void after() {
     npiOrgLookup.close();
-    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -134,8 +129,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
 
     claimTransformerInterface =
-        new DMEClaimTransformer(
-            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+        new DMEClaimTransformer(new MetricRegistry(), new FdaDrugCodeDisplayLookup());
     ExplanationOfBenefit dmeEob =
         claimTransformerInterface.transform(getClaim(DMEClaim.class), false);
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
@@ -157,16 +151,13 @@ public class SamhsaMatcherFromClaimTransformerTest {
 
     claimTransformerInterface =
         new CarrierClaimTransformer(
-            new MetricRegistry(),
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            localNpiLookup);
+            new MetricRegistry(), new FdaDrugCodeDisplayLookup(), localNpiLookup);
     ExplanationOfBenefit carrierEob =
         claimTransformerInterface.transform(getClaim(CarrierClaim.class), false);
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
 
     claimTransformerInterface =
-        new PartDEventTransformer(
-            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+        new PartDEventTransformer(new MetricRegistry(), new FdaDrugCodeDisplayLookup());
     ExplanationOfBenefit pdeEob =
         claimTransformerInterface.transform(getClaim(PartDEvent.class), false);
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();

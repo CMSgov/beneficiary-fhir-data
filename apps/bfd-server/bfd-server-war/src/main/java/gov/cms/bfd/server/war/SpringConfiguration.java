@@ -413,18 +413,25 @@ public class SpringConfiguration extends BaseConfiguration {
    * This bean provides an {@link FdaDrugCodeDisplayLookup} for use in the transformers to look up
    * drug codes.
    *
-   * @param includeFakeDrugCode if true, the {@link FdaDrugCodeDisplayLookup} will include a fake
-   *     drug code for testing purposes.
+   * <p>// * @param includeFakeDrugCode if true, the {@link FdaDrugCodeDisplayLookup} will include a
+   * fake drug code for testing purposes.
+   *
    * @return the {@link FdaDrugCodeDisplayLookup} for the application.
    */
   @Bean
-  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
-      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") Boolean includeFakeDrugCode) {
-    if (includeFakeDrugCode) {
-      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-    } else {
-      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
-    }
+  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup() {
+    //      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") String includeFakeDrugCode)
+    // throws IOException {
+    //    if (includeFakeDrugCode!= null && !includeFakeDrugCode.isEmpty()) {
+    //      return new FdaDrugCodeDisplayLookup();
+    ////      InputStream npiDataStream =
+    ////
+    // Thread.currentThread().getContextClassLoader().getResourceAsStream(includeFakeDrugCode);
+    ////      return new FdaDrugCodeDisplayLookup(npiDataStream);
+    //    } else {
+    //      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+    return new FdaDrugCodeDisplayLookup();
+    //    }
   }
 
   /**

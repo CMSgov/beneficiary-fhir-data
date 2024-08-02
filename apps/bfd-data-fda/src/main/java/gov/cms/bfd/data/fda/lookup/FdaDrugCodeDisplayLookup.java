@@ -19,17 +19,11 @@ import org.slf4j.LoggerFactory;
 public class FdaDrugCodeDisplayLookup {
   private static final Logger LOGGER = LoggerFactory.getLogger(FdaDrugCodeDisplayLookup.class);
 
-  /** A fake drug code used for testing. */
-  public static final String FAKE_DRUG_CODE = "00000-0000";
-
-  /** A fake drug code display that is associated with the FAKE_DRUG_CODE. */
-  public static final String FAKE_DRUG_CODE_DISPLAY = "Fake Diluent - WATER";
-
   /**
    * Stores a map from Drug Code (PRODUCTNDC) to Drug Code Display (SUBSTANCENAME) derived from the
    * downloaded NDC file.
    */
-  private Map<String, String> ndcProductHashMap = new HashMap<>();
+  public Map<String, String> ndcProductHashMap = new HashMap<>();
 
   /** Tracks the national drug codes that have already had code lookup failures. */
   private final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
@@ -44,61 +38,27 @@ public class FdaDrugCodeDisplayLookup {
   private static int SUBSTANCE_NAME_COLUMN_INDEX = 13;
 
   /**
-   * Cached copy of the testing version of the {@link FdaDrugCodeDisplayLookup} so that we don't
-   * have to construct it over and over in the unit tests.
-   */
-  private static FdaDrugCodeDisplayLookup drugCodeLookupForTesting;
-
-  /**
    * Cached copy of the production version of the {@link FdaDrugCodeDisplayLookup} so that we don't
    * have to construct it over and over in the unit tests.
    */
   private static FdaDrugCodeDisplayLookup drugCodeLookupForProduction;
 
   /**
-   * Factory method for creating a {@link FdaDrugCodeDisplayLookup} for testing that includes the
-   * fake drug code.
+   * Constructs an {@link FdaDrugCodeDisplayLookup}.
    *
-   * @return the {@link FdaDrugCodeDisplayLookup}
+   * <p>// * @param includeFakeDrugCode whether to include the fake testing drug code or not
    */
-  public static FdaDrugCodeDisplayLookup createDrugCodeLookupForTesting() {
-    if (drugCodeLookupForTesting == null) {
-      drugCodeLookupForTesting = new FdaDrugCodeDisplayLookup(true);
-    }
-
-    return drugCodeLookupForTesting;
-  }
-
-  /**
-   * Factory method for creating a {@link FdaDrugCodeDisplayLookup} for production that does not
-   * include the fake drug code.
-   *
-   * @return the {@link FdaDrugCodeDisplayLookup}
-   */
-  public static FdaDrugCodeDisplayLookup createDrugCodeLookupForProduction() {
-    if (drugCodeLookupForProduction == null) {
-      drugCodeLookupForProduction = new FdaDrugCodeDisplayLookup(false);
-    }
-
-    return drugCodeLookupForProduction;
-  }
-
-  /**
-   * Constructs a {@link FdaDrugCodeDisplayLookup} for testing purposes only.
-   *
-   * @param ndcProdMap Drug code lookup map to populate FdaDrugCodeDisplayLookup
-   */
-  public FdaDrugCodeDisplayLookup(Map<String, String> ndcProdMap) {
-    ndcProductHashMap.putAll(ndcProdMap);
+  public FdaDrugCodeDisplayLookup() {
+    readFDADrugCodeFile(getFileInputStream(App.FDA_PRODUCTS_RESOURCE));
   }
 
   /**
    * Constructs an {@link FdaDrugCodeDisplayLookup}.
    *
-   * @param includeFakeDrugCode whether to include the fake testing drug code or not
+   * @param npiDataStream whether to include the fake testing drug code or not
    */
-  private FdaDrugCodeDisplayLookup(boolean includeFakeDrugCode) {
-    readFDADrugCodeFile(includeFakeDrugCode, getFileInputStream(App.FDA_PRODUCTS_RESOURCE));
+  public FdaDrugCodeDisplayLookup(InputStream npiDataStream) throws IOException {
+    readFDADrugCodeFile(getFileInputStream(App.FDA_PRODUCTS_RESOURCE));
   }
 
   /**
@@ -146,18 +106,12 @@ public class FdaDrugCodeDisplayLookup {
    *
    * <p>See {@link gov.cms.bfd.data.fda.utility.App} for details.
    *
-   * @param includeFakeDrugCode is whether to incliude fake drug code
    * @param inputStream is the inputStream that is passed in
    * @return a map with drug codes and fields.
    */
-  protected Map<String, String> readFDADrugCodeFile(
-      boolean includeFakeDrugCode, InputStream inputStream) {
+  public Map<String, String> readFDADrugCodeFile(InputStream inputStream) {
 
-    ndcProductHashMap = getFdaProcessedData(includeFakeDrugCode, inputStream);
-
-    if (includeFakeDrugCode) {
-      ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
-    }
+    ndcProductHashMap = getFdaProcessedData(inputStream);
     return ndcProductHashMap;
   }
 
@@ -167,12 +121,12 @@ public class FdaDrugCodeDisplayLookup {
    *
    * <p>See {@link gov.cms.bfd.data.fda.utility.App} for details.
    *
-   * @param includeFakeDrugCode is whether to incliude fake drug code
+   * <p>// * @param includeFakeDrugCode is whether to incliude fake drug code
+   *
    * @param inputStream is the inputStream that is passed in
    * @return a map with drug codes and fields.
    */
-  protected Map<String, String> getFdaProcessedData(
-      boolean includeFakeDrugCode, InputStream inputStream) {
+  protected Map<String, String> getFdaProcessedData(InputStream inputStream) {
 
     Map<String, String> ndcProcessedData = new HashMap<String, String>();
 
