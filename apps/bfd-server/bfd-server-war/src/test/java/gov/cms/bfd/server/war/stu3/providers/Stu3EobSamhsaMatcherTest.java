@@ -171,7 +171,8 @@ public final class Stu3EobSamhsaMatcherTest {
     public void nonSamhsaRelatedClaims() throws IOException {
       NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
-      FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaDrugCodeDisplayLookup();
+      FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
+          RDATestUtils.fdaFakeDrugCodeDisplayLookup();
       // Note: none of our SAMPLE_A claims have SAMHSA-related codes (by default).
       List<Object> sampleRifRecords =
           ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -863,7 +864,7 @@ public final class Stu3EobSamhsaMatcherTest {
               sampleRifRecordForClaimType,
               new MetricRegistry(),
               false,
-              new FdaDrugCodeDisplayLookup(),
+              RDATestUtils.fdaDrugCodeDisplayLookup(),
               NPIOrgLookup.createNpiOrgLookup());
 
       return sampleEobForClaimType;

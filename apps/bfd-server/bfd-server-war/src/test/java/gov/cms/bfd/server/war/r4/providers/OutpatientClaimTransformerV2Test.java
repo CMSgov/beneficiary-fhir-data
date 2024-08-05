@@ -120,7 +120,7 @@ public final class OutpatientClaimTransformerV2Test {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaDrugCodeDisplayLookup();
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
     outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(

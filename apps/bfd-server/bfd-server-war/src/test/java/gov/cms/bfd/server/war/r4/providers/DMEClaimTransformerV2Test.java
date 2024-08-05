@@ -114,7 +114,7 @@ public final class DMEClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaDrugCodeDisplayLookup();
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
     dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
     claim = generateClaim();
