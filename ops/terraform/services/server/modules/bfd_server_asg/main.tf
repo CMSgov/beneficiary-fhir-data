@@ -254,7 +254,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
         AutoScalingGroupName = aws_autoscaling_group.main.name
       }
       metric_name = "CPUUtilization"
-      namespace   = "AWS/AutoScaling"
+      namespace   = "AWS/EC2"
       period      = local.scaling_alarms_config.scale_in.eval_period
       stat        = "Average"
     }
@@ -293,8 +293,8 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
         AutoScalingGroupName = aws_autoscaling_group.main.name
       }
       metric_name = "CPUUtilization"
-      namespace   = "AWS/AutoScaling"
-      period      = local.scaling_alarms_config.scale_in.eval_period
+      namespace   = "AWS/EC2"
+      period      = local.scaling_alarms_config.scale_out.eval_period
       stat        = "Average"
     }
   }
@@ -309,7 +309,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
       }
       metric_name = "GroupDesiredCapacity"
       namespace   = "AWS/AutoScaling"
-      period      = local.scaling_alarms_config.scale_in.eval_period
+      period      = local.scaling_alarms_config.scale_out.eval_period
       stat        = "Average"
     }
   }
@@ -324,7 +324,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
       }
       metric_name = "GroupInServiceInstances"
       namespace   = "AWS/AutoScaling"
-      period      = local.scaling_alarms_config.scale_in.eval_period
+      period      = local.scaling_alarms_config.scale_out.eval_period
       stat        = "Average"
     }
   }
