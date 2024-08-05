@@ -1,0 +1,58 @@
+name: CI - Python
+
+on:
+  pull_request:
+    paths:
+      - '**/*.py'
+      - '**/*requirement*.txt'
+
+  merge_group:
+
+env:
+  BASE_COMMIT: ""
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  matrix-pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        projects: 
+          [
+            { 
+              projectName: "sftp-outbound-transfer-lambda", 
+              projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer", 
+              testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests", 
+              pythonVersion: "3.12" 
+            },
+            { 
+              projectName: "update-pipeline-slis-lambda", 
+              projectRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src", 
+              testsRoot: "ops/terraform/services/pipeline/modules/bfd_pipeline_slis/lambda_src/tests", 
+              pythonVersion: "3.11" 
+            }
+          ]
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        id: code-checkout
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 2
+      - name: Setup Python Tests for affected folders
+        id: install-pytest-set
+        uses: actions/setup-python@v5.1.1
+        with:
+          python-version: ${{ matrix.projects.pythonVersion }}
+      - name: Run Python Tests per project
+        id: run-pytest-set
+        run: |
+            echo "Testing ${{ matrix.projects.projectName }}"
+            pip install --upgrade pip
+            if [ -f ${{ github.workspace }}/${{ matrix.projects.projectRoot }}/requirements.txt ]
+            then
+              pip install -r ${{ github.workspace }}/${{ matrix.projects.projectRoot }}/requirements.txt 
+            fi
+            pip install pytest
+            cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
+            pytest ${{ github.workspace }}/${{ matrix.projects.testsRoot }}
