@@ -144,8 +144,8 @@ public class ServerExecutor {
     final String pacEnabled = "true";
     final String pacOldMbiHashEnabled = "true";
     final String pacClaimSourceTypes = "fiss,mcs";
-    final String includeFakeDrugCode = "fakeDrugOrg.tsv";
-    final String fakeOrgFile = "fakeData.tsv";
+    final String drugCodeFileName = "fakeDrugOrg.tsv";
+    final String orgFileName = "fakeOrgData.tsv";
 
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_ENABLED, pacEnabled);
     appSettings.put(SpringConfiguration.PROP_PAC_OLD_MBI_HASH_ENABLED, pacOldMbiHashEnabled);
@@ -153,8 +153,8 @@ public class ServerExecutor {
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_URL, dbUrl);
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_USERNAME, dbUsername);
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD, dbPassword);
-    appSettings.put(SpringConfiguration.PROP_INCLUDE_FAKE_DRUG_CODE, includeFakeDrugCode);
-    appSettings.put(SpringConfiguration.PROP_INCLUDE_FAKE_ORG_NAME, fakeOrgFile);
+    appSettings.put(SpringConfiguration.PROP_DRUG_CODE_FILE_NAME, drugCodeFileName);
+    appSettings.put(SpringConfiguration.PROP_ORG_FILE_NAME, orgFileName);
   }
 
   /**

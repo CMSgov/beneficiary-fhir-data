@@ -16,7 +16,7 @@ public class NPIOrgLookup {
   private static final Logger LOGGER = LoggerFactory.getLogger(NPIOrgLookup.class);
 
   /** Hashmap to keep the org names. */
-  public Map<String, String> npiOrgHashMap = new HashMap<>();
+  private Map<String, String> npiOrgHashMap = new HashMap<>();
 
   /** A field to return the production org lookup. */
   private static NPIOrgLookup npiOrgLookupForProduction;
@@ -35,6 +35,15 @@ public class NPIOrgLookup {
     }
 
     return npiOrgLookupForProduction;
+  }
+
+  /**
+   * Constructs an {@link NPIOrgLookup} used for testing purposes only.
+   *
+   * @param npiOrgMap map for test data
+   */
+  public NPIOrgLookup(Map<String, String> npiOrgMap) {
+    npiOrgHashMap.putAll(npiOrgMap);
   }
 
   /**

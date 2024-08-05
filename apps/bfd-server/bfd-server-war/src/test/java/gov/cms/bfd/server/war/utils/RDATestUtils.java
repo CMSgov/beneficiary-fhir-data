@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.utils;
 
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
@@ -18,7 +19,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -698,16 +699,30 @@ public class RDATestUtils {
   }
 
   /**
-   * // * Mocks an FdaDrugCodeDisplayLookup object. // * // * @return mocked
-   * FdaDrugCodeDisplayLookup //
+   * Mocks an FdaDrugCodeDisplayLookup object. FdaDrugCodeDisplayLookup
    *
    * @return mocked FdaDrugCodeDisplayLookup
    */
-  public static @NotNull FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup() {
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup();
+  public static @NotNull FdaDrugCodeDisplayLookup fdaFakeDrugCodeDisplayLookup() {
 
-    fdaDrugCodeDisplayLookup.ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
-    return fdaDrugCodeDisplayLookup;
+    Map<String, String> ndcProductHashMap = new HashMap<>();
+    ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
+
+    return new FdaDrugCodeDisplayLookup(ndcProductHashMap);
+  }
+
+  /**
+   * Mocks an FdaDrugCodeDisplayLookup object. FdaDrugCodeDisplayLookup
+   *
+   * @return mocked FdaDrugCodeDisplayLookup
+   */
+  public static @NotNull FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup() throws IOException {
+    InputStream npiDataStream =
+        Thread.currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+
+    return new FdaDrugCodeDisplayLookup(npiDataStream);
   }
 
   /**
@@ -717,13 +732,13 @@ public class RDATestUtils {
    */
   public static @NotNull MockedStatic<NPIOrgLookup> mockNPIOrgLookup() {
     MockedStatic<NPIOrgLookup> npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
+    Map<String, String> npiOrgHashMap = new HashMap<>();
+    npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
     npiOrgLookup
         .when(NPIOrgLookup::createNpiOrgLookup)
         .thenAnswer(
             i -> {
-              InputStream npiDataStream = new ByteArrayInputStream("".getBytes());
-              NPIOrgLookup mockInstance = new NPIOrgLookup(npiDataStream);
-              mockInstance.npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
+              NPIOrgLookup mockInstance = new NPIOrgLookup(npiOrgHashMap);
               return mockInstance;
             });
 

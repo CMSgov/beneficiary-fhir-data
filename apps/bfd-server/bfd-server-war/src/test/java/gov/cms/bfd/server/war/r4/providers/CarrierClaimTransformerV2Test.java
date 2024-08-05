@@ -126,7 +126,7 @@ public class CarrierClaimTransformerV2Test {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaDrugCodeDisplayLookup();
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(

@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war;
 
+import static gov.cms.bfd.data.fda.utility.App.FDA_PRODUCTS_RESOURCE;
+import static gov.cms.bfd.data.npi.utility.App.NPI_RESOURCE;
+
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
@@ -64,20 +67,17 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class SpringConfiguration extends BaseConfiguration {
   /**
-   * The {@link String } Boolean property that is used to enable the fake drug code (00000-0000)
-   * that is used for integration testing. When this property is set to the string 'true', this fake
-   * drug code will be appended to the drug code lookup map to avoid test failures that result from
-   * unexpected changes to the external drug code file in {@link
-   * FdaDrugCodeDisplayLookup#retrieveFDADrugCodeDisplay}. This property defaults to false and
-   * should only be set to true when the server is under test in a local environment.
+   * The {@link String } property that is used to hold drug code file name that is used for
+   * integration testing and production changes to the external drug code file in {@link
+   * FdaDrugCodeDisplayLookup#retrieveFDADrugCodeDisplay}.
    */
-  public static final String PROP_INCLUDE_FAKE_DRUG_CODE = "bfdServer.include.fake.drug.code";
+  public static final String PROP_DRUG_CODE_FILE_NAME = "bfdServer.drug.code.file.name";
 
   /**
-   * The {@link String } Boolean property that is used to enable the fake org name that is used for
-   * integration testing.
+   * The {@link String } property that represents org file name that is used for integration
+   * testing.
    */
-  public static final String PROP_INCLUDE_FAKE_ORG_NAME = "bfdServer.include.fake.org.name";
+  public static final String PROP_ORG_FILE_NAME = "bfdServer.org.file.name";
 
   /**
    * The {@link String } Boolean property that is used to enable the partially adjudicated claims
@@ -413,42 +413,33 @@ public class SpringConfiguration extends BaseConfiguration {
    * This bean provides an {@link FdaDrugCodeDisplayLookup} for use in the transformers to look up
    * drug codes.
    *
-   * <p>// * @param includeFakeDrugCode if true, the {@link FdaDrugCodeDisplayLookup} will include a
-   * fake drug code for testing purposes.
-   *
-   * @param includeFakeDrugCode holds the test file name
+   * @param drugCodeFileName holds the file name for test or production
    * @return the {@link FdaDrugCodeDisplayLookup} for the application.
    */
   @Bean
   public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
-      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":}") String includeFakeDrugCode)
+      @Value("${" + PROP_DRUG_CODE_FILE_NAME + ":" + FDA_PRODUCTS_RESOURCE + "}")
+          String drugCodeFileName)
       throws IOException {
-    if (includeFakeDrugCode != null && !includeFakeDrugCode.isEmpty()) {
-      InputStream npiDataStream =
-          Thread.currentThread().getContextClassLoader().getResourceAsStream(includeFakeDrugCode);
-      return new FdaDrugCodeDisplayLookup(npiDataStream);
-    } else {
-      return new FdaDrugCodeDisplayLookup();
-    }
+    InputStream npiDataStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(drugCodeFileName);
+    return new FdaDrugCodeDisplayLookup(npiDataStream);
   }
 
   /**
    * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
    *
-   * @param fakeOrgFile file name for fake org data. If not null, it will load the test data
+   * @param orgFileName file name for fake org data. If not null, it will load the test data
    * @return the {@link NPIOrgLookup} for the application.
    * @throws IOException if there is an error accessing the resource
    */
   @Bean
   public NPIOrgLookup npiOrgLookup(
-      @Value("${" + PROP_INCLUDE_FAKE_ORG_NAME + ":}") String fakeOrgFile) throws IOException {
-    if (fakeOrgFile != null && !fakeOrgFile.isEmpty()) {
-      InputStream npiDataStream =
-          Thread.currentThread().getContextClassLoader().getResourceAsStream(fakeOrgFile);
-      return new NPIOrgLookup(npiDataStream);
-    } else {
-      return NPIOrgLookup.createNpiOrgLookup();
-    }
+      @Value("${" + PROP_ORG_FILE_NAME + ":" + NPI_RESOURCE + "}") String orgFileName)
+      throws IOException {
+    InputStream npiDataStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(orgFileName);
+    return new NPIOrgLookup(npiDataStream);
   }
 
   /**

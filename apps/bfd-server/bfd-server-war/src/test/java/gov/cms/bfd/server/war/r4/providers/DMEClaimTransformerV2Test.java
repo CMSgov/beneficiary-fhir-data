@@ -51,7 +51,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,7 +113,7 @@ public final class DMEClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaDrugCodeDisplayLookup();
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
     dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
     claim = generateClaim();
@@ -123,10 +122,6 @@ public final class DMEClaimTransformerV2Test {
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
-
-  /** Releases the static mock fdaDrugCodeDisplayLookup. */
-  @AfterEach
-  public void after() {}
 
   /**
    * Verifies that when transform is called, the metric registry is passed the correct class and

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -20,6 +21,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.sql.Date;
 import java.util.Arrays;
@@ -29,7 +31,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,19 +57,17 @@ public final class PartDEventTransformerTest {
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
-  protected void setup() {
+  protected void setup() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup();
-    fdaDrugCodeDisplayLookup.ndcProductHashMap.put(
-        RDATestUtils.FAKE_DRUG_CODE, RDATestUtils.FAKE_DRUG_CODE_DISPLAY);
+    InputStream npiDataStream =
+        Thread.currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
     partdEventTransformer = new PartDEventTransformer(metricRegistry, fdaDrugCodeDisplayLookup);
   }
-
-  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
-  @AfterEach
-  public void after() {}
 
   /**
    * Verifies that when transform is called, the metric registry is passed the correct class and
@@ -217,7 +216,8 @@ public final class PartDEventTransformerTest {
    *     PartDEvent}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob)
+      throws FHIRException, IOException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -244,7 +244,7 @@ public final class PartDEventTransformerTest {
     assertEquals("01", claim.getPrescriberIdQualifierCode());
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaDrugCodeDisplayLookup();
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,

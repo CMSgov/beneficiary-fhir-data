@@ -31,14 +31,12 @@ public class NPIOrgLookupTest {
   /** Setup Before Each test method. */
   @BeforeEach
   void setup() throws IOException {
-    InputStream npiDataStream = new ByteArrayInputStream("".getBytes());
-    npiOrgDataLookup = new NPIOrgLookup(npiDataStream);
     npiOrgDisplay = Optional.empty();
 
     Map<String, String> npiOrgHashMap = new HashMap<>();
     npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
 
-    npiOrgDataLookup.npiOrgHashMap = npiOrgHashMap;
+    npiOrgDataLookup = new NPIOrgLookup(npiOrgHashMap);
   }
 
   /** Return Fake NPI Org. */

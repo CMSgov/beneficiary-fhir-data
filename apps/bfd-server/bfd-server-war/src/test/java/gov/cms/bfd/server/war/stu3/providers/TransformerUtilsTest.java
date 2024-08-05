@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
@@ -529,7 +528,7 @@ public final class TransformerUtilsTest {
     dmeClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new DMEClaimTransformer(metricRegistry, new FdaDrugCodeDisplayLookup());
+        new DMEClaimTransformer(metricRegistry, RDATestUtils.fdaDrugCodeDisplayLookup());
     genEob = claimTransformerInterface.transform(dmeClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
