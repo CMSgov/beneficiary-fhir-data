@@ -1,6 +1,8 @@
 locals {
   victor_ops_url                    = local.sensitive_common_config["victor_ops_url"]
   ec2_failing_instances_runbook_url = local.sensitive_common_config["alarm_ec2_failing_instances_runbook_url"]
+  ec2_instance_script_failing_start_runbook_url = local.sensitive_common_config["alarm_ec2_instance_script_failing_start_runbook_url"]
+
   cloudwatch_sns_topic_policy_spec  = <<-EOF
 {
   "Version": "2008-10-17",
@@ -107,6 +109,41 @@ resource "aws_cloudwatch_metric_alarm" "ec2_failing_instances" {
   ok_actions    = [aws_sns_topic.victor_ops_ok.arn]
 }
 
+## BFD-3520
+resource "aws_cloudwatch_log_metric_filter" "ec2_init_fail_count" {
+  name           = local.init_fail_filter_name
+  pattern        = local.init_fail_pattern
+  log_group_name = local.log_groups.cloudinit_out
+
+  metric_transformation {
+    name          = local.init_fail_metric_name
+    namespace     = local.this_metric_namespace
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "ec2_init_fail" {
+  alarm_name          = local.init_fail_alarm_name
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+
+  metric_name = local.init_fail_filter_name
+  namespace   = local.this_metric_namespace
+  period      = 60
+
+  statistic = "Sum"
+  threshold = "0"
+
+  alarm_actions = [aws_sns_topic.victor_ops_alert.arn]
+
+  actions_enabled = true
+  alarm_description = join("", [
+    "At least 1 (see Alarm value for exact number) EC2 instance is failing startup steps.\n",
+    "See ${local.ec2_instance_script_failing_start_runbook_url} for instructions on resolving this alert."
+  ])
+}
+
 data "aws_sns_topic" "internal_alert_slack" {
   #FIXME: replace when slack alert is in mgmt
   name = "bfd-test-cloudwatch-alarms-slack-bfd-test"
@@ -131,3 +168,4 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   #FIXME: replace when slack alert is in mgmt
   alarm_actions       = [data.aws_sns_topic.internal_alert_slack.arn]
 }
+
