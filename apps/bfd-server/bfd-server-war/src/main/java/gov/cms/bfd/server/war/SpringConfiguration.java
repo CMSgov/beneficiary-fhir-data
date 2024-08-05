@@ -416,22 +416,20 @@ public class SpringConfiguration extends BaseConfiguration {
    * <p>// * @param includeFakeDrugCode if true, the {@link FdaDrugCodeDisplayLookup} will include a
    * fake drug code for testing purposes.
    *
+   * @param includeFakeDrugCode holds the test file name
    * @return the {@link FdaDrugCodeDisplayLookup} for the application.
    */
   @Bean
-  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup() {
-    //      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":false}") String includeFakeDrugCode)
-    // throws IOException {
-    //    if (includeFakeDrugCode!= null && !includeFakeDrugCode.isEmpty()) {
-    //      return new FdaDrugCodeDisplayLookup();
-    ////      InputStream npiDataStream =
-    ////
-    // Thread.currentThread().getContextClassLoader().getResourceAsStream(includeFakeDrugCode);
-    ////      return new FdaDrugCodeDisplayLookup(npiDataStream);
-    //    } else {
-    //      return FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
-    return new FdaDrugCodeDisplayLookup();
-    //    }
+  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
+      @Value("${" + PROP_INCLUDE_FAKE_DRUG_CODE + ":}") String includeFakeDrugCode)
+      throws IOException {
+    if (includeFakeDrugCode != null && !includeFakeDrugCode.isEmpty()) {
+      InputStream npiDataStream =
+          Thread.currentThread().getContextClassLoader().getResourceAsStream(includeFakeDrugCode);
+      return new FdaDrugCodeDisplayLookup(npiDataStream);
+    } else {
+      return new FdaDrugCodeDisplayLookup();
+    }
   }
 
   /**

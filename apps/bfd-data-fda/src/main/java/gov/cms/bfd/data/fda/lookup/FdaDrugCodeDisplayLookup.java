@@ -58,7 +58,7 @@ public class FdaDrugCodeDisplayLookup {
    * @param npiDataStream whether to include the fake testing drug code or not
    */
   public FdaDrugCodeDisplayLookup(InputStream npiDataStream) throws IOException {
-    readFDADrugCodeFile(getFileInputStream(App.FDA_PRODUCTS_RESOURCE));
+    readFDADrugCodeFile(npiDataStream);
   }
 
   /**
