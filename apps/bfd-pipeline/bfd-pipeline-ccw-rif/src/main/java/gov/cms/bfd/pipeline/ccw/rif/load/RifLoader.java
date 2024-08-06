@@ -175,7 +175,6 @@ public final class RifLoader {
    */
   public Flux<RifRecordLoadResult> processAsync(
       RifFileRecords dataToLoad, AtomicBoolean interrupted) {
-
     return FluxUtils.fromFluxFunction(
         () -> {
           final RifFile rifFile = dataToLoad.getSourceEvent().getFile();
