@@ -244,7 +244,7 @@ public final class RifLoader {
                   () -> {
                     progressTracker.writeProgress();
                     if (fileType == RifFileType.BENEFICIARY) {
-                      onBeneficiaryLoadComplete();
+                      refreshCurrentBeneficiariesView();
                     }
                   })
               // clean up when the flux terminates (either by error or completion)
@@ -263,7 +263,7 @@ public final class RifLoader {
   }
 
   /** Refreshes the current beneficiaries materialized view. */
-  private void onBeneficiaryLoadComplete() {
+  private void refreshCurrentBeneficiariesView() {
     try (EntityManager entityManager = appState.getEntityManagerFactory().createEntityManager()) {
       entityManager.createNativeQuery(REFRESH_CURRENT_BENEFICIARIES_VIEW_SQL).getResultList();
     }
