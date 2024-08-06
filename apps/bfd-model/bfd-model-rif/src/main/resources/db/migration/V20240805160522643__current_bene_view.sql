@@ -1,3 +1,15 @@
+-- This view tracks the current version of a beneficiary tied to each xref group.
+-- This process is inexact due to the nature of the data, but we make our best guess based on the information we have available.
+
+-- Our best guess is stored in a field called xref_rank which is defined as follows:
+-- If we have an MBI and the xref_sw is set to 'N' (meaning this record is NOT merged into another), assign a rank of 1 (1st place)
+-- If we have an MBI and the xref_sw is set to 'Y' (meaning this record IS merged into another), assign a rank of 2 (2nd place)
+-- Otherwise, assign a rank of 3 (last place). This case should only be hit if the MBI is null
+-- because each bene with an xref id will have an xref_sw value of 'Y' or 'N'
+
+-- For each xref group, we take the record with the lowest rank
+-- If there's a tie, we take the record with the highest bene_id
+
 CREATE MATERIALIZED VIEW IF NOT EXISTS ccw.current_beneficiaries AS (
     WITH ranked_benes AS (
         SELECT
