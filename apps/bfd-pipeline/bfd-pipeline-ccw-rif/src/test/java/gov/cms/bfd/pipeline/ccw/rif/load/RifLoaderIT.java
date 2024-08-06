@@ -569,6 +569,14 @@ public final class RifLoaderIT {
       assertEquals(beneficiaryFromDb2.getXrefSwitch().get(), 'Y');
       assertEquals(beneficiaryFromDb2.getXrefGroupId().get(), 1);
 
+      // Ensure the current beneficiaries view has been refreshed
+      Long currentBenes =
+          (Long)
+              entityManager
+                  .createNativeQuery("SELECT count(*) from ccw.current_beneficiaries")
+                  .getSingleResult();
+      assertEquals(currentBenes, 2);
+
     } finally {
       if (entityManager != null) {
         entityManager.close();

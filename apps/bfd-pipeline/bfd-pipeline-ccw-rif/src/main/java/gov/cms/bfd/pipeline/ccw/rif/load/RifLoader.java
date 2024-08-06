@@ -89,6 +89,10 @@ public final class RifLoader {
    */
   private static final Duration MAX_INTERRUPTED_WAIT_TIME = Duration.ofMinutes(5);
 
+  /** Query for refreshing the current beneficiaries materialized view. */
+  private static final String REFRESH_CURRENT_BENEFICIARIES_VIEW_SQL =
+      "SELECT ccw.refresh_current_beneficiaries()";
+
   /**
    * Constructs a new {@link RifLoader} instance.
    *
@@ -171,6 +175,7 @@ public final class RifLoader {
    */
   public Flux<RifRecordLoadResult> processAsync(
       RifFileRecords dataToLoad, AtomicBoolean interrupted) {
+
     return FluxUtils.fromFluxFunction(
         () -> {
           final RifFile rifFile = dataToLoad.getSourceEvent().getFile();
@@ -235,7 +240,13 @@ public final class RifLoader {
               // Mark active record as complete so progress can be updated.
               .doOnNext(result -> progressTracker.recordComplete(result.getRecordNumber()))
               // Update progress with final result when all records have been processed
-              .doOnComplete(() -> progressTracker.writeProgress())
+              .doOnComplete(
+                  () -> {
+                    progressTracker.writeProgress();
+                    if (fileType == RifFileType.BENEFICIARY) {
+                      onBeneficiaryLoadComplete();
+                    }
+                  })
               // clean up when the flux terminates (either by error or completion)
               .doFinally(
                   ignored -> {
@@ -249,6 +260,13 @@ public final class RifLoader {
               .doOnError(
                   ex -> LOGGER.error("terminated by exception: message={}", ex.getMessage(), ex));
         });
+  }
+
+  /** Refreshes the current beneficiaries materialized view. */
+  private void onBeneficiaryLoadComplete() {
+    try (EntityManager entityManager = appState.getEntityManagerFactory().createEntityManager()) {
+      entityManager.createNativeQuery(REFRESH_CURRENT_BENEFICIARIES_VIEW_SQL).getResultList();
+    }
   }
 
   /**
@@ -443,7 +461,7 @@ public final class RifLoader {
     Optional<Beneficiary> oldBeneficiaryRecord = Optional.empty();
 
     /*
-     * Grab the the previous/current version of the Beneficiary (if any, as it exists in the
+     * Grab the previous/current version of the Beneficiary (if any, as it exists in the
      * database before applying the specified RifRecordEvent).
      */
     if (rifRecordEvent.getRecordAction() == RecordAction.UPDATE) {
