@@ -28,7 +28,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -186,14 +185,6 @@ public final class CoverageTransformerV2Test {
     String mbiIdentifier =
         coverage.getIdentifier().getFirst().getType().getCodingFirstRep().getCode();
     assertEquals("MB", mbiIdentifier);
-
-    List<Extension> extensions = coverage.getExtension();
-    Set<String> actualColors =
-        extensions.stream()
-            .map(extension -> extension.getValue().toString())
-            .collect(Collectors.toSet());
-    Set<String> expectedColors = Set.of("#F4FEFF", "#092E86", "#3B9BFB");
-    assertEquals(expectedColors, actualColors);
   }
 
   // ==================

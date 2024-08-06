@@ -15,8 +15,8 @@ import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -137,20 +137,55 @@ final class CoverageTransformerV2 {
     coverage.setStatus(CoverageStatus.ACTIVE);
     coverage.setSubscriber(TransformerUtilsV2.referencePatient(beneficiary));
 
-    List<Extension> colorExtensions = new ArrayList<>();
+    Extension baseExtension = new Extension();
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_FOREGROUNDCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_FOREGROUNDCOLOR,
+            null));
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_BACKGROUNDCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_BACKGROUNDCOLOR,
+            null));
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_HIGHLIGHTCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_HIGHLIGHTCOLOR,
+            null));
+    coverage.setExtension(Collections.singletonList(baseExtension));
+
+    /*List<Extension> colorExtensions = new ArrayList<>();
     TransformerUtilsV2.addExtension(
         colorExtensions,
-        TransformerConstants.C4DIC_FOREGROUNDCOLOR_CODE_SYSTEM,
-        TransformerConstants.C4DIC_FOREGROUNDCOLOR);
+        TransformerConstants.C4DIC_FOREGROUNDCOLOR_EXT_URL,
+            new Coding(
+                    TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+                    TransformerConstants.C4DIC_FOREGROUNDCOLOR,
+                    null));
     TransformerUtilsV2.addExtension(
         colorExtensions,
-        TransformerConstants.C4DIC_BACKGROUNDCOLOR_CODE_SYSTEM,
-        TransformerConstants.C4DIC_BACKGROUNDCOLOR);
+        TransformerConstants.C4DIC_BACKGROUNDCOLOR_EXT_URL,
+            new Coding(
+                    TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+                    TransformerConstants.C4DIC_BACKGROUNDCOLOR,
+                    null));
     TransformerUtilsV2.addExtension(
         colorExtensions,
-        TransformerConstants.C4DIC_HIGHLIGHTCOLOR_CODE_SYSTEM,
-        TransformerConstants.C4DIC_HIGHLIGHTCOLOR);
-    coverage.setExtension(colorExtensions);
+        TransformerConstants.C4DIC_HIGHLIGHTCOLOR_EXT_URL,
+            new Coding(
+                    TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+                    TransformerConstants.C4DIC_HIGHLIGHTCOLOR,
+                    null));
+    List<List<Extension>> extensions = new ArrayList<>();
+    extensions.add(colorExtensions);
+    coverage.setExtension(extensions);*/
 
     timer.stop();
     return coverage;
@@ -921,7 +956,7 @@ final class CoverageTransformerV2 {
 
     ContactPoint emailContact =
         TransformerUtilsV2.createContactPoint(
-            ContactPoint.ContactPointSystem.EMAIL, TransformerConstants.C4DIC_MEDICARE_EMAIL, null);
+            ContactPoint.ContactPointSystem.URL, TransformerConstants.C4DIC_MEDICARE_URL, null);
     List<ContactPoint> contactPoints = List.of(phoneContact, emailContact);
     organizationContactComponent.setTelecom(contactPoints);
     organization.addContact(organizationContactComponent);
@@ -939,18 +974,20 @@ final class CoverageTransformerV2 {
         TransformerUtilsV2.findOrCreateContainedOrganization(
             coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
 
-    Identifier identifier =
-        new Identifier()
-            .setType(
-                TransformerUtilsV2.createCodeableConcept(
-                    TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-                    null,
-                    TransformerConstants.PATIENT_MB_ID_DISPLAY,
-                    "MB"))
-            .setValue((String.valueOf(beneficiary.getMedicareBeneficiaryId())))
-            .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
-            .setAssigner(new Reference(organization));
-    coverage.addIdentifier(identifier);
+    if (beneficiary.getMedicareBeneficiaryId().isPresent()) {
+      Identifier identifier =
+          new Identifier()
+              .setType(
+                  TransformerUtilsV2.createCodeableConcept(
+                      TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+                      null,
+                      TransformerConstants.PATIENT_MB_ID_DISPLAY,
+                      "MB"))
+              .setValue((String.valueOf(beneficiary.getMedicareBeneficiaryId())))
+              .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
+              .setAssigner(new Reference(organization));
+      coverage.addIdentifier(identifier);
+    }
   }
 
   /**

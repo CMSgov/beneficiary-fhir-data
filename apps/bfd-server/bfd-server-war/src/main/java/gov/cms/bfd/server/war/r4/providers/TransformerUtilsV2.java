@@ -117,7 +117,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
 import org.slf4j.Logger;
@@ -4164,12 +4164,31 @@ public final class TransformerUtilsV2 {
    * Creates an {@link Extension} from the given system and value.
    *
    * @param extensions The list of {@link Extension}s to add to.
-   * @param system The system to use for the {@link Extension}.
+   * @param url The url to use for the {@link Extension}.
    * @param value The value to use for the {@link Extension}.
    */
-  static void addExtension(List<Extension> extensions, String system, String value) {
+  static void addExtension(List<Extension> extensions, String url, Type value) {
     if (value != null) {
-      extensions.add(new Extension(system).setValue(new StringType(value)));
+      Extension extension = new Extension();
+      extension.setUrl(url);
+      extension.setValue(value);
+      extensions.add(extension);
+    }
+  }
+
+  /**
+   * Creates an {@link Extension} from the given system and value.
+   *
+   * @param extension The list of {@link Extension}s to add to.
+   * @param url The url to use for the {@link Extension}.
+   * @param value The value to use for the {@link Extension}.
+   */
+  static void addSubExtension(Extension extension, String url, Type value) {
+    if (value != null) {
+      Extension subExtension = new Extension();
+      subExtension.setUrl(url);
+      subExtension.setValue(value);
+      extension.addExtension(subExtension);
     }
   }
 }

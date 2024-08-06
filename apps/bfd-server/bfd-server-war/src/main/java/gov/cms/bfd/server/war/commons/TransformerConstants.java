@@ -587,16 +587,24 @@ public final class TransformerConstants {
   /** C4DIC Medicare Customer Service Phone Number. */
   public static final String C4DIC_MEDICARE_SERVICE_PHONE_NUMBER = "1-800-633-4227";
 
-  /** C4DIC Medicare Email. */
-  public static final String C4DIC_MEDICARE_EMAIL = "medicare.gov";
+  /** C4DIC Medicare URL. */
+  public static final String C4DIC_MEDICARE_URL = "medicare.gov";
 
   /**
    * Code System URL for C4DIC Foreground Color <a
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension">Extension:
    * C4DIC Foreground Color</a>.
    */
-  public static final String C4DIC_FOREGROUNDCOLOR_CODE_SYSTEM =
+  public static final String C4DIC_FOREGROUNDCOLOR_EXT_URL =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension";
+
+  /**
+   * Code System for C4DIC color palette extension <a
+   * href="http://terminology.hl7.org/CodeSystem/IECColourManagement">Extension: C4DIC color palette
+   * extension</a>.
+   */
+  public static final String C4DIC_COLORS_CODE_SYSTEM =
+      "http://terminology.hl7.org/CodeSystem/IECColourManagement";
 
   /**
    * Value for C4DIC Foreground Color <a
@@ -610,7 +618,7 @@ public final class TransformerConstants {
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension">Extension:
    * C4DIC Background Color</a>.
    */
-  public static final String C4DIC_BACKGROUNDCOLOR_CODE_SYSTEM =
+  public static final String C4DIC_BACKGROUNDCOLOR_EXT_URL =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension";
 
   /**
@@ -625,7 +633,7 @@ public final class TransformerConstants {
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension">Extension:
    * C4DIC Highlight Color</a>.
    */
-  public static final String C4DIC_HIGHLIGHTCOLOR_CODE_SYSTEM =
+  public static final String C4DIC_HIGHLIGHTCOLOR_EXT_URL =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension";
 
   /**
