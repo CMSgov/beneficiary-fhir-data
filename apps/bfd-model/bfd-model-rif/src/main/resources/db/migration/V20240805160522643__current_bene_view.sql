@@ -15,17 +15,15 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS ccw.current_beneficiaries AS (
         SELECT
             bene_id,
             xref_grp_id,
-            RANK() OVER (
-                PARTITION BY xref_grp_id
-                ORDER BY
-                    CASE WHEN mbi_num IS NOT NULL
-                        AND xref_sw = 'N'
-                        THEN 1
-                    WHEN mbi_num IS NOT NULL
-                        AND xref_sw = 'Y'
-                        THEN 2
-                    ELSE 3
-                END) AS xref_rank
+            CASE
+                WHEN mbi_num IS NOT NULL
+                    AND xref_sw = 'N'
+                THEN 1
+                WHEN mbi_num IS NOT NULL
+                    AND xref_sw = 'Y'
+                THEN 2
+                ELSE 3
+        END AS xref_rank
         FROM ccw.beneficiaries
         WHERE xref_grp_id IS NOT NULL
     )
