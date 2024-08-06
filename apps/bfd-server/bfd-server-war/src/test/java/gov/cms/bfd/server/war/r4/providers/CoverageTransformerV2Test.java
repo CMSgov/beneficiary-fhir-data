@@ -18,6 +18,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -185,6 +186,18 @@ public final class CoverageTransformerV2Test {
     String mbiIdentifier =
         coverage.getIdentifier().getFirst().getType().getCodingFirstRep().getCode();
     assertEquals("MB", mbiIdentifier);
+
+    List<Extension> extensions = coverage.getExtension();
+    Extension baseExtension = extensions.getFirst();
+    assertEquals(TransformerConstants.C4DIC_COLOR_PALETTE_EXT_URL, baseExtension.getUrl());
+    List<Extension> colorExtensions = baseExtension.getExtension();
+    List<String> expectedColors = Arrays.asList("#F4FEFF", "#092E86", "#3B9BFB");
+    colorExtensions.stream()
+        .allMatch(
+            colorExtension -> {
+              Coding coding = (Coding) colorExtension.getValue();
+              return expectedColors.contains(coding.getCode());
+            });
   }
 
   // ==================

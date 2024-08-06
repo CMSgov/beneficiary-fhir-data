@@ -591,6 +591,14 @@ public final class TransformerConstants {
   public static final String C4DIC_MEDICARE_URL = "medicare.gov";
 
   /**
+   * Code System URL for C4DIC Color Palette extension <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension">Extension:
+   * C4DIC Color Palette</a>.
+   */
+  public static final String C4DIC_COLOR_PALETTE_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension";
+
+  /**
    * Code System URL for C4DIC Foreground Color <a
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension">Extension:
    * C4DIC Foreground Color</a>.

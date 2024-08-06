@@ -138,6 +138,8 @@ final class CoverageTransformerV2 {
     coverage.setSubscriber(TransformerUtilsV2.referencePatient(beneficiary));
 
     Extension baseExtension = new Extension();
+    baseExtension.setUrl(TransformerConstants.C4DIC_COLOR_PALETTE_EXT_URL);
+
     TransformerUtilsV2.addSubExtension(
         baseExtension,
         TransformerConstants.C4DIC_FOREGROUNDCOLOR_EXT_URL,
@@ -160,32 +162,6 @@ final class CoverageTransformerV2 {
             TransformerConstants.C4DIC_HIGHLIGHTCOLOR,
             null));
     coverage.setExtension(Collections.singletonList(baseExtension));
-
-    /*List<Extension> colorExtensions = new ArrayList<>();
-    TransformerUtilsV2.addExtension(
-        colorExtensions,
-        TransformerConstants.C4DIC_FOREGROUNDCOLOR_EXT_URL,
-            new Coding(
-                    TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
-                    TransformerConstants.C4DIC_FOREGROUNDCOLOR,
-                    null));
-    TransformerUtilsV2.addExtension(
-        colorExtensions,
-        TransformerConstants.C4DIC_BACKGROUNDCOLOR_EXT_URL,
-            new Coding(
-                    TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
-                    TransformerConstants.C4DIC_BACKGROUNDCOLOR,
-                    null));
-    TransformerUtilsV2.addExtension(
-        colorExtensions,
-        TransformerConstants.C4DIC_HIGHLIGHTCOLOR_EXT_URL,
-            new Coding(
-                    TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
-                    TransformerConstants.C4DIC_HIGHLIGHTCOLOR,
-                    null));
-    List<List<Extension>> extensions = new ArrayList<>();
-    extensions.add(colorExtensions);
-    coverage.setExtension(extensions);*/
 
     timer.stop();
     return coverage;
@@ -983,7 +959,7 @@ final class CoverageTransformerV2 {
                       null,
                       TransformerConstants.PATIENT_MB_ID_DISPLAY,
                       "MB"))
-              .setValue((String.valueOf(beneficiary.getMedicareBeneficiaryId())))
+              .setValue(beneficiary.getMedicareBeneficiaryId().get())
               .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
               .setAssigner(new Reference(organization));
       coverage.addIdentifier(identifier);
