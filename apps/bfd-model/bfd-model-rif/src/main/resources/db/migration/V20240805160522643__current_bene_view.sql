@@ -41,14 +41,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS current_beneficiaries_bene_id_idx ON ccw.curre
 -- Care must be taken to create "security definer" functions safely
 -- see https://www.postgresql.org/docs/current/sql-createfunction.html
 CREATE OR REPLACE FUNCTION ccw.refresh_current_beneficiaries()
-RETURNS VOID
-LANGUAGE sql
--- Only the owner of the view may refresh it, we need to set "security definer" so the function
+    RETURNS VOID AS $$
+    DECLARE comment_sql TEXT;
+BEGIN
+    -- Using "concurrently" will make the refresh slower, but it will not block any reads
+    -- on the view while the refresh is in progress
+    REFRESH MATERIALIZED VIEW CONCURRENTLY ccw.current_beneficiaries;
+    -- There's no implicit way to know when a materialized view was last updated
+    -- add a comment on the object in case we need to verify that it's being updated as expected
+    comment_sql := 'COMMENT ON MATERIALIZED VIEW ccw.current_beneficiaries is '|| quote_literal('{"last_refreshed": "' || now() || '"}');
+    EXECUTE comment_sql;
+END;
+$$
+LANGUAGE plpgsql
+ -- Only the owner of the view may refresh it, we need to set "security definer" so the function
 -- can execute in the context of the creator
-SECURITY DEFINER
--- Using "concurrently" will make the refresh slower, but it will not block any reads
--- on the view while the refresh is in progress
-AS 'REFRESH MATERIALIZED VIEW CONCURRENTLY ccw.current_beneficiaries';
+SECURITY DEFINER;
 -- search_path is the order in which schemas are searched when a name is referenced with no schema specified
 -- Postgres recommends setting this on functions marked as "security definer" to prevent malicious users from
 -- creating an object that shadows an existing one on a globally writable schema
