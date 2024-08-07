@@ -264,7 +264,16 @@ public final class RifLoader {
   /** Refreshes the current beneficiaries materialized view. */
   private void refreshCurrentBeneficiariesView() {
     try (EntityManager entityManager = appState.getEntityManagerFactory().createEntityManager()) {
-      entityManager.createNativeQuery(REFRESH_CURRENT_BENEFICIARIES_VIEW_SQL).getResultList();
+      try (final Timer.Context timerRefreshCurrentBeneficiaries =
+          appState
+              .getMetrics()
+              .timer(
+                  MetricRegistry.name(
+                      getClass().getSimpleName(), "refreshCurrentBeneficiariesView"))
+              .time()) {
+        entityManager.createNativeQuery(REFRESH_CURRENT_BENEFICIARIES_VIEW_SQL).getResultList();
+        timerRefreshCurrentBeneficiaries.stop();
+      }
     }
   }
 
