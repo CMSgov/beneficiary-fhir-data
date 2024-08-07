@@ -49,7 +49,8 @@ BEGIN
     REFRESH MATERIALIZED VIEW CONCURRENTLY ccw.current_beneficiaries;
     -- There's no implicit way to know when a materialized view was last updated
     -- add a comment on the object in case we need to verify that it's being updated as expected
-    comment_sql := 'COMMENT ON MATERIALIZED VIEW ccw.current_beneficiaries is '|| quote_literal('{"last_refreshed": "' || now() || '"}');
+    comment_sql := 'COMMENT ON MATERIALIZED VIEW ccw.current_beneficiaries is '
+        || quote_literal('{"last_refreshed": "' || now() || '"}');
     EXECUTE comment_sql;
 END;
 $$
