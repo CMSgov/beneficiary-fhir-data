@@ -272,7 +272,6 @@ public final class RifLoader {
                       getClass().getSimpleName(), "refreshCurrentBeneficiariesView"))
               .time()) {
         entityManager.createNativeQuery(REFRESH_CURRENT_BENEFICIARIES_VIEW_SQL).getResultList();
-        timerRefreshCurrentBeneficiaries.stop();
       }
     }
   }
