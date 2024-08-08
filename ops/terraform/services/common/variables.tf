@@ -13,3 +13,12 @@ variable "rds_deletion_protection_override" {
   EOF
   type        = bool
 }
+
+variable "disable_rds_scheduling_override" {
+  default     = false
+  description = <<EOF
+  If true, RDS off hours scheduled scale-in actions will be disabled for this environment. Defaults
+  to false.
+  EOF
+  type        = bool
+}

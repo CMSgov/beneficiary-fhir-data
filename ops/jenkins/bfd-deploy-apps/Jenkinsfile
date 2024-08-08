@@ -19,6 +19,11 @@ properties([
     booleanParam(name: 'force_migrator_deployment', description: 'When true, force the migrator to deploy.',
       defaultValue: false),
 
+    booleanParam(
+      name: 'disable_rds_scheduling_override',
+      description: 'When true, disables RDS off-hours scheduled scaling of reader nodes. Applicable only to ephemeral/test environments',
+      defaultValue: false),
+
     string(name: 'server_regression_image_override',
       description: 'Overrides the Docker image tag used when deploying the server-regression lambda',
       defaultValue: null)
@@ -195,11 +200,15 @@ spec:
                 script {
                     currentStage = env.STAGE_NAME
                     try {
+                        // Guard against Jenkins' poor parameter handling on first run
+                        def disableRdsScheduledScaling = params.disable_rds_scheduling_override == null ? false : params.disable_rds_scheduling_override
+                        def terraformVars = [disable_rds_scheduling_override: disableRdsScheduledScaling]
                         lock(resource: lockResource) {
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
                                 env: trimmedEnv,
-                                directory: 'ops/terraform/services/common'
+                                directory: 'ops/terraform/services/common',
+                                tfVars: terraformVars
                             )
                         }
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {

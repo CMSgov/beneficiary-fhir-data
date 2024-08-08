@@ -5,7 +5,11 @@
 /bfd/${env}/common/nonsensitive/rds_backup_retention_period: 1
 /bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
 /bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: true
-/bfd/${env}/common/nonsensitive/rds_instance_count: 1
+/bfd/${env}/common/nonsensitive/rds_min_reader_nodes: 0 # Only enable writer node by default
+/bfd/${env}/common/nonsensitive/rds_max_reader_nodes: 0 # Only enable writer node by default
+/bfd/${env}/common/nonsensitive/rds_scaling_cpu_target: 50
+/bfd/${env}/common/nonsensitive/rds_scale_in_cooldown: 300
+/bfd/${env}/common/nonsensitive/rds_scale_out_cooldown: 300
 /bfd/${env}/migrator/nonsensitive/instance_type: m6a.large
 /bfd/${env}/migrator/nonsensitive/volume_iops: 3000
 /bfd/${env}/migrator/nonsensitive/volume_size: 100

@@ -100,8 +100,12 @@
 /bfd/${env}/common/nonsensitive/rds_master_username: bfduser
 /bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-prod-aurora-cluster
 /bfd/${env}/common/nonsensitive/rds_instance_class: db.r6i.12xlarge
-/bfd/${env}/common/nonsensitive/rds_instance_count: "3"
 /bfd/${env}/common/nonsensitive/rds_security_group: bfd-prod-aurora-cluster
+/bfd/${env}/common/nonsensitive/rds_min_reader_nodes: 1
+/bfd/${env}/common/nonsensitive/rds_max_reader_nodes: 3
+/bfd/${env}/common/nonsensitive/rds_scaling_cpu_target: 50
+/bfd/${env}/common/nonsensitive/rds_scale_in_cooldown: 300
+/bfd/${env}/common/nonsensitive/rds_scale_out_cooldown: 300
 /bfd/${env}/common/nonsensitive/vpc_name: bfd-prod-vpc
 /bfd/${env}/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private
 /bfd/${env}/migrator/nonsensitive/ref_dir: /opt/bfd-db-migrator
