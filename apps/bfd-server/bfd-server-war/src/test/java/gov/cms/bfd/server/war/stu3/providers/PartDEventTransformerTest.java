@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
@@ -18,11 +19,12 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.sql.Date;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -34,8 +36,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -56,36 +56,23 @@ public final class PartDEventTransformerTest {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
-
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
-  protected void setup() {
+  protected void setup() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    fdaDrugCodeDisplayLookup = Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
-    fdaDrugCodeDisplayLookup
-        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
-        .thenAnswer(
-            i -> {
-              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
-              fdaDrugCodeMap.put(
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
-              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
-            });
+    InputStream npiDataStream =
+        Thread.currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
-    partdEventTransformer =
-        new PartDEventTransformer(
-            metricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+    partdEventTransformer = new PartDEventTransformer(metricRegistry, fdaDrugCodeDisplayLookup);
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
   @AfterEach
-  public void after() {
-    fdaDrugCodeDisplayLookup.close();
-  }
+  public void after() {}
 
   /**
    * Verifies that when transform is called, the metric registry is passed the correct class and
@@ -234,7 +221,8 @@ public final class PartDEventTransformerTest {
    *     PartDEvent}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob)
+      throws FHIRException, IOException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -261,8 +249,7 @@ public final class PartDEventTransformerTest {
     assertEquals("01", claim.getPrescriberIdQualifierCode());
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup =
-        FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
@@ -407,7 +394,7 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
+          claim.getNationalDrugCode(), RDATestUtils.FAKE_DRUG_CODE_DISPLAY);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

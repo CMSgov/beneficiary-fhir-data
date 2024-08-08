@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
@@ -41,6 +42,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -81,21 +83,16 @@ public class TransformerUtilsV2Test {
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
-
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
   @AfterEach
   public void after() {
     npiOrgLookup.close();
-    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -239,8 +236,8 @@ public class TransformerUtilsV2Test {
 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
-        Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER),
-        Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME),
+        Optional.of(RDATestUtils.FAKE_NPI_NUMBER),
+        Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME),
         ' ',
         ' ',
         Optional.empty(),
@@ -265,10 +262,10 @@ public class TransformerUtilsV2Test {
     Organization org = (Organization) organization.get();
     Optional<Identifier> identifier =
         org.getIdentifier().stream()
-            .filter(i -> i.getValue().equals(NPIOrgLookup.FAKE_NPI_NUMBER))
+            .filter(i -> i.getValue().equals(RDATestUtils.FAKE_NPI_NUMBER))
             .findFirst();
-    assertEquals(NPIOrgLookup.FAKE_NPI_NUMBER, identifier.get().getValue());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, org.getName());
+    assertEquals(RDATestUtils.FAKE_NPI_NUMBER, identifier.get().getValue());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, org.getName());
   }
 
   /**
@@ -321,8 +318,8 @@ public class TransformerUtilsV2Test {
 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
-        Optional.of(NPIOrgLookup.FAKE_NPI_NUMBER),
-        Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME),
+        Optional.of(RDATestUtils.FAKE_NPI_NUMBER),
+        Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME),
         ' ',
         ' ',
         Optional.empty(),
@@ -343,7 +340,7 @@ public class TransformerUtilsV2Test {
     Organization actualEobContainedOrganizationResource = (Organization) eob.getContained().get(0);
     assertEquals("provider-org", actualEobContainedOrganizationResource.getId());
     assertEquals(true, actualEobContainedOrganizationResource.getActive());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, actualEobContainedOrganizationResource.getName());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, actualEobContainedOrganizationResource.getName());
     assertTrue(
         actualEobContainedOrganizationResource.getIdentifier().stream()
             .filter(s -> s.getSystem().equals(TransformerConstants.CODING_NPI_US))
@@ -781,12 +778,12 @@ public class TransformerUtilsV2Test {
     C4BBClaimProfessionalAndNonClinicianCareTeamRole role =
         C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY;
     String id = "123";
-    Optional<String> npiOrgDisplay = Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME);
+    Optional<String> npiOrgDisplay = Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME);
 
     CareTeamComponent careTeamEntry =
         TransformerUtilsV2.addCareTeamMemberWithNpiOrg(eob, item, type, role, id, npiOrgDisplay);
     assertEquals("primary", careTeamEntry.getRole().getCoding().get(0).getCode());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
     assertEquals(id, careTeamEntry.getProvider().getIdentifier().getValue());
     assertEquals(
         "npi", careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getCode());
@@ -949,10 +946,13 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .get();
     dmeClaim.setLastUpdated(Instant.now());
-
+    InputStream npiDataStream =
+        Thread.currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
     claimTransformerInterface =
         new DMEClaimTransformerV2(
-            new MetricRegistry(), FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+            new MetricRegistry(), new FdaDrugCodeDisplayLookup(npiDataStream));
     genEob = claimTransformerInterface.transform(dmeClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
