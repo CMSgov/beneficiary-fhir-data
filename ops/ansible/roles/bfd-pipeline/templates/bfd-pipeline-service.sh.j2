@@ -7,7 +7,7 @@ export BFD_DB_URL='{{ db_url }}' {# derived from terraform control plane #}{{ '\
 {{ '#' if db_password_override|default('', true)|length<1 else '' }}export BFD_DB_PASSWORD='{{ db_password_override|default('', true) }}'                      {# application defaults to ssm db/password #}{{ '\n' }}
 {{ '#' if db_username_override|default('', true)|length<1 else '' }}export BFD_DB_USERNAME='{{ db_username_override|default('', true) }}'                      {# application defaults to ssm db/username #}{{ '\n' }}
 {{ '#' if db_auth_type_override|default('', true)|length<1 else '' }}export BFD_DB_AUTH_TYPE='{{ db_auth_type_override|default('', true) }}'                   {# application defaults to ssm db/auth_type #}{{ '\n' }}
-{{ '#' if db_max_connections_override|default('', true)|length<1 else '' }}export BFD_DB_MAX_CONNECTIONS='{{ db_max_connections_override|default('', true) }}' {# application defaults to ssm db/max_connections #}{{ '\n' }}
+{{ '#' if db_max_connections_override|default('', true)|length<1 else '' }}export BFD_DB_HIKARI_MAX_POOL_SIZE='{{ db_hikari_max_pool_size_override|default('', true) }}' {# application defaults to ssm db/hikari/max_pool_size #}{{ '\n' }}
 
 {{ '#' if new_relic_app_name_override|default('', true)|length<1 else ''}}export BFD_NEW_RELIC_APP_NAME='{{ new_relic_app_name_override|default('', true) }}'                                   {# application defaults to ssm new_relic/app_name #}{{ '\n' }}
 {{ '#' if new_relic_metrics_license_key_override|default('', true)|length<1 else '' }}export BFD_NEW_RELIC_METRICS_LICENSE_KEY='{{ new_relic_metrics_license_key_override|default('', true) }}' {# application defaults to ssm new_relic/metrics/license_key #}{{ '\n' }}
