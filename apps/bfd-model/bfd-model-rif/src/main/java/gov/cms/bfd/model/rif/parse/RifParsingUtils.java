@@ -27,7 +27,7 @@ public final class RifParsingUtils {
 
   /** The {@link CSVFormat} for RIF file parsing/writing. */
   public static final CSVFormat CSV_FORMAT =
-      CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
+      CSVFormat.EXCEL.builder().setHeader().setDelimiter('|').setEscape('\\').build();
 
   /** Date formatter used for Rif timestamps. */
   private static final DateTimeFormatter RIF_TIMESTAMP_FORMATTER =

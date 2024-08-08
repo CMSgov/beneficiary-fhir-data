@@ -74,7 +74,11 @@ public class RifObjectWrapper {
    * @return true if the value is non-null and non-empty
    */
   public boolean hasValue(final String label) {
-    return !Strings.isNullOrEmpty(header.get(label));
+    if (header.isMapped(label)) {
+      // header.get() returns an error if the field is missing
+      return !Strings.isNullOrEmpty(header.get(label));
+    }
+    return false;
   }
 
   /**
