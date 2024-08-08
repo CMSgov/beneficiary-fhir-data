@@ -18,8 +18,8 @@ export BFD_DB_URL='{{ db_url }}' {# derived from terraform control plane #}{{ '\
 # NOTE: Calculated values from ansible facts. Multiple available cpus/cores e.g. `$((3 * $(nproc)))`
 export BFD_LOADER_THREAD_COUNT='{{ ansible_processor_vcpus * (thread_multiple|default(3, true)|int) }}'
 {{ '' if pipeline_instance_type == 'ccw' else '#' }}export BFD_CCW_JOB_CLAIMS_LOADER_THREAD_COUNT='{{ ansible_processor_vcpus * (rif_thread_multiple_claims|default(25, true)|int) }}'
-{{ '' if pipeline_instance_type == 'ccw' else '#' }}export BFD_CCW_S3_BUCKET_NAME='{{ s3_bucket }}'                {# derived from terraform control plane #}{{ '\n' }}
-{{ '' if pipeline_instance_type == 'rda' else '#' }}export BFD_RDA_GRPC_INPROC_SERVER_S3_BUCKET='{{ s3_bucket }}'  {# derived from terraform control plane #}{{ '\n' }}
+{{ '' if pipeline_instance_type == 'ccw' else '#' }}export BFD_CCW_S3_BUCKET_NAME='{{ s3_bucket }}'                   {# derived from terraform control plane #}{{ '\n' }}
+{{ '' if pipeline_instance_type == 'rda' else '#' }}export BFD_RDA_GRPC_INPROCESS_SERVER_S3_BUCKET='{{ s3_bucket }}'  {# derived from terraform control plane #}{{ '\n' }}
 
 {# Referenced by the pipeline's logback.xml file to add environment name for use in splunk. #}{{ '\n' }}
 export BFD_ENV_NAME='{{ env_name_std }}'
