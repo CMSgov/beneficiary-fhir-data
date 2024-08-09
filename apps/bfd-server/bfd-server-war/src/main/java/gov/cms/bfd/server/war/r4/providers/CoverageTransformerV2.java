@@ -15,8 +15,10 @@ import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -987,13 +989,16 @@ final class CoverageTransformerV2 {
           TransformerConstants.COVERAGE_PLAN_PART_B,
           Optional.empty());
     }
-    if (beneficiary.getHmoCoverageCount().isPresent()
-        && beneficiary.getHmoCoverageCount().get().compareTo(BigDecimal.ZERO) > 0) {
-      createCoverageClass(
-          coverage,
-          CoverageClass.PLAN,
-          TransformerConstants.COVERAGE_PLAN_PART_C,
-          Optional.empty());
+    Optional<Instant> lastUpdatedOpt = beneficiary.getLastUpdated();
+    if (lastUpdatedOpt.isPresent()) {
+      Date lastUpdated = Date.from(lastUpdatedOpt.get());
+      if (beneficiaryHasPartC(beneficiary, lastUpdated.getMonth())) {
+        createCoverageClass(
+            coverage,
+            CoverageClass.PLAN,
+            TransformerConstants.COVERAGE_PLAN_PART_C,
+            Optional.empty());
+      }
     }
     if (beneficiary.getPartDCoverageStartDate().isPresent()) {
       createCoverageClass(
@@ -1002,6 +1007,44 @@ final class CoverageTransformerV2 {
           TransformerConstants.COVERAGE_PLAN_PART_D,
           Optional.empty());
     }
+  }
+
+  /**
+   * Determines if the beneficiary is subscribed to Part C. Due to a lag with ingestion, we check if
+   * last_updated > current month, we check if the previous month is present.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @param month The month that the beneficiary record was last updated within the database.
+   * @return true/false if beneficiary has Part C
+   */
+  private boolean beneficiaryHasPartC(Beneficiary beneficiary, int month) {
+    return switch (month) {
+      case 1 -> beneficiary.getPartCContractNumberJanId().isPresent()
+          || beneficiary.getPartCContractNumberDecId().isPresent();
+      case 2 -> beneficiary.getPartCContractNumberFebId().isPresent()
+          || beneficiary.getPartCContractNumberJanId().isPresent();
+      case 3 -> beneficiary.getPartCContractNumberMarId().isPresent()
+          || beneficiary.getPartCContractNumberFebId().isPresent();
+      case 4 -> beneficiary.getPartCContractNumberAprId().isPresent()
+          || beneficiary.getPartCContractNumberMarId().isPresent();
+      case 5 -> beneficiary.getPartCContractNumberMayId().isPresent()
+          || beneficiary.getPartCContractNumberAprId().isPresent();
+      case 6 -> beneficiary.getPartCContractNumberJunId().isPresent()
+          || beneficiary.getPartCContractNumberMayId().isPresent();
+      case 7 -> beneficiary.getPartCContractNumberJulId().isPresent()
+          || beneficiary.getPartCContractNumberJunId().isPresent();
+      case 8 -> beneficiary.getPartCContractNumberAugId().isPresent()
+          || beneficiary.getPartCContractNumberJulId().isPresent();
+      case 9 -> beneficiary.getPartCContractNumberSeptId().isPresent()
+          || beneficiary.getPartCContractNumberAugId().isPresent();
+      case 10 -> beneficiary.getPartCContractNumberOctId().isPresent()
+          || beneficiary.getPartCContractNumberSeptId().isPresent();
+      case 11 -> beneficiary.getPartCContractNumberNovId().isPresent()
+          || beneficiary.getPartCContractNumberOctId().isPresent();
+      case 12 -> beneficiary.getPartCContractNumberDecId().isPresent()
+          || beneficiary.getPartCContractNumberNovId().isPresent();
+      default -> false;
+    };
   }
 
   /**
