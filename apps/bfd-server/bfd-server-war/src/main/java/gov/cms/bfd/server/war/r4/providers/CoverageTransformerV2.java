@@ -15,7 +15,10 @@ import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,8 +28,10 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -122,10 +127,43 @@ final class CoverageTransformerV2 {
     createCoverageClass(
         coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
 
+    addSubscribedParts(beneficiary, coverage);
+
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
+
+    TransformerUtilsV2.setPeriodStart(
+        coverage.getPeriod(), beneficiary.getMedicareCoverageStartDate());
+    coverage.setStatus(CoverageStatus.ACTIVE);
+    coverage.setSubscriber(TransformerUtilsV2.referencePatient(beneficiary));
+
+    Extension baseExtension = new Extension();
+    baseExtension.setUrl(TransformerConstants.C4DIC_COLOR_PALETTE_EXT_URL);
+
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_FOREGROUNDCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_FOREGROUNDCOLOR,
+            null));
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_BACKGROUNDCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_BACKGROUNDCOLOR,
+            null));
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_HIGHLIGHTCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_HIGHLIGHTCOLOR,
+            null));
+    coverage.setExtension(Collections.singletonList(baseExtension));
 
     timer.stop();
     return coverage;
@@ -868,8 +906,38 @@ final class CoverageTransformerV2 {
             coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
     organization.setActive(true);
     organization.setName(COVERAGE_ISSUER);
+    addC4dicOrganizationContact(organization);
 
     coverage.addPayor(new Reference(organization));
+  }
+
+  /**
+   * Sets the Payor's contact information on the contained {@link Organization} resource.
+   *
+   * @param organization The contained {@link Organization} resource
+   */
+  private void addC4dicOrganizationContact(Organization organization) {
+    Organization.OrganizationContactComponent organizationContactComponent =
+        new Organization.OrganizationContactComponent();
+    organizationContactComponent.setPurpose(
+        TransformerUtilsV2.createCodeableConcept(
+            TransformerConstants.C4DIC_CONTACT_TYPE_CODE_SYSTEM,
+            null,
+            TransformerConstants.C4DIC_CONTACT_TYPE_PAYOR_DISPLAY,
+            TransformerConstants.C4DIC_CONTACT_TYPE_PAYOR_CODE));
+
+    ContactPoint phoneContact =
+        TransformerUtilsV2.createContactPoint(
+            ContactPoint.ContactPointSystem.PHONE,
+            TransformerConstants.C4DIC_MEDICARE_SERVICE_PHONE_NUMBER,
+            null);
+
+    ContactPoint emailContact =
+        TransformerUtilsV2.createContactPoint(
+            ContactPoint.ContactPointSystem.URL, TransformerConstants.C4DIC_MEDICARE_URL, null);
+    List<ContactPoint> contactPoints = List.of(phoneContact, emailContact);
+    organizationContactComponent.setTelecom(contactPoints);
+    organization.addContact(organizationContactComponent);
   }
 
   /**
@@ -884,18 +952,99 @@ final class CoverageTransformerV2 {
         TransformerUtilsV2.findOrCreateContainedOrganization(
             coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
 
-    Identifier identifier =
-        new Identifier()
-            .setType(
-                TransformerUtilsV2.createCodeableConcept(
-                    TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-                    null,
-                    TransformerConstants.PATIENT_MB_ID_DISPLAY,
-                    "MB"))
-            .setValue((String.valueOf(beneficiary.getBeneficiaryId())))
-            .setSystem(TransformerConstants.CODING_BBAPI_BENE_ID)
-            .setAssigner(new Reference(organization));
-    coverage.addIdentifier(identifier);
+    if (beneficiary.getMedicareBeneficiaryId().isPresent()) {
+      Identifier identifier =
+          new Identifier()
+              .setType(
+                  TransformerUtilsV2.createCodeableConcept(
+                      TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+                      null,
+                      TransformerConstants.PATIENT_MB_ID_DISPLAY,
+                      "MB"))
+              .setValue(beneficiary.getMedicareBeneficiaryId().get())
+              .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
+              .setAssigner(new Reference(organization));
+      coverage.addIdentifier(identifier);
+    }
+  }
+
+  /**
+   * Denotes which parts the beneficiary is subscribed to on the provided {@link Coverage} resource.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @param coverage The {@link Coverage} to Coverage details
+   */
+  private void addSubscribedParts(Beneficiary beneficiary, Coverage coverage) {
+    if (beneficiary.getPartACoverageStartDate().isPresent()) {
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_A,
+          Optional.empty());
+    }
+    if (beneficiary.getPartBCoverageStartDate().isPresent()) {
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_B,
+          Optional.empty());
+    }
+    Optional<Instant> lastUpdatedOpt = beneficiary.getLastUpdated();
+    if (lastUpdatedOpt.isPresent()) {
+      Date lastUpdated = Date.from(lastUpdatedOpt.get());
+      if (beneficiaryHasPartC(beneficiary, lastUpdated.getMonth())) {
+        createCoverageClass(
+            coverage,
+            CoverageClass.PLAN,
+            TransformerConstants.COVERAGE_PLAN_PART_C,
+            Optional.empty());
+      }
+    }
+    if (beneficiary.getPartDCoverageStartDate().isPresent()) {
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_D,
+          Optional.empty());
+    }
+  }
+
+  /**
+   * Determines if the beneficiary is subscribed to Part C. Due to a lag with ingestion, we check if
+   * last_updated > current month, we check if the previous month is present.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @param month The month that the beneficiary record was last updated within the database.
+   * @return true/false if beneficiary has Part C
+   */
+  private boolean beneficiaryHasPartC(Beneficiary beneficiary, int month) {
+    return switch (month) {
+      case 1 -> beneficiary.getPartCContractNumberJanId().isPresent()
+          || beneficiary.getPartCContractNumberDecId().isPresent();
+      case 2 -> beneficiary.getPartCContractNumberFebId().isPresent()
+          || beneficiary.getPartCContractNumberJanId().isPresent();
+      case 3 -> beneficiary.getPartCContractNumberMarId().isPresent()
+          || beneficiary.getPartCContractNumberFebId().isPresent();
+      case 4 -> beneficiary.getPartCContractNumberAprId().isPresent()
+          || beneficiary.getPartCContractNumberMarId().isPresent();
+      case 5 -> beneficiary.getPartCContractNumberMayId().isPresent()
+          || beneficiary.getPartCContractNumberAprId().isPresent();
+      case 6 -> beneficiary.getPartCContractNumberJunId().isPresent()
+          || beneficiary.getPartCContractNumberMayId().isPresent();
+      case 7 -> beneficiary.getPartCContractNumberJulId().isPresent()
+          || beneficiary.getPartCContractNumberJunId().isPresent();
+      case 8 -> beneficiary.getPartCContractNumberAugId().isPresent()
+          || beneficiary.getPartCContractNumberJulId().isPresent();
+      case 9 -> beneficiary.getPartCContractNumberSeptId().isPresent()
+          || beneficiary.getPartCContractNumberAugId().isPresent();
+      case 10 -> beneficiary.getPartCContractNumberOctId().isPresent()
+          || beneficiary.getPartCContractNumberSeptId().isPresent();
+      case 11 -> beneficiary.getPartCContractNumberNovId().isPresent()
+          || beneficiary.getPartCContractNumberOctId().isPresent();
+      case 12 -> beneficiary.getPartCContractNumberDecId().isPresent()
+          || beneficiary.getPartCContractNumberNovId().isPresent();
+      default -> false;
+    };
   }
 
   /**

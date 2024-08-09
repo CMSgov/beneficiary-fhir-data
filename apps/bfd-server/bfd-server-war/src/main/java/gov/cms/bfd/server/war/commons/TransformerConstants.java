@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
+import org.hl7.fhir.r4.model.Organization;
 
 /**
  * Contains all of the shared constants used to transform CCW JPA entities (e.g. {@link
@@ -558,4 +559,95 @@ public final class TransformerConstants {
     /** Represents a historic identifier. */
     HISTORIC;
   }
+
+  /**
+   * Code system used for {@link Organization.OrganizationContactComponent#getTelecom()}.
+   *
+   * <p>ValueSet: C4DIC Contact Type Codes <a
+   * href="https://hl7.org/fhir/us/insurance-card/STU1.1/ValueSet-C4DICContactTypeVS.html">ValueSet:
+   * C4DIC Contact Type Codes</a>
+   */
+  public static final String C4DIC_CONTACT_TYPE_CODE_SYSTEM =
+      "http://terminology.hl7.org/CodeSystem/contactentity-type";
+
+  /**
+   * C4DIC Contact Type Value Set URL for code PAYOR <a
+   * href="https://hl7.org/fhir/us/insurance-card/STU1.1/ValueSet-C4DICContactTypeVS.html">ValueSet
+   * C4DIC Contact Type</a>.
+   */
+  public static final String C4DIC_CONTACT_TYPE_PAYOR_CODE = "PAYOR";
+
+  /**
+   * C4DIC Contact Type Value Set URL for code PAYOR <a
+   * href="https://hl7.org/fhir/us/insurance-card/STU1.1/ValueSet-C4DICContactTypeVS.html">ValueSet
+   * C4DIC Contact Type</a>.
+   */
+  public static final String C4DIC_CONTACT_TYPE_PAYOR_DISPLAY = "Payor";
+
+  /** C4DIC Medicare Customer Service Phone Number. */
+  public static final String C4DIC_MEDICARE_SERVICE_PHONE_NUMBER = "1-800-633-4227";
+
+  /** C4DIC Medicare URL. */
+  public static final String C4DIC_MEDICARE_URL = "medicare.gov";
+
+  /**
+   * Code System URL for C4DIC Color Palette extension <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension">Extension:
+   * C4DIC Color Palette</a>.
+   */
+  public static final String C4DIC_COLOR_PALETTE_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension";
+
+  /**
+   * Code System URL for C4DIC Foreground Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension">Extension:
+   * C4DIC Foreground Color</a>.
+   */
+  public static final String C4DIC_FOREGROUNDCOLOR_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension";
+
+  /**
+   * Code System for C4DIC color palette extension <a
+   * href="http://terminology.hl7.org/CodeSystem/IECColourManagement">Extension: C4DIC color palette
+   * extension</a>.
+   */
+  public static final String C4DIC_COLORS_CODE_SYSTEM =
+      "http://terminology.hl7.org/CodeSystem/IECColourManagement";
+
+  /**
+   * Value for C4DIC Foreground Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension">Extension:
+   * C4DIC Foreground Color</a>.
+   */
+  public static final String C4DIC_FOREGROUNDCOLOR = "#F4FEFF";
+
+  /**
+   * Code System URL for C4DIC Background Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension">Extension:
+   * C4DIC Background Color</a>.
+   */
+  public static final String C4DIC_BACKGROUNDCOLOR_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension";
+
+  /**
+   * Value for C4DIC Background Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension">Extension:
+   * C4DIC Background Color</a>.
+   */
+  public static final String C4DIC_BACKGROUNDCOLOR = "#092E86";
+
+  /**
+   * Code System URL for C4DIC Highlight Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension">Extension:
+   * C4DIC Highlight Color</a>.
+   */
+  public static final String C4DIC_HIGHLIGHTCOLOR_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension";
+
+  /**
+   * Value for C4DIC Highlight Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension">Extension:
+   * C4DIC Highlight Color</a>.
+   */
+  public static final String C4DIC_HIGHLIGHTCOLOR = "#3B9BFB";
 }
