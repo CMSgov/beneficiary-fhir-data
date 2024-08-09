@@ -1,0 +1,85 @@
+name: "Deploy Terraservice"
+description: "Composite action to deploy a given Terraservice; assumes BFD repo checked-out at workspace root"
+inputs:
+  bfdEnvironment:
+    description: "The BFD environment to deploy the given service to"
+    required: true
+  servicePath:
+    description: "The path to the Terraservice relative to the root of the repository"
+    required: true
+  terraformVarsJson:
+    description: "JSON object map of variables to their values"
+    required: false
+    default: "{}"
+runs:
+  using: "composite"
+  steps:
+    - name: Validate Terraservice path
+      run: |
+        if [[ ! -d "${{ inputs.servicePath }}"]]; then
+          echo "Directory '${{ inputs.servicePath }}' does not exist; has the BFD repo been checked-out?"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Generate Terraform vars args
+      id: gen-tf-vars-args
+      run: |
+        tf_vars_args="$(
+          echo "${{ inputs.terraformVarsJson }}" | jq -r 'to_entries |
+            map(select(.value != null and .value != "")) |
+            map("\"-var=" + .key + "=" + (.value | tostring)+ "\"") |
+            join(" ")'
+        )"
+        echo "tf_vars_args=$tf_vars_args" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Check existing Terraform version
+      id: check-tf-version
+      run: |
+        cur_version="NONE"
+        if [[ -x "$(command -v terraform)" ]]; then
+          cur_version="$(terraform --version)"
+        fi
+        echo "cur_version=$cur_version" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Get required Terraform version
+      uses: dflook/terraform-version@v1
+      id: terraform-version
+      with:
+        path: ${{ github.workspace }}/${{ inputs.servicePath }}
+
+    - name: Setup Terraform
+      if: steps.check-tf-version.outputs.cur_version != steps.terraform-version.outputs.terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ steps.terraform-version.outputs.terraform }}
+        # No subsequent jobs require the output of the Terraform commands, so we can stip installing
+        # the wrapper
+        terraform_wrapper: false
+
+    - name: Terraform init
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.servicePath }}"
+        terraform init -no-color
+      shell: bash
+
+    - name: Select Terraform workspace
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.servicePath }}"
+        terraform workspace new "${{ inputs.bfdEnvironment }}" 2> /dev/null || true &&\
+        terraform workspace select "${{ inputs.bfdEnvironment }}" -no-color
+      shell: bash
+
+    - name: Generate Terraform plan
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.servicePath }}"
+        terraform plan ${{ steps.gen-tf-vars-args.outputs.tf_vars_args }} -no-color -out=tfplan
+      shell: bash
+
+    - name: Apply Terraservice
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.servicePath }}"
+        terraform apply -no-color -input=false tfplan
+      shell: bash
