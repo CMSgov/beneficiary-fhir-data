@@ -8,7 +8,8 @@
   remote_user: ec2-user
   gather_facts: no
   vars:
-    data_pipeline_dir: '/bluebutton-data-pipeline'
+    ref_dir: '/bluebutton-data-pipeline'
+    env_name_std: "test"
     # TODO: Remove this when CloudWatch Agent role is properly removed from build tasks
     env: "test"
 
@@ -35,4 +36,4 @@
       import_role:
         name: bfd-pipeline
       vars:
-        data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
+        tmp: "{{ ref_dir }}/tmp"
