@@ -227,6 +227,7 @@ public class R4PatientResourceProviderTest {
     when(mockQueryFunction.setParameter(anyString(), anyString())).thenReturn(mockQueryFunction);
   }
 
+  /** Sets up the default search repository mocks. */
   private void mockBeneSearchRepository() {
     LocalDate date = YearMonth.of(Integer.parseInt(refYear.getValue()), 10).atDay(1);
     when(beneficiaryMonthlySearchRepository.beneficiaryExists(eq(date), eq(contractId.getValue())))

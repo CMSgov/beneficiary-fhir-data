@@ -44,7 +44,6 @@ public interface BeneficiaryMonthlySearchRepository
   @Query(
       value =
           """
-
           SELECT bm.parentBeneficiary
           FROM BeneficiaryMonthly bm
           WHERE (
