@@ -74,7 +74,10 @@ runs:
       run: |
         cur_version="NONE"
         if [[ -x "$(command -v terraform)" ]]; then
-          cur_version="$(terraform --version)"
+          # Terraform emits multiple unnecessary lines when running "terraform --version" indicating
+          # the OS, arch, whether Terraform is out-of-date, etc. We don't care about anything but
+          # the version, so the grep matches on the version number and returns only the match
+          cur_version="$(terraform --version | grep -Po "(?<=Terraform v)(.*)$")"
         fi
         echo "cur_version=$cur_version" >> $GITHUB_OUTPUT
       shell: bash
