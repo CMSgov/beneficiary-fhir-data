@@ -75,6 +75,6 @@ jobs:
         with:
           bfdEnvironment: ${{ inputs.bfdEnvironment }}
           servicePath: ops/terraform/services/static-site
-          # TODO
+          # TODO: Replace
           cloudwatchLogGroup: "/bfd-3465/testing"
           cloudwatchLogStream: "ci-static-site-${{ github.run_number }}"
