@@ -188,7 +188,7 @@ runs:
 
         # Process the "raw" JSON logs from each Terraform invocation into an array of non-empty
         # log events that CloudWatch understands
-        jq '. | map(select(.message != ""))' "${{ steps.tf-logs-file-path.outputs.raw_logs_path }}" > \
+        jq -s '. | map(select(.message != ""))' "${{ steps.tf-logs-file-path.outputs.raw_logs_path }}" > \
           "${{ steps.tf-logs-file-path.outputs.processed_logs_path }}"
         # Submit the "processed" logs file to CloudWatch
         aws logs put-log-events --log-group-name "${{ inputs.cloudwatchLogGroup }}" \
