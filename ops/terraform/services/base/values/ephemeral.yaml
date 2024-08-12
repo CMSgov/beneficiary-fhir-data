@@ -56,6 +56,7 @@
 /bfd/${env}/server/nonsensitive/pac_resources_enabled: true
 /bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
+/bfd/${env}/server/nonsensitive/xref/enabled: "false"
 /bfd/${env}/server/nonsensitive/lb_is_public: false
 /bfd/${env}/server/nonsensitive/lb_ingress_port: 443
 /bfd/${env}/server/nonsensitive/lb_egress_port: 7443

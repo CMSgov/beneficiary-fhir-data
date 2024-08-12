@@ -15,7 +15,7 @@
 			<layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
 				<jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
 					<!-- If you need things pretty-printed, pipe the log into jq or something like that. -->
-					<prettyPrint>false</prettyPrint>
+					<prettyPrint>${LOGBACK_PRETTY_PRINT:-false}</prettyPrint>
 				</jsonFormatter>
 
 				<!-- Add line breaks between each entry, to make tailing the log simpler. -->

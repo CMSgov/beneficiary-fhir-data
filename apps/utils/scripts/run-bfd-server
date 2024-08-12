@@ -179,7 +179,7 @@ function setvar() {
 }
 
 ARGS="-Xms${max_heap} -Xmx${max_heap}"
-ARGS="$ARGS -Dorg.jboss.logging.provider=slf4j"
+ARGS="$ARGS -Dorg.jboss.logging.provider=slf4j -DLOGBACK_PRETTY_PRINT=true"
 
 # If debug_enabled is true an IDE can connect its debugger on port 5005 to debug the pipeline.
 # If debug_suspend is y the pipeline app will wait for a debugger to connect before doing any work.
@@ -255,6 +255,7 @@ setvar db/password "InsecureLocalDev"
 setvar pac/enabled true
 setvar pac/claim_source_types "fiss,mcs"
 setvar c4dic/enabled false
+setvar xref/enabled false
 
 classpath="${launcher_jar}:${bin_dir}/lib/*:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.server.launcher.DataServerLauncherApp"

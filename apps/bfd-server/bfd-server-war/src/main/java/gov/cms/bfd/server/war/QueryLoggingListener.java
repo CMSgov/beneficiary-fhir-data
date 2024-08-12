@@ -153,9 +153,7 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     /** Represents the query for beneficiary by coverage contract. */
     BENE_BY_COVERAGE(
         "bene_by_coverage",
-        (s ->
-            s.contains(" from ccw.beneficiaries ")
-                && s.contains("where beneficiar0_.ptd_cntrct_"))),
+        (s -> s.contains("FROM ccw.beneficiaries ") && s.contains("AND bm.partd_contract_"))),
     /** Represents the query for EOB by bene id (carrier). */
     EOBS_BY_BENE_ID_CARRIER(
         "eobs_by_bene_id_carrier", (s -> s.contains(" from ccw.carrier_claims "))),
@@ -193,9 +191,9 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     BENE_EXISTS_BY_YEAR_MONTH_PARTD_CONTRACT_ID(
         "bene_exists_by_year_month_part_d_contract_id",
         (s ->
-            s.contains(" from ccw.beneficiary_monthly ")
-                && s.contains("year_month=")
-                && s.contains("partd_contract_number_id="))),
+            s.contains(" FROM ccw.beneficiary_monthly ")
+                && s.contains("year_month =")
+                && s.contains("partd_contract_number_id ="))),
 
     /** Represents query that invokes the check_claims_mask function. */
     CHECK_CLAIMS_MASK("check_claims_mask", (s -> s.contains("check_claims_mask"))),
