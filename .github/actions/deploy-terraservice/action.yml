@@ -82,22 +82,24 @@ runs:
         echo "cur_version=$cur_version" >> $GITHUB_OUTPUT
       shell: bash
 
-    - name: Get required Terraform version
-      uses: dflook/terraform-version@v1
-      id: terraform-version
-      with:
-        path: ${{ github.workspace }}/${{ inputs.servicePath }}
+    # - name: Get required Terraform version
+    #   uses: dflook/terraform-version@v1
+    #   id: terraform-version
+    #   with:
+    #     path: ${{ github.workspace }}/${{ inputs.servicePath }}
 
     - name: Setup Terraform
       # Only install Terraform if the current runner does not have the expected version of Terraform
       # installed already
-      if: steps.check-tf-version.outputs.cur_version != steps.terraform-version.outputs.terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: ${{ steps.terraform-version.outputs.terraform }}
-        # No subsequent jobs require the output of the Terraform commands, so we can stip installing
-        # the wrapper that sets the "stdout", "stderr", etc. outputs on steps running Terraform
-        terraform_wrapper: false
+      # if: steps.check-tf-version.outputs.cur_version != steps.terraform-version.outputs.terraform
+      # if: steps.check-tf-version.outputs.cur_version != "NONE"
+      # uses: hashicorp/setup-terraform@v3
+      uses: cbuschka/setup-tfvm@v1
+      # with:
+      #   terraform_version: ${{ steps.terraform-version.outputs.terraform }}
+      #   # No subsequent jobs require the output of the Terraform commands, so we can stip installing
+      #   # the wrapper that sets the "stdout", "stderr", etc. outputs on steps running Terraform
+      #   terraform_wrapper: false
 
     - name: Terraform init
       run: |
