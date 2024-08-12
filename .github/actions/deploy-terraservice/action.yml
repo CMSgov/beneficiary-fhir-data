@@ -22,7 +22,7 @@ runs:
   steps:
     - name: Validate inputs
       run: |
-        if [[ ! -d "${{ inputs.servicePath }}"]]; then
+        if [[ ! -d "${{ github.workspace }}/${{ inputs.servicePath }}" ]]; then
           echo "Directory '${{ inputs.servicePath }}' does not exist; has the BFD repo been checked-out?"
           exit 1
         fi
