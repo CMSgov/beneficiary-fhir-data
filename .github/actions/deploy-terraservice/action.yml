@@ -12,10 +12,10 @@ inputs:
     required: false
     default: "{}"
   cloudwatchLogGroup:
-    description: "Name of CloudWatch Log Group to submit Terraform logs to"
+    description: "Name of CloudWatch Log Group to submit Terraform logs to; must exist"
     required: true
   cloudwatchLogStream:
-    description: "Name of CloudWatch Log Stream to submit Terraform logs to"
+    description: "Name of CloudWatch Log Stream to submit Terraform logs to; will be created if necessary"
     required: true
 runs:
   using: "composite"
@@ -26,10 +26,17 @@ runs:
           echo "Directory '${{ inputs.servicePath }}' does not exist; has the BFD repo been checked-out?"
           exit 1
         fi
-        # See https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_CreateLogGroup.html
-        echo "${{ inputs.cloudwatchLogGroup }}" | grep -P '^[a-zA-Z0-9_\-/\.#]+$' | grep -Pv '^/aws/'
         # See https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_CreateLogStream.html
         echo "${{ inputs.cloudwatchLogStream }}" | grep -Pv '[:*]'
+
+        is_valid_log_group="$(
+          aws logs describe-log-groups --log-group-name-pattern "${{ inputs.cloudwatchLogGroup }}" |
+            jq -r '.logGroups != []'
+        )"
+        if [[ $is_valid_log_group == "false" ]]; then
+          echo "'${{ inputs.cloudwatchLogGroup }}' does not exist; was the the correct Log Group specified?"
+          exit 1
+        fi
 
         # Mask Terraform variable JSON as it could potentially include sensitive values
         echo "::add-mask::${{ inputs.terraformVarsJson }}"
@@ -156,6 +163,23 @@ runs:
         if [[ -z "${{ steps.tf-logs-file-path.outputs.raw_logs_path }}" || ! -f "${{ steps.tf-logs-file-path.outputs.raw_logs_path }}" ]]; then
           echo "No logs to submit to CloudWatch"
           exit
+        fi
+
+        # While the Log Group provided in the inputs is assumed to exist already, the Log Stream is
+        # not. Attempt to create it, swallowing any error code that is returned and also capture
+        # the stderr output so that it can be checked
+        create_log_stream_stderr="$(
+          aws logs create-log-stream --log-group-name "${{ inputs.cloudwatchLogGroup }}" \
+            --log-stream-name "${{ inputs.cloudwatchLogStream }}" 2>&1 >/dev/null || true
+        )"
+
+        # If there was an error message logged by create-log-stream and that error was not
+        # indicating that the Log Stream already exists (which is fine), then log that there was an
+        # unrecoverable error and exit
+        if [[ -n $create_log_stream_stderr && $create_log_stream_stderr != *"ResourceAlreadyExistsException"* ]]; then
+          echo "Unrecoverable error occurred when trying to create Log Stream '${{inputs.cloudwatchLogStream }}' in Log Group '${{ inputs.cloudwatchLogGroup }}' ";
+          echo "$create_log_stream_stderr"
+          exit 1
         fi
 
         # Process the "raw" JSON logs from each Terraform invocation into an array of non-empty
