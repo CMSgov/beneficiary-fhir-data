@@ -925,7 +925,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the matching {@link Beneficiary}s
    */
   @Trace
-  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlies(List<Long> ids) {
+  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<Long> ids) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
@@ -1097,7 +1097,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     // Fetch the benes using the ids
-    return queryBeneficiariesByIdsWithBeneficiaryMonthlies(ids);
+    return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids);
   }
 
   /**
