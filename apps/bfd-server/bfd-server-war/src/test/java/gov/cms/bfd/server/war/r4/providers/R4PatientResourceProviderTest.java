@@ -30,6 +30,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.repositories.BeneficiaryMonthlySearchRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -41,6 +42,8 @@ import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +62,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Units tests for the {@link R4PatientResourceProvider} that do not require a full fhir setup to
@@ -102,6 +106,9 @@ public class R4PatientResourceProviderTest {
   /** The mock query, for mocking native function call. */
   @Mock TypedQuery mockQueryFunction;
 
+  /** The mock beneficiary monthly search repository. */
+  @Mock BeneficiaryMonthlySearchRepository beneficiaryMonthlySearchRepository;
+
   /** The test data bene. */
   private Beneficiary testBene;
 
@@ -133,7 +140,11 @@ public class R4PatientResourceProviderTest {
   public void setup() {
     patientProvider =
         new R4PatientResourceProvider(
-            metricRegistry, loadedFilterManager, beneficiaryTransformerV2);
+            metricRegistry,
+            loadedFilterManager,
+            beneficiaryTransformerV2,
+            beneficiaryMonthlySearchRepository,
+            false);
     patientProvider.setEntityManager(entityManager);
 
     List<Object> parsedRecords =
@@ -150,6 +161,7 @@ public class R4PatientResourceProviderTest {
 
     // entity manager mocking
     mockEntityManager();
+    mockBeneSearchRepository();
 
     // metrics mocking
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
@@ -213,6 +225,15 @@ public class R4PatientResourceProviderTest {
     when(entityManager.createNativeQuery(anyString())).thenReturn(mockQueryFunction);
     when(mockQueryFunction.setHint(any(), any())).thenReturn(mockQueryFunction);
     when(mockQueryFunction.setParameter(anyString(), anyString())).thenReturn(mockQueryFunction);
+  }
+
+  private void mockBeneSearchRepository() {
+    LocalDate date = YearMonth.of(Integer.parseInt(refYear.getValue()), 10).atDay(1);
+    when(beneficiaryMonthlySearchRepository.beneficiaryExists(eq(date), eq(contractId.getValue())))
+        .thenReturn(true);
+    when(beneficiaryMonthlySearchRepository.getBeneficiariesByDateAndContract(
+            eq(date), eq(contractId.getValue()), any(Pageable.class)))
+        .thenReturn(List.of(testBene));
   }
 
   /**

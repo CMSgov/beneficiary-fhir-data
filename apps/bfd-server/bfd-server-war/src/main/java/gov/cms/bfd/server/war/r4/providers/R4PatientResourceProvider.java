@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_XREF_ENABLED;
 import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
 import static java.util.Objects.requireNonNull;
 
@@ -41,6 +42,7 @@ import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.repositories.BeneficiaryMonthlySearchRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -50,7 +52,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.time.LocalDate;
 import java.time.Year;
@@ -70,6 +71,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -114,6 +117,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   /** The Beneficiary transformer. */
   private final BeneficiaryTransformerV2 beneficiaryTransformerV2;
 
+  /** The beneficiary monthly search repository. */
+  private final BeneficiaryMonthlySearchRepository beneficiaryMonthlySearchRepository;
+
+  /** Whether to enable xref queries. */
+  private final boolean xrefEnabled;
+
   /** The expected coverage id length. */
   private static final int EXPECTED_COVERAGE_ID_LENGTH = 5;
 
@@ -126,14 +135,20 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @param metricRegistry the metric registry
    * @param loadedFilterManager the loaded filter manager
    * @param beneficiaryTransformerV2 the beneficiary transformer
+   * @param beneficiaryMonthlySearchRepository the beneficiary monthly search repository
+   * @param xrefEnabled whether to enable xref queries
    */
   public R4PatientResourceProvider(
       MetricRegistry metricRegistry,
       LoadedFilterManager loadedFilterManager,
-      BeneficiaryTransformerV2 beneficiaryTransformerV2) {
+      BeneficiaryTransformerV2 beneficiaryTransformerV2,
+      BeneficiaryMonthlySearchRepository beneficiaryMonthlySearchRepository,
+      @Value("${" + SSM_PATH_XREF_ENABLED + ":false}") Boolean xrefEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
     this.beneficiaryTransformerV2 = requireNonNull(beneficiaryTransformerV2);
+    this.beneficiaryMonthlySearchRepository = beneficiaryMonthlySearchRepository;
+    this.xrefEnabled = xrefEnabled;
   }
 
   /**
@@ -353,7 +368,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Search
   @Trace
   public Bundle searchByCoverageContract(
-      // This is very explicit as a place holder until this kind
+      // This is very explicit as a placeholder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
           @Description(
@@ -910,8 +925,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @return the matching {@link Beneficiary}s
    */
   @Trace
-  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<Long> ids) {
-
+  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlies(List<Long> ids) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
@@ -989,7 +1003,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Trace
   private Bundle searchByCoverageContractAndYearMonth(
-      // This is very explicit as a place holder until this kind
+      // This is very explicit as a placeholder until this kind
       // of relational search is more common.
       TokenParam coverageId, LocalDate yearMonth, RequestDetails requestDetails) {
     checkCoverageId(coverageId);
@@ -1072,6 +1086,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      * doesn't support `limit` on those.)
      */
 
+    if (xrefEnabled) {
+      return queryBeneficiariesByPartDContractCodeAndYearMonth(yearMonth, contractCode, paging);
+    }
     // Fetch the Beneficiary.id values that we will get results for.
     List<Long> ids =
         queryBeneficiaryIdsByPartDContractCodeAndYearMonth(yearMonth, contractCode, paging);
@@ -1080,7 +1097,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     // Fetch the benes using the ids
-    return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids);
+    return queryBeneficiariesByIdsWithBeneficiaryMonthlies(ids);
   }
 
   /**
@@ -1094,26 +1111,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Trace
   private boolean queryBeneExistsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId) {
-    // Create the query to run.
-    // Create the query to run.
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<BeneficiaryMonthly> beneExistsCriteria =
-        builder.createQuery(BeneficiaryMonthly.class);
-    Root<BeneficiaryMonthly> beneMonthlyRoot = beneExistsCriteria.from(BeneficiaryMonthly.class);
-
-    Subquery<Integer> beneExistsSubquery = beneExistsCriteria.subquery(Integer.class);
-    Root<BeneficiaryMonthly> beneMonthlyRootSubquery =
-        beneExistsSubquery.from(BeneficiaryMonthly.class);
-
-    beneExistsSubquery
-        .select(builder.literal(1))
-        .where(
-            builder.equal(beneMonthlyRootSubquery.get(BeneficiaryMonthly_.yearMonth), yearMonth),
-            builder.equal(
-                beneMonthlyRootSubquery.get(BeneficiaryMonthly_.partDContractNumberId),
-                contractId));
-
-    beneExistsCriteria.select(beneMonthlyRoot).where(builder.exists(beneExistsSubquery));
 
     // Run the query and return the results.
     boolean matchingBeneExists = false;
@@ -1126,9 +1123,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     try {
       matchingBeneExists =
-          entityManager.createQuery(beneExistsCriteria).setMaxResults(1).getResultList().stream()
-              .findFirst()
-              .isPresent();
+          this.beneficiaryMonthlySearchRepository.beneficiaryExists(yearMonth, contractId);
       return matchingBeneExists;
     } finally {
       long beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneExistsTimer.stop();
@@ -1198,6 +1193,47 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "bene_ids_by_year_month_part_d_contract_id",
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneIds == null ? 0 : matchingBeneIds.size());
+      beneIdMatchesTimer.close();
+    }
+  }
+
+  /**
+   * Query beneficiaries by part d contract code and year-month.
+   *
+   * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
+   * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
+   *     against
+   * @param paging the {@link PatientLinkBuilder} being used for paging
+   * @return the {@link List} of matching {@link Beneficiary} values
+   */
+  @Trace
+  private List<Beneficiary> queryBeneficiariesByPartDContractCodeAndYearMonth(
+      LocalDate yearMonth, String contractId, PatientLinkBuilder paging) {
+
+    List<Beneficiary> matchingBenes = null;
+    Timer.Context beneIdMatchesTimer =
+        CommonTransformerUtils.createMetricsTimer(
+            metricRegistry,
+            getClass().getSimpleName(),
+            "query",
+            "bene_ids_by_year_month_part_d_contract_id");
+    try {
+      Pageable pageable = Pageable.ofSize(paging.getQueryMaxSize());
+      Long cursor = paging.getCursor();
+      if (cursor != null) {
+        pageable = pageable.withPage(cursor.intValue());
+      }
+
+      matchingBenes =
+          beneficiaryMonthlySearchRepository.getBeneficiariesByDateAndContract(
+              yearMonth, contractId, pageable);
+      return matchingBenes;
+    } finally {
+      long beneHistoryMatchesTimerQueryNanoSeconds = beneIdMatchesTimer.stop();
+      CommonTransformerUtils.recordQueryInMdc(
+          "bene_ids_by_year_month_part_d_contract_id",
+          beneHistoryMatchesTimerQueryNanoSeconds,
+          matchingBenes == null ? 0 : matchingBenes.size());
       beneIdMatchesTimer.close();
     }
   }

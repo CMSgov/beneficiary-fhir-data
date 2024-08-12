@@ -52,6 +52,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
@@ -60,6 +61,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
+@EnableJpaRepositories(basePackages = "gov.cms.bfd.server.war.commons.repositories")
 @EnableScheduling
 public class SpringConfiguration extends BaseConfiguration {
   /**
@@ -97,8 +99,11 @@ public class SpringConfiguration extends BaseConfiguration {
    */
   public static final String SSM_PATH_PAC_CLAIM_SOURCE_TYPES = "pac/claim_source_types";
 
-  /** The {@link String } Boolean property that is used to enable the C4DIC profile. */
+  /** The {@link String} Boolean property that is used to enable the C4DIC profile. */
   public static final String SSM_PATH_C4DIC_ENABLED = "c4dic/enabled";
+
+  /** The {@link String} Boolean property that is used to enable handling xref IDs. */
+  public static final String SSM_PATH_XREF_ENABLED = "xref/enabled";
 
   /** Maximum number of threads to use for executing EOB claim transformers in parallel. */
   public static final String PROP_EXECUTOR_SERVICE_THREADS = "bfdServer.executorService.threads";

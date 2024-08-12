@@ -23,6 +23,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.repositories.BeneficiaryMonthlySearchRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -74,6 +75,9 @@ public final class R4PatientResourceProviderIT {
   /** The mock entity manager for mocking database calls. */
   @Mock private EntityManager entityManager;
 
+  /** The mock beneficiary monthly search repository. */
+  @Mock private BeneficiaryMonthlySearchRepository beneficiaryMonthlySearchRepository;
+
   /** The Beneficiary transformer. */
   private BeneficiaryTransformerV2 beneficiaryTransformer;
 
@@ -105,7 +109,12 @@ public final class R4PatientResourceProviderIT {
     beneficiaryTransformer = new BeneficiaryTransformerV2(metricRegistry, false);
 
     patientProvider =
-        new R4PatientResourceProvider(metricRegistry, loadedFilterManager, beneficiaryTransformer);
+        new R4PatientResourceProvider(
+            metricRegistry,
+            loadedFilterManager,
+            beneficiaryTransformer,
+            beneficiaryMonthlySearchRepository,
+            false);
     patientProvider.setEntityManager(entityManager);
 
     List<Object> parsedRecords =
