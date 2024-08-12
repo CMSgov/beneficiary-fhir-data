@@ -104,6 +104,7 @@ runs:
     - name: Terraform init
       run: |
         cd "${{ github.workspace }}/${{ inputs.servicePath }}"
+        terraform --version
         terraform init -no-color
       shell: bash
 
