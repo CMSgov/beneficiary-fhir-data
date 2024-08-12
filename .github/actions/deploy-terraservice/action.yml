@@ -129,21 +129,22 @@ runs:
         )
         echo "Plan generated for ${{ inputs.servicePath }} successfully"
 
-    - name: Apply Terraservice
-      run: |
-        cd "${{ github.workspace }}/${{ inputs.servicePath }}"
-        echo "Applying Terraform plan for ${{ inputs.servicePath }}..."
-        terraform apply -no-color -input=false tfplan &> >(
-          while read line; do
-            echo "$(
-              jq -n \
-                --arg unix_ts "$(date +%s%3N)" \
-                --arg line "$line" \
-                '{ "timestamp": ($unix_ts | tonumber), "message": ($line | tostring) }'
-            )" >> "${{ steps.tf-logs-file-path.outputs.raw_logs_path }}"
-          done
-        )
-        echo "Terraform plan for ${{ inputs.servicePath }} applied"
+    # TODO: Uncomment
+    # - name: Apply Terraservice
+    #   run: |
+    #     cd "${{ github.workspace }}/${{ inputs.servicePath }}"
+    #     echo "Applying Terraform plan for ${{ inputs.servicePath }}..."
+    #     terraform apply -no-color -input=false tfplan &> >(
+    #       while read line; do
+    #         echo "$(
+    #           jq -n \
+    #             --arg unix_ts "$(date +%s%3N)" \
+    #             --arg line "$line" \
+    #             '{ "timestamp": ($unix_ts | tonumber), "message": ($line | tostring) }'
+    #         )" >> "${{ steps.tf-logs-file-path.outputs.raw_logs_path }}"
+    #       done
+    #     )
+    #     echo "Terraform plan for ${{ inputs.servicePath }} applied"
 
     # This step uploads the potentially sensitive Terraform log output from previous steps to
     # CloudWatch Logs so that BFD Engineers can still inspect the output without fear of that
