@@ -17,6 +17,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -990,15 +991,18 @@ final class CoverageTransformerV2 {
           Optional.empty());
     }
     Optional<Instant> lastUpdatedOpt = beneficiary.getLastUpdated();
+    Calendar calendar = Calendar.getInstance();
+    int month = calendar.get(Calendar.MONTH); // get current month
     if (lastUpdatedOpt.isPresent()) {
-      Date lastUpdated = Date.from(lastUpdatedOpt.get());
-      if (beneficiaryHasPartC(beneficiary, lastUpdated.getMonth())) {
-        createCoverageClass(
-            coverage,
-            CoverageClass.PLAN,
-            TransformerConstants.COVERAGE_PLAN_PART_C,
-            Optional.empty());
-      }
+      calendar.setTime(Date.from(lastUpdatedOpt.get()));
+      month = calendar.get(Calendar.MONTH); // get month from last_Updated
+    }
+    if (beneficiaryHasPartC(beneficiary, month)) {
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_C,
+          Optional.empty());
     }
     if (beneficiary.getPartDCoverageStartDate().isPresent()) {
       createCoverageClass(
@@ -1019,30 +1023,18 @@ final class CoverageTransformerV2 {
    */
   private boolean beneficiaryHasPartC(Beneficiary beneficiary, int month) {
     return switch (month) {
-      case 1 -> beneficiary.getPartCContractNumberJanId().isPresent()
-          || beneficiary.getPartCContractNumberDecId().isPresent();
-      case 2 -> beneficiary.getPartCContractNumberFebId().isPresent()
-          || beneficiary.getPartCContractNumberJanId().isPresent();
-      case 3 -> beneficiary.getPartCContractNumberMarId().isPresent()
-          || beneficiary.getPartCContractNumberFebId().isPresent();
-      case 4 -> beneficiary.getPartCContractNumberAprId().isPresent()
-          || beneficiary.getPartCContractNumberMarId().isPresent();
-      case 5 -> beneficiary.getPartCContractNumberMayId().isPresent()
-          || beneficiary.getPartCContractNumberAprId().isPresent();
-      case 6 -> beneficiary.getPartCContractNumberJunId().isPresent()
-          || beneficiary.getPartCContractNumberMayId().isPresent();
-      case 7 -> beneficiary.getPartCContractNumberJulId().isPresent()
-          || beneficiary.getPartCContractNumberJunId().isPresent();
-      case 8 -> beneficiary.getPartCContractNumberAugId().isPresent()
-          || beneficiary.getPartCContractNumberJulId().isPresent();
-      case 9 -> beneficiary.getPartCContractNumberSeptId().isPresent()
-          || beneficiary.getPartCContractNumberAugId().isPresent();
-      case 10 -> beneficiary.getPartCContractNumberOctId().isPresent()
-          || beneficiary.getPartCContractNumberSeptId().isPresent();
-      case 11 -> beneficiary.getPartCContractNumberNovId().isPresent()
-          || beneficiary.getPartCContractNumberOctId().isPresent();
-      case 12 -> beneficiary.getPartCContractNumberDecId().isPresent()
-          || beneficiary.getPartCContractNumberNovId().isPresent();
+      case 0 -> beneficiary.getPartCContractNumberJanId().isPresent();
+      case 1 -> beneficiary.getPartCContractNumberFebId().isPresent();
+      case 2 -> beneficiary.getPartCContractNumberMarId().isPresent();
+      case 3 -> beneficiary.getPartCContractNumberAprId().isPresent();
+      case 4 -> beneficiary.getPartCContractNumberMayId().isPresent();
+      case 5 -> beneficiary.getPartCContractNumberJunId().isPresent();
+      case 6 -> beneficiary.getPartCContractNumberJulId().isPresent();
+      case 7 -> beneficiary.getPartCContractNumberAugId().isPresent();
+      case 8 -> beneficiary.getPartCContractNumberSeptId().isPresent();
+      case 9 -> beneficiary.getPartCContractNumberOctId().isPresent();
+      case 10 -> beneficiary.getPartCContractNumberNovId().isPresent();
+      case 11 -> beneficiary.getPartCContractNumberDecId().isPresent();
       default -> false;
     };
   }
