@@ -1,6 +1,6 @@
 {
   "metrics": {
-    "namespace": "bfd-{{ env }}/bfd-pipeline/CWAgent",
+    "namespace": "bfd-{{ env_name_std }}/bfd-pipeline/CWAgent",
     "metrics_collected": {
       "collectd": {}
     }
@@ -11,19 +11,19 @@
         "collect_list": [
           {
             "file_path": "/var/log/messages",
-            "log_group_name": "/bfd/{{ env }}/var/log/messages",
+            "log_group_name": "/bfd/{{ env_name_std }}/var/log/messages",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%b %d %H:%M:%S"
           },
           {
             "file_path": "/var/log/secure",
-            "log_group_name": "/bfd/{{ env }}/var/log/secure",
+            "log_group_name": "/bfd/{{ env_name_std }}/var/log/secure",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%b %d %H:%M:%S"
           },
           {
-            "file_path": "/bluebutton-data-pipeline/bluebutton-data-pipeline.log",
-            "log_group_name": "/bfd/{{ env }}/bfd-pipeline/messages.txt",
+            "file_path": "{{ ref_dir }}/bluebutton-data-pipeline.log",
+            "log_group_name": "/bfd/{{ env_name_std }}/bfd-pipeline/messages.txt",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S,%f",
             "multi_line_start_pattern": "^[\\d\\d\\d\\d-\\d\\d-\\d\\d ]"
