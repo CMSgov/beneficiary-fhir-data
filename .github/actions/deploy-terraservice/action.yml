@@ -23,7 +23,7 @@ defaults:
 runs:
   using: "composite"
   steps:
-    - name: Validate and mask inputs
+    - name: Validate inputs
       run: |
         if [[ ! -d "${{ inputs.servicePath }}"]]; then
           echo "Directory '${{ inputs.servicePath }}' does not exist; has the BFD repo been checked-out?"
@@ -40,9 +40,6 @@ runs:
           echo "'${{ inputs.cloudwatchLogGroup }}' does not exist; was the the correct Log Group specified?"
           exit 1
         fi
-
-        # Mask Terraform variable JSON as it could potentially include sensitive values
-        echo "::add-mask::${{ inputs.terraformVarsJson }}"
 
     - name: Get Terraform logs file paths
       id: tf-logs-file-path
