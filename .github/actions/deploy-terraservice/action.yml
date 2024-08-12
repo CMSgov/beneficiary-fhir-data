@@ -69,37 +69,17 @@ runs:
         echo "tf_vars_args=$tf_vars_args" >> $GITHUB_OUTPUT
       shell: bash
 
-    - name: Check existing Terraform version
-      id: check-tf-version
+    - name: Check if tfvm is installed
+      id: check-tfvm-installed
       run: |
-        cur_version="NONE"
-        if [[ -x "$(command -v terraform)" ]]; then
-          # Terraform emits multiple unnecessary lines when running "terraform --version" indicating
-          # the OS, arch, whether Terraform is out-of-date, etc. We don't care about anything but
-          # the version, so the grep matches on the version number and returns only the match
-          cur_version="$(terraform --version | grep -Po "(?<=Terraform v)(.*)$")"
-        fi
-        echo "cur_version=$cur_version" >> $GITHUB_OUTPUT
+        is_tfvm_installed="$([[ -x "$(command -v tfvm)" ]] && echo "true" || echo "false")"
+        echo "is_tfvm_installed=$is_tfvm_installed" >> $GITHUB_OUTPUT
       shell: bash
 
-    # - name: Get required Terraform version
-    #   uses: dflook/terraform-version@v1
-    #   id: terraform-version
-    #   with:
-    #     path: ${{ github.workspace }}/${{ inputs.servicePath }}
-
     - name: Setup Terraform
-      # Only install Terraform if the current runner does not have the expected version of Terraform
-      # installed already
-      # if: steps.check-tf-version.outputs.cur_version != steps.terraform-version.outputs.terraform
-      if: steps.check-tf-version.outputs.cur_version == 'NONE'
-      # uses: hashicorp/setup-terraform@v3
+      # Only install tfvm/Terraform if the current runner does not have tfvm installed
+      if: steps.check-tfvm-installed.outputs.is_tfvm_installed == 'false'
       uses: cbuschka/setup-tfvm@v1
-      # with:
-      #   terraform_version: ${{ steps.terraform-version.outputs.terraform }}
-      #   # No subsequent jobs require the output of the Terraform commands, so we can stip installing
-      #   # the wrapper that sets the "stdout", "stderr", etc. outputs on steps running Terraform
-      #   terraform_wrapper: false
 
     - name: Terraform init
       run: |
