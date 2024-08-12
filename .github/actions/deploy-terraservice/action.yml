@@ -190,10 +190,10 @@ runs:
         # log events that CloudWatch understands
         jq -s '. | map(select(.message != ""))' "${{ steps.tf-logs-file-path.outputs.raw_logs_path }}" > \
           "${{ steps.tf-logs-file-path.outputs.processed_logs_path }}"
-        # Submit the "processed" logs file to CloudWatch
+        # Submit the "processed" logs file to CloudWatch. Capture stdout and ignore it
         aws logs put-log-events --log-group-name "${{ inputs.cloudwatchLogGroup }}" \
           --log-stream-name "${{ inputs.cloudwatchLogStream }}" \
-          --log-events "file://${{ steps.tf-logs-file-path.outputs.processed_logs_path }}"
+          --log-events "file://${{ steps.tf-logs-file-path.outputs.processed_logs_path }}" 1>/dev/null
 
         echo "Terraform logs put to Log Group '${{ inputs.cloudwatchLogGroup }}' in Log Stream '${{ inputs.cloudwatchLogStream }}'"
       shell: bash
