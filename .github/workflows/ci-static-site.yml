@@ -1,0 +1,83 @@
+
+name: "CI - Deploy Static Site"
+on:
+  push:
+  # workflow_call:
+  #   inputs:
+  #     bfdEnvironment:
+  #       description: "The BFD environment to deploy the Static Site to"
+  #       required: true
+  #       type: string
+  #     awsRegion:
+  #       description: >-
+  #         Override the AWS Region destination for uploaded artifacts.
+  #         Default to `us-east-1`.
+  #       default: us-east-1
+  #       type: string
+  #       required: true
+  # workflow_dispatch:
+  #   inputs:
+  #     bfdEnvironment:
+  #       description: "The BFD environment to deploy the Static Site to"
+  #       required: true
+  #       type: string
+  #     branch:
+  #       description: >-
+  #         Override the branch on which the build is based.
+  #         Default to selected reference in the `Use workflow from` drop-down when empty.
+  #       required: false
+  #     awsRegion:
+  #       description: >-
+  #         Override the AWS Region destination for uploaded artifacts.
+  #         Default to `us-east-1`.
+  #       default: us-east-1
+  #       type: choice
+  #       options:
+  #        - us-east-1
+  #        - us-west-2
+  #       required: true
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+defaults:
+  run:
+    shell: bash
+jobs:
+  deploy-static-site:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "test"
+
+      # - name: Checkout
+      #   if: github.event_name == 'workflow_dispatch'
+      #   uses: actions/checkout@v4
+      #   with:
+      #     fetch-depth: 0
+      #     ref: ${{ inputs.branch || github.ref_name }}
+
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+      #     role-session-name: ci-static-site
+      #     aws-region: ${{ inputs.awsRegion }}
+
+      # - name: Mask sensitive AWS data
+      #   run: |
+      #     caller_id="$(aws sts get-caller-identity)"
+      #     account_num="$(jq -r '.Account' <<<$caller_id)"
+      #     role_arn="$(jq -r '.Arn' <<<$caller_id)"
+      #     user_id="$(jq -r '.UserId' <<<$caller_id)"
+
+      #     echo "::add-mask::$account_num"
+      #     echo "::add-mask::$role_arn"
+      #     echo "::add-mask::$user_id"
+
+      # - name: Deploy static-site Terraservice
+      #   uses: ./.github/actions/deploy-terraservice
+      #   with:
+      #     bfdEnvironment: ${{ inputs.bfdEnvironment }}
+      #     servicePath: ops/terraform/services/static-site
+      #     # TODO
+      #     cloudwatchLogGroup: "/bfd-3465/testing"
+      #     cloudwatchLogStream: "ci-static-site-${{ github.run_number }}"
