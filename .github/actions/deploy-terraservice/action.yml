@@ -17,6 +17,9 @@ inputs:
   cloudwatchLogStream:
     description: "Name of CloudWatch Log Stream to submit Terraform logs to; will be created if necessary"
     required: true
+defaults:
+  run:
+    shell: bash
 runs:
   using: "composite"
   steps:
@@ -40,7 +43,6 @@ runs:
 
         # Mask Terraform variable JSON as it could potentially include sensitive values
         echo "::add-mask::${{ inputs.terraformVarsJson }}"
-      shell: bash
 
     - name: Get Terraform logs file paths
       id: tf-logs-file-path
@@ -50,7 +52,6 @@ runs:
         echo "raw_logs_path=$raw_logs_path" >> $GITHUB_OUTPUT
         processed_logs_path="${{ github.workspace }}/$uuid.processed.json"
         echo "processed_logs_path=$processed_logs_path" >> $GITHUB_OUTPUT
-      shell: bash
 
     # Maps a given JSON object string of variable names to values, i.e.:
     # {
@@ -70,7 +71,6 @@ runs:
             join(" ")'
         )"
         echo "tf_vars_args=$tf_vars_args" >> $GITHUB_OUTPUT
-      shell: bash
 
     - name: Check existing Terraform version
       id: check-tf-version
@@ -80,7 +80,6 @@ runs:
           cur_version="$(terraform --version)"
         fi
         echo "cur_version=$cur_version" >> $GITHUB_OUTPUT
-      shell: bash
 
     - name: Get required Terraform version
       uses: dflook/terraform-version@v1
@@ -103,14 +102,12 @@ runs:
       run: |
         cd "${{ github.workspace }}/${{ inputs.servicePath }}"
         terraform init -no-color
-      shell: bash
 
     - name: Select Terraform workspace
       run: |
         cd "${{ github.workspace }}/${{ inputs.servicePath }}"
         terraform workspace new "${{ inputs.bfdEnvironment }}" 2> /dev/null || true &&\
         terraform workspace select "${{ inputs.bfdEnvironment }}" -no-color
-      shell: bash
 
     - name: Generate Terraform plan
       run: |
@@ -134,7 +131,6 @@ runs:
           done
         )
         echo "Plan generated for ${{ inputs.servicePath }} successfully"
-      shell: bash
 
     - name: Apply Terraservice
       run: |
@@ -151,7 +147,6 @@ runs:
           done
         )
         echo "Terraform plan for ${{ inputs.servicePath }} applied"
-      shell: bash
 
     # This step uploads the potentially sensitive Terraform log output from previous steps to
     # CloudWatch Logs so that BFD Engineers can still inspect the output without fear of that
@@ -190,4 +185,5 @@ runs:
         aws logs put-log-events --log-group-name "${{ inputs.cloudwatchLogGroup }}" \
           --log-stream-name "${{ inputs.cloudwatchLogStream }}" \
           --log-events "file://${{ steps.tf-logs-file-path.outputs.processed_logs_path }}"
-      shell: bash
+
+        echo "Terraform logs put to Log Group '${{ inputs.cloudwatchLogGroup }}' in Log Stream '${{ inputs.cloudwatchLogStream }}'"
