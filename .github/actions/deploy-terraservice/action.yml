@@ -92,7 +92,7 @@ runs:
       # Only install Terraform if the current runner does not have the expected version of Terraform
       # installed already
       # if: steps.check-tf-version.outputs.cur_version != steps.terraform-version.outputs.terraform
-      if: steps.check-tf-version.outputs.cur_version == "NONE"
+      if: steps.check-tf-version.outputs.cur_version == 'NONE'
       # uses: hashicorp/setup-terraform@v3
       uses: cbuschka/setup-tfvm@v1
       # with:
