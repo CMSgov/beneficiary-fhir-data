@@ -7,16 +7,16 @@ inputs:
   servicePath:
     description: "The path to the Terraservice relative to the root of the repository"
     required: true
-  terraformVarsJson:
-    description: "JSON object map of variables to their values"
-    required: false
-    default: "{}"
   cloudwatchLogGroup:
     description: "Name of CloudWatch Log Group to submit Terraform logs to; must exist"
     required: true
   cloudwatchLogStream:
     description: "Name of CloudWatch Log Stream to submit Terraform logs to; will be created if necessary"
     required: true
+  terraformVarsJson:
+    description: "JSON object map of variables to their values"
+    required: false
+    default: "{}"
 defaults:
   run:
     shell: bash
