@@ -17,18 +17,17 @@ inputs:
     description: "JSON object map of variables to their values"
     required: false
     default: "{}"
-env:
-  # Necessary for the "stdout-to-cwlogs.sh" script
-  CLOUDWATCH_LOG_GROUP: ${{ inputs.cloudwatchLogGroup }}
-  CLOUDWATCH_LOG_STREAM: ${{ inputs.cloudwatchLogStream }}
 runs:
   using: "composite"
   steps:
-    # This step is necessary as it seems that the "github" object is unavailable when the
-    # Workflow-level "env" is evaluated
+    # This step is necessary as it seems that some objects (like "github" or "inputs") are
+    # unavailable when the top-level "env" is evaluated for Composite Actions
     - name: Setup environment
       run: |
         echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/.github/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
+        # Necessary for the "stdout-to-cwlogs.sh" script
+        echo "CLOUDWATCH_LOG_GROUP=${{ inputs.cloudwatchLogGroup }}" >> $GITHUB_ENV
+        echo "CLOUDWATCH_LOG_STREAM=${{ inputs.cloudwatchLogStream }}" >> $GITHUB_ENV
       shell: bash
 
     - name: Validate inputs
