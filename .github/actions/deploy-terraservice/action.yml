@@ -164,9 +164,9 @@ runs:
         seconds_waited=0
 
         while (( seconds_waited < 60 )); do
-          remaining_aws_processes="$(psgrep -f "put-log-events")"
+          remaining_aws_processes="$(ps aux | grep '[p]ut-log-events' || true)"
 
-          if [[ $remaining_aws_processes == *"No processes found"* ]]; then
+          if [[ -z $remaining_aws_processes ]]; then
             echo "All logs have been submitted"
             exit 0
           fi
