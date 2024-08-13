@@ -155,4 +155,4 @@ jobs:
 
       - name: Sync static site to S3
         run: |
-          # aws s3 sync "${{ github.workspace }}/static-site" s3://bfd-${{ inputs.bfdEnvironment }} --delete
+          aws s3 sync "${{ github.workspace }}/static-site/_site" s3://bfd-${{ inputs.bfdEnvironment }}-static --delete
