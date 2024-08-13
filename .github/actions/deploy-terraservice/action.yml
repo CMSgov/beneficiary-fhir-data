@@ -18,10 +18,19 @@ inputs:
     required: false
     default: "{}"
 env:
-  STDOUT_TO_CWLOGS_SCRIPT: "${{ github.workspace }}/.github/scripts/stdout-to-cwlogs.sh"
+  # Necessary for the "stdout-to-cwlogs.sh" script
+  CLOUDWATCH_LOG_GROUP: ${{ inputs.cloudwatchLogGroup }}
+  CLOUDWATCH_LOG_STREAM: ${{ inputs.cloudwatchLogStream }}
 runs:
   using: "composite"
   steps:
+    # This step is necessary as it seems that the "github" object is unavailable when the
+    # Workflow-level "env" is evaluated
+    - name: Setup environment
+      run: |
+        echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/.github/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
+      shell: bash
+
     - name: Validate inputs
       run: |
         if [[ ! -d "${{ github.workspace }}/${{ inputs.servicePath }}" ]]; then
@@ -41,7 +50,7 @@ runs:
         fi
       shell: bash
 
-    - name: Create Log Stream if needed and update env
+    - name: Create Log Stream if needed
       run: |
         # While the Log Group provided in the inputs is assumed to exist already, the Log Stream is
         # not. Attempt to create it, swallowing any error code that is returned and also capture
@@ -62,10 +71,6 @@ runs:
 
         echo "'${{inputs.cloudwatchLogStream }}' in Log Group '${{ inputs.cloudwatchLogGroup }}' created or exists already"
         echo "Tail the Log Stream to view Terraform output in realtime"
-
-        # Add the Log Group and Log Stream to the runner's environment
-        echo "CLOUDWATCH_LOG_GROUP=${{ inputs.cloudwatchLogGroup }}" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_STREAM=${{inputs.cloudwatchLogStream }}" >> $GITHUB_ENV
       shell: bash
 
     # Maps a given JSON object string of variable names to values, i.e.:
