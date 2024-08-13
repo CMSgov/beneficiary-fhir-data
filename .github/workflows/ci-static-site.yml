@@ -153,6 +153,7 @@ jobs:
 
       - name: Build Jekyll static site
         run: |
+          cd "${{ github.workspace }}/static-site"
           bundle exec jekyll build
 
       - name: Sync static site to S3
