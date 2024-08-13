@@ -157,3 +157,21 @@ runs:
     #     )
     #     echo "Terraform plan for ${{ inputs.servicePath }} applied"
     # shell: bash
+
+    - name: Await AWS put-log-events
+      if: always()
+      run: |
+        seconds_waited=0
+
+        while (( seconds_waited < 60 )); do
+          remaining_aws_processes="$(psgrep -f "put-log-events")"
+
+          if [[ $remaining_aws_processes == *"No processes found"* ]]; then
+            echo "All logs have been submitted"
+            exit 0
+          fi
+          sleep 1
+          seconds_waited=$(( seconds_waited + 1))
+        done
+
+        echo "Some log events were unable to be uploaded"
