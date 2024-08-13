@@ -83,8 +83,6 @@ jobs:
             echo 1
           fi
 
-          # Strip leading "v" from the returned version if the latest version is chosen
-          release_version="$(echo "$release_version" | sed "s/^v//g")"
           echo "BFD_RELEASE=$release_version" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
