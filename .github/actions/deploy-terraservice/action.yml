@@ -18,7 +18,7 @@ inputs:
     required: false
     default: "{}"
 env:
-  STDOUT_TO_CWLOGS_SCRIPT: ${{ github.workspace }}/.github/scripts/stdout-to-cwlogs.sh
+  STDOUT_TO_CWLOGS_SCRIPT: "${{ github.workspace }}/.github/scripts/stdout-to-cwlogs.sh"
 runs:
   using: "composite"
   steps:
