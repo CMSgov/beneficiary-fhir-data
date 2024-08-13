@@ -144,26 +144,15 @@ jobs:
               "bfd-server-war-${{ inputs.bfdRelease }}-v2-data-dictionary.json",
             ]
 
-      - name: setup ruby
-        uses: actions/setup-ruby@v1
+      - name: Setup Ruby and install dependencies
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1.3 # Version recommended by Jekyll install instructions
-
-      # Use GitHub Actions' cache to shorten build times and decrease load on servers
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: ${{ github.workspace }}/static-site
 
       - name: Build Jekyll static site
         run: |
-          cd "${{ github.workspace }}/static-site"
-          bundle install --path=vendor/bundle --jobs 4 --retry 3
-          bundle clean
-
           bundle exec jekyll build
 
       - name: Sync static site to S3
