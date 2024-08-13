@@ -20,12 +20,12 @@ runs:
   steps:
     - name: Validate inputs
       run: |
-        int_regex='^[0-9]+$'
-        if ! [[ "${{ inputs.waitTimeSeconds }}" =~ $re && "${{ inputs.waitTimeSeconds }}" != 0 ]]; then
+        pos_int_regex='^[1-9][0-9]*$'
+        if ! [[ "${{ inputs.waitTimeSeconds }}" =~ $pos_int_regex ]]; then
           echo "'waitTimeSeconds' must be a positive integer"
           exit 1
         fi
-        if ! [[ "${{ inputs.sleepTimeSeconds }}" =~ $re && "${{ inputs.sleepTimeSeconds }}" != 0 ]]; then
+        if ! [[ "${{ inputs.sleepTimeSeconds }}" =~ $pos_int_regex ]]; then
           echo "'sleepTimeSeconds' must be a positive integer"
           exit 1
         fi
