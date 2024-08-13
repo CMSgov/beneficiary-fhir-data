@@ -35,8 +35,7 @@ runs:
     - name: Validate inputs
       run: |
         if [[ ! -d "${{ github.workspace }}/${{ inputs.servicePath }}" ]]; then
-          printf "$s" \
-            "Directory '${{ inputs.servicePath }}' does not exist; has the BFD repo been" \
+          echo "Directory '${{ inputs.servicePath }}' does not exist; has the BFD repo been" \
             "checked-out?"
           exit 1
         fi
@@ -48,8 +47,7 @@ runs:
             jq -r '.logGroups != []'
         )"
         if [[ $is_valid_log_group == "false" ]]; then
-          printf "%s" \
-            "'${{ inputs.cloudwatchLogGroup }}' does not exist; was the the correct Log Group" \
+          echo "'${{ inputs.cloudwatchLogGroup }}' does not exist; was the the correct Log Group" \
             "specified?"
           exit 1
         fi
@@ -72,15 +70,13 @@ runs:
           -n $create_log_stream_stderr &&
           $create_log_stream_stderr != *"ResourceAlreadyExistsException"* ]] \
           ; then
-          printf "%s" \
-            "Unrecoverable error occurred when trying to create Log Stream" \
+          echo "Unrecoverable error occurred when trying to create Log Stream" \
             "'${{inputs.cloudwatchLogStream }}' in Log Group '${{ inputs.cloudwatchLogGroup }}'"
           echo "$create_log_stream_stderr"
           exit 1
         fi
 
-        printf "%s" \
-          "'${{inputs.cloudwatchLogStream }}' in Log Group '${{ inputs.cloudwatchLogGroup }}'" \
+        echo "'${{inputs.cloudwatchLogStream }}' in Log Group '${{ inputs.cloudwatchLogGroup }}'" \
           "created or exists already"
         echo "Tail the Log Stream to view Terraform output in realtime"
       shell: bash
