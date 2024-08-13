@@ -40,7 +40,7 @@ runs:
       run: |
         seconds_waited=0
 
-        while (( seconds_waited < ${{ input.waitTimeSeconds }} )); do
+        while (( seconds_waited < ${{ inputs.waitTimeSeconds }} )); do
           remaining_aws_processes="$(ps aux | grep '[p]ut-log-events' || true)"
 
           if [[ -z $remaining_aws_processes ]]; then
@@ -48,8 +48,8 @@ runs:
             exit 0
           fi
 
-          sleep ${{ input.sleepTimeSeconds }}
-          seconds_waited=$(( seconds_waited + ${{ input.sleepTimeSeconds }}))
+          sleep ${{ inputs.sleepTimeSeconds }}
+          seconds_waited=$(( seconds_waited + ${{ inputs.sleepTimeSeconds }}))
         done
 
         echo "Some logs could not be uploaded to CloudWatch"
