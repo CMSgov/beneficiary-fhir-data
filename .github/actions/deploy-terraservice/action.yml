@@ -175,3 +175,4 @@ runs:
         done
 
         echo "Some log events were unable to be uploaded"
+      shell: bash
