@@ -70,7 +70,7 @@ jobs:
 
       - name: Determine latest release version
         id: determine-latest-release
-        if: !inputs.bfdRelease
+        if: inputs.bfdRelease == ''
         uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
           repository: ${{ github.repository }}
