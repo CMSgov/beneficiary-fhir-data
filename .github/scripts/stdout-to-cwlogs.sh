@@ -35,8 +35,8 @@ while read -r line; do
       --arg line "$line" \
       '[{ "timestamp": ($unix_ts | tonumber), "message": ($line | tostring) }]'
   )"
-  # Runs in a background subshell to avoid slowing down the Terraform process while
-  # trying to put the log output to CloudWatch. Errors are ignored and all output is
+  # Runs in a background subshell to avoid slowing down the process that is piping to this script
+  # while trying to put the log output to CloudWatch. Errors are ignored and all output is
   # redirected to /dev/null
   (aws logs put-log-events --log-group-name "$trimmed_log_group" \
     --log-stream-name "$trimmed_log_stream" \
