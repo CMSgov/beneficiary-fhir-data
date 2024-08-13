@@ -141,7 +141,7 @@ jobs:
           CA_ASSETS: |
             [
               "bfd-server-war-${{ inputs.bfdRelease }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ inputs.bfdRelease }}-v2-data-dictionary.json",
+              "bfd-server-war-${{ inputs.bfdRelease }}-v2-data-dictionary.json"
             ]
 
       - name: Setup Ruby and install dependencies
