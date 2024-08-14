@@ -104,7 +104,13 @@ runs:
     - name: Check if tfvm is installed
       id: check-tfvm-installed
       run: |
-        is_tfvm_installed="$([[ -x "$(command -v tfvm)" ]] && echo "true" || echo "false")"
+        is_tfvm_installed="$(
+          if [[ -x "$(command -v tfvm)" ]]; then
+            echo "true"
+          else
+            echo "false"
+          fi
+         )"
         echo "is-tfvm-installed=$is_tfvm_installed" >> $GITHUB_OUTPUT
       shell: bash
 
