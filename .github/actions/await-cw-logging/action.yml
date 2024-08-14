@@ -5,11 +5,11 @@
 name: "Await Background CloudWatch Logging"
 description: "Action that waits for a specified time for ongoing CloudWatch logging to finish"
 inputs:
-  waitTimeSeconds:
+  wait-time-seconds:
     description: "Amount of time, in seconds, to wait total"
     required: true
     default: "60"
-  sleepTimeSeconds:
+  sleep-time-seconds:
     description: >-
       Amount of time, in seconds, to sleep between checking for orphaned AWS CLI PutLogEvents
       processes
@@ -21,12 +21,12 @@ runs:
     - name: Validate inputs
       run: |
         pos_int_regex='^[1-9][0-9]*$'
-        if ! [[ "${{ inputs.waitTimeSeconds }}" =~ $pos_int_regex ]]; then
-          echo "'waitTimeSeconds' must be a positive integer"
+        if ! [[ "${{ inputs.wait-time-seconds }}" =~ $pos_int_regex ]]; then
+          echo "'wait-time-seconds' must be a positive integer"
           exit 1
         fi
-        if ! [[ "${{ inputs.sleepTimeSeconds }}" =~ $pos_int_regex ]]; then
-          echo "'sleepTimeSeconds' must be a positive integer"
+        if ! [[ "${{ inputs.sleep-time-seconds }}" =~ $pos_int_regex ]]; then
+          echo "'sleep-time-seconds' must be a positive integer"
           exit 1
         fi
       shell: bash
@@ -40,7 +40,7 @@ runs:
       run: |
         seconds_waited=0
 
-        while (( seconds_waited < ${{ inputs.waitTimeSeconds }} )); do
+        while (( seconds_waited < ${{ inputs.wait-time-seconds }} )); do
           remaining_aws_processes="$(ps aux | grep '[p]ut-log-events' || true)"
 
           if [[ -z $remaining_aws_processes ]]; then
@@ -48,8 +48,8 @@ runs:
             exit 0
           fi
 
-          sleep ${{ inputs.sleepTimeSeconds }}
-          seconds_waited=$(( seconds_waited + ${{ inputs.sleepTimeSeconds }}))
+          sleep ${{ inputs.sleep-time-seconds }}
+          seconds_waited=$(( seconds_waited + ${{ inputs.sleep-time-seconds }}))
         done
 
         echo "Some logs could not be uploaded to CloudWatch"

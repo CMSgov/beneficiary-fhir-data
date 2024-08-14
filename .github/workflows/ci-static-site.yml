@@ -4,28 +4,28 @@ on:
   # seperately for each trigger
   workflow_call:
     inputs:
-      bfdEnvironment:
+      bfd-env:
         description: "The BFD environment to deploy the Static Site to"
         required: true
         type: string
-      awsRegion:
+      aws-region:
         description: >-
           Override the AWS Region destination for uploaded artifacts.
           Default to `us-east-1`.
         default: us-east-1
         type: string
         required: true
-      bfdRelease:
+      bfd-release:
         description: >-
           Version string of the BFD release from which the data dictionaries will be pulled.
           If omitted, the latest GitHub release version will be used
         required: false
         type: string
-      cloudwatchLogGroupOverride:
+      cw-log-group-override:
         description: "Overrides the CloudWatch Log Group to submit Terraform logs to; must exist"
         required: false
         type: string
-      cloudwatchLogStreamOverride:
+      cw-log-stream-override:
         description: >-
           Overrides the the CloudWatch Log Stream to submit Terraform logs to; will be created if
           necessary
@@ -33,11 +33,11 @@ on:
         type: string
   workflow_dispatch:
     inputs:
-      bfdEnvironment:
+      bfd-env:
         description: "The BFD environment to deploy the Static Site to"
         required: true
         type: string
-      awsRegion:
+      aws-region:
         description: >-
           Override the AWS Region destination for uploaded artifacts.
           Default to `us-east-1`.
@@ -47,7 +47,7 @@ on:
           - us-east-1
           - us-west-2
         required: true
-      bfdRelease:
+      bfd-release:
         description: >-
           Version string of the BFD release from which the data dictionaries will be pulled.
           If omitted, the latest GitHub release version will be used
@@ -58,11 +58,11 @@ on:
           Override the branch on which the build is based.
           Default to selected reference in the `Use workflow from` drop-down when empty.
         required: false
-      cloudwatchLogGroupOverride:
+      cw-log-group-override:
         description: "Overrides the CloudWatch Log Group to submit Terraform logs to; must exist"
         required: false
         type: string
-      cloudwatchLogStreamOverride:
+      cw-log-stream-override:
         description: >-
           Overrides the the CloudWatch Log Stream to submit Terraform logs to; will be created if
           necessary
@@ -78,8 +78,8 @@ env:
   # AWS Code Artifact Repository
   CA_REPOSITORY: bfd-mgmt
   CA_DOMAIN: bfd-mgmt
-  AWS_REGION: ${{ inputs.awsRegion }}
-  DEFAULT_LOG_GROUP: "/bfd/${{ inputs.bfdEnvironment }}/gha/ci-static-site"
+  AWS_REGION: ${{ inputs.aws-region }}
+  DEFAULT_LOG_GROUP: "/bfd/${{ inputs.bfd-env }}/gha/ci-static-site"
   DEFAULT_LOG_STREAM: "deploy-terraservice_${{ github.run_number }}"
 jobs:
   deploy-static-site:
@@ -92,7 +92,7 @@ jobs:
           ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Determine latest release version
-        if: inputs.bfdRelease == ''
+        if: inputs.bfd-release == ''
         id: determine-latest-release
         uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
@@ -100,7 +100,7 @@ jobs:
 
       - name: Set environment variables
         run: |
-          release_version="${{ inputs.bfdRelease || steps.determine-latest-release.outputs.release }}"
+          release_version="${{ inputs.bfd-release || steps.determine-latest-release.outputs.release }}"
           if [[ -z $release_version ]]; then
             echo "Release version unspecified or unable to be determined"
             echo 1
@@ -113,7 +113,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: ci-static-site
-          aws-region: ${{ inputs.awsRegion }}
+          aws-region: ${{ inputs.aws-region }}
 
       - name: Mask sensitive AWS data
         run: |
@@ -129,10 +129,10 @@ jobs:
       - name: Deploy static-site Terraservice
         uses: ./.github/actions/deploy-terraservice
         with:
-          bfdEnvironment: ${{ inputs.bfdEnvironment }}
-          servicePath: ops/terraform/services/static-site
-          cloudwatchLogGroup: ${{ inputs.cloudwatchLogGroupOverride || env.DEFAULT_LOG_GROUP }}
-          cloudwatchLogStream: ${{ inputs.cloudwatchLogStreamOverride || env.DEFAULT_LOG_STREAM }}
+          bfd-env: ${{ inputs.bfd-env }}
+          service-path: ops/terraform/services/static-site
+          cw-log-group: ${{ inputs.cw-log-group-override || env.DEFAULT_LOG_GROUP }}
+          cw-log-stream: ${{ inputs.cw-log-stream-override || env.DEFAULT_LOG_STREAM }}
 
       - name: Pull data dictionaries
         run: |
@@ -177,4 +177,4 @@ jobs:
 
       - name: Sync static site to S3
         run: |
-          aws s3 sync "${{ github.workspace }}/static-site/_site" s3://bfd-${{ inputs.bfdEnvironment }}-static --delete
+          aws s3 sync "${{ github.workspace }}/static-site/_site" s3://bfd-${{ inputs.bfd-env }}-static --delete
