@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
 
   /** The {@link CSVFormat} used to parse the SAMHSA-related code CSV files. */
-  private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader();
+  private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.builder().setHeader().build();
 
   /** The DRG CCW codebook url. */
   protected static final String DRG =

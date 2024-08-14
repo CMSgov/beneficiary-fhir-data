@@ -493,7 +493,7 @@ public final class RifLoader {
        * state as a BeneficiaryHistory record. (Note: this has to be done AFTER the secret hashes
        * have been updated, as per above.
        */
-      updateBeneficaryHistory(
+      updateBeneficiaryHistory(
           entityManager,
           newBeneficiaryRecord,
           oldBeneficiaryRecord,
@@ -816,7 +816,7 @@ public final class RifLoader {
    *     exists in the database before applying the specified {@link RifRecordEvent})
    * @param batchTimestamp the timestamp of the batch
    */
-  private static void updateBeneficaryHistory(
+  private static void updateBeneficiaryHistory(
       EntityManager entityManager,
       Beneficiary newBeneficiaryRecord,
       Optional<Beneficiary> oldBeneficiaryRecord,
@@ -833,6 +833,8 @@ public final class RifLoader {
       oldBeneCopy.setMbiHash(oldBeneficiaryRecord.get().getMbiHash());
       oldBeneCopy.setMbiEffectiveDate(oldBeneficiaryRecord.get().getMbiEffectiveDate());
       oldBeneCopy.setMbiObsoleteDate(oldBeneficiaryRecord.get().getMbiObsoleteDate());
+      oldBeneCopy.setXrefGroupId(oldBeneficiaryRecord.get().getXrefGroupId());
+      oldBeneCopy.setXrefSwitch(oldBeneficiaryRecord.get().getXrefSwitch());
       oldBeneCopy.setLastUpdated(Optional.of(batchTimestamp));
 
       entityManager.persist(oldBeneCopy);
@@ -869,6 +871,17 @@ public final class RifLoader {
         newBeneficiaryRecord.getMbiEffectiveDate(), oldBeneficiaryRecord.getMbiEffectiveDate())) {
       return false;
     }
+
+    if (!Objects.equals(
+        newBeneficiaryRecord.getXrefGroupId(), oldBeneficiaryRecord.getXrefGroupId())) {
+      return false;
+    }
+
+    if (!Objects.equals(
+        newBeneficiaryRecord.getXrefSwitch(), oldBeneficiaryRecord.getXrefSwitch())) {
+      return false;
+    }
+
     // BFD-1308: removed check for getMbiObsoleteDate; this value is derived from the Beneficiary
     // EFCTV_END_DT but that field has never had a value in the beneficiary.rif file received from
     // CCW.

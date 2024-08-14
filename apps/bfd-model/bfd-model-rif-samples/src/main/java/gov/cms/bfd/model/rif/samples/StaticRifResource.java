@@ -104,6 +104,20 @@ public enum StaticRifResource {
       RifFileType.BENEFICIARY,
       1),
 
+  /** Sample B Beneficiary static rif. */
+  SAMPLE_B_BENES(
+      resourceUrl("rif-static-samples/sample-b-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
+
+  /** Sample B Beneficiary history static rif. */
+  SAMPLE_B_BENEFICIARY_HISTORY(
+      resourceUrl("rif-static-samples/sample-b-beneficiaryhistory.txt"),
+      RifFileType.BENEFICIARY_HISTORY,
+      1),
+
+  /** Sample C Beneficiary static rif. */
+  SAMPLE_C_BENES(
+      resourceUrl("rif-static-samples/sample-c-beneficiaries.txt"), RifFileType.BENEFICIARY, 2),
+
   /** Sample U Carrier static rif. */
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 
@@ -289,8 +303,10 @@ public enum StaticRifResource {
     try {
       Iterable<CSVRecord> records =
           CSVFormat.RFC4180
-              .withDelimiter('|')
-              .withHeader()
+              .builder()
+              .setDelimiter('|')
+              .setHeader()
+              .build()
               .parse(new InputStreamReader(file.open(), file.getCharset()));
       Set<String> uniqueIds = new HashSet<>();
       int i = 0;

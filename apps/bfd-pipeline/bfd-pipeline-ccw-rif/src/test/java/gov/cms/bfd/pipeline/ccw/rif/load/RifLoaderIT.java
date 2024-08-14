@@ -56,6 +56,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.apache.commons.csv.CSVFormat;
@@ -508,6 +509,65 @@ public final class RifLoaderIT {
       // Make sure the size is the same and no records have been inserted if the same
       // fields in the beneficiary history table are the same.
       assertEquals(6, beneficiaryHistoryEntries.size());
+
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+  }
+
+  /**
+   * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_B} and {@link
+   * StaticRifResourceGroup#SAMPLE_C} data.
+   */
+  @Test
+  public void loadSamplesWithXref() {
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
+    loadSample(Arrays.asList(StaticRifResourceGroup.SAMPLE_C.getResources()));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    verifyRecordPrimaryKeysPresent(Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
+    // Ensure no records were skipped
+    validateBeneficiaryCountsInDatabase(2);
+
+    /*
+     * Verify that the updates worked as expected by manually checking some fields.
+     */
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      CriteriaQuery<BeneficiaryHistory> beneficiaryHistoryCriteria =
+          entityManager.getCriteriaBuilder().createQuery(BeneficiaryHistory.class);
+      List<BeneficiaryHistory> beneficiaryHistoryEntries =
+          entityManager
+              .createQuery(
+                  beneficiaryHistoryCriteria.select(
+                      beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
+              .getResultList();
+      assertEquals(567834L, beneficiaryHistoryEntries.get(0).getBeneficiaryId());
+
+      assertEquals(7, beneficiaryHistoryEntries.size());
+      // last entry from first bene
+      BeneficiaryHistory beneHistory1 = beneficiaryHistoryEntries.get(5);
+      // only entry from second bene
+      BeneficiaryHistory beneHistory2 = beneficiaryHistoryEntries.get(6);
+
+      assertEquals(beneHistory1.getXrefSwitch(), Optional.empty());
+      assertEquals(beneHistory1.getXrefGroupId(), Optional.empty());
+      assertEquals(beneHistory2.getXrefSwitch().get(), 'N');
+      assertEquals(beneHistory2.getXrefGroupId().get(), 1);
+
+      Beneficiary beneficiaryFromDb1 = entityManager.find(Beneficiary.class, 567834L);
+      Beneficiary beneficiaryFromDb2 = entityManager.find(Beneficiary.class, 123456L);
+
+      assertEquals(beneficiaryFromDb1.getXrefSwitch().get(), 'Y');
+      assertEquals(beneficiaryFromDb1.getXrefGroupId().get(), 2);
+      assertEquals(beneficiaryFromDb2.getXrefSwitch().get(), 'Y');
+      assertEquals(beneficiaryFromDb2.getXrefGroupId().get(), 1);
 
     } finally {
       if (entityManager != null) {
@@ -1018,9 +1078,15 @@ public final class RifLoaderIT {
     Function<RifRecordEvent<?>, List<List<String>>> recordEditor =
         rifRecordEvent -> {
           CSVRecord beneCsvRow = rifRecordEvent.getRawCsvRecords().get(0);
+          List<String> headers = beneCsvRow.getParser().getHeaderNames();
+          int referenceYearIndex =
+              IntStream.range(0, headers.size())
+                  .filter(i -> headers.get(i).equals(BeneficiaryColumn.RFRNC_YR.name()))
+                  .findFirst()
+                  .getAsInt();
           List<String> beneCsvValues =
               StreamSupport.stream(beneCsvRow.spliterator(), false).collect(Collectors.toList());
-          beneCsvValues.set(BeneficiaryColumn.RFRNC_YR.ordinal() + 1, refYear);
+          beneCsvValues.set(referenceYearIndex, refYear);
           if (isUpdate) {
             beneCsvValues.set(0, "UPDATE");
           }
@@ -1149,14 +1215,10 @@ public final class RifLoaderIT {
       List<List<List<String>>> editedRifRecords =
           records.getRecords().map(editor).collectList().block();
 
-      // Build a CSVFormat with the specific header needed for the RIF file type.
-      String[] csvHeader =
-          Stream.concat(
-                  Stream.of("DML_IND"),
-                  Arrays.stream(rifFileEvent.getFile().getFileType().getColumns())
-                      .map(e -> e.name()))
-              .toArray(String[]::new);
-      CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader(csvHeader);
+      // Get the header from the original file
+      List<String> csvHeader = RifParsingUtils.createCsvParser(inputFile).getHeaderNames();
+      CSVFormat csvFormat =
+          RifParsingUtils.CSV_FORMAT.builder().setHeader(csvHeader.toArray(new String[0])).build();
 
       /*
        * Write the RIF records back out to a new RIF temp file. Worth noting that,
