@@ -110,7 +110,7 @@ runs:
           else
             echo "false"
           fi
-         )"
+        )"
         echo "is-tfvm-installed=$is_tfvm_installed" >> $GITHUB_OUTPUT
       shell: bash
 
