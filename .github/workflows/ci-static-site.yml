@@ -1,5 +1,7 @@
 name: "CI - Deploy Static Site"
 on:
+  # Unfortunately, there is no way to reduce duplication between inputs. They must be specified
+  # seperately for each trigger
   workflow_call:
     inputs:
       bfdEnvironment:
@@ -17,6 +19,16 @@ on:
         description: >-
           Version string of the BFD release from which the data dictionaries will be pulled.
           If omitted, the latest GitHub release version will be used
+        required: false
+        type: string
+      cloudwatchLogGroupOverride:
+        description: "Overrides the CloudWatch Log Group to submit Terraform logs to; must exist"
+        required: false
+        type: string
+      cloudwatchLogStreamOverride:
+        description: >-
+          Overrides the the CloudWatch Log Stream to submit Terraform logs to; will be created if
+          necessary
         required: false
         type: string
   workflow_dispatch:
@@ -46,6 +58,16 @@ on:
           Override the branch on which the build is based.
           Default to selected reference in the `Use workflow from` drop-down when empty.
         required: false
+      cloudwatchLogGroupOverride:
+        description: "Overrides the CloudWatch Log Group to submit Terraform logs to; must exist"
+        required: false
+        type: string
+      cloudwatchLogStreamOverride:
+        description: >-
+          Overrides the the CloudWatch Log Stream to submit Terraform logs to; will be created if
+          necessary
+        required: false
+        type: string
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
@@ -57,6 +79,8 @@ env:
   CA_REPOSITORY: bfd-mgmt
   CA_DOMAIN: bfd-mgmt
   AWS_REGION: ${{ inputs.awsRegion }}
+  DEFAULT_LOG_GROUP: "/bfd/${{ inputs.bfdEnvironment }}/gha/ci-static-site"
+  DEFAULT_LOG_STREAM: "deploy-terraservice_${{ github.run_number }}"
 jobs:
   deploy-static-site:
     runs-on: ubuntu-latest
@@ -68,8 +92,8 @@ jobs:
           ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Determine latest release version
-        id: determine-latest-release
         if: inputs.bfdRelease == ''
+        id: determine-latest-release
         uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
           repository: ${{ github.repository }}
@@ -107,9 +131,8 @@ jobs:
         with:
           bfdEnvironment: ${{ inputs.bfdEnvironment }}
           servicePath: ops/terraform/services/static-site
-          # TODO: Replace
-          cloudwatchLogGroup: "/bfd-3465/testing"
-          cloudwatchLogStream: "ci-static-site-${{ github.run_number }}"
+          cloudwatchLogGroup: ${{ inputs.cloudwatchLogGroupOverride || env.DEFAULT_LOG_GROUP }}
+          cloudwatchLogStream: ${{ inputs.cloudwatchLogStreamOverride || env.DEFAULT_LOG_STREAM }}
 
       - name: Pull data dictionaries
         run: |
