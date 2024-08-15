@@ -70,14 +70,17 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for R4 {@link Patient} resources, derived from
  * the CCW beneficiaries.
  */
 @Component
-public final class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
+public class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    * NOTE: For v2, HICN no longer supported.
@@ -168,6 +171,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Read(version = false)
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null || patientId.getIdPart() == null) {
       throw new InvalidRequestException("Missing required patient ID");
@@ -233,6 +240,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Search
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
           @Description(
@@ -352,6 +363,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Search
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -681,6 +696,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Search
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
           @Description(
