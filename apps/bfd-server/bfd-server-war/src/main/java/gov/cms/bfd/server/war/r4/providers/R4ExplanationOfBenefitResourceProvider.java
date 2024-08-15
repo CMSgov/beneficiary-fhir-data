@@ -59,7 +59,10 @@ import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for R4 {@link ExplanationOfBenefit} resources,
@@ -69,7 +72,7 @@ import org.springframework.stereotype.Component;
     name = "ExplanationOfBenefit",
     profile = "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit")
 @Component
-public final class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
+public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
     implements IResourceProvider {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(R4ExplanationOfBenefitResourceProvider.class);
@@ -191,6 +194,10 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
     Matcher eobIdMatcher =
@@ -280,6 +287,10 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    */
   @Search
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(
