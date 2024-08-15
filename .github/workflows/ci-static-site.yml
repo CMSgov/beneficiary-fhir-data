@@ -1,0 +1,180 @@
+name: "CI - Deploy Static Site"
+on:
+  # Unfortunately, there is no way to reduce duplication between inputs. They must be specified
+  # seperately for each trigger
+  workflow_call:
+    inputs:
+      bfd-env:
+        description: "The BFD environment to deploy the Static Site to"
+        required: true
+        type: string
+      aws-region:
+        description: >-
+          Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
+        default: us-east-1
+        type: string
+        required: true
+      bfd-release:
+        description: >-
+          Version string of the BFD release from which the data dictionaries will be pulled.
+          If omitted, the latest GitHub release version will be used
+        required: false
+        type: string
+      cw-log-group-override:
+        description: "Overrides the CloudWatch Log Group to submit Terraform logs to; must exist"
+        required: false
+        type: string
+      cw-log-stream-override:
+        description: >-
+          Overrides the the CloudWatch Log Stream to submit Terraform logs to; will be created if
+          necessary
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      bfd-env:
+        description: "The BFD environment to deploy the Static Site to"
+        required: true
+        type: string
+      aws-region:
+        description: >-
+          Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
+        default: us-east-1
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+        required: true
+      bfd-release:
+        description: >-
+          Version string of the BFD release from which the data dictionaries will be pulled.
+          If omitted, the latest GitHub release version will be used
+        required: false
+        type: string
+      branch:
+        description: >-
+          Override the branch on which the build is based.
+          Default to selected reference in the `Use workflow from` drop-down when empty.
+        required: false
+      cw-log-group-override:
+        description: "Overrides the CloudWatch Log Group to submit Terraform logs to; must exist"
+        required: false
+        type: string
+      cw-log-stream-override:
+        description: >-
+          Overrides the the CloudWatch Log Stream to submit Terraform logs to; will be created if
+          necessary
+        required: false
+        type: string
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+defaults:
+  run:
+    shell: bash
+env:
+  # AWS Code Artifact Repository
+  CA_REPOSITORY: bfd-mgmt
+  CA_DOMAIN: bfd-mgmt
+  AWS_REGION: ${{ inputs.aws-region }}
+  DEFAULT_LOG_GROUP: "/bfd/${{ inputs.bfd-env }}/gha/ci-static-site"
+  DEFAULT_LOG_STREAM: "deploy-terraservice_${{ github.run_number }}"
+jobs:
+  deploy-static-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.branch || github.ref_name }}
+
+      - name: Determine latest release version
+        if: inputs.bfd-release == ''
+        id: determine-latest-release
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
+        with:
+          repository: ${{ github.repository }}
+
+      - name: Set environment variables
+        run: |
+          release_version="${{ inputs.bfd-release || steps.determine-latest-release.outputs.release }}"
+          if [[ -z $release_version ]]; then
+            echo "Release version unspecified or unable to be determined"
+            echo 1
+          fi
+
+          echo "BFD_RELEASE=$release_version" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: ci-static-site
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Mask sensitive AWS data
+        run: |
+          caller_id="$(aws sts get-caller-identity)"
+          account_num="$(jq -r '.Account' <<<$caller_id)"
+          role_arn="$(jq -r '.Arn' <<<$caller_id)"
+          user_id="$(jq -r '.UserId' <<<$caller_id)"
+
+          echo "::add-mask::$account_num"
+          echo "::add-mask::$role_arn"
+          echo "::add-mask::$user_id"
+
+      - name: Deploy static-site Terraservice
+        uses: ./.github/actions/deploy-terraservice
+        with:
+          bfd-env: ${{ inputs.bfd-env }}
+          service-path: ops/terraform/services/static-site
+          cw-log-group: ${{ inputs.cw-log-group-override || env.DEFAULT_LOG_GROUP }}
+          cw-log-stream: ${{ inputs.cw-log-stream-override || env.DEFAULT_LOG_STREAM }}
+
+      - name: Pull data dictionaries
+        run: |
+          mkdir -p "${{ github.workspace }}/dist"
+          cd "${{ github.workspace }}/dist"
+
+          readarray -t assets < <(echo "$CA_ASSETS" | jq -r -c '.[]')
+          for asset in "${assets[@]}"
+          do
+            aws codeartifact get-package-version-asset \
+              --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} \
+              --domain "$CA_DOMAIN" \
+              --repository "$CA_REPOSITORY" \
+              --asset "$asset" \
+              --package-version "$BFD_RELEASE" \
+              --package "$CA_PACKAGE" \
+              --namespace "$CA_NAMESPACE" \
+              --format maven \
+              --region "$AWS_REGION" \
+              "${asset/$CA_PACKAGE-${BFD_RELEASE}-v/V}" 1>/dev/null
+          done
+        env:
+          CA_NAMESPACE: gov.cms.bfd
+          CA_PACKAGE: bfd-server-war
+          CA_ASSETS: |
+            [
+              "bfd-server-war-${{ env.BFD_RELEASE }}-v1-data-dictionary.json",
+              "bfd-server-war-${{ env.BFD_RELEASE }}-v2-data-dictionary.json"
+            ]
+
+      - name: Setup Ruby and install dependencies
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: ${{ github.workspace }}/static-site
+
+      - name: Build Jekyll static site
+        run: |
+          cd "${{ github.workspace }}/static-site"
+          bundle exec jekyll build
+
+      - name: Sync static site to S3
+        run: |
+          aws s3 sync "${{ github.workspace }}/static-site/_site" s3://bfd-${{ inputs.bfd-env }}-static --delete
