@@ -47,14 +47,17 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link Coverage} resources, derived
  * from the CCW beneficiary enrollment data.
  */
 @Component
-public final class CoverageResourceProvider implements IResourceProvider {
+public class CoverageResourceProvider implements IResourceProvider {
   /**
    * A {@link Pattern} that will match the {@link Coverage#getId()}s used in this application, e.g.
    * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
@@ -125,6 +128,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
    */
   @Read(version = false)
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
       throw new InvalidRequestException("Missing required coverage ID");
@@ -198,6 +205,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
    */
   @Search
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
           @Description(
