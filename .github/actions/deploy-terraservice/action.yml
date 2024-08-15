@@ -78,7 +78,8 @@ runs:
 
         echo "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'" \
           "created or exists already"
-        echo "Tail the Log Stream to view Terraform output in realtime"
+        echo "Tail the Log Stream to view Terraform output in realtime:"
+        echo "aws logs tail --since 1h --follow '${{ inputs.cw-log-group }}'"
       shell: bash
 
     # Maps a given JSON object string of variable names to values, i.e.:
