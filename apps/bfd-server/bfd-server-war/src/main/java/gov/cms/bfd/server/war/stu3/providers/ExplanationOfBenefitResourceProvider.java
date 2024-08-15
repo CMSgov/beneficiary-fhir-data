@@ -56,14 +56,17 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link ExplanationOfBenefit} resources,
  * derived from the CCW claims.
  */
 @Component
-public final class ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
+public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
     implements IResourceProvider {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
@@ -186,6 +189,10 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
     if (eobId == null) {
@@ -274,6 +281,10 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    */
   @Search
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(
