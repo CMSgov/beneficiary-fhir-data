@@ -54,6 +54,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
@@ -197,6 +200,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @Read
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
     if (claimId == null) {
       throw new InvalidRequestException("Resource ID can not be null");
@@ -350,6 +357,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @Search
   @Trace
+  @Retryable(
+      retryFor = FailoverSQLException.class,
+      maxAttempts = 3,
+      backoff = @Backoff(delay = 5000))
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
           @Description(
