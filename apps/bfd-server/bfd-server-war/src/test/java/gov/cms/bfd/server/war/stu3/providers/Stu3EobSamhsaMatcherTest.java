@@ -77,21 +77,16 @@ public final class Stu3EobSamhsaMatcherTest {
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
-
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   void setup() {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
   @AfterEach
   public void after() {
     npiOrgLookup.close();
-    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -177,7 +172,7 @@ public final class Stu3EobSamhsaMatcherTest {
       NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
       FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
-          FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+          RDATestUtils.fdaFakeDrugCodeDisplayLookup();
       // Note: none of our SAMPLE_A claims have SAMHSA-related codes (by default).
       List<Object> sampleRifRecords =
           ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -869,7 +864,7 @@ public final class Stu3EobSamhsaMatcherTest {
               sampleRifRecordForClaimType,
               new MetricRegistry(),
               false,
-              FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
+              RDATestUtils.fdaDrugCodeDisplayLookup(),
               NPIOrgLookup.createNpiOrgLookup());
 
       return sampleEobForClaimType;

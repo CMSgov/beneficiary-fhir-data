@@ -15,12 +15,6 @@ import org.slf4j.LoggerFactory;
 public class NPIOrgLookup {
   private static final Logger LOGGER = LoggerFactory.getLogger(NPIOrgLookup.class);
 
-  /** A fake npi number used for testing. */
-  public static final String FAKE_NPI_NUMBER = "0000000000";
-
-  /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
-  public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
-
   /** Hashmap to keep the org names. */
   private Map<String, String> npiOrgHashMap = new HashMap<>();
 
@@ -31,8 +25,8 @@ public class NPIOrgLookup {
    * Factory method for creating a {@link NPIOrgLookup } for production that does not include the
    * fake org name.
    *
-   * @throws IOException if there is an issue reading file
    * @return the {@link NPIOrgLookup }
+   * @throws IOException if there is an issue reading file
    */
   public static NPIOrgLookup createNpiOrgLookup() throws IOException {
     if (npiOrgLookupForProduction == null) {
@@ -41,11 +35,6 @@ public class NPIOrgLookup {
     }
 
     return npiOrgLookupForProduction;
-  }
-
-  /** Constructs an {@link NPIOrgLookup} used for testing purposes only. */
-  public NPIOrgLookup() {
-    npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
   }
 
   /**

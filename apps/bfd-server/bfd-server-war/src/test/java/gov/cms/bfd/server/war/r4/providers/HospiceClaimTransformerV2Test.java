@@ -220,7 +220,7 @@ public final class HospiceClaimTransformerV2Test {
     assertTrue(resource.isPresent());
 
     Organization actualEobContainedOrganizationResource = (Organization) resource.get();
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, actualEobContainedOrganizationResource.getName());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, actualEobContainedOrganizationResource.getName());
     assertTrue(actualEobContainedOrganizationResource.hasActive());
     assertTrue(
         actualEobContainedOrganizationResource.getMeta().getProfile().stream()

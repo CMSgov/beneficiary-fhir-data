@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -21,7 +22,9 @@ import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -29,6 +32,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -47,13 +51,10 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -80,8 +81,8 @@ public final class PartDEventTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
+  /** ndcProductHashMap represents a map of PRODUCTNDC and SUBSTANCENAME for test. */
+  Map<String, String> ndcProductHashMap = new HashMap<>();
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -112,29 +113,17 @@ public final class PartDEventTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    fdaDrugCodeDisplayLookup = Mockito.mockStatic(FdaDrugCodeDisplayLookup.class);
-    fdaDrugCodeDisplayLookup
-        .when(FdaDrugCodeDisplayLookup::createDrugCodeLookupForTesting)
-        .thenAnswer(
-            i -> {
-              HashMap<String, String> fdaDrugCodeMap = new HashMap<>();
-              fdaDrugCodeMap.put(
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE,
-                  FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY);
-              return new FdaDrugCodeDisplayLookup(fdaDrugCodeMap);
-            });
+    InputStream npiDataStream =
+        Thread.currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+    ndcProductHashMap.put(RDATestUtils.FAKE_DRUG_CODE, RDATestUtils.FAKE_DRUG_CODE_DISPLAY);
+    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
+        new FdaDrugCodeDisplayLookup(ndcProductHashMap);
 
-    partdEventTransformer =
-        new PartDEventTransformerV2(
-            metricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+    partdEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
     claim = generateClaim();
     eob = partdEventTransformer.transform(claim, false);
-  }
-
-  /** Releases the static mock fdaDrugCodeDisplayLookup. */
-  @AfterEach
-  public void after() {
-    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -698,7 +687,7 @@ public final class PartDEventTransformerV2Test {
                     new Coding(
                         "http://hl7.org/fhir/sid/ndc",
                         "000000000",
-                        FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY)));
+                        RDATestUtils.FAKE_DRUG_CODE_DISPLAY)));
 
     assertTrue(compare.equalsDeep(pos));
   }

@@ -126,13 +126,11 @@ public class CarrierClaimTransformerV2Test {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
+    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(
-            metricRegistry,
-            FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting(),
-            NPIOrgLookup.createNpiOrgLookup());
+            metricRegistry, drugCodeDisplayLookup, NPIOrgLookup.createNpiOrgLookup());
 
     claim = generateClaim();
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
@@ -145,7 +143,6 @@ public class CarrierClaimTransformerV2Test {
   @AfterEach
   public void after() {
     npiOrgLookup.close();
-    fdaDrugCodeDisplayLookup.close();
   }
 
   /**
@@ -813,7 +810,7 @@ public class CarrierClaimTransformerV2Test {
             "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
             "primary",
             "Primary provider");
-    compare4.getProvider().setDisplay(NPIOrgLookup.FAKE_NPI_ORG_NAME);
+    compare4.getProvider().setDisplay(RDATestUtils.FAKE_NPI_ORG_NAME);
 
     assertTrue(compare4.equalsDeep(member4));
 
@@ -1513,7 +1510,7 @@ public class CarrierClaimTransformerV2Test {
             .findAny()
             .orElse(null);
     assertEquals("primary", careTeamEntry.getRole().getCoding().get(0).getCode());
-    assertEquals(NPIOrgLookup.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
+    assertEquals(RDATestUtils.FAKE_NPI_ORG_NAME, careTeamEntry.getProvider().getDisplay());
     assertEquals(
         "npi", careTeamEntry.getProvider().getIdentifier().getType().getCoding().get(0).getCode());
     assertEquals(

@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
@@ -70,21 +69,16 @@ public final class TransformerUtilsTest {
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
-
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   public void setup() {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    fdaDrugCodeDisplayLookup = RDATestUtils.mockFdaDrugCodeDisplayLookup();
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
   @AfterEach
   public void after() {
     npiOrgLookup.close();
-    fdaDrugCodeDisplayLookup.close();
   }
 
   /** Verifies that {@link TransformerUtils#createExtensionCoding} works as expected. */
@@ -534,8 +528,7 @@ public final class TransformerUtilsTest {
     dmeClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new DMEClaimTransformer(
-            metricRegistry, FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting());
+        new DMEClaimTransformer(metricRegistry, RDATestUtils.fdaDrugCodeDisplayLookup());
     genEob = claimTransformerInterface.transform(dmeClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
