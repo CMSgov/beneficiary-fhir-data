@@ -1,0 +1,167 @@
+name: "Deploy Terraservice"
+description: "Composite action to deploy a given Terraservice"
+inputs:
+  bfd-env:
+    description: "The BFD environment to deploy the given service to"
+    required: true
+  service-path:
+    description: "The path to the Terraservice relative to the root of the repository"
+    required: true
+  cw-log-group:
+    description: "Name of CloudWatch Log Group to submit Terraform logs to; must exist"
+    required: true
+  cw-log-stream:
+    description: >-
+      Name of CloudWatch Log Stream to submit Terraform logs to; will be created if necessary
+    required: true
+  terraform-vars-json:
+    description: "JSON object map of variables to their values"
+    required: false
+    default: "{}"
+runs:
+  using: "composite"
+  steps:
+    # This step is necessary as it seems that some objects (like "github" or "inputs") are
+    # unavailable when the top-level "env" is evaluated for Composite Actions
+    - name: Setup environment
+      run: |
+        echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/.github/scripts/stdout-to-cwlogs.sh" \
+          >> $GITHUB_ENV
+        # Necessary for the "stdout-to-cwlogs.sh" script
+        echo "CLOUDWATCH_LOG_GROUP=${{ inputs.cw-log-group }}" >> $GITHUB_ENV
+        echo "CLOUDWATCH_LOG_STREAM=${{ inputs.cw-log-stream }}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Validate inputs
+      run: |
+        if [[ ! -d "${{ github.workspace }}/${{ inputs.service-path }}" ]]; then
+          echo "Directory '${{ inputs.service-path }}' does not exist; has the BFD repo been" \
+            "checked-out?"
+          exit 1
+        fi
+        # See https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_CreateLogStream.html
+        echo "${{ inputs.cw-log-stream }}" | grep -Pv '[:*]'
+
+        is_valid_log_group="$(
+          aws logs describe-log-groups --log-group-name-pattern "${{ inputs.cw-log-group }}" |
+            jq -r '.logGroups != []'
+        )"
+        if [[ $is_valid_log_group == "false" ]]; then
+          echo "'${{ inputs.cw-log-group }}' does not exist; was the the correct Log Group" \
+            "specified?"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Create Log Stream if needed
+      run: |
+        # While the Log Group provided in the inputs is assumed to exist already, the Log Stream is
+        # not. Attempt to create it, swallowing any error code that is returned and also capture
+        # the stderr output so that it can be checked
+        create_log_stream_stderr="$(
+          aws logs create-log-stream --log-group-name "${{ inputs.cw-log-group }}" \
+            --log-stream-name "${{ inputs.cw-log-stream }}" 2>&1 >/dev/null || true
+        )"
+
+        # If there was an error message logged by create-log-stream and that error was not
+        # indicating that the Log Stream already exists (which is fine), then log that there was an
+        # unrecoverable error and exit
+        if [[
+          -n $create_log_stream_stderr &&
+          $create_log_stream_stderr != *"ResourceAlreadyExistsException"* ]] \
+          ; then
+          echo "Unrecoverable error occurred when trying to create Log Stream" \
+            "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'"
+          echo "$create_log_stream_stderr"
+          exit 1
+        fi
+
+        echo "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'" \
+          "created or exists already"
+        echo "Tail the Log Stream to view Terraform output in realtime:"
+        echo "aws logs tail --since 1h --follow '${{ inputs.cw-log-group }}'"
+      shell: bash
+
+    # Maps a given JSON object string of variable names to values, i.e.:
+    # {
+    #   "var1": "val1",
+    #   "var2": 123,
+    #   "var3": true
+    # }
+    # into a space-delimited argument list that the Terraform CLI understands:
+    # -var=var1=val1 -var=var2=123 -var=var3=true
+    - name: Generate Terraform vars args
+      id: gen-tf-vars-args
+      run: |
+        tf_vars_args="$(
+          echo "${{ inputs.terraform-vars-json }}" | jq -r 'to_entries |
+            map(select(.value != null and .value != "")) |
+            map("\"-var=" + .key + "=" + (.value | tostring)+ "\"") |
+            join(" ")'
+        )"
+        echo "tf-vars-args=$tf_vars_args" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Check if tfvm is installed
+      id: check-tfvm-installed
+      run: |
+        is_tfvm_installed="$(
+          if [[ -x "$(command -v tfvm)" ]]; then
+            echo "true"
+          else
+            echo "false"
+          fi
+        )"
+        echo "is-tfvm-installed=$is_tfvm_installed" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Setup Terraform
+      # Only install tfvm/Terraform if the current runner does not have tfvm installed
+      if: steps.check-tfvm-installed.outputs.is-tfvm-installed == 'false'
+      uses: cbuschka/setup-tfvm@v1
+
+    - name: Terraform init
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+        terraform --version
+        terraform init -no-color
+      shell: bash
+
+    - name: Select Terraform workspace
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+        terraform workspace new "${{ inputs.bfd-env }}" 2> /dev/null || true &&\
+        terraform workspace select "${{ inputs.bfd-env }}" -no-color
+      shell: bash
+
+    - name: Generate Terraform plan
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
+        # Often the terraform plan logged to stdout as well as the errors logged to stderr include
+        # sensitive/private information. GHA logs are available for anyone logged in with a GitHub
+        # account to view, and so this information must be protected. Instead of logging to stdout,
+        # all potentially sensitive Terraform log output is instead logged to CloudWatch
+        echo "Generating Terraform plan for ${{ inputs.service-path }}..." |
+          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT") # Log to GHA logs and CW
+        terraform plan ${{ steps.gen-tf-vars-args.outputs.tf-vars-args }} -no-color \
+          -out=tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "Plan generated for ${{ inputs.service-path }} successfully" |
+          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+      shell: bash
+
+    - name: Apply Terraservice
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+        echo "Applying Terraform plan for ${{ inputs.service-path }}..." |
+          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+        terraform apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "Terraform plan for ${{ inputs.service-path }} applied" |
+          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+      shell: bash
+
+    # Ensures that orphaned, background AWS PutLogEvents invocations from using
+    # "stdout-to-cwlogs.sh" are able to complete before being cleaned-up by GHA
+    - name: Await Terraform CloudWatch logging
+      if: always()
+      uses: ./.github/actions/await-cw-logging

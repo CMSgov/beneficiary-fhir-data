@@ -10,7 +10,7 @@ Jekyll::Hooks.register :site, :after_init do ||
 def copy_data_dictionary(version)
     current_dir = File.dirname(__FILE__)
     # find the latest copy of the data dictionary (sorted by filename)
-    dd_source = Dir[File.join(current_dir,"../../dist/V#{version}-data-dictionary-*json")].sort[-1]
+    dd_source = Dir[File.join(current_dir,"../../dist/V#{version}-data-dictionary*json")].sort[-1]
     contents = File.read(dd_source)
     # un-escape extra newlines in the example json so it renders properly on the site
     replaced = contents.gsub(/\\\\n/, "\\n")
