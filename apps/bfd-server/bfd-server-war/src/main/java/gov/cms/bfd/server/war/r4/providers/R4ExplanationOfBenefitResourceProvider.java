@@ -33,6 +33,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
+import gov.cms.bfd.server.war.commons.RetryOnRdsFailover;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -59,10 +60,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for R4 {@link ExplanationOfBenefit} resources,
@@ -194,10 +192,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
     Matcher eobIdMatcher =
@@ -287,10 +282,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    */
   @Search
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(

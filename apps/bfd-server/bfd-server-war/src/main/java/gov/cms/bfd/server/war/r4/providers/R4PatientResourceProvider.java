@@ -40,6 +40,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.RetryOnRdsFailover;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -70,10 +71,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for R4 {@link Patient} resources, derived from
@@ -171,10 +169,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    */
   @Read(version = false)
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null || patientId.getIdPart() == null) {
       throw new InvalidRequestException("Missing required patient ID");
@@ -240,10 +235,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    */
   @Search
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
           @Description(
@@ -363,10 +355,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    */
   @Search
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -696,10 +685,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    */
   @Search
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
           @Description(

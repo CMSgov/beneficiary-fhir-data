@@ -24,6 +24,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
+import gov.cms.bfd.server.war.commons.RetryOnRdsFailover;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
@@ -54,9 +55,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
@@ -200,10 +198,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @Read
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
     if (claimId == null) {
       throw new InvalidRequestException("Resource ID can not be null");
@@ -357,10 +352,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @Search
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
           @Description(

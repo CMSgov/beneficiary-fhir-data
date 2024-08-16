@@ -31,6 +31,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.RetryOnRdsFailover;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -50,10 +51,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for R4 {@link Coverage} resources, derived from
@@ -135,10 +133,7 @@ public class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Read(version = false)
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
       throw new InvalidRequestException("Missing required coverage ID");
@@ -216,10 +211,7 @@ public class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Search
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
           @Description(

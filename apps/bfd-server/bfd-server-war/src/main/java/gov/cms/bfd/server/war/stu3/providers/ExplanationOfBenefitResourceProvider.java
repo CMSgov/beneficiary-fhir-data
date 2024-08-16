@@ -30,6 +30,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
+import gov.cms.bfd.server.war.commons.RetryOnRdsFailover;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -56,10 +57,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link ExplanationOfBenefit} resources,
@@ -189,10 +187,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
     if (eobId == null) {
@@ -281,10 +276,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    */
   @Search
   @Trace
-  @Retryable(
-      retryFor = FailoverSQLException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 5000))
+  @RetryOnRdsFailover
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(
