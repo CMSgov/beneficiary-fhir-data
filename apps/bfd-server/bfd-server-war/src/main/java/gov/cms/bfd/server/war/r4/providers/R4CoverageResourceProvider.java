@@ -237,7 +237,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
               case ProfileConstants.C4BB_COVERAGE_URL -> EnumSet.of(Profile.C4BB);
               default -> throw new InvalidRequestException("Invalid profile: " + profile);
             }
-            : this.enabledProfiles;
+            : EnumSet.of(Profile.C4BB);
 
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);

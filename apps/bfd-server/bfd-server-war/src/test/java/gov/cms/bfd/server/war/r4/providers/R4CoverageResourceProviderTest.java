@@ -350,7 +350,7 @@ public class R4CoverageResourceProviderTest {
     verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4DIC)));
   }
 
-  /** Tests that the transformer is called with both profiles when both are enabled. */
+  /** Tests that the transformer is called with only the C4BB profile if no profile is specified. */
   @Test
   public void testCoverageByBeneficiaryCountBothProfiles() {
     coverageProvider =
@@ -360,7 +360,7 @@ public class R4CoverageResourceProviderTest {
 
     coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
-    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB, Profile.C4DIC)));
+    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB)));
   }
 
   /** Tests that the transformer is called with the C4DIC profile when a C4DIC ID is used. */

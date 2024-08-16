@@ -165,21 +165,7 @@ public final class CoverageTransformerV2Test {
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(c4dicId, coverage.getIdPart());
     verifyMetrics("c4dic");
-    List<String> plans = Arrays.asList("Part A", "Part B", "Part C", "Part D");
 
-    List<String> actualPlans =
-        coverage.getClass_().stream()
-            .filter(
-                classComponent ->
-                    classComponent.getType().getCodingFirstRep().getCode().equals("plan"))
-            .map(
-                classComponent -> {
-                  String plan = classComponent.getValue();
-                  assertTrue(plans.contains(plan));
-                  return plan;
-                })
-            .toList();
-    assertEquals(plans.size(), actualPlans.size());
     assertEquals(Coverage.CoverageStatus.ACTIVE, coverage.getStatus());
     assertEquals("Patient/567834", coverage.getSubscriber().getReference());
     assertNotNull(coverage.getPeriod().getStart());
@@ -719,11 +705,11 @@ public final class CoverageTransformerV2Test {
     assertEquals(4, coverages.size());
   }
 
-  /** Tests that the transformer filters out the C4BB profile. */
+  /** Tests that the transformer separates each plan into a Coverage resource. */
   @Test
-  public void shouldFilterOutC4BBProfile() {
+  public void shouldSeparatePlansPerResource() {
     List<IBaseResource> coverages = transformCoverageAll(EnumSet.of(Profile.C4DIC), true);
-    assertEquals(1, coverages.size());
+    assertEquals(5, coverages.size());
   }
 
   /** Tests that the transformer returns all profiles. */

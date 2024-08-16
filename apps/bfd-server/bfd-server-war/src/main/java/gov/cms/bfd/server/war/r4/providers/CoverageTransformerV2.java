@@ -15,11 +15,8 @@ import gov.cms.bfd.server.war.commons.SubscriberPolicyRelationship;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -94,7 +91,7 @@ final class CoverageTransformerV2 {
     return Arrays.stream(MedicareSegment.values())
         .filter(
             s ->
-                (enabledProfiles.contains(Profile.C4DIC) && s == MedicareSegment.C4DIC)
+                enabledProfiles.contains(Profile.C4DIC)
                     || (enabledProfiles.contains(Profile.C4BB) && s != MedicareSegment.C4DIC))
         .map(s -> transform(s, beneficiary))
         .collect(Collectors.toList());
@@ -127,8 +124,6 @@ final class CoverageTransformerV2 {
 
     createCoverageClass(
         coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
-
-    addSubscribedParts(beneficiary, coverage);
 
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
@@ -967,76 +962,6 @@ final class CoverageTransformerV2 {
               .setAssigner(new Reference(organization));
       coverage.addIdentifier(identifier);
     }
-  }
-
-  /**
-   * Denotes which parts the beneficiary is subscribed to on the provided {@link Coverage} resource.
-   *
-   * @param beneficiary the value for {@link Beneficiary}
-   * @param coverage The {@link Coverage} to Coverage details
-   */
-  private void addSubscribedParts(Beneficiary beneficiary, Coverage coverage) {
-    if (beneficiary.getPartACoverageStartDate().isPresent()) {
-      createCoverageClass(
-          coverage,
-          CoverageClass.PLAN,
-          TransformerConstants.COVERAGE_PLAN_PART_A,
-          Optional.empty());
-    }
-    if (beneficiary.getPartBCoverageStartDate().isPresent()) {
-      createCoverageClass(
-          coverage,
-          CoverageClass.PLAN,
-          TransformerConstants.COVERAGE_PLAN_PART_B,
-          Optional.empty());
-    }
-    Optional<Instant> lastUpdatedOpt = beneficiary.getLastUpdated();
-    Calendar calendar = Calendar.getInstance();
-    int month = calendar.get(Calendar.MONTH); // get current month
-    if (lastUpdatedOpt.isPresent()) {
-      calendar.setTime(Date.from(lastUpdatedOpt.get()));
-      month = calendar.get(Calendar.MONTH); // get month from last_Updated
-    }
-    if (beneficiaryHasPartC(beneficiary, month)) {
-      createCoverageClass(
-          coverage,
-          CoverageClass.PLAN,
-          TransformerConstants.COVERAGE_PLAN_PART_C,
-          Optional.empty());
-    }
-    if (beneficiary.getPartDCoverageStartDate().isPresent()) {
-      createCoverageClass(
-          coverage,
-          CoverageClass.PLAN,
-          TransformerConstants.COVERAGE_PLAN_PART_D,
-          Optional.empty());
-    }
-  }
-
-  /**
-   * Determines if the beneficiary is subscribed to Part C. Due to a lag with ingestion, we check if
-   * last_updated > current month, we check if the previous month is present.
-   *
-   * @param beneficiary the value for {@link Beneficiary}
-   * @param month The month that the beneficiary record was last updated within the database.
-   * @return true/false if beneficiary has Part C
-   */
-  private boolean beneficiaryHasPartC(Beneficiary beneficiary, int month) {
-    return switch (month) {
-      case 0 -> beneficiary.getPartCContractNumberJanId().isPresent();
-      case 1 -> beneficiary.getPartCContractNumberFebId().isPresent();
-      case 2 -> beneficiary.getPartCContractNumberMarId().isPresent();
-      case 3 -> beneficiary.getPartCContractNumberAprId().isPresent();
-      case 4 -> beneficiary.getPartCContractNumberMayId().isPresent();
-      case 5 -> beneficiary.getPartCContractNumberJunId().isPresent();
-      case 6 -> beneficiary.getPartCContractNumberJulId().isPresent();
-      case 7 -> beneficiary.getPartCContractNumberAugId().isPresent();
-      case 8 -> beneficiary.getPartCContractNumberSeptId().isPresent();
-      case 9 -> beneficiary.getPartCContractNumberOctId().isPresent();
-      case 10 -> beneficiary.getPartCContractNumberNovId().isPresent();
-      case 11 -> beneficiary.getPartCContractNumberDecId().isPresent();
-      default -> false;
-    };
   }
 
   /**
